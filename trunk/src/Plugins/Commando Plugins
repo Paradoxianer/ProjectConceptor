@@ -1,0 +1,21 @@
+Commands:
+	Connect
+	Move
+	Insert
+	Delete
+	Select
+		- BRect ... die im Rechteck liegenden
+		- All
+		- PointerList
+	Copy
+	
+	Hide
+	Format?? or doing every Format on its own??
+	Resize
+	Rotate??
+	Scale???
+	Find
+	Replace
+	
+
+//** bei  Makro  Zeitsteurung einbauen

@@ -1,0 +1,4 @@
+Insert Protokoll
+settings
+	|-Pointer "node"			-- a BMessage or whatever.. :-) but a node to insert
+	|-Pointer "parentGroup"		-- must be a BMEssage Object to wich one the Node shoud be added :-)

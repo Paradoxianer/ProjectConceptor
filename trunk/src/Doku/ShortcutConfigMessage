@@ -1,0 +1,7 @@
+ShortcutConfig
+
+BMessage
+	|-"modifiers"	int32
+	|-"key"	uint32
+	|-"message" BMessage
+	|-"name" char*

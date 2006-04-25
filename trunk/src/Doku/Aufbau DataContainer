@@ -1,0 +1,40 @@
+DataContainer aufbau
+
+BMessage
+	|-"Frame"	BRect	"Frame of the DataContainer"
+	|-"SubContainer"	BList	"Liste der SubContainer"
+	|-"Renderer"	BPointer	"PointerList of all assigned Render"
+	|-"Font"	BMessage	"Fontstuff"
+	|-"Pattern"	BMessage	"Like FillColor and Bordersize and stuff"
+	|-"Data"	BMessage "Contains all visible Data´s"
+	|-"Selected"	Bool	"marks wheter this node is selected or not"
+	|-"Hide"	Bool	"marks wheter this node is hidden or not"
+
+
+BMessage "Data"
+	|-"Name"	String
+
+
+BMessage "Font"
+	|-"Color"	Data (*rgb_color)
+	|-"Encoding"	int8
+	|-"Face"	int16
+	|-"Family"	String
+	|-"Flags"	int32
+	|-"Rotation"	float
+	|-"Shear"	float
+	|-"Size"	float
+	|-"Spacing"	int8
+	|-"Style"	String
+
+BMessage
+	|-"FillColor"		Data (*rgb_color)
+	|-"BorderColor"		Data (*rgb_color)
+	|-"PenSize"		float	
+	|-"DrawingMode"		int8
+	|-"Scale"	Float
+	|-"HighColor"	Data (*rgb_color)
+	|-"LowColor"	Data (*rgb_color)
+	|-"Pattern"	String (????)
+
+	

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<svg width="512" height="512" color-interpolation="linearRGB">
+ <g>
+  <linearGradient id="gradient0" gradientUnits="userSpaceOnUse" x1="85.48" y1="86.59" x2="295.02" y2="199.44">
+   <stop offset="0.0027" stop-color="#ffffff"/>
+   <stop offset="0.5483" stop-color="#000000"/>
+  </linearGradient>
+  <path style="fill:url(#gradient0)"
+        d="M19.45 255.91l90.56 -127.95l-10.02 63.81l156.17 -0.02l-0.02 128.41l-166.47 -0.11l10.32 63.51"
+  />
+  <linearGradient id="gradient1" gradientUnits="userSpaceOnUse" x1="279.42" y1="314.26" x2="57.09" y2="185.35">
+   <stop offset="0.5457" stop-color="#000000"/>
+   <stop offset="1" stop-color="#ffffff"/>
+  </linearGradient>
+  <path style="fill:url(#gradient1)"
+        d="M257.54 19.02l127.96 90.56l-63.82 -10.02l0.01 156.16l-128.4 -0.02l0.11 -166.47l-63.52 10.32"
+  />
+  <path style="fill:#000000"
+        d="M493.57 255.07l-90.56 127.95l10.02 -63.82l-156.17 0.02l0.02 -128.41l166.47 0.1l-10.32 -63.51"
+  />
+  <path style="fill:#020101"
+        d="M257.98 490.35l-127.95 -90.57l63.82 10.02l-0.02 -156.16l128.4 0.02l-0.1 166.47l63.51 -10.33"
+  />
+ </g>
+</svg>
