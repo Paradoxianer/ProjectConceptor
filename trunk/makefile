@@ -128,7 +128,25 @@ TARGET_DIR	=  .
 OBJ_DIR		= obj.x86
 
 
-
 ## include the makefile-engine
 include /boot/develop/etc/makefile-engine
+# make all Plugins
+
+LEAFDIRS = \
+	src/Plugins/BasicEditor 		\
+	src/Plugins/BasicEditor/BasicRenderer	\
+	src/Plugins/ChangeValueCommand 	\
+	src/Plugins/DeleteCommand   	\
+	src/Plugins/GraphEditor		\
+	src/Plugins/InsertCommand         	\
+	src/Plugins/MoveCommand     	\
+	src/Plugins/NavigatorEditor  		\
+	src/Plugins/ResizeCommand		\
+	src/Plugins/SampleEditor	  	\
+	src/Plugins/SelectCommand	
+
+default .DEFAULT:
+	-@for f in $(LEAFDIRS); do \
+		$(MAKE) -C $$f $@; \
+	done
 
