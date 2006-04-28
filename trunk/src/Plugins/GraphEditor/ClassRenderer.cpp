@@ -68,8 +68,11 @@ void ClassRenderer::MouseDown(BPoint where)
 	{
 		uint32 buttons = 0;
 		uint32 modifiers = 0;
-		BPoint	tmpPoint;
-		editor->GetMouse(&tmpPoint,&buttons,true);
+/*		BPoint	tmpPoint;
+		editor->GetMouse(&tmpPoint,&buttons,true);*/
+		BMessage *currentMsg = editor->Window()->CurrentMessage();
+		currentMsg->FindInt32("buttons", (int32 *)&buttons);
+		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
 		if (buttons & B_PRIMARY_MOUSE_BUTTON)
 		{
 			editor->BringToFront(this);
