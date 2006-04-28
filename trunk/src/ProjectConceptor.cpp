@@ -18,6 +18,13 @@
 
 const char		*APP_SIGNATURE		= "application/ProjektConceptor";
 
+const char*		P_MENU_APP_HELP					= "Help";
+const char*		P_MENU_APP_ABOUT				= "About";
+const char*		P_MENU_APP_SETTINGS				= "Settings";
+const char*		P_MENU_APP_QUIT					= "Quit";
+
+
+
 const char*		P_M_MENU_BAR					= "P_M_MENU_BAR";
 /**string with wich you can find the correspondenting BMenubar wich is used for Status menus and information 
  *@see BMenuBar
@@ -94,7 +101,6 @@ const char*		P_MENU_EDIT_CLEAR				= "Clear";
 const char*		P_MENU_EDIT_SELECT_ALL			= "Select All";
 
 const char*		P_MENU_EDIT_PROJECT_SETTINGS	= "Project Settings";
-const char*		P_MENU_EDIT_SETTINGS			= "Settings";
 
 const char*		P_MENU_SEARCH					= "Search";
 const char*		P_MENU_SEARCH_FIND				= "Find";
@@ -124,8 +130,6 @@ const char*		P_MENU_MACRO_OPEN				= "Open";
 const char*		P_MENU_MACRO_SAVE				= "Save";
 
 
-const char*		P_MENU_HELP						= "Help";
-const char*		P_MENU_HELP_ABOUT				= "About";
 
 const char*		P_C_VERSION						= "0.01a Revision 31";
 

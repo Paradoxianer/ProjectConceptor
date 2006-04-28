@@ -1,6 +1,7 @@
 
 #define _ZETA_USING_EXPERIMENTAL_
 #include <interface/PrintJob.h>
+#include <interface/IconMenu.h>
 #include <interface/MenuItem.h>
 #include <interface/ScrollBar.h>
 #include <interface/ScrollView.h>
@@ -101,11 +102,33 @@ BMenuBar *PWindow::MakeMenu(void)
 	tmpBar->GetItemMargins(&left,&top,&right,&bottom);
 	menuFrame.bottom	= menuFrame.top+(height.ascent+height.descent+height.leading+top+bottom);
 	tmpBar->ResizeTo(menuFrame.Width(),menuFrame.Height());
-
 	BMenuItem	*item;
+	BMenu		*subMenu;	
+	BMenu 		*menu;		
+
+	// build AppMenu
+	menu= new BMenu(_T("IconMenu"));
+	BIconMenu *appMenu= new BIconMenu(menu);
+	menu->AddItem(	item = new BMenuItem(_T(P_MENU_APP_ABOUT), new BMessage(MENU_APP_ABOUT)));
+	item->SetTarget(be_app);
+	localizeMenuItems->AddPointer("item",(void *) item);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_ABOUT);
+	menu->AddItem(item = new BMenuItem(_T(P_MENU_APP_SETTINGS),new BMessage(MENU_APP_SETTINGS)));
+	localizeMenuItems->AddPointer("item",(void *) item);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_SETTINGS);
+	menu->AddItem(	item = new BMenuItem(_T(P_MENU_APP_HELP), new BMessage(MENU_APP_HELP)));
+	localizeMenuItems->AddPointer("item",(void *) item);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_HELP);
+	menu->AddSeparatorItem();
+	menu->AddItem(item = new BMenuItem(_T(P_MENU_APP_QUIT),new BMessage(MENU_APP_QUIT)));
+	item->SetTarget(be_app);
+	localizeMenuItems->AddPointer("item",(void *) item);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_QUIT);
+	tmpBar->AddItem(appMenu);
+
 	// build Filemenu
-	BMenu 		*menu		= new BMenu(_T(P_MENU_FILE));
-	BMenu		*subMenu	= new BMenu(_T(P_MENU_FILE_NEW));
+	menu		= new BMenu(_T(P_MENU_FILE));
+	subMenu		= new BMenu(_T(P_MENU_FILE_NEW));
 	menu->AddItem(subMenu);
 	localizeMenuItems->AddPointer("item",(void *) subMenu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_NEW);
@@ -207,10 +230,6 @@ BMenuBar *PWindow::MakeMenu(void)
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_PROJECT_SETTINGS);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_SETTINGS),new BMessage(MENU_EDIT_SETTINGS)));
-	item->SetTarget(be_app);
-	localizeMenuItems->AddPointer("item",(void *) item);
-	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_SETTINGS);
 	tmpBar->AddItem(menu);
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT);
@@ -291,7 +310,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO);
 
-	menu=new BMenu(_T(P_MENU_HELP));
+/*	menu=new BMenu(_T(P_MENU_HELP));
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_HELP_ABOUT),new BMessage(MENU_HELP_ABOUT)));
 	item->SetTarget(be_app_messenger);
 	localizeMenuItems->AddPointer("item",(void *) item);
@@ -299,7 +318,7 @@ BMenuBar *PWindow::MakeMenu(void)
 
 	tmpBar->AddItem(menu);
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
-	localizeMenuItems->AddPointer("itemstring",P_MENU_HELP);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_HELP);*/
 
 	savemessage = NULL;
 	tmpBar->SetBorder(B_BORDER_CONTENTS);
@@ -501,7 +520,7 @@ void PWindow::MessageReceived(BMessage *message)
 		case B_LANGUAGE_CHANGED:
 				ChangeLanguage();
 			break;
-		case MENU_EDIT_SETTINGS:
+		case MENU_APP_SETTINGS:
 				ShowSettings();
 			break;
 		case P_C_INSERT_EDITOR:

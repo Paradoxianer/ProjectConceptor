@@ -143,8 +143,9 @@ LEAFDIRS = \
 	src/Plugins/NavigatorEditor  		\
 	src/Plugins/ResizeCommand		\
 	src/Plugins/SampleEditor	  	\
-	src/Plugins/SelectCommand	
-
+	src/Plugins/SelectCommand		\
+	src/Plugins/CopyCommand		\
+	src/Plugins/PasteCommand		
 default .DEFAULT:
 	-@for f in $(LEAFDIRS); do \
 		$(MAKE) -C $$f $@; \

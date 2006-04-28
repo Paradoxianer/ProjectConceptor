@@ -8,30 +8,7 @@ Copy::Copy():PCommand()
 
 void Copy::Undo(PDocument *doc,BMessage *undo)
 {
-	BList			*connections		= doc->GetAllConnections();
-	BList			*allNodes			= doc->GetAllNodes();
-	BList			*trash				= doc->GetTrash();
-	BList			*changed			= doc->GetChangedNodes();
-	BMessage		*node				= new BMessage();
-	BMessage		*connection			= new BMessage();
-	int32			i					= 0;
-	PCommand::Undo(doc,undo);
-	while (undo->FindPointer("node",i,(void **)&node) == B_OK)
-	{
-		allNodes->RemoveItem(node);
-		trash->AddItem(node);
-		changed->AddItem(node);
-		i++;
-	}
-	i=0;
-	while (undo->FindPointer("connection",i,(void **)&connection) == B_OK) 
-	{
-		i++;
-		connections->RemoveItem(connection);
-		changed->AddItem(connection);	
-		trash->AddItem(connection);
-	}
-	doc->SetModified();
+	//** nothing to do :-)
 }
 
 BMessage* Copy::Do(PDocument *doc, BMessage *settings)

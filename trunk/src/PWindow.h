@@ -118,7 +118,7 @@ protected:
 			int32			window_id;	
 
 			BMenuBar		*menuBar;
-			BMenu			*menu;
+//			BMenu			*menu;
 			BMenu			*windows;
 			BMessage		*localizeMenuItems;
 			BMessage		*localizeToolTips;

@@ -84,6 +84,12 @@ const uint32	WINDOW_REGISTRY_SUB				= 'WRsb';
 const uint32	WINDOW_REGISTRY_ADDED			= 'WRdd';
 
 // Messages for menu commands
+const uint32	MENU_APP_ABOUT					= B_ABOUT_REQUESTED;
+const uint32	MENU_APP_SETTINGS				= 'MEse';
+const uint32	MENU_APP_HELP					= 'MEhe';
+const uint32	MENU_APP_QUIT					= B_QUIT_REQUESTED;
+
+
 
 const uint32	MENU_FILE_NEW					= 'MFnw';
 const uint32	MENU_FILE_NEW_TAB				= 'MFnt';
@@ -100,7 +106,6 @@ const uint32	MENU_FILE_QUIT					= 'MFqu';
 const uint32	MENU_EDIT_UNDO					= 'MEun';
 const uint32	MENU_EDIT_REDO					= 'MErd';
 
-const uint32	MENU_EDIT_SETTINGS				= 'MEse';
 const uint32	MENU_EDIT_PROJECT_SETTINGS		= 'MEps';
 
 const uint32	MENU_SEARCH_FIND				= 'MSfi';
@@ -119,12 +124,19 @@ const uint32	MENU_MACRO_PLAY					= 'MMpl';
 const uint32	MENU_MACRO_OPEN					= 'MMop';
 const uint32	MENU_MACRO_SAVE					= 'MMsv';
 
-const uint32	MENU_HELP_ABOUT					= B_ABOUT_REQUESTED;
+
 
 extern const char		*APP_SIGNATURE;//					= "application/ProjektConceptor";;
 /**string with wich you can find the correspondenting BMenubar for entry´s like File, Edit and so on
  *@see BMenuBar
  */
+
+
+extern const char*		P_MENU_APP_ABOUT;//				= "About";
+extern const char*		P_MENU_APP_SETTINGS;//			= "Settings";
+extern const char*		P_MENU_APP_HELP;//				= "Help";
+
+extern const char*		P_MENU_APP_QUIT;//				= "Quit";
 
 extern const char*		P_M_MENU_BAR;//					= "P_M_MENU_BAR";
 /**string with wich you can find the correspondenting BMenubar wich is used for Status menus and information 
@@ -202,7 +214,6 @@ extern const char*		P_MENU_EDIT_CLEAR;//				= "Clear";
 extern const char*		P_MENU_EDIT_SELECT_ALL;//			= "Select All";
 
 extern const char*		P_MENU_EDIT_PROJECT_SETTINGS;//	= "Project Settings";
-extern const char*		P_MENU_EDIT_SETTINGS;//			= "Settings";
 
 extern const char*		P_MENU_SEARCH;//					= "Search";
 extern const char*		P_MENU_SEARCH_FIND;//				= "Find";
@@ -231,9 +242,6 @@ extern const char*		P_MENU_MACRO_PLAY;//				= "Play";
 extern const char*		P_MENU_MACRO_OPEN;//				= "Open";
 extern const char*		P_MENU_MACRO_SAVE;//				= "Save";
 
-
-extern const char*		P_MENU_HELP;//						= "Help";
-extern const char*		P_MENU_HELP_ABOUT;//				= "About";
 
 extern const char*		P_C_VERSION;//						= "0.01a Revision 27";
 
