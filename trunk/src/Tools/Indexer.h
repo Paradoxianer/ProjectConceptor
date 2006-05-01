@@ -7,7 +7,7 @@
 #include <support/KeyedVector.h>
 #include <support/List.h>
 
-
+class PDocument;
 /**
  * @class Indexer
  *
@@ -28,7 +28,7 @@ class Indexer
 {
 
 public:
-								Indexer(BMessage *index,BMessage *deIndex = NULL);
+								Indexer(PDocument *documnent);
 								~Indexer(void);
 
 			BMessage*			IndexNode(BMessage *node);	
@@ -54,8 +54,9 @@ protected:
 			void				ReIndexUndo(BMessage *reIndexUndo);
 			void				ReIndexMacro(BMessage *reIndexUndo);
 			void				ReIndexCommand(BMessage *commandMessage);
-	
-		BKeyedVector<int32,BMessage*>*	sorter;
+			
+			PDocument			*doc;
+			BKeyedVector<int32,BMessage*>*	sorter;
 
 /*		BList*					allNodes;
 		BList*					selectedNodes;
