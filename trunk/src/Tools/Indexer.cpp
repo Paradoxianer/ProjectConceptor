@@ -12,18 +12,21 @@ Indexer::~Indexer(void)
 
 BMessage*	Indexer::IndexNode(BMessage *node)
 {
-	BList		*subNodeList	= NULL;
-	BMessage	*subNode		= NULL;
-	node->AddPointer("this",node);
-	if ((node->FindPointer("SubContainer",(void **)&subList) == B_OK) && (subList != NULL) )
+	if (node!=NULL)
 	{
-		for (int32 i=0; i<subList-CountItems();i++)
+		BList		*subNodeList	= NULL;
+		BMessage	*subNode		= NULL;
+		node->AddPointer("this",node);
+		if ((node->FindPointer("SubContainer",(void **)&subNodeList) == B_OK) && (subNodeList != NULL) )
 		{
-			subNode =(BMessage *) subnodeList->ItemAt(i);
-			node->AddMessage("SubContainerList",IndexNode(subList));
+			for (int32 i=0; i<subNodeList->CountItems();i++)
+			{
+				subNode =(BMessage *) subNodeList->ItemAt(i);
+				node->AddMessage("SubContainerList",IndexNode(subNode));
+			}
 		}
+		//** here we also shoud run the node throu the available Editors so that they can save all they need :-)
 	}
-	//** here we also shoud run the node throu the available Editors so that they can save all they need :-)
 	return node;
 }
 BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
@@ -32,8 +35,8 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 	BMessage *to	= NULL;
 	if (includeNodes)
 	{
-		connection->FindPointer("From",&from);
-		connection->FindPointer("To",&to);
+		connection->FindPointer("From",(void **)&from);
+		connection->FindPointer("To",(void **)&to);
 		//**this coud cause a error if someone added a second From Pointer
 		connection->RemoveName("From");
 		connection->RemoveName("To");
