@@ -33,7 +33,6 @@ SRCS= 	src/AboutWindow.cpp \
 		src/Commands/PCommandManager.cpp \
 		src/Config/ConfigWindow.cpp \
 		src/Config/ConfigView.cpp \
-		src/Document/PDocLoader.cpp \
 		src/Document/PDocument.cpp \
 		src/Document/PDocumentManager.cpp \
 		src/Document/PEditor.cpp \
@@ -42,6 +41,7 @@ SRCS= 	src/AboutWindow.cpp \
 		src/Document/WindowManager.cpp \
 		src/Plugins/BasePlugin.cpp \
 		src/Plugins/PluginManager.cpp \
+		src/Tools/PDocLoader.cpp \
 		src/ToolBar/BaseItem.cpp \
 		src/ToolBar/Mover.cpp \
 		src/ToolBar/ToolBar.cpp \
@@ -98,7 +98,7 @@ OPTIMIZE= FULL
 #	specify any preprocessor symbols to be defined.  The symbols
 #	will be set to a value of 1.  For example specify DEBUG if you want
 #	DEBUG=1 to be set when compiling.
-#DEFINES=  DEBUG
+DEFINES=  DEBUG
 
 #	specify special warning levels
 #	if unspecified default warnings will be used
