@@ -84,7 +84,7 @@ public:
 	 *@see PreprocessBeforSave()
  	 */
 
-	virtual void			PreprocessBeforLoad(BMessage *container){};
+	virtual void			PreprocessAfterLoad(BMessage *container){};
 
 	/**
 	 * if the Editor is an View (this mostly shoud be the case)

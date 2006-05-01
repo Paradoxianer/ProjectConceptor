@@ -31,7 +31,7 @@ public:
 								Indexer(BMessage *index,BMessage *deIndex = NULL);
 								~Indexer(void);
 
-			BMessage*			IndexNode(BMessage *node,bool includeNodes=false);	
+			BMessage*			IndexNode(BMessage *node);	
 			BMessage*			IndexConnection(BMessage *connection,bool includeNodes=false);	
 			BMessage*			IndexUndo(BMessage *undo,bool includeNodes=false);	
 			BMessage*			IndexMacro(BMessage *macro,bool includeNodes=false);

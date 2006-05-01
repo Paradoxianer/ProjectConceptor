@@ -10,24 +10,55 @@ Indexer::~Indexer(void)
 {
 }
 
-BMessage*	Indexer::IndexNode(BMessage *node,bool includeNodes=false)
+BMessage*	Indexer::IndexNode(BMessage *node)
 {
+	BList		*subNodeList	= NULL;
+	BMessage	*subNode		= NULL;
+	node->AddPointer("this",node);
+	if ((node->FindPointer("SubContainer",(void **)&subList) == B_OK) && (subList != NULL) )
+	{
+		for (int32 i=0; i<subList-CountItems();i++)
+		{
+			subNode =(BMessage *) subnodeList->ItemAt(i);
+			node->AddMessage("SubContainerList",IndexNode(subList));
+		}
+	}
+	//** here we also shoud run the node throu the available Editors so that they can save all they need :-)
 	return node;
 }
 BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 {
+	BMessage *from	= NULL;
+	BMessage *to	= NULL;
+	if (includeNodes)
+	{
+		connection->FindPointer("From",&from);
+		connection->FindPointer("To",&to);
+		//**this coud cause a error if someone added a second From Pointer
+		connection->RemoveName("From");
+		connection->RemoveName("To");
+		connection->AddMessage("From",IndexNode(from));
+		connection->AddMessage("To",IndexNode(to));
+	}
+	else
+	{
+		//**do we need a check if this node wich we are linking to is indexed??
+	}
 	return connection;
 }
 BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
 {
+	//**if store the first appearance of a node.. after this only store the index
 	return undo;
 }
 BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
 {
+	//**store the first appearance of a node.. after this only store the index
 	return macro;
 }
 BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 {
+	//**store the first appearance of a node.. after this only store the index
 	return command;
 }
 
