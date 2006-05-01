@@ -1,5 +1,5 @@
-#ifndef PDOCLOADER_H
-#define PDOCLOADER_H
+#ifndef P_DOCL_OADER_H
+#define P_DOC_LOADER_H
 
 #include <app/Message.h>
 #include <storage/Entry.h>
