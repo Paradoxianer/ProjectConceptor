@@ -1,6 +1,8 @@
 #include "Indexer.h"
 
 #include "PDocument.h"
+#include "PluginManager.h"
+#include "PDocumentManager.h"
 
 Indexer::Indexer(PDocument *document)
 {
@@ -129,7 +131,8 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 
 void Indexer::Init(void)
 {
-	sorter					= new BKeyedVector<int32,BMessage*>();
+	sorter				= new BKeyedVector<int32,BMessage*>();
+	pluginManager		= (document->BelongTo())->GetPluginManager();
 }
 
 

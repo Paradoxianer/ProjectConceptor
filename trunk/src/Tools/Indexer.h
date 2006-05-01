@@ -8,6 +8,7 @@
 #include <support/List.h>
 
 class PDocument;
+class PluginManager;
 /**
  * @class Indexer
  *
@@ -57,7 +58,7 @@ protected:
 			
 			PDocument			*doc;
 			BKeyedVector<int32,BMessage*>*	sorter;
-
+			PluginManager		*pluginManager
 /*		BList*					allNodes;
 		BList*					selectedNodes;
 		BList*					allConnections;
