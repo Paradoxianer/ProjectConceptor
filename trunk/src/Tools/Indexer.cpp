@@ -4,9 +4,6 @@ Indexer::Indexer(BMessage *index,BMessage *deIndex = NULL)
 
 {
 	Init();
-	toLoad	= new BFile (openEntry,B_READ_ONLY);
-//	Preprocess();
-	Load();
 }
 
 Indexer::~Indexer(void)
@@ -31,7 +28,7 @@ BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
 }
 BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 {
-	return macro;
+	return command;
 }
 
 			

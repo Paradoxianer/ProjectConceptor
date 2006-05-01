@@ -5,6 +5,7 @@
 #include <storage/Entry.h>
 #include <storage/File.h>
 #include <support/KeyedVector.h>
+#include <support/List.h>
 
 
 /**
@@ -28,6 +29,8 @@ class Indexer
 
 public:
 								Indexer(BMessage *index,BMessage *deIndex = NULL);
+								~Indexer(void);
+
 			BMessage*			IndexNode(BMessage *node,bool includeNodes=false);	
 			BMessage*			IndexConnection(BMessage *connection,bool includeNodes=false);	
 			BMessage*			IndexUndo(BMessage *undo,bool includeNodes=false);	
@@ -42,15 +45,15 @@ public:
 			BMessage*			DeIndexCommand(BMessage *command);	
 
 protected:
-			void				Init(void)
+			void				Init(void);
 	//spread sorts all BList stuff out of the nodes... ;-)
 			BList*				Spread(BMessage *allNodeMessage);
 	//ReIndex takes the stored Connections and ReAssing the Connections to real existing pointers 
-			BList*				DeIndexConnections(BMessage *allConnectionsMessage);
-			BList*				DeIndexSelected(BMessage *allConnectionsMessage);
-			void				DeIndexUndo(BMessage *reIndexUndo);
-			void				DeIndexMacro(BMessage *reIndexUndo);
-			void				DeIndexCommand(BMessage *commandMessage);
+			BList*				ReIndexConnections(BMessage *allConnectionsMessage);
+			BList*				ReIndexSelected(BMessage *allConnectionsMessage);
+			void				ReIndexUndo(BMessage *reIndexUndo);
+			void				ReIndexMacro(BMessage *reIndexUndo);
+			void				ReIndexCommand(BMessage *commandMessage);
 	
 		BKeyedVector<int32,BMessage*>*	sorter;
 

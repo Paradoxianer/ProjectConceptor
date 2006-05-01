@@ -41,7 +41,6 @@ SRCS= 	src/AboutWindow.cpp \
 		src/Document/WindowManager.cpp \
 		src/Plugins/BasePlugin.cpp \
 		src/Plugins/PluginManager.cpp \
-		src/Tools/PDocLoader.cpp \
 		src/ToolBar/BaseItem.cpp \
 		src/ToolBar/Mover.cpp \
 		src/ToolBar/ToolBar.cpp \
@@ -50,8 +49,10 @@ SRCS= 	src/AboutWindow.cpp \
 		src/ToolBar/ToolMenu.cpp\
 		src/ToolBar/ColorToolItem.cpp \
 		src/ToolBar/FloatToolItem.cpp \
-		src/ToolBar/PatternToolItem.cpp
-		
+		src/ToolBar/PatternToolItem.cpp \
+		src/Tools/PDocLoader.cpp \
+		src/Tools/Indexer.cpp 
+
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.
 RSRCS= src/ProjectConceptor.rsrc
@@ -151,3 +152,7 @@ default .DEFAULT:
 		$(MAKE) -C $$f $@; \
 	done
 
+clean::
+	-@for f in $(LEAFDIRS); do \
+		$(MAKE) clean -C $$f $@; \
+	done
