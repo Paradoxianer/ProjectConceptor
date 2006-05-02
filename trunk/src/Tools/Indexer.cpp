@@ -144,30 +144,40 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 
 BMessage* Indexer::DeIndexConnection(BMessage *connection)
 {
-	void		*fromPointer		= NULL;
-	void		*toPointer			= NULL;
-	if ((connection->FindPointer("From",(void **)&fromPointer) != B_OK)||
-		(connection->FindPointer("To",(void **)&toPointer) != B_OK))
+	if (connection)
 	{
-		//**here we shoud Find and DeIndex the nodes
-	}
-	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
-	BasePlugin	*plugin		= NULL;
-	PEditor		*editor		= NULL;
-	if (editorList!=NULL)
-	{
-		for (int32 i=0;i<editorList->CountItems();i++)
+		void		*fromPointer		= NULL;
+		void		*toPointer			= NULL;
+		BMessage	*fromMessage		= new BMessage();
+		BMessage	*toMessage			= new BMessage();	
+		if ((connection->FindPointer("From",(void **)&fromPointer) != B_OK)||
+			(connection->FindPointer("To",(void **)&toPointer) != B_OK))
 		{
-			plugin = (BasePlugin *) editorList->ItemAt(i);
-			if (plugin)
+			conncetion->FindMessage("From",fromMessage);
+			conncetion->FindMessage("To",toMessage);
+			connection->RemoveName("From");
+			connection->RemoveName("To");
+			fromPointer = DeIndexNode(fromMessage);
+			toPointer	= DeIndexNode(toMessage)
+		}
+		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
+		BasePlugin	*plugin		= NULL;
+		PEditor		*editor		= NULL;
+		if (editorList!=NULL)
+		{
+			for (int32 i=0;i<editorList->CountItems();i++)
 			{
-				editor=(PEditor *)plugin->GetNewObject(NULL);
-				editor->PreprocessAfterLoad(connection);
+				plugin = (BasePlugin *) editorList->ItemAt(i);
+				if (plugin)
+				{
+					editor=(PEditor *)plugin->GetNewObject(NULL);
+					editor->PreprocessAfterLoad(connection);
+				}
 			}
 		}
+		connection->AddPointer("From",sorter->ValueFor((int32)fromPointer));
+		connection->AddPointer("To",sorter->ValueFor((int32)toPointer));
 	}
-	connection->AddPointer("From",sorter->ValueFor((int32)fromPointer));
-	connection->AddPointer("To",sorter->ValueFor((int32)toPointer));
 	return connection;
 }
 BMessage* Indexer::DeIndexUndo(BMessage *undo)
