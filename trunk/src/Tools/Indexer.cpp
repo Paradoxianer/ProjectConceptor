@@ -3,6 +3,8 @@
 #include "PDocument.h"
 #include "PluginManager.h"
 #include "PDocumentManager.h"
+#include "BasePlugin.h"
+#include "PEditor.h"
 
 Indexer::Indexer(PDocument *document)
 {
@@ -16,6 +18,7 @@ Indexer::~Indexer(void)
 
 BMessage*	Indexer::IndexNode(BMessage *node)
 {
+	int32	i	= 0;
 	if (node!=NULL)
 	{
 		BList		*subNodeList	= NULL;
@@ -30,6 +33,22 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 			}
 		}
 		//** here we also shoud run the node through the available Editors so that they can save all they need :-)
+		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
+		BasePlugin	*plugin		= NULL;
+		PEditor		*editor		= NULL;
+		if (editorList)
+		{
+			for (i=0;i<editorList->CountItems();i++)
+			{
+				plugin = (BasePlugin *) editorList->ItemAt(i);
+				if (plugin)
+				{
+					editor=(PEditor *)plugin->GetNewObject(NULL);
+					editor->PreprocessBeforSave(node);
+				}
+				
+			}
+		}
 	}
 	return node;
 }
@@ -50,6 +69,22 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 	else
 	{
 		//**do we need a check if this node wich we are linking to is indexed??
+	}
+	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
+	BasePlugin	*plugin		= NULL;
+	PEditor		*editor		= NULL;
+	if (editorList)
+	{
+		for (int32 i=0;i<editorList->CountItems();i++)
+		{
+			plugin = (BasePlugin *) editorList->ItemAt(i);
+			if (plugin)
+			{
+				editor=(PEditor *)plugin->GetNewObject(NULL);
+				editor->PreprocessAfterLoad(connection);
+			}
+			
+		}
 	}
 	return connection;
 }
@@ -74,44 +109,63 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 {
 	BMessage	*subContainerEntry	= new BMessage();
 	BList		*subContainerList	= new BList();
+	int32		i					= 0;
 	void		*tmpPointer			= NULL;
 	if (node->FindPointer("SubContainer",&tmpPointer) == B_OK)
 			node->RemoveName("SubContainer");
-	while (node->FindMessage("SubContainerList",subContainerEntry) == B_OK)
+	while (node->FindMessage("SubContainerList",i,subContainerEntry) == B_OK)
 	{
 		subContainerList->AddItem(DeIndexNode(subContainerEntry));
 		subContainerEntry	= new BMessage();
+		i++;
 	}
 	if (subContainerList->CountItems()>0)
 		node->AddPointer("SubContainer",subContainerList);
 	node->FindPointer("this",(void **)&tmpPointer);
 	node->RemoveName("this");
-	//**replace this with a call of the PEditor::PreprocessAfterLoad() Method of all Loaded PEditor Plugins
-/*	char *name; 
-	uint32 type; 
-	int32 count;
-	while (node->GetInfo(B_POINTER_TYPE,0 ,(const char **)&name, &type, &count) == B_OK)
+	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
+	BasePlugin	*plugin		= NULL;
+	PEditor		*editor		= NULL;
+	if (editorList)
 	{
-		node->RemoveName(name);
-	}*/
+		for (i=0;i<editorList->CountItems();i++)
+		{
+			plugin = (BasePlugin *) editorList->ItemAt(i);
+			if (plugin)
+			{
+				editor=(PEditor *)plugin->GetNewObject(NULL);
+				editor->PreprocessAfterLoad(node);
+			}
+		}
+	}
 	sorter->AddItem((int32)tmpPointer,node);
 	return node;
 }
+
 BMessage* Indexer::DeIndexConnection(BMessage *connection)
 {
 	void		*fromPointer		= NULL;
 	void		*toPointer			= NULL;
 	if ((connection->FindPointer("From",(void **)&fromPointer) != B_OK)||
-		(connection->FindPointer("To",(void **)&toPointer) == B_OK))
-	
-	//**replace this with a call of the PEditor::PreprocessAfterLoad() Method of all Loaded PEditor Plugins
-/*	char *name; 
-	uint32 type; 
-	int32 count; 
-	while (connection->GetInfo(B_POINTER_TYPE,0 ,(const char **)&name, &type, &count) == B_OK)
+		(connection->FindPointer("To",(void **)&toPointer) != B_OK))
 	{
-		connection->RemoveName(name);
-	}*/
+		//**here we shoud Find and DeIndex the nodes
+	}
+	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
+	BasePlugin	*plugin		= NULL;
+	PEditor		*editor		= NULL;
+	if (editorList!=NULL)
+	{
+		for (int32 i=0;i<editorList->CountItems();i++)
+		{
+			plugin = (BasePlugin *) editorList->ItemAt(i);
+			if (plugin)
+			{
+				editor=(PEditor *)plugin->GetNewObject(NULL);
+				editor->PreprocessAfterLoad(connection);
+			}
+		}
+	}
 	connection->AddPointer("From",sorter->ValueFor((int32)fromPointer));
 	connection->AddPointer("To",sorter->ValueFor((int32)toPointer));
 	return connection;
@@ -132,7 +186,7 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 void Indexer::Init(void)
 {
 	sorter				= new BKeyedVector<int32,BMessage*>();
-	pluginManager		= (document->BelongTo())->GetPluginManager();
+	pluginManager		= (doc->BelongTo())->GetPluginManager();
 }
 
 

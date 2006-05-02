@@ -58,7 +58,7 @@ protected:
 			
 			PDocument			*doc;
 			BKeyedVector<int32,BMessage*>*	sorter;
-			PluginManager		*pluginManager
+			PluginManager		*pluginManager;
 /*		BList*					allNodes;
 		BList*					selectedNodes;
 		BList*					allConnections;
