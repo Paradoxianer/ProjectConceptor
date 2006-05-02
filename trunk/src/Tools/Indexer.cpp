@@ -153,12 +153,12 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 		if ((connection->FindPointer("From",(void **)&fromPointer) != B_OK)||
 			(connection->FindPointer("To",(void **)&toPointer) != B_OK))
 		{
-			conncetion->FindMessage("From",fromMessage);
-			conncetion->FindMessage("To",toMessage);
+			connection->FindMessage("From",fromMessage);
+			connection->FindMessage("To",toMessage);
 			connection->RemoveName("From");
 			connection->RemoveName("To");
 			fromPointer = DeIndexNode(fromMessage);
-			toPointer	= DeIndexNode(toMessage)
+			toPointer	= DeIndexNode(toMessage);
 		}
 		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 		BasePlugin	*plugin		= NULL;
