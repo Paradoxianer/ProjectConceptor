@@ -34,9 +34,12 @@ void PCommandManager::Init(void)
 
 	PluginManager	*pluginManager	= (document->BelongTo())->GetPluginManager();
 	BList 			*commands		= pluginManager->GetPluginsByType(P_C_COMMANDO_PLUGIN_TYPE);
-	for (int32 i=0; i<commands->CountItems();i++)
+	if (commands)
 	{
-		RegisterPCommand((BasePlugin *)commands->ItemAt(i));
+		for (int32 i=0; i<commands->CountItems();i++)
+		{
+			RegisterPCommand((BasePlugin *)commands->ItemAt(i));
+		}
 	}
 }
 

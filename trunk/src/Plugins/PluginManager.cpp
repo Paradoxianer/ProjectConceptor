@@ -1,5 +1,12 @@
 #include <string.h>
+#include <interface/Alert.h>
 #include <storage/Resources.h>
+#ifdef B_ZETA_VERSION_BETA
+	#include <locale/Locale.h>
+	#include <locale/LanguageNotifier.h>
+#else
+	#define _T(a) a
+#endif 
 
 #include "PluginManager.h"
 #include "BasePlugin.h"
@@ -91,6 +98,8 @@ void PluginManager::LoadPlugins(BDirectory *startDir, bool deep = true)
 		}
 		dirCounter++;
 	}
+	if (plugins->CountItems()<1)
+	  (new BAlert(_T("ProjectConceptor"), _T("Cant find Plugins"), "OK",NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go();
 }
 
 

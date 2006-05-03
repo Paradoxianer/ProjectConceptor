@@ -156,6 +156,7 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 		void		*toPointer			= NULL;
 		BMessage	*fromMessage		= new BMessage();
 		BMessage	*toMessage			= new BMessage();	
+		//** need to check this for every Pointer individual 
 		if ((connection->FindPointer("From",(void **)&fromPointer) != B_OK)||
 			(connection->FindPointer("To",(void **)&toPointer) != B_OK))
 		{
