@@ -58,6 +58,8 @@ protected:
 			
 			PDocument			*doc;
 			BKeyedVector<int32,BMessage*>*	sorter;
+			BList				*included;
+
 			PluginManager		*pluginManager;
 /*		BList*					allNodes;
 		BList*					selectedNodes;

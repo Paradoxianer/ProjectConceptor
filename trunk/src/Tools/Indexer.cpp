@@ -59,12 +59,17 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 	if (includeNodes)
 	{
 		connection->FindPointer("From",(void **)&from);
+		if (!included->HasItem(from))
+		{
+			connection->RemoveName("From");
+			connection->AddMessage("From",IndexNode(from));
+		}
 		connection->FindPointer("To",(void **)&to);
-		//**this coud cause a error if someone added a second From Pointer
-		connection->RemoveName("From");
-		connection->RemoveName("To");
-		connection->AddMessage("From",IndexNode(from));
-		connection->AddMessage("To",IndexNode(to));
+		if (!included->HasItem(to))
+		{
+			connection->RemoveName("To");
+			connection->AddMessage("To",IndexNode(to));
+		}
 	}
 	else
 	{
@@ -90,6 +95,7 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 }
 BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
 {
+
 	//**if store the first appearance of a node.. after this only store the index
 	return undo;
 }
@@ -196,6 +202,8 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 void Indexer::Init(void)
 {
 	sorter				= new BKeyedVector<int32,BMessage*>();
+	included			= new BList;
+
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
 }
 
