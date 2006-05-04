@@ -32,7 +32,7 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 				node->AddMessage("SubContainerList",IndexNode(subNode));
 			}
 		}
-		//** here we also shoud run the node through the available Editors so that they can save all they need :-)
+		//here we also run the node through the available Editors so that they can save all they need :-)
 		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 		BasePlugin	*plugin		= NULL;
 		PEditor		*editor		= NULL;
@@ -52,6 +52,7 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 	}
 	return node;
 }
+
 BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 {
 	BMessage *from	= NULL;
@@ -63,12 +64,14 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 		{
 			connection->RemoveName("From");
 			connection->AddMessage("From",IndexNode(from));
+			included->AddItem(from);
 		}
 		connection->FindPointer("To",(void **)&to);
 		if (!included->HasItem(to))
 		{
 			connection->RemoveName("To");
 			connection->AddMessage("To",IndexNode(to));
+			included->AddItem(to);
 		}
 	}
 	else
@@ -95,7 +98,12 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 }
 BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
 {
-
+	int32 i	= 0;
+	int32 j = 0;
+	if (includeNodes)
+	{
+		
+	}
 	//**if store the first appearance of a node.. after this only store the index
 	return undo;
 }
@@ -106,7 +114,33 @@ BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
 }
 BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 {
-	//**store the first appearance of a node.. after this only store the index
+	BMessage	*node		= NULL;
+	BMessage	*subCommand	= NULL;
+	int32		i		= 0;
+	int32		j		= 0;
+	if (includeNodes)
+	{
+		while (command->FindPointer("node",j,(void **)&node) == B_OK)
+		{
+			if (!included->HasItem(node))
+			{
+				included->AddItem(node);
+				command->AddMessage("node",IndexNode(node));
+			}
+		}
+		char		*name	= NULL;
+		type_code	type	= 0;
+		int32		count	= 0;
+		while (command->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+		{
+			if ( (command->FindMessage(name,i,subCommand) == B_OK) && (subCommand) )
+			{
+				IndexCommand(subCommand);
+				command->ReplaceMessage(name,count-1,subCommand);
+			}
+			i++;
+		}
+	}
 	return command;
 }
 
@@ -156,15 +190,17 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 		void		*toPointer			= NULL;
 		BMessage	*fromMessage		= new BMessage();
 		BMessage	*toMessage			= new BMessage();	
-		//** need to check this for every Pointer individual 
-		if ((connection->FindPointer("From",(void **)&fromPointer) != B_OK)||
-			(connection->FindPointer("To",(void **)&toPointer) != B_OK))
+		// need to check this for every Pointer individual 
+		if (connection->FindPointer("From",(void **)&fromPointer) != B_OK)
 		{
 			connection->FindMessage("From",fromMessage);
-			connection->FindMessage("To",toMessage);
 			connection->RemoveName("From");
-			connection->RemoveName("To");
 			fromPointer = DeIndexNode(fromMessage);
+		}
+		if (connection->FindPointer("To",(void **)&toPointer) != B_OK)
+		{
+			connection->FindMessage("To",toMessage);
+			connection->RemoveName("To");
 			toPointer	= DeIndexNode(toMessage);
 		}
 		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
@@ -189,14 +225,17 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 }
 BMessage* Indexer::DeIndexUndo(BMessage *undo)
 {
+	//** todo extract saved nodes
 	return undo;
 }
 BMessage* Indexer::DeIndexMacro(BMessage *macro)
 {
+	//** todo extract saved nodes
 	return macro;
 }
 BMessage* Indexer::DeIndexCommand(BMessage *command)
 {
+	//** todo extract saved nodes
 	return command;
 }
 
@@ -204,7 +243,6 @@ void Indexer::Init(void)
 {
 	sorter				= new BKeyedVector<int32,BMessage*>();
 	included			= new BList;
-
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
 }
 

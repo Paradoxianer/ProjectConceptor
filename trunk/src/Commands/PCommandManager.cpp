@@ -203,6 +203,8 @@ void PCommandManager::Execute(BMessage *settings)
 					recording->AddMessage("Macro::Commmand", settings);
 				undoList->RemoveItems(undoStatus+1,undoList->CountItems()-undoStatus);
 				undoList->AddItem(new BMessage(*tmpMessage));
+				tmpMessage->PrintToStream();
+
 				undoStatus	= undoList->CountItems()-1;
 			}
 			(document->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
