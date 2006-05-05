@@ -37,7 +37,7 @@ public:
 			BMessage*			IndexUndo(BMessage *undo,bool includeNodes=false);	
 			BMessage*			IndexMacro(BMessage *macro,bool includeNodes=false);
 			BMessage*			IndexCommand(BMessage *command,bool includeNodes=false);	
-
+			BMessage*			PointerForIndex(int32 index){return sorter->ValueFor(index);};
 			
 			BMessage*			DeIndexNode(BMessage *node);
 			BMessage*			DeIndexConnection(BMessage *connection);	

@@ -9,7 +9,9 @@
 #include "Commands/PCommandManager.h"
 #include "Document/PEditorManager.h"
 #include "Document/WindowManager.h"
+#include "Tools/Indexer.h"
 
+class PDocumen;
 /**
  * @class PDocLoader
  *
@@ -29,7 +31,7 @@ class PDocLoader
 {
 
 public:
-								PDocLoader(BEntry *openEntry);
+								PDocLoader(PDocument *doc,BEntry *openEntry);
 	virtual						~PDocLoader(void);
 
 
@@ -54,7 +56,7 @@ protected:
 	virtual BList*				ReIndexSelected(BMessage *allConnectionsMessage);
 	virtual void				ReIndexUndo(BMessage *reIndexUndo);
 	virtual void				ReIndexMacro(BMessage *reIndexUndo);
-	virtual void				ReIndexCommand(BMessage *commandMessage);
+//	virtual void				ReIndexCommand(BMessage *commandMessage);
 	
 		BKeyedVector<int32,BMessage*>*	sorter;
 		
@@ -74,6 +76,7 @@ protected:
 		
 		BFile*					toLoad;
 		BMessage*				loadedStuff;
+		Indexer					*indexer;
 
 private:
 

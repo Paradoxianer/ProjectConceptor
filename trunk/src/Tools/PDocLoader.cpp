@@ -1,11 +1,13 @@
 #include "PDocLoader.h"
+#include "PDocument.h"
 
 #include <support/Archivable.h>
 
-PDocLoader::PDocLoader(BEntry *openEntry)
+PDocLoader::PDocLoader(PDocument *doc,BEntry *openEntry)
 {
 	Init();
 	toLoad	= new BFile (openEntry,B_READ_ONLY);
+	indexer	= new Indexer(doc);
 //	Preprocess();
 	Load();
 }
@@ -73,6 +75,8 @@ void PDocLoader::Load(void)
 {
 	BMessage	*loadedStuff			= new BMessage();
 	BMessage	*allNodesMessage		= new BMessage();
+	BMessage	*allConnectionsMessage	= new BMessage();
+	BMessage	*selectedMessage		= new BMessage();
 	if (toLoad->InitCheck() == B_OK)
 	{
 		if (loadedStuff->Unflatten(toLoad) == B_OK)
@@ -81,9 +85,12 @@ void PDocLoader::Load(void)
 			loadedStuff->FindMessage("PDocument::documentSetting",settings);
 			loadedStuff->FindMessage("PDocument::allNodes",allNodesMessage);
 			loadedStuff->FindMessage("PDocument::commandManager",commandManagerMessage);
+			loadedStuff->FindMessage("PDocument::allConnections",allConnectionsMessage);
+			loadedStuff->FindMessage("PDocument::selected",selectedMessage);
+			
 			allNodes		=	Spread(allNodesMessage);
-			allConnections	=	ReIndexConnections(loadedStuff);
-			selectedNodes	=	ReIndexSelected(loadedStuff);
+			allConnections	=	ReIndexConnections(allConnectionsMessage);
+			selectedNodes	=	ReIndexSelected(selectedMessage);
 			ReIndexUndo(commandManagerMessage);
 			ReIndexMacro(commandManagerMessage);
 		}
@@ -92,7 +99,16 @@ void PDocLoader::Load(void)
 
 BList* PDocLoader::Spread(BMessage *allNodeMessage)
 {
-	BMessage	*subContainerList	= new BMessage();
+	BList		*newAllNodes		= new BList();
+	BMessage	*node				= new BMessage();
+	int32		i					= 0;
+	while (allNodeMessage->FindMessage("node",i,node) == B_OK)
+	{
+		newAllNodes->AddItem(indexer->DeIndexNode(node));
+		node =	new BMessage();
+		i++;		
+	}
+/*	BMessage	*subContainerList	= new BMessage();
 	BMessage	*node				= new BMessage();
 	BMessage	*newNode			= NULL;
 	BList		*newAllNodes		= new BList();
@@ -124,7 +140,7 @@ BList* PDocLoader::Spread(BMessage *allNodeMessage)
 		newAllNodes->AddItem(newNode);
 		sorter->AddItem((int32)tmpPointer,newNode);
 		i++;
-	}
+	}*/
 	return newAllNodes;
 }
 
@@ -134,23 +150,10 @@ BList* PDocLoader::ReIndexConnections(BMessage *allConnectionsMessage)
 	BMessage	*connection			= new BMessage();
 	BList		*newConnections		= new BList();
 	int32		i					= 0;
-	void		*fromPointer		= NULL;
-	void		*toPointer			= NULL;
-	
-	while (allConnectionsMessage->FindMessage("PDocument::allConnections",i,connection) == B_OK)
+	while (allConnectionsMessage->FindMessage("node",i,connection) == B_OK)
 	{
-		connection->FindPointer("From",(void **)&fromPointer);
-		connection->FindPointer("To",(void **)&toPointer);
-		char *name; 
-		uint32 type; 
-		int32 count; 
-		while (connection->GetInfo(B_POINTER_TYPE,0 ,(const char **)&name, &type, &count) == B_OK)
-		{
-			connection->RemoveName(name);
-		}
-		connection->AddPointer("From",sorter->ValueFor((int32)fromPointer));
-		connection->AddPointer("To",sorter->ValueFor((int32)toPointer));
-		newConnections->AddItem(new BMessage(*connection));
+		newConnections->AddItem(indexer->DeIndexConnection(connection));
+		connection =	new BMessage();
 		i++;
 	}
 	return newConnections;
@@ -158,13 +161,14 @@ BList* PDocLoader::ReIndexConnections(BMessage *allConnectionsMessage)
 
 BList* PDocLoader::ReIndexSelected(BMessage *selectionMessage)
 {
+//** how to change this???
 	BList		*newSelection		= new BList();
 	int32		i					= 0;
 	void		*selectPointer		= NULL;
 	
-	while (selectionMessage->FindPointer("PDocument::selected",i,&selectPointer) == B_OK)
+	while (selectionMessage->FindPointer("node",i,&selectPointer) == B_OK)
 	{
-		newSelection->AddItem(sorter->ValueFor((int32)selectPointer));
+		newSelection->AddItem(indexer->PointerForIndex((int32)selectPointer));
 		i++;
 	}
 	return newSelection;
@@ -174,10 +178,9 @@ void PDocLoader::ReIndexUndo(BMessage *reindexUndo)
 {
 	BMessage	*undoCommand		= new BMessage();
 	int32		i					= 0;
-
 	while (reindexUndo->FindMessage("undo",i,undoCommand)==B_OK)
 	{
-		ReIndexCommand(undoCommand);
+		indexer->DeIndexUndo(undoCommand);
 		reindexUndo->ReplaceMessage("undo",i,undoCommand);
 		i++;
 	}
@@ -185,17 +188,17 @@ void PDocLoader::ReIndexUndo(BMessage *reindexUndo)
 
 void PDocLoader::ReIndexMacro(BMessage *reindexMacro)
 {
-	BMessage	*macroCommand		= new BMessage();
-	int32		i					= 0;
-	while (reindexMacro->FindMessage("Macro::Commmand",i,macroCommand)==B_OK)
+	BMessage	*macro		= new BMessage();
+	int32		i			= 0;
+	while (reindexMacro->FindMessage("macro",i,macro)==B_OK)
 	{
-		ReIndexCommand(macroCommand);
-		reindexMacro->ReplaceMessage("Macro::Commmand",i,macroCommand);
+		indexer->DeIndexMacro(macro);
+		reindexMacro->ReplaceMessage("macro",i,macro);
 		i++;
 	}
 }
 
-void PDocLoader::ReIndexCommand(BMessage *commandMessage)
+/*void PDocLoader::ReIndexCommand(BMessage *commandMessage)
 {
 	BMessage	*subCommand			= new BMessage();
 	void		*nodePointer		= NULL;
@@ -218,7 +221,7 @@ void PDocLoader::ReIndexCommand(BMessage *commandMessage)
 		}
 		i++;
 	}
-/*	while(commandMessage->FindMessage("PCommand::subPCommand",i,subCommand) == B_OK)
+	while(commandMessage->FindMessage("PCommand::subPCommand",i,subCommand) == B_OK)
 	{
 		if (subCommand)
 		{
@@ -226,5 +229,5 @@ void PDocLoader::ReIndexCommand(BMessage *commandMessage)
 			commandMessage->ReplaceMessage("PCommand::subPCommand",i,subCommand);
 		}
 		i++;
-	}*/
-}
+	}
+}*/

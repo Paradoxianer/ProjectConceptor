@@ -6,7 +6,7 @@
 #include "PDocumentManager.h"
 #include "PluginManager.h"
 #include "BasePlugin.h"
-
+#include "Tools/Indexer.h"
 
 PDocument::PDocument(PDocumentManager *initManager):BLooper(),BReadWriteLocker() 
 {
@@ -359,28 +359,42 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 void PDocument::Save(void)
 {
 	TRACE();
-	status_t	err 				= B_OK;
-//	BMessage	*tmpMessage		= Convert();
-	BMessage	*tmpMessage			= new BMessage();
-	BMessage	*commandManage		= new BMessage();
-	
+	Indexer		*indexer				= new Indexer(this);
+	status_t	err 					= B_OK;
+//	BMessage	*tmpMessage				= Convert();
+	BMessage	*tmpMessage				= new BMessage();
+	BMessage	*commandManage			= new BMessage();
+	BMessage	*tmpNode				= NULL;
+	BMessage	*allNodesMessage		= new BMessage();
+	BMessage	*allConnectionsMessage	= new BMessage();
+	BMessage	*selectedMessage		= new BMessage();
+
 	tmpMessage->AddMessage("PDocument::printerSetting",printerSetting);
 	tmpMessage->AddMessage("PDocument::documentSetting",documentSetting);
-/*	windowManager->Archive(windowManage);
-	tmpMessage->AddMessage("PDocument::windowManager",windowManage);
-	editorManager->Archive(editorManage);
-	tmpMessage->AddMessage("PDocument::editorManager", editorManage);*/
+	//save all Command related Stuff like Undo/Makor
 	commandManager->Archive(commandManage);
 	tmpMessage->AddMessage("PDocument::commandManager", commandManage);
-	tmpMessage->AddMessage("PDocument::allNodes",ReIndex(allNodes));
+	//save all Nodes
+	for (int32 i=0; i<allNodes->CountItems();i++)
+	{
+		tmpNode=(BMessage *)allNodes->ItemAt(i);
+		allNodesMessage->AddMessage("node",indexer->IndexNode(tmpNode));
+	}
+	tmpMessage->AddMessage("PDocument::allNodes",allNodesMessage);
+	//save all Connections
 	for (int32 i=0; i<allConnections->CountItems();i++)
 	{
-		tmpMessage->AddMessage("PDocument::allConnections",(BMessage *)allConnections->ItemAt(i));
+		tmpNode=(BMessage *)allConnections->ItemAt(i);
+		allConnectionsMessage->AddMessage("node",indexer->IndexConnection(tmpNode));
 	}
+	tmpMessage->AddMessage("PDocument::allConnections",allConnectionsMessage);
+	//save the selected List
 	for (int32 i=0; i<selected->CountItems();i++)
 	{
-		tmpMessage->AddPointer("PDocument::selected",selected->ItemAt(i));
+		selectedMessage->AddPointer("node",selected->ItemAt(i));
 	}
+	tmpMessage->AddMessage("PDocument::selected",selectedMessage);
+	
 	if (entryRef) 
 	{
 		BFile *file=	new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
@@ -394,12 +408,19 @@ void PDocument::Save(void)
 	}
 	else
 		PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
+	delete	indexer;
+	delete	tmpMessage;
+	delete	commandManage;
+	delete	tmpNode;
+	delete	allNodesMessage;
+	delete	allConnectionsMessage;
+	delete	selectedMessage;
 }
 
 void PDocument::Load(void)
 {
 	TRACE();
-	PDocLoader	*docLoader	= new PDocLoader(new BEntry(entryRef));
+	PDocLoader	*docLoader	= new PDocLoader(this,new BEntry(entryRef));
 	delete allNodes;
 	delete allConnections;
 	delete printerSetting;

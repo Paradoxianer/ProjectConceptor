@@ -8,12 +8,14 @@
 
 Indexer::Indexer(PDocument *document)
 {
+	TRACE();
 	doc = document;
 	Init();
 }
 
 Indexer::~Indexer(void)
 {
+	TRACE();
 	delete sorter;
 	delete included;
 
@@ -21,6 +23,7 @@ Indexer::~Indexer(void)
 
 BMessage*	Indexer::IndexNode(BMessage *node)
 {
+	TRACE();
 	int32	i	= 0;
 	if (node!=NULL)
 	{
@@ -58,6 +61,7 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 
 BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 {
+	TRACE();
 	BMessage *from	= NULL;
 	BMessage *to	= NULL;
 	if (includeNodes)
@@ -92,7 +96,7 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 			if (plugin)
 			{
 				editor=(PEditor *)plugin->GetNewObject(NULL);
-				editor->PreprocessAfterLoad(connection);
+				editor->PreprocessBeforSave(connection);
 			}
 			
 		}
@@ -102,6 +106,7 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 
 BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
 {
+	TRACE();
 	int32 i	= 0;
 	int32 j = 0;
 	if (includeNodes)
@@ -113,6 +118,7 @@ BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
 
 BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
 {
+	TRACE();
 	BMessage	*macroCommand	= new BMessage;
 	if (includeNodes)
 	{
@@ -127,6 +133,7 @@ BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
 
 BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 {
+	TRACE();
 	BMessage	*node		= NULL;
 	BMessage	*subCommand	= NULL;
 	int32		i		= 0;
@@ -160,6 +167,7 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 			
 BMessage* Indexer::DeIndexNode(BMessage *node)
 {
+	TRACE();
 	BMessage	*subContainerEntry	= new BMessage();
 	BList		*subContainerList	= new BList();
 	int32		i					= 0;
@@ -197,6 +205,7 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 
 BMessage* Indexer::DeIndexConnection(BMessage *connection)
 {
+	TRACE();
 	if (connection)
 	{
 		void		*fromPointer		= NULL;
@@ -207,15 +216,15 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 		if (connection->FindPointer("From",(void **)&fromPointer) != B_OK)
 		{
 			connection->FindMessage("From",fromMessage);
-			connection->RemoveName("From");
 			fromPointer = DeIndexNode(fromMessage);
 		}
 		if (connection->FindPointer("To",(void **)&toPointer) != B_OK)
 		{
 			connection->FindMessage("To",toMessage);
-			connection->RemoveName("To");
 			toPointer	= DeIndexNode(toMessage);
 		}
+		connection->RemoveName("From");
+		connection->RemoveName("To");
 		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 		BasePlugin	*plugin		= NULL;
 		PEditor		*editor		= NULL;
@@ -239,6 +248,7 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 
 BMessage* Indexer::DeIndexCommand(BMessage *command)
 {
+	TRACE();
 	BMessage	*node		= new BMessage();
 	BMessage	*subCommand	= new BMessage();
 	int			i			= 0;
@@ -279,12 +289,14 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 
 BMessage* Indexer::DeIndexUndo(BMessage *undo)
 {
+	TRACE();
 	// extract saved nodes and because undo is only a saved Commandstructure with some undo messages (wich DeIndexCommand can handle we use DeindexCommand )
 	DeIndexCommand(undo);
 	return undo;
 }
 BMessage* Indexer::DeIndexMacro(BMessage *macro)
 {
+	TRACE();
 	BMessage	*macroCommand	= new BMessage();
 	while (macro->FindMessage("Macro::Commmand",macroCommand) == B_OK)
 	{
@@ -297,6 +309,7 @@ BMessage* Indexer::DeIndexMacro(BMessage *macro)
 
 void Indexer::Init(void)
 {
+	TRACE();
 	sorter				= new BKeyedVector<int32,BMessage*>();
 	included			= new BList;
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
