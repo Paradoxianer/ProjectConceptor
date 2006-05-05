@@ -189,6 +189,30 @@ void GraphEditor::InitAll()
 		}
 	}	
 }
+void GraphEditor::PreprocessBeforSave(BMessage *container)
+{
+	TRACE();
+	char	*name; 
+	uint32	type; 
+	int32	count; 
+	int32	i		= 0;
+	//remove all the Pointer to the Renderer so that on the next load a new Renderer are added
+	while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+	{
+		if ((strstr(name,"GraphEditor") != NULL) || 
+			(strcasecmp(name,"Outgoing") == B_OK) ||
+			(strcasecmp(name,"Incoming") == B_OK) ||
+			(strcasecmp(name,"Incoming") == B_OK) )
+		{
+			container->RemoveName(name);
+			i--;
+		}
+		
+		
+		i++;
+	}
+}
+
 
 void GraphEditor::ValueChanged()
 {
@@ -474,7 +498,6 @@ void GraphEditor::DetachedFromWindow(void)
 			toolBar->RemoveSeperator();	
 		}
 		Renderer	*nodeRenderer	= NULL;
-		
 		while(renderer->CountItems()>0)
 		{
 			nodeRenderer = (Renderer *)renderer->ItemAt(0);

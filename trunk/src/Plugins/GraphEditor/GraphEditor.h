@@ -54,6 +54,10 @@ public:
 	virtual	void			SetDirty(BRegion *region);
 	virtual	BMessage*		GetConfiguration(void){return configMessage;};
 	virtual	void			SetConfiguration(BMessage *message){delete configMessage;configMessage=message;};
+	
+	virtual void			PreprocessBeforSave(BMessage *container);
+//	virtual void			PreprocessAfterLoad(BMessage *container){};
+
 	//----------------PEditor	
 	
 	//++++++++++++++++BView
