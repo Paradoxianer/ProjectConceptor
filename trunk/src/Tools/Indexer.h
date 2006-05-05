@@ -47,14 +47,7 @@ public:
 
 protected:
 			void				Init(void);
-	//spread sorts all BList stuff out of the nodes... ;-)
-			BList*				Spread(BMessage *allNodeMessage);
-	//ReIndex takes the stored Connections and ReAssing the Connections to real existing pointers 
-			BList*				ReIndexConnections(BMessage *allConnectionsMessage);
-			BList*				ReIndexSelected(BMessage *allConnectionsMessage);
-			void				ReIndexUndo(BMessage *reIndexUndo);
-			void				ReIndexMacro(BMessage *reIndexUndo);
-			void				ReIndexCommand(BMessage *commandMessage);
+
 			
 			PDocument			*doc;
 			BKeyedVector<int32,BMessage*>*	sorter;
