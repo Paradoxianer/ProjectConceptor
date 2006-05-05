@@ -14,6 +14,9 @@ Indexer::Indexer(PDocument *document)
 
 Indexer::~Indexer(void)
 {
+	delete sorter;
+	delete included;
+
 }
 
 BMessage*	Indexer::IndexNode(BMessage *node)
@@ -96,22 +99,32 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 	}
 	return connection;
 }
+
 BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
 {
 	int32 i	= 0;
 	int32 j = 0;
 	if (includeNodes)
 	{
-		
+		IndexCommand(undo, true);
 	}
-	//**if store the first appearance of a node.. after this only store the index
 	return undo;
 }
+
 BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
 {
-	//**store the first appearance of a node.. after this only store the index
+	BMessage	*macroCommand	= new BMessage;
+	if (includeNodes)
+	{
+		while (macro->FindMessage("Macro::Commmand",macroCommand) == B_OK)
+		{
+			macroCommand = IndexCommand(macroCommand,true);
+			macro->ReplaceMessage("Macro::Commmand", macroCommand);
+		}
+	}
 	return macro;
 }
+
 BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 {
 	BMessage	*node		= NULL;
