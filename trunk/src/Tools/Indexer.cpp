@@ -138,7 +138,7 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 			if (!included->HasItem(node))
 			{
 				included->AddItem(node);
-				command->AddMessage("node",IndexNode(node));
+				command->AddMessage("included_node",IndexNode(node));
 			}
 		}
 		char		*name	= NULL;
@@ -236,21 +236,64 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 	}
 	return connection;
 }
+
+BMessage* Indexer::DeIndexCommand(BMessage *command)
+{
+	BMessage	*node		= new BMessage();
+	BMessage	*subCommand	= new BMessage();
+	int			i			= 0;
+	// extract all included Nodes :-)
+	while (command->FindMessage("included_node",i,node) == B_OK)
+	{
+		if (node->what == P_C_CLASS_TYPE)
+			DeIndexNode(node);
+		else if (node->what == P_C_CONNECTION_TYPE)
+			DeIndexConnection(node);
+		i++;
+		node = new BMessage();
+	}
+	i = 0;
+	// go through all added Subcommands and Undo Messagefields
+	command->RemoveName("included_node");
+	char		*name	= NULL;
+	type_code	type	= 0;
+	int32		count	= 0;
+	while (command->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+	{
+		if ( (command->FindMessage(name,i,subCommand) == B_OK) && (subCommand) )
+		{
+			DeIndexCommand(subCommand);
+			command->ReplaceMessage(name,count-1,subCommand);
+		}
+		i++;
+	}
+	i = 0;
+	//replace the old Pointer with the new ones
+	while (command->FindPointer("node",i,(void **)&node) == B_OK)
+	{
+		command->ReplacePointer("node",i,sorter->ValueFor((int32)node));
+		i++;
+	}
+	return command;
+}
+
 BMessage* Indexer::DeIndexUndo(BMessage *undo)
 {
-	//** todo extract saved nodes
+	// extract saved nodes and because undo is only a saved Commandstructure with some undo messages (wich DeIndexCommand can handle we use DeindexCommand )
+	DeIndexCommand(undo);
 	return undo;
 }
 BMessage* Indexer::DeIndexMacro(BMessage *macro)
 {
-	//** todo extract saved nodes
+	BMessage	*macroCommand	= new BMessage();
+	while (macro->FindMessage("Macro::Commmand",macroCommand) == B_OK)
+	{
+		macroCommand = DeIndexCommand(macroCommand);
+		macro->ReplaceMessage("Macro::Commmand", macroCommand);
+	}
 	return macro;
 }
-BMessage* Indexer::DeIndexCommand(BMessage *command)
-{
-	//** todo extract saved nodes
-	return command;
-}
+
 
 void Indexer::Init(void)
 {
