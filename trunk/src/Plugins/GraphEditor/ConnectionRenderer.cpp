@@ -11,7 +11,6 @@ ConnectionRenderer::ConnectionRenderer(GraphEditor *parentEditor,BMessage *forCo
 void ConnectionRenderer::Init()
 {	
 	TRACE();
-	PRINT_OBJECT(*container);
 	from			= NULL;
 	to				= NULL;
 	fromPoint		= BPoint(0,0);
@@ -48,6 +47,7 @@ void ConnectionRenderer::Init()
 	sentTo						= new BMessenger(NULL,doc);
 //	PCommandManager	*commandManager	= doc->GetCommandManager();
 //	selectCommand	= commandManager->GetPCommand("Select");
+	PRINT_OBJECT(*container);
 	ValueChanged();
 }
 	

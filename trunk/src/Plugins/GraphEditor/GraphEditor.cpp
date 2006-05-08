@@ -193,7 +193,6 @@ void GraphEditor::PreprocessBeforSave(BMessage *container)
 {
 	TRACE();
 	PRINT(("GraphEditor::PreprocessBeforSave:\n"));
-	PRINT_OBJECT(*container);
 	char	*name; 
 	uint32	type; 
 	int32	count; 

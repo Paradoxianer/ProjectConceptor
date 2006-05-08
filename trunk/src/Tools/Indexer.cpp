@@ -58,8 +58,6 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 			}
 		}
 	}
-	PRINT_OBJECT(*node);
-	PRINT_OBJECT(*returnNode);
 	return returnNode;
 }
 
