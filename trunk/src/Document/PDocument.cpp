@@ -101,6 +101,23 @@ void PDocument::MessageReceived(BMessage* message)
 				Save();
 			break;
 		}
+		case B_COPY:
+		{
+			BMessage	*copyMessage	= new BMessage(P_C_EXECUTE_COMMAND);
+			copyMessage->AddString("Command::Name","Copy");
+			copyMessage->AddBool("shadow",true);
+			commandManager->Execute(copyMessage);
+			break;
+		}
+		case B_PASTE:
+		{
+			BMessage	*pasteMessage	= new BMessage(P_C_EXECUTE_COMMAND);
+			pasteMessage->AddString("Command::Name","Paste");
+			pasteMessage->AddBool("shadow",true);
+			commandManager->Undo(NULL);
+			break;
+		}
+
 		case B_UNDO:
 		{
 			commandManager->Undo(NULL);
