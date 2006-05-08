@@ -1,5 +1,7 @@
+#include <app/Clipboard.h>
 #include "ProjectConceptorDefs.h"
 #include "Copy.h"
+#include "Indexer.h"
 
 
 Copy::Copy():PCommand()
@@ -8,52 +10,50 @@ Copy::Copy():PCommand()
 
 void Copy::Undo(PDocument *doc,BMessage *undo)
 {
-	//** nothing to do :-)
+	// nothing to do :-)
 }
 
 BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 {
-	BMessage		*node				= NULL;
-	BList			*parentGroupList	= NULL;
-	BList			*changed			= doc->GetChangedNodes();
-	BList			*allConnectinos		= doc->GetAllConnections();
-	BList			*allNodes			= doc->GetAllNodes();
-	int32			i					= 0;
-	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
+	BMessage 	*clip				= NULL;
+	BMessage	*node				= NULL;
+	BMessage	*connect			= NULL;
+	bool		connectselect		= false;
+	BMessage	*copyMessage		= new BMessage();
+	BList		*selected			= doc->GetSelected();
+	BList		*allConnections		= doc->GetAllConnections();
+
+	int32		i					= 0;
+	Indexer		*indexer			= new Indexer(doc);
+	if (doc->ReadLock())
 	{
-		if (settings->FindPointer("parentGroupList",i,(void **)&parentGroupList) == B_OK)
-			parentGroupList->AddItem(node);
-		else
+		for (i=0;i<selected->CountItems();i++)
 		{
-			if (node->what != P_C_CONNECTION_TYPE)
-				allNodes->AddItem(node);
-			else
-				allConnectinos->AddItem(node);
-			//recalc size
-			BRect	insertFrame		= BRect(0,0,0,0);
-			
-			if (node->FindRect("Frame",&insertFrame))
+			if (node=(BMessage *)selected->ItemAt(i))
 			{
-				BRect	docRect			= doc->Bounds();
-				if (insertFrame.bottom >= docRect.Height())
-				{
-					docRect.bottom= insertFrame.bottom+20;
-				}
-				if (insertFrame.right >= docRect.Width())
-				{
-					docRect.right = insertFrame.right+20;
-				}
-				if (docRect != doc->Bounds())
-				{
-					doc->Resize(docRect.right,docRect.bottom);
-				}
+				if (node->what == P_C_CONNECTION_TYPE)
+					copyMessage->AddMessage("connection",indexer->IndexConnection(node,true));
+				else
+					copyMessage->AddMessage("node",indexer->IndexNode(node));
 			}
+
 		}
-		i++;
-		if (!changed->HasItem(node))
-			changed->AddItem(node);
+/*		for (i=0;i<allConnections->CountItems();i++ )
+		{
+			copyMessage->AddMessage("connection",indexer->IndexConnection((BMessage *)allConnections->ItemAt(i),true));
+		}		*/
+		doc->ReadUnlock();
 	}
-	doc->SetModified();
+	if (be_clipboard->Lock()) 
+	{
+		be_clipboard->Clear();
+		if (clip = be_clipboard->Data()) 
+		{
+			clip->AddData("application/x-vnd.projectconceptor-document", B_MIME_TYPE, copyMessage, sizeof(copyMessage));
+			be_clipboard->Commit();
+		}
+		be_clipboard->Unlock();
+	} 
 	settings = PCommand::Do(doc,settings);
 	return settings;
 }
