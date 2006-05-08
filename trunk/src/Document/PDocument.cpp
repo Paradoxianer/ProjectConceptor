@@ -385,7 +385,9 @@ void PDocument::Save(void)
 	for (int32 i=0; i<allConnections->CountItems();i++)
 	{
 		tmpNode=(BMessage *)allConnections->ItemAt(i);
+		PRINT_OBJECT(*tmpNode);
 		allConnectionsMessage->AddMessage("node",indexer->IndexConnection(tmpNode));
+		PRINT_OBJECT(*tmpNode);
 	}
 	tmpMessage->AddMessage("PDocument::allConnections",allConnectionsMessage);
 	//save the selected List
@@ -411,7 +413,7 @@ void PDocument::Save(void)
 	delete	indexer;
 	delete	tmpMessage;
 	delete	commandManage;
-	delete	tmpNode;
+	//delete	tmpNode;
 	delete	allNodesMessage;
 	delete	allConnectionsMessage;
 	delete	selectedMessage;

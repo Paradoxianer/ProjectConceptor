@@ -192,6 +192,8 @@ void GraphEditor::InitAll()
 void GraphEditor::PreprocessBeforSave(BMessage *container)
 {
 	TRACE();
+	PRINT(("GraphEditor::PreprocessBeforSave:\n"));
+	PRINT_OBJECT(*container);
 	char	*name; 
 	uint32	type; 
 	int32	count; 
@@ -202,15 +204,14 @@ void GraphEditor::PreprocessBeforSave(BMessage *container)
 		if ((strstr(name,"GraphEditor") != NULL) || 
 			(strcasecmp(name,"Outgoing") == B_OK) ||
 			(strcasecmp(name,"Incoming") == B_OK) ||
-			(strcasecmp(name,"Incoming") == B_OK) )
+			(strcasecmp(name,"doc") == B_OK) )
 		{
 			container->RemoveName(name);
 			i--;
 		}
-		
-		
 		i++;
 	}
+	PRINT_OBJECT(*container);
 }
 
 
@@ -235,7 +236,7 @@ void GraphEditor::ValueChanged()
 	for (int32 i=0;i<allTrashed->CountItems();i++)
 	{
 		node = (BMessage *)allTrashed->ItemAt(i);
-		DeleteRenderObject(node);
+//		DeleteRenderObject(node);
 	}
 	if (BView::LockLooper())
 	{
@@ -498,10 +499,16 @@ void GraphEditor::DetachedFromWindow(void)
 			toolBar->RemoveSeperator();	
 		}
 		Renderer	*nodeRenderer	= NULL;
+		for (int32 i=0;i<renderer->CountItems();i++)
+		{
+			nodeRenderer = (Renderer *)renderer->ItemAt(i);
+			(nodeRenderer->GetMessage())->PrintToStream();
+		}
 		while(renderer->CountItems()>0)
 		{
 			nodeRenderer = (Renderer *)renderer->ItemAt(0);
-			DeleteRenderObject(nodeRenderer->GetMessage());
+//			DeleteRenderObject(nodeRenderer->GetMessage());
+			RemoveRenderer(nodeRenderer);
 		}
 	}
 }	
@@ -706,20 +713,8 @@ void GraphEditor::InsertRenderObject(BMessage *node)
 void GraphEditor::DeleteRenderObject(BMessage *node)
 {
 	TRACE();
-	Renderer *newRenderer = NULL;
-	if ((node->FindPointer(renderString,(void **)&newRenderer) == B_OK) && (newRenderer != NULL) )
-	{
-		node->RemoveName(renderString);
-		RemoveRenderer(newRenderer);
-	}
-/*	BasePlugin	*theRenderer	= (BasePlugin*)renderPlugins->ItemAt(0);
+			TRACE();
 
-	BView		*addView		= (BView *)theRenderer->GetNewObject(node);
-	if (addView!=NULL)
-	{
-		AddChild(addView);
-
-	}*/
 }
 
 void GraphEditor::AddRenderer(Renderer* newRenderer)
@@ -740,6 +735,8 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer)
 	if (mouseReciver == wichRenderer)
 		mouseReciver = NULL;
 	renderer->RemoveItem(wichRenderer);
+	(wichRenderer->GetMessage())->RemoveName(renderString);
+
 	delete wichRenderer;
 /*	delete rendersensitv;
 	rendersensitv = new BRegion();

@@ -24,18 +24,20 @@ Indexer::~Indexer(void)
 BMessage*	Indexer::IndexNode(BMessage *node)
 {
 	TRACE();
-	int32	i	= 0;
+	BMessage	*returnNode	= NULL;
+	int32		i			= 0;
 	if (node!=NULL)
 	{
 		BList		*subNodeList	= NULL;
 		BMessage	*subNode		= NULL;
-		node->AddPointer("this",node);
-		if ((node->FindPointer("SubContainer",(void **)&subNodeList) == B_OK) && (subNodeList != NULL) )
+		returnNode = new BMessage(*node);
+		returnNode->AddPointer("this",node);
+		if ((returnNode->FindPointer("SubContainer",(void **)&subNodeList) == B_OK) && (subNodeList != NULL) )
 		{
 			for (int32 i=0; i<subNodeList->CountItems();i++)
 			{
 				subNode =(BMessage *) subNodeList->ItemAt(i);
-				node->AddMessage("SubContainerList",IndexNode(subNode));
+				returnNode->AddMessage("SubContainerList",IndexNode(subNode));
 			}
 		}
 		//here we also run the node through the available Editors so that they can save all they need :-)
@@ -50,34 +52,37 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 				if (plugin)
 				{
 					editor=(PEditor *)plugin->GetNewObject(NULL);
-					editor->PreprocessBeforSave(node);
+					editor->PreprocessBeforSave(returnNode);
 				}
 				
 			}
 		}
 	}
-	return node;
+	PRINT_OBJECT(*node);
+	PRINT_OBJECT(*returnNode);
+	return returnNode;
 }
 
 BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 {
 	TRACE();
-	BMessage *from	= NULL;
-	BMessage *to	= NULL;
+	BMessage *returnNode	= new BMessage(*connection);
+	BMessage *from			= NULL;
+	BMessage *to			= NULL;
 	if (includeNodes)
 	{
-		connection->FindPointer("From",(void **)&from);
+		returnNode->FindPointer("From",(void **)&from);
 		if (!included->HasItem(from))
 		{
-			connection->RemoveName("From");
-			connection->AddMessage("From",IndexNode(from));
+			returnNode->RemoveName("From");
+			returnNode->AddMessage("From",IndexNode(from));
 			included->AddItem(from);
 		}
-		connection->FindPointer("To",(void **)&to);
+		returnNode->FindPointer("To",(void **)&to);
 		if (!included->HasItem(to))
 		{
-			connection->RemoveName("To");
-			connection->AddMessage("To",IndexNode(to));
+			returnNode->RemoveName("To");
+			returnNode->AddMessage("To",IndexNode(to));
 			included->AddItem(to);
 		}
 	}
@@ -96,19 +101,17 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 			if (plugin)
 			{
 				editor=(PEditor *)plugin->GetNewObject(NULL);
-				editor->PreprocessBeforSave(connection);
+				editor->PreprocessBeforSave(returnNode);
 			}
 			
 		}
 	}
-	return connection;
+	return returnNode;
 }
 
 BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
 {
 	TRACE();
-	int32 i	= 0;
-	int32 j = 0;
 	if (includeNodes)
 	{
 		IndexCommand(undo, true);
