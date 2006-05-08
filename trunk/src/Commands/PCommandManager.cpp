@@ -197,15 +197,16 @@ void PCommandManager::Execute(BMessage *settings)
 		{
 			BMessage	*tmpMessage		= command->Do(document, settings);
 			status_t	err				= settings->FindBool("shadow",&shadow);
-			if ((err != B_OK) && (!shadow))
+			if ((err != B_OK) )
 			{
 				if (recording)
 					recording->AddMessage("Macro::Commmand", settings);
-				undoList->RemoveItems(undoStatus+1,undoList->CountItems()-undoStatus);
-				undoList->AddItem(new BMessage(*tmpMessage));
-				tmpMessage->PrintToStream();
-
-				undoStatus	= undoList->CountItems()-1;
+				if (!shadow)
+				{
+					undoList->RemoveItems(undoStatus+1,undoList->CountItems()-undoStatus);
+					undoList->AddItem(new BMessage(*tmpMessage));
+					undoStatus	= undoList->CountItems()-1;
+				}
 			}
 			(document->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 			document->Unlock();
