@@ -1,5 +1,8 @@
+#include <app/Clipboard.h>
+#include <support/Debug.h>
 #include "ProjectConceptorDefs.h"
 #include "Paste.h"
+#include "Indexer.h"
 
 
 Paste::Paste():PCommand()
@@ -8,76 +11,52 @@ Paste::Paste():PCommand()
 
 void Paste::Undo(PDocument *doc,BMessage *undo)
 {
-	BList			*connections		= doc->GetAllConnections();
-	BList			*allNodes			= doc->GetAllNodes();
-	BList			*trash				= doc->GetTrash();
-	BList			*changed			= doc->GetChangedNodes();
-	BMessage		*node				= new BMessage();
-	BMessage		*connection			= new BMessage();
-	int32			i					= 0;
-	PCommand::Undo(doc,undo);
-	while (undo->FindPointer("node",i,(void **)&node) == B_OK)
-	{
-		allNodes->RemoveItem(node);
-		trash->AddItem(node);
-		changed->AddItem(node);
-		i++;
-	}
-	i=0;
-	while (undo->FindPointer("connection",i,(void **)&connection) == B_OK) 
-	{
-		i++;
-		connections->RemoveItem(connection);
-		changed->AddItem(connection);	
-		trash->AddItem(connection);
-	}
-	doc->SetModified();
+	// nothing to do :-)
 }
 
 BMessage* Paste::Do(PDocument *doc, BMessage *settings)
 {
-	BMessage		*node				= NULL;
-	BList			*parentGroupList	= NULL;
-	BList			*changed			= doc->GetChangedNodes();
-	BList			*allConnectinos		= doc->GetAllConnections();
-	BList			*allNodes			= doc->GetAllNodes();
-	int32			i					= 0;
-	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
+	BMessage 	*clip				= NULL;
+	BMessage	*node				= new BMessage();
+	BMessage	*deIndexedNode		= NULL;
+	BMessage	*connect			= NULL;
+	bool		connectselect		= false;
+	BMessage	*copyMessage		= new BMessage;
+	int32		messagelen			= 0;
+	int32		i					= 0;
+	Indexer		*indexer			= new Indexer(doc);
+	if (be_clipboard->Lock()) 
 	{
-		if (settings->FindPointer("parentGroupList",i,(void **)&parentGroupList) == B_OK)
-			parentGroupList->AddItem(node);
-		else
+		if (clip = be_clipboard->Data()) 
 		{
-			if (node->what != P_C_CONNECTION_TYPE)
-				allNodes->AddItem(node);
-			else
-				allConnectinos->AddItem(node);
-			//recalc size
-			BRect	insertFrame		= BRect(0,0,0,0);
-			
-			if (node->FindRect("Frame",&insertFrame))
-			{
-				BRect	docRect			= doc->Bounds();
-				if (insertFrame.bottom >= docRect.Height())
-				{
-					docRect.bottom= insertFrame.bottom+20;
-				}
-				if (insertFrame.right >= docRect.Width())
-				{
-					docRect.right = insertFrame.right+20;
-				}
-				if (docRect != doc->Bounds())
-				{
-					doc->Resize(docRect.right,docRect.bottom);
-				}
-			}
+//			clip->FindData("application/x-vnd.projectconceptor-document", B_MIME_TYPE, (const void **)&copyMessage, &messagelen); 
+			clip->FindMessage("test",copyMessage); 
+			copyMessage->PrintToStream();
 		}
-		i++;
-		if (!changed->HasItem(node))
-			changed->AddItem(node);
+		be_clipboard->Unlock(); 
 	}
-	doc->SetModified();
-	settings = PCommand::Do(doc,settings);
+
+	if (copyMessage)
+	{
+		BMessage	*inserter	= new BMessage(P_C_EXECUTE_COMMAND);
+		BMessage	*select		= new BMessage(P_C_EXECUTE_COMMAND);
+		inserter->AddString("Command::Name","Insert");
+		select->AddString("Command::Name","Select");
+		while (copyMessage->FindMessage("node",i,node) == B_OK)
+		{
+			if (node->what == P_C_CONNECTION_TYPE)
+				deIndexedNode		= indexer->DeIndexConnection(node);
+			else
+				deIndexedNode		= indexer->DeIndexNode(node);
+			inserter->AddPointer("node",deIndexedNode);
+			select->AddPointer("node",deIndexedNode);
+			i++;
+			node = new BMessage();
+		}
+		inserter->AddMessage("PCommand::subPCommand",select);
+		PRINT_OBJECT(*inserter);
+		(new BMessenger(NULL,doc))->SendMessage(inserter);
+	}
 	return settings;
 }
 

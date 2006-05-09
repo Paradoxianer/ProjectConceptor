@@ -60,7 +60,7 @@ SYSTEM_INCLUDE_PATHS =
 #	additional paths to look for local headers
 #	thes use the form: #include "header"
 #	source file directories are automatically included
-LOCAL_INCLUDE_PATHS =	../ ../../ ../../Document ../../Commands ../../ToolBar  ../../Config
+LOCAL_INCLUDE_PATHS =	../ ../../ ../../Document ../../Commands ../../ToolBar  ../../Config  ../../Tools
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
@@ -85,7 +85,7 @@ SYMBOLS = TRUE
 #	specify debug settings
 #	if TRUE will allow application to be run from
 #	a source-level debugger
-# DEBUGGER = TRUE
+ DEBUGGER = TRUE
 
 #	specify additional compiler flags for all files
 COMPILER_FLAGS =
