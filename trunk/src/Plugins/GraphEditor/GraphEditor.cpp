@@ -189,10 +189,11 @@ void GraphEditor::InitAll()
 		}
 	}	
 }
+
 void GraphEditor::PreprocessBeforSave(BMessage *container)
 {
 	TRACE();
-	PRINT(("GraphEditor::PreprocessBeforSave:\n"));
+	PRINT(("GraphEditor::PreprocessAfterLoad:\n"));
 	char	*name; 
 	uint32	type; 
 	int32	count; 
@@ -210,9 +211,7 @@ void GraphEditor::PreprocessBeforSave(BMessage *container)
 		}
 		i++;
 	}
-	PRINT_OBJECT(*container);
 }
-
 
 void GraphEditor::ValueChanged()
 {
@@ -685,6 +684,11 @@ void GraphEditor::InsertRenderObject(BMessage *node)
 {
 	TRACE();
 	Renderer *newRenderer = NULL;
+	void	*tmpDoc	= NULL;
+	if (node->FindPointer("doc",&tmpDoc)==B_OK)
+		node->ReplacePointer("doc",doc);
+	else
+		node->AddPointer("doc",doc);
 	switch(node->what) 
 	{
 		case P_C_CLASS_TYPE:
@@ -698,7 +702,10 @@ void GraphEditor::InsertRenderObject(BMessage *node)
 		break;
 	}		
 	node->AddPointer(renderString,newRenderer);
+
+	
 	AddRenderer(newRenderer);
+	
 /*	BasePlugin	*theRenderer	= (BasePlugin*)renderPlugins->ItemAt(0);
 
 	BView		*addView		= (BView *)theRenderer->GetNewObject(node);
