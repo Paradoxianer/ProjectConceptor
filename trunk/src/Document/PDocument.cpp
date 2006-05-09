@@ -114,7 +114,7 @@ void PDocument::MessageReceived(BMessage* message)
 			BMessage	*pasteMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			pasteMessage->AddString("Command::Name","Paste");
 			pasteMessage->AddBool("shadow",true);
-			commandManager->Undo(NULL);
+			commandManager->Execute(pasteMessage);
 			break;
 		}
 

@@ -1,4 +1,6 @@
 #include <app/Clipboard.h>
+#include <support/Debug.h>
+
 #include "ProjectConceptorDefs.h"
 #include "Copy.h"
 #include "Indexer.h"
@@ -32,7 +34,7 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 			if (node=(BMessage *)selected->ItemAt(i))
 			{
 				if (node->what == P_C_CONNECTION_TYPE)
-					copyMessage->AddMessage("connection",indexer->IndexConnection(node,true));
+					copyMessage->AddMessage("node",indexer->IndexConnection(node,true));
 				else
 					copyMessage->AddMessage("node",indexer->IndexNode(node));
 			}
@@ -50,6 +52,8 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 		if (clip = be_clipboard->Data()) 
 		{
 			clip->AddData("application/x-vnd.projectconceptor-document", B_MIME_TYPE, copyMessage, sizeof(copyMessage));
+			clip->AddMessage("test",copyMessage);
+			PRINT_OBJECT(*clip);
 			be_clipboard->Commit();
 		}
 		be_clipboard->Unlock();
