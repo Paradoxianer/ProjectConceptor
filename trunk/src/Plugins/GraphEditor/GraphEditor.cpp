@@ -234,7 +234,7 @@ void GraphEditor::ValueChanged()
 	for (int32 i=0;i<allTrashed->CountItems();i++)
 	{
 		node = (BMessage *)allTrashed->ItemAt(i);
-//		DeleteRenderObject(node);
+		RemoveRenderer(FindRenderer(node));
 	}
 	if (BView::LockLooper())
 	{
@@ -716,12 +716,6 @@ void GraphEditor::InsertRenderObject(BMessage *node)
 	}*/
 }
 
-void GraphEditor::DeleteRenderObject(BMessage *node)
-{
-	TRACE();
-			TRACE();
-
-}
 
 void GraphEditor::AddRenderer(Renderer* newRenderer)
 {
@@ -749,6 +743,7 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer)
 	renderer->DoForEach(ProceedRegion,rendersensitv);*/
 	//**recalc Region
 }
+
 Renderer* GraphEditor::FindRenderer(BPoint where)
 {
 	TRACE();
@@ -806,6 +801,25 @@ Renderer* GraphEditor::FindConnectionRenderer(BPoint where)
 		}
 //	}
 	return currentRenderer;
+}
+
+Renderer* GraphEditor::FindRenderer(BMessage *container)
+{
+	int32		i					= 0;
+	Renderer	*currentRenderer	= NULL;
+	bool		found				= false;
+
+	while ((i<renderer->CountItems()) && (!found))
+	{
+		currentRenderer= (Renderer*)renderer->ItemAt(i);			
+		if (currentRenderer->GetMessage() == container)
+			found=true;
+		i++;
+	}
+	if (found)
+		return currentRenderer;
+	else
+		return NULL;
 }
 
 
