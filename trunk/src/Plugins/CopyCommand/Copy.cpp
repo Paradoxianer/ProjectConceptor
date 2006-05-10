@@ -51,7 +51,7 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 				{
 					if (fselect && tselect)
 						copyMessage->AddMessage("node",indexer->IndexConnection(node,true));
-					else
+					else if (fselect || tselect)
 						copyMessage->AddMessage("node",indexer->IndexConnection(node));
 				}
 			}
