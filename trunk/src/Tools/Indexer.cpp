@@ -243,8 +243,19 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 				}
 			}
 		}
-		connection->AddPointer("From",sorter->ValueFor((int32)fromPointer));
-		connection->AddPointer("To",sorter->ValueFor((int32)toPointer));
+		
+//		if we cant find the right Pointer then add the old one
+		int32 indexFrom=sorter->IndexOf((int32)fromPointer);
+		if (indexFrom >= 0)
+			connection->AddPointer("From",sorter->ValueAt(indexFrom));
+		else
+			connection->AddPointer("From",fromPointer);
+//		if we cant find the right Pointer then add the old one			
+		int32 indexTo=sorter->IndexOf((int32)toPointer);
+		if (indexTo >= 0)
+			connection->AddPointer("To",sorter->ValueAt(indexTo));
+		else
+			connection->AddPointer("To",toPointer);
 	}
 	return connection;
 }
