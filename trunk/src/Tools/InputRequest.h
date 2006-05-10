@@ -17,11 +17,11 @@ class InputRequest : public BWindow
 						InputRequest(const char* title, const char* label, const char* text, const char* btn0_label);
 						InputRequest(const char* title, const char* label, const char* text, const char* btn0_label, const char* btn1_label);
 						InputRequest(const char* title, const char* label, const char* text, const char* btn0_label, const char* btn1_label, const char* btn2_label);
-	virtual	void		Init(const char* label, const char* text, const char* btn0_label, const char* btn1_label, const char* btn2_label);
-	virtual	void		MessageReceived(BMessage *msg);
 	virtual	int32		Go(char** input); //be carful! new memory (for input) is alloceted by this funktion. you have to free memory by yourself
 
   private:
+	virtual	void		Init(const char* label, const char* text, const char* btn0_label, const char* btn1_label, const char* btn2_label);
+	virtual	void		MessageReceived(BMessage *msg);
 	virtual	void		SetLabel(const char* label);
 	virtual	const char*	Label();
 	virtual	void		SetText(const char* text);
