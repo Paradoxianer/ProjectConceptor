@@ -51,7 +51,11 @@ SRCS= 	src/AboutWindow.cpp \
 		src/ToolBar/FloatToolItem.cpp \
 		src/ToolBar/PatternToolItem.cpp \
 		src/Tools/PDocLoader.cpp \
-		src/Tools/Indexer.cpp 
+		src/Tools/Indexer.cpp \
+		src/Tools/InputRequestView.h \
+ 		src/Tools/InputRequest.h \
+ 		src/Tools/ScreenInfo.cpp 
+
 
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.
