@@ -19,8 +19,10 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 {
 	BMessage 	*clip				= NULL;
 	BMessage	*node				= NULL;
-	BMessage	*connect			= NULL;
-	bool		connectselect		= false;
+	BMessage	*from				= NULL;
+	BMessage	*to					= NULL;
+	bool		fselect				= false;
+	bool		tselect				= false;
 	BMessage	*copyMessage		= new BMessage();
 	BList		*selected			= doc->GetSelected();
 	BList		*allConnections		= doc->GetAllConnections();
@@ -33,17 +35,28 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 		{
 			if (node=(BMessage *)selected->ItemAt(i))
 			{
-				if (node->what == P_C_CONNECTION_TYPE)
-					copyMessage->AddMessage("node",indexer->IndexConnection(node,true));
-				else
+				if (node->what != P_C_CONNECTION_TYPE)
 					copyMessage->AddMessage("node",indexer->IndexNode(node));
 			}
 
 		}
-/*		for (i=0;i<allConnections->CountItems();i++ )
+		for (i=0;i<allConnections->CountItems();i++ )
 		{
-			copyMessage->AddMessage("connection",indexer->IndexConnection((BMessage *)allConnections->ItemAt(i),true));
-		}		*/
+
+			node = (BMessage *)allConnections->ItemAt(i);
+			if ( (node->FindPointer("From",(void **)&from) == B_OK) &&
+				 (node->FindPointer("To",(void **)&to) == B_OK) )
+			{
+				if ((from->FindBool("selected",&fselect)==B_OK) && (to->FindBool("selected",&tselect) == B_OK) )
+				{
+					if (fselect && tselect)
+						copyMessage->AddMessage("node",indexer->IndexConnection(node,true));
+					else
+						copyMessage->AddMessage("node",indexer->IndexConnection(node));
+				}
+			}
+
+		}	
 		doc->ReadUnlock();
 	}
 	if (be_clipboard->Lock()) 

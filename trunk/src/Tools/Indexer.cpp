@@ -30,6 +30,8 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 	{
 		BList		*subNodeList	= NULL;
 		BMessage	*subNode		= NULL;
+		if (!included->HasItem(node))
+			included->AddItem(node);
 		returnNode = new BMessage(*node);
 		returnNode->AddPointer("this",node);
 		if ((returnNode->FindPointer("SubContainer",(void **)&subNodeList) == B_OK) && (subNodeList != NULL) )
