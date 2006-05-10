@@ -8,6 +8,7 @@
 
 #include "PCommand.h"
 #include "BasePlugin.h"
+#include "Indexer.h"
 class PDocument;
 
 
@@ -54,7 +55,7 @@ public:
 	virtual	int32		CountPCommand(void){return commandVector->CountItems();};
 	virtual	PCommand*	PCommandAt(int32 index){return (PCommand *)commandVector->ValueAt(index);};
 	
-	virtual PDocument* BelongTo(void){return document;};
+	virtual PDocument* BelongTo(void){return doc;};
 
 protected:
 	virtual void		Init(void);
@@ -63,8 +64,9 @@ protected:
 			BList		*macroList;
 			int32		undoStatus;
 			BKeyedVector<BString,PCommand *>	*commandVector;
-			PDocument	*document;
+			PDocument	*doc;
 			BMessage	*recording;
+			Indexer		*macroIndexer;
 private:
 
 };

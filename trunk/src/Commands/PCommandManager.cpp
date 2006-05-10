@@ -19,7 +19,7 @@
 PCommandManager::PCommandManager(PDocument *initDoc)
 {
 	TRACE();
-	document	= initDoc;
+	doc	= initDoc;
 	Init();
 }
 
@@ -32,7 +32,7 @@ void PCommandManager::Init(void)
 	undoStatus	= 0;
 	recording	= NULL;
 
-	PluginManager	*pluginManager	= (document->BelongTo())->GetPluginManager();
+	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*commands		= pluginManager->GetPluginsByType(P_C_COMMANDO_PLUGIN_TYPE);
 	if (commands)
 	{
@@ -142,7 +142,10 @@ void PCommandManager::StartMacro(void)
 {
 	TRACE();
 	if (!recording)	
-		recording	= new BMessage(P_C_MACRO_TYPE);
+	{
+		recording		= new BMessage(P_C_MACRO_TYPE);
+		macroIndexer	= new Indexer(doc);
+	}
 	else
 	{
 		//**alter that we still recording
@@ -161,8 +164,9 @@ void PCommandManager::StopMacro()
 		delete recording;
 		recording = NULL;
 		BMenuItem	*item	= new BMenuItem("Macro",(BMessage *)macroList->LastItem());
-		item->SetTarget(document);
-		document->AddMenuItem(P_MENU_MACRO_PLAY,item);
+		item->SetTarget(doc);
+		doc->AddMenuItem(P_MENU_MACRO_PLAY,item);
+		delete macroIndexer;
 	}
 	
 }
@@ -184,10 +188,10 @@ void PCommandManager::Execute(BMessage *settings)
 {
 	TRACE();
 	settings->PrintToStream();
-	if (document->Lock())
+	if (doc->Lock())
 	{
-		(document->GetChangedNodes())->MakeEmpty();
-		(document->GetTrash())->MakeEmpty();
+		(doc->GetChangedNodes())->MakeEmpty();
+		(doc->GetTrash())->MakeEmpty();
 		bool		shadow				= false;
 		char		*commandName		= NULL;
 		PCommand	*command			= NULL;
@@ -195,12 +199,12 @@ void PCommandManager::Execute(BMessage *settings)
 		command		= GetPCommand(commandName);
 		if (command != NULL)
 		{
-			BMessage	*tmpMessage		= command->Do(document, settings);
+			BMessage	*tmpMessage		= command->Do(doc, settings);
 			status_t	err				= settings->FindBool("shadow",&shadow);
 			if ((err != B_OK) )
 			{
 				if (recording)
-					recording->AddMessage("Macro::Commmand", settings);
+					recording->AddMessage("Macro::Commmand", macroIndexer->IndexCommand(settings,true));
 				if (!shadow)
 				{
 					undoList->RemoveItems(undoStatus+1,undoList->CountItems()-undoStatus);
@@ -208,8 +212,8 @@ void PCommandManager::Execute(BMessage *settings)
 					undoStatus	= undoList->CountItems()-1;
 				}
 			}
-			(document->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
-			document->Unlock();
+			(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+			doc->Unlock();
 		}
 	}
 }
@@ -247,10 +251,10 @@ void PCommandManager::Undo(BMessage *undo)
 	char			*commandName		= NULL;
 	PCommand		*undoPCommand		= NULL;
 	BMessage		*msg				= NULL;	
-	if (document->Lock())
+	if (doc->Lock())
 	{
-		(document->GetChangedNodes())->MakeEmpty();
-		(document->GetTrash())->MakeEmpty();
+		(doc->GetChangedNodes())->MakeEmpty();
+		(doc->GetTrash())->MakeEmpty();
 		if (index<0) 
 			index=undoStatus;
 		while (i>=index)
@@ -261,7 +265,7 @@ void PCommandManager::Undo(BMessage *undo)
 				msg->FindString("Command::Name",(const char**)&commandName);
 				undoPCommand	= GetPCommand(commandName);
 				if (undoPCommand != NULL)
-					undoPCommand->Undo(document,msg);
+					undoPCommand->Undo(doc,msg);
 				else
 					PRINT(("ERROR:\t PCommandManager","Didnt found the PCommand\n"));
 				undoStatus--;
@@ -270,8 +274,8 @@ void PCommandManager::Undo(BMessage *undo)
 			}
 			i--;
 		}
-		(document->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
-		document->Unlock();
+		(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+		doc->Unlock();
 	}
 }
 
@@ -283,10 +287,10 @@ void PCommandManager::Redo(BMessage *redo)
 	char			*commandName	= NULL;
 	PCommand		*redoPCommand	= NULL;
 	BMessage		*msg			= NULL;
-	if (document->Lock())
+	if (doc->Lock())
 	{	
-		(document->GetChangedNodes())->MakeEmpty();
-		(document->GetTrash())->MakeEmpty();
+		(doc->GetChangedNodes())->MakeEmpty();
+		(doc->GetTrash())->MakeEmpty();
 		if (index<0)	
 			index=undoStatus+1;
 		while (i<=index)
@@ -297,7 +301,7 @@ void PCommandManager::Redo(BMessage *redo)
 				msg->FindString("Command::Name",(const char**)&commandName);
 				redoPCommand	= GetPCommand(commandName);
 				if (redoPCommand)
-					redoPCommand->Do(document,msg);
+					redoPCommand->Do(doc,msg);
 				else
 					PRINT(("ERROR\tPCommandManager","Coudn´t find the PCommand\n"));
 			}
@@ -306,8 +310,8 @@ void PCommandManager::Redo(BMessage *redo)
 			if (undoStatus > (undoList->CountItems()-1))
 				undoStatus = undoList->CountItems()-1;
 		}
-		(document->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
-		document->Unlock();
+		(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+		doc->Unlock();
 	}
 }
 
