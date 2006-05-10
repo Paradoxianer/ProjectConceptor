@@ -47,9 +47,13 @@ BMessage* Paste::Do(PDocument *doc, BMessage *settings)
 			if (node->what == P_C_CONNECTION_TYPE)
 				deIndexedNode		= indexer->DeIndexConnection(node);
 			else
+			{
 				deIndexedNode		= indexer->DeIndexNode(node);
+				//only select nodes.. because es the copy and paste funktion with selected nodes dosent work proper
+				select->AddPointer("node",deIndexedNode);
+			}
 			inserter->AddPointer("node",deIndexedNode);
-			select->AddPointer("node",deIndexedNode);
+
 			i++;
 			node = new BMessage();
 		}
