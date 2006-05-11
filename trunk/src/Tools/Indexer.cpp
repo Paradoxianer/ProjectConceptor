@@ -137,34 +137,36 @@ BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
 BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 {
 	TRACE();
-	BMessage	*node		= NULL;
-	BMessage	*subCommand	= NULL;
-	int32		i		= 0;
-	int32		j		= 0;
+	BMessage	*returnCommand	= new BMessage(*command);
+	BMessage	*node			= NULL;
+	BMessage	*subCommand		= NULL;
+	int32		i				= 0;
+	int32		j				= 0;
 	if (includeNodes)
 	{
-		while (command->FindPointer("node",j,(void **)&node) == B_OK)
+		while (returnCommand->FindPointer("node",j,(void **)&node) == B_OK)
 		{
 			if (!included->HasItem(node))
 			{
 				included->AddItem(node);
-				command->AddMessage("included_node",IndexNode(node));
+				returnCommand->AddMessage("included_node",IndexNode(node));
 			}
+			j++;
 		}
 		char		*name	= NULL;
 		type_code	type	= 0;
 		int32		count	= 0;
-		while (command->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+		while (returnCommand->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
 		{
-			if ( (command->FindMessage(name,i,subCommand) == B_OK) && (subCommand) )
+			if ( (returnCommand->FindMessage(name,count,subCommand) == B_OK) && (subCommand) )
 			{
 				IndexCommand(subCommand);
-				command->ReplaceMessage(name,count-1,subCommand);
+				returnCommand->ReplaceMessage(name,count,subCommand);
 			}
 			i++;
 		}
 	}
-	return command;
+	return returnCommand;
 }
 
 			
@@ -284,10 +286,10 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 	int32		count	= 0;
 	while (command->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
 	{
-		if ( (command->FindMessage(name,i,subCommand) == B_OK) && (subCommand) )
+		if ( (command->FindMessage(name,count,subCommand) == B_OK) && (subCommand) )
 		{
 			DeIndexCommand(subCommand);
-			command->ReplaceMessage(name,count-1,subCommand);
+			command->ReplaceMessage(name,count,subCommand);
 		}
 		i++;
 	}

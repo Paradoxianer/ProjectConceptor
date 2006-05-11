@@ -8,6 +8,7 @@
 #include "PluginManager.h"
 #include "PEditorManager.h"
 #include "PDocumentManager.h"
+#include "InputRequest.h"
 
 #ifdef B_ZETA_VERSION_BETA
 	#include <locale/Locale.h>
@@ -158,17 +159,30 @@ void PCommandManager::StartMacro(void)
 void PCommandManager::StopMacro()
 {
 	TRACE();
-	if (recording)
+	InputRequest	*inputAlert = new InputRequest(_T("Input Macroname"),_T("Name"), _T("Macro"), _T("OK"),_T("Cancel"));
+	char			*input		= NULL;
+	char			*inputstr	= NULL;
+	if  (recording) 
 	{
-		macroList->AddItem(new BMessage(*recording));
+		if (inputAlert->Go(&input)<1) 
+		{
+			inputstr	= new char[strlen(input)+1];
+			strcpy(inputstr,input);
+			recording->AddString("Name",input);
+			// a littel trick because we need a pointer to the text wich isnt deleted :))
+			macroList->AddItem(new BMessage(*recording));
+			BMenuItem	*item	= new BMenuItem(input,(BMessage *)macroList->LastItem());
+			item->SetTarget(doc);
+			doc->AddMenuItem(P_MENU_MACRO_PLAY,item);
+		}
+		inputAlert->Lock();
+		inputAlert->Quit();
 		delete recording;
-		recording = NULL;
-		BMenuItem	*item	= new BMenuItem("Macro",(BMessage *)macroList->LastItem());
-		item->SetTarget(doc);
-		doc->AddMenuItem(P_MENU_MACRO_PLAY,item);
 		delete macroIndexer;
+		recording		= NULL;
+		macroIndexer	= NULL;
 	}
-	
+
 }
 
 void PCommandManager::PlayMacro(BMessage *makro)
