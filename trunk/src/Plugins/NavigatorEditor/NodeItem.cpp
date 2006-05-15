@@ -44,7 +44,7 @@ void NodeItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 	owner->DrawString(label);
 	owner->FillTriangle(BPoint(newBounds.right-2,newBounds.top+newBounds.Height()/2),BPoint(newBounds.right-10,newBounds.top+1),BPoint(newBounds.right-10,newBounds.bottom-1));
 	owner->SetHighColor(205,205,205,255);
-	owner->StrokeRoundRect(newBounds,3,3);
+//	owner->StrokeRoundRect(newBounds,3,3);
 	
 	owner->SetHighColor(foreground);	
 }

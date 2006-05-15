@@ -5,6 +5,7 @@
 
 StringItem::StringItem(char *newLabel, char *newString, uint32 level = 0, bool expanded = true):BaseListItem(B_RECT_TYPE,level,expanded)
 {
+
 	textControl		= new BTextControl(BRect(0,0,100,10),"StringItem",NULL,newString,NULL);
 	label			= newLabel;
 	string			= newString;
@@ -62,7 +63,7 @@ void StringItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 		owner->DrawString(string); 
 	}
 	owner->SetHighColor(205,205,205,255);
-	owner->StrokeRoundRect(newBounds,3,3);
+//	owner->StrokeRoundRect(newBounds,3,3);
 	owner->StrokeLine(BPoint(newBounds.right-separated,newBounds.top),BPoint(newBounds.right-separated,newBounds.bottom));
 	owner->SetHighColor(foreground);	
 }
@@ -76,5 +77,29 @@ void StringItem::Deselect(void)
 
 void StringItem::SetExpanded(bool expande)
 {
-	printf("SetExpanded\n");
 };
+
+status_t StringItem::SetMessage(BMessage *message)
+{
+	message->AddInt32("type",B_STRING_TYPE);
+	message->AddString("name",label);
+	textControl->SetMessage(message);
+	BInvoker::SetMessage(message);
+}
+
+status_t StringItem::Invoke(BMessage *message = NULL)
+{
+	BMessage	*sendMessage=message;
+	if (message==NULL)
+		sendMessage=Message();
+	if (sendMessage != NULL)	
+	{
+	
+		sendMessage->AddPointer("newValue", textControl->Text()); 
+		sendMessage->AddInt32("size",textControl->TextView()->TextLength()+1);
+		BInvoker::Invoke(sendMessage);
+	}
+	else
+		return B_ERROR;
+}
+

@@ -19,6 +19,7 @@
 
 NavigatorEditor::NavigatorEditor():PEditor(),BView(BRect(0,0,200,200),"NavigatorEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW|B_NAVIGABLE|B_NAVIGABLE_JUMP)
 {
+	TRACE();
 	Init();
 	BView::SetDoubleBuffering(1);
 //	SetDrawingMode(B_OP_ALPHA);
@@ -26,10 +27,7 @@ NavigatorEditor::NavigatorEditor():PEditor(),BView(BRect(0,0,200,200),"Navigator
 
 void NavigatorEditor::Init(void)
 {
-	insertCommand	= NULL;
-	selectCommand	= NULL;
-	deleteCommand	= NULL;
-	connectCommand	= NULL;
+	TRACE();
 	renderString	= new char[30];
 	font_family		family;
 	font_style		style;
@@ -71,39 +69,39 @@ void NavigatorEditor::Init(void)
 	patternMessage->AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));*/
 }
 
+void NavigatorEditor::InitGraph()
+{
+		BList		*allNodes		= doc->GetAllNodes();
+		BList		*allConnections	= doc->GetAllConnections();
+		BRect		rootrect		= Bounds();
+		rootrect.right				= 200;
+		root						= new NodeListView(rootrect,allNodes);
+		BMessage *invoked 			= new BMessage(N_A_INVOKATION);
+		invoked->AddPointer("ListView",root);
+		root->SetInvocationMessage(invoked);
+		root->SetTarget(this);
+		AddChild(new BScrollView("root",root,B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true));
+		SetViewColor(255,255,255,255);
+		Invalidate();
+}
+
 void NavigatorEditor::AttachedToManager(void)
 {
-	PCommandManager *commandManager = doc->GetCommandManager();
-	insertCommand	= commandManager->GetPCommand("Insert");
-	selectCommand	= commandManager->GetPCommand("Select");
-	deleteCommand	= commandManager->GetPCommand("Delete");
-	connectCommand	= commandManager->GetPCommand("Connect");
+	TRACE();
 	sentTo			= new BMessenger(doc);
-	id				=	manager->IndexOf(this);
+	id				= manager->IndexOf(this);
 	sprintf(renderString,"NavigatorEditor%ld::Renderer",id);
-
-	//put this in a seperate function??
-	BList		*allNodes		= doc->GetAllNodes();
-	BList		*allConnections	= doc->GetAllConnections();
-	BRect		rootrect		= Bounds();
-	rootrect.right				= 200;
-	root						= new NodeListView(rootrect,allNodes);
-	BMessage *invoked 			= new BMessage(N_A_INVOKATION);
-	invoked->AddPointer("ListView",root);
-	root->SetInvocationMessage(invoked);
-	root->SetTarget(this);
-	AddChild(new BScrollView("root",root,B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true));
-	SetViewColor(255,255,255,255);
-	Invalidate();
+	InitGraph();
 }
 
 void NavigatorEditor::DetachedFromManager(void)
 {
-
+	TRACE();
 }
 
 BList* NavigatorEditor::GetPCommandList(void)
 {
+	TRACE();
 	//at the Moment we dont support special Commands :-)
 	return NULL;
 }
@@ -111,6 +109,7 @@ BList* NavigatorEditor::GetPCommandList(void)
 
 void NavigatorEditor::ValueChanged()
 {
+	TRACE();
 	BView 			*child 				= NULL;
 	NodeListView	*nodeListView		= NULL;
 	MessageListView	*messageListView	= NULL;
@@ -127,37 +126,52 @@ void NavigatorEditor::ValueChanged()
 	} 
 }
 
-void NavigatorEditor::SetDirty(BRegion *region)
+
+void NavigatorEditor::AttachedToWindow(void)
 {
-	BView::Invalidate(region);
+	TRACE();
+	//put this in a seperate function??
+	if (doc)
+		InitGraph();
+}
+
+void NavigatorEditor::DetachedFromWindow(void)
+{
+	TRACE();
+	while (ChildAt(0)!=NULL)
+	{
+		RemoveChild(ChildAt(0));
+	}
 }
 
 bool NavigatorEditor::IsFocus(void) const
 {
+	TRACE();
 	return	 BView::IsFocus();
 
 }
 
 void NavigatorEditor::MakeFocus(bool focus = true)
 {
+	TRACE();
 	BView::MakeFocus(focus);
 }
 
-
-
 void NavigatorEditor::KeyDown(const char *bytes, int32 numBytes)
 {
-
+	TRACE();
 }
 
 void NavigatorEditor::KeyUp(const char *bytes, int32 numBytes)
 {
+	TRACE();
 }
 
 
 void NavigatorEditor::MessageReceived(BMessage *message)
 {
-	message->PrintToStream();
+	TRACE();
+	PRINT_OBJECT(*message);
 	switch(message->what) 
 	{
 		case P_C_VALUE_CHANGED:
@@ -184,6 +198,7 @@ void NavigatorEditor::MessageReceived(BMessage *message)
 
 void NavigatorEditor::InsertNewList(BListView *source)
 {
+	TRACE();
 	int32			selection	= -1;
 	BaseListItem	*item		= NULL;
 	selection = source->CurrentSelection(0);
@@ -206,7 +221,7 @@ void NavigatorEditor::InsertNewList(BListView *source)
 			{
 				ResizeTo(listrect.right+B_V_SCROLL_BAR_WIDTH+5,Bounds().bottom);
 			}
-			BListView	*list			= new MessageListView(listrect,((NodeItem *)item)->GetNode());
+			BListView	*list			= new MessageListView(doc,listrect,((NodeItem *)item)->GetNode());
 			BMessage *invoked 			= new BMessage(N_A_INVOKATION);
 			invoked->AddPointer("ListView",list);
 			list->SetInvocationMessage(invoked);
@@ -219,5 +234,6 @@ void NavigatorEditor::InsertNewList(BListView *source)
 
 void NavigatorEditor::DeleteRenderObject(BMessage *node)
 {
+	TRACE();
 }
 

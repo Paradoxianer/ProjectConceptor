@@ -22,6 +22,7 @@ public:
 	virtual	void	Update(BView *owner, const BFont *font);
 	virtual	void	DrawItem(BView *owner, BRect bounds, bool complete = false);
 
+
 protected:
 	BTextControl	*left,*top,*right,*bottom;
 	char 			*sleft,*stop,*sright,*sbottom;

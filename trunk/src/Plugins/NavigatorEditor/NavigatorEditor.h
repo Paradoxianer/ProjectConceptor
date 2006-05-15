@@ -15,6 +15,7 @@
 
 #include "BaseListItem.h"
 
+#define DEBUG 1
 
 const uint32	N_A_RENDERER			= 'naRr';
 const uint32	N_A_SELECTION_CHANGED	= 'naSC';
@@ -37,14 +38,18 @@ public:
 	virtual	BList*			GetPCommandList(void);
 
 	virtual	void			ValueChanged(void);
-	virtual	void			SetDirty(BRegion *region);
 
 	virtual	bool			IsFocus(void) const;
 	virtual	void			MakeFocus(bool focus = true);
+	
+	//virtual void			PreprocessBeforSave(BMessage *container);
+
 	//----------------PEditor	
 	
 	//++++++++++++++++BView
 		
+	virtual void			AttachedToWindow(void);
+	virtual void			DetachedFromWindow(void);
 	
 	virtual	void			KeyDown(const char *bytes, int32 numBytes);
 	virtual	void			KeyUp(const char *bytes, int32 numBytes);
@@ -56,6 +61,7 @@ public:
 	
 protected:
 			void			Init(void);
+			void			InitGraph();
 			void			InsertNewList(BListView *source);
 //			void			InsertRenderObject(BMessage *node);
 			void			DeleteRenderObject(BMessage *node);
@@ -63,11 +69,6 @@ protected:
 			int32			id;
 			char*			renderString;
 			
-
-			PCommand		*insertCommand;
-			PCommand		*selectCommand;
-			PCommand		*deleteCommand;
-			PCommand		*connectCommand;
 			BMessenger		*sentTo;
 
 			NodeListView	*root;

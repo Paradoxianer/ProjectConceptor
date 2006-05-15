@@ -70,7 +70,7 @@ void FloatItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 		owner->DrawString(svalue); 
 	}
 	owner->SetHighColor(205,205,205,255);
-	owner->StrokeRoundRect(newBounds,3,3);
+//	owner->StrokeRoundRect(newBounds,3,3);
 	owner->StrokeLine(BPoint(newBounds.right-separated,newBounds.top),BPoint(newBounds.right-separated,newBounds.bottom));
 	owner->SetHighColor(foreground);	
 }

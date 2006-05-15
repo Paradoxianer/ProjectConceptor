@@ -74,7 +74,7 @@ void RectItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 		owner->SetHighColor(foreground);	
 	else
 		owner->SetHighColor(tint_color(foreground,B_DISABLED_LABEL_TINT));
-	owner->MovePenTo(newBounds.left+4, newBounds.bottom-(textControlHeight*2)-textLine); 
+	owner->MovePenTo(newBounds.left+4, newBounds.bottom-(textControlHeight*3)-textLine); 
 	owner->DrawString(label);
 	if (IsSelected())
 	{
@@ -126,7 +126,7 @@ void RectItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 
 	}
 	owner->SetHighColor(205,205,205,255);
-	owner->StrokeRoundRect(newBounds,3,3);
+//	owner->StrokeRoundRect(newBounds,3,3);
 	owner->StrokeLine(BPoint(newBounds.right-separated,newBounds.top),BPoint(newBounds.right-separated,newBounds.bottom));
 	owner->SetHighColor(foreground);	
 }

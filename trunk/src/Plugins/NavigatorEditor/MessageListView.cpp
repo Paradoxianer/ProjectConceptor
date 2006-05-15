@@ -1,6 +1,9 @@
 #include <support/ClassInfo.h>
 #include <string.h>
 
+#include "ProjectConceptorDefs.h"
+#include "PDocument.h"
+
 #include "MessageListView.h"
 #include "StringItem.h"
 #include "RectItem.h"
@@ -8,16 +11,25 @@
 #include "BoolItem.h"
 #include "NodeItem.h"
 
-MessageListView::MessageListView(BRect rect, BMessage * forContainer):BOutlineListView(rect,"MessageListView")
+MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forContainer):BOutlineListView(rect,"MessageListView")
 {
-	container=forContainer;
-	ValueChanged();
+	doc				= document;
+	container		= forContainer;
+	baseEditMessage	=  new BMessage(P_C_EXECUTE_COMMAND);
+	baseEditMessage->AddPointer("node",container);
+	baseEditMessage->AddString("Command::Name","ChangeValue");
+	editMessage		= new BMessage(*baseEditMessage);
 }
 
 
 void MessageListView::MouseDown(BPoint point)
 {
 	BOutlineListView::MouseDown(point);
+}
+
+void MessageListView::AttachedToWindow(void)
+{
+	ValueChanged();
 }
 
 void MessageListView::ValueChanged()
@@ -30,7 +42,7 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 {
 	char		*name; 
 	uint32		type; 
-	int32		count; 
+	int32		count;
 	for (int32 i = 0; message->GetInfo(B_ANY_TYPE, i,(const char **) &name, &type, &count) == B_OK; i++)
 	{
 		switch(type)
@@ -45,6 +57,7 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 						AddUnder(newSuperItem,superItem);
 					else
 						AddItem(newSuperItem);
+					editMessage->AddString("subgroup",name); 
 					AddMessage(tmpMessage,newSuperItem);
 				}
 				break;
@@ -53,10 +66,21 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 			{
 				char		*string;
 				message->FindString(name,count-1,(const char **)&string);
+				StringItem *stringItem = new StringItem(name,string);
 				if (superItem)
-					AddUnder(new StringItem(name,string),superItem);
+				{
+					AddUnder(stringItem,superItem);
+				}
 				else
-					AddItem(new StringItem(name,string));
+				{
+					AddItem(stringItem);
+					delete editMessage;
+					editMessage		= new BMessage(*baseEditMessage);
+				}
+				BMessage *tmpMessage = new BMessage(*editMessage);
+				tmpMessage->AddPointer("item",stringItem);
+				stringItem->SetMessage(tmpMessage);
+				stringItem->SetTarget(this);
 				break;
 			}
 			case B_RECT_TYPE:
@@ -110,7 +134,6 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 						AddUnder(new NodeItem(toNode),masterItem);
 					}
 				}
-				
 
 /*				message->FindPointer(name,count,(void **)&pointer);
 				char	*className = (char *)class_name(pointer);
@@ -124,5 +147,27 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 		}
 
 	} 
+}
 
+void MessageListView::MessageReceived(BMessage *message)
+{
+	TRACE();
+	BaseListItem	*item;
+	switch(message->what) 
+	{
+		case P_C_EXECUTE_COMMAND:
+		{
+			PRINT_OBJECT(*message);
+			if (message->FindPointer("item",(void **)&item)==B_OK)
+			{
+				item->SetTarget(doc);
+				item->Invoke();
+				item->SetTarget(this);
+			}
+			break;
+		}
+		default:
+			BOutlineListView::MessageReceived(message);
+			break;
+	}
 }

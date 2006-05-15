@@ -1,9 +1,10 @@
 #ifndef BASE_LIST_ITEM_H
 #define BASE_LIST_ITEM_H
 
+#include <app/Invoker.h>
 #include <interface/ListItem.h>
 
-class BaseListItem : public BListItem
+class BaseListItem : public BListItem, public BInvoker
 {
 public:
 						BaseListItem(type_code supportetType, uint32 level = 0, bool expanded = true):BListItem(level,expanded){type=supportetType;};
