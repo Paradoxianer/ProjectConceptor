@@ -1,6 +1,12 @@
 // InputRequest.h
 // Autor: Christian Lörchner
-
+/**
+ * @class InputRequestView
+ *
+ * @author Christian Lörchner
+ * @date 2006/10/04
+ *
+ */
 #ifndef _INPUTREQUEST_VIEW_H
 #define _INPUTREQUEST_VIEW_H
 

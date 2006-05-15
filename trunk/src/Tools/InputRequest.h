@@ -1,5 +1,15 @@
 // InputRequest.h
 // Autor: Christian Lörchner
+/**
+ * @class InputRequest
+ * @brief A BAlert like class with a TextInput field
+ *
+ *
+ * @author Christian Lörchner
+ * @date 2006/10/04
+ *
+ * @todo 
+ */
 
 #ifndef _INPUTREQUEST_H
 #define _INPUTREQUEST_H
