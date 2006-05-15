@@ -54,6 +54,8 @@ public:
 	virtual	void			SetDirty(BRegion *region);
 	virtual	BMessage*		GetConfiguration(void){return configMessage;};
 	virtual	void			SetConfiguration(BMessage *message){delete configMessage;configMessage=message;};
+	
+	virtual void			PreprocessBeforSave(BMessage *container);
 	//----------------PEditor	
 	
 	//++++++++++++++++BView
@@ -80,6 +82,7 @@ public:
 	virtual Renderer*		FindRenderer(BPoint where);
 	virtual Renderer*		FindNodeRenderer(BPoint where);
 	virtual Renderer*		FindConnectionRenderer(BPoint where);
+	virtual Renderer*		FindRenderer(BMessage *container);
 	
 			PCommand*		MoveCommand(void){return moveCommand;};
 			PCommand*		ResizeCommand(void){return resizeCommand;};
@@ -94,7 +97,7 @@ protected:
 			void			Init(void);
 			void			InsertObject(BPoint where,bool deselect);
 			void			InsertRenderObject(BMessage *node);
-			void			DeleteRenderObject(BMessage *node);
+
 
 	static	bool			ProceedRegion(void *arg,void *region);
 	static	bool			DrawRenderer(void *arg,void *editor);

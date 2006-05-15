@@ -147,6 +147,30 @@ BList* SampleEditor::GetPCommandList(void)
 	//at the Moment we dont support special Commands :-)
 	return NULL;
 }
+
+void SampleEditor::PreprocessBeforSave(BMessage *container)
+{
+	TRACE();
+	PRINT(("GraphEditor::PreprocessAfterLoad:\n"));
+	char	*name; 
+	uint32	type; 
+	int32	count; 
+	int32	i		= 0;
+	//remove all the Pointer to the Renderer so that on the next load a new Renderer are added
+	while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+	{
+		if ((strstr(name,"SampleEditor") != NULL) || 
+			(strcasecmp(name,"Outgoing") == B_OK) ||
+			(strcasecmp(name,"Incoming") == B_OK) ||
+			(strcasecmp(name,"doc") == B_OK) )
+		{
+			container->RemoveName(name);
+			i--;
+		}
+		i++;
+	}
+}
+
 void SampleEditor::InitAll()
 {
 	TRACE();
@@ -194,7 +218,8 @@ void SampleEditor::ValueChanged()
 	for (int32 i=0;i<allTrashed->CountItems();i++)
 	{
 		node = (BMessage *)allTrashed->ItemAt(i);
-		DeleteRenderObject(node);
+//		DeleteRenderObject(node);
+		RemoveRenderer(FindRenderer(node));
 	}
 	if (BView::LockLooper())
 	{
@@ -409,7 +434,7 @@ void SampleEditor::DetachedFromWindow(void)
 		while(renderer->CountItems()>0)
 		{
 			nodeRenderer = (Renderer *)renderer->ItemAt(0);
-			DeleteRenderObject(nodeRenderer->GetMessage());
+			RemoveRenderer(nodeRenderer);
 		}
 	}
 }	
@@ -574,43 +599,14 @@ void SampleEditor::InsertRenderObject(BMessage *node)
 	}		
 	node->AddPointer(renderString,newRenderer);
 	AddRenderer(newRenderer);
-/*	BasePlugin	*theRenderer	= (BasePlugin*)renderPlugins->ItemAt(0);
-
-	BView		*addView		= (BView *)theRenderer->GetNewObject(node);
-	if (addView!=NULL)
-	{
-		AddChild(addView);
-
-	}*/
 }
 
-void SampleEditor::DeleteRenderObject(BMessage *node)
-{
-	TRACE();
-	Renderer *newRenderer = NULL;
-	if ((node->FindPointer(renderString,(void **)&newRenderer) == B_OK) && (newRenderer != NULL) )
-	{
-		node->RemoveName(renderString);
-		RemoveRenderer(newRenderer);
-	}
-/*	BasePlugin	*theRenderer	= (BasePlugin*)renderPlugins->ItemAt(0);
-
-	BView		*addView		= (BView *)theRenderer->GetNewObject(node);
-	if (addView!=NULL)
-	{
-		AddChild(addView);
-
-	}*/
-}
 
 void SampleEditor::AddRenderer(Renderer* newRenderer)
 {
 	TRACE();
 	renderer->AddItem(newRenderer);
 	activRenderer = newRenderer;
-//	delete rendersensitv;
-//	rendersensitv = new BRegion();
-//	renderer->DoForEach(ProceedRegion,rendersensitv);
 }
 
 void SampleEditor::RemoveRenderer(Renderer *wichRenderer)
@@ -621,28 +617,23 @@ void SampleEditor::RemoveRenderer(Renderer *wichRenderer)
 	if (mouseReciver == wichRenderer)
 		mouseReciver = NULL;
 	renderer->RemoveItem(wichRenderer);
+	(wichRenderer->GetMessage())->RemoveName(renderString);
 	delete wichRenderer;
-/*	delete rendersensitv;
-	rendersensitv = new BRegion();
-	renderer->DoForEach(ProceedRegion,rendersensitv);*/
-	//**recalc Region
 }
+
 Renderer* SampleEditor::FindRenderer(BPoint where)
 {
 	TRACE();
 	Renderer *currentRenderer = NULL;
-/*	if (rendersensitv->Contains(where))
-	{*/
-		bool found	=	false;
-		for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	bool found	=	false;
+	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	{
+		if (((Renderer*)renderer->ItemAt(i))->Caught(where))
 		{
-			if (((Renderer*)renderer->ItemAt(i))->Caught(where))
-			{
-				found			= true;
-				currentRenderer	= (Renderer*)renderer->ItemAt(i);
-			}
+			found			= true;
+			currentRenderer	= (Renderer*)renderer->ItemAt(i);
 		}
-//	}
+	}
 	return currentRenderer;
 }
 
@@ -650,19 +641,16 @@ Renderer* SampleEditor::FindNodeRenderer(BPoint where)
 {
 	TRACE();
 	Renderer *currentRenderer = NULL;
-/*	if (rendersensitv->Contains(where))
-	{*/
-		bool found	=	false;
-		for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	bool found	=	false;
+	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	{
+		if (((Renderer*)renderer->ItemAt(i))->Caught(where))
 		{
-			if (((Renderer*)renderer->ItemAt(i))->Caught(where))
-			{
-				currentRenderer	= (Renderer*)renderer->ItemAt(i);
-				if (currentRenderer->GetMessage()->what == P_C_CLASS_TYPE)
-					found			= true;
-			}
+			currentRenderer	= (Renderer*)renderer->ItemAt(i);
+			if (currentRenderer->GetMessage()->what == P_C_CLASS_TYPE)
+				found			= true;
 		}
-//	}
+	}
 	return currentRenderer;
 }
 
@@ -670,22 +658,37 @@ Renderer* SampleEditor::FindConnectionRenderer(BPoint where)
 {
 	TRACE();
 	Renderer *currentRenderer = NULL;
-/*	if (rendersensitv->Contains(where))
-	{*/
-		bool found	=	false;
-		for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	bool found	=	false;
+	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	{
+		if (((Renderer*)renderer->ItemAt(i))->Caught(where))
 		{
-			if (((Renderer*)renderer->ItemAt(i))->Caught(where))
-			{
-				currentRenderer	= (Renderer*)renderer->ItemAt(i);
-				if (currentRenderer->GetMessage()->what == P_C_CONNECTION_TYPE)
-					found			= true;
-			}
+			currentRenderer	= (Renderer*)renderer->ItemAt(i);
+			if (currentRenderer->GetMessage()->what == P_C_CONNECTION_TYPE)
+				found			= true;
 		}
-//	}
+	}
 	return currentRenderer;
 }
 
+Renderer* SampleEditor::FindRenderer(BMessage *container)
+{
+	int32		i					= 0;
+	Renderer	*currentRenderer	= NULL;
+	bool		found				= false;
+
+	while ((i<renderer->CountItems()) && (!found))
+	{
+		currentRenderer= (Renderer*)renderer->ItemAt(i);			
+		if (currentRenderer->GetMessage() == container)
+			found=true;
+		i++;
+	}
+	if (found)
+		return currentRenderer;
+	else
+		return NULL;
+}
 
 void SampleEditor::BringToFront(Renderer *wichRenderer)
 {
@@ -702,7 +705,7 @@ void SampleEditor::SendToBack(Renderer *wichRenderer)
 	TRACE();
 	renderer->RemoveItem(wichRenderer);
 	renderer->AddItem(wichRenderer,0);
-	//**draw all wich are under the Thing redraw
+	//draw all
 	Invalidate();
 }
 
