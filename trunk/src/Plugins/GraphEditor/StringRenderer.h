@@ -30,16 +30,16 @@ class StringRenderer
 {
 
 public:
-						StringRenderer(GraphEditor *parentEditor,char *forString,BRect stringRect,BMessage *message=NULL);
-			void		Draw(BView *drawOn, BRect updateRect);
-			void		SetString(char *newString);
-			char*		GetString(void){return string;};
-			void		MouseDown(BPoint where);
-			void		SetFrame(BRect newRect);
-			BRect		Frame(void){return frame;};
+							StringRenderer(GraphEditor *parentEditor,char *forString,BRect stringRect,BMessage *message=NULL);
+			void			Draw(BView *drawOn, BRect updateRect);
+			void			SetString(char *newString);
+			char*			GetString(void){return string;};
+			void			MouseDown(BPoint where);
+			void			SetFrame(BRect newRect);
+			BRect			Frame(void){return frame;};
 
 protected:
-			void		Init();
+			void			Init();
 		BMessage			*changeMessage;
 		GraphEditor 		*editor;
 		BRect				frame;
