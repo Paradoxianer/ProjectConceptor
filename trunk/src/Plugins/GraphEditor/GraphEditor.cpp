@@ -581,7 +581,6 @@ void GraphEditor::MessageReceived(BMessage *message)
 				subCommandMessage->AddString("Command::Name","Select");
 				subCommandMessage->AddPointer("node",connection);
 				commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
-
 				sentTo->SendMessage(commandMessage);
 			}
 			break;

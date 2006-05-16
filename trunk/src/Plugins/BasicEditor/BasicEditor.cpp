@@ -16,10 +16,6 @@ BasicEditor::BasicEditor():PEditor(),BView(BRect(0,0,200,200),"BasicEditor",B_FO
 
 void BasicEditor::Init(void)
 {
-	insertCommand	= NULL;
-	selectCommand	= NULL;
-	deleteCommand	= NULL;
-	connectCommand	= NULL;
 	printRect		= NULL;	
 	selectRect		= NULL;
 	startMouseDown	= NULL;
@@ -72,12 +68,6 @@ void BasicEditor::Init(void)
 
 void BasicEditor::AttachedToManager(void)
 {
-	PCommandManager *commandManager = doc->GetCommandManager();
-	//insertCommand contains off an object insert and an select
-	insertCommand	= commandManager->GetPCommand("Insert");
-	selectCommand	= commandManager->GetPCommand("Select");
-	deleteCommand	= commandManager->GetPCommand("Delete");
-	connectCommand	= commandManager->GetPCommand("Connect");
 	sentTo			= new BMessenger(doc);
 	id				=	manager->IndexOf(this);
 	sprintf(renderString,"BasicEditor%ld::Renderer",id);
@@ -260,7 +250,7 @@ void BasicEditor::MouseUp(BPoint where)
 		{
 			BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
 			selectMessage->AddRect("frame",*selectRect);
-			selectMessage->AddPointer("command",selectCommand);
+			selectMessage->AddString("Command::Name","Select");
 			sentTo->SendMessage(selectMessage);
 		}
 		else
@@ -356,8 +346,8 @@ void BasicEditor::MessageReceived(BMessage *message)
 				connection->AddPointer("doc",doc);
 				//** add the connections to the Nodes :-)
 				commandMessage->AddPointer("node",connection);
-				commandMessage->AddPointer("command",insertCommand);
-				subCommandMessage->AddPointer("command",selectCommand);
+				commandMessage->AddString("Command::Name","Insert");
+				subCommandMessage->AddString("Command::Name","Select");
 				subCommandMessage->AddPointer("node",connection);
 				commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
 				sentTo->SendMessage(commandMessage);
@@ -381,10 +371,10 @@ void BasicEditor::InsertObject(BPoint where,bool deselect)
 	newObject->AddMessage("Pattern",newPattern);
 	//preparing CommandMessage
 	commandMessage->AddPointer("node",(void *)newObject);
-	commandMessage->AddPointer("command",insertCommand);
+	commandMessage->AddString("Command::Name","Insert");
 	selectMessage->AddBool("deselect",deselect);
 	selectMessage->AddPointer("node",(void *)newObject);
-	selectMessage->AddPointer("command",selectCommand);
+	selectMessage->AddString("Command::Name","Select");
 	commandMessage->AddMessage("PCommand::subPCommand",selectMessage);
 	sentTo->SendMessage(commandMessage);
 }

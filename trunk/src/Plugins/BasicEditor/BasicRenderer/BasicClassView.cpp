@@ -38,10 +38,6 @@ void BasicClassView::Init()
 
 	err = viewMessage->FindPointer("doc",(void **)&doc);
 	sentTo						= new BMessenger(NULL,doc);
-	PCommandManager	*commandManager	= doc->GetCommandManager();
-	moveCommand		= commandManager->GetPCommand("Move");
-	resizeCommand	= commandManager->GetPCommand("Resize");
-	selectCommand	= commandManager->GetPCommand("Select");
 
 
 	err = viewMessage->FindRect("Frame",frame);
@@ -161,7 +157,7 @@ void BasicClassView::MouseDown(BPoint where)
 			if  ((modifiers & B_CONTROL_KEY) != 0) 
 				selectMessage->AddBool("deselect",false);
 			selectMessage->AddPointer("node",viewMessage);
-			selectMessage->AddPointer("command",selectCommand);
+			selectMessage->AddString("Command::Name","Select");
 			sentTo->SendMessage(selectMessage);
 		}
 //		Invalidate();*/
@@ -202,7 +198,7 @@ void BasicClassView::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 			if (!resizing)
 			{
 				BMessage	*mover	= new BMessage(P_C_EXECUTE_COMMAND);
-				mover->AddPointer("command",moveCommand);
+				mover->AddString("Command::Name","Move");
 				mover->AddFloat("dx",dx);
 				mover->AddFloat("dy",dy);
 				sentTo->SendMessage(mover);
@@ -210,7 +206,7 @@ void BasicClassView::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 			else
 			{
 				BMessage	*resizer	= new BMessage(P_C_EXECUTE_COMMAND);
-				resizer->AddPointer("command",resizeCommand);
+				resizer->AddString("Command::Name","Resize");
 				resizer->AddFloat("dx",dx);
 				resizer->AddFloat("dy",dy);
 				sentTo->SendMessage(resizer);
