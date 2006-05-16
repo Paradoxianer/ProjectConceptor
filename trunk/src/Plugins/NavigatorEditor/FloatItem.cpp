@@ -11,12 +11,13 @@ FloatItem::FloatItem(char *newLabel, float newValue, uint32 level = 0, bool expa
 {
 	svalue			= new char[24];
 	sprintf(svalue,"%.2f",newValue);
-	value			= new BTextControl(BRect(0,0,100,10),"left",NULL,svalue,NULL);
+	BMessage		*inputChanged = new BMessage(ITEM_CHANDED);
+	inputChanged->AddPointer("item",this);
+	value			= new BTextControl(BRect(0,0,100,10),"left",NULL,svalue,inputChanged);
 	label			= newLabel;
 	background		= ui_color(B_CONTROL_BACKGROUND_COLOR);
 	backgroundHi	= ui_color(B_CONTROL_HIGHLIGHT_COLOR);
 	foreground		= ui_color(B_CONTROL_TEXT_COLOR);
-	separated		= 100;
 }
 
 
@@ -55,9 +56,12 @@ void FloatItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 	if (IsSelected())
 	{
 		if (value->Parent() == NULL)
+		{
 			owner->AddChild(value);
-	    value->MoveTo(newBounds.right-separated+1,newBounds.top+2);
-	    value->ResizeTo(newBounds.right-separated-3,newBounds.Height()-3);
+			value->SetTarget(owner);
+		}
+	    value->MoveTo(newBounds.right-SEPERATOR+1,newBounds.top+2);
+	    value->ResizeTo(newBounds.right-SEPERATOR-3,newBounds.Height()-3);
 	}
 	else
 	{
@@ -66,12 +70,12 @@ void FloatItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 			owner->RemoveChild(value);
 			svalue = (char *)value->Text();
 		}
-		owner->MovePenTo(newBounds.right-separated+3, newBounds.bottom-textLine);
+		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-textLine);
 		owner->DrawString(svalue); 
 	}
 	owner->SetHighColor(205,205,205,255);
 //	owner->StrokeRoundRect(newBounds,3,3);
-	owner->StrokeLine(BPoint(newBounds.right-separated,newBounds.top),BPoint(newBounds.right-separated,newBounds.bottom));
+	owner->StrokeLine(BPoint(newBounds.right-SEPERATOR,newBounds.top),BPoint(newBounds.right-SEPERATOR,newBounds.bottom));
 	owner->SetHighColor(foreground);	
 }
 

@@ -4,6 +4,9 @@
 #include <app/Invoker.h>
 #include <interface/ListItem.h>
 
+const uint32	ITEM_CHANDED			= 'bliC';
+const float		SEPERATOR				= 100;
+
 class BaseListItem : public BListItem, public BInvoker
 {
 public:

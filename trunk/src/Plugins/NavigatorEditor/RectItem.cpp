@@ -21,10 +21,14 @@ RectItem::RectItem(char *newLabel, BRect newRect, uint32 level = 0, bool expande
 	sprintf(stop,"%.2f",newRect.top);
 	sprintf(sright,"%.2f",newRect.right);
 	sprintf(sbottom,"%.2f",newRect.bottom);
-	left			= new BTextControl(BRect(0,0,100,10),"left","left",sleft,NULL);
-	top				= new BTextControl(BRect(0,0,100,10),"top","top",stop,NULL);
-	right			= new BTextControl(BRect(0,0,100,10),"right","right",sright,NULL);
-	bottom			= new BTextControl(BRect(0,0,100,10),"bottom","bottom",sbottom,NULL);
+
+	BMessage		*inputChanged = new BMessage(ITEM_CHANDED);
+	inputChanged->AddPointer("item",this);
+
+	left			= new BTextControl(BRect(0,0,100,10),"left","left",sleft,inputChanged);
+	top				= new BTextControl(BRect(0,0,100,10),"top","top",stop,inputChanged);
+	right			= new BTextControl(BRect(0,0,100,10),"right","right",sright,inputChanged);
+	bottom			= new BTextControl(BRect(0,0,100,10),"bottom","bottom",sbottom,inputChanged);
 	left->SetDivider(40);
 	top->SetDivider(40);
 	right->SetDivider(40);
@@ -34,7 +38,6 @@ RectItem::RectItem(char *newLabel, BRect newRect, uint32 level = 0, bool expande
 	background		= ui_color(B_CONTROL_BACKGROUND_COLOR);
 	backgroundHi	= ui_color(B_CONTROL_HIGHLIGHT_COLOR);
 	foreground		= ui_color(B_CONTROL_TEXT_COLOR);
-	separated		= 100;
 }
 
 
@@ -84,15 +87,19 @@ void RectItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 			owner->AddChild(top);
 			owner->AddChild(right);
 			owner->AddChild(bottom);
-			left->ResizeTo(newBounds.Width()-separated-3,textControlHeight);
-			top->ResizeTo(newBounds.Width()-separated-3,textControlHeight);
-			right->ResizeTo(newBounds.Width()-separated-3,textControlHeight);
-			bottom->ResizeTo(newBounds.Width()-separated-3,textControlHeight);
+			left->ResizeTo(newBounds.Width()-SEPERATOR-3,textControlHeight);
+			top->ResizeTo(newBounds.Width()-SEPERATOR-3,textControlHeight);
+			right->ResizeTo(newBounds.Width()-SEPERATOR-3,textControlHeight);
+			bottom->ResizeTo(newBounds.Width()-SEPERATOR-3,textControlHeight);
+			left->SetTarget(owner);
+			top->SetTarget(owner);
+			right->SetTarget(owner);
+			bottom->SetTarget(owner);
 		}
-	    left->MoveTo(newBounds.right-separated+1,newBounds.top+2);
-	    top->MoveTo(newBounds.right-separated+1,left->Frame().bottom);
-	    right->MoveTo(newBounds.right-separated+1,top->Frame().bottom);
-   	    bottom->MoveTo(newBounds.right-separated+1,right->Frame().bottom);
+	    left->MoveTo(newBounds.right-SEPERATOR+1,newBounds.top+2);
+	    top->MoveTo(newBounds.right-SEPERATOR+1,left->Frame().bottom);
+	    right->MoveTo(newBounds.right-SEPERATOR+1,top->Frame().bottom);
+   	    bottom->MoveTo(newBounds.right-SEPERATOR+1,right->Frame().bottom);
 	}
 	else
 	{
@@ -107,27 +114,27 @@ void RectItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 			owner->RemoveChild(right);
 			owner->RemoveChild(bottom);
 		}
-		owner->MovePenTo(newBounds.right-separated+3, newBounds.bottom-(textControlHeight*3)-textLine);
+		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-(textControlHeight*3)-textLine);
 		owner->DrawString(_T("left")); 
-		owner->MovePenTo(newBounds.right-separated+52, newBounds.bottom-(textControlHeight*3)-textLine);
+		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-(textControlHeight*3)-textLine);
 		owner->DrawString(sleft);
-		owner->MovePenTo(newBounds.right-separated+3, newBounds.bottom-(textControlHeight*2)-textLine);
+		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-(textControlHeight*2)-textLine);
 		owner->DrawString(_T("top")); 
-		owner->MovePenTo(newBounds.right-separated+52, newBounds.bottom-(textControlHeight*2)-textLine);
+		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-(textControlHeight*2)-textLine);
 		owner->DrawString(stop);
-		owner->MovePenTo(newBounds.right-separated+3, newBounds.bottom-(textControlHeight)-textLine);
+		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-(textControlHeight)-textLine);
 		owner->DrawString(_T("right")); 
-		owner->MovePenTo(newBounds.right-separated+52, newBounds.bottom-(textControlHeight)-textLine);
+		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-(textControlHeight)-textLine);
 		owner->DrawString(sright);
-		owner->MovePenTo(newBounds.right-separated+3, newBounds.bottom-textLine);
+		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-textLine);
 		owner->DrawString(_T("bottom")); 
-		owner->MovePenTo(newBounds.right-separated+52, newBounds.bottom-textLine);
+		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-textLine);
 		owner->DrawString(sbottom);
 
 	}
 	owner->SetHighColor(205,205,205,255);
 //	owner->StrokeRoundRect(newBounds,3,3);
-	owner->StrokeLine(BPoint(newBounds.right-separated,newBounds.top),BPoint(newBounds.right-separated,newBounds.bottom));
+	owner->StrokeLine(BPoint(newBounds.right-SEPERATOR,newBounds.top),BPoint(newBounds.right-SEPERATOR,newBounds.bottom));
 	owner->SetHighColor(foreground);	
 }
 
@@ -149,4 +156,9 @@ BRect RectItem::GetRect(void)
 	float rright	= atof(sright);
 	float rbottom	= atof(sbottom);
 	return BRect(rleft,rtop,rright,rbottom);
+}
+
+status_t RectItem::Invoke(BMessage *message = NULL)
+{
+	
 }

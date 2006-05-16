@@ -78,9 +78,8 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 					editMessage		= new BMessage(*baseEditMessage);
 				}
 				BMessage *tmpMessage = new BMessage(*editMessage);
-				tmpMessage->AddPointer("item",stringItem);
 				stringItem->SetMessage(tmpMessage);
-				stringItem->SetTarget(this);
+				stringItem->SetTarget(doc);
 				break;
 			}
 			case B_RECT_TYPE:
@@ -155,15 +154,10 @@ void MessageListView::MessageReceived(BMessage *message)
 	BaseListItem	*item;
 	switch(message->what) 
 	{
-		case P_C_EXECUTE_COMMAND:
+		case ITEM_CHANDED:
 		{
-			PRINT_OBJECT(*message);
-			if (message->FindPointer("item",(void **)&item)==B_OK)
-			{
-				item->SetTarget(doc);
+			if ( (message->FindPointer("item",(void **)&item)==B_OK) && (item != NULL) )
 				item->Invoke();
-				item->SetTarget(this);
-			}
 			break;
 		}
 		default:

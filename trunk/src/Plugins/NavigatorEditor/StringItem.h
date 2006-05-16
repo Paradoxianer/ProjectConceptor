@@ -21,10 +21,7 @@ public:
 	virtual void		SetExpanded(bool expande);
 	virtual	void		Update(BView *owner, const BFont *font);
 	virtual	void		DrawItem(BView *owner, BRect bounds, bool complete = false);
-	virtual status_t	SetMessage(BMessage *message);
 	virtual status_t	Invoke(BMessage *message = NULL);
-	virtual status_t	SetTarget(BMessenger messenger){textControl->SetTarget(messenger);BInvoker::SetTarget(messenger);};
-	virtual status_t	SetTarget(const BHandler *handler, const BLooper *looper = NULL){textControl->SetTarget(handler,looper);BInvoker::SetTarget(handler,looper);};
 protected:
 	BTextControl		*textControl;
 	char				*label;
@@ -33,7 +30,6 @@ protected:
 	rgb_color			foreground;
 	rgb_color			background;
 	rgb_color			backgroundHi;
-	float				separated;
 private:
 };
 #endif

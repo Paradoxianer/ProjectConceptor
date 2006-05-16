@@ -37,7 +37,6 @@ protected:
 	rgb_color		foreground;
 	rgb_color		background;
 	rgb_color		backgroundHi;
-	float			separated;
 private:
 };
 #endif

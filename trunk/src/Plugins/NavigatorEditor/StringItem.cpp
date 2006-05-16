@@ -6,13 +6,14 @@
 StringItem::StringItem(char *newLabel, char *newString, uint32 level = 0, bool expanded = true):BaseListItem(B_RECT_TYPE,level,expanded)
 {
 
-	textControl		= new BTextControl(BRect(0,0,100,10),"StringItem",NULL,newString,NULL);
+	BMessage		*inputChanged = new BMessage(ITEM_CHANDED);
+	inputChanged->AddPointer("item",this);
+	textControl		= new BTextControl(BRect(0,0,100,10),"StringItem",NULL,newString,inputChanged);
 	label			= newLabel;
 	string			= newString;
 	background		= ui_color(B_CONTROL_BACKGROUND_COLOR);
 	backgroundHi	= ui_color(B_CONTROL_HIGHLIGHT_COLOR);
 	foreground		= ui_color(B_CONTROL_TEXT_COLOR);
-	separated		= 100;
 }
 
 
@@ -51,20 +52,23 @@ void StringItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 	if (IsSelected())
 	{
 		if (textControl->Parent() == NULL)
+		{
 			owner->AddChild(textControl);
-	    textControl->MoveTo(newBounds.right-separated+1,newBounds.top+2);
-	    textControl->ResizeTo(newBounds.right-separated-3,newBounds.Height()-3);
+			textControl->SetTarget(owner);
+		}
+	    textControl->MoveTo(newBounds.right-SEPERATOR+1,newBounds.top+2);
+	    textControl->ResizeTo(newBounds.right-SEPERATOR-3,newBounds.Height()-3);
 	}
 	else
 	{
 		if (textControl->Parent() != NULL)
 			owner->RemoveChild(textControl);
-		owner->MovePenTo(newBounds.right-separated+3, newBounds.bottom-textLine);
+		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-textLine);
 		owner->DrawString(string); 
 	}
 	owner->SetHighColor(205,205,205,255);
 //	owner->StrokeRoundRect(newBounds,3,3);
-	owner->StrokeLine(BPoint(newBounds.right-separated,newBounds.top),BPoint(newBounds.right-separated,newBounds.bottom));
+	owner->StrokeLine(BPoint(newBounds.right-SEPERATOR,newBounds.top),BPoint(newBounds.right-SEPERATOR,newBounds.bottom));
 	owner->SetHighColor(foreground);	
 }
 
@@ -79,22 +83,18 @@ void StringItem::SetExpanded(bool expande)
 {
 };
 
-status_t StringItem::SetMessage(BMessage *message)
-{
-	message->AddInt32("type",B_STRING_TYPE);
-	message->AddString("name",label);
-	textControl->SetMessage(message);
-	BInvoker::SetMessage(message);
-}
 
 status_t StringItem::Invoke(BMessage *message = NULL)
 {
-	BMessage	*sendMessage=message;
+	BMessage	*sendMessage	= NULL;
 	if (message==NULL)
-		sendMessage=Message();
+		sendMessage = new BMessage(*Message());
+	else
+		sendMessage = new BMessage(*message);
 	if (sendMessage != NULL)	
 	{
-	
+		sendMessage->AddInt32("type",B_STRING_TYPE);
+		sendMessage->AddString("name",label);
 		sendMessage->AddPointer("newValue", textControl->Text()); 
 		sendMessage->AddInt32("size",textControl->TextView()->TextLength()+1);
 		BInvoker::Invoke(sendMessage);
