@@ -151,9 +151,14 @@ void PCommandManager::StartMacro(void)
 	}
 	else
 	{
-		//**alter that we still recording
-		delete recording;
-		recording	= new BMessage(P_C_MACRO_TYPE);
+		int32 choice	= (new BAlert("Error!",_T("Macro Recording already started!"),_T("Restart Recording"),_T("Contiune Recording"),NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_STOP_ALERT))->Go();
+		if (choice == 0)
+		{
+			delete macroIndexer;
+			macroIndexer	= new Indexer(doc);		
+			delete recording;
+			recording	= new BMessage(P_C_MACRO_TYPE);
+		}
 	}
 	
 }
