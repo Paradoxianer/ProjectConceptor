@@ -461,8 +461,10 @@ void PDocument::Load(void)
 	selected = docLoader->GetSelectedNodes();
 	delete commandManager;
 	commandManager= new PCommandManager(this);
-	commandManager->LoadMacros(docLoader->GetCommandManagerMessage());
-	commandManager->LoadUndo(docLoader->GetCommandManagerMessage());
+	commandManager->SetMacroList(docLoader->GetMacroList());
+	commandManager->SetUndoList(docLoader->GetUndoList());
+//	commandManager->LoadMacros(docLoader->GetCommandManagerMessage());
+//	commandManager->LoadUndo(docLoader->GetCommandManagerMessage());
 	printerSetting	= docLoader->GetPrinterSetting();
 	editorManager->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 }

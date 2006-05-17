@@ -40,8 +40,8 @@ public:
 	virtual	void		UnregisterPCommand(char *name);
 
 	virtual status_t	Archive(BMessage *archive, bool deep = true);
-	virtual	status_t	LoadMacros(BMessage *archive);
-	virtual	status_t	LoadUndo(BMessage *archive);
+	virtual	status_t	SetMacroList(BList *newMacroList);
+	virtual	status_t	SetUndoList(BList *newUndoList);
 
 	virtual	PCommand*	GetPCommand(char* name);
 
@@ -55,7 +55,7 @@ public:
 	virtual	int32		CountPCommand(void){return commandVector->CountItems();};
 	virtual	PCommand*	PCommandAt(int32 index){return (PCommand *)commandVector->ValueAt(index);};
 	
-	virtual PDocument* BelongTo(void){return doc;};
+	virtual PDocument*	BelongTo(void){return doc;};
 
 protected:
 	virtual void		Init(void);

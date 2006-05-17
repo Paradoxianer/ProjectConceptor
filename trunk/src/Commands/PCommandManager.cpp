@@ -28,10 +28,10 @@ PCommandManager::PCommandManager(PDocument *initDoc)
 void PCommandManager::Init(void)
 {
 	commandVector	= new BKeyedVector<BString,PCommand *>();
-	undoList	= new BList();
-	macroList	= new BList();
-	undoStatus	= 0;
-	recording	= NULL;
+	undoList		= new BList();
+	macroList		= new BList();
+	undoStatus		= 0;
+	recording		= NULL;
 
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*commands		= pluginManager->GetPluginsByType(P_C_COMMANDO_PLUGIN_TYPE);
@@ -49,24 +49,11 @@ status_t PCommandManager::Archive(BMessage *archive, bool deep = true)
 	for (int32 i=0;i<undoList->CountItems();i++)
 	{
 		BMessage	*undoMessage	= (BMessage*)undoList->ItemAt(i);
-/*		BMessage	*deIndexed		= new BMessage(*undoMessage);
-		if (DeIndex(deIndexed) == B_OK)
-			archive->AddMessage("undo",deIndexed);*/
 		archive->AddMessage("undo",undoMessage);
 	}
 	for (int32 i=0;i<macroList->CountItems();i++)
 	{
 		BMessage	*macroMessage	= (BMessage*)macroList->ItemAt(i);
-//		BMessage	*deIndexed		= new BMessage(*macroMessage);
-/*		BMessage	*macroCommand	= new BMessage();
-		int32 		j				= 0;
-		while (deIndexed->FindMessage("Macro::Command",j,macroCommand) == B_OK)
-		{
-			if (DeIndex(macroCommand) == B_OK)	
-				deIndexed->ReplaceMessage("Macro::Command",j,macroCommand);
-			j++;
-		}
-		archive->AddMessage("macro",deIndexed);*/
 		archive->AddMessage("macro",macroMessage);
 	}
 	archive->AddInt32("undoStatus",undoStatus);
@@ -96,37 +83,52 @@ status_t PCommandManager::RegisterPCommand(BasePlugin *commandPlugin)
 	return err;
 }
 
-status_t PCommandManager::LoadMacros(BMessage *archive)
+status_t PCommandManager::SetMacroList(BList *newMacroList)
 {
 	status_t	err			= B_OK;
-	BMessage	*tmpMessage	= new BMessage();
-	int32		i			= 0;
-	//** todo Error Check
-	while (archive->FindMessage("macro",i,tmpMessage) == B_OK)
+	if (newMacroList)
 	{
-//		if ( ReIndex(tmpMessage) == B_OK)
-			macroList->AddItem(tmpMessage);
-		tmpMessage = new BMessage();
-		i++;
+	
+//		BMenu 		*macroPlay 		= doc->GetMenu(P_MENU_MACRO_PLAY);
+		BMenuItem	*singleMacro	= NULL;
+		BMessage	*macro			= NULL;
+		char		*name			= NULL;
+/*		while (macroPlay!=NULL)
+		{
+			singleMacro=macroPlay->RemoveItem((int32)0);
+			while (singleMacro)
+			{
+				delete singleMacro;
+				singleMacro=macroPlay->RemoveItem((int32)0);
+			}
+			macroPlay++;
+		}*/
+		delete macroList;
+		macroList = newMacroList;
+		for (int32 i=0;i<macroList->CountItems();i++)
+		{
+			macro =(BMessage *) macroList->ItemAt(i);
+			macro->FindString("Name",(const char**)&name);
+			BMenuItem	*item	= new BMenuItem(name,macro);
+			item->SetTarget(doc);
+			doc->AddMenuItem(P_MENU_MACRO_PLAY,item);
+		}
 	}
+	else
+		err = B_BAD_VALUE;
 	return err;
 }
 
-status_t PCommandManager::LoadUndo(BMessage *archive)
+status_t PCommandManager::SetUndoList(BList *newUndoList)
 {
 	status_t	err			= B_OK;	
-	//** todo Error Check
-	undoList->MakeEmpty();
-	BMessage	*tmpMessage	= new BMessage();
-	int32		i			= 0;
-	while (archive->FindMessage("undo",i,tmpMessage) == B_OK)
+	if (newUndoList)
 	{
-//		if ( ReIndex(tmpMessage) == B_OK)
-			undoList->AddItem(tmpMessage);
-		tmpMessage = new BMessage();
-		i++;
+		delete undoList;
+		undoList	= newUndoList;
 	}
-	archive->FindInt32("undoStatus",&undoStatus);
+	else
+		err = B_BAD_VALUE;
 	return err;
 }
 

@@ -16,31 +16,7 @@ PDocLoader::~PDocLoader(void)
 {
 }
 
-BList* PDocLoader::GetAllNodes(void)
-{
-	return allNodes;
-}
 
-
-BList* PDocLoader::GetAllConnections(void)
-{
-	return allConnections;
-}
-
-BList* PDocLoader::GetSelectedNodes(void)
-{
-	return selectedNodes;
-}
-
-
-BMessage* PDocLoader::GetPrinterSetting(void)
-{
-	return printerSettings;
-}
-BMessage* PDocLoader::GetSettings(void)
-{
-	return settings;
-}
 WindowManager* PDocLoader::GetWindowManager(void)
 {
 	return windowManager;
@@ -91,8 +67,8 @@ void PDocLoader::Load(void)
 			allNodes		=	Spread(allNodesMessage);
 			allConnections	=	ReIndexConnections(allConnectionsMessage);
 			selectedNodes	=	ReIndexSelected(selectedMessage);
-			ReIndexUndo(commandManagerMessage);
-			ReIndexMacro(commandManagerMessage);
+			undoList		=	ReIndexUndo(commandManagerMessage);
+			macroList		=	ReIndexMacro(commandManagerMessage);
 		}
 	}
 }
@@ -108,39 +84,6 @@ BList* PDocLoader::Spread(BMessage *allNodeMessage)
 		node =	new BMessage();
 		i++;		
 	}
-/*	BMessage	*subContainerList	= new BMessage();
-	BMessage	*node				= new BMessage();
-	BMessage	*newNode			= NULL;
-	BList		*newAllNodes		= new BList();
-	void		*tmpPointer			= NULL;
-	int32		i					= 0;
-	while (allNodeMessage->FindMessage("node",i,node) == B_OK)
-	{
-		if (node->FindMessage("SubContainerList",subContainerList) == B_OK)
-		{
-			if (node->FindPointer("SubContainer",&tmpPointer) == B_OK)
-			{
-				node->ReplacePointer("SubContainer",Spread(subContainerList));
-			}
-			else
-				node->AddPointer("SubContainer",Spread(subContainerList));
-			//Find alle Pointer und löschen
-		}
-		node->FindPointer("this",(void **)&tmpPointer);
-		node->RemoveName("this");
-		//we shoud do this over the GraphEditor->BeforeLoad()
-		char *name; 
-		uint32 type; 
-		int32 count; 
-		while (node->GetInfo(B_POINTER_TYPE,0 ,(const char **)&name, &type, &count) == B_OK)
-		{
-			node->RemoveName(name);
-		}
-		newNode	= new BMessage(*node);
-		newAllNodes->AddItem(newNode);
-		sorter->AddItem((int32)tmpPointer,newNode);
-		i++;
-	}*/
 	return newAllNodes;
 }
 
@@ -161,7 +104,6 @@ BList* PDocLoader::ReIndexConnections(BMessage *allConnectionsMessage)
 
 BList* PDocLoader::ReIndexSelected(BMessage *selectionMessage)
 {
-//** how to change this???
 	BList		*newSelection		= new BList();
 	int32		i					= 0;
 	void		*selectPointer		= NULL;
@@ -174,60 +116,31 @@ BList* PDocLoader::ReIndexSelected(BMessage *selectionMessage)
 	return newSelection;
 }
 
-void PDocLoader::ReIndexUndo(BMessage *reindexUndo)
+BList* PDocLoader::ReIndexUndo(BMessage *reindexUndo)
 {
+	BList		*mewUndoList		= new BList();
 	BMessage	*undoCommand		= new BMessage();
 	int32		i					= 0;
 	while (reindexUndo->FindMessage("undo",i,undoCommand)==B_OK)
 	{
-		indexer->DeIndexUndo(undoCommand);
-		reindexUndo->ReplaceMessage("undo",i,undoCommand);
+		mewUndoList->AddItem(indexer->DeIndexUndo(undoCommand));
+		undoCommand = new BMessage();
 		i++;
 	}
+	return mewUndoList;
 }
 
-void PDocLoader::ReIndexMacro(BMessage *reindexMacro)
+BList* PDocLoader::ReIndexMacro(BMessage *reindexMacro)
 {
-	BMessage	*macro		= new BMessage();
-	int32		i			= 0;
+	BList		*newMacroList	= new BList();
+	BMessage	*macro			= new BMessage();
+	int32		i				= 0;
 	while (reindexMacro->FindMessage("macro",i,macro)==B_OK)
 	{
-		indexer->DeIndexMacro(macro);
-		reindexMacro->ReplaceMessage("macro",i,macro);
+		newMacroList->AddItem(indexer->DeIndexMacro(macro));
+		macro = new BMessage();
 		i++;
 	}
+	return newMacroList;
 }
 
-/*void PDocLoader::ReIndexCommand(BMessage *commandMessage)
-{
-	BMessage	*subCommand			= new BMessage();
-	void		*nodePointer		= NULL;
-	int32		i					= 0;
-	char 		*name				= NULL; 
-	uint32		type				= B_ANY_TYPE; 
-	int32		count				= 0; 
-	while (commandMessage->FindPointer("node",i,&nodePointer) == B_OK)
-	{
-		commandMessage->ReplacePointer("node",i,sorter->ValueFor((int32)nodePointer));
-		i++;
-	}
-	i = 0;
-	while (commandMessage->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
-	{
-		if ( (commandMessage->FindMessage(name,i,subCommand) == B_OK) && (subCommand) )
-		{
-			ReIndexCommand(subCommand);
-			commandMessage->ReplaceMessage(name,count-1,subCommand);
-		}
-		i++;
-	}
-	while(commandMessage->FindMessage("PCommand::subPCommand",i,subCommand) == B_OK)
-	{
-		if (subCommand)
-		{
-			ReIndexCommand(subCommand);
-			commandMessage->ReplaceMessage("PCommand::subPCommand",i,subCommand);
-		}
-		i++;
-	}
-}*/

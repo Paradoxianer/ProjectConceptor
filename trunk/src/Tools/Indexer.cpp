@@ -314,10 +314,12 @@ BMessage* Indexer::DeIndexMacro(BMessage *macro)
 {
 	TRACE();
 	BMessage	*macroCommand	= new BMessage();
-	while (macro->FindMessage("Macro::Commmand",macroCommand) == B_OK)
+	int32		i				= 0;
+	while (macro->FindMessage("Macro::Commmand",i,macroCommand) == B_OK)
 	{
 		macroCommand = DeIndexCommand(macroCommand);
 		macro->ReplaceMessage("Macro::Commmand", macroCommand);
+		i++;
 	}
 	return macro;
 }

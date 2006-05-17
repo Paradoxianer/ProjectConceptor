@@ -35,12 +35,15 @@ public:
 	virtual						~PDocLoader(void);
 
 
-	virtual	BList*				GetAllNodes(void);
-	virtual	BList*				GetAllConnections(void);
-	virtual	BList*				GetSelectedNodes(void);
-
-	virtual	BMessage*			GetPrinterSetting(void);
-	virtual	BMessage*			GetSettings(void);
+	virtual	BList*				GetAllNodes(void){return allNodes;};
+	virtual	BList*				GetAllConnections(void){return allConnections;};
+	virtual	BList*				GetSelectedNodes(void){return selectedNodes;};
+	
+	virtual BList*				GetUndoList(void){return undoList;};
+	virtual BList*				GetMacroList(void){return macroList;};
+	
+	virtual	BMessage*			GetPrinterSetting(void){return printerSettings;};
+	virtual	BMessage*			GetSettings(void){return settings;};
 
 	virtual	WindowManager*		GetWindowManager(void);
 	virtual	PEditorManager*		GetEditorManager(void);
@@ -54,8 +57,8 @@ protected:
 	//ReIndex takes the stored Connections and ReAssing the Connections to real existing pointers 
 	virtual BList*				ReIndexConnections(BMessage *allConnectionsMessage);
 	virtual BList*				ReIndexSelected(BMessage *allConnectionsMessage);
-	virtual void				ReIndexUndo(BMessage *reIndexUndo);
-	virtual void				ReIndexMacro(BMessage *reIndexUndo);
+	virtual BList*				ReIndexUndo(BMessage *reIndexUndo);
+	virtual BList*				ReIndexMacro(BMessage *reIndexUndo);
 //	virtual void				ReIndexCommand(BMessage *commandMessage);
 	
 		BKeyedVector<int32,BMessage*>*	sorter;
@@ -63,7 +66,9 @@ protected:
 		BList*					allNodes;
 		BList*					selectedNodes;
 		BList*					allConnections;
-
+		BList*					undoList;
+		BList*					macroList;
+		
 		BMessage*				settings;
 		
 		BMessage*				printerSettings;
