@@ -119,20 +119,6 @@ BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
 	return undo;
 }
 
-/*BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
-{
-	TRACE();
-	BMessage	*macroCommand	= new BMessage;
-	if (includeNodes)
-	{
-		while (macro->FindMessage("Macro::Commmand",macroCommand) == B_OK)
-		{
-			macro->ReplaceMessage("Macro::Commmand", macroCommand);
-		}
-	}
-	return macro;
-}*/
-
 BMessage*	Indexer::IndexMacroCommand(BMessage *macro)
 {
 	char 		*commandName		= NULL;
@@ -323,19 +309,6 @@ BMessage* Indexer::DeIndexUndo(BMessage *undo)
 	DeIndexCommand(undo);
 	return undo;
 }
-/*BMessage* Indexer::DeIndexMacro(BMessage *macro)
-{
-	TRACE();
-	BMessage	*macroCommand	= new BMessage();
-	int32		i				= 0;
-	while (macro->FindMessage("Macro::Commmand",i,macroCommand) == B_OK)
-	{
-		macroCommand = DeIndexCommand(macroCommand);
-		macro->ReplaceMessage("Macro::Commmand", macroCommand);
-		i++;
-	}
-	return macro;
-}*/
 
 
 void Indexer::Init(void)

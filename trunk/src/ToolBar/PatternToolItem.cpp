@@ -69,10 +69,6 @@ status_t PatternToolItem::Archive(BMessage *archive, bool deep=true) const
 	err = archive->AddString("PatternToolItem::tName",tName);
 	BMessage tmpArchive;
 	//**is the NULL - pointer test OK?
-/*	if ((popUp!=NULL)&&( popUp->Archive(&tmpArchive, deep) == B_OK))
-		err = archive->AddMessage("PatternToolItem::popUp",&tmpArchive);
-	if ((kontextMenu!=NULL)&&(kontextMenu->Archive(&tmpArchive, deep) == B_OK))
-		err = archive->AddMessage("PatternToolItem::kontextMenu",&tmpArchive);*/
 	err = archive->AddData("PatternToolItem::value",B_PATTERN_TYPE,&value,sizeof(value));
 	if (description!=NULL)
 		archive->AddString("PatternToolItem::description",*description);
@@ -118,75 +114,9 @@ void PatternToolItem::Draw(BRect updateRect)
 
 void PatternToolItem::MouseDown(BPoint point)
 {
-/*	if (Bounds().Contains(point))
-	{
-		if (behavior == P_M_ONE_STATE_ITEM)
-		{
-			state = P_M_ITEM_DOWN;
-		}
-		else
-		{
-			if ((state&P_M_ITEM_DOWN) == P_M_ITEM_DOWN)
-				//Markieren dass der Button beim nächsten mal loslassen wieder hoch muss
-				state=state|P_M_ITEM_UP;
-			else
-			{
-				//ansonsten ein "normale" down
-				state=P_M_ITEM_DOWN;
-				//aber schon die Naricht weiterleiten
-				Invoke();
-				//the Modifikation Message
-				BMessage *msg=parentToolBar->Message();
-				if (msg!=NULL)
-				{
-					msg->AddPointer("source",(const void *)this);
-					msg->AddInt32("state",state);
-					parentToolBar->SetMessage(msg);
-					parentToolBar->Invoke();
-				}
-			}
-		}
-	}*/
 	BButton::MouseDown(point);
 }
 void PatternToolItem::MouseUp(BPoint point)
 {
-/*	if (behavior == P_M_ONE_STATE_ITEM)
-	{
-		state = P_M_ITEM_UP;
-		if (Bounds().Contains(point))
-		{
-			Invoke();
-			//the Modifikation Message
-			BMessage *msg=parentToolBar->Message();
-			if (msg!=NULL)
-			{
-				msg->AddPointer("source",(const void *)this);
-				msg->AddInt32("state",state);
-				parentToolBar->SetMessage(msg);
-				parentToolBar->Invoke();
-			}
-		}
-	}
-	else
-	{
-		if (((state&P_M_ITEM_DOWN) == P_M_ITEM_DOWN)&&(Bounds().Contains(point)))
-		{
-			if ((state&P_M_ITEM_UP) == P_M_ITEM_UP)
-			{
-				state = P_M_ITEM_UP;
-				Invoke();
-				//the Modifikation Message
-				BMessage *msg=parentToolBar->Message();
-				if (msg!=NULL)
-				{
-					msg->AddPointer("source",(const void *)this);
-					msg->AddInt32("state",state);
-					parentToolBar->SetMessage(msg);
-					parentToolBar->Invoke();
-				}
-			}
-		}
-	}*/
 	BButton::MouseUp(point);
 }

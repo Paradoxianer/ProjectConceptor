@@ -50,7 +50,7 @@ public:
 	virtual	void		Undo(BMessage *undo);
 	virtual	void		Redo(BMessage *redo);
 
-	virtual	void		Execute(BMessage *settings);
+	virtual	status_t	Execute(BMessage *settings);
 	
 	virtual	int32		CountPCommand(void){return commandVector->CountItems();};
 	virtual	PCommand*	PCommandAt(int32 index){return (PCommand *)commandVector->ValueAt(index);};

@@ -73,10 +73,6 @@ status_t FloatToolItem::Archive(BMessage *archive, bool deep=true) const
 	err = archive->AddString("FloatToolItem::tName",tName);
 	BMessage tmpArchive;
 	//**is the NULL - pointer test OK?
-/*	if ((popUp!=NULL)&&( popUp->Archive(&tmpArchive, deep) == B_OK))
-		err = archive->AddMessage("FloatToolItem::popUp",&tmpArchive);
-	if ((kontextMenu!=NULL)&&(kontextMenu->Archive(&tmpArchive, deep) == B_OK))
-		err = archive->AddMessage("FloatToolItem::kontextMenu",&tmpArchive);*/
 	err = archive->AddData("FloatToolItem::value",B_PATTERN_TYPE,&value,sizeof(value));
 	if (description!=NULL)
 		archive->AddString("FloatToolItem::description",*description);

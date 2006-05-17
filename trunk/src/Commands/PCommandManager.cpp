@@ -192,18 +192,20 @@ void PCommandManager::PlayMacro(BMessage *makro)
 	int32 		i				= 0;
 	BMessage	*message		= new BMessage();
 	Indexer		*playDeIndexer	= new Indexer(doc);
-	while (makro->FindMessage("Macro::Commmand", i,message) == B_OK)
+	status_t	err				= B_OK;
+	while ( (makro->FindMessage("Macro::Commmand", i,message) == B_OK) && (err==B_OK) )
 	{
-		Execute(playDeIndexer->DeIndexCommand(message));
+		err = Execute(playDeIndexer->DeIndexCommand(message));
 		snooze(100000);
 		i++;
 	}
 
 }
 
-void PCommandManager::Execute(BMessage *settings)
+status_t PCommandManager::Execute(BMessage *settings)
 {
 	TRACE();
+	status_t	err	= B_OK;
 	settings->PrintToStream();
 	if (doc->Lock())
 	{
@@ -232,29 +234,22 @@ void PCommandManager::Execute(BMessage *settings)
 			(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 			doc->Unlock();
 		}
+		else
+		{
+			char	*error	= new char[255];
+			sprintf(error,"%s: %s",_T("Coud not Find Command"),commandName);
+			(new BAlert("Error!",error, "OK",NULL,NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_STOP_ALERT))->Go();
+			delete error;
+			err = B_ERROR;
+		}
 	}
+	return err;
 }
 
 
 PCommand* PCommandManager::GetPCommand(char* name)
 {
 	TRACE();
-/*	BasePlugin	*plugin		= NULL;
-	PCommand	*command	= NULL;
-	bool 	found			= false;
-	int32 	i				= 0;
-	while ((i<commandVector->CountItems())&&(!found))
-	{
-		plugin	= (BasePlugin*)commandVector->ItemAt(i);
-		if (strcmp(plugin->GetName(),name) == B_OK)
-		{
-			command = (PCommand *)plugin->GetNewObject(NULL);
-			command->SetManager(this);
-			found=true;
-		}
-		i++;
-	}
-	return command;	*/
 	return commandVector->ValueFor(BString(name));
 }
 

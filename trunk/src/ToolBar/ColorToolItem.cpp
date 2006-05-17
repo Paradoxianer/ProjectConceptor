@@ -74,10 +74,6 @@ status_t ColorToolItem::Archive(BMessage *archive, bool deep=true) const
 	err = archive->AddString("ColorToolItem::tName",tName);
 	BMessage tmpArchive;
 	//**is the NULL - pointer test OK?
-/*	if ((popUp!=NULL)&&( popUp->Archive(&tmpArchive, deep) == B_OK))
-		err = archive->AddMessage("ColorToolItem::popUp",&tmpArchive);
-	if ((kontextMenu!=NULL)&&(kontextMenu->Archive(&tmpArchive, deep) == B_OK))
-		err = archive->AddMessage("ColorToolItem::kontextMenu",&tmpArchive);*/
 	err = archive->AddData("ColorToolItem::value",B_PATTERN_TYPE,&value,sizeof(value));
 	if (description!=NULL)
 		archive->AddString("ColorToolItem::description",*description);

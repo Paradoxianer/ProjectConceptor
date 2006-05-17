@@ -45,13 +45,7 @@ PWindow::~PWindow(void)
 {
 	TRACE();
 	manager->RemovePWindow(this);
-/*	while (mainView->CountTabs()>0)
-		RemoveEditor();*/
-/*	if (savemessage != NULL)
-	{
-		delete savemessage;
-	}*/
-	//delete savePanel;
+
 }
 
 /**
