@@ -103,3 +103,21 @@ void	BoolItem::ValueChange(void)
 	else
 		sprintf(svalue,_T("false"));
 }
+
+status_t BoolItem::Invoke(BMessage *message = NULL)
+{
+	BMessage	*sendMessage	= NULL;
+	if (message==NULL)
+		sendMessage = new BMessage(*Message());
+	else
+		sendMessage = new BMessage(*message);
+	if (sendMessage != NULL)	
+	{
+		sendMessage->AddInt32("type",B_BOOL_TYPE);
+		sendMessage->AddString("name",label);
+		sendMessage->AddBool("newValue", GetValue()); 
+		BInvoker::Invoke(sendMessage);
+	}
+	else
+		return B_ERROR;
+}

@@ -26,6 +26,8 @@ public:
 	virtual	void	Update(BView *owner, const BFont *font);
 	virtual	void	DrawItem(BView *owner, BRect bounds, bool complete = false);
 
+	virtual status_t	Invoke(BMessage *message = NULL);
+
 protected:
 	BCheckBox		*value;
 	char 			*svalue;

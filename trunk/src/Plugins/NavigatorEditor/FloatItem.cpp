@@ -89,3 +89,21 @@ void FloatItem::Deselect(void)
 void FloatItem::SetExpanded(bool expande)
 {
 };
+
+status_t FloatItem::Invoke(BMessage *message = NULL)
+{
+	BMessage	*sendMessage	= NULL;
+	if (message==NULL)
+		sendMessage = new BMessage(*Message());
+	else
+		sendMessage = new BMessage(*message);
+	if (sendMessage != NULL)	
+	{
+		sendMessage->AddInt32("type",B_FLOAT_TYPE);
+		sendMessage->AddString("name",label);
+		sendMessage->AddFloat("newValue", GetFloat()); 
+		BInvoker::Invoke(sendMessage);
+	}
+	else
+		return B_ERROR;
+}

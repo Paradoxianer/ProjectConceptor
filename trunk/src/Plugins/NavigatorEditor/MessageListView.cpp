@@ -86,30 +86,54 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 			{
 				BRect	rect;
 				message->FindRect(name,count-1,&rect);
+				RectItem	*rectItem	= new RectItem(name,rect);
 				if (superItem)
-					AddUnder(new RectItem(name,rect),superItem);
+					AddUnder(rectItem,superItem);
 				else
-					AddItem(new RectItem(name,rect));
+				{
+					AddItem(rectItem);
+					delete editMessage;
+					editMessage		= new BMessage(*baseEditMessage);
+				}
+				BMessage *tmpMessage = new BMessage(*editMessage);
+				rectItem->SetMessage(tmpMessage);
+				rectItem->SetTarget(doc);
 				break;
 			}
 			case B_FLOAT_TYPE:
 			{
 				float	value;
 				message->FindFloat(name,count-1,&value);
+				FloatItem *floatItem	= new FloatItem(name,value);
 				if (superItem)
-					AddUnder(new FloatItem(name,value),superItem);
+					AddUnder(floatItem,superItem);
 				else
-					AddItem(new FloatItem(name,value));
+				{
+					AddItem(floatItem);
+					delete editMessage;
+					editMessage		= new BMessage(*baseEditMessage);
+				}
+				BMessage *tmpMessage = new BMessage(*editMessage);
+				floatItem->SetMessage(tmpMessage);
+				floatItem->SetTarget(doc);
 				break;
 			}
 			case B_BOOL_TYPE:
 			{
 				bool	value;
 				message->FindBool(name,count-1,&value);
+				BoolItem	*boolItem	= new BoolItem(name,value);
 				if (superItem)
-					AddUnder(new BoolItem(name,value),superItem);
+					AddUnder(boolItem,superItem);
 				else
-					AddItem(new BoolItem(name,value));
+				{
+					AddItem(boolItem);
+					delete editMessage;
+					editMessage		= new BMessage(*baseEditMessage);
+				}
+				BMessage *tmpMessage = new BMessage(*editMessage);
+				boolItem->SetMessage(tmpMessage);
+				boolItem->SetTarget(doc);
 				break;
 			}
 			case B_POINTER_TYPE:

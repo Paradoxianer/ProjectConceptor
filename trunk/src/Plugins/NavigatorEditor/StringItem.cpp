@@ -95,8 +95,7 @@ status_t StringItem::Invoke(BMessage *message = NULL)
 	{
 		sendMessage->AddInt32("type",B_STRING_TYPE);
 		sendMessage->AddString("name",label);
-		sendMessage->AddPointer("newValue", textControl->Text()); 
-		sendMessage->AddInt32("size",textControl->TextView()->TextLength()+1);
+		sendMessage->AddString("newValue", textControl->Text()); 
 		BInvoker::Invoke(sendMessage);
 	}
 	else

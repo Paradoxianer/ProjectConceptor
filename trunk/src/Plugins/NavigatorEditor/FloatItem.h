@@ -17,26 +17,27 @@
 class FloatItem : public BaseListItem
 {
 public:
-					FloatItem(char *newLabel,float newVlaue, uint32 level = 0, bool expanded = true);
-	virtual	float	GetFloat(void){return atof(svalue);};
-	virtual	void	SetFloat(float *newFloat){sprintf(svalue,"%.2f",newFloat);};
+						FloatItem(char *newLabel,float newVlaue, uint32 level = 0, bool expanded = true);
+	virtual	float		GetFloat(void){return atof(svalue);};
+	virtual	void		SetFloat(float *newFloat){sprintf(svalue,"%.2f",newFloat);};
 
-	virtual void	ValueChange(void){value->SetText(svalue);};
+	virtual void		ValueChange(void){value->SetText(svalue);};
 
-	virtual	void	Select(void);
-	virtual	void	Deselect(void);
-	virtual void	SetExpanded(bool expande);
-	virtual	void	Update(BView *owner, const BFont *font);
-	virtual	void	DrawItem(BView *owner, BRect bounds, bool complete = false);
+	virtual	void		Select(void);
+	virtual	void		Deselect(void);
+	virtual void		SetExpanded(bool expande);
+	virtual	void		Update(BView *owner, const BFont *font);
+	virtual	void		DrawItem(BView *owner, BRect bounds, bool complete = false);
+	virtual status_t	Invoke(BMessage *message = NULL);
 
 protected:
-	BTextControl	*value;
-	char 			*svalue;
-	char			*label;
-	float			textLine;
-	rgb_color		foreground;
-	rgb_color		background;
-	rgb_color		backgroundHi;
+	BTextControl		*value;
+	char 				*svalue;
+	char				*label;
+	float				textLine;
+	rgb_color			foreground;
+	rgb_color			background;
+	rgb_color			backgroundHi;
 private:
 };
 #endif
