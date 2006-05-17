@@ -210,6 +210,7 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 BMessage* Indexer::DeIndexConnection(BMessage *connection)
 {
 	TRACE();
+	void		*tmpPointer			= NULL;
 	if (connection)
 	{
 		void		*fromPointer		= NULL;
@@ -258,6 +259,9 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 		else
 			connection->AddPointer("To",toPointer);
 	}
+	connection->FindPointer("this",(void **)&tmpPointer);
+	connection->RemoveName("this");
+	sorter->AddItem((int32)tmpPointer,connection);
 	return connection;
 }
 
