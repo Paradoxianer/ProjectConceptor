@@ -137,7 +137,7 @@ BList* PDocLoader::ReIndexMacro(BMessage *reindexMacro)
 	int32		i				= 0;
 	while (reindexMacro->FindMessage("macro",i,macro)==B_OK)
 	{
-		newMacroList->AddItem(indexer->DeIndexMacro(macro));
+		newMacroList->AddItem(macro);
 		macro = new BMessage();
 		i++;
 	}

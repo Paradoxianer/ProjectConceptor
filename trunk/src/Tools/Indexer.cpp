@@ -119,7 +119,7 @@ BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
 	return undo;
 }
 
-BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
+/*BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
 {
 	TRACE();
 	BMessage	*macroCommand	= new BMessage;
@@ -127,12 +127,25 @@ BMessage*	Indexer::IndexMacro(BMessage *macro,bool includeNodes=false)
 	{
 		while (macro->FindMessage("Macro::Commmand",macroCommand) == B_OK)
 		{
-			macroCommand = IndexCommand(macroCommand,true);
 			macro->ReplaceMessage("Macro::Commmand", macroCommand);
 		}
 	}
 	return macro;
+}*/
+
+BMessage*	Indexer::IndexMacroCommand(BMessage *macro)
+{
+	char 		*commandName		= NULL;
+	if (macro->FindString("Command::Name",(const char **)&commandName) == B_OK)
+	{
+		BMessage	*macroCommand		= new BMessage(*macro);
+		macroCommand = IndexCommand(macroCommand,true);
+		return macroCommand;
+	}
+	else
+		return macro;
 }
+
 
 BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 {
@@ -310,7 +323,7 @@ BMessage* Indexer::DeIndexUndo(BMessage *undo)
 	DeIndexCommand(undo);
 	return undo;
 }
-BMessage* Indexer::DeIndexMacro(BMessage *macro)
+/*BMessage* Indexer::DeIndexMacro(BMessage *macro)
 {
 	TRACE();
 	BMessage	*macroCommand	= new BMessage();
@@ -322,7 +335,7 @@ BMessage* Indexer::DeIndexMacro(BMessage *macro)
 		i++;
 	}
 	return macro;
-}
+}*/
 
 
 void Indexer::Init(void)

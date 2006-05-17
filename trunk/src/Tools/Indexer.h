@@ -35,14 +35,17 @@ public:
 			BMessage*			IndexNode(BMessage *node);	
 			BMessage*			IndexConnection(BMessage *connection,bool includeNodes=false);	
 			BMessage*			IndexUndo(BMessage *undo,bool includeNodes=false);	
-			BMessage*			IndexMacro(BMessage *macro,bool includeNodes=false);
+//			BMessage*			IndexMacro(BMessage *macro,bool includeNodes=false);
+			BMessage*			IndexMacroCommand(BMessage *macro);
 			BMessage*			IndexCommand(BMessage *command,bool includeNodes=false);	
 			BMessage*			PointerForIndex(int32 index){return sorter->ValueFor(index);};
 			
 			BMessage*			DeIndexNode(BMessage *node);
 			BMessage*			DeIndexConnection(BMessage *connection);	
 			BMessage*			DeIndexUndo(BMessage *undo);	
-			BMessage*			DeIndexMacro(BMessage *macro);	
+//			BMessage*			DeIndexMacro(BMessage *macro);
+			BMessage*			DeIndexMacroCommand(BMessage *macro){return DeIndexCommand(macro);};
+
 			BMessage*			DeIndexCommand(BMessage *command);	
 
 protected:

@@ -189,11 +189,12 @@ void PCommandManager::StopMacro()
 
 void PCommandManager::PlayMacro(BMessage *makro)
 {
-	int32 		i			= 0;
-	BMessage	*message	= new BMessage();
+	int32 		i				= 0;
+	BMessage	*message		= new BMessage();
+	Indexer		*playDeIndexer	= new Indexer(doc);
 	while (makro->FindMessage("Macro::Commmand", i,message) == B_OK)
 	{
-		Execute(message);
+		Execute(playDeIndexer->DeIndexCommand(message));
 		snooze(100000);
 		i++;
 	}
@@ -220,7 +221,7 @@ void PCommandManager::Execute(BMessage *settings)
 			if ((err != B_OK) )
 			{
 				if (recording)
-					recording->AddMessage("Macro::Commmand", macroIndexer->IndexCommand(settings,true));
+					recording->AddMessage("Macro::Commmand", macroIndexer->IndexMacroCommand(settings));
 				if (!shadow)
 				{
 					undoList->RemoveItems(undoStatus+1,undoList->CountItems()-undoStatus);
