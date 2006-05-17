@@ -601,7 +601,6 @@ void GraphEditor::MessageReceived(BMessage *message)
 		}
 		case B_E_COLOR_CHANGED:
 		{
-			rgb_color	*newColor=	new rgb_color(colorItem->GetColor());
 			rgb_color	tmpNewColor =	{255, 0, 0, 255};
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changeColorMessage->AddString("Command::Name","ChangeValue");
@@ -609,22 +608,19 @@ void GraphEditor::MessageReceived(BMessage *message)
 			changeColorMessage->AddString("name","FillColor");
 			changeColorMessage->AddString("subgroup","Pattern");
 			changeColorMessage->AddInt32("type",B_RGB_COLOR_TYPE);
-			changeColorMessage->AddPointer("newValue",newColor); 
-			changeColorMessage->AddInt32("size",sizeof(*newColor));
+			changeColorMessage->AddRGBColor("newValue",colorItem->GetColor()); 
 			sentTo->SendMessage(changeColorMessage);
 			break;
 		}
 		case B_E_PEN_SIZE_CHANGED:
 		{
-			float		*newPenSize				= new float(penSize->GetValue());
 			BMessage	*changePenSizeMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changePenSizeMessage->AddString("Command::Name","ChangeValue");
 			changePenSizeMessage->AddBool("selected",true);
 			changePenSizeMessage->AddString("name","PenSize");
 			changePenSizeMessage->AddString("subgroup","Pattern");
 			changePenSizeMessage->AddInt32("type",B_FLOAT_TYPE);
-			changePenSizeMessage->AddPointer("newValue",newPenSize); 
-			changePenSizeMessage->AddInt32("size",sizeof(*newPenSize));
+			changePenSizeMessage->AddFloat("newValue",penSize->GetValue()); 
 			sentTo->SendMessage(changePenSizeMessage);
 			break;
 		}

@@ -12,7 +12,7 @@
 
 
 
-StringRenderer::StringRenderer(SampleEditor *parentEditor,char *forString,BRect stringRect,BMessage *message=NULL)
+StringRenderer::StringRenderer(SampleEditor *parentEditor,char *forString,BRect stringRect)
 {
 	TRACE();
 	editor		= parentEditor;

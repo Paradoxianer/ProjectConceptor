@@ -40,14 +40,7 @@ void ClassRenderer::Init()
 	font						= new BFont();
 	penSize						= 1.0;
 	connecting					= 0;
-
-	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
-	editMessage->AddPointer("node",container);
-	editMessage->AddString("name","Name");
-	editMessage->AddString("subgroup","Data");
-	editMessage->AddString("Command::Name","ChangeValue");
-	editMessage->AddInt32("type",B_STRING_TYPE);
-	name						= new StringRenderer(editor,"",BRect(0,0,100,100), editMessage);
+	name						= new StringRenderer(editor,"",BRect(0,0,100,100));
 	err 						= container->FindPointer("doc",(void **)&doc);
 	sentTo						= new BMessenger(NULL,doc);
 	if (container->FindFloat("xRadius",&xRadius) != B_OK)

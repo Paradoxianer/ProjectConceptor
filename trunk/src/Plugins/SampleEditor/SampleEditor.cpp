@@ -524,16 +524,13 @@ void SampleEditor::MessageReceived(BMessage *message)
 		}
 		case B_E_COLOR_CHANGED:
 		{
-			rgb_color	*newColor=	new rgb_color(colorItem->GetColor());
-			rgb_color	tmpNewColor =	{255, 0, 0, 255};
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changeColorMessage->AddString("Command::Name","ChangeValue");
 			changeColorMessage->AddBool("selected",true);
 			changeColorMessage->AddString("name","FillColor");
 			changeColorMessage->AddString("subgroup","Pattern");
 			changeColorMessage->AddInt32("type",B_RGB_COLOR_TYPE);
-			changeColorMessage->AddPointer("newValue",newColor); 
-			changeColorMessage->AddInt32("size",sizeof(*newColor));
+			changeColorMessage->AddRGBColor("newValue",colorItem->GetColor()); 
 			sentTo->SendMessage(changeColorMessage);
 			break;
 		}

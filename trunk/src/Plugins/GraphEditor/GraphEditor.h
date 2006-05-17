@@ -87,12 +87,6 @@ public:
 	virtual Renderer*		FindNodeRenderer(BPoint where);
 	virtual Renderer*		FindConnectionRenderer(BPoint where);
 	virtual Renderer*		FindRenderer(BMessage *container);
-
-	
-			PCommand*		MoveCommand(void){return moveCommand;};
-			PCommand*		ResizeCommand(void){return resizeCommand;};
-			PCommand*		SelectCommand(void){return selectCommand;};
-			PCommand*		ChangeValueCommand(void){return changeValueCommand;};
 	
 	virtual void			BringToFront(Renderer *wichRenderer);
 	virtual void			SendToBack(Renderer *wichRenderer);
@@ -132,17 +126,6 @@ protected:
 			BMessage		*configMessage;
 			BMessage		*connectionMessage;
 			BMessage		*groupMessage;		
-			
-		
-			PCommand		*insertCommand;
-			PCommand		*selectCommand;
-			PCommand		*deleteCommand;
-			PCommand		*connectCommand;
-
-			//support for the renderer
-			PCommand		*moveCommand;
-			PCommand		*resizeCommand;
-			PCommand		*changeValueCommand;
 			
 			BMessenger		*sentTo;
 
