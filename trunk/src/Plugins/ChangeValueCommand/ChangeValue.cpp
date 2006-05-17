@@ -87,13 +87,12 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 	status_t	err				= B_OK;
 	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
 	{
-		node->PrintToStream();
-		err = B_OK;
 		err = settings->FindString("name",i,(const char**)&name);
 		err = err | settings->FindInt32("type",i,(int32 *)&type);
 		err = err | settings->FindInt32("index",i,(int32 *)&index);
-		err = err | settings->FindPointer("newValue",i,&newValue);
-		err = err | settings->FindInt32("size",i,(int32 *)&size);
+//		err = err | settings->FindPointer("newValue",i,&newValue);
+//		err = err | settings->FindInt32("size",i,(int32 *)&size);
+		err = err | settings->FindData("newValue", type, i, (const void **)&newValue, &size);
 		if ( (settings->FindString("subgroup",i,(const char**)&subGroupName) == B_OK))
 		{
 			err = node->FindMessage(subGroupName,subGroup);
@@ -119,8 +118,9 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 		err = settings->FindString("name",i,(const char**)&name);
 		err = err | settings->FindInt32("type",i,(int32 *)&type);
 		err = err | settings->FindInt32("index",i,(int32 *)&index);
-		err = err | settings->FindPointer("newValue",i,&newValue);
-		err = err | settings->FindInt32("size",i,(int32 *)&size);
+	/*	err = err | settings->FindPointer("newValue",i,&newValue);
+		err = err | settings->FindInt32("size",i,(int32 *)&size);*/
+		err = err | settings->FindData("newValue",type,i,(const void **)&newValue,&size);
 		if ( (settings->FindString("subgroup",i,(const char**)&subGroupName) != B_OK))
 		subGroupName=NULL;
 		for (int32 i=0;i<selection->CountItems();i++)
