@@ -117,19 +117,19 @@ void RectItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-(textControlHeight*3)-textLine);
 		owner->DrawString(_T("left")); 
 		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-(textControlHeight*3)-textLine);
-		owner->DrawString(sleft);
+		owner->DrawString(left->Text());
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-(textControlHeight*2)-textLine);
 		owner->DrawString(_T("top")); 
 		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-(textControlHeight*2)-textLine);
-		owner->DrawString(stop);
+		owner->DrawString(top->Text());
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-(textControlHeight)-textLine);
 		owner->DrawString(_T("right")); 
 		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-(textControlHeight)-textLine);
-		owner->DrawString(sright);
+		owner->DrawString(right->Text());
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-textLine);
 		owner->DrawString(_T("bottom")); 
 		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-textLine);
-		owner->DrawString(sbottom);
+		owner->DrawString(bottom->Text());
 
 	}
 	owner->SetHighColor(205,205,205,255);
@@ -151,10 +151,10 @@ void RectItem::SetExpanded(bool expande)
 
 BRect RectItem::GetRect(void)
 {
-	float rleft		= atof(sleft);
-	float rtop		= atof(stop);
-	float rright	= atof(sright);
-	float rbottom	= atof(sbottom);
+	float rleft		= atof(left->Text());
+	float rtop		= atof(top->Text());
+	float rright	= atof(right->Text());
+	float rbottom	= atof(bottom->Text());
 	return BRect(rleft,rtop,rright,rbottom);
 }
 

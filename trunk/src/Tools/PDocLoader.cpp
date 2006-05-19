@@ -42,7 +42,6 @@ void PDocLoader::Init(void)
 	
 	toLoad					= NULL;
 	loadedStuff				= new BMessage();
-	sorter					= new BKeyedVector<int32,BMessage*>();
 	
 }
 
@@ -63,7 +62,8 @@ void PDocLoader::Load(void)
 			loadedStuff->FindMessage("PDocument::commandManager",commandManagerMessage);
 			loadedStuff->FindMessage("PDocument::allConnections",allConnectionsMessage);
 			loadedStuff->FindMessage("PDocument::selected",selectedMessage);
-			
+			commandManagerMessage->FindInt32("undoStatus",(int32 *)&undoIndex);
+						
 			allNodes		=	Spread(allNodesMessage);
 			allConnections	=	ReIndexConnections(allConnectionsMessage);
 			selectedNodes	=	ReIndexSelected(selectedMessage);

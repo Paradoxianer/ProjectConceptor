@@ -56,7 +56,11 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 					if (superItem)
 						AddUnder(newSuperItem,superItem);
 					else
+					{
 						AddItem(newSuperItem);
+						delete editMessage;
+						editMessage		= new BMessage(*baseEditMessage);
+					}
 					editMessage->AddString("subgroup",name); 
 					AddMessage(tmpMessage,newSuperItem);
 				}

@@ -18,7 +18,7 @@ class FloatItem : public BaseListItem
 {
 public:
 						FloatItem(char *newLabel,float newVlaue, uint32 level = 0, bool expanded = true);
-	virtual	float		GetFloat(void){return atof(svalue);};
+	virtual	float		GetFloat(void){return atof(value->Text());};
 	virtual	void		SetFloat(float *newFloat){sprintf(svalue,"%.2f",newFloat);};
 
 	virtual void		ValueChange(void){value->SetText(svalue);};

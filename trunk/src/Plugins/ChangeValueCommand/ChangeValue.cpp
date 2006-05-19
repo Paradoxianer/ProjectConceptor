@@ -92,7 +92,7 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 		err = err | settings->FindInt32("index",i,(int32 *)&index);
 //		err = err | settings->FindPointer("newValue",i,&newValue);
 //		err = err | settings->FindInt32("size",i,(int32 *)&size);
-		err = err | settings->FindData("newValue", type, i, (const void **)&newValue, &size);
+		err = settings->FindData("newValue", type, i, (const void **)&newValue, &size);
 		if ( (settings->FindString("subgroup",i,(const char**)&subGroupName) == B_OK))
 		{
 			err = node->FindMessage(subGroupName,subGroup);

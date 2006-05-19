@@ -4,7 +4,6 @@
 #include <app/Message.h>
 #include <storage/Entry.h>
 #include <storage/File.h>
-#include <support/KeyedVector.h>
 
 #include "Commands/PCommandManager.h"
 #include "Document/PEditorManager.h"
@@ -42,6 +41,8 @@ public:
 	virtual BList*				GetUndoList(void){return undoList;};
 	virtual BList*				GetMacroList(void){return macroList;};
 	
+	virtual uint32				GetUndoIndex(void){return undoIndex;};
+	
 	virtual	BMessage*			GetPrinterSetting(void){return printerSettings;};
 	virtual	BMessage*			GetSettings(void){return settings;};
 
@@ -59,9 +60,7 @@ protected:
 	virtual BList*				ReIndexSelected(BMessage *allConnectionsMessage);
 	virtual BList*				ReIndexUndo(BMessage *reIndexUndo);
 	virtual BList*				ReIndexMacro(BMessage *reIndexUndo);
-//	virtual void				ReIndexCommand(BMessage *commandMessage);
 	
-		BKeyedVector<int32,BMessage*>*	sorter;
 		
 		BList*					allNodes;
 		BList*					selectedNodes;
@@ -69,6 +68,9 @@ protected:
 		BList*					undoList;
 		BList*					macroList;
 		
+		uint32					undoIndex;
+
+
 		BMessage*				settings;
 		
 		BMessage*				printerSettings;

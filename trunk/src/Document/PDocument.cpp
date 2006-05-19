@@ -378,7 +378,7 @@ void PDocument::Save(void)
 	TRACE();
 	Indexer		*indexer				= new Indexer(this);
 	status_t	err 					= B_OK;
-//	BMessage	*tmpMessage				= Convert();
+	int32		i						= 0;
 	BMessage	*tmpMessage				= new BMessage();
 	BMessage	*commandManage			= new BMessage();
 	BMessage	*tmpNode				= NULL;
@@ -388,29 +388,40 @@ void PDocument::Save(void)
 
 	tmpMessage->AddMessage("PDocument::printerSetting",printerSetting);
 	tmpMessage->AddMessage("PDocument::documentSetting",documentSetting);
-	//save all Command related Stuff like Undo/Makor
-	commandManager->Archive(commandManage);
-	tmpMessage->AddMessage("PDocument::commandManager", commandManage);
 	//save all Nodes
-	for (int32 i=0; i<allNodes->CountItems();i++)
+	for (i=0; i<allNodes->CountItems();i++)
 	{
 		tmpNode=(BMessage *)allNodes->ItemAt(i);
 		allNodesMessage->AddMessage("node",indexer->IndexNode(tmpNode));
 	}
 	tmpMessage->AddMessage("PDocument::allNodes",allNodesMessage);
 	//save all Connections
-	for (int32 i=0; i<allConnections->CountItems();i++)
+	for (i=0; i<allConnections->CountItems();i++)
 	{
 		tmpNode=(BMessage *)allConnections->ItemAt(i);
 		allConnectionsMessage->AddMessage("node",indexer->IndexConnection(tmpNode));
 	}
 	tmpMessage->AddMessage("PDocument::allConnections",allConnectionsMessage);
 	//save the selected List
-	for (int32 i=0; i<selected->CountItems();i++)
+	for (i=0; i<selected->CountItems();i++)
 	{
 		selectedMessage->AddPointer("node",selected->ItemAt(i));
 	}
 	tmpMessage->AddMessage("PDocument::selected",selectedMessage);
+	//save all Command related Stuff like Undo/Makor
+//	commandManager->Archive(commandManage);
+	for (i=0;i<(commandManager->GetUndoList())->CountItems();i++)
+	{
+		commandManage->AddMessage("undo",indexer->IndexMacroCommand((BMessage *)(commandManager->GetUndoList())->ItemAt(i)));
+
+	}
+	for (i=0;i<(commandManager->GetMacroList())->CountItems();i++)
+	{
+		commandManage->AddMessage("macro",(BMessage *)(commandManager->GetMacroList())->ItemAt(i));
+
+	}
+	commandManage->AddInt32("undoStatus",commandManager->GetUndoIndex());
+	tmpMessage->AddMessage("PDocument::commandManager", commandManage);	
 	
 	if (entryRef) 
 	{
@@ -463,6 +474,7 @@ void PDocument::Load(void)
 	commandManager= new PCommandManager(this);
 	commandManager->SetMacroList(docLoader->GetMacroList());
 	commandManager->SetUndoList(docLoader->GetUndoList());
+	commandManager->SetUndoIndex(docLoader->GetUndoIndex());
 //	commandManager->LoadMacros(docLoader->GetCommandManagerMessage());
 //	commandManager->LoadUndo(docLoader->GetCommandManagerMessage());
 	printerSetting	= docLoader->GetPrinterSetting();

@@ -43,9 +43,11 @@ public:
 	virtual	status_t	SetMacroList(BList *newMacroList);
 	virtual	status_t	SetUndoList(BList *newUndoList);
 
+	virtual void		SetUndoIndex(uint32 newIndex){undoStatus=newIndex;};
 	virtual	PCommand*	GetPCommand(char* name);
-
-//	virtual	BList*		GetPCommandPluginList(void){return commandList;};
+	virtual BList*		GetUndoList(void){return undoList;};
+	virtual BList*		GetMacroList(void){return macroList;};
+	virtual int32		GetUndoIndex(void){return undoStatus;};
 
 	virtual	void		Undo(BMessage *undo);
 	virtual	void		Redo(BMessage *redo);

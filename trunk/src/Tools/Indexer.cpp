@@ -67,6 +67,7 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 {
 	TRACE();
 	BMessage *returnNode	= new BMessage(*connection);
+	returnNode->AddPointer("this",connection);
 	BMessage *from			= NULL;
 	BMessage *to			= NULL;
 	if (includeNodes)
@@ -114,7 +115,7 @@ BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
 	TRACE();
 	if (includeNodes)
 	{
-		IndexCommand(undo, true);
+		IndexCommand(undo);
 	}
 	return undo;
 }
@@ -289,10 +290,10 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 	int32		count	= 0;
 	while (command->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
 	{
-		if ( (command->FindMessage(name,count,subCommand) == B_OK) && (subCommand) )
+		if ( (command->FindMessage(name,count-1,subCommand) == B_OK) && (subCommand) )
 		{
 			DeIndexCommand(subCommand);
-			command->ReplaceMessage(name,count,subCommand);
+			command->ReplaceMessage(name,count-1,subCommand);
 		}
 		i++;
 	}
@@ -310,8 +311,7 @@ BMessage* Indexer::DeIndexUndo(BMessage *undo)
 {
 	TRACE();
 	// extract saved nodes and because undo is only a saved Commandstructure with some undo messages (wich DeIndexCommand can handle we use DeindexCommand )
-	DeIndexCommand(undo);
-	return undo;
+	return DeIndexCommand(undo);
 }
 
 
