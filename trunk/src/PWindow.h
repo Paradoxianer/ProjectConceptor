@@ -9,7 +9,7 @@
 #include <interface/Window.h>
 #include <interface/TabView.h>
 
-#ifdef B_ZETA_VERSION_BETA
+#ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
 	#include <locale/LanguageNotifier.h>
 #else
@@ -142,7 +142,7 @@ protected:
 			WindowManager	*manager;
 			PDocument		*doc;
 private:
-	#ifdef B_ZETA_VERSION_BETA
+	#ifdef B_ZETA_VERSION_1_0_0
     	    BLanguageNotifier languageChanger;
     #endif 
 

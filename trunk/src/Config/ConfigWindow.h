@@ -7,7 +7,7 @@
 #include "ProjectConceptorDefs.h"
 #include "ConfigView.h"
 
-#ifdef B_ZETA_VERSION_BETA
+#ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
 	#include <locale/LanguageNotifier.h>
 #else

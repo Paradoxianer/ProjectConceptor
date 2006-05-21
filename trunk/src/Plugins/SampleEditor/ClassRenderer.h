@@ -17,7 +17,7 @@
 //#include "PCommand.h"
 #include "Renderer.h"
 
-#ifdef B_ZETA_VERSION
+#ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
 	#include <locale/LanguageNotifier.h>
 #else

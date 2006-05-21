@@ -3,7 +3,7 @@
 
 #include <interface/Window.h>
 
-#ifdef B_ZETA_VERSION_BETA
+#ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
 #else
 	#define _T(a) a

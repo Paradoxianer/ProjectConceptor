@@ -30,7 +30,7 @@ PWindow::PWindow(BRect rect,PDocument *document):BWindow(rect,"ProjectConceptor"
 	doc	= document;
 	Init();
 	Show();
-	#ifdef B_ZETA_VERSION
+	#ifdef B_ZETA_VERSION_1_0_0
 		languageChanger.SetTarget(this);
     #endif 
 }

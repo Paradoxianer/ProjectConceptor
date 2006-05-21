@@ -265,7 +265,11 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->AddLine(BPoint(frame.left,frame.top+19),BPoint(frame.right,frame.top+19),tint_color(drawColor,0.9));
 	drawOn->AddLine(BPoint(frame.left,frame.top+20),BPoint(frame.right,frame.top+20),tint_color(drawColor,0.95));
 	drawOn->EndLineArray();
-	drawOn->SetHighColor(ui_color(B_UI_DOCUMENT_LINK_COLOR));
+	#ifdef B_ZETA_VERSION_1_0_0
+		drawOn->SetHighColor(ui_color(B_UI_DOCUMENT_LINK_COLOR));	
+	#else
+		drawOn->SetHighColor(0,0,255,255);	
+	#endif 
 	float	yOben	= frame.top+frame.Height()/2 - triangleHeight;
 	float	yMitte	= yOben + triangleHeight;
 	float	yUnten	= yMitte + triangleHeight;
