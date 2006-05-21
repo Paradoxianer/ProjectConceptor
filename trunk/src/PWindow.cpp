@@ -511,9 +511,11 @@ void PWindow::MessageReceived(BMessage *message)
 		case B_SAVE_REQUESTED:
 		//	Save(message);
 			break;
+	#ifdef B_ZETA_VERSION_1_0_0
 		case B_LANGUAGE_CHANGED:
 				ChangeLanguage();
 			break;
+    #endif 
 		case MENU_APP_SETTINGS:
 				ShowSettings();
 			break;
