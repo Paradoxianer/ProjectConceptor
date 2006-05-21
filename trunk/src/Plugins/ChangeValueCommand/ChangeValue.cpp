@@ -10,6 +10,7 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 {
 	BMessage	*undoMessage	= new BMessage();
 	BMessage	*subGroup		= new BMessage();
+	BMessage	*selectNodes	= new BMessage();
 	BList		*changed		= doc->GetChangedNodes();
 	BMessage	*node			= NULL;
 	char		*name			= NULL;
@@ -40,8 +41,10 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 		i++;
 		changed->AddItem(node);
 	}
+
 	if ( (undo->FindBool("selected",&selected) == B_OK) && (selected==true) )
 	{
+		undoMessage->FindMessage("selectedNodes",selectNodes);
 		err 		= B_OK;
 		int32 	i	= 0;
 		err = undo->FindString("name",i,(const char**)&name);
@@ -49,10 +52,10 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 		err = err | undo->FindInt32("index",i,&index);
 		if ( (undo->FindString("subgroup",i,(const char**)&subGroupName) != B_OK))
 			subGroupName=NULL;	
-		while (undoMessage->FindPointer("seletion::node",i,(void **)&node) == B_OK)
+		while (selectNodes->FindPointer("node",i,(void **)&node) == B_OK)
 		{
 			changed->AddItem(node);
-			undoMessage->FindData("selection::oldValue",type,i,(const void **)&oldValue,&oldSize);
+			selectNodes->FindData("oldValue",type,i,(const void **)&oldValue,&oldSize);
 			if (subGroupName)
 			{
 				node->FindMessage(subGroupName,subGroup);
@@ -74,6 +77,7 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 	BMessage	*undoMessage	= new BMessage();
 	BMessage	*node			= NULL;
 	BMessage	*subGroup		= new BMessage();
+	BMessage	*selectedNodes	= new BMessage();
 	int32		i				= 0;
 	bool		selected		= false;
 	char		*name			= NULL;
@@ -109,7 +113,6 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 			if (err==B_OK) 
 				node->ReplaceData(name,type,index,newValue,size);
 		}
-		node->PrintToStream();
 		changed->AddItem(node);
 		i++;
 	}
@@ -126,13 +129,13 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 		for (int32 i=0;i<selection->CountItems();i++)
 		{
 			node =(BMessage *) selection->ItemAt(i);
-			undoMessage->AddPointer("seletion::node",node);
+			selectedNodes->AddPointer("node",node);
 			changed->AddItem(node);
 			if (subGroupName)
 			{
 				err = node->FindMessage(subGroupName,subGroup);
 				err = err | subGroup->FindData(name,type,index,(const void **)&oldValue,&oldSize);
-				undoMessage->AddData("selection::oldValue",type,oldValue,oldSize,false);
+				selectedNodes->AddData("oldValue",type,oldValue,oldSize,false);
 				if (err==B_OK) 
 					subGroup->ReplaceData(name,type,index,newValue,size);
 				node->ReplaceMessage(subGroupName,subGroup);
@@ -140,12 +143,13 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 			else
 			{
 				err = err | node->FindData(name,type,index,(const void **)&oldValue,&oldSize);
-				undoMessage->AddData("selection::oldValue",type,oldValue,oldSize,false);
+				selectedNodes->AddData("oldValue",type,oldValue,oldSize,false);
 				if (err==B_OK) 
 					node->ReplaceData(name,type,index,newValue,size);
 			}
 		}
 	}
+	undoMessage->AddMessage("selectedNodes",selectedNodes);
 	doc->SetModified();
 	settings->RemoveName("ChangeValue::Undo");
 	settings->AddMessage("ChangeValue::Undo",undoMessage);

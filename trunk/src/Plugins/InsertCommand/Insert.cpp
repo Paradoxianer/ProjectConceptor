@@ -8,7 +8,7 @@ Insert::Insert():PCommand()
 
 void Insert::Undo(PDocument *doc,BMessage *undo)
 {
-	BList			*connections		= doc->GetAllConnections();
+	BList			*allConnectinos		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();
 	BList			*trash				= doc->GetTrash();
 	BList			*changed			= doc->GetChangedNodes();
@@ -18,19 +18,16 @@ void Insert::Undo(PDocument *doc,BMessage *undo)
 	PCommand::Undo(doc,undo);
 	while (undo->FindPointer("node",i,(void **)&node) == B_OK)
 	{
-		allNodes->RemoveItem(node);
+		if (node->what != P_C_CONNECTION_TYPE)
+			allNodes->RemoveItem(node);
+		else
+			allConnectinos->RemoveItem(node);
 		trash->AddItem(node);
 		changed->AddItem(node);
 		i++;
 	}
 	i=0;
-	while (undo->FindPointer("connection",i,(void **)&connection) == B_OK) 
-	{
-		i++;
-		connections->RemoveItem(connection);
-		changed->AddItem(connection);	
-		trash->AddItem(connection);
-	}
+
 	doc->SetModified();
 }
 
