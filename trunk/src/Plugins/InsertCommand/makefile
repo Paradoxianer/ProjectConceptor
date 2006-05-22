@@ -92,7 +92,7 @@ COMPILER_FLAGS =
 
 #	specify additional linker flags
 LINKER_FLAGS =
-
+INSTALL_DIR    = /boot/apps/Development/ProjectConceptor/Plugins/Commands
 
 ## include the makefile-engine
 include /boot/develop/etc/makefile-engine

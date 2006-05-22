@@ -78,7 +78,6 @@ void GraphEditor::Init(void)
 	patternMessage->AddRGBColor("BorderColor",borderColor);
 	patternMessage->AddFloat("PenSize",1.0);
 	patternMessage->AddInt8("DrawingMode",B_OP_ALPHA);
-	patternMessage->AddFloat("Scale",1.0);
 	rgb_color	highColor			= {0, 0, 0, 255};
 	patternMessage->AddRGBColor("HighColor",highColor);
 	rgb_color 	lowColor			= {128, 128, 128, 255};

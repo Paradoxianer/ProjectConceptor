@@ -132,6 +132,9 @@ SVG_ICON = src/Doku/Logogross.svg
 TARGET_DIR	=  .
 OBJ_DIR		= obj.x86
 
+INSTALL_DIR	= /boot/apps/Development/ProjectConceptor
+
+APP_MENU	= Software/Development
 
 ## include the makefile-engine
 include /boot/develop/etc/makefile-engine
@@ -159,4 +162,8 @@ default .DEFAULT:
 clean::
 	-@for f in $(LEAFDIRS); do \
 		$(MAKE) clean -C $$f $@; \
+	done
+install::
+	-@for f in $(LEAFDIRS); do \
+		$(MAKE) install -C $$f $@; \
 	done

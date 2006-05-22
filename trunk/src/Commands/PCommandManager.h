@@ -6,6 +6,13 @@
 #include <support/KeyedVector.h>
 #include <support/String.h>
 
+#ifdef B_ZETA_VERSION_1_0_0
+	#include <locale/Locale.h>
+	#include <locale/LanguageNotifier.h>
+#else
+	#define _T(a) a
+#endif 
+
 #include "PCommand.h"
 #include "BasePlugin.h"
 #include "Indexer.h"

@@ -85,7 +85,7 @@ SYMBOLS = TRUE
 #	specify debug settings
 #	if TRUE will allow application to be run from
 #	a source-level debugger
- DEBUGGER = TRUE
+# DEBUGGER = TRUE
 
 #	specify additional compiler flags for all files
 COMPILER_FLAGS =
@@ -93,6 +93,7 @@ COMPILER_FLAGS =
 #	specify additional linker flags
 LINKER_FLAGS =
 
+INSTALL_DIR    = /boot/apps/Development/ProjectConceptor/Plugins/Commands
 
 ## include the makefile-engine
 include /boot/develop/etc/makefile-engine
