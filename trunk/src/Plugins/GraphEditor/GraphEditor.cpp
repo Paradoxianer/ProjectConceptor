@@ -521,11 +521,8 @@ void GraphEditor::MessageReceived(BMessage *message)
 		case P_C_DOC_BOUNDS_CHANGED:
 		{
 			BRect		docRect		= doc->Bounds();
-			if (BView::LockLooper())
-			{
-				ResizeTo(docRect.right,docRect.bottom);
-				BView::UnlockLooper();
-			}
+			ResizeTo(docRect.right,docRect.bottom);
+			BView::UnlockLooper();
 			break;
 		}
 		case B_E_CONNECTING:

@@ -131,7 +131,7 @@ const char*		P_MENU_MACRO_SAVE				= "Save";
 
 
 
-const char*		P_C_VERSION						= "0.01.1 Revision 44";
+const char*		P_C_VERSION						= "0.01.1 Revision 67";
 
 ProjektConceptor::ProjektConceptor():BApplication(APP_SIGNATURE)
 {
