@@ -1,5 +1,4 @@
 // InputRequest.h
-// Autor: Christian Lörchner
 /**
  * @class InputRequest
  * @brief A BAlert like class with a TextInput field
@@ -14,9 +13,6 @@
 #ifndef _INPUTREQUEST_H
 #define _INPUTREQUEST_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <Window.h>  
 #include "InputRequestView.h"
 #include "ScreenInfo.h"
@@ -40,10 +36,10 @@ class InputRequest : public BWindow
 	#define	IR_WINDOW_WIDTH		315 // recommend min. value! the view does not take this in every case (button width)
 	#define	IR_WINDOW_HEIGHT	75
 
-	ScreenInfo			screen;
+	ScreenInfo			fScreen;
 
-	InputRequestView	*irView;
-	int32				button_index;
+	InputRequestView	*fIrView;
+	int32				fButton_index;
 };
 
 #endif
