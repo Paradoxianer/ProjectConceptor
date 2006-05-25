@@ -66,20 +66,10 @@ void PWindow::Init(void)
 	horizontalToolbars		= new BList();
 	configWindow			= NULL;
 	aboutWindow				= NULL;
-//	doc			= NULL;
-	//tabView				= new ProjektTabView();
-	MakeToolbars();
-//	Register(true);
-
 	BRect containerRect		= BRect(P_M_MAIN_VIEW_LEFT+1,P_M_MAIN_VIEW_TOP+2,P_M_MAIN_VIEW_RIGHT-1,P_M_MAIN_VIEW_BOTTOM-1);
 	mainView				= new MainView(doc,containerRect, "tabContainer"); 
-//	tabContainer->SetViewColor(255,255,255,0); 
-	
-	//tabContainer->ContainerView()->SetViewColor(255,255,255,0);
-	
-//	tab->View()->SetViewColor(180,200,255,0);
+	MakeToolbars();
 	AddChild(mainView);
-	
 }
 
 BMenuBar *PWindow::MakeMenu(void)
@@ -743,6 +733,11 @@ status_t PWindow::AddToolBar(ToolBar *toolBar)
 	//	ReCalcToolBars(B_ITEMS_IN_ROW);
 		//recalc the istems in Row
 	}
+	if (mainView)
+	{
+		mainView->ResizeTo(P_M_MAIN_VIEW_RIGHT-P_M_MAIN_VIEW_LEFT-2,P_M_MAIN_VIEW_BOTTOM-P_M_MAIN_VIEW_TOP-2);
+		mainView->MoveTo(P_M_MAIN_VIEW_LEFT+1,P_M_MAIN_VIEW_TOP+1);
+	}
 	return B_OK;
 }
 
@@ -825,16 +820,31 @@ status_t	PWindow::RemoveMenuItem(const char* signature)
 status_t	PWindow::RemoveToolBar(const char* signature)
 {
 	TRACE();
-	status_t err	= B_OK;
+	status_t	err		= B_OK;
+	bool		removed	= true;
 	ToolBar *tmpToolBar		= GetToolBar(signature);
+	removed = RemoveChild(tmpToolBar);
 	if (verticalToolbars->HasItem(tmpToolBar))
+	{
 		if (!verticalToolbars->RemoveItem(tmpToolBar))
-			err=B_ERROR;
+			err = B_ERROR;
+		else
+		{
+			P_M_MAIN_VIEW_LEFT	-= tmpToolBar->Frame().Width();
+		}
+	}
 	else if (horizontalToolbars->HasItem(tmpToolBar))
+	{
 		if (!horizontalToolbars->RemoveItem(tmpToolBar))
 			err=B_ERROR;
-	if (err == B_OK)
-		ReCalcToolBars(B_ITEMS_IN_ROW);
+		else
+		{
+			P_M_MAIN_VIEW_TOP	-= tmpToolBar->Frame().Height();
+			ReCalcToolBars(B_ITEMS_IN_COLUMN);
+		}
+	}
+	mainView->ResizeTo(P_M_MAIN_VIEW_RIGHT-P_M_MAIN_VIEW_LEFT-2,P_M_MAIN_VIEW_BOTTOM-P_M_MAIN_VIEW_TOP-2);
+	mainView->MoveTo(P_M_MAIN_VIEW_LEFT+1,P_M_MAIN_VIEW_TOP+1);
 	return err;
 }
 
@@ -880,7 +890,6 @@ void PWindow::ReCalcToolBars(menu_layout layout)
 		/*if (tmpToolBar != NULL)
 			P_M_MAIN_VIEW_TOP=tmpToolBar->Bounds().bottom+1.0;*/
 	}
-	//this case is normaly not necessary
 	else
 	{
 		for (i=0;i<verticalToolbars->CountItems();i++)
@@ -889,7 +898,7 @@ void PWindow::ReCalcToolBars(menu_layout layout)
 			tmpToolBar->MoveTo(tmpToolBar->Frame().left,P_M_MAIN_VIEW_TOP+1.0);
 			tmpToolBar->ResizeTo((tmpToolBar->Bounds()).Width(),P_M_MAIN_VIEW_BOTTOM-P_M_MAIN_VIEW_TOP-1);
 		}
-	/*	if (tmpToolBar != NULL)
+		/*if (tmpToolBar != NULL)
 			P_M_MAIN_VIEW_LEFT=tmpToolBar->Frame().right+1.0;*/
 	}
 }
@@ -929,5 +938,13 @@ void PWindow::SetManager(WindowManager* newManager)
 	TRACE();
 	manager=newManager;
 	AttachedToManager();
+}
+
+void PWindow::FrameResized(float width, float height)
+{
+		P_M_MAIN_VIEW_LEFT		= mainView->Frame().left;
+		P_M_MAIN_VIEW_TOP 		= mainView->Frame().top;
+		P_M_MAIN_VIEW_BOTTOM	= mainView->Frame().bottom;
+		P_M_MAIN_VIEW_RIGHT		= mainView->Frame().right;
 }
 

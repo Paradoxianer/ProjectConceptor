@@ -49,7 +49,7 @@ public:
 	 * GetNewObject returns a new instance (in case of P_C_EDITOR_PLUGIN_TYPE a new
 	 * instance of a PEditor) you have to cast it for yourself to the right Class
 	 */
-	virtual void*		GetNewObject(void *valu)	= 0;
+	virtual void*		GetNewObject(void *value)	= 0;
 	
 	
 

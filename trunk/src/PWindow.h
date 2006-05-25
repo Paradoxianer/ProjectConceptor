@@ -98,10 +98,14 @@ public:
 	virtual	bool			QuitRequested();
 
 						
+	virtual void			FrameResized(float width, float height);
 			void			Init(void);
 			void			SetManager(WindowManager *newManager);
 			WindowManager*	Manager(void){return manager;};
-
+			float			P_M_MAIN_VIEW_LEFT;
+			float			P_M_MAIN_VIEW_TOP;
+			float			P_M_MAIN_VIEW_BOTTOM;
+			float			P_M_MAIN_VIEW_RIGHT;
 
 
 protected:
@@ -133,10 +137,7 @@ protected:
 	//		ProjektTabView	*tabView;
 			BList			*verticalToolbars;
 			BList			*horizontalToolbars;
-			float			P_M_MAIN_VIEW_LEFT;
-			float			P_M_MAIN_VIEW_TOP;
-			float			P_M_MAIN_VIEW_BOTTOM;
-			float			P_M_MAIN_VIEW_RIGHT;
+
 			
 			MainView		*mainView;
 			WindowManager	*manager;
