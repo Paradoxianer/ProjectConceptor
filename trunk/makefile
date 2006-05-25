@@ -143,18 +143,19 @@ include /boot/develop/etc/makefile-engine
 
 LEAFDIRS = \
 	src/Plugins/AddAttributeCommand	\
-	src/Plugins/BasicEditor 		\
+	src/Plugins/BasicEditor 				\
 	src/Plugins/BasicEditor/BasicRenderer	\
 	src/Plugins/ChangeValueCommand 	\
-	src/Plugins/DeleteCommand   	\
-	src/Plugins/GraphEditor		\
-	src/Plugins/InsertCommand         	\
-	src/Plugins/MoveCommand     	\
-	src/Plugins/NavigatorEditor  		\
-	src/Plugins/ResizeCommand		\
-	src/Plugins/SampleEditor	  	\
-	src/Plugins/SelectCommand		\
-	src/Plugins/CopyCommand		\
+	src/Plugins/DeleteCommand   		\
+	src/Plugins/GraphEditor			\
+	src/Plugins/InsertCommand         		\
+	src/Plugins/MoveCommand     		\
+	src/Plugins/NavigatorEditor  			\
+	src/Plugins/RenoveAttributeCommand	\
+	src/Plugins/ResizeCommand			\
+	src/Plugins/SampleEditor	  		\
+	src/Plugins/SelectCommand			\
+	src/Plugins/CopyCommand			\
 	src/Plugins/PasteCommand		
 
 default .DEFAULT:
