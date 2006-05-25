@@ -89,13 +89,19 @@ InputRequestView::InputRequestView(BRect frame, const char* btn0_label, const ch
     AddChild(fButton2);
   }
   
-  fButton0->MakeDefault(true);
-  //fText->MakeFocus(true);
-  
   //just prepare our quotation mark (thanks to staphan aßmus for this great tip :))
   SetDrawingMode(B_OP_ALPHA);
   //get the icon from the resource file (thanks to paradoxon for help)
   fIcon = BTranslationUtils::GetBitmap(B_PNG_FORMAT,"check");
+  
+  fButton0->MakeDefault(true);
+
+}
+
+void InputRequestView::SelectText()
+{
+  fText->TextView()->MakeFocus(true);
+  fText->TextView()->SelectAll();  
 }
 
 float InputRequestView::Width()

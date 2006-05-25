@@ -30,8 +30,10 @@ class InputRequestView : public BView
     				InputRequestView(BRect frame, const char* btn0_label, const char* btn1_label, const char* btn2_label);
 	virtual	float	Width(); //auxilliary function for use in our window
 
+	inline virtual void			SelectText();
+
 	inline virtual const char*	Label();
-	inline virtual	void		SetLabel(const char* label);
+	inline virtual void		SetLabel(const char* label);
 	inline virtual const char*	Text();
 	inline virtual void			SetText(const char* text);
 	

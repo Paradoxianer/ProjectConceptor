@@ -46,6 +46,8 @@ void InputRequest::Init(const char* label, const char* text, const char* btn0_la
   SetLabel(label);
   SetText(text);
   
+  fIrView->SelectText();
+  
   //init
   fButton_index = -1;
 }
