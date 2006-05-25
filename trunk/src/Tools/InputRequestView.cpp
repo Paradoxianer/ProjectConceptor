@@ -10,10 +10,8 @@
 #include "InputRequestView.h"
 
 #include <TranslationUtils.h>
-#include <Application.h>
-#include <Roster.h>
-#include <Path.h>
-#include <String.h>
+#include <TranslatorFormats.h>
+//#include <Roster.h>
 
 InputRequestView::InputRequestView(BRect frame, const char* btn0_label, const char* btn1_label, const char* btn2_label)
 	:BView(frame, "InputRequestView", B_FOLLOW_ALL, B_WILL_DRAW)
@@ -91,20 +89,10 @@ InputRequestView::InputRequestView(BRect frame, const char* btn0_label, const ch
     AddChild(fButton2);
   }
   
-  //calculate the path to the quotation mark file
-  struct app_info info;
-  be_app->GetAppInfo(&info);
-  
-  BPath iconPath(&info.ref);
-  
-  BString *pathStr;
-  pathStr = new BString(iconPath.Path());
-  pathStr->Truncate(pathStr->FindLast('/'));
-  pathStr->Append("/quotationmark.png");
-  
-  //just prepare our quotation mark (thanks to staphan assmus for this great tip :))
+  //just prepare our quotation mark (thanks to staphan aßmus for this great tip :))
   SetDrawingMode(B_OP_ALPHA);
-  fIcon = BTranslationUtils::GetBitmap(pathStr->String());
+  //get the icon from the resource file (thanks to paradoxon for help)
+  fIcon = BTranslationUtils::GetBitmap(B_PNG_FORMAT,"quotationmark");
 }
 
 float InputRequestView::Width()
@@ -140,8 +128,8 @@ void InputRequestView::Draw(BRect rect)
   {
     DrawBitmap(fIcon, BPoint(15, 20));
   }
-  else
-  {
-    AddChild(new BStringView(BRect(5, 5, 150, 20), "ErrorMSG1", "Quotation mark is missing!"));
-  }
+  //else
+  //{
+  //  AddChild(new BStringView(BRect(5, 5, 150, 20), "ErrorMSG1", "Quotation mark is missing!"));
+  //}
 }

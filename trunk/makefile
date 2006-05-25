@@ -59,7 +59,8 @@ SRCS= 	src/AboutWindow.cpp \
 
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.
-RSRCS= src/ProjectConceptor.rsrc
+RSRCS= 	src/ProjectConceptor.rsrc \
+		src/Tools/InputRequest.rsrc
 
 #	specify additional libraries to link against
 #	there are two acceptable forms of library specifications
