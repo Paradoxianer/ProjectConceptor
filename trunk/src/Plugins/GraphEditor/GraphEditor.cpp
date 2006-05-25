@@ -522,7 +522,6 @@ void GraphEditor::MessageReceived(BMessage *message)
 		{
 			BRect		docRect		= doc->Bounds();
 			ResizeTo(docRect.right,docRect.bottom);
-			BView::UnlockLooper();
 			break;
 		}
 		case B_E_CONNECTING:
