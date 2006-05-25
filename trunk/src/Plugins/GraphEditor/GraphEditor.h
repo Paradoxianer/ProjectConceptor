@@ -35,6 +35,7 @@ const uint32	B_E_PATTERN_CHANGED		= 'bePC';
 const uint32	B_E_COLOR_CHANGED		= 'beCC';
 const uint32	B_E_PEN_SIZE_CHANGED	= 'bePS';
 
+extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
 
 const float		triangleHeight	= 7;
 const float		gridWidth		= 50;
@@ -45,7 +46,7 @@ class GraphEditor : public PEditor, public BView
 {
 
 public:
-							GraphEditor();
+							GraphEditor(image_id newId);
 
 	//++++++++++++++++PEditor
 	virtual	void			AttachedToManager(void);
@@ -111,8 +112,11 @@ protected:
 			int32			id;
 			char*			renderString;
 			BMenu			*scaleMenu;
-
+			ToolBar			*toolBar;
 			ToolItem		*grid;
+			ToolItem		*addBool;
+			ToolItem		*addText;
+
 
 			FloatToolItem	*penSize;
 			ColorToolItem	*colorItem;
@@ -143,6 +147,7 @@ protected:
 			float			scale;
 			
 			bool			gridEnabled;
+			image_id 		pluginID;
 			
 private:
 };

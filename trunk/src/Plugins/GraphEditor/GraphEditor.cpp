@@ -4,6 +4,8 @@
 #include <interface/GraphicsDefs.h>
 #include <translation/TranslationUtils.h>
 #include <translation/TranslatorFormats.h>
+#include <storage/Resources.h>
+#include <support/DataIO.h>
 
 #include <string.h>
 #include "GraphEditor.h"
@@ -14,9 +16,12 @@
 
 #include "ToolBar.h"
 
-GraphEditor::GraphEditor():PEditor(),BView(BRect(0,0,200,200),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW |B_NAVIGABLE|B_NAVIGABLE_JUMP|B_FRAME_EVENTS)
+const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
+
+GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,200,200),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW |B_NAVIGABLE|B_NAVIGABLE_JUMP|B_FRAME_EVENTS)
 {
 	TRACE();
+	pluginID	= newId;
 	Init();
 	BView::SetDoubleBuffering(1);
 	SetDrawingMode(B_OP_ALPHA);
@@ -25,10 +30,6 @@ GraphEditor::GraphEditor():PEditor(),BView(BRect(0,0,200,200),"GraphEditor",B_FO
 void GraphEditor::Init(void)
 {
 	TRACE();
-/*	insertCommand	= NULL;
-	selectCommand	= NULL;
-	deleteCommand	= NULL;
-	connectCommand	= NULL;*/
 	printRect		= NULL;	
 	selectRect		= NULL;
 	startMouseDown	= NULL;
@@ -120,20 +121,42 @@ void GraphEditor::Init(void)
 	penSize		= new FloatToolItem(_T("Pen Size"),1.0,new BMessage(B_E_PEN_SIZE_CHANGED));
 	colorItem	= new ColorToolItem(_T("Fill"),fillColor,new BMessage(B_E_COLOR_CHANGED));
 	patternItem	= new PatternToolItem(_T("Pattern"),B_SOLID_HIGH, new BMessage(B_E_PATTERN_CHANGED));
+	
+	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);	
+
+	//loading ressource_images from the PluginRessource
+	image_info	*info 	= new image_info;
+	BBitmap		*bmp	= NULL;
+	size_t		size;
+
+	get_image_info(pluginID,info);
+	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
+	const void *data=res->LoadResource((type_code)'PNG ',"addBool",&size);
+	if (data)
+	{
+		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
+		if (bmp)
+		{
+			addBool		= new ToolItem("addBool",bmp,NULL);	
+			toolBar->AddItem(addBool);
+		}
+	}
+	data=res->LoadResource((type_code)'PNG ',"addText",&size);
+	if (data)
+	{
+		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
+		if (bmp)
+		{
+			addText		= new ToolItem("addText",bmp,NULL);	
+			toolBar->AddItem(addText);
+		}
+	}
+	
 }
 
 void GraphEditor::AttachedToManager(void)
 {
 	TRACE();
-//	PCommandManager *commandManager = doc->GetCommandManager();
-	//insertCommand contains off an object insert and an select
-/*	insertCommand		= commandManager->GetPCommand("Insert");
-	selectCommand		= commandManager->GetPCommand("Select");
-	deleteCommand		= commandManager->GetPCommand("Delete");
-	connectCommand		= commandManager->GetPCommand("Connect");
-	moveCommand			= commandManager->GetPCommand("Move");
-	resizeCommand		= commandManager->GetPCommand("Resize");
-	changeValueCommand	= commandManager->GetPCommand("ChangeValue");*/
 	sentTo				= new BMessenger(doc);
 	id					= manager->IndexOf(this);
 	sprintf(renderString,"GraphEditor%ld::Renderer",id);
@@ -237,20 +260,10 @@ void GraphEditor::ValueChanged()
 	}
 	if (BView::LockLooper())
 	{
-//		invalid.InsetBy(-20,-20);
-//		Invalidate(invalid);
 		Invalidate();
 		BView::UnlockLooper();
 	}
-/*	BMessage	*node		= NULL;
-	int32		i			= 0;
 
-	while (wich->FindPointer("node",i,(void **)&node) == B_OK)	
-	{
-		if ( (node->FindPointer("GraphEditor::Renderer",(void **)&renderer) == B_OK) &&  (renderer != NULL))
-			renderer->ValueChanged();
-		i++;
-	}*/
 }
 
 void GraphEditor::SetDirty(BRegion *region)
@@ -453,21 +466,23 @@ void GraphEditor::AttachedToWindow(void)
 	scaleMenu->SetTargetForItems(this);
 	if (doc)
 		InitAll();
-	ToolBar		*toolBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
-	toolBar->AddSeperator();
-	toolBar->AddSeperator();
-	toolBar->AddSeperator();	
-	toolBar->AddSeperator();
-	toolBar->AddSeperator();		
-	toolBar->AddItem(grid);
-	toolBar->AddSeperator();	
-	toolBar->AddItem(penSize);
-	toolBar->AddItem(colorItem);
-	toolBar->AddItem(patternItem);
+		
+	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
+	pWindow->AddToolBar(toolBar);
+	ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
+	configBar->AddSeperator();
+	configBar->AddSeperator();
+	configBar->AddSeperator();	
+	configBar->AddSeperator();
+	configBar->AddSeperator();		
+	configBar->AddItem(grid);
+	configBar->AddSeperator();	
+	configBar->AddItem(penSize);
+	configBar->AddItem(colorItem);
+
 	grid->SetTarget(this);
 	penSize->SetTarget(this);
 	colorItem->SetTarget(this);
-	patternItem->SetTarget(this);
 }
 
 
@@ -481,19 +496,21 @@ void GraphEditor::DetachedFromWindow(void)
 		BMenuBar	*menuBar		= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
 		if (menuBar)
 			menuBar->RemoveItem(scaleMenu);
-		ToolBar		*toolBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
-		if (toolBar)
+//		pWindow->AddToolBar(toolBar);
+		pWindow->RemoveToolBar(G_E_TOOL_BAR	);
+		ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
+		if (configBar)
 		{
-			toolBar->RemoveItem(penSize);
-			toolBar->RemoveItem(colorItem);
-			toolBar->RemoveItem(patternItem);
-			toolBar->RemoveSeperator();
-			toolBar->RemoveItem(grid);
-			toolBar->RemoveSeperator();
-			toolBar->RemoveSeperator();
-			toolBar->RemoveSeperator();	
-			toolBar->RemoveSeperator();
-			toolBar->RemoveSeperator();	
+			configBar->RemoveItem(penSize);
+			configBar->RemoveItem(colorItem);
+			configBar->RemoveItem(patternItem);
+			configBar->RemoveSeperator();
+			configBar->RemoveItem(grid);
+			configBar->RemoveSeperator();
+			configBar->RemoveSeperator();
+			configBar->RemoveSeperator();	
+			configBar->RemoveSeperator();
+			configBar->RemoveSeperator();	
 		}
 		Renderer	*nodeRenderer	= NULL;
 		for (int32 i=0;i<renderer->CountItems();i++)
@@ -504,7 +521,6 @@ void GraphEditor::DetachedFromWindow(void)
 		while(renderer->CountItems()>0)
 		{
 			nodeRenderer = (Renderer *)renderer->ItemAt(0);
-//			DeleteRenderObject(nodeRenderer->GetMessage());
 			RemoveRenderer(nodeRenderer);
 		}
 	}

@@ -26,7 +26,7 @@ public:
 	virtual char*			GetAutor(void){return "Paradoxon";};
 	virtual char*			GetName(void){return "GraphEditor";};
 	virtual char*			GetDescription(void){return "This is a simple Editor for ProjectConceptor with basic funktionality";};
-	virtual void*			GetNewObject(void *value){return new GraphEditor();};
+	virtual void*			GetNewObject(void *value){return new GraphEditor(GetPluginID());};
 	//----------------BasePlugin
 };
 #endif
