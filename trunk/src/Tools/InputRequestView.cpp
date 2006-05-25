@@ -92,7 +92,7 @@ InputRequestView::InputRequestView(BRect frame, const char* btn0_label, const ch
   //just prepare our quotation mark (thanks to staphan aßmus for this great tip :))
   SetDrawingMode(B_OP_ALPHA);
   //get the icon from the resource file (thanks to paradoxon for help)
-  fIcon = BTranslationUtils::GetBitmap(B_PNG_FORMAT,"quotationmark");
+  fIcon = BTranslationUtils::GetBitmap(B_PNG_FORMAT,"check");
 }
 
 float InputRequestView::Width()
