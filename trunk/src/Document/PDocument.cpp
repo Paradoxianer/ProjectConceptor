@@ -149,7 +149,7 @@ void PDocument::Init()
 	valueChanged	= new BList();
 	trashed			= new BList();
 
-	printerSetting	= new BMessage();
+	printerSetting	= NULL;
 	documentSetting	= new BMessage();
 	bounds			= BRect(0,0,100,100);
 	printableRect	= NULL;
