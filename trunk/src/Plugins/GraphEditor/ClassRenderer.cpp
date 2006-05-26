@@ -157,7 +157,7 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 		else
 		{
 			// make connecting Stuff
-			BMessage *connecter=new BMessage(B_E_CONNECTING);
+			BMessage *connecter=new BMessage(G_E_CONNECTING);
 //			BMessage *connecter=new BMessage();
 /*			connecter->AddInt64("undoID",when);
 			connecter->AddString("undoName","Connect");*/
@@ -202,7 +202,7 @@ void ClassRenderer::MouseUp(BPoint where)
 		}
 		else
 		{
-			BMessage *connecter=new BMessage(B_E_CONNECTED);
+			BMessage *connecter=new BMessage(G_E_CONNECTED);
 			if (connecting == 2)
 			{
 				connecter->AddPointer("From",container);

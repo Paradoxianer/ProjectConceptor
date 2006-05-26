@@ -15,6 +15,7 @@
 #include "ConnectionRenderer.h"
 
 #include "ToolBar.h"
+#include "InputRequest.h"
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
@@ -86,41 +87,41 @@ void GraphEditor::Init(void)
 	patternMessage->AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
 	
 	scaleMenu		= new BMenu(_T("Scale"));
-	BMessage	*newScale	= new BMessage(B_E_NEW_SCALE);
+	BMessage	*newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",0.1);
 	scaleMenu->AddItem(new BMenuItem("10 %",newScale,0,0));
-	newScale	= new BMessage(B_E_NEW_SCALE);
+	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",0.25);
 	scaleMenu->AddItem(new BMenuItem("25 %",newScale,0,0));
-	newScale	= new BMessage(B_E_NEW_SCALE);
+	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",0.33);
 	scaleMenu->AddItem(new BMenuItem("33 %",newScale,0,0));
-	newScale	= new BMessage(B_E_NEW_SCALE);
+	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",0.5);
 	scaleMenu->AddItem(new BMenuItem("50 %",newScale,0,0));
-	newScale	= new BMessage(B_E_NEW_SCALE);
+	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",0.75);
 	scaleMenu->AddItem(new BMenuItem("75 %",newScale,0,0));
-	newScale	= new BMessage(B_E_NEW_SCALE);
+	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",1.00);
 	scaleMenu->AddItem(new BMenuItem("100 %",newScale,0,0));
-	newScale	= new BMessage(B_E_NEW_SCALE);
+	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",1.5);
 	scaleMenu->AddItem(new BMenuItem("150 %",newScale,0,0));
-	newScale	= new BMessage(B_E_NEW_SCALE);
+	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",2);
 	scaleMenu->AddItem(new BMenuItem("200 %",newScale,0,0));
-	newScale	= new BMessage(B_E_NEW_SCALE);
+	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",5);
 	scaleMenu->AddItem(new BMenuItem("500 %",newScale,0,0));
-	newScale	= new BMessage(B_E_NEW_SCALE);
+	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",10);
 	scaleMenu->AddItem(new BMenuItem("1000 %",newScale,0,0));
 	
-	grid		= new ToolItem("Grid",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(B_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
-	penSize		= new FloatToolItem(_T("Pen Size"),1.0,new BMessage(B_E_PEN_SIZE_CHANGED));
-	colorItem	= new ColorToolItem(_T("Fill"),fillColor,new BMessage(B_E_COLOR_CHANGED));
-	patternItem	= new PatternToolItem(_T("Pattern"),B_SOLID_HIGH, new BMessage(B_E_PATTERN_CHANGED));
+	grid		= new ToolItem("Grid",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
+	penSize		= new FloatToolItem(_T("Pen Size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
+	colorItem	= new ColorToolItem(_T("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
+	patternItem	= new PatternToolItem(_T("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 	
 	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);	
 
@@ -128,26 +129,32 @@ void GraphEditor::Init(void)
 	image_info	*info 	= new image_info;
 	BBitmap		*bmp	= NULL;
 	size_t		size;
-
+	// look up the plugininfos
 	get_image_info(pluginID,info);
+	// init the ressource for the plugin files
 	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
+	// load the addBool icon
 	const void *data=res->LoadResource((type_code)'PNG ',"addBool",&size);
 	if (data)
 	{
+		//translate the icon because it was png but we ne a bmp 
 		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
 		if (bmp)
 		{
-			addBool		= new ToolItem("addBool",bmp,NULL);	
+			BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
+			addBool		= new ToolItem("addBool",bmp,addBoolMessage);	
 			toolBar->AddItem(addBool);
 		}
 	}
+	
 	data=res->LoadResource((type_code)'PNG ',"addText",&size);
 	if (data)
 	{
 		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
 		if (bmp)
 		{
-			addText		= new ToolItem("addText",bmp,NULL);	
+			BMessage	*addTextMessage = new BMessage(G_E_ADD_ATTRIBUTE);
+			addText		= new ToolItem("addText",bmp,addTextMessage);	
 			toolBar->AddItem(addText);
 		}
 	}
@@ -469,6 +476,8 @@ void GraphEditor::AttachedToWindow(void)
 		
 	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
 	pWindow->AddToolBar(toolBar);
+	addBool->SetTarget(this);
+	addText->SetTarget(this);
 	ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
 	configBar->AddSeperator();
 	configBar->AddSeperator();
@@ -540,7 +549,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			ResizeTo(docRect.right,docRect.bottom);
 			break;
 		}
-		case B_E_CONNECTING:
+		case G_E_CONNECTING:
 		{
 				connecting = true;
 				message->FindPoint("To",toPoint);
@@ -548,7 +557,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 				Invalidate();
 			break;
 		}
-		case B_E_CONNECTED:
+		case G_E_CONNECTED:
 		{
 			connecting = false;
 			Invalidate();
@@ -596,7 +605,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			}
 			break;
 		}
-		case B_E_NEW_SCALE:
+		case G_E_NEW_SCALE:
 		{
 			message->FindFloat("scale",&scale);
 			SetScale(scale);
@@ -604,13 +613,13 @@ void GraphEditor::MessageReceived(BMessage *message)
 			Invalidate();
 			break;
 		}
-		case B_E_GRID_CHANGED:
+		case G_E_GRID_CHANGED:
 		{
 			gridEnabled =! gridEnabled;
 			Invalidate();
 			break;
 		}
-		case B_E_COLOR_CHANGED:
+		case G_E_COLOR_CHANGED:
 		{
 			rgb_color	tmpNewColor =	{255, 0, 0, 255};
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
@@ -623,7 +632,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			sentTo->SendMessage(changeColorMessage);
 			break;
 		}
-		case B_E_PEN_SIZE_CHANGED:
+		case G_E_PEN_SIZE_CHANGED:
 		{
 			BMessage	*changePenSizeMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changePenSizeMessage->AddString("Command::Name","ChangeValue");
@@ -633,6 +642,16 @@ void GraphEditor::MessageReceived(BMessage *message)
 			changePenSizeMessage->AddInt32("type",B_FLOAT_TYPE);
 			changePenSizeMessage->AddFloat("newValue",penSize->GetValue()); 
 			sentTo->SendMessage(changePenSizeMessage);
+			break;
+		}
+		case G_E_ADD_ATTRIBUTE:
+		{
+			InputRequest	*inputAlert = new InputRequest(_T("Input AttributName"),_T("Name"), _T("Attribut"), _T("OK"),_T("Cancel"));
+			char			*input		= NULL;
+			char			*inputstr	= NULL;
+			if (inputAlert->Go(&input)<1) 
+			{
+			}
 			break;
 		}
 		default:

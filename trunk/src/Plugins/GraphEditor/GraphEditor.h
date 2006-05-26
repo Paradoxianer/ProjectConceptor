@@ -23,17 +23,18 @@
 #include "ColorToolItem.h"
 #include "FloatToolItem.h"
 
-const float 	max_entfernung			= 50.0;
-const uint32	B_E_RENDERER			= 'beRr';
-const uint32	B_E_CONNECTING			= 'beCG';
-const uint32	B_E_CONNECTED			= 'beCD';
-const uint32	B_E_NEW_SCALE			= 'beNS';
+const float			 	max_entfernung			= 50.0;
+const uint32			G_E_RENDERER			= 'geRr';
+const uint32			G_E_CONNECTING			= 'geCG';
+const uint32			G_E_CONNECTED			= 'geCD';
+const uint32			G_E_NEW_SCALE			= 'geNS';
 
-const uint32	B_E_GRID_CHANGED		= 'beGC';
+const uint32			G_E_GRID_CHANGED		= 'geGC';
 
-const uint32	B_E_PATTERN_CHANGED		= 'bePC';
-const uint32	B_E_COLOR_CHANGED		= 'beCC';
-const uint32	B_E_PEN_SIZE_CHANGED	= 'bePS';
+const uint32			G_E_PATTERN_CHANGED		= 'gePC';
+const uint32			G_E_COLOR_CHANGED		= 'geCC';
+const uint32			G_E_PEN_SIZE_CHANGED	= 'gePS';
+const uint32			G_E_ADD_ATTRIBUTE		= 'geAA';
 
 extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
 
