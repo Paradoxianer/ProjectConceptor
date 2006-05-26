@@ -610,13 +610,15 @@ BMenuItem*	PWindow::GetMenuItem(const char *menuitemSignature)
 
 ToolBar* PWindow::GetToolBar(const char *signature)
 {
-	bool 	found		= false;
-	int32	i			= 0;
-	ToolBar	*tmpBar		= NULL;
+	bool 		found		= false;
+	int32		i			= 0;
+	ToolBar		*tmpBar		= NULL;
+	char		*tmpBarName	= NULL;
 	while ( (!found) && (i<horizontalToolbars->CountItems()) )
 	{
-		tmpBar =(ToolBar*) horizontalToolbars->ItemAt(i);
-		if (strcmp(signature,tmpBar->Name()) == B_OK)
+		tmpBar		= (ToolBar*) horizontalToolbars->ItemAt(i);
+		tmpBarName	= (char *)tmpBar->Name();
+		if ((tmpBar) && (tmpBarName) &&(strcmp(signature,tmpBarName) == B_OK))
 			found=true;
 		else
 			i++;
