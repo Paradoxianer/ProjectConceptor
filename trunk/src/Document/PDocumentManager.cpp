@@ -36,8 +36,11 @@ PDocumentManager::~PDocumentManager(void)
 	for (int32 i=0; i<documentList->CountItems();i++)
 	{
 		currentDocument		= (PDocument *)documentList->ItemAt(i);
-		currentDocument->Lock();
-		delete currentDocument;
+		if (currentDocument->Lock())
+		{
+			currentDocument->Quit();
+			delete currentDocument;
+		}
 	}
 	delete pluginManager;
 }
