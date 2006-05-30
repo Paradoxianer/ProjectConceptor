@@ -15,6 +15,7 @@
 #include "PDocument.h"
 #include "PCommand.h"
 #include "Renderer.h"
+#include "ItemRenderer.h"
 #include "TextEditorControl.h"
 
 #ifdef B_ZETA_VERSION
@@ -26,7 +27,7 @@
 
 const uint32	B_C_V_NAME_CHANGED	= 'bcNC';
 
-class StringRenderer
+class StringRenderer: public ItemRenderer
 {
 
 public:
@@ -35,8 +36,12 @@ public:
 			void			SetString(char *newString);
 			char*			GetString(void){return string;};
 			void			MouseDown(BPoint where);
+			void			MouseUp(BPoint where){};
 			void			SetFrame(BRect newRect);
 			BRect			Frame(void){return frame;};
+			void			MoveBy(float dx, float dy){frame.OffsetBy(dx,dy);};
+			void			ResizeBy(float dx,float dy){frame.right+=dx;frame.bottom += dy;};
+
 
 protected:
 			void			Init();
@@ -46,7 +51,6 @@ protected:
 		char				*string;
 		BString				*shortString;
 		BFont				*editorFont;
-		BPoint				*startPoint;
 		float				fontHeight;
 private:
 };

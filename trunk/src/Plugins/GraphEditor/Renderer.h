@@ -23,6 +23,10 @@ public:
 	virtual	void		Draw(BView *drawOn, BRect updateRect)					= 0;
 
 	virtual BRect		Frame(void)												= 0;
+	virtual	void		MoveBy(float dx, float dy)								= 0;
+	virtual	void		ResizeBy(float dx,float dy)								= 0;
+
+	virtual bool		Selected(void)											= 0;
 	virtual bool		Caught(BPoint where)									= 0;
 
 	virtual	BMessage*	GetMessage(void){return container;};

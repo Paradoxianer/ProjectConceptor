@@ -1,5 +1,5 @@
-#ifndef BASIC_CONNECTION_VIEW_H
-#define BASIC_CONNECTION_VIEW_H
+#ifndef CONNECTION_RENDERER_H
+#define CONNECTION_RENDERER_H
 /*
  * @author Paradoxon powered by Jesus Christ
  */
@@ -30,6 +30,10 @@ public:
 	virtual	void		ValueChanged(void);
 
 	virtual BRect		Frame(void);
+	virtual	void		MoveBy(float dx, float dy){};
+	virtual	void		ResizeBy(float dx,float dy){};
+
+	virtual bool		Selected(void){};
 	virtual bool		Caught(BPoint where);
 
 protected:

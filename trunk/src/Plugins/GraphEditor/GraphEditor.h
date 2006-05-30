@@ -87,20 +87,22 @@ public:
 	virtual void			FrameResized(float width, float height);
 	//----------------BView	
 	
-	virtual void			AddRenderer(Renderer* newRenderer);
-	virtual void			RemoveRenderer(Renderer* wichRenderer);
+			void			AddRenderer(Renderer* newRenderer);
+			void			RemoveRenderer(Renderer* wichRenderer);
 	
-	virtual bool			GridEnabled(void){return gridEnabled;};
-	virtual float			GridWidth(void){return gridWidth;};
-	virtual Renderer*		FindRenderer(BPoint where);
-	virtual Renderer*		FindNodeRenderer(BPoint where);
-	virtual Renderer*		FindConnectionRenderer(BPoint where);
-	virtual Renderer*		FindRenderer(BMessage *container);
+			bool			GridEnabled(void){return gridEnabled;};
+			float			GridWidth(void){return gridWidth;};
+			Renderer*		FindRenderer(BPoint where);
+			Renderer*		FindNodeRenderer(BPoint where);
+			Renderer*		FindConnectionRenderer(BPoint where);
+			Renderer*		FindRenderer(BMessage *container);
 	
-	virtual void			BringToFront(Renderer *wichRenderer);
-	virtual void			SendToBack(Renderer *wichRenderer);
+			void			BringToFront(Renderer *wichRenderer);
+			void			SendToBack(Renderer *wichRenderer);
 	
-	virtual float			Scale(void){return scale;};
+			float			Scale(void){return scale;};
+			BList*			RenderList(void){return renderer;};
+	
 protected:
 			void			Init(void);
 			void			InsertObject(BPoint where,bool deselect);

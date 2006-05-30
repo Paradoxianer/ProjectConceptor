@@ -3,12 +3,13 @@
 //#include "PCommandManager.h"
 
 #include <math.h>
-
+#include <cpp/multimap.h>
+#include <cpp/iterator.h>
 
 #include <interface/Font.h>
 #include <interface/View.h>
 #include <interface/GraphicsDefs.h>
-//#include <interface/InterfaceDefs.h>*/
+
 #include <interface/Window.h>
 
 #include <support/String.h>
@@ -35,6 +36,7 @@ void ClassRenderer::Init()
 	
 	xRadius						= 10;
 	yRadius						= 10;
+	attributes					= new multimap<BString *,ItemRenderer *>();
 	frame						= BRect(0,0,0,0);
 	selected					= false;
 	font						= new BFont();
@@ -68,8 +70,6 @@ void ClassRenderer::MouseDown(BPoint where)
 	{
 		uint32 buttons = 0;
 		uint32 modifiers = 0;
-/*		BPoint	tmpPoint;
-		editor->GetMouse(&tmpPoint,&buttons,true);*/
 		BMessage *currentMsg = editor->Window()->CurrentMessage();
 		currentMsg->FindInt32("buttons", (int32 *)&buttons);
 		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
@@ -141,17 +141,23 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 			oldPt	= new BPoint(pt);
 			if (!resizing)
 			{
-				BList	*selected	= doc->GetSelected();
 				BPoint	deltaPoint(dx,dy);
+/*				BList	*selected	= doc->GetSelected();
 				selected->DoForEach(MoveAll,&deltaPoint);
-				editor->ValueChanged();
+				editor->ValueChanged();*/
+				BList	*renderer	= editor->RenderList();
+				renderer->DoForEach(MoveAll, &deltaPoint);
+				editor->Invalidate();
 			}
 			else
 			{
-				BList	*selected	= doc->GetSelected();
 				BPoint	deltaPoint(dx,dy);
+/*				BList	*selected	= doc->GetSelected();
 				selected->DoForEach(ResizeAll,&deltaPoint);
-				editor->ValueChanged();
+				editor->ValueChanged();*/
+				BList	*renderer	= editor->RenderList();
+				renderer->DoForEach(ResizeAll, &deltaPoint);
+				editor->Invalidate();
 			}
 		}
 		else
@@ -179,8 +185,8 @@ void ClassRenderer::MouseUp(BPoint where)
 			if (!resizing)
 			{
 				BList		*selected	= doc->GetSelected();
-				BPoint deltaPoint(-dx,-dy);
-				selected->DoForEach(MoveAll,&deltaPoint);
+/*				BPoint deltaPoint(-dx,-dy);
+				selected->DoForEach(MoveAll,&deltaPoint);*/
 				BMessage	*mover	= new BMessage(P_C_EXECUTE_COMMAND);
 				mover->AddString("Command::Name","Move");
 				mover->AddFloat("dx",dx);
@@ -190,8 +196,8 @@ void ClassRenderer::MouseUp(BPoint where)
 			else
 			{
 				BList	*selected	= doc->GetSelected();
-				BPoint	deltaPoint(-dx,-dy);
-				selected->DoForEach(ResizeAll,&deltaPoint);
+/*				BPoint	deltaPoint(-dx,-dy);
+				selected->DoForEach(ResizeAll,&deltaPoint);*/
 				BMessage	*resizer	= new BMessage(P_C_EXECUTE_COMMAND);
 				resizer->AddString("Command::Name","Resize");
 				resizer->AddFloat("dx",dx);
@@ -331,25 +337,61 @@ bool  ClassRenderer::Caught(BPoint where)
 {
 	return frame.Contains(where);
 }
+
 bool  ClassRenderer::MoveAll(void *arg,void *deltaPoint)
 {
-	BMessage	*node	=(BMessage *)arg;
-	BRect		rect;
+/*	BMessage	*node	=(BMessage *)arg;
+	BRect		rect;*/
 	BPoint		*delta	= (BPoint *)deltaPoint;
-	node->FindRect("Frame",&rect);
+/*	node->FindRect("Frame",&rect);
 	rect.OffsetBy(delta->x,delta->y);
-	node->ReplaceRect("Frame",rect);
+	node->ReplaceRect("Frame",rect);*/
+	Renderer	*renderer	= (Renderer*)arg;
+	if (renderer->Selected())
+		renderer->MoveBy(delta->x,delta->y);
 	return false;
 }
+
 bool  ClassRenderer::ResizeAll(void *arg,void *deltaPoint)
 {
-	BMessage	*node	=(BMessage *)arg;
-	BRect		rect;
+	/*BMessage	*node	=(BMessage *)arg;
+	BRect		rect;*/
 	BPoint		*delta	= (BPoint *)deltaPoint;
-	node->FindRect("Frame",&rect);
+/*	node->FindRect("Frame",&rect);
 	rect.right		+=	delta->x;
 	rect.bottom		+=	delta->y;
 	if ( (rect.IsValid()) && (rect.Width()>20) && ((rect.Height()>20)) )
-		node->ReplaceRect("Frame",rect);
+		node->ReplaceRect("Frame",rect);*/
+	Renderer	*renderer	= (Renderer*)arg;
+	if (renderer->Selected())
+		renderer->ResizeBy(delta->x,delta->y);
 	return false;
 }
+
+void ClassRenderer::MoveBy(float dx,float dy)
+{
+	frame.OffsetBy(dx,dy);
+	name->MoveBy(dx,dy);
+	multimap<BString *,ItemRenderer *>::iterator	allAttributes = attributes->begin();
+	while( allAttributes != attributes->end() )
+	{
+
+		allAttributes->second->MoveBy(dx,dy);
+		allAttributes++;
+	}
+}
+
+void ClassRenderer::ResizeBy(float dx,float dy)
+{
+	frame.right+=dx; 
+	frame.bottom += dy;
+	name->ResizeBy(dy,dy);
+	multimap<BString *,ItemRenderer *>::iterator	allAttributes = attributes->begin();
+	while( allAttributes != attributes->end() )
+	{
+		allAttributes->second->ResizeBy(dx,dy);
+		allAttributes++;
+	}
+
+}
+

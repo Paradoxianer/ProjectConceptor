@@ -52,8 +52,6 @@ void StringRenderer::SetFrame(BRect newRect)
 	shortString	= new BString(string);
 	editorFont->TruncateString(shortString,B_TRUNCATE_MIDDLE,frame.Width()-2);
 	frame.bottom=frame.top+fontHeight+2;
-	startPoint	= new BPoint(frame.left+2,frame.top+fontHeight);
-
 }
 
 void StringRenderer::MouseDown(BPoint where)
@@ -73,7 +71,7 @@ void StringRenderer::MouseDown(BPoint where)
 
 void StringRenderer::Draw(BView *drawOn, BRect updateRect)
 {	
-	drawOn->MovePenTo(startPoint->x,startPoint->y);
+	drawOn->MovePenTo(frame.left+2,frame.top+fontHeight);
 	drawOn->DrawString(shortString->String());
 }
 

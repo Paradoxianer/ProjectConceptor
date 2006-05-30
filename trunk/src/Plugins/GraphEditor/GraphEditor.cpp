@@ -270,7 +270,6 @@ void GraphEditor::ValueChanged()
 		Invalidate();
 		BView::UnlockLooper();
 	}
-
 }
 
 void GraphEditor::SetDirty(BRegion *region)
