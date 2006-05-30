@@ -36,7 +36,7 @@ void ClassRenderer::Init()
 	
 	xRadius						= 10;
 	yRadius						= 10;
-	attributes					= new multimap<BString *,ItemRenderer *>();
+	attributes					= new multimap<BString *,Renderer *>();
 	frame						= BRect(0,0,0,0);
 	selected					= false;
 	font						= new BFont();
@@ -62,11 +62,23 @@ void ClassRenderer::Init()
 	
 void ClassRenderer::MouseDown(BPoint where)
 {
-	if (name->Frame().Contains(where))
+	bool found=false;
+	if (name->Caught(where))
 	{
 		name->MouseDown(where);
+		found	= true;
 	}
-	else if (startMouseDown == NULL)
+	multimap<BString *,Renderer *>::iterator	allAttributes = attributes->begin();
+	while( (found == false) && (allAttributes != attributes->end()) )
+	{
+		if (allAttributes->second->Caught(where))
+		{
+			found = true;
+			allAttributes->second->MouseDown(where);
+		}
+		allAttributes++;
+	}
+	if ((!found) && (startMouseDown == NULL))
 	{
 		uint32 buttons = 0;
 		uint32 modifiers = 0;
@@ -142,9 +154,6 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 			if (!resizing)
 			{
 				BPoint	deltaPoint(dx,dy);
-/*				BList	*selected	= doc->GetSelected();
-				selected->DoForEach(MoveAll,&deltaPoint);
-				editor->ValueChanged();*/
 				BList	*renderer	= editor->RenderList();
 				renderer->DoForEach(MoveAll, &deltaPoint);
 				editor->Invalidate();
@@ -152,9 +161,6 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 			else
 			{
 				BPoint	deltaPoint(dx,dy);
-/*				BList	*selected	= doc->GetSelected();
-				selected->DoForEach(ResizeAll,&deltaPoint);
-				editor->ValueChanged();*/
 				BList	*renderer	= editor->RenderList();
 				renderer->DoForEach(ResizeAll, &deltaPoint);
 				editor->Invalidate();
@@ -164,9 +170,6 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 		{
 			// make connecting Stuff
 			BMessage *connecter=new BMessage(G_E_CONNECTING);
-//			BMessage *connecter=new BMessage();
-/*			connecter->AddInt64("undoID",when);
-			connecter->AddString("undoName","Connect");*/
 			connecter->AddPoint("From",*startMouseDown);
 			connecter->AddPoint("To",pt);
 			(new BMessenger((BView *)editor))->SendMessage(connecter);
@@ -229,9 +232,6 @@ void ClassRenderer::MouseUp(BPoint where)
 	}
 }
 
-void ClassRenderer::LanguageChanged()
-{
-}
 
 void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 {	
@@ -292,6 +292,12 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->StrokeTriangle(BPoint(frame.left,yOben),BPoint(frame.left+triangleHeight,yMitte),BPoint(frame.left,yUnten));
 	drawOn->StrokeTriangle(BPoint(frame.right-triangleHeight,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-triangleHeight,yUnten));
 	name->Draw(drawOn,updateRect);
+	multimap<BString *,Renderer *>::iterator	allAttributes = attributes->begin();
+	while( allAttributes != attributes->end() )
+	{
+		allAttributes->second->Draw(drawOn,updateRect);
+		allAttributes++;
+	}
 }
 
 void ClassRenderer::MessageReceived(BMessage *message)
@@ -310,8 +316,14 @@ void ClassRenderer::ValueChanged()
 	BMessage	*pattern		= new BMessage();
 	BMessage	*messageFont	= new BMessage();
 	BMessage	*data			= new BMessage();
-	char		*newName;
-
+	char		*newName		= NULL;
+	
+	char		*attribName		= NULL;
+	BMessage	*attribMessage	= new BMessage();
+	uint32		type; 
+	int32		count;
+	bool		found;
+	
 	container->FindRect("Frame",&frame);
 	container->FindBool("selected",&selected);
 	container->FindFloat("xRadius",&xRadius);
@@ -319,13 +331,25 @@ void ClassRenderer::ValueChanged()
 	container->FindMessage("Pattern",pattern);
 	container->FindMessage("Font",messageFont);
 	container->FindMessage("Data",data);
-	
 	pattern->FindRGBColor("FillColor",&fillColor);
 	pattern->FindRGBColor("BorderColor",&borderColor);
 	pattern->FindFloat("PenSize",&penSize);
 	data->FindString("Name",(const char **)&newName);
 	name->SetString(newName);
 	name->SetFrame(BRect(frame.left+2,frame.top+2,frame.right,frame.top+12));
+	container->PrintToStream();
+	for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(const char **) &attribName, &type, &count) == B_OK; i++)
+	{
+
+		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
+		{
+			BString	*compareString = new BString(attribName);
+			multimap<BString *,Renderer *>::iterator	allAttributes = attributes->find(compareString);
+//			if (allAttributes < attributes->upper_bound(compareString))
+					InsertAttribute(attribName,attribMessage);
+		}
+			
+	}
 }
 
 BRect ClassRenderer::Frame( void )
@@ -340,12 +364,7 @@ bool  ClassRenderer::Caught(BPoint where)
 
 bool  ClassRenderer::MoveAll(void *arg,void *deltaPoint)
 {
-/*	BMessage	*node	=(BMessage *)arg;
-	BRect		rect;*/
 	BPoint		*delta	= (BPoint *)deltaPoint;
-/*	node->FindRect("Frame",&rect);
-	rect.OffsetBy(delta->x,delta->y);
-	node->ReplaceRect("Frame",rect);*/
 	Renderer	*renderer	= (Renderer*)arg;
 	if (renderer->Selected())
 		renderer->MoveBy(delta->x,delta->y);
@@ -354,14 +373,7 @@ bool  ClassRenderer::MoveAll(void *arg,void *deltaPoint)
 
 bool  ClassRenderer::ResizeAll(void *arg,void *deltaPoint)
 {
-	/*BMessage	*node	=(BMessage *)arg;
-	BRect		rect;*/
 	BPoint		*delta	= (BPoint *)deltaPoint;
-/*	node->FindRect("Frame",&rect);
-	rect.right		+=	delta->x;
-	rect.bottom		+=	delta->y;
-	if ( (rect.IsValid()) && (rect.Width()>20) && ((rect.Height()>20)) )
-		node->ReplaceRect("Frame",rect);*/
 	Renderer	*renderer	= (Renderer*)arg;
 	if (renderer->Selected())
 		renderer->ResizeBy(delta->x,delta->y);
@@ -372,7 +384,7 @@ void ClassRenderer::MoveBy(float dx,float dy)
 {
 	frame.OffsetBy(dx,dy);
 	name->MoveBy(dx,dy);
-	multimap<BString *,ItemRenderer *>::iterator	allAttributes = attributes->begin();
+	multimap<BString *,Renderer *>::iterator	allAttributes = attributes->begin();
 	while( allAttributes != attributes->end() )
 	{
 
@@ -386,7 +398,7 @@ void ClassRenderer::ResizeBy(float dx,float dy)
 	frame.right+=dx; 
 	frame.bottom += dy;
 	name->ResizeBy(dy,dy);
-	multimap<BString *,ItemRenderer *>::iterator	allAttributes = attributes->begin();
+	multimap<BString *,Renderer *>::iterator	allAttributes = attributes->begin();
 	while( allAttributes != attributes->end() )
 	{
 		allAttributes->second->ResizeBy(dx,dy);
@@ -395,3 +407,33 @@ void ClassRenderer::ResizeBy(float dx,float dy)
 
 }
 
+void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute)
+{
+	char	*realName	= NULL;
+	/*switch(attribute->what) 
+	{
+		case B_STRING_TYPE:
+		{
+			BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+			editMessage->AddPointer("node",container);
+			editMessage->AddString("Command::Name","ChangeValue");
+			editMessage->AddString("subgroup","Data");
+			editMessage->AddString("name",attribName);
+			attribute->FindString("Name",(const char **)&realName);
+			BString		*testString 	= new BString(attribName);
+			Renderer	*testRenderer	= new StringRenderer(editor,"",BRect(frame.left+2,frame.top+10,frame.right-2,frame.bottom-2), editMessage);
+			attributes->insert(pair<BString *,Renderer*>(testString,testRenderer));
+			break;
+		}
+	}*/
+	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+	editMessage->AddPointer("node",container);
+	editMessage->AddString("Command::Name","ChangeValue");
+	editMessage->AddString("subgroup","Data");
+	editMessage->AddString("name",attribName);
+	attribute->FindString("Name",(const char **)&realName);
+	BString		*testString 	= new BString(attribName);
+	Renderer	*testRenderer	= new StringRenderer(editor,realName,BRect(frame.left+triangleHeight+2,name->Frame().bottom+4,frame.right-triangleHeight-2,frame.bottom-2), editMessage);
+	attributes->insert(pair<BString *,Renderer*>(testString,testRenderer));
+
+}

@@ -645,11 +645,24 @@ void GraphEditor::MessageReceived(BMessage *message)
 		}
 		case G_E_ADD_ATTRIBUTE:
 		{
+			message->PrintToStream();
 			InputRequest	*inputAlert = new InputRequest(_T("Input AttributName"),_T("Name"), _T("Attribut"), _T("OK"),_T("Cancel"));
 			char			*input		= NULL;
 			char			*inputstr	= NULL;
 			if (inputAlert->Go(&input)<1) 
 			{
+				inputstr	= new char[strlen(input)+1];
+				strcpy(inputstr,input);
+				BMessage	*addMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+				addMessage->AddString("Command::Name","AddAttribute");
+				addMessage->AddBool("selected",true);
+				addMessage->AddInt32("type",B_MESSAGE_TYPE);
+				addMessage->AddString("name",inputstr);
+				addMessage->AddString("subgroup","Data");
+				BMessage	*newAttribute	= new BMessage();
+				newAttribute->AddString("Name",inputstr);
+				addMessage->AddMessage("newAttribute",newAttribute);
+				sentTo->SendMessage(addMessage);
 			}
 			break;
 		}

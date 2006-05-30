@@ -15,7 +15,7 @@
 #include "PDocument.h"
 #include "PCommand.h"
 #include "Renderer.h"
-#include "ItemRenderer.h"
+#include "Renderer.h"
 #include "TextEditorControl.h"
 
 #ifdef B_ZETA_VERSION
@@ -27,21 +27,26 @@
 
 const uint32	B_C_V_NAME_CHANGED	= 'bcNC';
 
-class StringRenderer: public ItemRenderer
+class StringRenderer: public Renderer
 {
 
 public:
 							StringRenderer(GraphEditor *parentEditor,char *forString,BRect stringRect,BMessage *message=NULL);
+			void			ValueChanged(void){};
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetString(char *newString);
 			char*			GetString(void){return string;};
 			void			MouseDown(BPoint where);
+			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg){};
+
 			void			MouseUp(BPoint where){};
 			void			SetFrame(BRect newRect);
 			BRect			Frame(void){return frame;};
 			void			MoveBy(float dx, float dy){frame.OffsetBy(dx,dy);};
 			void			ResizeBy(float dx,float dy){frame.right+=dx;frame.bottom += dy;};
 
+			bool			Selected(void){return false;};
+			bool			Caught(BPoint where){frame.Contains(where);};
 
 protected:
 			void			Init();

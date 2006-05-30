@@ -17,7 +17,6 @@
 #include "GraphEditor.h"
 #include "PDocument.h"
 #include "Renderer.h"
-#include "ItemRenderer.h"
 #include "StringRenderer.h"
 
 #ifdef B_ZETA_VERSION_1_0_0
@@ -49,7 +48,10 @@ public:
 
 protected:
 				void		Init();
+				void		InsertAttribute(char *attribName, BMessage *attribute);
 		BMessage			*viewMessage;
+
+
 		static	bool		MoveAll(void *arg,void *deltaPoint);
 		static	bool		ResizeAll(void *arg,void *deltaPoint);
 
@@ -78,7 +80,7 @@ protected:
 		BList				*outgoing;
 		BList				*incoming;
 		StringRenderer		*name;
-		multimap<BString *,ItemRenderer *>	*attributes;
+		multimap<BString *,Renderer *>	*attributes;
 
 private:
 };
