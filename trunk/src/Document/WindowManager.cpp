@@ -43,8 +43,8 @@ void WindowManager::Init()
 	windowList=new BList();
 	BScreen *tmpScreen	= new BScreen();
 	windowRect	= tmpScreen->Frame();
-	windowRect.InsetBy(100,100);
-	windowRect.OffsetBy(-50,-50);
+	windowRect.InsetBy(50,50);
+	windowRect.OffsetBy(-25,-25);
 }
 
 

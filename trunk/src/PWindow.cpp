@@ -68,6 +68,7 @@ void PWindow::Init(void)
 	aboutWindow				= NULL;
 	BRect containerRect		= BRect(P_M_MAIN_VIEW_LEFT+1,P_M_MAIN_VIEW_TOP+2,P_M_MAIN_VIEW_RIGHT-1,P_M_MAIN_VIEW_BOTTOM-1);
 	mainView				= new MainView(doc,containerRect, "tabContainer"); 
+	SetSizeLimits(300,6000,150,4000);
 	MakeToolbars();
 	AddChild(mainView);
 }
