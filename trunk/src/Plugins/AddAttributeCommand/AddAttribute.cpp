@@ -37,7 +37,8 @@ void AddAttribute::Undo(PDocument *doc,BMessage *undo)
 		if ( (undo->FindString("subgroup",i,(const char**)&subGroupName) == B_OK) && (node->FindMessage(subGroupName,subGroup) == B_OK) )
 		{
 			index = 0;
-          			while (subGroup->GetInfo(B_ANY_TYPE, index, (const char **)&compareName, &typeFound, &count) == B_OK)
+			err = node->FindMessage(subGroupName,subGroup);
+        	while (subGroup->GetInfo(B_ANY_TYPE, index, (const char **)&compareName, &typeFound, &count) == B_OK)
     		{
     			if ( (strcmp(name,compareName)) && (type == typeFound) )
     				lastIndex = count;
@@ -74,10 +75,12 @@ void AddAttribute::Undo(PDocument *doc,BMessage *undo)
 			if (subGroupName)
 			{
 				index = 0;
+				err = node->FindMessage(subGroupName,subGroup);
 				while (subGroup->GetInfo(B_ANY_TYPE, index,(const char**) &compareName, &typeFound, &count) == B_OK)
     			{
-    				if ( (strcmp(name,compareName)) && (type == typeFound) )
-    					lastIndex = count;
+    				if ( (strcmp(name,compareName)==B_OK) && (type == typeFound) )
+    					lastIndex = count-1;
+    				index++;
        			}  
 				subGroup->RemoveData(name,lastIndex);
 				node->ReplaceMessage(subGroupName,subGroup);
@@ -87,8 +90,9 @@ void AddAttribute::Undo(PDocument *doc,BMessage *undo)
 				index = 0;
 				while (node->GetInfo(B_ANY_TYPE, index,(const char**) &compareName, &typeFound, &count) == B_OK)
     			{
-    				if ( (strcmp(name,compareName)) && (type == typeFound) )
-	    				lastIndex = count;
+    				if ( (strcmp(name,compareName)==B_OK) && (type == typeFound) )
+	    				lastIndex = count-1;
+	    			index++;
     	   		}
     			node->RemoveData(name,lastIndex);
 	   	   	}
