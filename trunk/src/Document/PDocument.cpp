@@ -386,7 +386,8 @@ void PDocument::Save(void)
 	BMessage	*allConnectionsMessage	= new BMessage();
 	BMessage	*selectedMessage		= new BMessage();
 
-	tmpMessage->AddMessage("PDocument::printerSetting",printerSetting);
+	if (printerSetting)
+		tmpMessage->AddMessage("PDocument::printerSetting",printerSetting);
 	tmpMessage->AddMessage("PDocument::documentSetting",documentSetting);
 	//save all Nodes
 	for (i=0; i<allNodes->CountItems();i++)
