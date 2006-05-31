@@ -184,6 +184,15 @@ void ClassRenderer::MouseUp(BPoint where)
 		{
 			float dx = where.x - startMouseDown->x;
 			float dy = where.y - startMouseDown->y;
+			if (editor->GridEnabled())
+			{			
+				float newPosX = startLeftTop->x + dx;
+				float newPosY = startLeftTop->y + dy;
+				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
+				newPosY = newPosY - fmod(newPosY,editor->GridWidth());
+				dx = newPosX-startLeftTop->x;
+				dy = newPosY-startLeftTop->y;
+			}
 			if (!resizing)
 			{
 				BList		*selected	= doc->GetSelected();
