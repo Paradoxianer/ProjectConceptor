@@ -3,8 +3,6 @@
 //#include "PCommandManager.h"
 
 #include <math.h>
-#include <cpp/multimap.h>
-#include <cpp/iterator.h>
 
 #include <interface/Font.h>
 #include <interface/View.h>
@@ -36,7 +34,7 @@ void ClassRenderer::Init()
 	
 	xRadius						= 10;
 	yRadius						= 10;
-	attributes					= new multimap<BString *,Renderer *>();
+	attributes					= new vector<Renderer *>();
 	frame						= BRect(0,0,0,0);
 	selected					= false;
 	font						= new BFont();
@@ -62,22 +60,23 @@ void ClassRenderer::Init()
 	
 void ClassRenderer::MouseDown(BPoint where)
 {
-	bool found=false;
+	bool		found			= false;
+	Renderer*	tmpRenderer		= NULL;
 	if (name->Caught(where))
 	{
 		name->MouseDown(where);
 		found	= true;
 	}
-	multimap<BString *,Renderer *>::iterator	allAttributes = attributes->begin();
-	while( (found == false) && (allAttributes != attributes->end()) )
+	for (int32 i = 0; (found == false) && (i < attributes->size());i++)
 	{
-		if (allAttributes->second->Caught(where))
+		tmpRenderer=(*attributes)[i];
+		if (tmpRenderer->Caught(where))
 		{
 			found = true;
-			allAttributes->second->MouseDown(where);
+			tmpRenderer->MouseDown(where);
 		}
-		allAttributes++;
 	}
+	
 	if ((!found) && (startMouseDown == NULL))
 	{
 		uint32 buttons = 0;
@@ -235,7 +234,10 @@ void ClassRenderer::MouseUp(BPoint where)
 
 void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 {	
-	BRect shadowFrame = frame;
+	BRect		shadowFrame = frame;
+	bool		fitIn		= true;
+	Renderer*	tmpRenderer	= NULL;
+
 	rgb_color	drawColor;
 	shadowFrame.OffsetBy(3,3);
 	drawOn->SetPenSize(penSize);
@@ -292,12 +294,17 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->StrokeTriangle(BPoint(frame.left,yOben),BPoint(frame.left+triangleHeight,yMitte),BPoint(frame.left,yUnten));
 	drawOn->StrokeTriangle(BPoint(frame.right-triangleHeight,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-triangleHeight,yUnten));
 	name->Draw(drawOn,updateRect);
-	multimap<BString *,Renderer *>::iterator	allAttributes = attributes->begin();
-	while( allAttributes != attributes->end() )
+
+	for (int32 i=0;(fitIn)&& (i<attributes->size());i++)
 	{
-		allAttributes->second->Draw(drawOn,updateRect);
-		allAttributes++;
+		tmpRenderer=(*attributes)[i];
+		if (frame.Contains(tmpRenderer->Frame()))
+			tmpRenderer->Draw(drawOn,updateRect);
+		else
+			fitIn=false;
 	}
+	if (!fitIn)
+		drawOn->DrawString("...",BPoint(frame.left+triangleHeight+2,frame.bottom-2));
 }
 
 void ClassRenderer::MessageReceived(BMessage *message)
@@ -320,10 +327,10 @@ void ClassRenderer::ValueChanged()
 	
 	char		*attribName		= NULL;
 	BMessage	*attribMessage	= new BMessage();
-	uint32		type; 
-	int32		count;
-	bool		found;
-	
+	uint32		type			= B_ANY_TYPE; 
+	int32		count			= 0;
+	bool		found			= false;
+		
 	container->FindRect("Frame",&frame);
 	container->FindBool("selected",&selected);
 	container->FindFloat("xRadius",&xRadius);
@@ -337,18 +344,13 @@ void ClassRenderer::ValueChanged()
 	data->FindString("Name",(const char **)&newName);
 	name->SetString(newName);
 	name->SetFrame(BRect(frame.left+2,frame.top+2,frame.right,frame.top+12));
-	container->PrintToStream();
+	//delete all "old" Attribs
+	attributes->erase(attributes->begin(),attributes->end());
+	//and add all attribs we found
 	for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(const char **) &attribName, &type, &count) == B_OK; i++)
 	{
-
 		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
-		{
-			BString	*compareString = new BString(attribName);
-			multimap<BString *,Renderer *>::iterator	allAttributes = attributes->find(compareString);
-//			if (allAttributes < attributes->upper_bound(compareString))
-					InsertAttribute(attribName,attribMessage);
-		}
-			
+			InsertAttribute(attribName,attribMessage);
 	}
 }
 
@@ -384,13 +386,18 @@ void ClassRenderer::MoveBy(float dx,float dy)
 {
 	frame.OffsetBy(dx,dy);
 	name->MoveBy(dx,dy);
-	multimap<BString *,Renderer *>::iterator	allAttributes = attributes->begin();
-	while( allAttributes != attributes->end() )
+	vector<Renderer *>::iterator	allAttributes = attributes->begin();
+/*	while( allAttributes != attributes->end() )
 	{
 
-		allAttributes->second->MoveBy(dx,dy);
+		allAttributes->MoveBy(dx,dy);
 		allAttributes++;
+	}*/
+	for (int32 i=0;i<attributes->size();i++)
+	{
+		(*attributes)[i]->MoveBy(dx,dy);
 	}
+
 }
 
 void ClassRenderer::ResizeBy(float dx,float dy)
@@ -398,13 +405,10 @@ void ClassRenderer::ResizeBy(float dx,float dy)
 	frame.right+=dx; 
 	frame.bottom += dy;
 	name->ResizeBy(dy,dy);
-	multimap<BString *,Renderer *>::iterator	allAttributes = attributes->begin();
-	while( allAttributes != attributes->end() )
+	for (int32 i=0;i<attributes->size();i++)
 	{
-		allAttributes->second->ResizeBy(dx,dy);
-		allAttributes++;
+		(*attributes)[i]->ResizeBy(dx,dy);
 	}
-
 }
 
 void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute)
@@ -426,14 +430,23 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute)
 			break;
 		}
 	}*/
+	BRect	attributeRect;
+	if (attributes->empty())
+	{
+		attributeRect = BRect(frame.left+triangleHeight+2,name->Frame().bottom+6,frame.right-triangleHeight-2,frame.bottom-2);
+	}
+	else
+	{
+		Renderer* lastRenderer = (*attributes)[attributes->size()-1];
+		attributeRect = BRect(frame.left+triangleHeight+2,lastRenderer->Frame().bottom+1,frame.right-triangleHeight-2,frame.bottom-2);
+	}
 	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 	editMessage->AddPointer("node",container);
 	editMessage->AddString("Command::Name","ChangeValue");
 	editMessage->AddString("subgroup","Data");
 	editMessage->AddString("name",attribName);
 	attribute->FindString("Name",(const char **)&realName);
-	BString		*testString 	= new BString(attribName);
-	Renderer	*testRenderer	= new StringRenderer(editor,realName,BRect(frame.left+triangleHeight+2,name->Frame().bottom+4,frame.right-triangleHeight-2,frame.bottom-2), editMessage);
-	attributes->insert(pair<BString *,Renderer*>(testString,testRenderer));
+	Renderer	*testRenderer	= new StringRenderer(editor,realName,attributeRect, editMessage);
+	attributes->push_back(testRenderer);
 
 }

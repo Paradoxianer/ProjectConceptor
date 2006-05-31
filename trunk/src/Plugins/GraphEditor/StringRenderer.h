@@ -43,7 +43,7 @@ public:
 			void			SetFrame(BRect newRect);
 			BRect			Frame(void){return frame;};
 			void			MoveBy(float dx, float dy){frame.OffsetBy(dx,dy);};
-			void			ResizeBy(float dx,float dy){frame.right+=dx;frame.bottom += dy;};
+			void			ResizeBy(float dx,float dy){frame.right+=dx;SetFrame(frame);};
 
 			bool			Selected(void){return false;};
 			bool			Caught(BPoint where){frame.Contains(where);};

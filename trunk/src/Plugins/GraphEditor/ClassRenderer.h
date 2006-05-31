@@ -10,7 +10,7 @@
 #include <interface/TextControl.h>
 
 //using the ugly stl instead of the nice Zeta templates to make it Haiku ready
-#include <cpp/multimap.h>
+#include <cpp/vector.h>
 #include <cpp/iterator.h>
 
 
@@ -80,7 +80,7 @@ protected:
 		BList				*outgoing;
 		BList				*incoming;
 		StringRenderer		*name;
-		multimap<BString *,Renderer *>	*attributes;
+		vector<Renderer*>	*attributes;
 
 private:
 };
