@@ -142,6 +142,7 @@ void GraphEditor::Init(void)
 		if (bmp)
 		{
 			BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
+			addBoolMessage->AddInt32("type",B_BOOL_TYPE);
 			addBool		= new ToolItem("addBool",bmp,addBoolMessage);	
 			toolBar->AddItem(addBool);
 		}
@@ -154,6 +155,7 @@ void GraphEditor::Init(void)
 		if (bmp)
 		{
 			BMessage	*addTextMessage = new BMessage(G_E_ADD_ATTRIBUTE);
+			addTextMessage->AddInt32("type",B_STRING_TYPE);
 			addText		= new ToolItem("addText",bmp,addTextMessage);	
 			toolBar->AddItem(addText);
 		}
@@ -652,7 +654,10 @@ void GraphEditor::MessageReceived(BMessage *message)
 		}
 		case G_E_ADD_ATTRIBUTE:
 		{
-			message->PrintToStream();
+			int32	type;
+			char	*datadummy	= new char[4];
+			strcpy(datadummy,"    ");
+			message->FindInt32("type",&type);
 			InputRequest	*inputAlert = new InputRequest(_T("Input AttributName"),_T("Name"), _T("Attribut"), _T("OK"),_T("Cancel"));
 			char			*input		= NULL;
 			char			*inputstr	= NULL;
@@ -666,8 +671,9 @@ void GraphEditor::MessageReceived(BMessage *message)
 				addMessage->AddInt32("type",B_MESSAGE_TYPE);
 				addMessage->AddString("name",inputstr);
 				addMessage->AddString("subgroup","Data");
-				BMessage	*newAttribute	= new BMessage();
+				BMessage	*newAttribute	= new BMessage(type);
 				newAttribute->AddString("Name",inputstr);
+				newAttribute->AddData("Value",type,datadummy,sizeof(datadummy));
 				addMessage->AddMessage("newAttribute",newAttribute);
 				sentTo->SendMessage(addMessage);
 			}

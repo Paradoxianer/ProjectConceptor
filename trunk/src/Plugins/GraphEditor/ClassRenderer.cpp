@@ -11,7 +11,7 @@
 #include <interface/Window.h>
 
 #include <support/String.h>
-
+#include "AttributRenderer.h"
 
 
 
@@ -458,8 +458,9 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute)
 	editMessage->AddString("Command::Name","ChangeValue");
 	editMessage->AddString("subgroup","Data");
 	editMessage->AddString("name",attribName);
-	attribute->FindString("Name",(const char **)&realName);
-	Renderer	*testRenderer	= new StringRenderer(editor,realName,attributeRect, editMessage);
+//	attribute->FindString("Name",(const char **)&realName);
+//	Renderer	*testRenderer	= new StringRenderer(editor,realName,attributeRect, editMessage);
+	Renderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage);
 	attributes->push_back(testRenderer);
 
 }
