@@ -42,6 +42,7 @@ public:
 	
 				bool		Caught(BPoint where);
 				BRect		Frame(void);
+				void		SetFrame(BRect newFrame);
 				void		MoveBy(float dx, float dy);
 				void		ResizeBy(float dx,float dy);
 				bool		Selected(){return selected;};

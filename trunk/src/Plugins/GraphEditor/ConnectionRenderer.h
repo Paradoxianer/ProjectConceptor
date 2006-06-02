@@ -29,8 +29,12 @@ public:
 	virtual	void		MessageReceived(BMessage *message);
 	virtual	void		ValueChanged(void);
 
+	//**implement this
+	virtual void		SetFrame(BRect newFrame){};
 	virtual BRect		Frame(void);
+	//**implement this
 	virtual	void		MoveBy(float dx, float dy){};
+	//**implement this
 	virtual	void		ResizeBy(float dx,float dy){};
 
 	virtual bool		Selected(void){};

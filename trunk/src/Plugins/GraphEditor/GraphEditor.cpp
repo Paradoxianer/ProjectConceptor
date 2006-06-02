@@ -178,6 +178,13 @@ void GraphEditor::AttachedToManager(void)
 	shortcuts->AddInt32("modifiers",0);
 	shortcuts->AddMessage("message",sendMessage);
 	shortcuts->AddPointer("handler",doc);
+	
+
+	BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
+	shortcuts->AddInt32("key",'b');
+	shortcuts->AddInt32("modifiers",B_COMMAND_KEY);
+	shortcuts->AddMessage("message",addBoolMessage);
+	shortcuts->AddPointer("handler",this);
 	configMessage->AddMessage("Shortcuts",shortcuts);
 	InitAll();
 }

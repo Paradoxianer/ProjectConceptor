@@ -24,11 +24,12 @@ TYPE= SHARED
 #	if two source files with the same name (source.c or source.cpp)
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
-SRCS= 	ClassRenderer.cpp \
-		ConnectionRenderer.cpp \
-		GraphEditor.cpp \
-		GraphEditorPlugin.cpp \
-		StringRenderer.cpp \
+SRCS= 	AttributRenderer.cpp		\
+		ClassRenderer.cpp		\
+		ConnectionRenderer.cpp	\
+		GraphEditor.cpp			\
+		GraphEditorPlugin.cpp		\
+		StringRenderer.cpp		\
 		TextEditorControl.cpp
 
 		
@@ -89,7 +90,7 @@ SYMBOLS = TRUE
 #	specify debug settings
 #	if TRUE will allow application to be run from
 #	a source-level debugger
-DEBUGGER = TRUE
+# DEBUGGER = TRUE
 
 #	specify additional compiler flags for all files
 COMPILER_FLAGS =

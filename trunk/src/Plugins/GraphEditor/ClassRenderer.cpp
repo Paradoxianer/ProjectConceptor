@@ -372,6 +372,10 @@ bool  ClassRenderer::Caught(BPoint where)
 {
 	return frame.Contains(where);
 }
+//**implement this
+void  ClassRenderer::SetFrame(BRect newFrame)
+{
+}
 
 bool  ClassRenderer::MoveAll(void *arg,void *deltaPoint)
 {
