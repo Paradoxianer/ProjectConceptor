@@ -161,15 +161,18 @@ BRect RectItem::GetRect(void)
 status_t RectItem::Invoke(BMessage *message = NULL)
 {
 	BMessage	*sendMessage	= NULL;
+	BMessage	*valueContainer	= new BMessage();
 	if (message==NULL)
 		sendMessage = new BMessage(*Message());
 	else
 		sendMessage = new BMessage(*message);
 	if (sendMessage != NULL)	
 	{
-		sendMessage->AddInt32("type",B_RECT_TYPE);
-		sendMessage->AddString("name",label);
-		sendMessage->AddRect("newValue", GetRect()); 
+		sendMessage->FindMessage("valueContainer",valueContainer);
+		valueContainer->AddInt32("type",B_RECT_TYPE);
+		valueContainer->AddString("name",label);
+		valueContainer->AddRect("newValue", GetRect()); 
+		sendMessage->ReplaceMessage("valueContainer",valueContainer);
 		BInvoker::Invoke(sendMessage);
 	}
 	else

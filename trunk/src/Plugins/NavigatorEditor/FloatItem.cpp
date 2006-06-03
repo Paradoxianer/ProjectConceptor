@@ -93,15 +93,18 @@ void FloatItem::SetExpanded(bool expande)
 status_t FloatItem::Invoke(BMessage *message = NULL)
 {
 	BMessage	*sendMessage	= NULL;
+	BMessage	*valueContainer	= new BMessage();
 	if (message==NULL)
 		sendMessage = new BMessage(*Message());
 	else
 		sendMessage = new BMessage(*message);
 	if (sendMessage != NULL)	
 	{
-		sendMessage->AddInt32("type",B_FLOAT_TYPE);
-		sendMessage->AddString("name",label);
-		sendMessage->AddFloat("newValue", GetFloat()); 
+		sendMessage->FindMessage("valueContainer",valueContainer);
+		valueContainer->AddInt32("type",B_FLOAT_TYPE);
+		valueContainer->AddString("name",label);
+		valueContainer->AddFloat("newValue", GetFloat());
+		sendMessage->ReplaceMessage("valueContainer",valueContainer);
 		BInvoker::Invoke(sendMessage);
 	}
 	else

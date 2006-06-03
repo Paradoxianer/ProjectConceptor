@@ -107,15 +107,18 @@ void	BoolItem::ValueChange(void)
 status_t BoolItem::Invoke(BMessage *message = NULL)
 {
 	BMessage	*sendMessage	= NULL;
+	BMessage	*valueContainer	= new BMessage();
 	if (message==NULL)
 		sendMessage = new BMessage(*Message());
 	else
 		sendMessage = new BMessage(*message);
 	if (sendMessage != NULL)	
 	{
-		sendMessage->AddInt32("type",B_BOOL_TYPE);
-		sendMessage->AddString("name",label);
-		sendMessage->AddBool("newValue", GetValue()); 
+		sendMessage->FindMessage("valueContainer",valueContainer);
+		valueContainer->AddInt32("type",B_BOOL_TYPE);
+		valueContainer->AddString("name",label);
+		valueContainer->AddBool("newValue", GetValue());
+		sendMessage->ReplaceMessage("valueContainer",valueContainer);
 		BInvoker::Invoke(sendMessage);
 	}
 	else

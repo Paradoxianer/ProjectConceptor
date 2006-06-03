@@ -87,18 +87,22 @@ void StringItem::SetExpanded(bool expande)
 status_t StringItem::Invoke(BMessage *message = NULL)
 {
 	BMessage	*sendMessage	= NULL;
+	BMessage	*valueContainer	= new BMessage();
 	if (message==NULL)
 		sendMessage = new BMessage(*Message());
 	else
 		sendMessage = new BMessage(*message);
 	if (sendMessage != NULL)	
 	{
-		sendMessage->AddInt32("type",B_STRING_TYPE);
-		sendMessage->AddString("name",label);
-		sendMessage->AddString("newValue", textControl->Text()); 
+		sendMessage->FindMessage("valueContainer",valueContainer);
+		valueContainer->AddInt32("type",B_STRING_TYPE);
+		valueContainer->AddString("name",label);
+		valueContainer->AddString("newValue", textControl->Text()); 
+		sendMessage->ReplaceMessage("valueContainer",valueContainer);
 		BInvoker::Invoke(sendMessage);
 	}
 	else
 		return B_ERROR;
+	delete valueContainer;
 }
 

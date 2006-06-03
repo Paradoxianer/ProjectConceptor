@@ -18,6 +18,7 @@ MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forC
 	baseEditMessage	=  new BMessage(P_C_EXECUTE_COMMAND);
 	baseEditMessage->AddPointer("node",container);
 	baseEditMessage->AddString("Command::Name","ChangeValue");
+	baseEditMessage->AddMessage("valueContainer",new BMessage());
 	editMessage		= new BMessage(*baseEditMessage);
 }
 
@@ -50,6 +51,7 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 			case B_MESSAGE_TYPE:
 			{
 				BMessage	*tmpMessage		= new BMessage();
+				BMessage	*valueContainer	= new BMessage();
 				if (message->FindMessage(name,count-1,tmpMessage)==B_OK)
 				{
 					BListItem	*newSuperItem=new BStringItem(name);
@@ -61,7 +63,9 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 						delete editMessage;
 						editMessage		= new BMessage(*baseEditMessage);
 					}
-					editMessage->AddString("subgroup",name); 
+					editMessage->FindMessage("valueContainer",valueContainer);
+					valueContainer->AddString("subgroup",name);
+					editMessage->ReplaceMessage("valueContainer",valueContainer);
 					AddMessage(tmpMessage,newSuperItem);
 				}
 				break;
