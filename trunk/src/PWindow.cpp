@@ -539,6 +539,7 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	tab->SetLabel(name); 
 	mainView->Select(tab);
 	editor->GetView()->MakeFocus(true);
+	
 	(doc->GetEditorManager())->RegisterPEditor(editor);
 	if ((doc->GetEditorManager())->CountPEditors()>1)
 		editor->GetView()->ResizeTo(doc->Bounds().Width(),doc->Bounds().Height());

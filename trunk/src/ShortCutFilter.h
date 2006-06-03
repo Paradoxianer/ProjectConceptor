@@ -14,7 +14,7 @@ struct shortcut
 	uint32		key;
 	uint32		modifiers;
 	BMessage	*sendMessage;
-	BMessenger	*sentTo;
+	BHandler	*sentTo;
 };
 
 class ShortCutFilter : public BMessageFilter

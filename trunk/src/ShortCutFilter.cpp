@@ -15,35 +15,43 @@ BMessage* ShortCutFilter::GetShortcutList(void)
 {
 	shortcut	*theShortcut	= NULL;
 	BMessage	*returnMessage	= new BMessage();
-	BLooper		*tmpLooper		= NULL;
 	for (uint32 i=0;i<shortcutVector->CountItems();i++)
 	{
 		theShortcut = shortcutVector->ValueAt(i);
 		returnMessage->AddInt32("key",theShortcut->key);
 		returnMessage->AddInt32("modifiers",theShortcut->modifiers);
-		returnMessage->AddMessage("message",(theShortcut->sendMessage));
-		returnMessage->AddPointer("handler",(theShortcut->sentTo)->Target(&tmpLooper));
+		returnMessage->AddMessage("message",theShortcut->sendMessage);
+		returnMessage->AddPointer("handler",theShortcut->sentTo);
 	}
 	return returnMessage;
 }
 filter_result ShortCutFilter::Filter(BMessage *message, BHandler **target)
 {
 	uint32		key;
+	uint32		modifiers;
 	shortcut	*theShortcut	= NULL;
+	status_t	err				= B_OK;
 	switch(message->what) 
 	{
 		case B_KEY_DOWN:
 		{
 			if (message->FindInt32("raw_char",(int32 *)&key) == B_OK)
 			{
-				BMessenger *messenger		= NULL;
+				
+				message->PrintToStream();
+				message->FindInt32("modifiers",(int32)&modifiers);
+				BMessenger	*messenger		= NULL;
 				BMessage	*sendMessage	= NULL;
 				theShortcut	= shortcutVector->ValueFor(key);
 				if (theShortcut != NULL)
 				{
-					messenger	= theShortcut->sentTo;
-					sendMessage	= theShortcut->sendMessage;
-					messenger->SendMessage(sendMessage);
+					if ( (theShortcut->modifiers == 0) || ((theShortcut->modifiers && modifiers) != 0 ) )
+					{
+						messenger	= new BMessenger(theShortcut->sentTo,NULL,&err);
+						PRINT(("Messenger- error %s",strerror(err)));
+						sendMessage	= theShortcut->sendMessage;
+						messenger->SendMessage(sendMessage);
+					}
 				}
 			}
 		}
@@ -63,8 +71,6 @@ void ShortCutFilter::AddShortCutList(BMessage *shortcutList)
 	int32		i				= 0;
 	shortcut	*theShortcut	= NULL;
 	BHandler	*handler		= NULL;
-
-	
 	while (shortcutList->FindInt32("key",i,(int32 *)&key) == B_OK)
 	{
 		handler 	= NULL;
@@ -72,10 +78,11 @@ void ShortCutFilter::AddShortCutList(BMessage *shortcutList)
 		theShortcut	= new shortcut;
 		theShortcut->sendMessage = new BMessage();
 		theShortcut->key=key;
-		shortcutList->FindInt32("modifiers",i,(int32 *)&(theShortcut->modifiers));
+		shortcutList->FindInt32("modifiers",i,(int32 *)&modifiers);
 		shortcutList->FindMessage("message",i,(theShortcut->sendMessage));
 		shortcutList->FindPointer("handler",i,(void **)&handler);
-		theShortcut->sentTo= new BMessenger(handler);
+		theShortcut->sentTo		= handler;
+		theShortcut->modifiers	= modifiers;
 		i++;
 		shortcutVector->AddItem(key,theShortcut);
 	}
