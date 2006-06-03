@@ -79,7 +79,10 @@ status_t TextEditorControl::Invoke(BMessage *message = NULL)
 	BMessage copy(*Message()); 
 /*	copy.AddPointer("newValue", Text()); 
 	copy.AddInt32("size",TextLength()+1);*/
-	copy.AddString("newValue",Text());
+	BMessage *valueContainer	= new BMessage();
+	copy.FindMessage("valueContainer",valueContainer);
+	valueContainer->AddString("newValue",Text());
+	copy.ReplaceMessage("valueContainer",valueContainer);
 	if (Parent())
 	{
 		Parent()->MakeFocus(true);

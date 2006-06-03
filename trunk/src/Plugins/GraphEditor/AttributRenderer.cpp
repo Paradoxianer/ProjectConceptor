@@ -41,7 +41,13 @@ void AttributRenderer::SetAttribute(BMessage *newAttribut)
 	{	
 		if (name)
 			delete name;
-		name = new StringRenderer(editor, attribName, frame,changeMessage);
+		BMessage	*nameChange		= new BMessage(*changeMessage);
+		BMessage	*valueContainer	= new BMessage();
+		nameChange->FindMessage("valueContainer",valueContainer);
+		valueContainer->AddString("name","Name");
+		valueContainer->AddInt32("type",B_STRING_TYPE);
+		nameChange->ReplaceMessage("valueContainer",valueContainer);
+		name = new StringRenderer(editor, attribName, frame,nameChange);
 	}
 	switch(attribut->what) 
 	{
@@ -49,7 +55,13 @@ void AttributRenderer::SetAttribute(BMessage *newAttribut)
 		{
 			char	*attribValue	= NULL;
 			attribut->FindString("Value",(const char **)&attribValue);
-			value	= new StringRenderer(editor,attribValue,frame,changeMessage);
+			BMessage	*valueChange	= new BMessage(*changeMessage);
+			BMessage	*valueContainer	= new BMessage();
+			valueChange->FindMessage("valueContainer",valueContainer);
+			valueContainer->AddString("name","Value");
+			valueContainer->AddInt32("type",B_STRING_TYPE);
+			valueChange->ReplaceMessage("valueContainer",valueContainer);
+			value	= new StringRenderer(editor,attribValue,frame,valueChange);
 			break;
 		}
 	}
@@ -108,9 +120,9 @@ void AttributRenderer::Draw(BView *drawOn, BRect updateRect)
 		value->Draw(drawOn,updateRect);
 	if (deleter)
 		deleter->Draw(drawOn,updateRect);
-	rgb_color stored = drawOn->HighColor();
+	/*rgb_color stored = drawOn->HighColor();
 	drawOn->SetHighColor(60,50,50,255);
 	drawOn->StrokeLine(BPoint(frame.left+divider,frame.top),BPoint(frame.left+divider,frame.bottom));
-	drawOn->SetHighColor(stored);
+	drawOn->SetHighColor(stored);*/
 }
 

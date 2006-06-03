@@ -633,10 +633,12 @@ void GraphEditor::MessageReceived(BMessage *message)
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changeColorMessage->AddString("Command::Name","ChangeValue");
 			changeColorMessage->AddBool("selected",true);
-			changeColorMessage->AddString("name","FillColor");
-			changeColorMessage->AddString("subgroup","Pattern");
-			changeColorMessage->AddInt32("type",B_RGB_COLOR_TYPE);
-			changeColorMessage->AddRGBColor("newValue",colorItem->GetColor()); 
+			BMessage	*valueContainer	= new BMessage();
+			valueContainer->AddString("name","FillColor");
+			valueContainer->AddString("subgroup","Pattern");
+			valueContainer->AddInt32("type",B_RGB_COLOR_TYPE);
+			valueContainer->AddRGBColor("newValue",colorItem->GetColor()); 
+			changeColorMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changeColorMessage);
 			break;
 		}
@@ -645,10 +647,12 @@ void GraphEditor::MessageReceived(BMessage *message)
 			BMessage	*changePenSizeMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changePenSizeMessage->AddString("Command::Name","ChangeValue");
 			changePenSizeMessage->AddBool("selected",true);
-			changePenSizeMessage->AddString("name","PenSize");
-			changePenSizeMessage->AddString("subgroup","Pattern");
-			changePenSizeMessage->AddInt32("type",B_FLOAT_TYPE);
-			changePenSizeMessage->AddFloat("newValue",penSize->GetValue()); 
+			BMessage	*valueContainer	= new BMessage();
+			valueContainer->AddString("name","PenSize");
+			valueContainer->AddString("subgroup","Pattern");
+			valueContainer->AddInt32("type",B_FLOAT_TYPE);
+			valueContainer->AddFloat("newValue",penSize->GetValue()); 
+			changePenSizeMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changePenSizeMessage);
 			break;
 		}

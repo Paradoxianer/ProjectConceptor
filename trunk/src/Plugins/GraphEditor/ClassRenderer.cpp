@@ -43,10 +43,13 @@ void ClassRenderer::Init()
 
 	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 	editMessage->AddPointer("node",container);
-	editMessage->AddString("name","Name");
-	editMessage->AddString("subgroup","Data");
+
 	editMessage->AddString("Command::Name","ChangeValue");
-	editMessage->AddInt32("type",B_STRING_TYPE);
+	BMessage	*valueContainer	= new BMessage();
+	valueContainer->AddString("name","Name");
+	valueContainer->AddString("subgroup","Data");
+	valueContainer->AddInt32("type",B_STRING_TYPE);
+	editMessage->AddMessage("valueContainer",valueContainer);
 	name						= new StringRenderer(editor,"",BRect(0,0,100,100), editMessage);
 	err 						= container->FindPointer("doc",(void **)&doc);
 	sentTo						= new BMessenger(NULL,doc);
@@ -456,8 +459,10 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute)
 	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 	editMessage->AddPointer("node",container);
 	editMessage->AddString("Command::Name","ChangeValue");
-	editMessage->AddString("subgroup","Data");
-	editMessage->AddString("name",attribName);
+	BMessage*	valueContainer	= new BMessage();
+	valueContainer->AddString("subgroup","Data");
+	valueContainer->AddString("subgroup",attribName);
+	editMessage->AddMessage("valueContainer",valueContainer);
 //	attribute->FindString("Name",(const char **)&realName);
 //	Renderer	*testRenderer	= new StringRenderer(editor,realName,attributeRect, editMessage);
 	Renderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage);
