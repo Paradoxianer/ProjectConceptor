@@ -25,6 +25,7 @@ TYPE= SHARED
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
 SRCS= 	AttributRenderer.cpp		\
+		BoolRenderer.cpp		\
 		ClassRenderer.cpp		\
 		ConnectionRenderer.cpp	\
 		GraphEditor.cpp			\
@@ -90,7 +91,7 @@ SYMBOLS = TRUE
 #	specify debug settings
 #	if TRUE will allow application to be run from
 #	a source-level debugger
-# DEBUGGER = TRUE
+DEBUGGER = TRUE
 
 #	specify additional compiler flags for all files
 COMPILER_FLAGS =

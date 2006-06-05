@@ -180,8 +180,18 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 }
 void ClassRenderer::MouseUp(BPoint where)
 {
-	//berechnung des Moveparameters ist falsch.. da er sich relativ auf den ausgangspunkt von View bezieht, da sich aber das View bewegt ist das falsch
-	if (startMouseDown)
+	bool		found			= false;
+	Renderer*	tmpRenderer		= NULL;
+	for (int32 i = 0; (found == false) && (i < attributes->size());i++)
+	{
+		tmpRenderer=(*attributes)[i];
+		if (tmpRenderer->Caught(where))
+		{
+			found = true;
+			tmpRenderer->MouseUp(where);
+		}
+	}
+	if ( (!found) && (startMouseDown) )
 	{
 		if (!connecting)
 		{

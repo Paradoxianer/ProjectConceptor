@@ -1,6 +1,3 @@
-#include "AttributRenderer.h"
-#include "ProjectConceptorDefs.h"
-#include "PCommandManager.h"
 
 #include <interface/Font.h>
 #include <interface/View.h>
@@ -11,7 +8,10 @@
 #include <support/String.h>
 #include <math.h>
 
-
+#include "AttributRenderer.h"
+#include "ProjectConceptorDefs.h"
+#include "PCommandManager.h"
+#include "BoolRenderer.h"
 
 AttributRenderer::AttributRenderer(GraphEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *message=NULL):Renderer(parentEditor,NULL)
 {
@@ -64,6 +64,20 @@ void AttributRenderer::SetAttribute(BMessage *newAttribut)
 			value	= new StringRenderer(editor,attribValue,frame,valueChange);
 			break;
 		}
+		case B_BOOL_TYPE:
+		{
+			bool	attribValue	= false;
+			attribut->FindBool("Value",&attribValue);
+			BMessage	*valueChange	= new BMessage(*changeMessage);
+			BMessage	*valueContainer	= new BMessage();
+			valueChange->FindMessage("valueContainer",valueContainer);
+			valueContainer->AddString("name","Value");
+			valueContainer->AddInt32("type",B_BOOL_TYPE);
+			valueChange->ReplaceMessage("valueContainer",valueContainer);
+			value	= new BoolRenderer(editor,attribValue,frame,valueChange);	
+			break;
+		}
+
 	}
 	SetFrame(frame);
 }
@@ -110,6 +124,28 @@ void AttributRenderer::MouseDown(BPoint where)
 		if (value)
 			value->MouseDown(where);
 	}
+}
+
+void AttributRenderer::MouseUp(BPoint where)
+{
+	TRACE();
+	if ( (name) && (name->Caught(where)) )
+		name->MouseUp(where);
+	else if ((deleter) && (deleter->Caught(where)) )
+		deleter->MouseUp(where);
+	else
+	{
+		if (value)
+			value->MouseUp(where);
+	}
+}
+
+
+void AttributRenderer::MoveBy(float dx, float dy)
+{
+	frame.OffsetBy(dx,dy);
+	name->MoveBy(dx,dy);
+	value->MoveBy(dx,dy);
 }
 
 void AttributRenderer::Draw(BView *drawOn, BRect updateRect)
