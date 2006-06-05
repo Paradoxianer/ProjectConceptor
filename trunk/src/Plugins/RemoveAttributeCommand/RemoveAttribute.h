@@ -20,5 +20,9 @@ public:
 	virtual	void			DetachedFromManager(void);
 
 	//----------------PCommand
+protected:
+			void			RemoveAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage);
+			void			AddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *newValue);
+
 };
 #endif

@@ -5,11 +5,13 @@
  */
 #include <app/Message.h>
 #include <app/Messenger.h>
-#include <interface/View.h>
-#include <interface/Box.h>
-#include <interface/PictureButton.h>
+
+#include <interface/Menu.h>
+#include <interface/MenuItem.h>
+#include <interface/PopUpMenu.h>
 #include <interface/TextView.h>
 #include <interface/TextControl.h>
+#include <interface/View.h>
 
 #include "GraphEditor.h"
 #include "PDocument.h"
@@ -57,6 +59,7 @@ protected:
 		Renderer			*value;
 		Renderer			*deleter;
 		float				divider;
+		BPopUpMenu			*kontextMenu;
 private:
 };
 #endif

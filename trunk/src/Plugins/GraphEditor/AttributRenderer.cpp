@@ -26,10 +26,11 @@ AttributRenderer::AttributRenderer(GraphEditor *parentEditor,BMessage *forAttrib
 void AttributRenderer::Init()
 {
 	TRACE();
-	name	= NULL;
-	value	= NULL;
-	deleter	= NULL;
-
+	name		= NULL;
+	value		= NULL;
+	deleter		= NULL;
+	kontextMenu	= new BPopUpMenu("deleter");
+	kontextMenu->AddItem(new BMenuItem(_T("Delete"),NULL));
 }
 
 void AttributRenderer::SetAttribute(BMessage *newAttribut)
@@ -115,28 +116,51 @@ void AttributRenderer::SetFrame(BRect newRect)
 void AttributRenderer::MouseDown(BPoint where)
 {
 	TRACE();
-	if ( (name) && (name->Caught(where)) )
-		name->MouseDown(where);
-	else if ((deleter) && (deleter->Caught(where)) )
-		deleter->MouseDown(where);
+	uint32 modifiers = 0;
+	uint32 buttons = 0;
+	BMessage *currentMsg = editor->Window()->CurrentMessage();
+	currentMsg->FindInt32("buttons", (int32 *)&buttons);
+	currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
+	if (buttons & B_SECONDARY_MOUSE_BUTTON)
+ 	{
+ 		BMenuItem *selected;
+ 		BMessage *copy;
+ 		editor->ConvertToScreen(&where);
+		selected = kontextMenu->Go(where); 
+	}
 	else
 	{
-		if (value)
-			value->MouseDown(where);
+		if ( (name) && (name->Caught(where)) )
+			name->MouseDown(where);
+		else if ((deleter) && (deleter->Caught(where)) )
+			deleter->MouseDown(where);
+		else
+		{
+			if (value)
+				value->MouseDown(where);
+		}
 	}
 }
 
 void AttributRenderer::MouseUp(BPoint where)
 {
 	TRACE();
-	if ( (name) && (name->Caught(where)) )
-		name->MouseUp(where);
-	else if ((deleter) && (deleter->Caught(where)) )
-		deleter->MouseUp(where);
-	else
+	uint32 modifiers = 0;
+	uint32 buttons = 0;
+	BMessage *currentMsg = editor->Window()->CurrentMessage();
+	currentMsg->FindInt32("buttons", (int32 *)&buttons);
+	currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
+	if (!(buttons & B_SECONDARY_MOUSE_BUTTON))
 	{
-		if (value)
-			value->MouseUp(where);
+		if ( (name) && (name->Caught(where)) )
+			name->MouseUp(where);
+		else if ((deleter) && (deleter->Caught(where)) )
+			deleter->MouseUp(where);
+		else
+		{
+			if (value)
+				value->MouseUp(where);
+		}
 	}
 }
 

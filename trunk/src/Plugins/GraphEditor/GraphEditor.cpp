@@ -336,10 +336,10 @@ void GraphEditor::MouseDown(BPoint where)
 	scaledWhere.x	= where.x / scale;
 	scaledWhere.y	= where.y / scale;	
 
-//	BMessage *currentMsg = Window()->CurrentMessage();
+	BMessage *currentMsg = Window()->CurrentMessage();
 	uint32 modifiers = 0;
 	uint32 buttons = 0;
-	GetMouse(&where,&buttons);
+//	GetMouse(&where,&buttons);
 	bool found	=	false;
 	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0) );i--)
 	{
@@ -352,9 +352,8 @@ void GraphEditor::MouseDown(BPoint where)
 	}
 	if (!found)
 	{
-//		currentMsg->FindInt32("buttons", (int32 *)&buttons);
-
-//		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
+		currentMsg->FindInt32("buttons", (int32 *)&buttons);
+		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
 		if (buttons & B_PRIMARY_MOUSE_BUTTON)
 	 	{
 			startMouseDown=new BPoint(scaledWhere);
@@ -672,13 +671,16 @@ void GraphEditor::MessageReceived(BMessage *message)
 				BMessage	*addMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 				addMessage->AddString("Command::Name","AddAttribute");
 				addMessage->AddBool("selected",true);
-				addMessage->AddInt32("type",B_MESSAGE_TYPE);
-				addMessage->AddString("name",inputstr);
-				addMessage->AddString("subgroup","Data");
+				BMessage	*valueContainer	= new BMessage();
+				
+				valueContainer->AddInt32("type",B_MESSAGE_TYPE);
+				valueContainer->AddString("name",inputstr);
+				valueContainer->AddString("subgroup","Data");
 				BMessage	*newAttribute	= new BMessage(type);
 				newAttribute->AddString("Name",inputstr);
 				newAttribute->AddData("Value",type,datadummy,sizeof(datadummy));
-				addMessage->AddMessage("newAttribute",newAttribute);
+				valueContainer->AddMessage("newAttribute",newAttribute);
+				addMessage->AddMessage("valueContainer",valueContainer);
 				sentTo->SendMessage(addMessage);
 			}
 			break;

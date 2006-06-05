@@ -20,7 +20,7 @@ public:
 	virtual	void			DetachedFromManager(void);
 
 protected:
-			void			DoAddAttribute(PDocument *doc,BRect *rect,BMessage *settings);
+			void			DoAddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,bool undo = false);
 	//----------------PCommand
 };
 #endif
