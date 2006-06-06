@@ -22,7 +22,7 @@ void RemoveAttribute::Undo(PDocument *doc,BMessage *undo)
 	{
 		err = B_OK;
 		if (undo->FindMessage("valueContainer",i,valueContainer) == B_OK)
-			AddAttribute(doc,node,valueContainer,newValue);
+//			AddAttribute(doc,node,valueContainer,newValue);
 		i++;
 
 	}
@@ -35,7 +35,7 @@ void RemoveAttribute::Undo(PDocument *doc,BMessage *undo)
 		{
 			while (selectNodes->FindPointer("node",i,(void **)&node) == B_OK)
 			{
-				AddAttribute(doc,node,valueContainer,newValue);
+//				AddAttribute(doc,node,valueContainer,newValue);
 				i++;				
 			}
 		}	
@@ -57,7 +57,7 @@ BMessage* RemoveAttribute::Do(PDocument *doc, BMessage *settings)
 	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
 	{
 		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK)
-			RemoveAttribute(doc,node,valueContainer,undoMessage);
+			DoRemoveAttribute(doc,node,valueContainer,undoMessage);
 		i++;
 	}
 	if ( (settings->FindBool("selected",&selected) == B_OK) && (selected==true) )
@@ -68,7 +68,7 @@ BMessage* RemoveAttribute::Do(PDocument *doc, BMessage *settings)
 			{
 				node =(BMessage *) selection->ItemAt(i);
 				selectedNodes->AddPointer("node",node);
-				RemoveAttribute(doc,node,valueContainer,selectedNodes);
+				DoRemoveAttribute(doc,node,valueContainer,selectedNodes);
 			}
 		}
 	}
@@ -78,7 +78,7 @@ BMessage* RemoveAttribute::Do(PDocument *doc, BMessage *settings)
 	settings->AddMessage("RemoveAttribute::Undo",undoMessage);
 	settings = PCommand::Do(doc,settings);
 	return settings;
-
+}
 
 
 void RemoveAttribute::AttachedToManager(void)
@@ -89,10 +89,11 @@ void RemoveAttribute::DetachedFromManager(void)
 {
 }
 
-void RemoveAttribute::RemoveAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage)
+void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage)
 {
 	status_t	err				= B_OK;
 	int32 		i				= 0;
+	int32		j				= 0;
 	BList		*subGroupList	= new BList();
 	BMessage	*subGroup		= NULL;
 	BMessage	*tmpSubGroup	= new BMessage();
@@ -101,11 +102,12 @@ void RemoveAttribute::RemoveAttribute(PDocument *doc, BMessage *node, BMessage *
 	char		*name			= NULL;
 	char		*subGroupName	= NULL;
 	type_code	type			= B_ANY_TYPE;
-	void*		newValue		= NULL;
-	int32		index			= NULL;
+	void*		oldValue		= NULL;
+	int32		index			= 0;
+	int32		count			= 0;
+	ssize_t 	size			= 0;
 	err = valueContainer->FindString("name",(const char**)&name);
-	err = err | valueContainer->FindInt32("type",(int32 *)&type);
-	err = err | valueContainer->FindInt32("index",(int32 *)&type);
+	err = err | valueContainer->FindInt32("index",(int32 *)&index);
 	subGroup = node;
 	subGroupList->AddItem(subGroup);
 	while (valueContainer->FindString("subgroup",i,(const char**)&subGroupName) == B_OK)
@@ -117,7 +119,13 @@ void RemoveAttribute::RemoveAttribute(PDocument *doc, BMessage *node, BMessage *
 		i++;
 	}
 	delete tmpSubGroup;
-	subGroup->AddData(name,type,newValue,size);
+	while ( (subGroup->GetInfo(B_ANY_TYPE, j, (const char **)&name, &type, &count) == B_OK) && (count != index) )
+		j++;
+	subGroup->FindData(name,type,count-1,(const void **)&oldValue,&size);
+	undoMessage->AddData("deletedAttribut",type,oldValue,size);
+	undoMessage->AddString("deletedName",name);
+	undoMessage->AddInt32("deletedType",type);
+	subGroupe->RemoveData(name,index);
 	for (i=subGroupList->CountItems()-1;i>0;i--)
 	{
 		tmpSubGroup = (BMessage *)subGroupList->ItemAt(i-1);
@@ -130,7 +138,7 @@ void RemoveAttribute::RemoveAttribute(PDocument *doc, BMessage *node, BMessage *
 	
 }
 
-void RemoveAttribute::DoAddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *newValue)
+void RemoveAttribute::AddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage)
 {
 	int32 		i				= 0;
 	status_t	err				= B_OK;
@@ -142,19 +150,20 @@ void RemoveAttribute::DoAddAttribute(PDocument *doc, BMessage *node, BMessage *v
 	char		*name			= NULL;
 	char		*subGroupName	= NULL;
 	type_code	type			= B_ANY_TYPE;
-	void*		newValue		= NULL;
 	ssize_t		size			= 0;
 	
 	//undo
 	char		*compareName	= NULL;
+	void*		newValue		= NULL;
 	int32		lastIndex		= -1;
 	int32		count			= 0;
 	int32		index			= 0;
 	type_code	typeFound		= B_ANY_TYPE;
 
-	err = valueContainer->FindString("name",(const char**)&name);
-	err = err | valueContainer->FindInt32("type",(int32 *)&type);
-	err = valueContainer->FindData("newAttribute", type,(const void **)&newValue, &size);
+	err = undoMessage->FindString("deletedName",(const char**)&name);
+	err = err | undoMessage->FindInt32("deletedType",(int32 *)&type);
+	err = undoMessage->FindData("deletedAttribut", type,(const void **)&newValue, &size);
+	
 	subGroup = node;
 	subGroupList->AddItem(subGroup);
 	while (valueContainer->FindString("subgroup",i,(const char**)&subGroupName) == B_OK)

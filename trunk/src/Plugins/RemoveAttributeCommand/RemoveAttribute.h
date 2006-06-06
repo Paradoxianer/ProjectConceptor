@@ -21,8 +21,8 @@ public:
 
 	//----------------PCommand
 protected:
-			void			RemoveAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage);
-			void			AddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *newValue);
+			void			DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage);
+			void			AddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage);
 
 };
 #endif
