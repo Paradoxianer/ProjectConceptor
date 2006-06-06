@@ -91,6 +91,9 @@ void RemoveAttribute::DetachedFromManager(void)
 
 void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage)
 {
+	node->PrintToStream();
+	valueContainer->PrintToStream();
+	undoMessage->PrintToStream();
 	status_t	err				= B_OK;
 	int32 		i				= 0;
 	int32		j				= 0;
@@ -100,6 +103,7 @@ void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage
 	BList		*changed		= doc->GetChangedNodes();
 	//do 
 	char		*name			= NULL;
+	char		*tmpName		= NULL;
 	char		*subGroupName	= NULL;
 	type_code	type			= B_ANY_TYPE;
 	void*		oldValue		= NULL;
@@ -119,13 +123,13 @@ void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage
 		i++;
 	}
 	delete tmpSubGroup;
-	while ( (subGroup->GetInfo(B_ANY_TYPE, j, (const char **)&name, &type, &count) == B_OK) && (count != index) )
+	while ( (subGroup->GetInfo(B_ANY_TYPE, j, (const char **)&tmpName, &type, &count) == B_OK) && ((count-1) != index) )
 		j++;
 	subGroup->FindData(name,type,count-1,(const void **)&oldValue,&size);
 	undoMessage->AddData("deletedAttribut",type,oldValue,size);
 	undoMessage->AddString("deletedName",name);
 	undoMessage->AddInt32("deletedType",type);
-	subGroupe->RemoveData(name,index);
+	subGroup->RemoveData(name,index);
 	for (i=subGroupList->CountItems()-1;i>0;i--)
 	{
 		tmpSubGroup = (BMessage *)subGroupList->ItemAt(i-1);
@@ -140,6 +144,9 @@ void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage
 
 void RemoveAttribute::AddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage)
 {
+	node->PrintToStream();
+	valueContainer->PrintToStream();
+	undoMessage->PrintToStream();
 	int32 		i				= 0;
 	status_t	err				= B_OK;
 	BList		*subGroupList	= new BList();
