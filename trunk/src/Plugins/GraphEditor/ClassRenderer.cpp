@@ -372,7 +372,7 @@ void ClassRenderer::ValueChanged()
 	for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(const char **) &attribName, &type, &count) == B_OK; i++)
 	{
 		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
-			InsertAttribute(attribName,attribMessage);
+			InsertAttribute(attribName,attribMessage, count-1);
 	}
 }
 
@@ -437,7 +437,7 @@ void ClassRenderer::ResizeBy(float dx,float dy)
 	}
 }
 
-void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute)
+void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 count)
 {
 	char	*realName	= NULL;
 	/*switch(attribute->what) 
@@ -473,9 +473,19 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute)
 	valueContainer->AddString("subgroup","Data");
 	valueContainer->AddString("subgroup",attribName);
 	editMessage->AddMessage("valueContainer",valueContainer);
+	delete valueContainer;
+	BMessage*	removeAttribMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+	removeAttribMessage->AddPointer("node",container);
+	removeAttribMessage->AddString("Command::Name","RemoveAttribute");
+	valueContainer	= new BMessage();
+	valueContainer->AddString("subgroup","Data");
+	valueContainer->AddString("name",attribName);
+	valueContainer->AddInt32("index",count);
+	removeAttribMessage->AddMessage("valueContainer",valueContainer);
+	
 //	attribute->FindString("Name",(const char **)&realName);
 //	Renderer	*testRenderer	= new StringRenderer(editor,realName,attributeRect, editMessage);
-	Renderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage);
+	Renderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage,removeAttribMessage);
 	attributes->push_back(testRenderer);
 
 }

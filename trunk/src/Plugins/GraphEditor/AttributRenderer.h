@@ -32,7 +32,7 @@ class AttributRenderer: public Renderer
 {
 
 public:
-							AttributRenderer(GraphEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *message=NULL);
+							AttributRenderer(GraphEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *chgMessage=NULL, BMessage *delMessage=NULL);
 			void			ValueChanged(void){};
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetAttribute(BMessage *newAttribut);
@@ -53,6 +53,7 @@ protected:
 			void			Init();
 		BMessage			*changeMessage;
 		BMessage			*attribut;
+		BMessage			*deleteMessage;
 		GraphEditor 		*editor;
 		BRect				frame;
 		StringRenderer		*name;

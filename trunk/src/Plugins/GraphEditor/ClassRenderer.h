@@ -49,7 +49,7 @@ public:
 
 protected:
 				void		Init();
-				void		InsertAttribute(char *attribName, BMessage *attribute);
+				void		InsertAttribute(char *attribName, BMessage *attribute,int32 count);
 		BMessage			*viewMessage;
 
 

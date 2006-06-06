@@ -13,12 +13,14 @@
 #include "PCommandManager.h"
 #include "BoolRenderer.h"
 
-AttributRenderer::AttributRenderer(GraphEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *message=NULL):Renderer(parentEditor,NULL)
+AttributRenderer::AttributRenderer(GraphEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *chgMessage=NULL, BMessage *delMessage=NULL):Renderer(parentEditor,NULL)
 {
 	TRACE();
-	changeMessage	= message;
+	changeMessage	= chgMessage;
+	deleteMessage	= delMessage;
 	editor			= parentEditor;
 	frame			= attribRect;
+	
 	Init();
 	SetAttribute(forAttribut);
 	
@@ -30,7 +32,9 @@ void AttributRenderer::Init()
 	value		= NULL;
 	deleter		= NULL;
 	kontextMenu	= new BPopUpMenu("deleter");
-	kontextMenu->AddItem(new BMenuItem(_T("Delete"),NULL));
+	BMenuItem	*deleter = new BMenuItem(_T("Delete"),deleteMessage);
+	kontextMenu->AddItem(deleter);
+	status_t err = kontextMenu->SetTargetForItems(editor->BelongTo());
 }
 
 void AttributRenderer::SetAttribute(BMessage *newAttribut)
@@ -127,6 +131,7 @@ void AttributRenderer::MouseDown(BPoint where)
  		BMessage *copy;
  		editor->ConvertToScreen(&where);
 		selected = kontextMenu->Go(where); 
+		selected->Invoke();
 	}
 	else
 	{
