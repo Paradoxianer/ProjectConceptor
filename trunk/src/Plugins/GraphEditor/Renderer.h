@@ -30,7 +30,7 @@ public:
 
 
 protected:
-			BMessage*	container;
+			BMessage	*container;
 			GraphEditor	*editor;
 };
 #endif

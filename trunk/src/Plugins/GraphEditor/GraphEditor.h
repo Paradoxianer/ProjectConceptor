@@ -103,6 +103,7 @@ public:
 			float			Scale(void){return scale;};
 			BList*			RenderList(void){return renderer;};
 			image_id		PluginID(void){return pluginID;};
+			char*			RenderString(void){return renderString;};
 	
 protected:
 			void			Init(void);

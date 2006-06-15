@@ -58,8 +58,16 @@ void BoolRenderer::SetFrame(BRect newRect)
 {
 	TRACE();
 	frame			= newRect;
-	frame.bottom	= frame.top + selected->Bounds().Height();
-	frame.right		= frame.left + selected->Bounds().Width();
+	if (selected)
+	{
+		frame.bottom	= frame.top + selected->Bounds().Height();
+		frame.right		= frame.left + selected->Bounds().Width();
+	}
+	else
+	{
+		frame.bottom	= frame.top+10;
+		frame.right		= frame.left+10;
+	}
 }
 
 void BoolRenderer::MouseDown(BPoint where)

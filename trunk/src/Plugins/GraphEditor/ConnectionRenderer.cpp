@@ -1,4 +1,5 @@
 #include "ConnectionRenderer.h"
+#include "ClassRenderer.h"
 #include <interface/Window.h>
 #include <stdio.h>
 
@@ -21,21 +22,23 @@ void ConnectionRenderer::Init()
 //	AddChild(connectionName);
 	BList		*outgoing	= NULL;
 	BList		*incoming	= NULL;
+	BMessage	*fromNode	= NULL;
+	BMessage	*toNode		= NULL;
 	BMessage	*data		= new BMessage();
-	container->FindPointer("From",(void **)&from);
-	container->FindPointer("To",(void **)&to);
+	container->FindPointer("From",(void **)&fromNode);
+	container->FindPointer("To",(void **)&toNode);
 	PRINT_OBJECT(*from);
 	PRINT_OBJECT(*to);
-	if (from->FindPointer("Outgoing",(void **)&outgoing) != B_OK)
+	if (fromNode->FindPointer("Outgoing",(void **)&outgoing) != B_OK)
 	{
 		outgoing = new BList();
-		from->AddPointer("Outgoing",outgoing);
+		fromNode->AddPointer("Outgoing",outgoing);
 	}
 	outgoing->AddItem(container);
-	if (to->FindPointer("Incoming",(void **)&incoming) != B_OK)
+	if (toNode->FindPointer("Incoming",(void **)&incoming) != B_OK)
 	{
 		incoming = new BList();
-		to->AddPointer("Incoming",incoming);
+		toNode->AddPointer("Incoming",incoming);
 	}
 	incoming->AddItem(container);
 	if (container->FindMessage("Data",data) != B_OK)
@@ -92,7 +95,8 @@ void ConnectionRenderer::LanguageChanged()
 
 void ConnectionRenderer::Draw(BView *drawOn, BRect updateRect)
 {	
-	ValueChanged();
+	//ValueChanged();
+	CalcLine();
 	drawOn->SetPenSize(2.0);
 	BPoint	shadowFrom = fromPoint;
 	BPoint	shadowTo = toPoint;
@@ -105,38 +109,14 @@ void ConnectionRenderer::Draw(BView *drawOn, BRect updateRect)
 	shadowsecond.y	+=3;
 	shadowthird.y	+=3;
 
-//	printf("ConnectionRenderer::Draw\n");
-	/*SetPenSize(0.5);
-	SetHighColor(55,55,55,255);
-	StrokeRect(Bounds());*/
 	drawOn->SetHighColor(0,0,0,77);
 	drawOn->StrokeLine(	shadowFrom,shadowTo);
 	drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
-
 	if (!selected)
 		drawOn->SetHighColor(fillColor);
 	else
 		drawOn->SetHighColor(tint_color(fillColor,1.5));
-//	drawOn->SetHighColor(255,0,0,255);
-	/*float c;
-	BPoint left=Bounds().LeftTop();
-	BPoint right=Bounds().RightBottom();
-	if (mirrorX)
-	{
-		c=left.x;
-		left.x=right.x;
-		right.x=c;
-	}
-	if (mirrorY)
-	{
-		c=left.y;
-		left.y=right.y;
-		right.y=c;
-	}*/
-//	StrokeLine(fromDrawer->Frame().RightBottom(),toDrawer->Frame().LeftTop());
-//	StrokeLine(left,right);
 	drawOn->StrokeLine(	fromPoint,toPoint);
-//	drawOn->	*fromPoint,*toPoint);
 	drawOn->FillTriangle(first,second,third);
 }
 void ConnectionRenderer::MessageReceived(BMessage *message)
@@ -159,12 +139,20 @@ void ConnectionRenderer::MessageReceived(BMessage *message)
 
 void ConnectionRenderer::ValueChanged()
 {
-	BRect	*fromRect	= new BRect(0,0,0,0);
-	BRect	*toRect		= new BRect(0,0,0,0);
-	from->FindRect("Frame",fromRect);
-	to->FindRect("Frame",toRect);
-/*	fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->Height()/2));
-	toPoint		=  BPoint(toRect->left,toRect->top+(toRect->Height()/2));*/
+	BMessage	*tmpNode	= NULL;
+	container->FindPointer("From",(void **)&tmpNode);
+	tmpNode->FindPointer(editor->RenderString(),(void **)&from);
+	tmpNode->PrintToStream();
+	container->FindPointer("To",(void **)&tmpNode);
+	tmpNode->FindPointer(editor->RenderString(),(void **)&to);
+	tmpNode->PrintToStream();
+	container->FindBool("selected",&selected);
+}
+
+void ConnectionRenderer::CalcLine()
+{
+	BRect	*fromRect	= new BRect(from->Frame());
+	BRect	*toRect		= new BRect(to->Frame());
 	float		toMiddleX 	=	(toRect->right-toRect->left)/2;
 	float		toMiddleY	=	(toRect->bottom-toRect->top)/2;
 	alpha		= atan2((toRect->top-fromRect->top),(toRect->left-fromRect->left));
@@ -207,8 +195,8 @@ void ConnectionRenderer::ValueChanged()
 	ay			= (toPoint.x-fromPoint.x)/(toPoint.y-fromPoint.y);
 	my			= fromPoint.x-(fromPoint.y*ay);
 
-	container->FindBool("selected",&selected);
 }
+
 
 BRect ConnectionRenderer::Frame()
 {

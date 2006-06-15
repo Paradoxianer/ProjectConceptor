@@ -532,7 +532,6 @@ void GraphEditor::DetachedFromWindow(void)
 		for (int32 i=0;i<renderer->CountItems();i++)
 		{
 			nodeRenderer = (Renderer *)renderer->ItemAt(i);
-			(nodeRenderer->GetMessage())->PrintToStream();
 		}
 		while(renderer->CountItems()>0)
 		{

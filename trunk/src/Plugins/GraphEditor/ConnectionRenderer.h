@@ -15,6 +15,7 @@ const uint32	B_C_NAME_CHANGED	= 'bcNC';
 
 
 const double M_PI_3_4	= M_PI_2+M_PI_4;
+class ClassRenderer;
 
 class ConnectionRenderer: public Renderer
 {
@@ -41,12 +42,13 @@ public:
 	virtual bool		Caught(BPoint where);
 
 protected:
-	virtual void		Init();
+			void		Init();
+			void		CalcLine();
 	bool				selected;
 	BPoint				first,second,third;
 	rgb_color			fillColor;
-	BMessage			*from;
-	BMessage			*to;
+	ClassRenderer		*from;
+	ClassRenderer		*to;
 	BPoint				fromPoint;
 	BPoint				toPoint;
 	bool				mirrorX,mirrorY;

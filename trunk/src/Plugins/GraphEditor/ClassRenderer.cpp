@@ -316,7 +316,6 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->StrokeTriangle(BPoint(frame.left,yOben),BPoint(frame.left+triangleHeight,yMitte),BPoint(frame.left,yUnten));
 	drawOn->StrokeTriangle(BPoint(frame.right-triangleHeight,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-triangleHeight,yUnten));
 	name->Draw(drawOn,updateRect);
-
 	for (int32 i=0;(fitIn)&& (i<attributes->size());i++)
 	{
 		tmpRenderer=(*attributes)[i];
@@ -326,7 +325,7 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 			fitIn=false;
 	}
 	if (!fitIn)
-		drawOn->DrawString("...",BPoint(frame.left+triangleHeight+2,frame.bottom-2));
+		drawOn->DrawString("...",BPoint(frame.left+triangleHeight+2,frame.bottom-(yRadius/3)));
 }
 
 void ClassRenderer::MessageReceived(BMessage *message)
@@ -365,7 +364,7 @@ void ClassRenderer::ValueChanged()
 	pattern->FindFloat("PenSize",&penSize);
 	data->FindString("Name",(const char **)&newName);
 	name->SetString(newName);
-	name->SetFrame(BRect(frame.left+2,frame.top+2,frame.right,frame.top+12));
+	name->SetFrame(BRect(frame.left+(xRadius/3),frame.top+(yRadius/3),frame.right-(xRadius/3),frame.top+12));
 	//delete all "old" Attribs
 	attributes->erase(attributes->begin(),attributes->end());
 	//and add all attribs we found
@@ -428,8 +427,10 @@ void ClassRenderer::MoveBy(float dx,float dy)
 
 void ClassRenderer::ResizeBy(float dx,float dy)
 {
-	frame.right+=dx; 
-	frame.bottom += dy;
+	if ((frame.right+dx-frame.left) > 70)
+		frame.right		+= dx; 
+	if  ((frame.bottom+dy-frame.top) > 30)
+		frame.bottom	+= dy;
 	name->ResizeBy(dy,dy);
 	for (int32 i=0;i<attributes->size();i++)
 	{
