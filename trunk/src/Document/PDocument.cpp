@@ -87,7 +87,6 @@ void PDocument::MessageReceived(BMessage* message)
 		}
 		case P_C_MACRO_TYPE:
 		{
-			message->PrintToStream();
 			commandManager->PlayMacro(message);
 			break;
 		}

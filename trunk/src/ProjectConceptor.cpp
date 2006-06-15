@@ -228,13 +228,13 @@ void ProjektConceptor::AboutRequested()
 
 void ProjektConceptor::ArgvReceived(int32 argc, char **argv)
 {
-/*	if (argc>1)
+	if (argc>1)
 	{
 		if (strcasecmp(argv[1],"-d") == B_OK)
 			SET_DEBUG_ENABLED(true);
 	}
 	else
-			SET_DEBUG_ENABLED(false);*/
+			SET_DEBUG_ENABLED(false);
 }
 int main()
 {

@@ -211,7 +211,6 @@ status_t PCommandManager::Execute(BMessage *settings)
 {
 	TRACE();
 	status_t	err	= B_OK;
-	settings->PrintToStream();
 	if (doc->Lock())
 	{
 		(doc->GetChangedNodes())->MakeEmpty();

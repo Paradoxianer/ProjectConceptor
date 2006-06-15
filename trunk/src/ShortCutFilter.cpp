@@ -37,8 +37,6 @@ filter_result ShortCutFilter::Filter(BMessage *message, BHandler **target)
 		{
 			if (message->FindInt32("raw_char",(int32 *)&key) == B_OK)
 			{
-				
-				message->PrintToStream();
 				message->FindInt32("modifiers",(int32)&modifiers);
 				BMessenger	*messenger		= NULL;
 				BMessage	*sendMessage	= NULL;
