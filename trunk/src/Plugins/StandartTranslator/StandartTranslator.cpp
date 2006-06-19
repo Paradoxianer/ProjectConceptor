@@ -16,11 +16,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-
-char translatorName[] = "ProjectConceptorTranslator";
-char translatorInfo[] = "Reads and writes the nativ ProjectConcpetor files";
-
+#include "StandartTranslator.h"
 
 
 

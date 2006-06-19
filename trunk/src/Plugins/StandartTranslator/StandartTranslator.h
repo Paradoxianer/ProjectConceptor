@@ -4,9 +4,9 @@
 //ProjectConceptor Main Type
 #define P_C_MAIN_TYPE 'pcMT'
 
-char translatorName[] = "PPMTranslator";
-char translatorInfo[] = "Reads and writes images in the PPM file format. http://www.be.com/";
-int32 translatorVersion = 100; /* format is revision+minor*10+major*100 */
+char translatorName[] = "ProjectConceptorTranslator";
+char translatorInfo[] = "Reads and writes the nativ ProjectConcpetor files";
+int32 translatorVersion = 10; /* format is revision+minor*10+major*100 */
 
 
 
