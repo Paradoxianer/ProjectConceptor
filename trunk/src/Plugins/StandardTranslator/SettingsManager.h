@@ -1,7 +1,7 @@
 class SettingsManager 
 {
 public:
-			SettingsManager(const char * str);
+			SettingsManager(const char * str = NULL);
 			~SettingsManager();
 	void	SetSaveUndo(bool newValue){saveUndo = newValue;};
 	bool	SaveUndo(void){return saveUndo;};
