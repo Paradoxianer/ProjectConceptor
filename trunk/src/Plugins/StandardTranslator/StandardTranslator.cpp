@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "StandartTranslator.h"
+#include "StandardTranslator.h"
 #include "SettingsManager.h"
 
 
@@ -33,8 +33,10 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	BMessage		*allConnections		= new BMessage();
 	BMessage		*selected			= new BMessage();
 	BMessage		*commandStuff		= new BMessage();
-	SettingsManager	*settingsManager	= new SettingsManager();
+	SettingsManager	*settingsManager	= new SettingsManager("ProjectConceptorTranslator_settings");
 	BMessage		*inMessage			= new BMessage();
+	BMessage		*outMessage			= new BMessage();
+	inMessage->Unflatten(inSource);
 	//translations Process 
 	inMessage->FindMessage("PDocument::allNodes",allNodes);
 	outMessage->AddMessage("PDocument::allNodes",allNodes);
@@ -45,8 +47,7 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	
 	inMessage->FindMessage("PDocument::commandManager",commandStuff);
 	outMessage->AddMessage("PDocument::commandManager",commandStuff);
-	BMessage		*outMessage			= new BMessage();
-	inMessage->Unflatten(inSource);
+	
 	
 	outMessage->Flatten(outDestination);
 	return err;
