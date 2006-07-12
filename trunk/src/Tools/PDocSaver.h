@@ -23,7 +23,7 @@ class PDocument;
  *
  */
 
-lass PDocSaver
+class PDocSaver
 {
 
 public:

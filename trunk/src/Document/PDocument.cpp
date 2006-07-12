@@ -448,6 +448,7 @@ void PDocument::Save(void)
 void PDocument::Load(void)
 {
 	TRACE();
+	//docloader handles the Format and Stuff also the input translation
 	PDocLoader	*docLoader	= new PDocLoader(this,new BEntry(entryRef));
 	delete allNodes;
 	delete allConnections;

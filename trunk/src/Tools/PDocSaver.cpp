@@ -6,8 +6,7 @@
 PDocSaver::PDocSaver(PDocument *doc,BEntry *saveEntry)
 {
 	Init();
-	toSave = new BFile (openEntry,B_READ_ONLY);
-	Load();
+	toSave = new BFile (saveEntry,B_READ_ONLY);
 }
 
 PDocSaver::~PDocSaver(void)
