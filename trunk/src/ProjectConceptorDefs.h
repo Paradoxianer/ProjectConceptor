@@ -14,14 +14,7 @@
 
 //extern const Debugger		*myDebugger;
 //		= new Debugger("ProjektConceptor");
-/*#define INFO //myDebugger->Info
-#define DE_BUG //myDebugger->Debug
-#define ERROR myDebugger->Error*/
 
-
-/*#define INFO printf
-#define DE_BUG printf
-#define ERROR printf*/
 
 
 const uint32	P_C_PLUGIN_MESSAGE				= 'pcPM';
@@ -29,7 +22,7 @@ const uint32	P_C_PLUGIN_MESSAGE				= 'pcPM';
 const uint32	P_C_EDITOR_PLUGIN_TYPE			= 'pcET';
 const uint32	P_C_COMMANDO_PLUGIN_TYPE		= 'pcCT';
 const uint32	P_C_ITEM_PLUGIN_TYPE			= 'pcIT';
-
+const uint32	P_C_ITEM_INPORT_EXPORT_TYPE		= 'pcTT';
 
 const uint32	P_C_DATA_CELL_RENDERER			= 'pcDR';
 const uint32	P_C_MESSAGE_FILTER				= 'pcMF';
@@ -69,6 +62,7 @@ const uint32	P_C_CONNECTED					= 'pcCd';*/
  */	
 
 const uint32	P_C_EXECUTE_COMMAND				= 'pcEC';
+
 const uint32	P_C_VALUE_CHANGED				= 'pcVC';
 const uint32	P_C_DOC_BOUNDS_CHANGED			= 'pcDB';
 

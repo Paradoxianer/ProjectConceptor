@@ -33,9 +33,20 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	BMessage		*allConnections		= new BMessage();
 	BMessage		*selected			= new BMessage();
 	BMessage		*commandStuff		= new BMessage();
-	SettingsManager	*settingsManager	= new SettingsManager("ProjectConceptorTranslator_settings");
 	BMessage		*inMessage			= new BMessage();
 	BMessage		*outMessage			= new BMessage();
+	bool			saveUndo			= true;
+	bool			saveMacro			= true;
+	bool			restoreWindowPos	= true;
+	int32			undoLevel			= -1;
+
+	if (ioExtension != NULL)
+	{
+		ioExtension->FindBool("SaveUndo",&saveUndo);
+		ioExtension->FindBool("SaveMacro",&saveUndo);
+		ioExtension->FindInt32("UndoLevel",&undoLevel);
+	}
+
 	inMessage->Unflatten(inSource);
 	//translations Process 
 	inMessage->FindMessage("PDocument::allNodes",allNodes);
@@ -44,11 +55,26 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	outMessage->AddMessage("PDocument::allConnections",allConnections);
 	inMessage->FindMessage("PDocument::selected",selected);
 	outMessage->AddMessage("PDocument::selected",selected);
-	
+
 	inMessage->FindMessage("PDocument::commandManager",commandStuff);
+	if (saveUndo)
+	{
+		if (undoLevel>0)
+		{
+			type_code	typeFound;
+			int32		countFound;
+			int32		i			= 0;
+			commandStuff->GetInfo("undo",&typeFound,&countFound);
+			for (i = countFound;i>undoLevel;i--)
+			{
+			}
+		}
+	}
+	else
+		commandStuff->RemoveName("undo");
+	if (!saveMacro)
+		commandStuff->RemoveName("makro");
 	outMessage->AddMessage("PDocument::commandManager",commandStuff);
-	
-	
 	outMessage->Flatten(outDestination);
 	return err;
 }
@@ -56,6 +82,7 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 status_t MakeConfig(BMessage * ioExtension,	BView * * outView, BRect * outExtent)
 {
 	status_t err	= B_OK;
+	
 	return err;
 }
 

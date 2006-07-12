@@ -139,6 +139,15 @@ public:
 	 *@see SetEntry
 	 */
 			void				Load(void);
+	/*
+	 * export the current Project to a different "type"
+	 */
+			status_t			Export(void);
+	
+	/* impoprt a project from a different kind of "data/type"
+	*/
+			status_t			Import(void);
+
 
 	/**shows a savePanel.. wich pass back an entry and autmatically call SetEntry
 	 *@see SetEntry
