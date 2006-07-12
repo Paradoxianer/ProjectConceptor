@@ -1,4 +1,4 @@
-#ifndef P_DOCL_OADER_H
+#ifndef P_DOC_LOADER_H
 #define P_DOC_LOADER_H
 
 #include <app/Message.h>
