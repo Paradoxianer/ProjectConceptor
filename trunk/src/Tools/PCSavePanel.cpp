@@ -1,10 +1,13 @@
 #include "PCSavePanel.h"
-
+#include "ImportExport.h"
+#include "BasePlugin.h"
 #include <interface/Window.h>
 
-PCSavePanel::PCSavePanel(BMessage *msg): BFilePanel(B_SAVE_PANEL,NULL,NULL,B_FILE_NODE,false,msg,NULL,false,true)
+
+PCSavePanel::PCSavePanel(PluginManager *pManager,BMessage *msg): BFilePanel(B_SAVE_PANEL,NULL,NULL,B_FILE_NODE,false,msg,NULL,false,true)
 {
-	float height=74;
+	pluginManager	= pManager;
+	float height	= 74;
 	Window()->SetTitle(_T("Save As"));
 	Window()->Lock();
 	BView *background = Window()->ChildAt(0),*dirmenufield;
@@ -31,8 +34,8 @@ PCSavePanel::PCSavePanel(BMessage *msg): BFilePanel(B_SAVE_PANEL,NULL,NULL,B_FIL
 		rect.OffsetBy(-20,2);
 	}
 
-	format = new BMenuField(rect,"",NULL,format_menu,B_FOLLOW_TOP | B_FOLLOW_RIGHT ,B_WILL_DRAW);
-	background->AddChild(format);
+	formatMenu = new BMenuField(rect,"",NULL,format_menu,B_FOLLOW_TOP | B_FOLLOW_RIGHT ,B_WILL_DRAW);
+	background->AddChild(formatMenu);
 	Window()->Unlock();
 }
 
@@ -44,5 +47,33 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 	int32 typecode;
 	BMenu *menu = new BMenu(_T("Fileformat") );
 	BMenuItem *item;
+	BList	*importExportPlugins	= pluginManager->GetPluginsByType(P_C_ITEM_INPORT_EXPORT_TYPE);
+	if (importExportPlugins!=NULL)
+	{
+		ImportExport	*exporter;
+		p_c_i_o_format	*formatStart;
+		p_c_i_o_format	*format;
+		int32			countFormat;
+		for (int32 i = 0;i<importExportPlugins->CountItems();i++)	
+		{
+			exporter = (ImportExport *)((BasePlugin *)importExportPlugins)->GetNewObject(NULL);
+			if (exporter)
+			{
+				exporter->GetOutputFormats((const p_c_i_o_format **)&formatStart,&countFormat);
+				format = formatStart;
+				for (int32 q = 0;q<countFormat;q++)
+				{
+					item = new BMenuItem(format->name, message);
+					menu->AddItem( item );
+					format++;
+				}
+				delete[] formatStart;
+				formatStart = NULL;
+				countFormat	= 0;
+			}
+		}
+	}
+	else
+		menu->AddItem(new BMenuItem(_T("Could not find Plugins"),NULL));
 	return menu;
 }

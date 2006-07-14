@@ -1,13 +1,15 @@
 #ifndef P_C_SAVE_PANEL_H
 #define P_C_SAVE_PANEL_H
 
-#include <Application.h>
-#include <TranslatorRoster.h>
-#include <Menu.h>
-#include <MenuItem.h>
-#include <MenuField.h>
+#include "PluginManager.h"
+
+#include <app/Application.h>
+#include <interface/Menu.h>
+#include <interface/MenuItem.h>
+#include <interface/MenuField.h>
 #include <FilePanel.h>
-#include <Button.h>
+#include <interface/Button.h>
+#include <TranslatorRoster.h>
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
@@ -19,13 +21,15 @@
 class PCSavePanel : public BFilePanel
 {
 public:
-				PCSavePanel(BMessage *msg);
+				PCSavePanel(PluginManager *pManager,BMessage *msg);
 	BMenu		*BuildFormatsMenu(void);
 	//virtual void SelectionChanged();
 
 protected:
-	BMenuField	*format;
-	entry_ref old_dir_ref,the_active_ref;
+	BMenuField		*formatMenu;
+	entry_ref 		entryRef;
+	BButton			*settings;
+	PluginManager	*pluginManager;
 };
 
 #endif
