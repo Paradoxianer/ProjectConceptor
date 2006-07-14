@@ -29,7 +29,7 @@ class PDocSaver
 public:
 								PDocSaver(PDocument *doc,BEntry *saveEntry);
 	virtual						~PDocSaver(void);
-	virtual	void				Save(void);	
+	virtual	void				Save(BMessage *settings);	
 	
 protected:
 	virtual void				Init(void);

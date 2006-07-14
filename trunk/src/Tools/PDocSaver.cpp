@@ -19,7 +19,8 @@ void PDocSaver::Init(void)
 }
 
 
-void PDocSaver::Save(void)
+void PDocSaver::Save(BMessage *settings)
 {
+		
 }
 
