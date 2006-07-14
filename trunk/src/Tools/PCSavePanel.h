@@ -21,10 +21,10 @@
 class PCSavePanel : public BFilePanel
 {
 public:
-				PCSavePanel(PluginManager *pManager,BMessage *msg);
-	BMenu		*BuildFormatsMenu(void);
+					PCSavePanel(PluginManager *pManager,BMessage *msg);
+		BMenu		*BuildFormatsMenu(void);
 	//virtual void SelectionChanged();
-
+virtual	void		SendMessage(const BMessenger*, BMessage*);
 protected:
 	BMenuField		*formatMenu;
 	entry_ref 		entryRef;
