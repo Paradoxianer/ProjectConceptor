@@ -92,6 +92,7 @@ void PDocument::MessageReceived(BMessage* message)
 		}
 		case  B_SAVE_REQUESTED:
 		{
+				message->PrintToStream();
 				entry_ref *ref	= new entry_ref;
 				const char* name;
 				message->FindRef("directory",ref);
@@ -487,7 +488,8 @@ void PDocument::SavePanel()
 	TRACE();
 	if (!savePanel)
 	{
-		savePanel = new BFilePanel(B_SAVE_PANEL, new BMessenger(this),NULL,0,false);
+//		savePanel = new PCSavePanel(B_SAVE_PANEL, new BMessenger(this),NULL,0,false);
+		savePanel = new PCSavePanel(documentManager->GetPluginManager(),NULL);
 	}
 	if (entryRef) savePanel->SetPanelDirectory(entryRef);
 	savePanel->Window()->SetWorkspaces(B_CURRENT_WORKSPACE);

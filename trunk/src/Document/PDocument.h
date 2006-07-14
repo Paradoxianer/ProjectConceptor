@@ -26,7 +26,7 @@
 #include "PEditorManager.h"
 #include "PCommandManager.h"
 #include "HelpManager.h"
-
+#include "PCSavePanel.h"
 
 
 class PDocumentManager;
@@ -203,7 +203,7 @@ protected:
 			BRect				*printableRect;
 			BMessage			*printerSetting;
 			BMessage	 	 	*documentSetting;
-			BFilePanel			*savePanel;
+			PCSavePanel			*savePanel;
 		
 		 	float				width,height;
 			bool				dirty;
