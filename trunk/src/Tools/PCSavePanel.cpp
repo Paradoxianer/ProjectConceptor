@@ -70,7 +70,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 		int32			countFormat;
 		for (int32 i = 0;i<importExportPlugins->CountItems();i++)	
 		{
-			plugin	 = (BasePlugin *)importExportPlugins;
+			plugin	 = (BasePlugin *)importExportPlugins->ItemAt(i);
 			exporter = (ImportExport *)plugin->GetNewObject(NULL);
 			if (exporter)
 			{
