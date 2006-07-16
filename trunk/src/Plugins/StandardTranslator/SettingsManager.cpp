@@ -8,7 +8,6 @@
 
 SettingsManager::SettingsManager(const char * str = NULL)
 {
-	stringList
 }
 
 SettingsManager::~SettingsManager()

@@ -4,7 +4,7 @@
 #include <interface/Window.h>
 
 
-PCSavePanel::PCSavePanel(PluginManager *pManager,BMessage *msg): BFilePanel(B_SAVE_PANEL,NULL,NULL,B_FILE_NODE,false,msg,NULL,false,true)
+PCSavePanel::PCSavePanel(PluginManager *pManager,BMessage *msg,  BMessenger* target = NULL): BFilePanel(B_SAVE_PANEL,target,NULL,B_FILE_NODE,false,msg,NULL,false,true)
 {
 	pluginManager		= pManager;
 	float 	height		= 74;

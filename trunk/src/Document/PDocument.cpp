@@ -43,7 +43,61 @@ PDocument::~PDocument()
 status_t PDocument::Archive(BMessage* archive, bool deep = true) const
 {
 	TRACE();
-	return B_ERROR;
+	Indexer		*indexer				= new Indexer((PDocument *)this);
+	status_t	err 					= B_OK;
+	int32		i						= 0;
+	BMessage	*commandManage			= new BMessage();
+	BMessage	*tmpNode				= NULL;
+	BMessage	*allNodesMessage		= new BMessage();
+	BMessage	*allConnectionsMessage	= new BMessage();
+	BMessage	*selectedMessage		= new BMessage();
+
+	if (printerSetting)
+		archive->AddMessage("PDocument::printerSetting",printerSetting);
+	archive->AddMessage("PDocument::documentSetting",documentSetting);
+	//save all Nodes
+	for (i=0; i<allNodes->CountItems();i++)
+	{
+		tmpNode=(BMessage *)allNodes->ItemAt(i);
+		allNodesMessage->AddMessage("node",indexer->IndexNode(tmpNode));
+	}
+	archive->AddMessage("PDocument::allNodes",allNodesMessage);
+	//save all Connections
+	for (i=0; i<allConnections->CountItems();i++)
+	{
+		tmpNode=(BMessage *)allConnections->ItemAt(i);
+		allConnectionsMessage->AddMessage("node",indexer->IndexConnection(tmpNode));
+	}
+	archive->AddMessage("PDocument::allConnections",allConnectionsMessage);
+	//save the selected List
+	for (i=0; i<selected->CountItems();i++)
+	{
+		selectedMessage->AddPointer("node",selected->ItemAt(i));
+	}
+	archive->AddMessage("PDocument::selected",selectedMessage);
+	//save all Command related Stuff like Undo/Makor
+//	commandManager->Archive(commandManage);
+	for (i=0;i<(commandManager->GetUndoList())->CountItems();i++)
+	{
+		commandManage->AddMessage("undo",indexer->IndexMacroCommand((BMessage *)(commandManager->GetUndoList())->ItemAt(i)));
+
+	}
+	for (i=0;i<(commandManager->GetMacroList())->CountItems();i++)
+	{
+		commandManage->AddMessage("macro",(BMessage *)(commandManager->GetMacroList())->ItemAt(i));
+
+	}
+	commandManage->AddInt32("undoStatus",commandManager->GetUndoIndex());
+	archive->AddMessage("PDocument::commandManager", commandManage);	
+	
+	delete	indexer;
+	delete	commandManage;
+	//delete	tmpNode;
+	delete	allNodesMessage;
+	delete	allConnectionsMessage;
+	delete	selectedMessage;
+
+	return B_OK;
 }
 
 BArchivable* PDocument::Instantiate(BMessage* message)
@@ -354,6 +408,7 @@ void PDocument::Print(void)
 void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 {
 	TRACE();
+
 	if (ReadLock())
 	{
 		if (saveEntry!=NULL)
@@ -376,60 +431,15 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 void PDocument::Save(void)
 {
 	TRACE();
-	Indexer		*indexer				= new Indexer(this);
 	status_t	err 					= B_OK;
-	int32		i						= 0;
-	BMessage	*tmpMessage				= new BMessage();
-	BMessage	*commandManage			= new BMessage();
-	BMessage	*tmpNode				= NULL;
-	BMessage	*allNodesMessage		= new BMessage();
-	BMessage	*allConnectionsMessage	= new BMessage();
-	BMessage	*selectedMessage		= new BMessage();
-
-	if (printerSetting)
-		tmpMessage->AddMessage("PDocument::printerSetting",printerSetting);
-	tmpMessage->AddMessage("PDocument::documentSetting",documentSetting);
-	//save all Nodes
-	for (i=0; i<allNodes->CountItems();i++)
-	{
-		tmpNode=(BMessage *)allNodes->ItemAt(i);
-		allNodesMessage->AddMessage("node",indexer->IndexNode(tmpNode));
-	}
-	tmpMessage->AddMessage("PDocument::allNodes",allNodesMessage);
-	//save all Connections
-	for (i=0; i<allConnections->CountItems();i++)
-	{
-		tmpNode=(BMessage *)allConnections->ItemAt(i);
-		allConnectionsMessage->AddMessage("node",indexer->IndexConnection(tmpNode));
-	}
-	tmpMessage->AddMessage("PDocument::allConnections",allConnectionsMessage);
-	//save the selected List
-	for (i=0; i<selected->CountItems();i++)
-	{
-		selectedMessage->AddPointer("node",selected->ItemAt(i));
-	}
-	tmpMessage->AddMessage("PDocument::selected",selectedMessage);
-	//save all Command related Stuff like Undo/Makor
-//	commandManager->Archive(commandManage);
-	for (i=0;i<(commandManager->GetUndoList())->CountItems();i++)
-	{
-		commandManage->AddMessage("undo",indexer->IndexMacroCommand((BMessage *)(commandManager->GetUndoList())->ItemAt(i)));
-
-	}
-	for (i=0;i<(commandManager->GetMacroList())->CountItems();i++)
-	{
-		commandManage->AddMessage("macro",(BMessage *)(commandManager->GetMacroList())->ItemAt(i));
-
-	}
-	commandManage->AddInt32("undoStatus",commandManager->GetUndoIndex());
-	tmpMessage->AddMessage("PDocument::commandManager", commandManage);	
-	
+	BMessage	*archived	=new BMessage();
+	Archive(archived,true);
 	if (entryRef) 
 	{
 		BFile *file=	new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
 		err=file->InitCheck();
 		PRINT(("ERROR\tSave file error %s\n",strerror(err)));
-		err = tmpMessage->Flatten(file);
+		err = archived->Flatten(file);
 	}
 	if (err==B_OK)
 	{
@@ -437,13 +447,7 @@ void PDocument::Save(void)
 	}
 	else
 		PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
-	delete	indexer;
-	delete	tmpMessage;
-	delete	commandManage;
-	//delete	tmpNode;
-	delete	allNodesMessage;
-	delete	allConnectionsMessage;
-	delete	selectedMessage;
+
 }
 
 void PDocument::Load(void)
@@ -489,7 +493,7 @@ void PDocument::SavePanel()
 	if (!savePanel)
 	{
 //		savePanel = new PCSavePanel(B_SAVE_PANEL, new BMessenger(this),NULL,0,false);
-		savePanel = new PCSavePanel(documentManager->GetPluginManager(),NULL);
+		savePanel = new PCSavePanel(documentManager->GetPluginManager(),NULL,new BMessenger(this));
 	}
 	if (entryRef) savePanel->SetPanelDirectory(entryRef);
 	savePanel->Window()->SetWorkspaces(B_CURRENT_WORKSPACE);
