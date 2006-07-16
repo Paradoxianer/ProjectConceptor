@@ -157,7 +157,7 @@ LEAFDIRS = \
 	src/Plugins/RenoveAttributeCommand	\
 	src/Plugins/ResizeCommand			\
 	src/Plugins/SampleEditor	  		\
-	src/Plugins/StandartTranslator	  	\
+	src/Plugins/StandardTranslator 	  	\
 	src/Plugins/SelectCommand			\
 	src/Plugins/CopyCommand			\
 	src/Plugins/TranslatorExporter		\

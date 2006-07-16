@@ -1,3 +1,5 @@
+#ifndef SETTINGS_MANAGER_H
+#define SETTINGS_MANAGER_H
 #include <support/StringList.h>
 
 class SettingsManager 
@@ -19,3 +21,4 @@ private:
 	bool		changed;
 	BStringList	*stringList;
 };
+#endif

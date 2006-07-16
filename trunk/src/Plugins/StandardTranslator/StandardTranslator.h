@@ -1,3 +1,6 @@
+#ifndef STANDARD_TRANSLATOR_H
+#define STANDARD_TRANSLATOR_H
+
 #include <TranslatorAddOn.h>
 #include <TranslationKit.h>
 
@@ -19,3 +22,5 @@ translation_format outputFormats[] = {
 	{	P_C_MAIN_TYPE,	B_TRANSLATOR_NONE,  0.4, 0.8, "application/application/x-vnd.projectconceptor-document", "ProjectConceptor Standart Translator"  },
 	{	0, 0, 0, 0, "\0", "\0" }
 };
+
+#endif

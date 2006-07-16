@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include "StandardTranslator.h"
 #include "SettingsManager.h"
-
+#include "ConfigView.h"
 
 status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	BMessage * ioExtension,	translator_info * outInfo, uint32 outType)
 {
@@ -82,12 +82,13 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 status_t MakeConfig(BMessage * ioExtension,	BView * * outView, BRect * outExtent)
 {
 	status_t err	= B_OK;
-	
+	*outView = new ConfigView();
 	return err;
 }
 
 status_t GetConfigMessage(BMessage * ioExtension)
 {
 	status_t err = B_OK;
+
 	return err;
 }

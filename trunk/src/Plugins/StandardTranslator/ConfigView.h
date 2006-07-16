@@ -10,7 +10,7 @@ public:
 			ConfigView(void);
 
 protected:
-	SettingsManager	*settingsManager	= new SettingsManager("ProjectConceptorTranslator_settings");
+	SettingsManager	*settingsManager;
 private:
 };
 #endif
