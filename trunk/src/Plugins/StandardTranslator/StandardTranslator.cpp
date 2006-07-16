@@ -23,6 +23,31 @@
 status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	BMessage * ioExtension,	translator_info * outInfo, uint32 outType)
 {
 	status_t err	= B_OK;
+	BMessage		*testMessage	= new BMessage();
+	BMessage		*tmpMessage		= new BMessage();
+	if ((!inSource) || (!outInfo))
+		err = B_BAD_VALUE;
+	else
+	{
+		if (outType == 0) 
+			outType = B_TRANSLATOR_NONE;
+		if (outType != B_TRANSLATOR_NONE && outType != P_C_DOCUMENT_TYPE)
+			err	= B_NO_TRANSLATOR;
+		err = testMessage->Unflatten(inSource);
+		if (err == B_OK)
+			err = testMessage->FindMessage("Document::allNodes",tmpMessage);
+		if (err != B_OK)
+			err = B_NO_TRANSLATOR;
+		else
+		{
+			outInfo->group = B_NO_TRANSLATOR;
+			outInfo->type = P_C_DOCUMENT_TYPE;
+			outInfo->quality = 0.3;		
+			outInfo->capability = 0.8;	
+			strcpy(outInfo->name, "ProjectConceptor nativ format");
+			strcpy(outInfo->MIME, "application/application/x-vnd.projectconceptor-document");
+		}
+	}
 	return err;
 }
 
@@ -33,8 +58,10 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	BMessage		*allConnections		= new BMessage();
 	BMessage		*selected			= new BMessage();
 	BMessage		*commandStuff		= new BMessage();
+	BMessage		*outCommand			= new BMessage();
 	BMessage		*inMessage			= new BMessage();
 	BMessage		*outMessage			= new BMessage();
+	BMessage		*tmpMessage			= new BMessage();
 	bool			saveUndo			= true;
 	bool			saveMacro			= true;
 	bool			restoreWindowPos	= true;
@@ -65,8 +92,10 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 			int32		countFound;
 			int32		i			= 0;
 			commandStuff->GetInfo("undo",&typeFound,&countFound);
-			for (i = countFound;i>undoLevel;i--)
+			for (i =undoLevel;i< countFound;i++)
 			{
+				commandStuff->FindMessage("und",i,tmpMessage);
+				outCommand->AddMessage("undo",tmpMessage);
 			}
 		}
 	}

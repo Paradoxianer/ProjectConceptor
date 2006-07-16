@@ -15,8 +15,8 @@ public:
 	virtual PDocument	Import(BEntry *entry, BMessage *settings);
 	virtual PDocument	Import(BDataIO *io, BMessage *settings);
 	virtual void*		Export(PDocument *doc, BMessage *settings);
-	virtual status_t	GetOutputFormats(const p_c_i_o_format **outFormats,  int32 *outNumFormats);
-	virtual status_t	GetInputFormats(const p_c_i_o_format **outFormats,  int32 *outNumFormats);
+	virtual status_t	GetOutputFormats(const translation_format **outFormats,  int32 *outNumFormats);
+	virtual status_t	GetInputFormats(const translation_format **outFormats,  int32 *outNumFormats);
 
 protected:
 };

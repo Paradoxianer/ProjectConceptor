@@ -15,6 +15,9 @@
 //extern const Debugger		*myDebugger;
 //		= new Debugger("ProjektConceptor");
 
+//main type for Translation
+#define P_C_DOCUMENT_TYPE 'pcDT'
+
 
 
 const uint32	P_C_PLUGIN_MESSAGE				= 'pcPM';
