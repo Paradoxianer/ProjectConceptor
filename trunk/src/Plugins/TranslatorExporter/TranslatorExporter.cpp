@@ -11,15 +11,29 @@ TranslatorExporter::TranslatorExporter():ImportExport()
 {
 }
 
-PDocument TranslatorExporter::Import(BEntry *entry, BMessage *settings)
-{
-}
-PDocument TranslatorExporter::Import(BDataIO *io, BMessage *settings)
+PDocument *TranslatorExporter::Import(BMessage *settings, BEntry *entry,BDataIO *io= NULL)
 {
 }
 
-void* TranslatorExporter::Export(PDocument *doc, BMessage *settings)
+status_t TranslatorExporter::Export(PDocument *doc,BMessage *settings , BEntry *entry,BDataIO *io= NULL)
 {
+	status_t	err 		= B_OK;
+	BMessage	*archived	= new BMessage();
+	doc->Archive(archived,true);
+	if (entry) 
+	{
+		BFile *file=	new BFile(entry,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
+		err=file->InitCheck();
+		PRINT(("ERROR\tSave file error %s\n",strerror(err)));
+		err = archived->Flatten(file);
+	}
+	if (err==B_OK)
+	{
+		doc->ResetModified();
+	}
+	else
+		PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
+
 }
 
 status_t TranslatorExporter::GetOutputFormats(const translation_format **outFormats,  int32 *outNumFormats)
