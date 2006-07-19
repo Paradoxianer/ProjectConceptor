@@ -136,6 +136,7 @@ const char*		P_C_VERSION						= "0.01.1 Revision 82";
 ProjektConceptor::ProjektConceptor():BApplication(APP_SIGNATURE)
 {
 	TRACE();
+	RegisterMime();
 	documentManager = new PDocumentManager();
 	openPanel		= new BFilePanel();
 }
@@ -236,6 +237,21 @@ void ProjektConceptor::ArgvReceived(int32 argc, char **argv)
 	else
 			SET_DEBUG_ENABLED(false);
 }
+
+void ProjektConceptor::RegisterMime(void)
+{
+	BMimeType		mime;
+	mime.SetType(P_C_DOCUMENT_MIMETYPE);
+	if (!mime.IsInstalled()) 
+	{
+		mime.Install();
+		mime.SetShortDescription("ProjectConceptor Document");
+		mime.SetLongDescription("Documentfile for the ProjectConceptor");
+		mime.SetPreferredApp(APP_SIGNATURE);
+	}
+
+}
+
 int main()
 {
 //	SET_DEBUG_ENABLED(false);

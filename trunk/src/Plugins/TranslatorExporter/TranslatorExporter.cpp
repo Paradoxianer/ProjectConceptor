@@ -111,7 +111,7 @@ status_t TranslatorExporter::GetOutputFormats(const translation_format **outForm
 		roster->GetOutputFormats(translators[i], (const translation_format**)&supportFormats,&supportNum);
 		for (q=0;q<supportNum;q++) 
 		{
-			if  ( (supportFormats[q].type == P_C_DOCUMENT_TYPE) || (strcmp(supportFormats[q].MIME,"application/application/x-vnd.projectconceptor-document") == B_OK ) )
+			if  ( (supportFormats[q].type == P_C_DOCUMENT_TYPE) || (strcmp(supportFormats[q].MIME,P_C_DOCUMENT_MIMETYPE) == B_OK ) )
 			{
 				allFormats[*outNumFormats] = supportFormats[q];
 				(*outNumFormats)++;

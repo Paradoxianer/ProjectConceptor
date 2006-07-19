@@ -31,6 +31,7 @@ public:
 	virtual	void				RefsReceived(BMessage *message);
 	virtual	void				AboutRequested(void);
 	virtual void				ArgvReceived(int32 argc, char **argv);
+	virtual	void				RegisterMime(void);
 private:
 			PDocumentManager	*documentManager;
 			BFilePanel			*openPanel;

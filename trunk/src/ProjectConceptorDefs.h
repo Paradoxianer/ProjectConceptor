@@ -16,6 +16,9 @@
 //		= new Debugger("ProjektConceptor");
 
 //main type for Translation
+
+#define	P_C_DOCUMENT_MIMETYPE	"application/x-vnd.projectconceptor-document"
+
 #define P_C_DOCUMENT_TYPE 'pcDT'
 
 

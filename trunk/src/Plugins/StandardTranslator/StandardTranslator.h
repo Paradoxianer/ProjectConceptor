@@ -13,12 +13,12 @@ int32 translatorVersion = 10; /* format is revision+minor*10+major*100 */
 
 
 translation_format inputFormats[] = {
-	{	P_C_DOCUMENT_TYPE,	B_TRANSLATOR_NONE,  0.4, 0.8, "application/application/x-vnd.projectconceptor-document", "ProjectConceptor Document" },
+	{	P_C_DOCUMENT_TYPE,	B_TRANSLATOR_NONE,  0.4, 0.8, P_C_DOCUMENT_MIMETYPE, "ProjectConceptor Document" },
 	{	0, 0, 0, 0, "\0", "\0" }
 };
 
 translation_format outputFormats[] = {
-	{	P_C_DOCUMENT_TYPE,	B_TRANSLATOR_NONE,  0.4, 0.8, "application/application/x-vnd.projectconceptor-document", "ProjectConceptor Document" },
+	{	P_C_DOCUMENT_TYPE,	B_TRANSLATOR_NONE,  0.4, 0.8, P_C_DOCUMENT_MIMETYPE, "ProjectConceptor Document" },
 	{	0, 0, 0, 0, "\0", "\0" }
 };
 
