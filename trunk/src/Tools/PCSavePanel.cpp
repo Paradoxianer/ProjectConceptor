@@ -44,6 +44,7 @@ PCSavePanel::PCSavePanel(PluginManager *pManager,BMessage *msg,  BMessenger* tar
 	background->FindView("HScrollBar")->SetResizingMode(B_FOLLOW_NONE);
 	Window()->ResizeTo(background->Bounds().Width(),textView->Frame().bottom+10);
 	textView->SetResizingMode(B_FOLLOW_LEFT|B_FOLLOW_BOTTOM);
+	formatMenu->SetResizingMode(B_FOLLOW_BOTTOM | B_FOLLOW_LEFT );
 	background->FindView("PoseView")->SetResizingMode(B_FOLLOW_ALL_SIDES);
 	
 	BRect sRect=background->FindView("cancel button")->Frame();
@@ -75,6 +76,8 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 			exporter = (ImportExport *)plugin->GetNewObject(NULL);
 			if (exporter)
 			{
+				if (menu->CountItems()>0)
+					menu->AddSeparatorItem();
 				exporter->GetOutputFormats((const translation_format **)&formatStart,&countFormat);
 				if (formatStart != NULL)
 				{
