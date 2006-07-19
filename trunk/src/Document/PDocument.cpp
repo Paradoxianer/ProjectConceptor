@@ -7,6 +7,7 @@
 #include "PluginManager.h"
 #include "BasePlugin.h"
 #include "Tools/Indexer.h"
+#include "ImportExport.h"
 
 PDocument::PDocument(PDocumentManager *initManager):BLooper(),BReadWriteLocker() 
 {
@@ -147,11 +148,15 @@ void PDocument::MessageReceived(BMessage* message)
 		case  B_SAVE_REQUESTED:
 		{
 				message->PrintToStream();
+				BMessage	*saveSettings	= new BMessage();
+				message->FindMessage("saveSettings",saveSettings);
 				entry_ref *ref	= new entry_ref;
 				const char* name;
 				message->FindRef("directory",ref);
 				message->FindString("name", &name);
 				SetEntry(ref,name);
+				if (documentSetting->ReplaceMessage("saveSettings",saveSettings) != B_OK)
+					documentSetting->AddMessage("saveSettings",saveSettings);
 				Save();
 			break;
 		}
@@ -431,22 +436,66 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 void PDocument::Save(void)
 {
 	TRACE();
-	status_t	err 					= B_OK;
-	BMessage	*archived	=new BMessage();
-	Archive(archived,true);
-	if (entryRef) 
+/*	status_t	err 					= B_OK;*/
+	BMessage			*saveSettings		= new BMessage();
+	char				*pluginName			= NULL;
+	char				*formatName			= NULL;
+	char				*formatMIME			= NULL;
+	translation_format	*format				= new translation_format;
+	int32				i					= 0;
+	status_t			err					= B_OK;
+	int32				tmpInt				= 0;
+	float				tmpFloat			= 0;
+	documentSetting->FindMessage("saveSettings",saveSettings);
+	saveSettings->FindString("plugin::Name",(const char**)&pluginName);
+	saveSettings->FindString("format::name",(const char**)&formatName);
+	saveSettings->FindString("format::MIME",(const char**)&formatMIME);
+	strcpy((format->name),formatName);
+	strcpy((format->MIME),formatMIME);
+	saveSettings->FindInt32("format::type",(int32 *)&tmpInt);
+	format->type		= tmpInt;
+	saveSettings->FindInt32("format::group",(int32 *)&tmpInt);
+	format->group		= tmpInt;
+	saveSettings->FindFloat("format::quality",(float *)&tmpFloat);
+	format->quality		= tmpFloat;
+	saveSettings->FindFloat("format::capability",(float *)&tmpFloat);
+	format->capability	= tmpFloat;
+	BList	*importExportPlugins	= documentManager->GetPluginManager()->GetPluginsByType(P_C_ITEM_INPORT_EXPORT_TYPE);
+	BasePlugin			*plugin;
+	ImportExport		*exporter;
+	bool				found		= false;
+	if (importExportPlugins!=NULL)
 	{
-		BFile *file=	new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
-		err=file->InitCheck();
-		PRINT(("ERROR\tSave file error %s\n",strerror(err)));
-		err = archived->Flatten(file);
-	}
-	if (err==B_OK)
-	{
-		modified=false;
+		while  ( (!found) && (i<importExportPlugins->CountItems()) )
+		{
+			plugin	 = (BasePlugin *)importExportPlugins->ItemAt(i);
+			exporter = (ImportExport *)plugin->GetNewObject(NULL);
+			if ( (exporter) && (strcmp(plugin->GetName(),pluginName) == B_OK ) )
+				found = true;
+			i++;
+		}
+		if (found)
+			exporter->Export(this,format,new BEntry(entryRef));
 	}
 	else
-		PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
+	{
+		BMessage	*archived	=new BMessage();
+		Archive(archived,true);
+		if (entryRef) 
+		{
+			BFile *file=	new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
+			err=file->InitCheck();
+			PRINT(("ERROR\tSave file error %s\n",strerror(err)));
+			err = archived->Flatten(file);
+		}
+		if (err==B_OK)
+		{
+			modified=false;
+		}
+		else
+			PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
+	}
+	delete saveSettings;
 
 }
 

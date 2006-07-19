@@ -83,8 +83,14 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 					{
 						message	= new BMessage();
 						message->AddString("plugin::Name",plugin->GetName());
-						message->AddString("format::Name",format->name);
+						message->AddString("format::name",format->name);
 						message->AddString("format::MIME",format->MIME);
+						message->AddInt32("format::type",format->type);
+						message->AddInt32("format::group",format->group);
+						message->AddFloat("format::quality",format->quality);
+						message->AddFloat("format::capability",format->capability);
+						
+
 						item = new BMenuItem(format->name, message);
 						menu->AddItem( item );
 						format++;
@@ -94,6 +100,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 				}
 				countFormat	= 0;
 			}
+			delete	exporter;
 		}
 	}
 	else
@@ -108,7 +115,7 @@ void	PCSavePanel::SendMessage(const BMessenger* messenger, BMessage *message)
 	BMenuItem *selected = formatMenu->Menu()->FindMarked();
 	if ( (selected) && (selected->Message()) )
 	{
-		message->AddMessage("settings",selected->Message());
+		message->AddMessage("saveSettings",selected->Message());
 	}
 	BFilePanel::SendMessage(messenger,message);
 }

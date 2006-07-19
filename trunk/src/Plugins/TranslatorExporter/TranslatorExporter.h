@@ -12,8 +12,8 @@ class TranslatorExporter : public ImportExport
 public:
 						TranslatorExporter();
 	
-	virtual PDocument*	Import(BMessage *settings, BEntry *entry,BDataIO *io= NULL);
-	virtual status_t	Export(PDocument *doc, BMessage *settings,BEntry *entry,BDataIO *io= NULL);
+	virtual PDocument*	Import(translation_format *inFormat, BEntry *entry, BPositionIO *io= NULL);
+	virtual status_t	Export(PDocument *doc,  translation_format *outFormat,BEntry *entry, BPositionIO *io= NULL);
 	virtual status_t	GetOutputFormats(const translation_format **outFormats,  int32 *outNumFormats);
 	virtual status_t	GetInputFormats(const translation_format **outFormats,  int32 *outNumFormats);
 

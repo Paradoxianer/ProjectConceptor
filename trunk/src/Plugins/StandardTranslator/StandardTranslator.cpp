@@ -45,7 +45,7 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 			outInfo->quality = 0.3;		
 			outInfo->capability = 0.8;	
 			strcpy(outInfo->name, "ProjectConceptor nativ format");
-			strcpy(outInfo->MIME, "application/application/x-vnd.projectconceptor-document");
+			strcpy(outInfo->MIME, "application/x-vnd.projectconceptor-document");
 		}
 	}
 	return err;
