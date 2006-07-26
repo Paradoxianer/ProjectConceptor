@@ -16,7 +16,7 @@
 
 
 
-const char		*APP_SIGNATURE		= "application/ProjektConceptor";
+const char		*APP_SIGNATURE		= "application/ProjectConceptor";
 
 const char*		P_MENU_APP_HELP					= "Help";
 const char*		P_MENU_APP_ABOUT				= "About";
@@ -53,7 +53,7 @@ const char*		P_MENU_FILE						= "File";
  *@see PMenuAcces
  */	
 const char*		P_MENU_FILE_NEW					= "New";
-const char*		P_MENU_FILE_NEW_TAB				= "New Tab";
+const char*		P_MENU_FILE_NEW_TAB				= "New tab";
 /**value to find the BMenu Item "File->Open" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
@@ -69,14 +69,14 @@ const char*		P_MENU_FILE_SAVE				= "Save";
 /**value to find the BMenu Item "File->Save As" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
-const char*		P_MENU_FILE_SAVE_AS				= "Save As";
+const char*		P_MENU_FILE_SAVE_AS				= "Save as";
 /**value to find the BMenu Item "File->PageSetup" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
  
 const char*		P_MENU_FILE_EXPORT				= "Export";
 
-const char*		P_MENU_FILE_PAGESETUP			= "Page Setup";
+const char*		P_MENU_FILE_PAGESETUP			= "Page setup";
 /**value to find the BMenu Item "File->Print" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
@@ -98,24 +98,24 @@ const char*		P_MENU_EDIT_COPY				= "Copy";
 const char*		P_MENU_EDIT_PASTE				= "Paste";
 
 const char*		P_MENU_EDIT_CLEAR				= "Clear";
-const char*		P_MENU_EDIT_SELECT_ALL			= "Select All";
+const char*		P_MENU_EDIT_SELECT_ALL			= "Select all";
 
-const char*		P_MENU_EDIT_PROJECT_SETTINGS	= "Project Settings";
+const char*		P_MENU_EDIT_PROJECT_SETTINGS	= "Project settings";
 
 const char*		P_MENU_SEARCH					= "Search";
 const char*		P_MENU_SEARCH_FIND				= "Find";
-const char*		P_MENU_SEARCH_FIND_NEXT			= "Find Next";
+const char*		P_MENU_SEARCH_FIND_NEXT			= "Find next";
 const char*		P_MENU_SEARCH_REPLACE			= "Replace";
-const char*		P_MENU_SEARCH_REPLACE_AND_FIND	= "Replace & Find";
-const char*		P_MENU_SEARCH_REPLACE_ALL		= "Replace All";
+const char*		P_MENU_SEARCH_REPLACE_AND_FIND	= "Find & replace";
+const char*		P_MENU_SEARCH_REPLACE_ALL		= "Replace all";
 
 /**value to find the BMenu "Window" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
 
 const char*		P_MENU_WINDOW					= "Window";
-const char*		P_MENU_WINDOW_TITLE				= "Title";
-const char*		P_MENU_WINDOW_TITLE_VERTICAL	= "Title Vertical";
+const char*		P_MENU_WINDOW_TITLE				= "Tile";
+const char*		P_MENU_WINDOW_TITLE_VERTICAL	= "Tile vertical";
 const char*		P_MENU_WINDOW_CASCADE			= "Cascade";
 
 
@@ -123,8 +123,8 @@ const char*		P_MENU_WINDOW_CASCADE			= "Cascade";
  *@see PMenuAcces
  */	
 const char*		P_MENU_MACRO					= "Macro";
-const char*		P_MENU_MACRO_START_RECORDING	= "Start Recording";
-const char*		P_MENU_MACRO_STOP_RECORDING		= "Stop Recording";
+const char*		P_MENU_MACRO_START_RECORDING	= "Start recording";
+const char*		P_MENU_MACRO_STOP_RECORDING		= "Stop recording";
 const char*		P_MENU_MACRO_PLAY				= "Play";
 const char*		P_MENU_MACRO_OPEN				= "Open";
 const char*		P_MENU_MACRO_SAVE				= "Save";
