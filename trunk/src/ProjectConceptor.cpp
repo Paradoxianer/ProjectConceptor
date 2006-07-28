@@ -240,7 +240,7 @@ void ProjektConceptor::ArgvReceived(int32 argc, char **argv)
 
 void ProjektConceptor::RegisterMime(void)
 {
-	BMimeType		mime;
+/*	BMimeType		mime;
 	mime.SetType(P_C_DOCUMENT_MIMETYPE);
 	if (!mime.IsInstalled()) 
 	{
@@ -248,7 +248,7 @@ void ProjektConceptor::RegisterMime(void)
 		mime.SetShortDescription("ProjectConceptor Document");
 		mime.SetLongDescription("Documentfile for the ProjectConceptor");
 		mime.SetPreferredApp(APP_SIGNATURE);
-	}
+	}*/
 
 }
 
