@@ -20,7 +20,7 @@
 #define	P_C_DOCUMENT_MIMETYPE	"application/x-vnd.projectconceptor-document"
 
 #define P_C_DOCUMENT_TYPE 'pcDT'
-
+#define P_C_DOCUMENT_RAW_TYPE 'pcRT'
 
 
 const uint32	P_C_PLUGIN_MESSAGE				= 'pcPM';

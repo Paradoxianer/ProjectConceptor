@@ -37,7 +37,6 @@ SRCS= 	src/AboutWindow.cpp \
 		src/Document/PDocumentManager.cpp \
 		src/Document/PEditor.cpp \
 		src/Document/PEditorManager.cpp \
-		src/Document/ImportExport \
 		src/Document/HelpManager.cpp \
 		src/Document/WindowManager.cpp \
 		src/Plugins/BasePlugin.cpp \
@@ -133,6 +132,8 @@ LINKER_FLAGS =
 
 SVG_ICON = src/Doku/Logogross.svg
 
+#EXTRA_DEPS = copy
+
 TARGET_DIR	=  .
 OBJ_DIR		= obj.x86
 
@@ -177,3 +178,12 @@ install::
 	-@for f in $(LEAFDIRS); do \
 		$(MAKE) install -C $$f $@; \
 	done
+	@echo "Copying locale files"
+	@echo $(INSTALL_DIR)
+	@mkdir -p $(INSTALL_DIR)
+	@cp -rf ./Language $(INSTALL_DIR)
+	@cd $(INSTALL_DIR)/Language
+	@echo "Done copying."
+
+
+

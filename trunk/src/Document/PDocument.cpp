@@ -7,7 +7,6 @@
 #include "PluginManager.h"
 #include "BasePlugin.h"
 #include "Tools/Indexer.h"
-#include "ImportExport.h"
 
 PDocument::PDocument(PDocumentManager *initManager):BLooper(),BReadWriteLocker() 
 {
@@ -436,30 +435,35 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 void PDocument::Save(void)
 {
 	TRACE();
-/*	status_t	err 					= B_OK;*/
+	status_t			err 				= B_OK;
+	BTranslatorRoster	*roster				= BTranslatorRoster::Default();
+	BMessage			*archived			= new BMessage();
 	BMessage			*saveSettings		= new BMessage();
-	char				*pluginName			= NULL;
 	char				*formatName			= NULL;
 	char				*formatMIME			= NULL;
-	translation_format	*format				= new translation_format;
-	int32				i					= 0;
-	status_t			err					= B_OK;
+	translator_info		*translatorInfo		= new translator_info;
 	int32				tmpInt				= 0;
 	float				tmpFloat			= 0;
 	documentSetting->FindMessage("saveSettings",saveSettings);
-	saveSettings->FindString("plugin::Name",(const char**)&pluginName);
+	saveSettings->FindInt32("translator_id",&tmpInt);
+	translatorInfo->translator	= tmpInt;
 	saveSettings->FindString("format::name",(const char**)&formatName);
 	saveSettings->FindString("format::MIME",(const char**)&formatMIME);
-	strcpy((format->name),formatName);
-	strcpy((format->MIME),formatMIME);
+	strcpy((translatorInfo->name),formatName);
+	strcpy((translatorInfo->MIME),formatMIME);
 	saveSettings->FindInt32("format::type",(int32 *)&tmpInt);
-	format->type		= tmpInt;
+	translatorInfo->type				= tmpInt;
 	saveSettings->FindInt32("format::group",(int32 *)&tmpInt);
-	format->group		= tmpInt;
+	translatorInfo->group				= tmpInt;
 	saveSettings->FindFloat("format::quality",(float *)&tmpFloat);
-	format->quality		= tmpFloat;
+	translatorInfo->quality				= tmpFloat;
 	saveSettings->FindFloat("format::capability",(float *)&tmpFloat);
-	format->capability	= tmpFloat;
+	translatorInfo->capability			= tmpFloat;
+
+/*	
+
+	int32				i					= 0;
+	status_t			err					= B_OK;
 	BList	*importExportPlugins	= documentManager->GetPluginManager()->GetPluginsByType(P_C_ITEM_INPORT_EXPORT_TYPE);
 	BasePlugin			*plugin;
 	ImportExport		*exporter;
@@ -495,7 +499,12 @@ void PDocument::Save(void)
 		else
 			PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
 	}
-	delete saveSettings;
+	delete saveSettings;*/
+	Archive(archived,true);
+	BPositionIO		*input	= new BMallocIO();
+	BFile			*file	= new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
+	archived->Flatten(input);
+	err=	roster->Translate(input,translatorInfo,NULL,file,P_C_DOCUMENT_TYPE);
 
 }
 
@@ -542,7 +551,7 @@ void PDocument::SavePanel()
 	if (!savePanel)
 	{
 //		savePanel = new PCSavePanel(B_SAVE_PANEL, new BMessenger(this),NULL,0,false);
-		savePanel = new PCSavePanel(documentManager->GetPluginManager(),NULL,new BMessenger(this));
+		savePanel = new PCSavePanel(NULL,new BMessenger(this));
 	}
 	if (entryRef) savePanel->SetPanelDirectory(entryRef);
 	savePanel->Window()->SetWorkspaces(B_CURRENT_WORKSPACE);

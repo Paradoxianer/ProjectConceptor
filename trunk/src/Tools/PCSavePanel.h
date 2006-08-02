@@ -21,7 +21,7 @@
 class PCSavePanel : public BFilePanel
 {
 public:
-					PCSavePanel(PluginManager *pManager,BMessage *msg,  BMessenger* target = NULL) ;
+					PCSavePanel(BMessage *msg,  BMessenger* target = NULL) ;
 		BMenu		*BuildFormatsMenu(void);
 	//virtual void SelectionChanged();
 virtual	void		SendMessage(const BMessenger*, BMessage*);
@@ -29,7 +29,6 @@ protected:
 	BMenuField		*formatMenu;
 	entry_ref 		entryRef;
 	BButton			*settings;
-	PluginManager	*pluginManager;
 };
 
 #endif

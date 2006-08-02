@@ -1,12 +1,10 @@
 #include "PCSavePanel.h"
-#include "ImportExport.h"
 #include "BasePlugin.h"
 #include <interface/Window.h>
 
 
-PCSavePanel::PCSavePanel(PluginManager *pManager,BMessage *msg,  BMessenger* target = NULL): BFilePanel(B_SAVE_PANEL,target,NULL,B_FILE_NODE,false,msg,NULL,false,true)
+PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target = NULL): BFilePanel(B_SAVE_PANEL,target,NULL,B_FILE_NODE,false,msg,NULL,false,true)
 {
-	pluginManager		= pManager;
 	float 	height		= 74;
 	Window()->Lock();
 	BView 	*background = Window()->ChildAt(0);
@@ -57,12 +55,19 @@ PCSavePanel::PCSavePanel(PluginManager *pManager,BMessage *msg,  BMessenger* tar
 BMenu *PCSavePanel::BuildFormatsMenu(void)
 {
 	// Builds a menu with all the possible file types
-	BMessage *message;
-	bool first=true;
-	int32 typecode;
-	BMenu *menu = new BMenu(_T("Fileformat") );
-	BMenuItem *item;
-	BList	*importExportPlugins	= pluginManager->GetPluginsByType(P_C_ITEM_INPORT_EXPORT_TYPE);
+	BTranslatorRoster			*roster				= BTranslatorRoster::Default();
+	int32						num_translators		= 0;
+	int32						i,q					= 0;
+	int32						outNum				= 0;
+	int32						inNum				= 0;
+	translator_id				*translators		= NULL;
+	const	translation_format	*oFormats;
+	const	translation_format	*iFormats;
+	translation_format			*allFormats			= NULL;
+	BMessage					*message			= NULL;
+	BMenu						*menu				= new BMenu(_T("Fileformat") );
+	BMenuItem					*item				= NULL;
+/*	BList	*importExportPlugins	= pluginManager->GetPluginsByType(P_C_ITEM_INPORT_EXPORT_TYPE);
 	if (importExportPlugins!=NULL)
 	{
 		BasePlugin			*plugin;
@@ -107,7 +112,38 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 		}
 	}
 	else
-		menu->AddItem(new BMenuItem(_T("Could not find Plugins"),NULL));
+		menu->AddItem(new BMenuItem(_T("Could not find Plugins"),NULL));*/
+	roster->GetAllTranslators(&translators, &num_translators);
+	allFormats	=	new translation_format[num_translators];
+	for (i=0;i<num_translators;i++) 
+	{
+		roster->GetInputFormats(translators[i], &iFormats, &inNum);
+		for (q=0;q<inNum;q++) 
+		{
+			if (iFormats[q].type == P_C_DOCUMENT_RAW_TYPE)
+			{
+				roster->GetOutputFormats(translators[i], &oFormats, &outNum);
+				for (int j=0; j<outNum; j++)
+				{
+					//	and take the first output format that isn't BBitmap
+					if( oFormats[j].type != P_C_DOCUMENT_RAW_TYPE)
+					{
+						message	= new BMessage();
+						message->AddInt32("translator_id",translators[i]);
+						message->AddString("format::name",oFormats[j].name);
+						message->AddString("format::MIME",oFormats[j].MIME);
+						message->AddInt32("format::type",oFormats[j].type);
+						message->AddInt32("format::group",oFormats[j].group);
+						message->AddFloat("format::quality",oFormats[j].quality);
+						message->AddFloat("format::capability",oFormats[j].capability);
+						item = new BMenuItem(oFormats[j].name, message);
+						menu->AddItem( item );
+					}
+				}
+			}
+		}
+	}
+	delete [] translators; 
 	if (menu->CountItems() == 0)
 		menu->AddItem(new BMenuItem(_T("Could not find Plugins"),NULL));
 	return menu;
