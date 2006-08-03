@@ -543,6 +543,49 @@ void PDocument::Load(void)
 //	commandManager->LoadUndo(docLoader->GetCommandManagerMessage());
 	printerSetting	= docLoader->GetPrinterSetting();
 	editorManager->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+	/*
+	BFile		*file		= new BFile(entryRef,B_READ_ONLY);
+	BNodeInfo	*mimeReader	= NULL;
+	char		*mime		= NULL
+	if (file->InitCheck() == B_OK)
+	{
+		mimeReader	= new BNodeInfo(file);
+		if (mimeReader->InitCheck == B_OK) && (mimeReader->GetType(mime) == B_OK))
+		{
+			if (strcmp(mimeType,P_C_DOCUMENT_MIMETYPE) == 0)
+			//load it direct
+			;
+			BTranslatorRoster *trans = BTranslatorRoster::Default();
+			translator_id * allTranslators = NULL;
+			bool r = false;
+			int32 fmtCount,count = 0;
+			status_t err = trans->GetAllTranslators(&allTranslators, &count);
+			if (err >= B_OK)
+			{
+				err = B_ERROR;
+				for (int32 ix=0;ix<count;ix++) 
+				{
+					const translation_format * outFormats;
+					if (trans->GetOutputFormats(allTranslators[ix],	&outFormats, &fmtCount) == B_OK) 
+					{
+						for (int i=0; i<fmtCount; i++) 
+						{
+							if (strcmp(mimeType,outFormats[i].MIME) == 0) 
+							{
+								//gefunden
+							};
+						}
+					}
+				}
+			}
+
+		}
+		
+	}
+	else
+		// we should try to find the translator over identify if not working .. .alert
+		
+	delete[] allTranslators;*/
 }
 
 void PDocument::SavePanel()

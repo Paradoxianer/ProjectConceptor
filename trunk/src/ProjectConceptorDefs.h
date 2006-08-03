@@ -243,7 +243,7 @@ extern const char*		P_MENU_MACRO_OPEN;//				= "Open";
 extern const char*		P_MENU_MACRO_SAVE;//				= "Save";
 
 
-extern const char*		P_C_VERSION;//						= "0.01a Revision 27";
+extern const char*		P_C_VERSION;//						= "0.01a Revision 132";
 
 
 #endif
