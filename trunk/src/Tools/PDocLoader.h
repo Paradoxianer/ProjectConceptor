@@ -2,8 +2,7 @@
 #define P_DOC_LOADER_H
 
 #include <app/Message.h>
-#include <storage/Entry.h>
-#include <storage/File.h>
+
 
 #include "Commands/PCommandManager.h"
 #include "Document/PEditorManager.h"
@@ -14,7 +13,7 @@ class PDocumen;
 /**
  * @class PDocLoader
  *
- * @brief  PDocLoader is a class to load ProjectConceptor files
+ * @brief  PDocLoader is a class to generate Classes from a ProjectConceptor Dokument datastream
  * @warning it assums that the Nodes and Connections are BMEssages!!
  * but it automatically restores pointers from Connections to the Nodes (BMessage Objects) 
  *
@@ -30,7 +29,7 @@ class PDocLoader
 {
 
 public:
-								PDocLoader(PDocument *doc,BEntry *openEntry);
+								PDocLoader(PDocument *doc,BMessage *loadableMessage);
 	virtual						~PDocLoader(void);
 
 
@@ -52,7 +51,7 @@ public:
 
 protected:
 	virtual void				Init(void);
-	virtual	void				Load(void);
+	virtual void				Load(void);
 	//spread sorts all BList stuff out of the nodes... ;-)
 	virtual BList*				Spread(BMessage *allNodeMessage);
 	//ReIndex takes the stored Connections and ReAssing the Connections to real existing pointers 
@@ -81,7 +80,6 @@ protected:
 		PEditorManager*			editorManager;
 		WindowManager*			windowManager;
 		
-		BFile*					toLoad;
 		BMessage*				loadedStuff;
 		Indexer					*indexer;
 

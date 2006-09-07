@@ -161,8 +161,6 @@ LEAFDIRS = \
 	src/Plugins/StandardTranslator 	  	\
 	src/Plugins/SelectCommand			\
 	src/Plugins/CopyCommand			\
-	src/Plugins/TranslatorExporter		\
-	src/Plugins/ImageExporter			\
 	src/Plugins/PasteCommand		
 
 default .DEFAULT:

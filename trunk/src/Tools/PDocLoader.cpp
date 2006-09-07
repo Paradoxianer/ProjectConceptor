@@ -3,12 +3,11 @@
 
 #include <support/Archivable.h>
 
-PDocLoader::PDocLoader(PDocument *doc,BEntry *openEntry)
+PDocLoader::PDocLoader(PDocument *doc,BMessage *loadableMessage)
 {
 	Init();
-	toLoad	= new BFile (openEntry,B_READ_ONLY);
-	indexer	= new Indexer(doc);
-//	Preprocess();
+	indexer		= new Indexer(doc);
+	loadedStuff	= loadableMessage;
 	Load();
 }
 
@@ -39,38 +38,27 @@ void PDocLoader::Init(void)
 	
 	editorManager			= NULL;
 	windowManager			= NULL;
-	
-	toLoad					= NULL;
-	loadedStuff				= new BMessage();
-	
 }
 
 
 void PDocLoader::Load(void)
 {
-	BMessage	*loadedStuff			= new BMessage();
 	BMessage	*allNodesMessage		= new BMessage();
 	BMessage	*allConnectionsMessage	= new BMessage();
 	BMessage	*selectedMessage		= new BMessage();
-	if (toLoad->InitCheck() == B_OK)
-	{
-		if (loadedStuff->Unflatten(toLoad) == B_OK)
-		{
-			loadedStuff->FindMessage("PDocument::printerSetting",printerSettings);
-			loadedStuff->FindMessage("PDocument::documentSetting",settings);
-			loadedStuff->FindMessage("PDocument::allNodes",allNodesMessage);
-			loadedStuff->FindMessage("PDocument::commandManager",commandManagerMessage);
-			loadedStuff->FindMessage("PDocument::allConnections",allConnectionsMessage);
-			loadedStuff->FindMessage("PDocument::selected",selectedMessage);
-			commandManagerMessage->FindInt32("undoStatus",(int32 *)&undoIndex);
-						
-			allNodes		=	Spread(allNodesMessage);
-			allConnections	=	ReIndexConnections(allConnectionsMessage);
-			selectedNodes	=	ReIndexSelected(selectedMessage);
-			undoList		=	ReIndexUndo(commandManagerMessage);
-			macroList		=	ReIndexMacro(commandManagerMessage);
-		}
-	}
+	loadedStuff->FindMessage("PDocument::printerSetting",printerSettings);
+	loadedStuff->FindMessage("PDocument::documentSetting",settings);
+	loadedStuff->FindMessage("PDocument::allNodes",allNodesMessage);
+	loadedStuff->FindMessage("PDocument::commandManager",commandManagerMessage);
+	loadedStuff->FindMessage("PDocument::allConnections",allConnectionsMessage);
+	loadedStuff->FindMessage("PDocument::selected",selectedMessage);
+	commandManagerMessage->FindInt32("undoStatus",(int32 *)&undoIndex);
+				
+	allNodes		=	Spread(allNodesMessage);
+	allConnections	=	ReIndexConnections(allConnectionsMessage);
+	selectedNodes	=	ReIndexSelected(selectedMessage);
+	undoList		=	ReIndexUndo(commandManagerMessage);
+	macroList		=	ReIndexMacro(commandManagerMessage);
 }
 
 BList* PDocLoader::Spread(BMessage *allNodeMessage)
