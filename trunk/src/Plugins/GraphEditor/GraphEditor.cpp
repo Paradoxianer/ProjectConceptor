@@ -134,7 +134,7 @@ void GraphEditor::Init(void)
 	// init the ressource for the plugin files
 	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
 	// load the addBool icon
-	const void *data=res->LoadResource((type_code)'PNG ',"addBool",&size);
+const void *data=res->LoadResource((type_code)'PNG ',"addBool",&size);
 	if (data)
 	{
 		//translate the icon because it was png but we ne a bmp 
@@ -160,34 +160,40 @@ void GraphEditor::Init(void)
 			toolBar->AddItem(addText);
 		}
 	}
-	
 }
 
 void GraphEditor::AttachedToManager(void)
 {
 	TRACE();
+	
 	sentTo				= new BMessenger(doc);
 	id					= manager->IndexOf(this);
+	status_t	err		= B_OK;
 	sprintf(renderString,"GraphEditor%ld::Renderer",id);
 	//put this in a seperate function??
 	nodeMessage->AddPointer("doc",doc);
 	
 	BMessage	*shortcuts	= new BMessage();
+	BMessage	*tmpMessage	= new BMessage();
 	BMessage	*sendMessage;
 	shortcuts->AddInt32("key",B_DELETE);
 	sendMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 	sendMessage->AddString("Command::Name","Delete");
 	shortcuts->AddInt32("modifiers",0);
 	shortcuts->AddMessage("message",sendMessage);
-	shortcuts->AddPointer("handler",doc);
+	shortcuts->AddPointer("handler",new BMessenger(doc,NULL,&err));
 	
 
 	BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
+	addBoolMessage->AddInt32("type",B_BOOL_TYPE);
 	shortcuts->AddInt32("key",'b');
 	shortcuts->AddInt32("modifiers",B_COMMAND_KEY);
 	shortcuts->AddMessage("message",addBoolMessage);
-	shortcuts->AddPointer("handler",this);
-	configMessage->AddMessage("Shortcuts",shortcuts);
+	shortcuts->AddPointer("handler",new BMessenger(this,NULL,&err));
+	if (configMessage->FindMessage("Shortcuts",tmpMessage)==B_OK) 
+		configMessage->ReplaceMessage("Shortcuts",shortcuts);
+	else
+		configMessage->AddMessage("Shortcuts",shortcuts);
 	InitAll();
 }
 

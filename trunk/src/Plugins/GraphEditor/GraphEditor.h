@@ -120,7 +120,7 @@ protected:
 			ToolBar			*toolBar;
 			ToolItem		*grid;
 			ToolItem		*addBool;
-			ToolItem		*addText;
+			ToolItem		*addText;	
 
 
 			FloatToolItem	*penSize;
