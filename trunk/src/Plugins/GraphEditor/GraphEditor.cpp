@@ -31,7 +31,7 @@ GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,200,200),"Gra
 void GraphEditor::Init(void)
 {
 	TRACE();
-	printRect		= NULL;	
+	printRect		= NULL;
 	selectRect		= NULL;
 	startMouseDown	= NULL;
 	activRenderer	= NULL;
@@ -46,8 +46,8 @@ void GraphEditor::Init(void)
 	renderer		= new BList();
 	scale			= 1.0;
 	configMessage	= new BMessage();
-	
-	
+
+
 	font_family		family;
 	font_style		style;
 
@@ -70,10 +70,10 @@ void GraphEditor::Init(void)
 	fontMessage->AddString("Style",(const char*)&style);
 	rgb_color	fontColor			= {111, 151, 181, 255};
 	fontMessage->AddRGBColor("Color",fontColor);
-	
+
 	//perparing Pattern Message
 	patternMessage	=new BMessage();
-	//standart Color 
+	//standart Color
 	rgb_color	fillColor			= {152, 180, 190, 255};
 	patternMessage->AddRGBColor("FillColor",fillColor);
 	rgb_color	borderColor			= {0, 0, 0, 255};
@@ -85,7 +85,7 @@ void GraphEditor::Init(void)
 	rgb_color 	lowColor			= {128, 128, 128, 255};
 	patternMessage->AddRGBColor("LowColor",lowColor);
 	patternMessage->AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
-	
+
 	scaleMenu		= new BMenu(_T("Scale"));
 	BMessage	*newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",0.1);
@@ -117,13 +117,13 @@ void GraphEditor::Init(void)
 	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",10);
 	scaleMenu->AddItem(new BMenuItem("1000 %",newScale,0,0));
-	
+
 	grid		= new ToolItem("Grid",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
 	penSize		= new FloatToolItem(_T("Pen Size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
 	colorItem	= new ColorToolItem(_T("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
 	patternItem	= new PatternToolItem(_T("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
-	
-	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);	
+
+	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);
 
 	//loading ressource_images from the PluginRessource
 	image_info	*info 	= new image_info;
@@ -137,17 +137,17 @@ void GraphEditor::Init(void)
 const void *data=res->LoadResource((type_code)'PNG ',"addBool",&size);
 	if (data)
 	{
-		//translate the icon because it was png but we ne a bmp 
+		//translate the icon because it was png but we ne a bmp
 		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
 		if (bmp)
 		{
 			BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
 			addBoolMessage->AddInt32("type",B_BOOL_TYPE);
-			addBool		= new ToolItem("addBool",bmp,addBoolMessage);	
+			addBool		= new ToolItem("addBool",bmp,addBoolMessage);
 			toolBar->AddItem(addBool);
 		}
 	}
-	
+
 	data=res->LoadResource((type_code)'PNG ',"addText",&size);
 	if (data)
 	{
@@ -156,7 +156,7 @@ const void *data=res->LoadResource((type_code)'PNG ',"addBool",&size);
 		{
 			BMessage	*addTextMessage = new BMessage(G_E_ADD_ATTRIBUTE);
 			addTextMessage->AddInt32("type",B_STRING_TYPE);
-			addText		= new ToolItem("addText",bmp,addTextMessage);	
+			addText		= new ToolItem("addText",bmp,addTextMessage);
 			toolBar->AddItem(addText);
 		}
 	}
@@ -165,14 +165,14 @@ const void *data=res->LoadResource((type_code)'PNG ',"addBool",&size);
 void GraphEditor::AttachedToManager(void)
 {
 	TRACE();
-	
+
 	sentTo				= new BMessenger(doc);
 	id					= manager->IndexOf(this);
 	status_t	err		= B_OK;
 	sprintf(renderString,"GraphEditor%ld::Renderer",id);
 	//put this in a seperate function??
 	nodeMessage->AddPointer("doc",doc);
-	
+
 	BMessage	*shortcuts	= new BMessage();
 	BMessage	*tmpMessage	= new BMessage();
 	BMessage	*sendMessage;
@@ -182,7 +182,7 @@ void GraphEditor::AttachedToManager(void)
 	shortcuts->AddInt32("modifiers",0);
 	shortcuts->AddMessage("message",sendMessage);
 	shortcuts->AddPointer("handler",new BMessenger(doc,NULL,&err));
-	
+
 
 	BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
 	addBoolMessage->AddInt32("type",B_BOOL_TYPE);
@@ -190,7 +190,14 @@ void GraphEditor::AttachedToManager(void)
 	shortcuts->AddInt32("modifiers",B_COMMAND_KEY);
 	shortcuts->AddMessage("message",addBoolMessage);
 	shortcuts->AddPointer("handler",new BMessenger(this,NULL,&err));
-	if (configMessage->FindMessage("Shortcuts",tmpMessage)==B_OK) 
+
+	BMessage	*insertNode = new BMessage(G_E_INSERT_NODE);
+	shortcuts->AddInt32("key",B_INSERT);
+	shortcuts->AddInt32("modifiers",0);
+	shortcuts->AddMessage("message",insertNode);
+	shortcuts->AddPointer("handler",new BMessenger(this,NULL,&err));
+
+	if (configMessage->FindMessage("Shortcuts",tmpMessage)==B_OK)
 		configMessage->ReplaceMessage("Shortcuts",shortcuts);
 	else
 		configMessage->AddMessage("Shortcuts",shortcuts);
@@ -223,7 +230,7 @@ void GraphEditor::InitAll()
 		{
 			InsertRenderObject(node);
 		}
-	}	
+	}
 	for (int32 i=0;i<allConnections->CountItems();i++)
 	{
 		node = (BMessage *)allConnections->ItemAt(i);
@@ -231,21 +238,21 @@ void GraphEditor::InitAll()
 		{
 			InsertRenderObject(node);
 		}
-	}	
+	}
 }
 
 void GraphEditor::PreprocessBeforSave(BMessage *container)
 {
 	TRACE();
 	PRINT(("GraphEditor::PreprocessAfterLoad:\n"));
-	char	*name; 
-	uint32	type; 
-	int32	count; 
+	char	*name;
+	uint32	type;
+	int32	count;
 	int32	i		= 0;
 	//remove all the Pointer to the Renderer so that on the next load a new Renderer are added
 	while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
 	{
-		if ((strstr(name,"GraphEditor") != NULL) || 
+		if ((strstr(name,"GraphEditor") != NULL) ||
 			(strcasecmp(name,"Outgoing") == B_OK) ||
 			(strcasecmp(name,"Incoming") == B_OK) ||
 			(strcasecmp(name,"doc") == B_OK) )
@@ -340,7 +347,7 @@ void GraphEditor::MouseDown(BPoint where)
 	BView::MakeFocus(true);
 	BPoint		scaledWhere;
 	scaledWhere.x	= where.x / scale;
-	scaledWhere.y	= where.y / scale;	
+	scaledWhere.y	= where.y / scale;
 
 	BMessage *currentMsg = Window()->CurrentMessage();
 	uint32 modifiers = 0;
@@ -375,7 +382,7 @@ void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messa
 	BView::MouseMoved(where,code,a_message);
 	BPoint		scaledWhere;
 	scaledWhere.x	= where.x / scale;
-	scaledWhere.y	= where.y / scale;	
+	scaledWhere.y	= where.y / scale;
 	if (startMouseDown)
 	{
 		//only if the user hase moved the Mouse we start to select...
@@ -421,7 +428,7 @@ void GraphEditor::MouseUp(BPoint where)
 	BView::MouseUp(where);
 	BPoint		scaledWhere;
 	scaledWhere.x	= where.x / scale;
-	scaledWhere.y	= where.y / scale;	
+	scaledWhere.y	= where.y / scale;
 	if (startMouseDown != NULL)
 	{
    		if (selectRect != NULL)
@@ -486,7 +493,7 @@ void GraphEditor::AttachedToWindow(void)
 	scaleMenu->SetTargetForItems(this);
 	if (doc)
 		InitAll();
-		
+
 	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
 	pWindow->AddToolBar(toolBar);
 	addBool->SetTarget(this);
@@ -494,11 +501,11 @@ void GraphEditor::AttachedToWindow(void)
 	ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
 	configBar->AddSeperator();
 	configBar->AddSeperator();
-	configBar->AddSeperator();	
 	configBar->AddSeperator();
-	configBar->AddSeperator();		
+	configBar->AddSeperator();
+	configBar->AddSeperator();
 	configBar->AddItem(grid);
-	configBar->AddSeperator();	
+	configBar->AddSeperator();
 	configBar->AddItem(penSize);
 	configBar->AddItem(colorItem);
 
@@ -530,9 +537,9 @@ void GraphEditor::DetachedFromWindow(void)
 			configBar->RemoveItem(grid);
 			configBar->RemoveSeperator();
 			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();	
 			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();	
+			configBar->RemoveSeperator();
+			configBar->RemoveSeperator();
 		}
 		Renderer	*nodeRenderer	= NULL;
 		for (int32 i=0;i<renderer->CountItems();i++)
@@ -545,10 +552,10 @@ void GraphEditor::DetachedFromWindow(void)
 			RemoveRenderer(nodeRenderer);
 		}
 	}
-}	
+}
 void GraphEditor::MessageReceived(BMessage *message)
 {
-	switch(message->what) 
+	switch(message->what)
 	{
 		case P_C_VALUE_CHANGED:
 		{
@@ -641,7 +648,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			valueContainer->AddString("name","FillColor");
 			valueContainer->AddString("subgroup","Pattern");
 			valueContainer->AddInt32("type",B_RGB_COLOR_TYPE);
-			valueContainer->AddRGBColor("newValue",colorItem->GetColor()); 
+			valueContainer->AddRGBColor("newValue",colorItem->GetColor());
 			changeColorMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changeColorMessage);
 			break;
@@ -655,7 +662,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			valueContainer->AddString("name","PenSize");
 			valueContainer->AddString("subgroup","Pattern");
 			valueContainer->AddInt32("type",B_FLOAT_TYPE);
-			valueContainer->AddFloat("newValue",penSize->GetValue()); 
+			valueContainer->AddFloat("newValue",penSize->GetValue());
 			changePenSizeMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changePenSizeMessage);
 			break;
@@ -669,7 +676,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			InputRequest	*inputAlert = new InputRequest(_T("Input AttributName"),_T("Name"), _T("Attribut"), _T("OK"),_T("Cancel"));
 			char			*input		= NULL;
 			char			*inputstr	= NULL;
-			if (inputAlert->Go(&input)<1) 
+			if (inputAlert->Go(&input)<1)
 			{
 				inputstr	= new char[strlen(input)+1];
 				strcpy(inputstr,input);
@@ -677,7 +684,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 				addMessage->AddString("Command::Name","AddAttribute");
 				addMessage->AddBool("selected",true);
 				BMessage	*valueContainer	= new BMessage();
-				
+
 				valueContainer->AddInt32("type",B_MESSAGE_TYPE);
 				valueContainer->AddString("name",inputstr);
 				valueContainer->AddString("subgroup","Data");
@@ -688,6 +695,16 @@ void GraphEditor::MessageReceived(BMessage *message)
 				addMessage->AddMessage("valueContainer",valueContainer);
 				sentTo->SendMessage(addMessage);
 			}
+			break;
+		}
+		case G_E_INSERT_NODE:
+		{
+            sentTo->SendMessage(GenerateInsertCommand());
+			break;
+		}
+		case G_E_INSERT_SIBLING:
+		{
+			 sentTo->SendMessage(GenerateInsertCommand());
 			break;
 		}
 		default:
@@ -728,7 +745,7 @@ void GraphEditor::InsertObject(BPoint where,bool deselect)
 		where.y=where.y-fmod(where.y,GridWidth());
 	}
 
-		newObject->AddRect("Frame",BRect(where,where+BPoint(100,80)));
+	newObject->AddRect("Frame",BRect(where,where+BPoint(100,80)));
 	newObject->AddMessage("Font",newFont);
 	newObject->AddMessage("Pattern",newPattern);
 	//preparing CommandMessage
@@ -750,7 +767,7 @@ void GraphEditor::InsertRenderObject(BMessage *node)
 		node->ReplacePointer("doc",doc);
 	else
 		node->AddPointer("doc",doc);
-	switch(node->what) 
+	switch(node->what)
 	{
 		case P_C_CLASS_TYPE:
 			newRenderer	= new  ClassRenderer(this,node);
@@ -761,12 +778,12 @@ void GraphEditor::InsertRenderObject(BMessage *node)
 		case P_C_CONNECTION_TYPE:
 			newRenderer	= new ConnectionRenderer(this,node);
 		break;
-	}		
+	}
 	node->AddPointer(renderString,newRenderer);
 
-	
+
 	AddRenderer(newRenderer);
-	
+
 /*	BasePlugin	*theRenderer	= (BasePlugin*)renderPlugins->ItemAt(0);
 
 	BView		*addView		= (BView *)theRenderer->GetNewObject(node);
@@ -872,7 +889,7 @@ Renderer* GraphEditor::FindRenderer(BMessage *container)
 
 	while ((i<renderer->CountItems()) && (!found))
 	{
-		currentRenderer= (Renderer*)renderer->ItemAt(i);			
+		currentRenderer= (Renderer*)renderer->ItemAt(i);
 		if (currentRenderer->GetMessage() == container)
 			found=true;
 		i++;
@@ -891,7 +908,7 @@ void GraphEditor::BringToFront(Renderer *wichRenderer)
 	renderer->AddItem(wichRenderer);
 	//**draw the new "onTop" renderer
 	Invalidate();
-	
+
 }
 
 void GraphEditor::SendToBack(Renderer *wichRenderer)
@@ -902,6 +919,80 @@ void GraphEditor::SendToBack(Renderer *wichRenderer)
 	//**draw all wich are under the Thing redraw
 	Invalidate();
 }
+BMessage *GraphEditor::GenerateInsertCommand()
+{
+	BList		*selected			= doc->GetSelected();
+	BMessage	*newNode	    	= new BMessage(*nodeMessage);
+	BMessage	*newFont	    	= new BMessage(*fontMessage);
+	BMessage	*newPattern		    = new BMessage(*patternMessage);
+	BMessage	*connection		    = NULL;
+	BMessage	*commandMessage     = new BMessage(P_C_EXECUTE_COMMAND);
+	BMessage	*subCommandMessage	= new BMessage(P_C_EXECUTE_COMMAND);
+	BRect       *fromRect           = new BRect();
+	BRect       *selectRect         = NULL;
+	BMessage	*from			    = NULL;
+	BMessage	*to				    = newNode;
+	BMessage	*data		    	= new BMessage();
+	int32		i                   = 0;
+	status_t    err                 = B_OK;
+	BPoint      where;
+
+    data->AddString("Name","Unbenannt");
+    //insert new Node here*/
+	newPattern->ReplaceRGBColor("FillColor",colorItem->GetColor());
+	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
+    //** we need a good algorithm to find the best rect for this new node we just put it at 100,100**/
+	where = BPoint(100,100);
+	if (GridEnabled())
+	{
+		where.x=where.x-fmod(where.x,GridWidth());
+		where.y=where.y-fmod(where.y,GridWidth());
+	}
+
+	newNode->AddMessage("Font",newFont);
+	newNode->AddMessage("Pattern",newPattern);
+	commandMessage->AddString("Command::Name","Insert");
+    subCommandMessage->AddString("Command::Name","Select");
+	commandMessage->AddPointer("node",newNode);
+    subCommandMessage->AddPointer("node",newNode);
+
+    while (i<selected->CountItems())
+	{
+		from	= (BMessage *)selected->ItemAt(i);
+        if (to != NULL && from!=NULL)
+        {
+            connection		    = new BMessage(P_C_CONNECTION_TYPE);
+            err = from->FindRect("Frame",fromRect);
+            if (!selectRect)
+                selectRect = new BRect(*fromRect);
+            else
+                *selectRect = *selectRect | *fromRect;
+            err = B_OK;
+            connection->AddPointer("From",from);
+            connection->AddPointer("To",to);
+            connection->AddMessage("Data",data);
+            connection->AddPointer("doc",doc);
+            //** add the connections to the Nodes :-)
+            commandMessage->AddPointer("node",connection);
+        }
+		i++;
+	}
+	where.x         = selectRect->right+100;
+	int32 middle    = selectRect->top+(selectRect->Height()/2);
+	where.y         = middle;
+	int32 step      = -1;
+	while (FindRenderer(where)!=NULL)
+	{
+		    where.y = middle + (step*85);
+		if (step>0)
+   			step++;
+		step=-step;
+	}
+	newNode->AddRect("Frame",BRect(where,where+BPoint(100,80)));
+	commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
+	return commandMessage;
+}
+
 
 bool GraphEditor::DrawRenderer(void *arg,void *editor)
 {

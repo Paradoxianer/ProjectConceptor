@@ -11,7 +11,7 @@
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
-#endif 
+#endif
 
 
 #include "PEditor.h"
@@ -35,6 +35,10 @@ const uint32			G_E_PATTERN_CHANGED		= 'gePC';
 const uint32			G_E_COLOR_CHANGED		= 'geCC';
 const uint32			G_E_PEN_SIZE_CHANGED	= 'gePS';
 const uint32			G_E_ADD_ATTRIBUTE		= 'geAA';
+//*order to Insert and new a Node and to connect it to all current selected Nodes*/
+const uint32			G_E_INSERT_NODE 		= 'geIN';
+//*order to Insert and new a Node directly as a sibling to the last selected Node*/
+const uint32            G_E_INSERT_SIBLING      = 'geIS';
 
 extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
 
@@ -63,70 +67,71 @@ public:
 	virtual	void			SetDirty(BRegion *region);
 	virtual	BMessage*		GetConfiguration(void){return configMessage;};
 	virtual	void			SetConfiguration(BMessage *message){delete configMessage;configMessage=message;};
-	
+
 	virtual void			PreprocessBeforSave(BMessage *container);
 //	virtual void			PreprocessAfterLoad(BMessage *container);
 
-	//----------------PEditor	
-	
+	//----------------PEditor
+
 	//++++++++++++++++BView
 	virtual void			AttachedToWindow(void);
 	virtual void			DetachedFromWindow(void);
 
 	virtual	void			Draw(BRect updateRect);
-	
+
 	virtual	void			MouseDown(BPoint where);
 	virtual	void			MouseMoved(	BPoint where, uint32 code, const BMessage *a_message);
 	virtual	void			MouseUp(BPoint where);
-	
+
 	virtual	void			KeyDown(const char *bytes, int32 numBytes);
 	virtual	void			KeyUp(const char *bytes, int32 numBytes);
-	
+
 	virtual	void			MessageReceived(BMessage *msg);
-	
+
 	virtual void			FrameResized(float width, float height);
-	//----------------BView	
-	
+	//----------------BView
+
 			void			AddRenderer(Renderer* newRenderer);
 			void			RemoveRenderer(Renderer* wichRenderer);
-	
+
 			bool			GridEnabled(void){return gridEnabled;};
 			float			GridWidth(void){return gridWidth;};
 			Renderer*		FindRenderer(BPoint where);
 			Renderer*		FindNodeRenderer(BPoint where);
 			Renderer*		FindConnectionRenderer(BPoint where);
 			Renderer*		FindRenderer(BMessage *container);
-	
+
 			void			BringToFront(Renderer *wichRenderer);
 			void			SendToBack(Renderer *wichRenderer);
-	
+
 			float			Scale(void){return scale;};
 			BList*			RenderList(void){return renderer;};
 			image_id		PluginID(void){return pluginID;};
 			char*			RenderString(void){return renderString;};
-	
+
 protected:
 			void			Init(void);
 			void			InsertObject(BPoint where,bool deselect);
 			void			InsertRenderObject(BMessage *node);
+			BMessage        *GenerateInsertCommand(void);
 
 	static	bool			ProceedRegion(void *arg,void *region);
 	static	bool			DrawRenderer(void *arg,void *editor);
 
-			
+
 			int32			id;
 			char*			renderString;
 			BMenu			*scaleMenu;
 			ToolBar			*toolBar;
 			ToolItem		*grid;
 			ToolItem		*addBool;
-			ToolItem		*addText;	
+			ToolItem		*addText;
 
 
 			FloatToolItem	*penSize;
 			ColorToolItem	*colorItem;
 			PatternToolItem	*patternItem;
-			
+
 			BRect			*printRect;
 			bool			key_hold;
 
@@ -141,8 +146,8 @@ protected:
 			BMessage		*patternMessage;
 			BMessage		*configMessage;
 			BMessage		*connectionMessage;
-			BMessage		*groupMessage;		
-			
+			BMessage		*groupMessage;
+
 			BMessenger		*sentTo;
 
 			BRegion			*rendersensitv;
@@ -150,10 +155,10 @@ protected:
 			Renderer		*mouseReciver;
 			BList			*renderer;
 			float			scale;
-			
+
 			bool			gridEnabled;
 			image_id 		pluginID;
-			
+
 private:
 };
 #endif
