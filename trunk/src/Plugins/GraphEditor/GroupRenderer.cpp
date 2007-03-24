@@ -1,699 +1,505 @@
-#include <support/List.h>
-#include <interface/Font.h>
-#include <interface/ScrollView.h>
-#include <interface/GraphicsDefs.h>
-#include <translation/TranslationUtils.h>
-#include <translation/TranslatorFormats.h>
-#include <storage/Resources.h>
-#include <support/DataIO.h>
-
-#include <string.h>
 #include "GroupRenderer.h"
-#include "PCommandManager.h"
-#include "Renderer.h"
-#include "ClassRenderer.h"
-#include "ConnectionRenderer.h"
+#include "ProjectConceptorDefs.h"
 
-#include "ToolBar.h"
-#include "InputRequest.h"
+#include <math.h>
 
-const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
+#include <interface/Font.h>
+#include <interface/View.h>
+#include <interface/GraphicsDefs.h>
 
-GroupRenderer::GroupRenderer(image_id newId):Renderer
+#include <interface/Window.h>
+
+#include <support/String.h>
+#include "AttributRenderer.h"
+#include "PDocument.h"
+
+
+
+
+GroupRenderer::GroupRenderer(GraphEditor *parentEditor,BMessage *forContainer):Renderer(parentEditor,forContainer)
 {
 	TRACE();
-	pluginID	= newId;
 	Init();
-	BView::SetDoubleBuffering(1);
-	SetDrawingMode(B_OP_ALPHA);
+	ValueChanged();
 }
-
-void GroupRenderer::Init(void)
-{
+void GroupRenderer::Init()
+{	
 	TRACE();
-	printRect		= NULL;
-	selectRect		= NULL;
-	startMouseDown	= NULL;
-	activRenderer	= NULL;
-	mouseReciver	= NULL;
-	rendersensitv	= new BRegion();
-	renderString	= new char[30];
-	key_hold		= false;
-	connecting		= false;
-	gridEnabled		= false;
-	fromPoint		= new BPoint(0,0);
-	toPoint			= new BPoint(0,0);
-	renderer		= new BList();
-	scale			= 1.0;
-	configMessage	= new BMessage();
+	status_t	err			 	= B_OK;
+	resizing					= false;
+	startMouseDown				= NULL;
+	oldPt						= NULL;
+	doc							= NULL;
+	outgoing					= NULL;
+	incoming					= NULL;
+	allNodes					= NULL;
+	allConnections				= NULL;
+	
+	xRadius						= 10;
+	yRadius						= 10;
+	attributes					= new vector<Renderer *>();
+	frame						= BRect(0,0,0,0);
+	selected					= false;
+	font						= new BFont();
+	penSize						= 1.0;
+	connecting					= 0;
+	renderer					= new BList();
 
 
-	font_family		family;
-	font_style		style;
+	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+	editMessage->AddPointer("node",container);
 
-	BMessage		*dataMessage	= new BMessage();
-	dataMessage->AddString("Name","Untitled");
-	//preparing the standart ObjectMessage
-	nodeMessage	= new BMessage(P_C_CLASS_TYPE);
-	nodeMessage->AddMessage("Data",dataMessage);
-	//Preparing the standart FontMessage
-	fontMessage		= new BMessage(B_FONT_TYPE);
-	fontMessage->AddInt8("Encoding",be_plain_font->Encoding());
-	fontMessage->AddInt16("Face",be_plain_font->Face());
-	be_plain_font->GetFamilyAndStyle(&family,&style);
-	fontMessage->AddString("Family",(const char*)&family);
-	fontMessage->AddInt32("Flags", be_plain_font->Flags());
-	fontMessage->AddFloat("Rotation",be_plain_font->Rotation());
-	fontMessage->AddFloat("Shear",be_plain_font->Shear());
-	fontMessage->AddFloat("Size",be_plain_font->Size());
-	fontMessage->AddInt8("Spacing",be_plain_font->Spacing());
-	fontMessage->AddString("Style",(const char*)&style);
-	rgb_color	fontColor			= {111, 151, 181, 255};
-	fontMessage->AddRGBColor("Color",fontColor);
+	editMessage->AddString("Command::Name","ChangeValue");
+	BMessage	*valueContainer	= new BMessage();
+	valueContainer->AddString("name","Name");
+	valueContainer->AddString("subgroup","Data");
+	valueContainer->AddInt32("type",B_STRING_TYPE);
+	editMessage->AddMessage("valueContainer",valueContainer);
+	name						= new StringRenderer(editor,"",BRect(0,0,100,100), editMessage);
+	err 						= container->FindPointer("doc",(void **)&doc);
+	sentTo						= new BMessenger(NULL,doc);
+	if (container->FindFloat("xRadius",&xRadius) != B_OK)
+		container->AddFloat("xRadius",7.0);
+	if (container->FindFloat("yRadius",&yRadius) != B_OK)
+		container->AddFloat("yRadius",7.0);
+	if (container->FindPointer("allNodes", (void **)&allNodes) !=B_OK)
+		container->AddPointer("allNodes",allNodes=new BList());
+	if (container->FindPointer("allConnections", (void **)&allConnections) !=B_OK)
+		container->AddPointer("allConnections",allConnections=new BList());
+	PRINT_OBJECT(*container);
+}
 
-	//perparing Pattern Message
-	patternMessage	=new BMessage();
-	//standart Color
-	rgb_color	fillColor			= {152, 180, 190, 255};
-	patternMessage->AddRGBColor("FillColor",fillColor);
-	rgb_color	borderColor			= {0, 0, 0, 255};
-	patternMessage->AddRGBColor("BorderColor",borderColor);
-	patternMessage->AddFloat("PenSize",1.0);
-	patternMessage->AddInt8("DrawingMode",B_OP_ALPHA);
-	rgb_color	highColor			= {0, 0, 0, 255};
-	patternMessage->AddRGBColor("HighColor",highColor);
-	rgb_color 	lowColor			= {128, 128, 128, 255};
-	patternMessage->AddRGBColor("LowColor",lowColor);
-	patternMessage->AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
-
-	scaleMenu		= new BMenu(_T("Scale"));
-	BMessage	*newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.1);
-	scaleMenu->AddItem(new BMenuItem("10 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.25);
-	scaleMenu->AddItem(new BMenuItem("25 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.33);
-	scaleMenu->AddItem(new BMenuItem("33 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.5);
-	scaleMenu->AddItem(new BMenuItem("50 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.75);
-	scaleMenu->AddItem(new BMenuItem("75 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",1.00);
-	scaleMenu->AddItem(new BMenuItem("100 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",1.5);
-	scaleMenu->AddItem(new BMenuItem("150 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",2);
-	scaleMenu->AddItem(new BMenuItem("200 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",5);
-	scaleMenu->AddItem(new BMenuItem("500 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",10);
-	scaleMenu->AddItem(new BMenuItem("1000 %",newScale,0,0));
-
-	grid		= new ToolItem("Grid",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
-	penSize		= new FloatToolItem(_T("Pen Size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
-	colorItem	= new ColorToolItem(_T("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
-	patternItem	= new PatternToolItem(_T("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
-
-	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);
-
-	//loading ressource_images from the PluginRessource
-	image_info	*info 	= new image_info;
-	BBitmap		*bmp	= NULL;
-	size_t		size;
-	// look up the plugininfos
-	get_image_info(pluginID,info);
-	// init the ressource for the plugin files
-	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
-	// load the addBool icon
-const void *data=res->LoadResource((type_code)'PNG ',"addBool",&size);
-	if (data)
+	
+void GroupRenderer::MouseDown(BPoint where)
+{
+	bool		found			= false;
+	Renderer*	tmpRenderer		= NULL;
+	if (name->Caught(where))
 	{
-		//translate the icon because it was png but we ne a bmp
-		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-		if (bmp)
+		name->MouseDown(where);
+		found	= true;
+	}
+	for (int32 i = 0; (found == false) && (i < attributes->size());i++)
+	{
+		tmpRenderer=(*attributes)[i];
+		if (tmpRenderer->Caught(where))
 		{
-			BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
-			addBoolMessage->AddInt32("type",B_BOOL_TYPE);
-			addBool		= new ToolItem("addBool",bmp,addBoolMessage);
-			toolBar->AddItem(addBool);
+			found = true;
+			tmpRenderer->MouseDown(where);
 		}
 	}
-
-	data=res->LoadResource((type_code)'PNG ',"addText",&size);
-	if (data)
+	
+	if ((!found) && (startMouseDown == NULL))
 	{
-		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-		if (bmp)
+		uint32 buttons = 0;
+		uint32 modifiers = 0;
+		BMessage *currentMsg = editor->Window()->CurrentMessage();
+		currentMsg->FindInt32("buttons", (int32 *)&buttons);
+		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
+		if (buttons & B_PRIMARY_MOUSE_BUTTON)
 		{
-			BMessage	*addTextMessage = new BMessage(G_E_ADD_ATTRIBUTE);
-			addTextMessage->AddInt32("type",B_STRING_TYPE);
-			addText		= new ToolItem("addText",bmp,addTextMessage);
-			toolBar->AddItem(addText);
+			editor->BringToFront(this);
+			startMouseDown	= new BPoint(where);
+			startLeftTop	= new BPoint(frame.LeftTop());
+			editor->SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
+			if  (!selected) 
+			{
+				BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
+				if  ((modifiers & B_SHIFT_KEY) != 0) 
+					selectMessage->AddBool("deselect",false);
+				selectMessage->AddPointer("node",container);
+				selectMessage->AddString("Command::Name","Select");
+				sentTo->SendMessage(selectMessage);
+			}
+			float	yOben	= frame.top+frame.Height()/2 - triangleHeight;
+			float	yUnten	= yOben + (triangleHeight*2);
+			if ((where.y>=yOben)&&(where.y<=yUnten))
+			{
+				if ((where.x >= frame.left)&&(where.x <= (frame.left+(triangleHeight*2))))
+				{
+					connecting=1;
+				}
+				else if ((where.x >= frame.right-(triangleHeight*2))&&(where.x <= frame.right))
+				{
+					//then the user hit the "output-connecting-triangle "
+					connecting=2;
+				}
+			}
+			else if ( (where.y >= (frame.bottom-triangleHeight)) && (where.x >= (frame.right-triangleHeight)) )
+			{
+				resizing = true;
+			}
 		}
+		else if (buttons & B_SECONDARY_MOUSE_BUTTON )
+		{
+			editor->SendToBack(this);
+		}
+	}
+}
+void GroupRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
+{
+	if (startMouseDown)
+	{
+		if (!connecting)
+		{
+			float dx	= 0;
+			float dy	= 0;
+			if (!oldPt)
+				oldPt	= startMouseDown;
+			if (editor->GridEnabled())
+			{
+			
+				float newPosX = startLeftTop->x + (pt.x-startMouseDown->x);
+				float newPosY = startLeftTop->y + (pt.y-startMouseDown->y);
+				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
+				newPosY = newPosY - fmod(newPosY,editor->GridWidth());
+				dx = newPosX - frame.left;
+				dy = newPosY -frame.top ;
+			}
+			else
+			{
+				dx = pt.x - oldPt->x;
+				dy = pt.y - oldPt->y;				
+			}
+			oldPt	= new BPoint(pt);
+			if (!resizing)
+			{
+				BPoint	deltaPoint(dx,dy);
+				BList	*renderer	= editor->RenderList();
+				renderer->DoForEach(MoveAll, &deltaPoint);
+				editor->Invalidate();
+			}
+			else
+			{
+				BPoint	deltaPoint(dx,dy);
+				BList	*renderer	= editor->RenderList();
+				renderer->DoForEach(ResizeAll, &deltaPoint);
+				editor->Invalidate();
+			}
+		}
+		else
+		{
+			// make connecting Stuff
+			BMessage *connecter=new BMessage(G_E_CONNECTING);
+			connecter->AddPoint("From",*startMouseDown);
+			connecter->AddPoint("To",pt);
+			(new BMessenger((BView *)editor))->SendMessage(connecter);
+		}
+	}
+}
+void GroupRenderer::MouseUp(BPoint where)
+{
+	bool		found			= false;
+	Renderer*	tmpRenderer		= NULL;
+	for (int32 i = 0; (found == false) && (i < attributes->size());i++)
+	{
+		tmpRenderer=(*attributes)[i];
+		if (tmpRenderer->Caught(where))
+		{
+			found = true;
+			tmpRenderer->MouseUp(where);
+		}
+	}
+	if ( (!found) && (startMouseDown) )
+	{
+		if (!connecting)
+		{
+			float dx = where.x - startMouseDown->x;
+			float dy = where.y - startMouseDown->y;
+			if (editor->GridEnabled())
+			{			
+				float newPosX = startLeftTop->x + dx;
+				float newPosY = startLeftTop->y + dy;
+				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
+				newPosY = newPosY - fmod(newPosY,editor->GridWidth());
+				dx = newPosX-startLeftTop->x;
+				dy = newPosY-startLeftTop->y;
+			}
+			if (!resizing)
+			{
+				BList		*selected	= doc->GetSelected();
+/*				BPoint deltaPoint(-dx,-dy);
+				selected->DoForEach(MoveAll,&deltaPoint);*/
+				BMessage	*mover	= new BMessage(P_C_EXECUTE_COMMAND);
+				mover->AddString("Command::Name","Move");
+				mover->AddFloat("dx",dx);
+				mover->AddFloat("dy",dy);
+				sentTo->SendMessage(mover);
+			}
+			else
+			{
+				BList	*selected	= doc->GetSelected();
+/*				BPoint	deltaPoint(-dx,-dy);
+				selected->DoForEach(ResizeAll,&deltaPoint);*/
+				BMessage	*resizer	= new BMessage(P_C_EXECUTE_COMMAND);
+				resizer->AddString("Command::Name","Resize");
+				resizer->AddFloat("dx",dx);
+				resizer->AddFloat("dy",dy);
+				sentTo->SendMessage(resizer);	
+			}
+			resizing		= false;
+		}
+		else
+		{
+			BMessage *connecter=new BMessage(G_E_CONNECTED);
+			if (connecting == 2)
+			{
+				connecter->AddPointer("From",container);
+				connecter->AddPoint("To",where);
+			}
+			else
+			{
+				connecter->AddPoint("From",where);
+				connecter->AddPointer("To",container);
+			}
+			(new BMessenger((BView *)editor))->SendMessage(connecter);
+		}
+		delete startMouseDown;
+		delete oldPt;
+		startMouseDown	= NULL;
+		oldPt			= NULL;
+		connecting=false;
 	}
 }
 
 
+void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
+{	
+	BRect		shadowFrame = frame;
+	bool		fitIn		= true;
+	Renderer*	tmpRenderer	= NULL;
+
+	rgb_color	drawColor;
+	shadowFrame.OffsetBy(3,3);
+	drawOn->SetPenSize(penSize);
+	drawOn->SetHighColor(0,0,0,77);
+	drawOn->FillRoundRect(shadowFrame, xRadius, yRadius);
+	if (!selected)
+		drawColor = fillColor;
+
+	else
+		drawColor = tint_color(fillColor,1.35);
+	drawOn->SetHighColor(drawColor);
+	drawOn->FillRoundRect(frame, xRadius, yRadius);
+	drawOn->SetPenSize(1.0);
+	drawOn->BeginLineArray(20);
+	drawOn->AddLine(BPoint(frame.left+xRadius,frame.top+1),BPoint(frame.right-xRadius,frame.top+1),tint_color(drawColor,0));
+	drawOn->AddLine(BPoint(frame.left,frame.top+2),BPoint(frame.right,frame.top+2),tint_color(drawColor,0.05));
+	drawOn->AddLine(BPoint(frame.left,frame.top+3),BPoint(frame.right,frame.top+3),tint_color(drawColor,0.1));
+	drawOn->AddLine(BPoint(frame.left,frame.top+4),BPoint(frame.right,frame.top+4),tint_color(drawColor,0.15));	
+	drawOn->AddLine(BPoint(frame.left,frame.top+5),BPoint(frame.right,frame.top+5),tint_color(drawColor,0.2));
+	drawOn->AddLine(BPoint(frame.left,frame.top+6),BPoint(frame.right,frame.top+6),tint_color(drawColor,0.25));	
+	drawOn->AddLine(BPoint(frame.left,frame.top+7),BPoint(frame.right,frame.top+7),tint_color(drawColor,0.3));
+	drawOn->AddLine(BPoint(frame.left,frame.top+8),BPoint(frame.right,frame.top+8),tint_color(drawColor,0.35));
+	drawOn->AddLine(BPoint(frame.left,frame.top+9),BPoint(frame.right,frame.top+9),tint_color(drawColor,0.4));
+	drawOn->AddLine(BPoint(frame.left,frame.top+10),BPoint(frame.right,frame.top+10),tint_color(drawColor,0.45));
+	drawOn->AddLine(BPoint(frame.left,frame.top+11),BPoint(frame.right,frame.top+11),tint_color(drawColor,0.5));
+	drawOn->AddLine(BPoint(frame.left,frame.top+12),BPoint(frame.right,frame.top+12),tint_color(drawColor,0.55));
+	drawOn->AddLine(BPoint(frame.left,frame.top+13),BPoint(frame.right,frame.top+13),tint_color(drawColor,0.6));
+	drawOn->AddLine(BPoint(frame.left,frame.top+14),BPoint(frame.right,frame.top+14),tint_color(drawColor,0.65));	
+	drawOn->AddLine(BPoint(frame.left,frame.top+15),BPoint(frame.right,frame.top+15),tint_color(drawColor,0.7));
+	drawOn->AddLine(BPoint(frame.left,frame.top+16),BPoint(frame.right,frame.top+16),tint_color(drawColor,0.75));	
+	drawOn->AddLine(BPoint(frame.left,frame.top+17),BPoint(frame.right,frame.top+17),tint_color(drawColor,0.8));
+	drawOn->AddLine(BPoint(frame.left,frame.top+18),BPoint(frame.right,frame.top+18),tint_color(drawColor,0.85));
+	drawOn->AddLine(BPoint(frame.left,frame.top+19),BPoint(frame.right,frame.top+19),tint_color(drawColor,0.9));
+	drawOn->AddLine(BPoint(frame.left,frame.top+20),BPoint(frame.right,frame.top+20),tint_color(drawColor,0.95));
+	drawOn->EndLineArray();
+	#ifdef B_ZETA_VERSION_1_0_0
+		drawOn->SetHighColor(ui_color(B_UI_DOCUMENT_LINK_COLOR));	
+	#else
+		drawOn->SetHighColor(0,0,255,255);	
+	#endif 
+	float	yOben	= frame.top+frame.Height()/2 - triangleHeight;
+	float	yMitte	= yOben + triangleHeight;
+	float	yUnten	= yMitte + triangleHeight;
+
+	drawOn->FillTriangle(BPoint(frame.left,yOben),BPoint(frame.left+triangleHeight,yMitte),BPoint(frame.left,yUnten));
+	drawOn->FillTriangle(BPoint(frame.right-triangleHeight,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-triangleHeight,yUnten));
+	//pattern resizePattern = { 0x55, 0x55, 0x55, 0x55, 0x55,0x55, 0x55, 0x55 };
+	drawOn->FillTriangle(BPoint(frame.right-triangleHeight,frame.bottom),BPoint(frame.right,frame.bottom-triangleHeight),BPoint(frame.right,frame.bottom),B_MIXED_COLORS);
+
+	drawOn->SetHighColor(borderColor);
+	drawOn->SetPenSize(penSize);
+	drawOn->StrokeRoundRect(frame, xRadius, yRadius);
+	drawOn->SetPenSize(1.0);
+	drawOn->StrokeTriangle(BPoint(frame.left,yOben),BPoint(frame.left+triangleHeight,yMitte),BPoint(frame.left,yUnten));
+	drawOn->StrokeTriangle(BPoint(frame.right-triangleHeight,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-triangleHeight,yUnten));
+	name->Draw(drawOn,updateRect);
+	for (int32 i=0;(fitIn)&& (i<attributes->size());i++)
+	{
+		tmpRenderer=(*attributes)[i];
+		if (frame.Contains(tmpRenderer->Frame()))
+			tmpRenderer->Draw(drawOn,updateRect);
+		else
+			fitIn=false;
+	}
+	if (!fitIn)
+		drawOn->DrawString("...",BPoint(frame.left+triangleHeight+2,frame.bottom-(yRadius/3)));
+	renderer->DoForEach(DrawRenderer,this);
+}
+
+void GroupRenderer::MessageReceived(BMessage *message)
+{
+	switch(message->what) 
+	{
+		case P_C_VALUE_CHANGED:
+				ValueChanged();	
+			break;
+	}
+}
 
 void GroupRenderer::ValueChanged()
 {
 	TRACE();
-	BList		*changedNodes	= doc->GetChangedNodes();
-	BList		*allTrashed		= doc->GetTrash();
-
-	BMessage	*node			= NULL;
-	Renderer	*painter		= NULL;
-	BRect		frame;
-	BRect		invalid;
-	for (int32 i=0;i<changedNodes->CountItems();i++)
+	BMessage	*pattern		= new BMessage();
+	BMessage	*messageFont	= new BMessage();
+	BMessage	*data			= new BMessage();
+	char		*newName		= NULL;
+	
+	char		*attribName		= NULL;
+	BMessage	*attribMessage	= new BMessage();
+	uint32		type			= B_ANY_TYPE; 
+	int32		count			= 0;
+	bool		found			= false;
+		
+	container->FindRect("Frame",&frame);
+	container->FindBool("selected",&selected);
+	container->FindFloat("xRadius",&xRadius);
+	container->FindFloat("yRadius",&yRadius);
+	container->FindMessage("Pattern",pattern);
+	container->FindMessage("Font",messageFont);
+	container->FindMessage("Data",data);
+	pattern->FindRGBColor("FillColor",&fillColor);
+	pattern->FindRGBColor("BorderColor",&borderColor);
+	pattern->FindFloat("PenSize",&penSize);
+	data->FindString("Name",(const char **)&newName);
+	name->SetString(newName);
+	name->SetFrame(BRect(frame.left+(xRadius/3),frame.top+(yRadius/3),frame.right-(xRadius/3),frame.top+12));
+	//delete all "old" Attribs
+	attributes->erase(attributes->begin(),attributes->end());
+	//and add all attribs we found
+	for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(const char **) &attribName, &type, &count) == B_OK; i++)
 	{
-		node = (BMessage *)changedNodes->ItemAt(i);
-		if (node->FindPointer(renderString,(void **)&painter) == B_OK)
-			painter->ValueChanged();
-		else
-			InsertRenderObject(node);
-	}
-	for (int32 i=0;i<allTrashed->CountItems();i++)
-	{
-		node = (BMessage *)allTrashed->ItemAt(i);
-		RemoveRenderer(FindRenderer(node));
-	}
-	if (BView::LockLooper())
-	{
-		Invalidate();
-		BView::UnlockLooper();
-	}
-}
-
-void GroupRenderer::SetDirty(BRegion *region)
-{
-	TRACE();
-	BView::Invalidate(region);
-}
-
-
-void GroupRenderer::Draw(BRect updateRect)
-{
-	SetHighColor(230,230,230,255);
-	BView::Draw(BRect(updateRect.left/scale,updateRect.top/scale,updateRect.right/scale,updateRect.bottom/scale));
-	if (gridEnabled)
-	{
-		int32		xcount		= (Frame().Width()/gridWidth)+1;
-		int32		ycount		= (Frame().Height()/gridWidth)+1;
-		float		x			= 0;
-		float		y			= 0;
-		rgb_color	gridColor	= tint_color(ViewColor(),1.1);
-		BeginLineArray(xcount+ycount);
-		for (int32 i=1;i<xcount;i++)
-		{
-			AddLine(BPoint(x,Bounds().top),BPoint(x,Frame().Height()),gridColor);
-			x += gridWidth;
-		}
-		for (int32 i=1;i<ycount;i++)
-		{
-			AddLine(BPoint(Bounds().left,y),BPoint(Frame().Width(),y),gridColor);
-			y += gridWidth;
-		}
-		EndLineArray();
-	}
-	renderer->DoForEach(DrawRenderer,this);
-	if (selectRect)
-	{
-		SetHighColor(81,131,171,120);
-		FillRect(*selectRect);
-		SetHighColor(31,81,121,255);
-		StrokeRect(*selectRect);
-	}
-	else if (connecting)
-	{
-		SetHighColor(50,50,50,255);
-		StrokeLine(*fromPoint,*toPoint);
-	}
-
-}
-
-void GroupRenderer::MouseDown(BPoint where)
-{
-	BView::MouseDown(where);
-	BView::MakeFocus(true);
-	BPoint		scaledWhere;
-	scaledWhere.x	= where.x / scale;
-	scaledWhere.y	= where.y / scale;
-
-	BMessage *currentMsg = Window()->CurrentMessage();
-	uint32 modifiers = 0;
-	uint32 buttons = 0;
-//	GetMouse(&where,&buttons);
-	bool found	=	false;
-	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0) );i--)
-	{
-		if (((Renderer*)renderer->ItemAt(i))->Caught(scaledWhere))
-		{
-			mouseReciver = (Renderer*)renderer->ItemAt(i);
-			mouseReciver->MouseDown(scaledWhere);
-			found			= true;
-		}
-	}
-	if (!found)
-	{
-		currentMsg->FindInt32("buttons", (int32 *)&buttons);
-		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
-		if (buttons & B_PRIMARY_MOUSE_BUTTON)
-	 	{
-			startMouseDown=new BPoint(scaledWhere);
-			//EventMaske setzen so dass die Maus auch über den View verfolgt wird
-			SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
-		}
+		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
+			InsertAttribute(attribName,attribMessage, count-1);
 	}
 }
 
-
-void GroupRenderer::MouseMoved(	BPoint where, uint32 code, const BMessage *a_message)
+BRect GroupRenderer::Frame( void )
 {
-	BView::MouseMoved(where,code,a_message);
-	BPoint		scaledWhere;
-	scaledWhere.x	= where.x / scale;
-	scaledWhere.y	= where.y / scale;
-	if (startMouseDown)
-	{
-		//only if the user hase moved the Mouse we start to select...
-		float dx=scaledWhere.x - startMouseDown->x;
-		float dy=scaledWhere.y - startMouseDown->y;
-		float entfernung=sqrt(dx*dx+dy*dy);
-		if (entfernung>max_entfernung)
-		{
-			if (selectRect!=NULL)
-			{
-				selectRect->SetLeftTop(*startMouseDown);
-				selectRect->SetRightBottom(scaledWhere);
-			}
-			else
-			{
-				selectRect=new BRect(*startMouseDown,scaledWhere);
-			}
-
-			//make the Rect valid
-			if (selectRect->left>selectRect->right)
-			{
-				float c=selectRect->left;
-				selectRect->left=selectRect->right;
-				selectRect->right=c;
-			}
-			if (selectRect->top>selectRect->bottom)
-			{
-				float c=selectRect->top;
-				selectRect->top=selectRect->bottom;
-				selectRect->bottom=c;
-			}
-			Invalidate();
-		}
-	}
-	else if (mouseReciver != NULL)
-	{
-		mouseReciver->MouseMoved(scaledWhere,code,a_message);
-	}
+	return frame;
 }
 
-void GroupRenderer::MouseUp(BPoint where)
+bool  GroupRenderer::Caught(BPoint where)
 {
-	BView::MouseUp(where);
-	BPoint		scaledWhere;
-	scaledWhere.x	= where.x / scale;
-	scaledWhere.y	= where.y / scale;
-	if (startMouseDown != NULL)
+	return frame.Contains(where);
+}
+//**implement this
+void  GroupRenderer::SetFrame(BRect newFrame)
+{
+}
+
+bool  GroupRenderer::MoveAll(void *arg,void *deltaPoint)
+{
+	BPoint		*delta	= (BPoint *)deltaPoint;
+	Renderer	*renderer	= (Renderer*)arg;
+	if (renderer->Selected())
+		renderer->MoveBy(delta->x,delta->y);
+	return false;
+}
+
+bool  GroupRenderer::ResizeAll(void *arg,void *deltaPoint)
+{
+	BPoint		*delta	= (BPoint *)deltaPoint;
+	Renderer	*renderer	= (Renderer*)arg;
+	if (renderer->Selected())
+		renderer->ResizeBy(delta->x,delta->y);
+	return false;
+}
+
+void GroupRenderer::MoveBy(float dx,float dy)
+{
+	frame.OffsetBy(dx,dy);
+	name->MoveBy(dx,dy);
+	vector<Renderer *>::iterator	allAttributes = attributes->begin();
+/*	while( allAttributes != attributes->end() )
 	{
-   		if (selectRect != NULL)
-		{
-			BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
-			selectMessage->AddRect("frame",*selectRect);
-			selectMessage->AddString("Command::Name","Select");
-			sentTo->SendMessage(selectMessage);
-		}
-		else
-		{
-		/*	BMessage *insertMessage=new BMessage();
-			insertMessage->AddMessage("newObject",nodeMessage);
-			insertMessage->AddPoint("where",where);
-			sentTo->SendMessage(insertMessage);*/
-			BMessage	*currentMsg	= Window()->CurrentMessage();
-			uint32		buttons		= 0;
-			uint32		modifiers	= 0;
-			currentMsg->FindInt32("buttons", (int32 *)&buttons);
-			currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
-			if ((modifiers & B_CONTROL_KEY) != 0)
-				InsertObject(scaledWhere,false);
-			else
-				InsertObject(scaledWhere,true);
-			//InsertObject(insertMessage);
-		}
-		delete startMouseDown;
-		startMouseDown=NULL;
-		delete selectRect;
-		selectRect=NULL;
-		Invalidate();
-	}
-	else if (mouseReciver != NULL)
-	{
-		mouseReciver->MouseUp(scaledWhere);
-	}
-/*	else
-	{
-		BMessage *selectMessage=new BMessage(B_SELECT_ALL);
-		selectMessage->AddBool("clearSelection",true);
-		sentTo->SendMessage(selectMessage);
+
+		allAttributes->MoveBy(dx,dy);
+		allAttributes++;
 	}*/
-
-}
-
-void GroupRenderer::KeyDown(const char *bytes, int32 numBytes)
-{
-	TRACE();
-}
-
-void GroupRenderer::KeyUp(const char *bytes, int32 numBytes)
-{
-	TRACE();
-}
-void GroupRenderer::AttachedToWindow(void)
-{
-	TRACE();
-	SetViewColor(230,230,230,255);
-	PWindow 	*pWindow	= (PWindow *)Window();
-	BMenuBar	*menuBar	= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
-	menuBar->AddItem(scaleMenu);
-	scaleMenu->SetTargetForItems(this);
-	if (doc)
-		InitAll();
-
-	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
-	pWindow->AddToolBar(toolBar);
-	addBool->SetTarget(this);
-	addText->SetTarget(this);
-	ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddItem(grid);
-	configBar->AddSeperator();
-	configBar->AddItem(penSize);
-	configBar->AddItem(colorItem);
-
-	grid->SetTarget(this);
-	penSize->SetTarget(this);
-	colorItem->SetTarget(this);
-}
-
-
-
-void GroupRenderer::DetachedFromWindow(void)
-{
-	TRACE();
-	if (Window())
+	for (int32 i=0;i<attributes->size();i++)
 	{
-		PWindow 	*pWindow		= (PWindow *)Window();
-		BMenuBar	*menuBar		= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
-		if (menuBar)
-			menuBar->RemoveItem(scaleMenu);
-//		pWindow->AddToolBar(toolBar);
-		pWindow->RemoveToolBar(G_E_TOOL_BAR	);
-		ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
-		if (configBar)
-		{
-			configBar->RemoveItem(penSize);
-			configBar->RemoveItem(colorItem);
-			configBar->RemoveItem(patternItem);
-			configBar->RemoveSeperator();
-			configBar->RemoveItem(grid);
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-		}
-		Renderer	*nodeRenderer	= NULL;
-		for (int32 i=0;i<renderer->CountItems();i++)
-		{
-			nodeRenderer = (Renderer *)renderer->ItemAt(i);
-		}
-		while(renderer->CountItems()>0)
-		{
-			nodeRenderer = (Renderer *)renderer->ItemAt(0);
-			RemoveRenderer(nodeRenderer);
-		}
+		(*attributes)[i]->MoveBy(dx,dy);
 	}
+
 }
-void GroupRenderer::MessageReceived(BMessage *message)
+
+void GroupRenderer::ResizeBy(float dx,float dy)
 {
-	switch(message->what)
+	if ((frame.right+dx-frame.left) > 70)
+		frame.right		+= dx; 
+	if  ((frame.bottom+dy-frame.top) > 30)
+		frame.bottom	+= dy;
+	name->ResizeBy(dy,dy);
+	for (int32 i=0;i<attributes->size();i++)
 	{
-		case P_C_VALUE_CHANGED:
-		{
-			ValueChanged();
-			break;
-		}
-		case P_C_DOC_BOUNDS_CHANGED:
-		{
-			BRect		docRect		= doc->Bounds();
-			ResizeTo(docRect.right,docRect.bottom);
-			break;
-		}
-		case G_E_CONNECTING:
-		{
-				connecting = true;
-				message->FindPoint("To",toPoint);
-				message->FindPoint("From",fromPoint);
-				Invalidate();
-			break;
-		}
-		case G_E_CONNECTED:
-		{
-			connecting = false;
-			Invalidate();
-			BMessage	*connection		= new BMessage(P_C_CONNECTION_TYPE);
-			BMessage	*commandMessage	= new BMessage(P_C_EXECUTE_COMMAND);
-			BMessage	*subCommandMessage	= new BMessage(P_C_EXECUTE_COMMAND);
-
-			BMessage	*from			= NULL;
-			BMessage	*to				= NULL;
-			BMessage	*data			= new BMessage();
-			BPoint		*toPointer		= new BPoint(-10,-10);
-			BPoint		*fromPointer	= new BPoint(-10,-10);
-			Renderer	*foundRenderer	= NULL;
-			if (message->FindPointer("From",(void **)&from) == B_OK)
-			{
-				message->FindPoint("To",toPointer);
-				foundRenderer = FindNodeRenderer(*toPointer);
-				if (foundRenderer)
-					to = foundRenderer->GetMessage();
-				//to = doc->FindObject(toPointer);
-			}
-			else
-			{
-				message->FindPointer("To",(void **)&to);
-				message->FindPoint("From",fromPointer);
-				foundRenderer = FindNodeRenderer(*fromPointer);
-				if (foundRenderer)
-					from  = foundRenderer->GetMessage();
-			//	from	= doc->FindObject(fromPointer);
-			}
-			data->AddString("Name","Unbenannt");
-			if (to != NULL && from!=NULL)
-			{
-				connection->AddPointer("From",from);
-				connection->AddPointer("To",to);
-				connection->AddMessage("Data",data);
-				connection->AddPointer("doc",doc);
-				//** add the connections to the Nodes :-)
-				commandMessage->AddPointer("node",connection);
-				commandMessage->AddString("Command::Name","Insert");
-				subCommandMessage->AddString("Command::Name","Select");
-				subCommandMessage->AddPointer("node",connection);
-				commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
-				sentTo->SendMessage(commandMessage);
-			}
-			break;
-		}
-		case G_E_NEW_SCALE:
-		{
-			message->FindFloat("scale",&scale);
-			SetScale(scale);
-			FrameResized(0,0);
-			Invalidate();
-			break;
-		}
-		case G_E_GRID_CHANGED:
-		{
-			gridEnabled =! gridEnabled;
-			Invalidate();
-			break;
-		}
-		case G_E_COLOR_CHANGED:
-		{
-			rgb_color	tmpNewColor =	{255, 0, 0, 255};
-			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
-			changeColorMessage->AddString("Command::Name","ChangeValue");
-			changeColorMessage->AddBool("selected",true);
-			BMessage	*valueContainer	= new BMessage();
-			valueContainer->AddString("name","FillColor");
-			valueContainer->AddString("subgroup","Pattern");
-			valueContainer->AddInt32("type",B_RGB_COLOR_TYPE);
-			valueContainer->AddRGBColor("newValue",colorItem->GetColor());
-			changeColorMessage->AddMessage("valueContainer",valueContainer);
-			sentTo->SendMessage(changeColorMessage);
-			break;
-		}
-		case G_E_PEN_SIZE_CHANGED:
-		{
-			BMessage	*changePenSizeMessage	= new BMessage(P_C_EXECUTE_COMMAND);
-			changePenSizeMessage->AddString("Command::Name","ChangeValue");
-			changePenSizeMessage->AddBool("selected",true);
-			BMessage	*valueContainer	= new BMessage();
-			valueContainer->AddString("name","PenSize");
-			valueContainer->AddString("subgroup","Pattern");
-			valueContainer->AddInt32("type",B_FLOAT_TYPE);
-			valueContainer->AddFloat("newValue",penSize->GetValue());
-			changePenSizeMessage->AddMessage("valueContainer",valueContainer);
-			sentTo->SendMessage(changePenSizeMessage);
-			break;
-		}
-		case G_E_ADD_ATTRIBUTE:
-		{
-			int32	type;
-			char	*datadummy	= new char[4];
-			strcpy(datadummy,"    ");
-			message->FindInt32("type",&type);
-			InputRequest	*inputAlert = new InputRequest(_T("Input AttributName"),_T("Name"), _T("Attribut"), _T("OK"),_T("Cancel"));
-			char			*input		= NULL;
-			char			*inputstr	= NULL;
-			if (inputAlert->Go(&input)<1)
-			{
-				inputstr	= new char[strlen(input)+1];
-				strcpy(inputstr,input);
-				BMessage	*addMessage		= new BMessage(P_C_EXECUTE_COMMAND);
-				addMessage->AddString("Command::Name","AddAttribute");
-				addMessage->AddBool("selected",true);
-				BMessage	*valueContainer	= new BMessage();
-
-				valueContainer->AddInt32("type",B_MESSAGE_TYPE);
-				valueContainer->AddString("name",inputstr);
-				valueContainer->AddString("subgroup","Data");
-				BMessage	*newAttribute	= new BMessage(type);
-				newAttribute->AddString("Name",inputstr);
-				newAttribute->AddData("Value",type,datadummy,sizeof(datadummy));
-				valueContainer->AddMessage("newAttribute",newAttribute);
-				addMessage->AddMessage("valueContainer",valueContainer);
-				sentTo->SendMessage(addMessage);
-			}
-			break;
-		}
-		case G_E_INSERT_NODE:
-		{
-            sentTo->SendMessage(GenerateInsertCommand());
-			break;
-		}
-		case G_E_INSERT_SIBLING:
-		{
-			 sentTo->SendMessage(GenerateInsertCommand());
-			break;
-		}
-		default:
-			BView::MessageReceived(message);
-			break;
+		(*attributes)[i]->ResizeBy(dx,dy);
 	}
 }
 
-void GroupRenderer::FrameResized(float width, float height)
+void GroupRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 count)
 {
-	TRACE();
-	BRect		docRect		= doc->Bounds();
-	BView::FrameResized(width,height);
-	BScrollView	*scrollView = dynamic_cast<BScrollView *> (BView::Parent());
-	if (scrollView)
+	char	*realName	= NULL;
+	/*switch(attribute->what) 
 	{
-		scrollView->ScrollBar(B_HORIZONTAL)->SetRange(0,docRect.Width()*scale);
-		scrollView->ScrollBar(B_HORIZONTAL)->SetProportion(Bounds().Width()/(docRect.Width()*scale));
-		scrollView->ScrollBar(B_VERTICAL)->SetRange(0,docRect.Height()*scale);
-		scrollView->ScrollBar(B_VERTICAL)->SetProportion(Bounds().Height()/(docRect.Height()*scale));
-	}
-}
-
-void GroupRenderer::InsertObject(BPoint where,bool deselect)
-{
-	TRACE();
-	BMessage	*commandMessage	= new BMessage(P_C_EXECUTE_COMMAND);
-	BMessage	*newObject		= new BMessage(*nodeMessage);
-	BMessage	*newFont		= new BMessage(*fontMessage);
-	BMessage	*newPattern		= new BMessage(*patternMessage);
-	newPattern->ReplaceRGBColor("FillColor",colorItem->GetColor());
-	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
-
-	BMessage	*selectMessage	= new BMessage();
-	if (GridEnabled())
+		case B_STRING_TYPE:
+		{
+			BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+			editMessage->AddPointer("node",container);
+			editMessage->AddString("Command::Name","ChangeValue");
+			editMessage->AddString("subgroup","Data");
+			editMessage->AddString("name",attribName);
+			attribute->FindString("Name",(const char **)&realName);
+			BString		*testString 	= new BString(attribName);
+			Renderer	*testRenderer	= new StringRenderer(editor,"",BRect(frame.left+2,frame.top+10,frame.right-2,frame.bottom-2), editMessage);
+			attributes->insert(pair<BString *,Renderer*>(testString,testRenderer));
+			break;
+		}
+	}*/
+	BRect	attributeRect;
+	if (attributes->empty())
 	{
-		where.x=where.x-fmod(where.x,GridWidth());
-		where.y=where.y-fmod(where.y,GridWidth());
+		attributeRect = BRect(frame.left+triangleHeight+2,name->Frame().bottom+6,frame.right-triangleHeight-2,frame.bottom-2);
 	}
-
-	newObject->AddRect("Frame",BRect(where,where+BPoint(100,80)));
-	newObject->AddMessage("Font",newFont);
-	newObject->AddMessage("Pattern",newPattern);
-	//preparing CommandMessage
-	commandMessage->AddPointer("node",(void *)newObject);
-	commandMessage->AddString("Command::Name","Insert");
-	selectMessage->AddBool("deselect",deselect);
-	selectMessage->AddPointer("node",(void *)newObject);
-	selectMessage->AddString("Command::Name","Select");
-	commandMessage->AddMessage("PCommand::subPCommand",selectMessage);
-	sentTo->SendMessage(commandMessage);
-}
-
-void GroupRenderer::InsertRenderObject(BMessage *node)
-{
-	TRACE();
-	Renderer *newRenderer = NULL;
-	void	*tmpDoc	= NULL;
-	if (node->FindPointer("doc",&tmpDoc)==B_OK)
-		node->ReplacePointer("doc",doc);
 	else
-		node->AddPointer("doc",doc);
-	switch(node->what)
 	{
-		case P_C_CLASS_TYPE:
-			newRenderer	= new  ClassRenderer(this,node);
-		break;
-		case P_C_GROUP_TYPE:
-//			newRenderer = new BasicGroupView(theValue);
-		break;
-		case P_C_CONNECTION_TYPE:
-			newRenderer	= new ConnectionRenderer(this,node);
-		break;
+		Renderer* lastRenderer = (*attributes)[attributes->size()-1];
+		attributeRect = BRect(frame.left+triangleHeight+2,lastRenderer->Frame().bottom+1,frame.right-triangleHeight-2,frame.bottom-2);
 	}
-	node->AddPointer(renderString,newRenderer);
+	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+	editMessage->AddPointer("node",container);
+	editMessage->AddString("Command::Name","ChangeValue");
+	BMessage*	valueContainer	= new BMessage();
+	valueContainer->AddString("subgroup","Data");
+	valueContainer->AddString("subgroup",attribName);
+	editMessage->AddMessage("valueContainer",valueContainer);
+	delete valueContainer;
+	BMessage*	removeAttribMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+	removeAttribMessage->AddPointer("node",container);
+	removeAttribMessage->AddString("Command::Name","RemoveAttribute");
+	valueContainer	= new BMessage();
+	valueContainer->AddString("subgroup","Data");
+	valueContainer->AddString("name",attribName);
+	valueContainer->AddInt32("index",count);
+	removeAttribMessage->AddMessage("valueContainer",valueContainer);
+	
+//	attribute->FindString("Name",(const char **)&realName);
+//	Renderer	*testRenderer	= new StringRenderer(editor,realName,attributeRect, editMessage);
+	Renderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage,removeAttribMessage);
+	attributes->push_back(testRenderer);
 
-
-	AddRenderer(newRenderer);
-
-/*	BasePlugin	*theRenderer	= (BasePlugin*)renderPlugins->ItemAt(0);
-
-	BView		*addView		= (BView *)theRenderer->GetNewObject(node);
-	if (addView!=NULL)
-	{
-		AddChild(addView);
-
-	}*/
 }
-
 
 void GroupRenderer::AddRenderer(Renderer* newRenderer)
 {
@@ -713,8 +519,8 @@ void GroupRenderer::RemoveRenderer(Renderer *wichRenderer)
 	if (mouseReciver == wichRenderer)
 		mouseReciver = NULL;
 	renderer->RemoveItem(wichRenderer);
-	(wichRenderer->GetMessage())->RemoveName(renderString);
-
+//	(wichRenderer->GetMessage())->RemoveName(renderString);
+//** need to sent a command to delete this renderer 
 	delete wichRenderer;
 /*	delete rendersensitv;
 	rendersensitv = new BRegion();
@@ -800,14 +606,12 @@ Renderer* GroupRenderer::FindRenderer(BMessage *container)
 		return NULL;
 }
 
-
 void GroupRenderer::BringToFront(Renderer *wichRenderer)
 {
 	TRACE();
 	renderer->RemoveItem(wichRenderer);
 	renderer->AddItem(wichRenderer);
 	//**draw the new "onTop" renderer
-	Invalidate();
 
 }
 
@@ -817,87 +621,12 @@ void GroupRenderer::SendToBack(Renderer *wichRenderer)
 	renderer->RemoveItem(wichRenderer);
 	renderer->AddItem(wichRenderer,0);
 	//**draw all wich are under the Thing redraw
-	Invalidate();
 }
-BMessage *GroupRenderer::GenerateInsertCommand()
-{
-	BList		*selected			= doc->GetSelected();
-	BMessage	*newNode	    	= new BMessage(*nodeMessage);
-	BMessage	*newFont	    	= new BMessage(*fontMessage);
-	BMessage	*newPattern		    = new BMessage(*patternMessage);
-	BMessage	*connection		    = NULL;
-	BMessage	*commandMessage     = new BMessage(P_C_EXECUTE_COMMAND);
-	BMessage	*subCommandMessage	= new BMessage(P_C_EXECUTE_COMMAND);
-	BRect       *fromRect           = new BRect();
-	BRect       *selectRect         = NULL;
-	BMessage	*from			    = NULL;
-	BMessage	*to				    = newNode;
-	BMessage	*data		    	= new BMessage();
-	int32		i                   = 0;
-	status_t    err                 = B_OK;
-	BPoint      where;
-
-    data->AddString("Name","Unbenannt");
-    //insert new Node here*/
-	newPattern->ReplaceRGBColor("FillColor",colorItem->GetColor());
-	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
-    //** we need a good algorithm to find the best rect for this new node we just put it at 100,100**/
-	where = BPoint(100,100);
-	if (GridEnabled())
-	{
-		where.x=where.x-fmod(where.x,GridWidth());
-		where.y=where.y-fmod(where.y,GridWidth());
-	}
-
-	newNode->AddMessage("Font",newFont);
-	newNode->AddMessage("Pattern",newPattern);
-	commandMessage->AddString("Command::Name","Insert");
-    subCommandMessage->AddString("Command::Name","Select");
-	commandMessage->AddPointer("node",newNode);
-    subCommandMessage->AddPointer("node",newNode);
-
-    while (i<selected->CountItems())
-	{
-		from	= (BMessage *)selected->ItemAt(i);
-        if (to != NULL && from!=NULL)
-        {
-            connection		    = new BMessage(P_C_CONNECTION_TYPE);
-            err = from->FindRect("Frame",fromRect);
-            if (!selectRect)
-                selectRect = new BRect(*fromRect);
-            else
-                *selectRect = *selectRect | *fromRect;
-            err = B_OK;
-            connection->AddPointer("From",from);
-            connection->AddPointer("To",to);
-            connection->AddMessage("Data",data);
-            connection->AddPointer("doc",doc);
-            //** add the connections to the Nodes :-)
-            commandMessage->AddPointer("node",connection);
-        }
-		i++;
-	}
-	where.x         = selectRect->right+100;
-	int32 middle    = selectRect->top+(selectRect->Height()/2);
-	where.y         = middle;
-	int32 step      = -1;
-	while (FindRenderer(where)!=NULL)
-	{
-		    where.y = middle + (step*85);
-		if (step>0)
-   			step++;
-		step=-step;
-	}
-	newNode->AddRect("Frame",BRect(where,where+BPoint(100,80)));
-	commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
-	return commandMessage;
-}
-
 
 bool GroupRenderer::DrawRenderer(void *arg,void *editor)
 {
 	Renderer *painter=(Renderer *)arg;
-	painter->Draw((GroupRenderer*)editor,BRect(0,0,0,0));
+	painter->Draw((GraphEditor*)editor,BRect(0,0,0,0));
 	return false;
 }
 

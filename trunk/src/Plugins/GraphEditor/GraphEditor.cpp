@@ -13,6 +13,7 @@
 #include "Renderer.h"
 #include "ClassRenderer.h"
 #include "ConnectionRenderer.h"
+#include "GroupRenderer.h"
 
 #include "ToolBar.h"
 #include "InputRequest.h"
@@ -124,7 +125,6 @@ void GraphEditor::Init(void)
 	patternItem	= new PatternToolItem(_T("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 
 	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);
-
 	//loading ressource_images from the PluginRessource
 	image_info	*info 	= new image_info;
 	BBitmap		*bmp	= NULL;
@@ -134,7 +134,20 @@ void GraphEditor::Init(void)
 	// init the ressource for the plugin files
 	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
 	// load the addBool icon
-const void *data=res->LoadResource((type_code)'PNG ',"addBool",&size);
+	const void *data=res->LoadResource((type_code)'PNG ',"group",&size);
+	if (data)
+	{
+		//translate the icon because it was png but we ne a bmp
+		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
+		if (bmp)
+		{
+			BMessage	*groupMessage = new BMessage();
+			addGroup		= new ToolItem("addGroup",bmp,groupMessage);
+			toolBar->AddItem(addGroup);
+		}
+	}
+	toolBar->AddSeperator();
+	data=res->LoadResource((type_code)'PNG ',"addBool",&size);
 	if (data)
 	{
 		//translate the icon because it was png but we ne a bmp
@@ -269,6 +282,8 @@ void GraphEditor::ValueChanged()
 	TRACE();
 	BList		*changedNodes	= doc->GetChangedNodes();
 	BList		*allTrashed		= doc->GetTrash();
+	BList		*allNodes		= doc->GetAllNodes();
+	BList		*allConnections	= doc->GetAllConnections();
 
 	BMessage	*node			= NULL;
 	Renderer	*painter		= NULL;
@@ -279,7 +294,8 @@ void GraphEditor::ValueChanged()
 		node = (BMessage *)changedNodes->ItemAt(i);
 		if (node->FindPointer(renderString,(void **)&painter) == B_OK)
 			painter->ValueChanged();
-		else
+		//**check if this node is in the node or connection list because it it is not it´s a nodd frome a subgroup
+		else if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))		
 			InsertRenderObject(node);
 	}
 	for (int32 i=0;i<allTrashed->CountItems();i++)
@@ -773,7 +789,7 @@ void GraphEditor::InsertRenderObject(BMessage *node)
 			newRenderer	= new  ClassRenderer(this,node);
 		break;
 		case P_C_GROUP_TYPE:
-//			newRenderer = new BasicGroupView(theValue);
+			newRenderer = new GroupRenderer(this,node);
 		break;
 		case P_C_CONNECTION_TYPE:
 			newRenderer	= new ConnectionRenderer(this,node);

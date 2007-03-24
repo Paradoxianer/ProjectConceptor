@@ -1,81 +1,60 @@
 #ifndef GROUP_RENDERER_H
 #define GROUP_RENDERER_H
-/*
- * @author Paradoxon powered by Jesus Christ
- */
+
 #include <app/Message.h>
+#include <app/Messenger.h>
 #include <interface/View.h>
-#include <support/List.h>
+#include <interface/Box.h>
+#include <interface/PictureButton.h>
+#include <interface/TextView.h>
+#include <interface/TextControl.h>
+
+//using the ugly stl instead of the nice Zeta templates to make it Haiku ready
+#include <cpp/vector.h>
+#include <cpp/iterator.h>
+
+
+#include "GraphEditor.h"
+#include "PDocument.h"
+#include "Renderer.h"
+#include "StringRenderer.h"
+#include "PCommandManager.h"
+#include "Renderer.h"
+#include "ClassRenderer.h"
+#include "ConnectionRenderer.h"
+#include "GroupRenderer.h"
+
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
-#endif
+#endif 
 
-
-#include "GraphEditor.h"
-#include "BasePlugin.h"
-#include "PDocument.h"
-#include "PluginManager.h"
-
-#include "PatternToolItem.h"
-#include "ColorToolItem.h"
-#include "FloatToolItem.h"
-
-const float			 	max_entfernung			= 50.0;
-const uint32			G_E_RENDERER			= 'geRr';
-const uint32			G_E_CONNECTING			= 'geCG';
-const uint32			G_E_CONNECTED			= 'geCD';
-const uint32			G_E_NEW_SCALE			= 'geNS';
-
-const uint32			G_E_GRID_CHANGED		= 'geGC';
-
-const uint32			G_E_PATTERN_CHANGED		= 'gePC';
-const uint32			G_E_COLOR_CHANGED		= 'geCC';
-const uint32			G_E_PEN_SIZE_CHANGED	= 'gePS';
-const uint32			G_E_ADD_ATTRIBUTE		= 'geAA';
-//*order to Insert and new a Node and to connect it to all current selected Nodes*/
-const uint32			G_E_INSERT_NODE 		= 'geIN';
-//*order to Insert and new a Node directly as a sibling to the last selected Node*/
-const uint32            G_E_INSERT_SIBLING      = 'geIS';
-
-extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
-
-const float		triangleHeight	= 7;
-const float		gridWidth		= 50;
-
-class Renderer;
-
-class GroupRenderer : public Renderer
+class GroupRenderer: public Renderer
 {
 
 public:
-							GroupRenderer(image_id newId);
+							GroupRenderer(GraphEditor *parentEditor,BMessage *forContainer);
+			void			Draw(BView *drawOn, BRect updateRect);
+			void			MouseDown(BPoint where);
+			void			MouseUp(BPoint where);
+			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg); 
+			void			LanguageChanged();
+			void			MessageReceived(BMessage *message);
 
-	//++++++++++++++++BView
-	virtual void			AttachedToWindow(void);
-	virtual void			DetachedFromWindow(void);
+			void			ValueChanged(void);
 
-	virtual	void			Draw(BRect updateRect);
-
-	virtual	void			MouseDown(BPoint where);
-	virtual	void			MouseMoved(	BPoint where, uint32 code, const BMessage *a_message);
-	virtual	void			MouseUp(BPoint where);
-
-	virtual	void			KeyDown(const char *bytes, int32 numBytes);
-	virtual	void			KeyUp(const char *bytes, int32 numBytes);
-
-	virtual	void			MessageReceived(BMessage *msg);
-
-	virtual void			FrameResized(float width, float height);
-	//----------------BView
-
+			bool			Caught(BPoint where);
+			BRect			Frame(void);
+			void			SetFrame(BRect newFrame);
+			void			MoveBy(float dx, float dy);
+			void			ResizeBy(float dx,float dy);
+			bool			Selected(){return selected;};
+				
+				//++++++Group Special Methods
 			void			AddRenderer(Renderer* newRenderer);
 			void			RemoveRenderer(Renderer* wichRenderer);
-
-			bool			GridEnabled(void){return gridEnabled;};
-			float			GridWidth(void){return gridWidth;};
 			Renderer*		FindRenderer(BPoint where);
 			Renderer*		FindNodeRenderer(BPoint where);
 			Renderer*		FindConnectionRenderer(BPoint where);
@@ -86,58 +65,57 @@ public:
 
 			float			Scale(void){return scale;};
 			BList*			RenderList(void){return renderer;};
-			image_id		PluginID(void){return pluginID;};
-			char*			RenderString(void){return renderString;};
-
-protected:
-			void			Init(void);
-			void			InsertObject(BPoint where,bool deselect);
-			void			InsertRenderObject(BMessage *node);
-			BMessage        *GenerateInsertCommand(void);
-
 	static	bool			ProceedRegion(void *arg,void *region);
 	static	bool			DrawRenderer(void *arg,void *editor);
 
+				//------Group Special Methods
+				
 
-			int32			id;
-			char*			renderString;
-			BMenu			*scaleMenu;
-			ToolBar			*toolBar;
-			ToolItem		*grid;
-			ToolItem		*addBool;
-			ToolItem		*addText;
+protected:
+				void		Init();
+				void		InsertAttribute(char *attribName, BMessage *attribute,int32 count);
+		BMessage			*viewMessage;
 
 
-			FloatToolItem	*penSize;
-			ColorToolItem	*colorItem;
-			PatternToolItem	*patternItem;
+		static	bool		MoveAll(void *arg,void *deltaPoint);
+		static	bool		ResizeAll(void *arg,void *deltaPoint);
 
-			BRect			*printRect;
-			bool			key_hold;
+	//++++++++++ClassSettings++++++++++
+		float				xRadius,yRadius;
+		rgb_color			fillColor,borderColor;
+		BRect				frame;
+		bool				selected;
+		BFont				*font;
+		float				penSize;
+		
+	//const char*			name;
+	//---------ClassSettings-----------
 
-			BPoint			*startMouseDown;
-			bool			connecting;
-			BPoint			*fromPoint;
-			BPoint			*toPoint;
-			BRect			*selectRect;
+		BPoint				*startMouseDown;
+		BPoint				*startLeftTop;	
 
-			BMessage		*nodeMessage;
-			BMessage		*fontMessage;
-			BMessage		*patternMessage;
-			BMessage		*configMessage;
-			BMessage		*connectionMessage;
-			BMessage		*groupMessage;
+		BPoint				*oldPt;
 
-			BMessenger		*sentTo;
+		int					connecting;
+		bool				resizing;
 
-			BRegion			*rendersensitv;
-			Renderer		*activRenderer;
-			Renderer		*mouseReciver;
-			BList			*renderer;
-			float			scale;
+		PDocument			*doc;
+		BMessenger			*sentTo;
+	
+		BList				*outgoing;
+		BList				*incoming;
+		StringRenderer		*name;
+		vector<Renderer*>	*attributes;
 
-			bool			gridEnabled;
-			image_id 		pluginID;
+		//++++++Group Special Methods
+		BList				*allNodes;
+		BList				*allConnections;
+		BRegion				*rendersensitv;
+		BList				*renderer;
+		Renderer			*activRenderer;
+		Renderer			*mouseReciver;
+		float				scale;
+		//-----Group Special Methods
 
 private:
 };

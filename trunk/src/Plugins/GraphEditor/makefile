@@ -30,6 +30,7 @@ SRCS= 	AttributRenderer.cpp		\
 		ConnectionRenderer.cpp	\
 		GraphEditor.cpp			\
 		GraphEditorPlugin.cpp		\
+		GroupRenderer.cpp		\
 		StringRenderer.cpp		\
 		TextEditorControl.cpp
 

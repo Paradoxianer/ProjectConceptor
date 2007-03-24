@@ -124,6 +124,8 @@ protected:
 			BMenu			*scaleMenu;
 			ToolBar			*toolBar;
 			ToolItem		*grid;
+
+			ToolItem		*addGroup;
 			ToolItem		*addBool;
 			ToolItem		*addText;
 
