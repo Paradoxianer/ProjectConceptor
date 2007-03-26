@@ -235,11 +235,11 @@ void GraphEditor::InitAll()
 	BList		*allConnections	= doc->GetAllConnections();
 
 	BMessage	*node			= NULL;
-	BView		*renderer		= NULL;
+	void		*renderer		= NULL;
 	for (int32 i=0;i<allNodes->CountItems();i++)
 	{
 		node = (BMessage *)allNodes->ItemAt(i);
-		if (node->FindPointer(renderString,(void **)&renderer) != B_OK)
+		if (node->FindPointer(renderString,&renderer) != B_OK)
 		{
 			InsertRenderObject(node);
 		}
@@ -247,7 +247,7 @@ void GraphEditor::InitAll()
 	for (int32 i=0;i<allConnections->CountItems();i++)
 	{
 		node = (BMessage *)allConnections->ItemAt(i);
-		if (node->FindPointer(renderString,(void **)&renderer) != B_OK)
+		if (node->FindPointer(renderString,&renderer) != B_OK)
 		{
 			InsertRenderObject(node);
 		}

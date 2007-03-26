@@ -74,6 +74,7 @@ public:
 protected:
 				void		Init();
 				void		InsertAttribute(char *attribName, BMessage *attribute,int32 count);
+				void		InsertRenderObject(BMessage *node);
 		BMessage			*viewMessage;
 
 

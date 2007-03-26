@@ -25,28 +25,30 @@ GroupRenderer::GroupRenderer(GraphEditor *parentEditor,BMessage *forContainer):R
 void GroupRenderer::Init()
 {	
 	TRACE();
-	status_t	err			 	= B_OK;
-	resizing					= false;
-	startMouseDown				= NULL;
-	oldPt						= NULL;
-	doc							= NULL;
-	outgoing					= NULL;
-	incoming					= NULL;
-	allNodes					= NULL;
-	allConnections				= NULL;
+	status_t	err			 		= B_OK;
+	resizing						= false;
+	startMouseDown					= NULL;
+	oldPt							= NULL;
+	doc								= NULL;
+	outgoing						= NULL;
+	incoming						= NULL;
+	allNodes						= NULL;
+	allConnections					= NULL;
 	
-	xRadius						= 10;
-	yRadius						= 10;
-	attributes					= new vector<Renderer *>();
-	frame						= BRect(0,0,0,0);
-	selected					= false;
-	font						= new BFont();
-	penSize						= 1.0;
-	connecting					= 0;
-	renderer					= new BList();
+	xRadius							= 10;
+	yRadius							= 10;
+	attributes							= new vector<Renderer *>();
+	frame							= BRect(0,0,0,0);
+	selected						= false;
+	font							= new BFont();
+	penSize							= 1.0;
+	connecting						= 0;
+	renderer						= new BList();
+	
+	BMessage*		editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+	BMessage*		node			= NULL;
 
-
-	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+	void*			parent;
 	editMessage->AddPointer("node",container);
 
 	editMessage->AddString("Command::Name","ChangeValue");
@@ -66,6 +68,22 @@ void GroupRenderer::Init()
 		container->AddPointer("allNodes",allNodes=new BList());
 	if (container->FindPointer("allConnections", (void **)&allConnections) !=B_OK)
 		container->AddPointer("allConnections",allConnections=new BList());
+	for (int32 i=0;i<allNodes->CountItems();i++)
+	{
+		node = (BMessage *)allNodes->ItemAt(i);
+		if (node->FindPointer("Parent",(void **)&parent) != B_OK)
+		{
+			InsertRenderObject(node);
+		}
+	}
+	for (int32 i=0;i<allConnections->CountItems();i++)
+	{
+		node = (BMessage *)allConnections->ItemAt(i);
+		if (node->FindPointer("Parent",(void **)&parent) != B_OK)
+		{
+			InsertRenderObject(node);
+		}
+	}
 	PRINT_OBJECT(*container);
 }
 
@@ -353,6 +371,8 @@ void GroupRenderer::ValueChanged()
 	TRACE();
 	BMessage	*pattern		= new BMessage();
 	BMessage	*messageFont	= new BMessage();
+	BMessage	*node			= NULL;
+
 	BMessage	*data			= new BMessage();
 	char		*newName		= NULL;
 	
@@ -361,7 +381,7 @@ void GroupRenderer::ValueChanged()
 	uint32		type			= B_ANY_TYPE; 
 	int32		count			= 0;
 	bool		found			= false;
-		
+	void		*parent			= NULL;
 	container->FindRect("Frame",&frame);
 	container->FindBool("selected",&selected);
 	container->FindFloat("xRadius",&xRadius);
@@ -382,6 +402,22 @@ void GroupRenderer::ValueChanged()
 	{
 		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
 			InsertAttribute(attribName,attribMessage, count-1);
+	}
+	for (int32 i=0;i<allNodes->CountItems();i++)
+	{
+		node = (BMessage *)allNodes->ItemAt(i);
+		if (node->FindPointer("Parent",(void **)&parent) != B_OK)
+		{
+			InsertRenderObject(node);
+		}
+	}
+	for (int32 i=0;i<allConnections->CountItems();i++)
+	{
+		node = (BMessage *)allConnections->ItemAt(i);
+		if (node->FindPointer("Parent",(void **)&parent) != B_OK)
+		{
+			InsertRenderObject(node);
+		}
 	}
 }
 
@@ -500,6 +536,33 @@ void GroupRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	attributes->push_back(testRenderer);
 
 }
+
+void GroupRenderer::InsertRenderObject(BMessage *node)
+{
+	TRACE();
+	Renderer *newRenderer = NULL;
+	void	*tmpDoc	= NULL;
+	if (node->FindPointer("doc",&tmpDoc)==B_OK)
+		node->ReplacePointer("doc",doc);
+	else
+		node->AddPointer("doc",doc);
+	switch(node->what)
+	{
+		case P_C_CLASS_TYPE:
+			newRenderer	= new  ClassRenderer(editor,node);
+		break;
+		case P_C_GROUP_TYPE:
+			newRenderer = new GroupRenderer(editor,node);
+		break;
+		case P_C_CONNECTION_TYPE:
+			newRenderer	= new ConnectionRenderer(editor,node);
+		break;
+	}
+	node->AddPointer("Parent",this);
+	AddRenderer(newRenderer);
+
+}
+
 
 void GroupRenderer::AddRenderer(Renderer* newRenderer)
 {
