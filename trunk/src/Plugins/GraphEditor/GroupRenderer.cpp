@@ -37,7 +37,7 @@ void GroupRenderer::Init()
 	
 	xRadius							= 10;
 	yRadius							= 10;
-	attributes							= new vector<Renderer *>();
+	attributes						= new vector<Renderer *>();
 	frame							= BRect(0,0,0,0);
 	selected						= false;
 	font							= new BFont();
@@ -71,18 +71,18 @@ void GroupRenderer::Init()
 	for (int32 i=0;i<allNodes->CountItems();i++)
 	{
 		node = (BMessage *)allNodes->ItemAt(i);
-		if (node->FindPointer("Parent",(void **)&parent) != B_OK)
-		{
+/*		if (node->FindPointer("Parent",(void **)&parent) != B_OK)
+		{*/
 			InsertRenderObject(node);
-		}
+//		}
 	}
 	for (int32 i=0;i<allConnections->CountItems();i++)
 	{
 		node = (BMessage *)allConnections->ItemAt(i);
-		if (node->FindPointer("Parent",(void **)&parent) != B_OK)
-		{
+/*		if (node->FindPointer("Parent",(void **)&parent) != B_OK)
+		{*/
 			InsertRenderObject(node);
-		}
+//		}
 	}
 	PRINT_OBJECT(*container);
 }
@@ -353,7 +353,7 @@ void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
 	}
 	if (!fitIn)
 		drawOn->DrawString("...",BPoint(frame.left+triangleHeight+2,frame.bottom-(yRadius/3)));
-	renderer->DoForEach(DrawRenderer,this);
+	renderer->DoForEach(DrawRenderer,editor);
 }
 
 void GroupRenderer::MessageReceived(BMessage *message)
