@@ -27,6 +27,8 @@ const float			 	max_entfernung			= 50.0;
 const uint32			G_E_RENDERER			= 'geRr';
 const uint32			G_E_CONNECTING			= 'geCG';
 const uint32			G_E_CONNECTED			= 'geCD';
+const uint32			G_E_GROUP				= 'geGR';
+
 const uint32			G_E_NEW_SCALE			= 'geNS';
 
 const uint32			G_E_GRID_CHANGED		= 'geGC';
@@ -113,7 +115,7 @@ protected:
 			void			Init(void);
 			void			InsertObject(BPoint where,bool deselect);
 			void			InsertRenderObject(BMessage *node);
-			BMessage        *GenerateInsertCommand(void);
+			BMessage        *GenerateInsertCommand(uint32 newWhat);
 
 	static	bool			ProceedRegion(void *arg,void *region);
 	static	bool			DrawRenderer(void *arg,void *editor);

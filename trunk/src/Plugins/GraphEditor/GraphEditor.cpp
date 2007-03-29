@@ -141,8 +141,8 @@ void GraphEditor::Init(void)
 		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
 		if (bmp)
 		{
-			BMessage	*groupMessage = new BMessage();
-			addGroup		= new ToolItem("addGroup",bmp,groupMessage);
+			BMessage	*groupMessage = new BMessage(G_E_GROUP);
+			addGroup	= new ToolItem("addGroup",bmp,groupMessage);
 			toolBar->AddItem(addGroup);
 		}
 	}
@@ -293,10 +293,17 @@ void GraphEditor::ValueChanged()
 	{
 		node = (BMessage *)changedNodes->ItemAt(i);
 		if (node->FindPointer(renderString,(void **)&painter) == B_OK)
-			painter->ValueChanged();
-		//**check if this node is in the node or connection list because it it is not it´s a nodd frome a subgroup
-		else if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))		
-			InsertRenderObject(node);
+		{
+			painter->ValueChanged();	
+		}
+		else
+		{
+			//**check if this node is in the node or connection list because it it is not it´s a nodd frome a subgroup or it was deleted
+			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))		
+				InsertRenderObject(node);
+			else
+				RemoveRenderer(FindRenderer(node));
+		}
 	}
 	for (int32 i=0;i<allTrashed->CountItems();i++)
 	{
@@ -512,6 +519,7 @@ void GraphEditor::AttachedToWindow(void)
 
 	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
 	pWindow->AddToolBar(toolBar);
+	addGroup->SetTarget(this);
 	addBool->SetTarget(this);
 	addText->SetTarget(this);
 	ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
@@ -715,12 +723,19 @@ void GraphEditor::MessageReceived(BMessage *message)
 		}
 		case G_E_INSERT_NODE:
 		{
-            sentTo->SendMessage(GenerateInsertCommand());
+            sentTo->SendMessage(GenerateInsertCommand(P_C_CLASS_TYPE));
 			break;
 		}
 		case G_E_INSERT_SIBLING:
 		{
-			 sentTo->SendMessage(GenerateInsertCommand());
+			 sentTo->SendMessage(GenerateInsertCommand(P_C_CLASS_TYPE));
+			break;
+		}
+		case G_E_GROUP:
+		{
+			BMessage	*commandMessage	= GenerateInsertCommand(P_C_GROUP_TYPE);
+			commandMessage->ReplaceString("Command::Name","Group");
+			sentTo->SendMessage(commandMessage);
 			break;
 		}
 		default:
@@ -824,14 +839,17 @@ void GraphEditor::AddRenderer(Renderer* newRenderer)
 void GraphEditor::RemoveRenderer(Renderer *wichRenderer)
 {
 	TRACE();
-	if (activRenderer == wichRenderer)
-		activRenderer = NULL;
-	if (mouseReciver == wichRenderer)
-		mouseReciver = NULL;
-	renderer->RemoveItem(wichRenderer);
-	(wichRenderer->GetMessage())->RemoveName(renderString);
+	if (wichRenderer != NULL)
+	{
+		if (activRenderer == wichRenderer)
+			activRenderer = NULL;
+		if (mouseReciver == wichRenderer)
+			mouseReciver = NULL;
+		renderer->RemoveItem(wichRenderer);
+		(wichRenderer->GetMessage())->RemoveName(renderString);	
 
-	delete wichRenderer;
+		delete wichRenderer;
+	}
 /*	delete rendersensitv;
 	rendersensitv = new BRegion();
 	renderer->DoForEach(ProceedRegion,rendersensitv);*/
@@ -869,7 +887,7 @@ Renderer* GraphEditor::FindNodeRenderer(BPoint where)
 			if (((Renderer*)renderer->ItemAt(i))->Caught(where))
 			{
 				currentRenderer	= (Renderer*)renderer->ItemAt(i);
-				if (currentRenderer->GetMessage()->what == P_C_CLASS_TYPE)
+				if ((currentRenderer->GetMessage()->what == P_C_CLASS_TYPE) || (currentRenderer->GetMessage()->what == P_C_GROUP_TYPE) )
 					found			= true;
 			}
 		}
@@ -935,7 +953,7 @@ void GraphEditor::SendToBack(Renderer *wichRenderer)
 	//**draw all wich are under the Thing redraw
 	Invalidate();
 }
-BMessage *GraphEditor::GenerateInsertCommand()
+BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat)
 {
 	BList		*selected			= doc->GetSelected();
 	BMessage	*newNode	    	= new BMessage(*nodeMessage);
@@ -961,10 +979,10 @@ BMessage *GraphEditor::GenerateInsertCommand()
 	where = BPoint(100,100);
 	if (GridEnabled())
 	{
-		where.x=where.x-fmod(where.x,GridWidth());
-		where.y=where.y-fmod(where.y,GridWidth());
+		where.x = where.x-fmod(where.x,GridWidth());
+		where.y = where.y-fmod(where.y,GridWidth());
 	}
-
+	newNode->what = newWhat;
 	newNode->AddMessage("Font",newFont);
 	newNode->AddMessage("Pattern",newPattern);
 	commandMessage->AddString("Command::Name","Insert");
