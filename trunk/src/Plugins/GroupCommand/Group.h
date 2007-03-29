@@ -11,7 +11,7 @@ class Group : public PCommand
 
 public:
 							Group();
-	
+
 	//++++++++++++++++PCommand
 	virtual	void			Undo(PDocument *doc,BMessage *undo);
 	virtual	BMessage*		Do(PDocument *doc, BMessage *settings);
@@ -20,9 +20,6 @@ public:
 	virtual	void			DetachedFromManager(void);
 
 protected:
-	virtual	void			DoGroup(PDocument *doc ,BRect *rect);
-	virtual	void			DoGroup(PDocument *doc ,BMessage *container);
-	virtual void			DoGroupAll(PDocument *doc);
 private:
 	//----------------PCommand
 };
