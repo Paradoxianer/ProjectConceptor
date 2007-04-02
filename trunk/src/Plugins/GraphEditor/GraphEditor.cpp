@@ -294,7 +294,10 @@ void GraphEditor::ValueChanged()
 		node = (BMessage *)changedNodes->ItemAt(i);
 		if (node->FindPointer(renderString,(void **)&painter) == B_OK)
 		{
-			painter->ValueChanged();	
+			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))		
+				painter->ValueChanged();
+			else
+				RemoveRenderer(FindRenderer(node));		
 		}
 		else
 		{
