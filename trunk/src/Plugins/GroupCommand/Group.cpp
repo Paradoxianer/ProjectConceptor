@@ -69,7 +69,7 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings)
 			groupedNode = (BMessage *)selected->ItemAt(i);
 			if (groupedNode != NULL)
 			{
-				trash->AddItem(groupedNode);
+//				trash->AddItem(groupedNode);
 				allNodes->RemoveItem(groupedNode);
 				groupedNode->AddPointer("Parent",node);
 				gAllNodes->AddItem(groupedNode);
