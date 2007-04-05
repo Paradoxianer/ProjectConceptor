@@ -8,21 +8,8 @@ void Group::Undo(PDocument *doc,BMessage *undo)
 {
 	PCommand::Undo(doc,undo);
 	int32 			i					= 0;
-	BMessage		*currentContainer	= NULL;
-	BList			*selected			= doc->GetSelected();
-	for (i=0;i<selected->CountItems();i++)
-	{
-		currentContainer	= (BMessage *)selected->ItemAt(i);
-		currentContainer->ReplaceBool("selected",0,false);
-	}
-	i = 0;
-	while (	undo->FindPointer("node",i,(void **)&currentContainer) == B_OK)
-	{
-		i++;
-		if (currentContainer)
-			currentContainer->ReplaceBool("selected",0,true);
-	}
-}
+	BMessage		*currentContainer	= NULL;	BMessage		*node				= NULL;	BMessage		*subNode			= NULL;	BList			*subList			= NULL;	BList			*selected			= doc->GetSelected();	BList			*allNodes			= NULL;	BList			*allConnections		= NULL;
+	settings->FindPointer("allNodes",i,(void **)&allNodes);	if (allNodes==NULL)		allNodes=doc->GetAllNodes();	settings->FindPointer("allConnections",i,(void **)&allConnections);	if (allConnections==NULL)		allConnections=doc->GetAllConnections();	if ( (undo->FindPointer("node",i,(void **)&node) == B_OK) && (node) )	{		allNodes->RemoveItem(node);		if ( (node->FindPointer("allNodes",(void **)&subList) != B_OK) && (subList) )		{			while (subList->CountItems()>0)			{				subNode	= (BMessage *)subList->RemoveItem((int32)0);				allNodes->AddItem(subNode);				changed->AddItem(subNode);			}		}		if ((node->FindPointer("allConnections",(void **)&subList)) && (subList))		{			while (subList->CountItems()>0)			{				subNode	= (BMessage *)subList->RemoveItem((int32)0);				allConnections->AddItem(subNode);				changed->AddItem(subNode);			}		}	}}
 
 BMessage* Group::Do(PDocument *doc, BMessage *settings)
 {
@@ -146,4 +133,4 @@ void Group::AttachedToManager(void)
 
 void Group::DetachedFromManager(void)
 {
-}
+}
