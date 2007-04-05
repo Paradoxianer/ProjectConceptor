@@ -377,7 +377,7 @@ void GraphEditor::MouseDown(BPoint where)
 
 	BMessage *currentMsg = Window()->CurrentMessage();
 	uint32 modifiers = 0;
-	uint32 buttons = 0;
+	uint32 buttons	= 0;
 //	GetMouse(&where,&buttons);
 	bool found	=	false;
 	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0) );i--)

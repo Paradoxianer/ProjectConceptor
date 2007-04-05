@@ -28,13 +28,14 @@ void GroupRenderer::Init()
 	status_t	err			 		= B_OK;
 	resizing						= false;
 	startMouseDown					= NULL;
+	scale							= 1.0;
 	oldPt							= NULL;
 	doc								= NULL;
 	outgoing						= NULL;
 	incoming						= NULL;
 	allNodes						= NULL;
 	allConnections					= NULL;
-	
+	mouseReciver					= NULL;
 	xRadius							= 10;
 	yRadius							= 10;
 	attributes						= new vector<Renderer *>();
@@ -109,19 +110,23 @@ void GroupRenderer::MouseDown(BPoint where)
 			found			= true;
 		}
 	}
-/*	if (!found)
+	/*if (!found)
 	{
+		BMessage *currentMsg = editor->Window()->CurrentMessage();
+		int32 modifiers	= 0;
+		uint32 buttons	= 0;
 		currentMsg->FindInt32("buttons", (int32 *)&buttons);
 		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
 		if (buttons & B_PRIMARY_MOUSE_BUTTON)
 	 	{
 			startMouseDown=new BPoint(scaledWhere);
 			//EventMaske setzen so dass die Maus auch über den View verfolgt wird
-			SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
+			editor->SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
 		}
 	}*/
 
-	for (int32 i = 0; (found == false) && (i < attributes->size());i++)
+//** Shall we support Attribs for Group???
+/*	for (int32 i = 0; (found == false) && (i < attributes->size());i++)
 	{
 		tmpRenderer=(*attributes)[i];
 		if (tmpRenderer->Caught(where))
@@ -129,7 +134,7 @@ void GroupRenderer::MouseDown(BPoint where)
 			found = true;
 			tmpRenderer->MouseDown(where);
 		}
-	}
+	}*/
 	
 	if ((!found) && (startMouseDown == NULL))
 	{
@@ -180,6 +185,9 @@ void GroupRenderer::MouseDown(BPoint where)
 }
 void GroupRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 {
+	BPoint		scaledWhere;
+	scaledWhere.x	= pt.x / scale;
+	scaledWhere.y	= pt.y / scale;
 	if (startMouseDown)
 	{
 		if (!connecting)
@@ -227,12 +235,21 @@ void GroupRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 			(new BMessenger((BView *)editor))->SendMessage(connecter);
 		}
 	}
+	else if (mouseReciver != NULL)
+	{
+		mouseReciver->MouseMoved(scaledWhere,code,msg);
+	}
 }
+
 void GroupRenderer::MouseUp(BPoint where)
 {
 	bool		found			= false;
 	Renderer*	tmpRenderer		= NULL;
-	for (int32 i = 0; (found == false) && (i < attributes->size());i++)
+	BPoint		scaledWhere;
+	scaledWhere.x	= where.x / scale;
+	scaledWhere.y	= where.y / scale;
+//shall we support attribs??
+/*	for (int32 i = 0; (found == false) && (i < attributes->size());i++)
 	{
 		tmpRenderer=(*attributes)[i];
 		if (tmpRenderer->Caught(where))
@@ -240,7 +257,7 @@ void GroupRenderer::MouseUp(BPoint where)
 			found = true;
 			tmpRenderer->MouseUp(where);
 		}
-	}
+	}*/
 	if ( (!found) && (startMouseDown) )
 	{
 		if (!connecting)
@@ -300,6 +317,10 @@ void GroupRenderer::MouseUp(BPoint where)
 		startMouseDown	= NULL;
 		oldPt			= NULL;
 		connecting=false;
+	}
+	else if (mouseReciver != NULL)
+	{
+		mouseReciver->MouseUp(scaledWhere);
 	}
 }
 
