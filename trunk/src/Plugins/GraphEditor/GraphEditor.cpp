@@ -294,25 +294,42 @@ void GraphEditor::ValueChanged()
 		node = (BMessage *)changedNodes->ItemAt(i);
 		if (node->FindPointer(renderString,(void **)&painter) == B_OK)
 		{
-			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))		
+			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
+			{
 				painter->ValueChanged();
+				//if we procedded this node than it´s not changed anymore
+//				changedNodes->RemoveItem(i);
+//				i--;
+			}
 			else
-				RemoveRenderer(FindRenderer(node));		
+			{
+				RemoveRenderer(FindRenderer(node));
+				//if we procedded this node than it´s not changed anymore
+//				changedNodes->RemoveItem(i);
+//				i--;
+			}
 		}
 		else
 		{
 			//**check if this node is in the node or connection list because it it is not it´s a nodd frome a subgroup or it was deleted
-			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))		
+			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
+			{
 				InsertRenderObject(node);
+ 				//if we procedded this node than it´s not changed anymore
+//				changedNodes->RemoveItem(i);
+//				i--;
+
+			}
 			else
+			{
 				RemoveRenderer(FindRenderer(node));
+				//if we procedded this node than it´s not changed anymore
+//				changedNodes->RemoveItem(i);
+//				i--;
+			}
 		}
 	}
-	for (int32 i=0;i<allTrashed->CountItems();i++)
-	{
-		node = (BMessage *)allTrashed->ItemAt(i);
-		RemoveRenderer(FindRenderer(node));
-	}
+
 	if (BView::LockLooper())
 	{
 		Invalidate();
@@ -538,7 +555,7 @@ void GraphEditor::AttachedToWindow(void)
 
 	grid->SetTarget(this);
 	penSize->SetTarget(this);
-	colorItem->SetTarget(this);
+	colorItem->SetTarget(this);	sentToMe	= new BMessenger((BView *)this);
 }
 
 
@@ -734,6 +751,11 @@ void GraphEditor::MessageReceived(BMessage *message)
 			 sentTo->SendMessage(GenerateInsertCommand(P_C_CLASS_TYPE));
 			break;
 		}
+		case G_E_INVALIDATE:
+		{
+			Invalidate();
+			break;
+		}
 		case G_E_GROUP:
 		{
 			BMessage	*commandMessage	= GenerateInsertCommand(P_C_GROUP_TYPE);
@@ -804,13 +826,13 @@ void GraphEditor::InsertRenderObject(BMessage *node)
 	switch(node->what)
 	{
 		case P_C_CLASS_TYPE:
-			newRenderer	= new  ClassRenderer(this,node);
+			newRenderer	= new  ClassRenderer(this,NULL,node);
 		break;
 		case P_C_GROUP_TYPE:
-			newRenderer = new GroupRenderer(this,node);
+			newRenderer = new GroupRenderer(this,NULL,node);
 		break;
 		case P_C_CONNECTION_TYPE:
-			newRenderer	= new ConnectionRenderer(this,node);
+			newRenderer	= new ConnectionRenderer(this,NULL,node);
 		break;
 	}
 	node->AddPointer(renderString,newRenderer);
@@ -849,7 +871,7 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer)
 		if (mouseReciver == wichRenderer)
 			mouseReciver = NULL;
 		renderer->RemoveItem(wichRenderer);
-		(wichRenderer->GetMessage())->RemoveName(renderString);	
+		(wichRenderer->GetMessage())->RemoveName(renderString);
 
 		delete wichRenderer;
 	}

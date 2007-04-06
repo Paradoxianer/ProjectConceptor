@@ -29,17 +29,17 @@
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
-#endif 
+#endif
 
 class GroupRenderer: public Renderer
 {
 
 public:
-							GroupRenderer(GraphEditor *parentEditor,BMessage *forContainer);
+							GroupRenderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer);
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			MouseDown(BPoint where);
 			void			MouseUp(BPoint where);
-			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg); 
+			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg);
 			void			LanguageChanged();
 			void			MessageReceived(BMessage *message);
 
@@ -51,7 +51,7 @@ public:
 			void			MoveBy(float dx, float dy);
 			void			ResizeBy(float dx,float dy);
 			bool			Selected(){return selected;};
-				
+			
 				//++++++Group Special Methods
 			void			AddRenderer(Renderer* newRenderer);
 			void			RemoveRenderer(Renderer* wichRenderer);
@@ -65,11 +65,10 @@ public:
 
 			float			Scale(void){return scale;};
 			BList*			RenderList(void){return renderer;};
-	static	bool			ProceedRegion(void *arg,void *region);
 	static	bool			DrawRenderer(void *arg,void *editor);
 
 				//------Group Special Methods
-				
+
 
 protected:
 				void		Init();
@@ -88,12 +87,12 @@ protected:
 		bool				selected;
 		BFont				*font;
 		float				penSize;
-		
+
 	//const char*			name;
 	//---------ClassSettings-----------
 
 		BPoint				*startMouseDown;
-		BPoint				*startLeftTop;	
+		BPoint				*startLeftTop;
 
 		BPoint				*oldPt;
 
@@ -102,16 +101,12 @@ protected:
 
 		PDocument			*doc;
 		BMessenger			*sentTo;
-	
-		BList				*outgoing;
-		BList				*incoming;
+
 		StringRenderer		*name;
-		vector<Renderer*>	*attributes;
 
 		//++++++Group Special Methods
 		BList				*allNodes;
 		BList				*allConnections;
-		BRegion				*rendersensitv;
 		BList				*renderer;
 		Renderer			*activRenderer;
 		Renderer			*mouseReciver;

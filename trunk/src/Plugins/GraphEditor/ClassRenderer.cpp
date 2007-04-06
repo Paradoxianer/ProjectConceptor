@@ -12,17 +12,17 @@
 
 #include <support/String.h>
 #include "AttributRenderer.h"
+#include "GroupRenderer.h"
 
 
-
-ClassRenderer::ClassRenderer(GraphEditor *parentEditor,BMessage *forContainer):Renderer(parentEditor,forContainer)
+ClassRenderer::ClassRenderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer):Renderer(parentEditor,parentRenderer,forContainer)
 {
 	TRACE();
 	Init();
 	ValueChanged();
 }
 void ClassRenderer::Init()
-{	
+{
 	TRACE();
 	status_t	err			 	= B_OK;
 	resizing					= false;
@@ -31,7 +31,7 @@ void ClassRenderer::Init()
 	doc							= NULL;
 	outgoing					= NULL;
 	incoming					= NULL;
-	
+
 	xRadius						= 10;
 	yRadius						= 10;
 	attributes					= new vector<Renderer *>();
@@ -60,7 +60,7 @@ void ClassRenderer::Init()
 	PRINT_OBJECT(*container);
 }
 
-	
+
 void ClassRenderer::MouseDown(BPoint where)
 {
 	bool		found			= false;
@@ -79,7 +79,7 @@ void ClassRenderer::MouseDown(BPoint where)
 			tmpRenderer->MouseDown(where);
 		}
 	}
-	
+
 	if ((!found) && (startMouseDown == NULL))
 	{
 		uint32 buttons = 0;
@@ -89,14 +89,17 @@ void ClassRenderer::MouseDown(BPoint where)
 		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
 		if (buttons & B_PRIMARY_MOUSE_BUTTON)
 		{
-			editor->BringToFront(this);
+			if (parent)
+				((GroupRenderer *)parent)->BringToFront(this);
+			else 
+				editor->BringToFront(this);
 			startMouseDown	= new BPoint(where);
 			startLeftTop	= new BPoint(frame.LeftTop());
 			editor->SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
-			if  (!selected) 
+			if  (!selected)
 			{
 				BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
-				if  ((modifiers & B_SHIFT_KEY) != 0) 
+				if  ((modifiers & B_SHIFT_KEY) != 0)
 					selectMessage->AddBool("deselect",false);
 				selectMessage->AddPointer("node",container);
 				selectMessage->AddString("Command::Name","Select");
@@ -123,7 +126,11 @@ void ClassRenderer::MouseDown(BPoint where)
 		}
 		else if (buttons & B_SECONDARY_MOUSE_BUTTON )
 		{
-			editor->SendToBack(this);
+			//need to do deal with Parent
+			if (parent)
+				((GroupRenderer *)parent)->SendToBack(this);
+			else 
+				editor->SendToBack(this);
 		}
 	}
 }
@@ -139,7 +146,7 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 				oldPt	= startMouseDown;
 			if (editor->GridEnabled())
 			{
-			
+
 				float newPosX = startLeftTop->x + (pt.x-startMouseDown->x);
 				float newPosY = startLeftTop->y + (pt.y-startMouseDown->y);
 				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
@@ -150,7 +157,7 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 			else
 			{
 				dx = pt.x - oldPt->x;
-				dy = pt.y - oldPt->y;				
+				dy = pt.y - oldPt->y;
 			}
 			oldPt	= new BPoint(pt);
 			if (!resizing)
@@ -158,14 +165,20 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 				BPoint	deltaPoint(dx,dy);
 				BList	*renderer	= editor->RenderList();
 				renderer->DoForEach(MoveAll, &deltaPoint);
-				editor->Invalidate();
+				if (parent)
+					parent->SetDirty();
+				else
+					editor->Invalidate();
 			}
 			else
 			{
 				BPoint	deltaPoint(dx,dy);
 				BList	*renderer	= editor->RenderList();
 				renderer->DoForEach(ResizeAll, &deltaPoint);
-				editor->Invalidate();
+				if (parent)
+					parent->SetDirty();
+				else
+					editor->Invalidate();
 			}
 		}
 		else
@@ -198,7 +211,7 @@ void ClassRenderer::MouseUp(BPoint where)
 			float dx = where.x - startMouseDown->x;
 			float dy = where.y - startMouseDown->y;
 			if (editor->GridEnabled())
-			{			
+			{
 				float newPosX = startLeftTop->x + dx;
 				float newPosY = startLeftTop->y + dy;
 				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
@@ -226,7 +239,7 @@ void ClassRenderer::MouseUp(BPoint where)
 				resizer->AddString("Command::Name","Resize");
 				resizer->AddFloat("dx",dx);
 				resizer->AddFloat("dy",dy);
-				sentTo->SendMessage(resizer);	
+				sentTo->SendMessage(resizer);
 			}
 			resizing		= false;
 		}
@@ -245,8 +258,8 @@ void ClassRenderer::MouseUp(BPoint where)
 			}
 			(new BMessenger((BView *)editor))->SendMessage(connecter);
 		}
-		delete startMouseDown;
-		delete oldPt;
+		if (startMouseDown) delete startMouseDown;
+		if (oldPt) delete oldPt;
 		startMouseDown	= NULL;
 		oldPt			= NULL;
 		connecting=false;
@@ -255,7 +268,7 @@ void ClassRenderer::MouseUp(BPoint where)
 
 
 void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
-{	
+{
 	BRect		shadowFrame = frame;
 	bool		fitIn		= true;
 	Renderer*	tmpRenderer	= NULL;
@@ -277,9 +290,9 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->AddLine(BPoint(frame.left+xRadius,frame.top+1),BPoint(frame.right-xRadius,frame.top+1),tint_color(drawColor,0));
 	drawOn->AddLine(BPoint(frame.left,frame.top+2),BPoint(frame.right,frame.top+2),tint_color(drawColor,0.05));
 	drawOn->AddLine(BPoint(frame.left,frame.top+3),BPoint(frame.right,frame.top+3),tint_color(drawColor,0.1));
-	drawOn->AddLine(BPoint(frame.left,frame.top+4),BPoint(frame.right,frame.top+4),tint_color(drawColor,0.15));	
+	drawOn->AddLine(BPoint(frame.left,frame.top+4),BPoint(frame.right,frame.top+4),tint_color(drawColor,0.15));
 	drawOn->AddLine(BPoint(frame.left,frame.top+5),BPoint(frame.right,frame.top+5),tint_color(drawColor,0.2));
-	drawOn->AddLine(BPoint(frame.left,frame.top+6),BPoint(frame.right,frame.top+6),tint_color(drawColor,0.25));	
+	drawOn->AddLine(BPoint(frame.left,frame.top+6),BPoint(frame.right,frame.top+6),tint_color(drawColor,0.25));
 	drawOn->AddLine(BPoint(frame.left,frame.top+7),BPoint(frame.right,frame.top+7),tint_color(drawColor,0.3));
 	drawOn->AddLine(BPoint(frame.left,frame.top+8),BPoint(frame.right,frame.top+8),tint_color(drawColor,0.35));
 	drawOn->AddLine(BPoint(frame.left,frame.top+9),BPoint(frame.right,frame.top+9),tint_color(drawColor,0.4));
@@ -287,19 +300,19 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->AddLine(BPoint(frame.left,frame.top+11),BPoint(frame.right,frame.top+11),tint_color(drawColor,0.5));
 	drawOn->AddLine(BPoint(frame.left,frame.top+12),BPoint(frame.right,frame.top+12),tint_color(drawColor,0.55));
 	drawOn->AddLine(BPoint(frame.left,frame.top+13),BPoint(frame.right,frame.top+13),tint_color(drawColor,0.6));
-	drawOn->AddLine(BPoint(frame.left,frame.top+14),BPoint(frame.right,frame.top+14),tint_color(drawColor,0.65));	
+	drawOn->AddLine(BPoint(frame.left,frame.top+14),BPoint(frame.right,frame.top+14),tint_color(drawColor,0.65));
 	drawOn->AddLine(BPoint(frame.left,frame.top+15),BPoint(frame.right,frame.top+15),tint_color(drawColor,0.7));
-	drawOn->AddLine(BPoint(frame.left,frame.top+16),BPoint(frame.right,frame.top+16),tint_color(drawColor,0.75));	
+	drawOn->AddLine(BPoint(frame.left,frame.top+16),BPoint(frame.right,frame.top+16),tint_color(drawColor,0.75));
 	drawOn->AddLine(BPoint(frame.left,frame.top+17),BPoint(frame.right,frame.top+17),tint_color(drawColor,0.8));
 	drawOn->AddLine(BPoint(frame.left,frame.top+18),BPoint(frame.right,frame.top+18),tint_color(drawColor,0.85));
 	drawOn->AddLine(BPoint(frame.left,frame.top+19),BPoint(frame.right,frame.top+19),tint_color(drawColor,0.9));
 	drawOn->AddLine(BPoint(frame.left,frame.top+20),BPoint(frame.right,frame.top+20),tint_color(drawColor,0.95));
 	drawOn->EndLineArray();
 	#ifdef B_ZETA_VERSION_1_0_0
-		drawOn->SetHighColor(ui_color(B_UI_DOCUMENT_LINK_COLOR));	
+		drawOn->SetHighColor(ui_color(B_UI_DOCUMENT_LINK_COLOR));
 	#else
-		drawOn->SetHighColor(0,0,255,255);	
-	#endif 
+		drawOn->SetHighColor(0,0,255,255);
+	#endif
 	float	yOben	= frame.top+frame.Height()/2 - triangleHeight;
 	float	yMitte	= yOben + triangleHeight;
 	float	yUnten	= yMitte + triangleHeight;
@@ -330,10 +343,10 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 
 void ClassRenderer::MessageReceived(BMessage *message)
 {
-	switch(message->what) 
+	switch(message->what)
 	{
 		case P_C_VALUE_CHANGED:
-				ValueChanged();	
+				ValueChanged();
 			break;
 	}
 }
@@ -345,13 +358,13 @@ void ClassRenderer::ValueChanged()
 	BMessage	*messageFont	= new BMessage();
 	BMessage	*data			= new BMessage();
 	char		*newName		= NULL;
-	
+
 	char		*attribName		= NULL;
 	BMessage	*attribMessage	= new BMessage();
-	uint32		type			= B_ANY_TYPE; 
+	uint32		type			= B_ANY_TYPE;
 	int32		count			= 0;
 	bool		found			= false;
-		
+
 	container->FindRect("Frame",&frame);
 	container->FindBool("selected",&selected);
 	container->FindFloat("xRadius",&xRadius);
@@ -412,23 +425,22 @@ void ClassRenderer::MoveBy(float dx,float dy)
 	frame.OffsetBy(dx,dy);
 	name->MoveBy(dx,dy);
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
-/*	while( allAttributes != attributes->end() )
+	/*while( allAttributes != attributes->end() )
 	{
-
 		allAttributes->MoveBy(dx,dy);
 		allAttributes++;
-	}*/
+	}
 	for (int32 i=0;i<attributes->size();i++)
 	{
 		(*attributes)[i]->MoveBy(dx,dy);
-	}
+	}*/
 
 }
 
 void ClassRenderer::ResizeBy(float dx,float dy)
 {
 	if ((frame.right+dx-frame.left) > 70)
-		frame.right		+= dx; 
+		frame.right		+= dx;
 	if  ((frame.bottom+dy-frame.top) > 30)
 		frame.bottom	+= dy;
 	name->ResizeBy(dy,dy);
@@ -441,7 +453,7 @@ void ClassRenderer::ResizeBy(float dx,float dy)
 void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 count)
 {
 	char	*realName	= NULL;
-	/*switch(attribute->what) 
+	/*switch(attribute->what)
 	{
 		case B_STRING_TYPE:
 		{
@@ -483,7 +495,7 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	valueContainer->AddString("name",attribName);
 	valueContainer->AddInt32("index",count);
 	removeAttribMessage->AddMessage("valueContainer",valueContainer);
-	
+
 //	attribute->FindString("Name",(const char **)&realName);
 //	Renderer	*testRenderer	= new StringRenderer(editor,realName,attributeRect, editMessage);
 	Renderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage,removeAttribMessage);

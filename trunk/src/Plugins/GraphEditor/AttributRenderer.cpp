@@ -13,7 +13,7 @@
 #include "PCommandManager.h"
 #include "BoolRenderer.h"
 
-AttributRenderer::AttributRenderer(GraphEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *chgMessage=NULL, BMessage *delMessage=NULL):Renderer(parentEditor,NULL)
+AttributRenderer::AttributRenderer(GraphEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *chgMessage=NULL, BMessage *delMessage=NULL):Renderer(parentEditor,NULL,NULL)
 {
 	TRACE();
 	changeMessage	= chgMessage;

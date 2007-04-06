@@ -7,7 +7,7 @@ class Renderer
 {
 
 public:
-						Renderer(GraphEditor *parentEditor,BMessage *forContainer){editor=parentEditor;container = forContainer;};
+						Renderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer){editor = parentEditor; parent = parentRenderer; container = forContainer;};
 
 	virtual	void		ValueChanged(void)										= 0;
 
@@ -17,7 +17,7 @@ public:
 	virtual	void		MouseUp(BPoint where) 									= 0;
 
 	virtual	void		Draw(BView *drawOn, BRect updateRect)					= 0;
-	
+
 	virtual void		SetFrame(BRect newFrame)								= 0;
 	virtual BRect		Frame(void)												= 0;
 	virtual	void		MoveBy(float dx, float dy)								= 0;
@@ -27,10 +27,14 @@ public:
 	virtual bool		Caught(BPoint where)									= 0;
 
 	virtual	BMessage*	GetMessage(void){return container;};
-
+	virtual	Renderer*	GetParent(void){return parent;};
+	virtual bool		IstDirty(void){return dirty;};
+			void		SetDirty(void){if (parent) parent->SetDirty(); else dirty = true;};
 
 protected:
 			BMessage	*container;
 			GraphEditor	*editor;
+			Renderer	*parent;
+			bool		dirty;
 };
 #endif

@@ -24,22 +24,22 @@
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
-#endif 
+#endif
 
 class ClassRenderer: public Renderer
 {
 
 public:
-							ClassRenderer(GraphEditor *parentEditor,BMessage *forContainer);
+							ClassRenderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer);
 				void		Draw(BView *drawOn, BRect updateRect);
 				void		MouseDown(BPoint where);
 				void		MouseUp(BPoint where);
-				void		MouseMoved(BPoint pt, uint32 code, const BMessage *msg); 
+				void		MouseMoved(BPoint pt, uint32 code, const BMessage *msg);
 				void		LanguageChanged();
 				void		MessageReceived(BMessage *message);
 
 				void		ValueChanged(void);
-	
+
 				bool		Caught(BPoint where);
 				BRect		Frame(void);
 				void		SetFrame(BRect newFrame);
@@ -63,12 +63,12 @@ protected:
 		bool				selected;
 		BFont				*font;
 		float				penSize;
-		
+
 	//const char*			name;
 	//---------ClassSettings-----------
 
 		BPoint				*startMouseDown;
-		BPoint				*startLeftTop;	
+		BPoint				*startLeftTop;
 
 		BPoint				*oldPt;
 
@@ -77,7 +77,7 @@ protected:
 
 		PDocument			*doc;
 		BMessenger			*sentTo;
-	
+
 		BList				*outgoing;
 		BList				*incoming;
 		StringRenderer		*name;

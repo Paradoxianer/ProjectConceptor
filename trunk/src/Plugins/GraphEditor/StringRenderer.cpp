@@ -13,7 +13,7 @@
 
 
 
-StringRenderer::StringRenderer(GraphEditor *parentEditor,char *forString,BRect stringRect,BMessage *message=NULL):Renderer(parentEditor,message)
+StringRenderer::StringRenderer(GraphEditor *parentEditor,char *forString,BRect stringRect,BMessage *message=NULL):Renderer(parentEditor,NULL,message)
 {
 	TRACE();
 	changeMessage	=message;

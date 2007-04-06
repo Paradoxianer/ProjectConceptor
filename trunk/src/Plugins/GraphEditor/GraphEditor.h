@@ -30,7 +30,7 @@ const uint32			G_E_CONNECTED			= 'geCD';
 const uint32			G_E_GROUP				= 'geGR';
 
 const uint32			G_E_NEW_SCALE			= 'geNS';
-
+const uint32			G_E_INVALIDATE			= 'geIV';
 const uint32			G_E_GRID_CHANGED		= 'geGC';
 
 const uint32			G_E_PATTERN_CHANGED		= 'gePC';
@@ -110,6 +110,7 @@ public:
 			BList*			RenderList(void){return renderer;};
 			image_id		PluginID(void){return pluginID;};
 			char*			RenderString(void){return renderString;};
+			void			SendMessage(BMessage* msg){sentToMe->SendMessage(msg);};
 
 protected:
 			void			Init(void);
@@ -153,7 +154,7 @@ protected:
 			BMessage		*groupMessage;
 
 			BMessenger		*sentTo;
-
+			BMessenger		*sentToMe;
 			BRegion			*rendersensitv;
 			Renderer		*activRenderer;
 			Renderer		*mouseReciver;

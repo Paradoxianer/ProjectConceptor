@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 
-ConnectionRenderer::ConnectionRenderer(GraphEditor *parentEditor,BMessage *forContainer):Renderer(parentEditor,forContainer)
+ConnectionRenderer::ConnectionRenderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer):Renderer(parentEditor, parentRenderer, forContainer)
 {
 	TRACE();
 	Init();
