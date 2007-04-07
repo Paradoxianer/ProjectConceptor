@@ -165,9 +165,9 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 				BPoint	deltaPoint(dx,dy);
 				BList	*renderer	= editor->RenderList();
 				renderer->DoForEach(MoveAll, &deltaPoint);
-				if (parent)
+				/*if (parent)
 					parent->SetDirty();
-				else
+				else*/
 					editor->Invalidate();
 			}
 			else
@@ -175,9 +175,9 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 				BPoint	deltaPoint(dx,dy);
 				BList	*renderer	= editor->RenderList();
 				renderer->DoForEach(ResizeAll, &deltaPoint);
-				if (parent)
+			/*	if (parent)
 					parent->SetDirty();
-				else
+				else*/
 					editor->Invalidate();
 			}
 		}

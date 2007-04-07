@@ -268,6 +268,7 @@ void GraphEditor::PreprocessBeforSave(BMessage *container)
 		if ((strstr(name,"GraphEditor") != NULL) ||
 			(strcasecmp(name,"Outgoing") == B_OK) ||
 			(strcasecmp(name,"Incoming") == B_OK) ||
+			(strcasecmp(name,"Parent") == B_OK)  ||
 			(strcasecmp(name,"doc") == B_OK) )
 		{
 			container->RemoveName(name);
@@ -287,6 +288,7 @@ void GraphEditor::ValueChanged()
 
 	BMessage	*node			= NULL;
 	Renderer	*painter		= NULL;
+	void		*pointer		= NULL;
 	BRect		frame;
 	BRect		invalid;
 	for (int32 i=0;i<changedNodes->CountItems();i++)
@@ -312,7 +314,7 @@ void GraphEditor::ValueChanged()
 		else
 		{
 			//**check if this node is in the node or connection list because it it is not it´s a nodd frome a subgroup or it was deleted
-			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
+			if (((allConnections->HasItem(node))||(allNodes->HasItem(node))) && (node->FindPointer("Parent",&pointer) !=B_OK))
 			{
 				InsertRenderObject(node);
  				//if we procedded this node than it´s not changed anymore

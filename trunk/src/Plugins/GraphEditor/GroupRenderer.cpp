@@ -70,18 +70,18 @@ void GroupRenderer::Init()
 		container->AddPointer("allNodes",allNodes=new BList());
 	if (container->FindPointer("allConnections", (void **)&allConnections) !=B_OK)
 		container->AddPointer("allConnections",allConnections=new BList());
-/*	for (i=0;i<allNodes->CountItems();i++)
+	for (i=0;i<allNodes->CountItems();i++)
 	{
 		node = (BMessage *)allNodes->ItemAt(i);
-		node->PrintToStream();
-		InsertRenderObject(node);
+		if (FindRenderer(node) == NULL)
+			InsertRenderObject(node);
 	}
 	for (i=0;i<allConnections->CountItems();i++)
 	{
 		node = (BMessage *)allConnections->ItemAt(i);
-		node->PrintToStream();
-		InsertRenderObject(node);
-	}*/
+		if (FindRenderer(node) == NULL)
+			InsertRenderObject(node);
+	}
 	PRINT_OBJECT(*container);
 }
 
