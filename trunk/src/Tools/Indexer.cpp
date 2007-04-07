@@ -28,20 +28,33 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 	int32		i			= 0;
 	if (node!=NULL)
 	{
-		BList		*subNodeList	= NULL;
-		BMessage	*subNode		= NULL;
+		BList		*allNodeList		= NULL;
+		BList		*allConnectionList	= NULL;
+
+		BMessage	*subNode			= NULL;
+		
 		if (!included->HasItem(node))
 			included->AddItem(node);
 		returnNode = new BMessage(*node);
 		returnNode->AddPointer("this",node);
-		if ((returnNode->FindPointer("SubContainer",(void **)&subNodeList) == B_OK) && (subNodeList != NULL) )
+			// we need to check for the allNodes List
+		if ((returnNode->FindPointer("allNodes",(void **)&allNodeList) == B_OK) && (allNodeList != NULL) )
 		{
-			for (int32 i=0; i<subNodeList->CountItems();i++)
+			for (i=0; i<allNodeList->CountItems();i++)
 			{
-				subNode =(BMessage *) subNodeList->ItemAt(i);
-				returnNode->AddMessage("SubContainerList",IndexNode(subNode));
+				subNode =(BMessage *) allNodeList->ItemAt(i);
+				returnNode->AddMessage("allNodesList",IndexNode(subNode));
 			}
 		}
+		if ((returnNode->FindPointer("allConnections",(void **)&allConnectionList) == B_OK) && (allConnectionList != NULL) )
+		{
+			for (i=0; i<allConnectionList->CountItems();i++)
+			{
+				subNode =(BMessage *) allConnectionList->ItemAt(i);
+				returnNode->AddMessage("allConnectionsList",IndexNode(subNode));
+			}
+		}
+
 		//here we also run the node through the available Editors so that they can save all they need :-)
 		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 		BasePlugin	*plugin		= NULL;
@@ -174,19 +187,39 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 {
 	TRACE();
 	BMessage	*subContainerEntry	= new BMessage();
-	BList		*subContainerList	= new BList();
+	BList		*allNodesList		= new BList();
+	BList		*allConnectionsList	= new BList();
+
 	int32		i					= 0;
 	void		*tmpPointer			= NULL;
-	if (node->FindPointer("SubContainer",&tmpPointer) == B_OK)
-			node->RemoveName("SubContainer");
-	while (node->FindMessage("SubContainerList",i,subContainerEntry) == B_OK)
+	i = 0;
+	if (node->FindPointer("allNodes",&tmpPointer) == B_OK)
+			node->RemoveName("allNodes");
+	while (node->FindMessage("allNodesList",i,subContainerEntry) == B_OK)
 	{
-		subContainerList->AddItem(DeIndexNode(subContainerEntry));
+		allNodesList->AddItem(DeIndexNode(subContainerEntry));
 		subContainerEntry	= new BMessage();
 		i++;
 	}
-	if (subContainerList->CountItems()>0)
-		node->AddPointer("SubContainer",subContainerList);
+	if (allNodesList->CountItems()>0)
+	{
+		node->AddPointer("allNodes",allNodesList);
+		node->RemoveName("allNodesList");
+	}	
+	i = 0;
+	if (node->FindPointer("allConnections",&tmpPointer) == B_OK)
+			node->RemoveName("allConnections");
+	while (node->FindMessage("allConnectionsList",i,subContainerEntry) == B_OK)
+	{
+		allConnectionsList->AddItem(DeIndexNode(subContainerEntry));
+		subContainerEntry	= new BMessage();
+		i++;
+	}
+	if (allConnectionsList->CountItems()>0)
+	{
+		node->AddPointer("allConnections",allConnectionsList);
+		node->RemoveName("allConnectionsList");
+	}
 	node->FindPointer("this",(void **)&tmpPointer);
 	node->RemoveName("this");
 	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
@@ -205,6 +238,7 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 		}
 	}
 	sorter->AddItem((int32)tmpPointer,node);
+	node->PrintToStream();
 	return node;
 }
 
