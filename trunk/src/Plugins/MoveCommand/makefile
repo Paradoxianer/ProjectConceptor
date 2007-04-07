@@ -93,6 +93,8 @@ COMPILER_FLAGS =
 #	specify additional linker flags
 LINKER_FLAGS =
 
+SVG_ICON = ../../Doku/Move.svg
+
 INSTALL_DIR    = /boot/apps/Development/ProjectConceptor/Plugins/Commands
 
 ## include the makefile-engine
