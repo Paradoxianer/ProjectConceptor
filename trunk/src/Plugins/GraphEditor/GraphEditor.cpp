@@ -313,7 +313,7 @@ void GraphEditor::ValueChanged()
 		}
 		else
 		{
-			//**check if this node is in the node or connection list because it it is not it´s a nodd frome a subgroup or it was deleted
+			//**check if this node is in the node or connection list because if it is not it´s a nodd frome a subgroup or it was deleted
 			if (((allConnections->HasItem(node))||(allNodes->HasItem(node))) && (node->FindPointer("Parent",&pointer) !=B_OK))
 			{
 				InsertRenderObject(node);
@@ -324,7 +324,19 @@ void GraphEditor::ValueChanged()
 			}
 			else
 			{
-				RemoveRenderer(FindRenderer(node));
+				/*if (node->FindPointer("Parent",&pointer) == B_OK)
+				{
+					//we have to find the father ... wich should be invalidatet :( :) maby there is a nother faster way to do this ..
+					BMessage	*parent		= (BMessage *)pointer;
+					while ( parent->FindPointer("Parent", &pointer)==B_OK)
+					{
+						parent = (BMessage *)pointer;
+					}
+					if ((parent!=NULL)&&(parent->FindPointer(renderString,(void **)&painter) == B_OK))
+					 painter->ValueChanged();
+				}
+				else*/
+					RemoveRenderer(FindRenderer(node));
 				//if we procedded this node than it´s not changed anymore
 //				changedNodes->RemoveItem(i);
 //				i--;
@@ -509,6 +521,7 @@ void GraphEditor::MouseUp(BPoint where)
 	else if (mouseReciver != NULL)
 	{
 		mouseReciver->MouseUp(scaledWhere);
+		mouseReciver = NULL;
 	}
 /*	else
 	{
@@ -745,12 +758,16 @@ void GraphEditor::MessageReceived(BMessage *message)
 		}
 		case G_E_INSERT_NODE:
 		{
-            sentTo->SendMessage(GenerateInsertCommand(P_C_CLASS_TYPE));
+			BMessage *generatedInsertCommand = GenerateInsertCommand(P_C_CLASS_TYPE);
+			if (generatedInsertCommand)
+	            sentTo->SendMessage(generatedInsertCommand);
 			break;
 		}
 		case G_E_INSERT_SIBLING:
 		{
-			 sentTo->SendMessage(GenerateInsertCommand(P_C_CLASS_TYPE));
+			BMessage *generatedInsertCommand = GenerateInsertCommand(P_C_CLASS_TYPE);
+			if (generatedInsertCommand)
+				sentTo->SendMessage(generatedInsertCommand);
 			break;
 		}
 		case G_E_INVALIDATE:
@@ -761,8 +778,11 @@ void GraphEditor::MessageReceived(BMessage *message)
 		case G_E_GROUP:
 		{
 			BMessage	*commandMessage	= GenerateInsertCommand(P_C_GROUP_TYPE);
-			commandMessage->ReplaceString("Command::Name","Group");
-			sentTo->SendMessage(commandMessage);
+			if (commandMessage)
+			{
+				commandMessage->ReplaceString("Command::Name","Group");
+				sentTo->SendMessage(commandMessage);
+			}
 			break;
 		}
 		default:
@@ -1038,19 +1058,24 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat)
         }
 		i++;
 	}
-	where.x         = selectRect->right+100;
-	int32 middle    = selectRect->top+(selectRect->Height()/2);
-	where.y         = middle;
-	int32 step      = -1;
-	while (FindRenderer(where)!=NULL)
+	if (selectRect)
 	{
-		    where.y = middle + (step*85);
-		if (step>0)
-   			step++;
-		step=-step;
+		where.x         = selectRect->right+100;
+		int32 middle    = selectRect->top+(selectRect->Height()/2);
+		where.y         = middle;
+		int32 step      = -1;
+		while (FindRenderer(where)!=NULL)
+		{	
+		   	 where.y = middle + (step*85);
+			if (step>0)
+   				step++;
+			step=-step;
+		}
+		newNode->AddRect("Frame",BRect(where,where+BPoint(100,80)));
+		commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
 	}
-	newNode->AddRect("Frame",BRect(where,where+BPoint(100,80)));
-	commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
+	else
+		commandMessage = NULL;
 	return commandMessage;
 }
 

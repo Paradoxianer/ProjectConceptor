@@ -28,13 +28,10 @@ public:
 
 	virtual	BMessage*	GetMessage(void){return container;};
 	virtual	Renderer*	GetParent(void){return parent;};
-	virtual bool		IstDirty(void){return dirty;};
-			void		SetDirty(void){if (parent) parent->SetDirty(); else dirty = true;};
 
 protected:
 			BMessage	*container;
 			GraphEditor	*editor;
 			Renderer	*parent;
-			bool		dirty;
 };
 #endif

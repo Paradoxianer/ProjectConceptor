@@ -43,6 +43,7 @@ void GroupRenderer::Init()
 	penSize							= 1.0;
 	connecting						= 0;
 	renderer						= new BList();
+	father							= NULL;
 
 	BMessage*		node			= NULL;
 
@@ -193,20 +194,14 @@ void GroupRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 				BPoint	deltaPoint(dx,dy);
 				BList	*renderer	= editor->RenderList();
 				renderer->DoForEach(MoveAll, &deltaPoint);
-				if (parent)
-					parent->SetDirty();
-				else
-					editor->Invalidate();
+				editor->Invalidate();
 			}
 			else
 			{
 				BPoint	deltaPoint(dx,dy);
 				BList	*renderer	= editor->RenderList();
 				renderer->DoForEach(ResizeAll, &deltaPoint);
-				if (parent)
-					parent->SetDirty();
-				else
-					editor->Invalidate();
+				editor->Invalidate();
 			}
 		}
 		else
@@ -222,8 +217,6 @@ void GroupRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 	{
 		mouseReciver->MouseMoved(scaledWhere,code,msg);
 	}
-	if ((dirty) && (!parent))
-		editor->SendMessage(new BMessage(G_E_INVALIDATE));
 }
 
 void GroupRenderer::MouseUp(BPoint where)
@@ -296,6 +289,7 @@ void GroupRenderer::MouseUp(BPoint where)
 	else if (mouseReciver != NULL)
 	{
 		mouseReciver->MouseUp(scaledWhere);
+		mouseReciver = NULL;
 	}
 }
 
@@ -408,6 +402,7 @@ void GroupRenderer::ValueChanged()
 	int32		count			= 0;
 	bool		found			= false;
 	void		*parent			= NULL;
+	void		*pointer		= NULL;
 	
 	container->FindRect("Frame",&frame);
 	container->FindBool("selected",&selected);
@@ -430,11 +425,14 @@ void GroupRenderer::ValueChanged()
 			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
 			{
 				//**maby we could speed this up
-				painter=FindRenderer(node);
+				painter = FindRenderer(node);
 				painter->ValueChanged();
 			}
 			else
 				RemoveRenderer(FindRenderer(node));
+			//we have to find the father ... wich should be invalidatet :( :) maby there is a nother faster way to do this ..
+			while ((((Renderer *)parent)->GetMessage())->FindPointer("Parent",(void **)&parent)==B_OK)
+				father = (Renderer *)parent;
 		}
 		else
 		{
@@ -632,6 +630,16 @@ Renderer* GroupRenderer::FindConnectionRenderer(BPoint where)
 		}
 	}
 	return currentRenderer;
+}
+
+void GroupRenderer::SetDirty()
+{
+	if (!parent)
+	{
+		BList		*changedNodes	= doc->GetChangedNodes();
+		changedNodes->AddItem(GetMessage());
+		editor->Invalidate();	
+	}
 }
 
 Renderer* GroupRenderer::FindRenderer(BMessage *container)
