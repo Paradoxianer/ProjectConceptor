@@ -539,8 +539,8 @@ void GroupRenderer::InsertRenderObject(BMessage *node)
 {
 	TRACE();
 	Renderer	*newRenderer = NULL;
-	char		*dummyString = NULL;	
-	void	*tmpDoc	= NULL;
+	void		*parentPointer = NULL;	
+	void		*tmpDoc	= NULL;
 	if (node->FindPointer("doc",&tmpDoc)==B_OK)
 		node->ReplacePointer("doc",doc);
 	else
@@ -557,7 +557,7 @@ void GroupRenderer::InsertRenderObject(BMessage *node)
 			newRenderer	= new ConnectionRenderer(editor,this,node);
 		break;
 	}
-	if (node->FindString("Parent",(const char **)&dummyString) != B_OK)
+	if (node->FindPointer("Parent",&parentPointer) != B_OK)
 		node->AddPointer("Parent",this);
 	AddRenderer(newRenderer);
 
@@ -630,16 +630,6 @@ Renderer* GroupRenderer::FindConnectionRenderer(BPoint where)
 		}
 	}
 	return currentRenderer;
-}
-
-void GroupRenderer::SetDirty()
-{
-	if (!parent)
-	{
-		BList		*changedNodes	= doc->GetChangedNodes();
-		changedNodes->AddItem(GetMessage());
-		editor->Invalidate();	
-	}
 }
 
 Renderer* GroupRenderer::FindRenderer(BMessage *container)

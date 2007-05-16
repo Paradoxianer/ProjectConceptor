@@ -109,6 +109,8 @@ protected:
 		BList				*allConnections;
 		BList				*renderer;
 		Renderer			*activRenderer;
+		Renderer			*father;
+
 		Renderer			*mouseReciver;
 		float				scale;
 		//-----Group Special Methods
