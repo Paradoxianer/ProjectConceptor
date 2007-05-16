@@ -93,7 +93,7 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings)
 			if (groupedNode != NULL)
 			{
 				allNodes->RemoveItem(groupedNode);
-				groupedNode->AddPointer("Parent",node);
+//				groupedNode->AddPointer("Parent",node);
 				gAllNodes->AddItem(groupedNode);
 				if (!groupFrame.IsValid())
 					groupedNode->FindRect("Frame",&groupFrame);
