@@ -169,6 +169,8 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 				else
 					renderer = ((GroupRenderer *)parent)->RenderList();
 				renderer->DoForEach(MoveAll, &deltaPoint);
+				if (parent)
+					((GroupRenderer *)parent)->RecalcFrame();
 				editor->Invalidate();
 			}
 			else
@@ -331,13 +333,14 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->StrokeTriangle(BPoint(frame.left,yOben),BPoint(frame.left+triangleHeight,yMitte),BPoint(frame.left,yUnten));
 	drawOn->StrokeTriangle(BPoint(frame.right-triangleHeight,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-triangleHeight,yUnten));
 	name->Draw(drawOn,updateRect);
-	for (int32 i=0;(fitIn)&& (i<attributes->size());i++)
+	vector<Renderer *>::iterator	allAttributes = attributes->begin();
+	while( allAttributes != attributes->end() )
 	{
-		tmpRenderer=(*attributes)[i];
-		if (frame.Contains(tmpRenderer->Frame()))
-			tmpRenderer->Draw(drawOn,updateRect);
+		if (frame.Contains((*allAttributes)->Frame()))
+			(*allAttributes)->Draw(drawOn,updateRect);
 		else
 			fitIn=false;
+		allAttributes++;
 	}
 	if (!fitIn)
 		drawOn->DrawString("...",BPoint(frame.left+triangleHeight+2,frame.bottom-(yRadius/3)));
@@ -427,12 +430,12 @@ void ClassRenderer::MoveBy(float dx,float dy)
 	frame.OffsetBy(dx,dy);
 	name->MoveBy(dx,dy);
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
-	/*while( allAttributes != attributes->end() )
+	while( allAttributes != attributes->end() )
 	{
-		allAttributes->MoveBy(dx,dy);
+		(*allAttributes)->MoveBy(dx,dy);
 		allAttributes++;
 	}
-	for (int32 i=0;i<attributes->size();i++)
+/*	for (int32 i=0;i<attributes->size();i++)
 	{
 		(*attributes)[i]->MoveBy(dx,dy);
 	}*/
@@ -446,10 +449,16 @@ void ClassRenderer::ResizeBy(float dx,float dy)
 	if  ((frame.bottom+dy-frame.top) > 30)
 		frame.bottom	+= dy;
 	name->ResizeBy(dy,dy);
-	for (int32 i=0;i<attributes->size();i++)
+	vector<Renderer *>::iterator	allAttributes = attributes->begin();
+	while( allAttributes != attributes->end() )
+	{
+		(*allAttributes)->ResizeBy(dx,dy);
+		allAttributes++;
+	}
+/*	for (int32 i=0;i<attributes->size();i++)
 	{
 		(*attributes)[i]->ResizeBy(dx,dy);
-	}
+	}*/
 }
 
 void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 count)

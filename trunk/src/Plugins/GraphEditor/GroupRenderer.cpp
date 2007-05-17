@@ -673,3 +673,29 @@ bool GroupRenderer::DrawRenderer(void *arg,void *editor)
 	painter->Draw((GraphEditor*)editor,BRect(0,0,0,0));
 	return false;
 }
+
+void GroupRenderer::RecalcFrame(void)
+{
+	Renderer*	tmpRenderer		= NULL;
+	BRect			groupFrame			= BRect(0,0,-1,-1);
+	for (int32 i=0;(i<renderer->CountItems());i++)
+	{
+		tmpRenderer = (Renderer *) renderer->ItemAt(i);
+		if ( (tmpRenderer->GetMessage()->what == P_C_CLASS_TYPE) || (tmpRenderer->GetMessage()->what == P_C_GROUP_TYPE) )
+		{
+			if (!groupFrame.IsValid())
+				groupFrame = tmpRenderer->Frame();
+			else
+				groupFrame = groupFrame | tmpRenderer->Frame();
+		}
+	}
+	groupFrame.InsetBy(-5,-5);
+	groupFrame.top = groupFrame.top-15;
+	if (groupFrame != frame)
+	{
+		frame = groupFrame;
+		//** need to move the Attribs and the Name...
+		if (parent)
+			((GroupRenderer *)parent)->RecalcFrame();
+	}
+}

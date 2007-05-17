@@ -66,6 +66,7 @@ public:
 			float			Scale(void){return scale;};
 			BList*			RenderList(void){return renderer;};
 	static	bool			DrawRenderer(void *arg,void *editor);
+			void			RecalcFrame(void);
 
 				//------Group Special Methods
 
