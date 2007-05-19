@@ -497,10 +497,7 @@ void GraphEditor::MouseUp(BPoint where)
 		}
 		else
 		{
-		/*	BMessage *insertMessage=new BMessage();
-			insertMessage->AddMessage("newObject",nodeMessage);
-			insertMessage->AddPoint("where",where);
-			sentTo->SendMessage(insertMessage);*/
+
 			BMessage	*currentMsg	= Window()->CurrentMessage();
 			uint32		buttons		= 0;
 			uint32		modifiers	= 0;
@@ -510,7 +507,6 @@ void GraphEditor::MouseUp(BPoint where)
 				InsertObject(scaledWhere,false);
 			else
 				InsertObject(scaledWhere,true);
-			//InsertObject(insertMessage);
 		}
 		delete startMouseDown;
 		startMouseDown=NULL;
@@ -523,13 +519,6 @@ void GraphEditor::MouseUp(BPoint where)
 		mouseReciver->MouseUp(scaledWhere);
 		mouseReciver = NULL;
 	}
-/*	else
-	{
-		BMessage *selectMessage=new BMessage(B_SELECT_ALL);
-		selectMessage->AddBool("clearSelection",true);
-		sentTo->SendMessage(selectMessage);
-	}*/
-
 }
 
 void GraphEditor::KeyDown(const char *bytes, int32 numBytes)
@@ -848,20 +837,17 @@ void GraphEditor::InsertRenderObject(BMessage *node)
 	switch(node->what)
 	{
 		case P_C_CLASS_TYPE:
-			newRenderer	= new  ClassRenderer(this,NULL,node);
+			newRenderer	= new  ClassRenderer(this,node);
 		break;
 		case P_C_GROUP_TYPE:
-			newRenderer = new GroupRenderer(this,NULL,node);
+			newRenderer = new GroupRenderer(this,node);
 		break;
 		case P_C_CONNECTION_TYPE:
-			newRenderer	= new ConnectionRenderer(this,NULL,node);
+			newRenderer	= new ConnectionRenderer(this,node);
 		break;
 	}
 	node->AddPointer(renderString,newRenderer);
-
-
 	AddRenderer(newRenderer);
-
 /*	BasePlugin	*theRenderer	= (BasePlugin*)renderPlugins->ItemAt(0);
 
 	BView		*addView		= (BView *)theRenderer->GetNewObject(node);
@@ -877,6 +863,7 @@ void GraphEditor::AddRenderer(Renderer* newRenderer)
 {
 	TRACE();
 	renderer->AddItem(newRenderer);
+	BringToFront(newRenderer);
 	activRenderer = newRenderer;
 //	delete rendersensitv;
 //	rendersensitv = new BRegion();
@@ -964,18 +951,18 @@ Renderer* GraphEditor::FindConnectionRenderer(BPoint where)
 
 Renderer* GraphEditor::FindRenderer(BMessage *container)
 {
-	int32		i					= 0;
+//	int32		i					= 0;
 	Renderer	*currentRenderer	= NULL;
-	bool		found				= false;
+//	bool		found				= false;
 
-	while ((i<renderer->CountItems()) && (!found))
+	/*while ((i<renderer->CountItems()) && (!found))
 	{
 		currentRenderer= (Renderer*)renderer->ItemAt(i);
 		if (currentRenderer->GetMessage() == container)
 			found=true;
 		i++;
-	}
-	if (found)
+	}*/
+	if ( (container->FindPointer(renderString,(void **) &currentRenderer) == B_OK) && (currentRenderer) )
 		return currentRenderer;
 	else
 		return NULL;
@@ -984,22 +971,75 @@ Renderer* GraphEditor::FindRenderer(BMessage *container)
 
 void GraphEditor::BringToFront(Renderer *wichRenderer)
 {
+	//** need complete rewrite... need to make a sortet list... remove all renderer of the renderlist and then add them in the new sorted way.
 	TRACE();
-	renderer->RemoveItem(wichRenderer);
-	renderer->AddItem(wichRenderer);
-	//**draw the new "onTop" renderer
+	BMessage	*parentNode			= NULL;
+	BList		*tmpRenderList		= new BList();
+	BList		*groupAllNodeList	= new BList();
+	Renderer	*tmpRenderer		= NULL;
+	
+	if (wichRenderer->GetMessage()->FindPointer("parentNode", (void **)&parentNode) == B_OK)
+	{
+		parentNode->FindPointer(renderString,(void **)&tmpRenderer);
+		if (tmpRenderer)
+			((GroupRenderer *)tmpRenderer)->BringToFront(wichRenderer);
+	}
+	/*else
+	{
+		renderer->RemoveItem(wichRenderer);
+		renderer->AddItem(wichRenderer);
+		if (wichRenderer->GetMessage()->what == P_C_GROUP_TYPE)
+		{
+			wichRenderer->GetMessage()->FindPointer("allNodes",(void **)&groupAllNodeList);
+			for (int32 i=0;i<groupAllNodeList->CountItems(); i++)
+			{
+				tmpRenderer = FindRenderer((BMessage *)groupAllNodeList->ItemAt(i));
+				renderer->RemoveItem(tmpRenderer);
+				renderer->AddItem(tmpRenderer);
+			}
+		}
+		//draw the new "onTop" renderer
+	}*/
+	DeleteFromList(wichRenderer);
+	AddToList(wichRenderer,renderer->CountItems()+2);
 	Invalidate();
-
+	
 }
 
 void GraphEditor::SendToBack(Renderer *wichRenderer)
 {
-	TRACE();
+	BMessage	*parentNode	= NULL;
+	Renderer	*painter	= NULL;
+	int32		i			= -1;
+	if (wichRenderer->GetMessage()->FindPointer("parentNode",(void **) &parentNode)==B_OK)
+	{
+		painter	= FindRenderer(parentNode);
+		if (painter)
+			((GroupRenderer *)painter)->SendToBack(wichRenderer);
+		i = renderer->IndexOf(painter);
+	}
 	renderer->RemoveItem(wichRenderer);
-	renderer->AddItem(wichRenderer,0);
-	//**draw all wich are under the Thing redraw
+	renderer->AddItem(wichRenderer,i);
+	/*TRACE();
+	BMessage	*parentNode	= NULL;
+	Renderer	*painter	= NULL;
+	int32		i			= -1;
+	renderer->RemoveItem(wichRenderer);
+	if (wichRenderer->GetMessage()->FindPointer("parentNode",(void **) &parentNode)==B_OK)
+	{
+		painter	= FindRenderer(parentNode);
+		if (painter)
+			((GroupRenderer *)tmpRenderer)->SendToBack(wichRenderer);
+		i = renderer->IndexOf(painter);
+		parentNode->FindPointer(renderString,(void **)&tmpRenderer);
+		renderer->AddItem(wichRenderer,i+1);
+	}
+	else
+		renderer->AddItem(wichRenderer,0);
+	//**draw all wich are under the Thing redraw*/
 	Invalidate();
 }
+
 BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat)
 {
 	BList		*selected			= doc->GetSelected();
@@ -1095,3 +1135,28 @@ bool GraphEditor::ProceedRegion(void *arg,void *region)
 	return false;
 }
 
+void GraphEditor::DeleteFromList(Renderer *wichRenderer)
+{
+	renderer->RemoveItem(wichRenderer);
+	if (wichRenderer->GetMessage()->what == P_C_GROUP_TYPE)
+	{
+		//should we dynamic cast this??
+		GroupRenderer	*groupPainter	= (GroupRenderer *)wichRenderer;
+		for (int32 i = 0; i<groupPainter->RenderList()->CountItems();i++)
+			DeleteFromList((Renderer *)groupPainter->RenderList()->ItemAt(i));
+	}
+}
+void GraphEditor::AddToList(Renderer *wichRenderer, int32 pos)
+{
+	if (pos>renderer->CountItems())
+		renderer->AddItem(wichRenderer);	
+	else
+		renderer->AddItem(wichRenderer,pos);
+	if (wichRenderer->GetMessage()->what == P_C_GROUP_TYPE)
+	{
+		//should we dynamic cast this??
+		GroupRenderer	*groupPainter	= (GroupRenderer *)wichRenderer;
+		for (int32 i = 0; i<groupPainter->RenderList()->CountItems();i++)
+				AddToList((Renderer *)groupPainter->RenderList()->ItemAt(i),pos+1);
+	}
+}

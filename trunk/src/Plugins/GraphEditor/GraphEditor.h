@@ -13,7 +13,6 @@
 	#define _T(a) a
 #endif
 
-
 #include "PEditor.h"
 #include "BasePlugin.h"
 #include "PDocument.h"
@@ -117,6 +116,10 @@ protected:
 			void			InsertObject(BPoint where,bool deselect);
 			void			InsertRenderObject(BMessage *node);
 			BMessage        *GenerateInsertCommand(uint32 newWhat);
+			
+			void			DeleteFromList(Renderer *wichRenderer);
+			void			AddToList(Renderer *wichRenderer, int32 pos);
+
 
 	static	bool			ProceedRegion(void *arg,void *region);
 	static	bool			DrawRenderer(void *arg,void *editor);

@@ -31,88 +31,59 @@
 	#define _T(a) a
 #endif
 
-class GroupRenderer: public Renderer
+class GroupRenderer: public ClassRenderer
 {
 
 public:
-							GroupRenderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer);
-			void			Draw(BView *drawOn, BRect updateRect);
-			void			MouseDown(BPoint where);
+							GroupRenderer(GraphEditor *parentEditor, BMessage *forContainer);
+/*			void			MouseDown(BPoint where);
 			void			MouseUp(BPoint where);
-			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg);
+			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg);*/
 			void			LanguageChanged();
-			void			MessageReceived(BMessage *message);
+//			void			MessageReceived(BMessage *message);
 
 			void			ValueChanged(void);
 
-			bool			Caught(BPoint where);
+/*			bool			Caught(BPoint where);
 			BRect			Frame(void);
-			void			SetFrame(BRect newFrame);
+			void			SetFrame(BRect newFrame);*/
 			void			MoveBy(float dx, float dy);
 			void			ResizeBy(float dx,float dy);
-			bool			Selected(){return selected;};
+//			bool			Selected(){return selected;};
 			
 				//++++++Group Special Methods
 			void			AddRenderer(Renderer* newRenderer);
 			void			RemoveRenderer(Renderer* wichRenderer);
-			Renderer*		FindRenderer(BPoint where);
+/*			Renderer*		FindRenderer(BPoint where);
 			Renderer*		FindNodeRenderer(BPoint where);
-			Renderer*		FindConnectionRenderer(BPoint where);
+			Renderer*		FindConnectionRenderer(BPoint where);*/
 			Renderer*		FindRenderer(BMessage *container);
 
-			void			BringToFront(Renderer *wichRenderer);
-			void			SendToBack(Renderer *wichRenderer);
+
 
 			float			Scale(void){return scale;};
 			BList*			RenderList(void){return renderer;};
 	static	bool			DrawRenderer(void *arg,void *editor);
 			void			RecalcFrame(void);
 
+			void			BringToFront(Renderer *wichRenderer);
+			void			SendToBack(Renderer *wichRenderer);
 				//------Group Special Methods
 
 
 protected:
 				void		Init();
-				void		InsertAttribute(char *attribName, BMessage *attribute,int32 count);
 				void		InsertRenderObject(BMessage *node);
-		BMessage			*viewMessage;
+				
+/*				bool		MoveAll(void *arg,float dx, float dy);
+				bool		ResizeAll(void *arg,float dx, float dy);*/
+				
 
-
-		static	bool		MoveAll(void *arg,void *deltaPoint);
-		static	bool		ResizeAll(void *arg,void *deltaPoint);
-
-	//++++++++++ClassSettings++++++++++
-		float				xRadius,yRadius;
-		rgb_color			fillColor,borderColor;
-		BRect				frame;
-		bool				selected;
-		BFont				*font;
-		float				penSize;
-
-	//const char*			name;
-	//---------ClassSettings-----------
-
-		BPoint				*startMouseDown;
-		BPoint				*startLeftTop;
-
-		BPoint				*oldPt;
-
-		int					connecting;
-		bool				resizing;
-
-		PDocument			*doc;
-		BMessenger			*sentTo;
-
-		StringRenderer		*name;
 
 		//++++++Group Special Methods
 		BList				*allNodes;
-		BList				*allConnections;
 		BList				*renderer;
-		Renderer			*activRenderer;
 		Renderer			*father;
-
-		Renderer			*mouseReciver;
 		float				scale;
 		//-----Group Special Methods
 

@@ -7,7 +7,7 @@ class Renderer
 {
 
 public:
-						Renderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer){editor = parentEditor; parent = parentRenderer; container = forContainer;};
+						Renderer(GraphEditor *parentEditor, BMessage *forContainer){editor = parentEditor; container = forContainer;};
 
 	virtual	void		ValueChanged(void)										= 0;
 
@@ -27,11 +27,9 @@ public:
 	virtual bool		Caught(BPoint where)									= 0;
 
 	virtual	BMessage*	GetMessage(void){return container;};
-	virtual	Renderer*	GetParent(void){return parent;};
 
 protected:
 			BMessage	*container;
 			GraphEditor	*editor;
-			Renderer	*parent;
 };
 #endif

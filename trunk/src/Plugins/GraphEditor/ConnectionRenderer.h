@@ -21,7 +21,7 @@ class ConnectionRenderer: public Renderer
 {
 
 public:
-						ConnectionRenderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer);
+						ConnectionRenderer(GraphEditor *parentEditor, BMessage *forContainer);
 	virtual void		Draw(BView *drawOn, BRect updateRect);
 	virtual	void		MouseDown(BPoint where);
 	virtual	void		MouseUp(BPoint where);

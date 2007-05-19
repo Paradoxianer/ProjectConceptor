@@ -20,7 +20,7 @@
 
 
 
-BoolRenderer::BoolRenderer(GraphEditor *parentEditor,bool forValue,BRect valueRect,BMessage *message=NULL):Renderer(parentEditor,NULL,NULL)
+BoolRenderer::BoolRenderer(GraphEditor *parentEditor,bool forValue,BRect valueRect,BMessage *message=NULL):Renderer(parentEditor,NULL)
 {
 	TRACE();
 	changeMessage	= message;

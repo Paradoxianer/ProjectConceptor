@@ -15,7 +15,7 @@
 #include "GroupRenderer.h"
 
 
-ClassRenderer::ClassRenderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer):Renderer(parentEditor,parentRenderer,forContainer)
+ClassRenderer::ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer):Renderer(parentEditor, forContainer)
 {
 	TRACE();
 	Init();
@@ -24,6 +24,7 @@ ClassRenderer::ClassRenderer(GraphEditor *parentEditor, Renderer *parentRenderer
 void ClassRenderer::Init()
 {
 	TRACE();
+	PRINT_OBJECT(*container);
 	status_t	err			 	= B_OK;
 	resizing					= false;
 	startMouseDown				= NULL;
@@ -31,6 +32,7 @@ void ClassRenderer::Init()
 	doc							= NULL;
 	outgoing					= NULL;
 	incoming					= NULL;
+	parentNode					= NULL;
 
 	xRadius						= 10;
 	yRadius						= 10;
@@ -41,7 +43,7 @@ void ClassRenderer::Init()
 	penSize						= 1.0;
 	connecting					= 0;
 
-	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+	BMessage	*editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 	editMessage->AddPointer("node",container);
 
 	editMessage->AddString("Command::Name","ChangeValue");
@@ -57,7 +59,8 @@ void ClassRenderer::Init()
 		container->AddFloat("xRadius",7.0);
 	if (container->FindFloat("yRadius",&yRadius) != B_OK)
 		container->AddFloat("yRadius",7.0);
-	PRINT_OBJECT(*container);
+	container->FindPointer("parentNode", (void **)&parentNode);
+
 }
 
 
@@ -89,10 +92,7 @@ void ClassRenderer::MouseDown(BPoint where)
 		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
 		if (buttons & B_PRIMARY_MOUSE_BUTTON)
 		{
-			if (parent)
-				((GroupRenderer *)parent)->BringToFront(this);
-			else 
-				editor->BringToFront(this);
+			editor->BringToFront(this);
 			startMouseDown	= new BPoint(where);
 			startLeftTop	= new BPoint(frame.LeftTop());
 			editor->SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
@@ -125,13 +125,7 @@ void ClassRenderer::MouseDown(BPoint where)
 			}
 		}
 		else if (buttons & B_SECONDARY_MOUSE_BUTTON )
-		{
-			//need to do deal with Parent
-			if (parent)
-				((GroupRenderer *)parent)->SendToBack(this);
-			else 
-				editor->SendToBack(this);
-		}
+			editor->SendToBack(this);
 	}
 }
 void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
@@ -163,25 +157,33 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 			if (!resizing)
 			{
 				BPoint	deltaPoint(dx,dy);
-				BList	*renderer;
-				if (!parent)
-					renderer	= editor->RenderList();
-				else
-					renderer = ((GroupRenderer *)parent)->RenderList();
-				renderer->DoForEach(MoveAll, &deltaPoint);
-				if (parent)
-					((GroupRenderer *)parent)->RecalcFrame();
+				BList *renderer	= editor->RenderList();
+				for (int32 i=0;i<renderer->CountItems();i++)
+				{
+					MoveAll(renderer->ItemAt(i),dx,dy);
+				}
+				if (parentNode)
+				{
+					GroupRenderer	*parent	= NULL;
+					if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
+						parent->RecalcFrame();
+				}
 				editor->Invalidate();
 			}
 			else
 			{
 				BPoint	deltaPoint(dx,dy);
-				BList	*renderer;
-				if (!parent)
-					renderer	= editor->RenderList();
-				else
-					renderer = ((GroupRenderer *)parent)->RenderList();
-				renderer->DoForEach(ResizeAll, &deltaPoint);
+				BList *renderer	= editor->RenderList();
+				for (int32 i=0;i<renderer->CountItems();i++)
+				{
+					ResizeAll(renderer->ItemAt(i),dx,dy);
+				}
+				if (parentNode)
+				{
+					GroupRenderer	*parent	= NULL;
+					if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
+						parent->RecalcFrame();
+				}
 				editor->Invalidate();
 			}
 		}
@@ -226,8 +228,6 @@ void ClassRenderer::MouseUp(BPoint where)
 			if (!resizing)
 			{
 				BList		*selected	= doc->GetSelected();
-/*				BPoint deltaPoint(-dx,-dy);
-				selected->DoForEach(MoveAll,&deltaPoint);*/
 				BMessage	*mover	= new BMessage(P_C_EXECUTE_COMMAND);
 				mover->AddString("Command::Name","Move");
 				mover->AddFloat("dx",dx);
@@ -237,8 +237,6 @@ void ClassRenderer::MouseUp(BPoint where)
 			else
 			{
 				BList	*selected	= doc->GetSelected();
-/*				BPoint	deltaPoint(-dx,-dy);
-				selected->DoForEach(ResizeAll,&deltaPoint);*/
 				BMessage	*resizer	= new BMessage(P_C_EXECUTE_COMMAND);
 				resizer->AddString("Command::Name","Resize");
 				resizer->AddFloat("dx",dx);
@@ -391,6 +389,7 @@ void ClassRenderer::ValueChanged()
 		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
 			InsertAttribute(attribName,attribMessage, count-1);
 	}
+	container->FindPointer("parentNode", (void **)&parentNode);
 }
 
 BRect ClassRenderer::Frame( void )
@@ -407,21 +406,19 @@ void  ClassRenderer::SetFrame(BRect newFrame)
 {
 }
 
-bool  ClassRenderer::MoveAll(void *arg,void *deltaPoint)
+bool  ClassRenderer::MoveAll(void *arg,float dx, float dy)
 {
-	BPoint		*delta	= (BPoint *)deltaPoint;
 	Renderer	*renderer	= (Renderer*)arg;
 	if (renderer->Selected())
-		renderer->MoveBy(delta->x,delta->y);
+		renderer->MoveBy(dx,dy);
 	return false;
 }
 
-bool  ClassRenderer::ResizeAll(void *arg,void *deltaPoint)
+bool  ClassRenderer::ResizeAll(void *arg,float dx, float dy)
 {
-	BPoint		*delta	= (BPoint *)deltaPoint;
 	Renderer	*renderer	= (Renderer*)arg;
 	if (renderer->Selected())
-		renderer->ResizeBy(delta->x,delta->y);
+		renderer->ResizeBy(dx,dy);
 	return false;
 }
 

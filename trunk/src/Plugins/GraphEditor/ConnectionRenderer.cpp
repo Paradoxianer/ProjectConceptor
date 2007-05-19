@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 
-ConnectionRenderer::ConnectionRenderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer):Renderer(parentEditor, parentRenderer, forContainer)
+ConnectionRenderer::ConnectionRenderer(GraphEditor *parentEditor, BMessage *forContainer):Renderer(parentEditor, forContainer)
 {
 	TRACE();
 	Init();
@@ -27,20 +27,22 @@ void ConnectionRenderer::Init()
 	BMessage	*data		= new BMessage();
 	container->FindPointer("From",(void **)&fromNode);
 	container->FindPointer("To",(void **)&toNode);
-	PRINT_OBJECT(*from);
-	PRINT_OBJECT(*to);
+	PRINT_OBJECT(*fromNode);
+	PRINT_OBJECT(*toNode);
 	if (fromNode->FindPointer("Outgoing",(void **)&outgoing) != B_OK)
 	{
 		outgoing = new BList();
 		fromNode->AddPointer("Outgoing",outgoing);
 	}
-	outgoing->AddItem(container);
+	if (!outgoing->HasItem(container))
+		outgoing->AddItem(container);
 	if (toNode->FindPointer("Incoming",(void **)&incoming) != B_OK)
 	{
 		incoming = new BList();
 		toNode->AddPointer("Incoming",incoming);
 	}
-	incoming->AddItem(container);
+	if (!incoming->HasItem(container))
+		incoming->AddItem(container);
 	if (container->FindMessage("Data",data) != B_OK)
 	{
 		data->AddString("Name","Unbenannt");

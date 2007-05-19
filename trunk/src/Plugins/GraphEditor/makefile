@@ -76,7 +76,7 @@ OPTIMIZE= FULL
 #	specify any preprocessor symbols to be defined.  The symbols
 #	will be set to a value of 1.  For example specify DEBUG if you want
 #	DEBUG=1 to be set when compiling.
-DEFINES= 
+DEFINES =   DEBUG
 
 #	specify special warning levels
 #	if unspecified default warnings will be used

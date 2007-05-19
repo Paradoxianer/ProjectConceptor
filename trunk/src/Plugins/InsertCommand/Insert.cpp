@@ -8,6 +8,8 @@ Insert::Insert():PCommand()
 
 void Insert::Undo(PDocument *doc,BMessage *undo)
 {
+	BMessage		*parentNode			= NULL;
+	BList			*parentAllNodes		= NULL;
 	BList			*allConnectinos		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();
 	BList			*trash				= doc->GetTrash();
@@ -16,10 +18,17 @@ void Insert::Undo(PDocument *doc,BMessage *undo)
 	BMessage		*connection			= new BMessage();
 	int32			i					= 0;
 	PCommand::Undo(doc,undo);
+	undo->FindPointer("parentNode", (void **)&parentNode);
+	if (parentNode)
+		parentNode->FindPointer("allNodes", (void **)&parentAllNodes);
 	while (undo->FindPointer("node",i,(void **)&node) == B_OK)
 	{
 		if (node->what != P_C_CONNECTION_TYPE)
+		{
 			allNodes->RemoveItem(node);
+			if (parentAllNodes)
+				parentAllNodes->RemoveItem(node);			
+		}
 		else
 			allConnectinos->RemoveItem(node);
 		trash->AddItem(node);
@@ -34,20 +43,26 @@ void Insert::Undo(PDocument *doc,BMessage *undo)
 BMessage* Insert::Do(PDocument *doc, BMessage *settings)
 {
 	BMessage		*node				= NULL;
-	BList			*parentGroupList	= NULL;
+	BMessage		*parentNode			= NULL;
+	BList			*parentAllNodes		= NULL;
 	BList			*changed			= doc->GetChangedNodes();
-	BList			*allConnections		= NULL;
-	BList			*allNodes			= NULL;
+	BList			*allConnections		= doc->GetAllConnections();
+	BList			*allNodes			= doc->GetAllNodes();
 	int32			i					= 0;
-	if 	((settings->FindPointer("allNodes",(void **)&allNodes)!=B_OK) || (allNodes==NULL))
-		allNodes = doc->GetAllNodes();
-	if ((settings->FindPointer("allConnections",(void **)&allConnections) != B_OK) || (allConnections == NULL))
-		allConnections = doc->GetAllConnections();
-
+	settings->FindPointer("parentNode", (void **)&parentNode);
+	if (parentNode)
+	{
+		if (parentNode->FindPointer("allNodes", (void **)&parentAllNodes) != B_OK)
+			parentNode->AddPointer("allNodes", new BList());
+	}
 	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
 	{
 		if (node->what != P_C_CONNECTION_TYPE)
+		{
 			allNodes->AddItem(node);
+			if (parentAllNodes)
+				parentAllNodes->AddItem(node);
+		}
 		else
 			allConnections->AddItem(node);
 		//recalc size

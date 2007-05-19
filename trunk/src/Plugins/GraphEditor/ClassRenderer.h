@@ -30,7 +30,7 @@ class ClassRenderer: public Renderer
 {
 
 public:
-							ClassRenderer(GraphEditor *parentEditor, Renderer *parentRenderer, BMessage *forContainer);
+							ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer);
 				void		Draw(BView *drawOn, BRect updateRect);
 				void		MouseDown(BPoint where);
 				void		MouseUp(BPoint where);
@@ -45,7 +45,7 @@ public:
 				void		SetFrame(BRect newFrame);
 				void		MoveBy(float dx, float dy);
 				void		ResizeBy(float dx,float dy);
-				bool		Selected(){return selected;};
+				bool		Selected(void){return selected;};
 
 protected:
 				void		Init();
@@ -53,8 +53,8 @@ protected:
 		BMessage			*viewMessage;
 
 
-		static	bool		MoveAll(void *arg,void *deltaPoint);
-		static	bool		ResizeAll(void *arg,void *deltaPoint);
+		virtual	bool		MoveAll(void *arg,float dx, float dy);
+		virtual	bool		ResizeAll(void *arg, float dx, float dy);
 
 	//++++++++++ClassSettings++++++++++
 		float				xRadius,yRadius;
@@ -66,6 +66,7 @@ protected:
 
 	//const char*			name;
 	//---------ClassSettings-----------
+		BMessage			*parentNode;
 
 		BPoint				*startMouseDown;
 		BPoint				*startLeftTop;
