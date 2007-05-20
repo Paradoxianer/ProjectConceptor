@@ -142,8 +142,18 @@ status_t ConvertPDoc2ASCII(BPositionIO * inSource, BMessage * ioExtension,	BPosi
 {
 	status_t		err					= B_OK;
 	BMessage		*inMessage			= new BMessage();
+	BMessage		*outMessage			= new BMessage();
+	BMessage		*outCommand			= new BMessage();
+
 	BMessage		*tmpMessage			= new BMessage();
+	BMessage		*allConnections		= new BMessage();
+	BMessage		*selected			= new BMessage();
+	BMessage		*commandStuff		= new BMessage();
+
 	int32			i					= 0;
+	bool			saveUndo			= true;
+	bool			saveMacro			= true;
+	int32			undoLevel			= -1;
 	printf("StandartTranslator::Translate\n");
 	if (ioExtension != NULL)
 	{
@@ -157,7 +167,7 @@ status_t ConvertPDoc2ASCII(BPositionIO * inSource, BMessage * ioExtension,	BPosi
 	inMessage->Unflatten(inSource);
 	//translations Process 
 	inMessage->FindMessage("PDocument::allNodes",tmpMessage);
-	while (tmpMessage->FindMessage("node",))
+//	while (tmpMessage->FindMessage("node",))
 	inMessage->FindMessage("PDocument::allConnections",allConnections);
 	outMessage->AddMessage("PDocument::allConnections",allConnections);
 	inMessage->FindMessage("PDocument::selected",selected);

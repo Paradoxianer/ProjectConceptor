@@ -220,6 +220,11 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 		node->AddPointer("allConnections",allConnectionsList);
 		node->RemoveName("allConnectionsList");
 	}
+	if (node->FindPointer("parentNode",(void **)&tmpPointer) == B_OK)
+	{
+		node->RemoveName("parentNode");
+		node->AddPointer("parentNode",DeIndexNode((BMessage *)tmpPointer));
+	}
 	node->FindPointer("this",(void **)&tmpPointer);
 	node->RemoveName("this");
 	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);

@@ -153,6 +153,7 @@ LEAFDIRS = \
 	src/Plugins/ClassEditor			 	\
 	src/Plugins/DeleteCommand   		\
 	src/Plugins/GraphEditor			\
+	src/Plugins/GroupCommand			\
 	src/Plugins/InsertCommand         		\
 	src/Plugins/MoveCommand     		\
 	src/Plugins/NavigatorEditor  			\
