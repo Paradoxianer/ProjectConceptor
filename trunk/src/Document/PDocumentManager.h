@@ -11,13 +11,17 @@
 #include "PDocument.h"
 #include "PWindow.h"
 
-class PDocumentManager
+class PDocumentManager : public BArchivable
 {
 
 public:
 							PDocumentManager(void);
 							PDocumentManager(BMessage *archive);
 	virtual					~PDocumentManager();
+
+	virtual	status_t		Archive(BMessage *into, bool deep = true) const;
+	static	BArchivable		*Instantiate(BMessage *from);
+
 	virtual	void			AddDocument(PDocument *doc);
 	virtual	void			RemoveDocument(PDocument *doc);
 	virtual	PDocument*		CreateDocument(void);
@@ -27,6 +31,8 @@ public:
 	//neeeed QuitRequested!!!!!
 protected:
 			void			Init(void);
+			void			Init(BMessage *archive);
+
 			BList*			documentList;
 			PluginManager	*pluginManager;
 

@@ -25,9 +25,12 @@ void BasicEditor::Init(void)
 	connecting		= false;
 	fromPoint		= new BPoint(0,0);
 	toPoint			= new BPoint(0,0);
+	configuration	= new BMessage();
 
 	font_family		family;
 	font_style		style;
+	
+
 
 	BMessage		*dataMessage	= new BMessage();
 	dataMessage->AddString("Name","Untitled");
@@ -103,6 +106,35 @@ void BasicEditor::DetachedFromManager(void)
 
 }
 
+void BasicEditor::PreprocessBeforSave(BMessage *container)
+{
+	TRACE();
+	char	*name;
+	uint32	type;
+	int32	count;
+	int32	i		= 0;
+	//remove all the Pointer to the Renderer so that on the next load a new Renderer are added
+	while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+	{
+		if ((strstr(name,"BasicEditor") != NULL) ||
+			(strcasecmp(name,"Outgoing") == B_OK) ||
+			(strcasecmp(name,"Incoming") == B_OK) ||
+			(strcasecmp(name,"doc") == B_OK) )
+		{
+			container->RemoveName(name);
+			i--;
+		}
+		i++;
+	}
+}
+
+
+void BasicEditor::PreprocessAfterLoad(BMessage *container)
+{
+	//**nothing to do jet as i know
+	container=container;
+}
+
 BList* BasicEditor::GetPCommandList(void)
 {
 	//at the Moment we dont support special Commands :-)
@@ -113,7 +145,7 @@ BList* BasicEditor::GetPCommandList(void)
 void BasicEditor::ValueChanged()
 {
 	BList		*changedNodes	= doc->GetChangedNodes();
-	BList		*allTrashed		= doc->GetTrash();
+//	BList		*allTrashed		= doc->GetTrash();
 
 	BMessage	*node			= NULL;
 	BView		*renderer		= NULL;
@@ -130,11 +162,11 @@ void BasicEditor::ValueChanged()
 			InsertRenderObject(node);
 		}
 	}
-	for (int32 i=0;i<allTrashed->CountItems();i++)
+/*	for (int32 i=0;i<allTrashed->CountItems();i++)
 	{
 		node = (BMessage *)allTrashed->ItemAt(i);
 		DeleteRenderObject(node);
-	}
+	}*/
 /*	BMessage	*node		= NULL;
 	int32		i			= 0;
 

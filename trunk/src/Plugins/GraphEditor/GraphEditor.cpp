@@ -278,11 +278,16 @@ void GraphEditor::PreprocessBeforSave(BMessage *container)
 	}
 }
 
+void GraphEditor::PreprocessAfterLoad(BMessage *container)
+{
+	//**nothing to do jet as i know
+	container=container;
+}
+
 void GraphEditor::ValueChanged()
 {
 	TRACE();
 	BList		*changedNodes	= doc->GetChangedNodes();
-	BList		*allTrashed		= doc->GetTrash();
 	BList		*allNodes		= doc->GetAllNodes();
 	BList		*allConnections	= doc->GetAllConnections();
 

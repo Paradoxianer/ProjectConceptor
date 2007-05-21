@@ -70,7 +70,7 @@ public:
 	virtual	void			SetConfiguration(BMessage *message){delete configMessage;configMessage=message;};
 
 	virtual void			PreprocessBeforSave(BMessage *container);
-//	virtual void			PreprocessAfterLoad(BMessage *container);
+	virtual void			PreprocessAfterLoad(BMessage *container);
 
 	//----------------PEditor
 

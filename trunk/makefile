@@ -52,7 +52,6 @@ SRCS= 	src/AboutWindow.cpp \
 		src/ToolBar/PatternToolItem.cpp \
 		src/Tools/PCSavePanel.cpp \
 		src/Tools/PDocLoader.cpp \
-		src/Tools/PDocSaver.cpp \
 		src/Tools/Indexer.cpp \
 		src/Tools/InputRequestView.h \
  		src/Tools/InputRequest.h \

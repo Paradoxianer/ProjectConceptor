@@ -151,7 +151,6 @@ BList* SampleEditor::GetPCommandList(void)
 void SampleEditor::PreprocessBeforSave(BMessage *container)
 {
 	TRACE();
-	PRINT(("GraphEditor::PreprocessAfterLoad:\n"));
 	char	*name; 
 	uint32	type; 
 	int32	count; 
@@ -169,6 +168,12 @@ void SampleEditor::PreprocessBeforSave(BMessage *container)
 		}
 		i++;
 	}
+}
+
+void SampleEditor::PreprocessAfterLoad(BMessage *container)
+{
+	//**nothing to do jet as i know
+	container=container;
 }
 
 void SampleEditor::InitAll()
@@ -201,7 +206,7 @@ void SampleEditor::ValueChanged()
 {
 	TRACE();
 	BList		*changedNodes	= doc->GetChangedNodes();
-	BList		*allTrashed		= doc->GetTrash();
+//	BList		*allTrashed		= doc->GetTrash();
 
 	BMessage	*node			= NULL;
 	Renderer	*painter		= NULL;
@@ -215,12 +220,12 @@ void SampleEditor::ValueChanged()
 		else
 			InsertRenderObject(node);
 	}
-	for (int32 i=0;i<allTrashed->CountItems();i++)
+/*	for (int32 i=0;i<allTrashed->CountItems();i++)
 	{
 		node = (BMessage *)allTrashed->ItemAt(i);
 //		DeleteRenderObject(node);
 		RemoveRenderer(FindRenderer(node));
-	}
+	}*/
 	if (BView::LockLooper())
 	{
 		Invalidate();

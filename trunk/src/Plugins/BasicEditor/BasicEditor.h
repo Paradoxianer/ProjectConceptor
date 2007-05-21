@@ -29,6 +29,13 @@ public:
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
 
+	virtual void			PreprocessBeforSave(BMessage *container);
+	virtual void			PreprocessAfterLoad(BMessage *container);
+
+	virtual	BMessage*		GetConfiguration(void) {return configuration;};
+	virtual void			SetConfiguration(BMessage *message){configuration = message;};
+
+
 	virtual	BView*			GetView(void){return this;};
 	virtual	BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
@@ -81,7 +88,9 @@ protected:
 			BMessage		*patternMessage;
 			BMessage		*configMessage;
 			BMessage		*connectionMessage;
-			BMessage		*groupMessage;		
+			BMessage		*groupMessage;
+			
+			BMessage		*configuration;
 		
 			PCommand		*insertCommand;
 			PCommand		*selectCommand;

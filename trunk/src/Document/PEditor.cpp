@@ -10,6 +10,7 @@ PEditor::PEditor(void)
 	TRACE();
 	Init();
 }
+
 void PEditor::Init(void)
 {
 	doc				= NULL;

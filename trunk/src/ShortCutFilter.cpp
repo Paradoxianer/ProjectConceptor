@@ -30,7 +30,7 @@ filter_result ShortCutFilter::Filter(BMessage *message, BHandler **target)
 	uint32		key;
 	uint32		modifiers;
 	shortcut	*theShortcut	= NULL;
-	status_t	err				= B_OK;
+	target = target;
 	switch(message->what) 
 	{
 		case B_KEY_DOWN:
@@ -38,7 +38,6 @@ filter_result ShortCutFilter::Filter(BMessage *message, BHandler **target)
 			if (message->FindInt32("raw_char",(int32 *)&key) == B_OK)
 			{
 				message->FindInt32("modifiers",(int32 *)&modifiers);
-				BMessenger	*messenger		= NULL;
 				BMessage	*sendMessage	= NULL;
 				theShortcut	= shortcutVector->ValueFor(key);
 				if (theShortcut != NULL)

@@ -11,11 +11,14 @@
  * @version 0.01
  * @date 2005/10/04
  *
+ * @todo change every function to virtual and abstract this cause changes to many classes
  */
 
 class ObjectHelp
 {
 public:
+
+	char*		GetID(void){return NULL;};
 	char*		GetToolTip(void){return NULL;};
 	char*		GetShortDescription(void){return NULL;};
 	entry_ref*	GetHelpFile(void){return NULL;};

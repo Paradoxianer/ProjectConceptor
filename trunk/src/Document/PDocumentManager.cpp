@@ -2,16 +2,16 @@
 
 
 
-PDocumentManager::PDocumentManager(void)
+PDocumentManager::PDocumentManager(void) : BArchivable()
 {
 	TRACE();
 	Init();
 	CreateDocument();
 }
 
-PDocumentManager::PDocumentManager(BMessage *archive)
+PDocumentManager::PDocumentManager(BMessage *archive) : BArchivable(archive)
 {
-	Init();
+	Init(archive);
 	TRACE();
 }
 
@@ -30,6 +30,21 @@ void PDocumentManager::Init()
 	BDirectory *dir	= new BDirectory(path.Path());
 	pluginManager->LoadPlugins(dir);
 }
+
+void PDocumentManager::Init(BMessage *archive)
+{
+	BMessage	*docMessage	= new BMessage();
+	PDocument	*doc		= NULL;
+	int32		i			= 0;
+	Init();
+	while (archive->FindMessage("document",i,docMessage) == B_OK)
+	{
+		doc = new PDocument(docMessage); 
+		documentList->AddItem(doc);
+		i++	;
+	}
+}
+
 PDocumentManager::~PDocumentManager(void)
 {
 	PDocument *currentDocument	= NULL;
@@ -47,6 +62,32 @@ PDocumentManager::~PDocumentManager(void)
 /**
  *@todo set the docname;
  */
+ 
+status_t PDocumentManager::Archive(BMessage *archive, bool deep) const
+{
+	BMessage	docArchive;
+	status_t	err = B_OK;
+	err = BArchivable::Archive(archive, deep);
+	for (int32 i; i < documentList->CountItems(); i++)
+	{
+		if (((PDocument*)documentList->ItemAt(i))->Archive(&docArchive, deep) == B_OK )
+			err = err | archive->AddMessage("PDocumentManager::document", &docArchive);
+	}
+	err = err | archive->AddString("class", "PDocumentManager"); 
+	if (err != B_OK)
+		return B_ERROR;
+	else
+		return B_OK;
+} 
+
+BArchivable *PDocumentManager::Instantiate(BMessage *archive)
+{
+	if ( validate_instantiation(archive, "PDocumentManager"))
+		return new PDocumentManager(archive);
+	else
+	   	return NULL;
+} 
+
 void PDocumentManager::AddDocument(PDocument *doc)
 {
 	TRACE();

@@ -46,17 +46,19 @@ void PCommandManager::Init(void)
 
 status_t PCommandManager::Archive(BMessage *archive, bool deep = true)
 {
-	for (int32 i=0;i<undoList->CountItems();i++)
+	int32	i	= 0;
+	for (i = 0; i<undoList->CountItems(); i++)
 	{
 		BMessage	*undoMessage	= (BMessage*)undoList->ItemAt(i);
 		archive->AddMessage("undo",undoMessage);
 	}
-	for (int32 i=0;i<macroList->CountItems();i++)
+	for (i = 0; i<macroList->CountItems(); i++)
 	{
 		BMessage	*macroMessage	= (BMessage*)macroList->ItemAt(i);
 		archive->AddMessage("macro",macroMessage);
 	}
-	archive->AddInt32("undoStatus",undoStatus);
+	if (deep)
+		archive->AddInt32("undoStatus",undoStatus);
 	//** need a good Errorcheck
 	return B_OK;
 }
@@ -88,9 +90,7 @@ status_t PCommandManager::SetMacroList(BList *newMacroList)
 	status_t	err			= B_OK;
 	if (newMacroList)
 	{
-	
 //		BMenu 		*macroPlay 		= doc->GetMenu(P_MENU_MACRO_PLAY);
-		BMenuItem	*singleMacro	= NULL;
 		BMessage	*macro			= NULL;
 		char		*name			= NULL;
 /*		while (macroPlay!=NULL)
@@ -214,7 +214,7 @@ status_t PCommandManager::Execute(BMessage *settings)
 	if (doc->Lock())
 	{
 		(doc->GetChangedNodes())->MakeEmpty();
-		(doc->GetTrash())->MakeEmpty();
+//		(doc->GetTrash())->MakeEmpty();
 		bool		shadow				= false;
 		char		*commandName		= NULL;
 		PCommand	*command			= NULL;
@@ -223,7 +223,7 @@ status_t PCommandManager::Execute(BMessage *settings)
 		if (command != NULL)
 		{
 			BMessage	*tmpMessage		= command->Do(doc, settings);
-			status_t	err				= settings->FindBool("shadow",&shadow);
+			err				= settings->FindBool("shadow",&shadow);
 			if ((err != B_OK) )
 			{
 				if (recording)
@@ -270,7 +270,7 @@ void PCommandManager::Undo(BMessage *undo)
 	if (doc->Lock())
 	{
 		(doc->GetChangedNodes())->MakeEmpty();
-		(doc->GetTrash())->MakeEmpty();
+//		(doc->GetTrash())->MakeEmpty();
 		if (index<0) 
 			index=undoStatus;
 		while (i>=index)
@@ -306,7 +306,7 @@ void PCommandManager::Redo(BMessage *redo)
 	if (doc->Lock())
 	{	
 		(doc->GetChangedNodes())->MakeEmpty();
-		(doc->GetTrash())->MakeEmpty();
+//		(doc->GetTrash())->MakeEmpty();
 		if (index<0)	
 			index=undoStatus+1;
 		while (i<=index)

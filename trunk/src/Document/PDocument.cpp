@@ -23,6 +23,7 @@ PDocument::PDocument(PDocumentManager *initManager):BLooper(),BReadWriteLocker()
 PDocument::PDocument(PDocumentManager *initManager,entry_ref *openEntry):BLooper(),BReadWriteLocker() 
 {
 	TRACE();
+	PRINT(("%d\n",openEntry));
 	documentManager=initManager;
 	Init();
 	Run();
@@ -45,9 +46,9 @@ PDocument::~PDocument()
 
 status_t PDocument::Archive(BMessage* archive, bool deep = true) const
 {
+	BLooper::Archive(archive, deep);
 	TRACE();
 	Indexer		*indexer				= new Indexer((PDocument *)this);
-	status_t	err 					= B_OK;
 	int32		i						= 0;
 	BMessage	*commandManage			= new BMessage();
 	BMessage	*tmpNode				= NULL;
@@ -106,7 +107,10 @@ status_t PDocument::Archive(BMessage* archive, bool deep = true) const
 BArchivable* PDocument::Instantiate(BMessage* message)
 {
 	TRACE();
-	return NULL;
+	if (!validate_instantiation(message, "PDocument")) 
+		return NULL;
+	else
+		return new PDocument(message);
 }
 
 void PDocument::MessageReceived(BMessage* message)
@@ -208,7 +212,7 @@ void PDocument::Init()
 	allConnections	= new BList();
 	selected		= new BList();
 	valueChanged	= new BList();
-	trashed			= new BList();
+//	trashed			= new BList();
 
 	printerSetting	= NULL;
 	documentSetting	= new BMessage();
@@ -230,6 +234,14 @@ void PDocument::Init()
 void PDocument::Init(BMessage *archive)
 {
 	TRACE();
+	printerSetting	= NULL;
+	documentSetting	= new BMessage();
+	if (archive->FindMessage("PDocument::printerSetting",printerSetting) != B_OK)
+	{
+		delete printerSetting;
+		printerSetting = NULL;
+	}
+	archive->FindMessage("PDocument::documentSetting",documentSetting);
 	
 }
 
@@ -521,6 +533,7 @@ void PDocument::Load(void)
 	BMallocIO			*output			= new BMallocIO();
 	BMessage			*loaded			= new BMessage();
 	void				*buffer			= NULL;
+	int32				i				= 0;
 	if (file->InitCheck() == B_OK)
 	{
 		roster	= BTranslatorRoster::Default();
@@ -543,14 +556,14 @@ void PDocument::Load(void)
 	delete selected;
 	
 	allNodes 		= docLoader->GetAllNodes();
-	for (int32 i=0;i<allNodes->CountItems();i++)
+	for (i = 0; i<allNodes->CountItems(); i++)
 	{
 		node=((BMessage*)allNodes->ItemAt(i));
 		node->AddPointer("doc",this);
 		valueChanged->AddItem(node);
 	}
 	allConnections	= docLoader->GetAllConnections();
-	for (int32 i=0;i<allConnections->CountItems();i++)
+	for (i = 0; i<allConnections->CountItems(); i++)
 	{
 		node= (BMessage *)allConnections->ItemAt(i);
 		node->AddPointer("doc",this);

@@ -946,6 +946,9 @@ void PWindow::SetManager(WindowManager* newManager)
 
 void PWindow::FrameResized(float width, float height)
 {
+		//just to remove the warnings .. from the compiler
+		width	= width;
+		height	= height;
 		P_M_MAIN_VIEW_LEFT		= mainView->Frame().left;
 		P_M_MAIN_VIEW_TOP 		= mainView->Frame().top;
 		P_M_MAIN_VIEW_BOTTOM	= mainView->Frame().bottom;

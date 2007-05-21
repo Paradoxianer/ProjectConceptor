@@ -29,8 +29,11 @@ void NavigatorEditor::Init(void)
 {
 	TRACE();
 	renderString	= new char[30];
+	configMessage 	= new BMessage();
 	font_family		family;
 	font_style		style;
+	
+
 
 /*	BMessage		*dataMessage	= new BMessage();
 	dataMessage->AddString("Name","Untitled");
@@ -97,6 +100,36 @@ void NavigatorEditor::AttachedToManager(void)
 void NavigatorEditor::DetachedFromManager(void)
 {
 	TRACE();
+}
+
+void NavigatorEditor::PreprocessBeforSave(BMessage *container)
+{
+	TRACE();
+	PRINT(("GraphEditor::PreprocessAfterLoad:\n"));
+	char	*name;
+	uint32	type;
+	int32	count;
+	int32	i		= 0;
+	//remove all the Pointer to the Renderer so that on the next load a new Renderer are added
+	while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+	{
+		if ((strstr(name,"GraphEditor") != NULL) ||
+			(strcasecmp(name,"Outgoing") == B_OK) ||
+			(strcasecmp(name,"Incoming") == B_OK) ||
+			(strcasecmp(name,"Parent") == B_OK)  ||
+			(strcasecmp(name,"doc") == B_OK) )
+		{
+			container->RemoveName(name);
+			i--;
+		}
+		i++;
+	}
+}
+
+void NavigatorEditor::PreprocessAfterLoad(BMessage *container)
+{
+	//**nothing to do jet as i know
+	container=container;
 }
 
 BList* NavigatorEditor::GetPCommandList(void)

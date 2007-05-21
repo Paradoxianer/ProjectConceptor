@@ -31,7 +31,7 @@ class PDocument;
  * @see BMessage
  */
 
-class PEditor : public ObjectHelp
+class PEditor : public ObjectHelp, public BArchivable
 {
 
 public:
@@ -59,13 +59,12 @@ public:
 	 *	<tr><td>PDocument::GetSelected()</td><td>"Selected"</td></tr>
 	 *	<tr><td>PDocument::GetAllNodes()</td><td>"AllNodes"</td></tr>
 	 *	<tr><td>PDocument::GetAllConnections()</td><td>"AllConnections"</td></tr>
-	 *	<tr><td>PDocument::GetTrash()</td><td>"Trash"</td></tr>
 	 *	<tr><td>PDocument::GetChangedNodes</td><td>"ChangedNodes"</td></tr> 	
 	 *</tabale>
 	 *
 	 *@see PreprocessBeforLoad()
  	 */
-	virtual void			PreprocessBeforSave(BMessage *container){};
+	virtual void			PreprocessBeforSave(BMessage *container) = 0;
 /**
 	 * this Method can perform Steps wich are necessary befor loading
 	 * e.g. converting Messages back into valid Objects and add the Objects as Pointer and remove the ObjectMessage
@@ -77,14 +76,13 @@ public:
 	 *	<tr><td>PDocument::GetSelected()</td><td>"Selected"</td></tr>
 	 *	<tr><td>PDocument::GetAllNodes()</td><td>"AllNodes"</td></tr>
 	 *	<tr><td>PDocument::GetAllConnections()</td><td>"AllConnections"</td></tr>
-	 *	<tr><td>PDocument::GetTrash()</td><td>"Trash"</td></tr>
 	 *	<tr><td>PDocument::GetChangedNodes</td><td>"ChangedNodes"</td></tr> 	
 	 *</tabale>
 	 *
 	 *@see PreprocessBeforSave()
  	 */
 
-	virtual void			PreprocessAfterLoad(BMessage *container){};
+	virtual void			PreprocessAfterLoad(BMessage *container) = 0;
 
 	/**
 	 * if the Editor is an View (this mostly shoud be the case)
@@ -125,8 +123,8 @@ public:
 	 * @see PEditorManager 
 	 */
 	 
-	virtual	BMessage*		GetConfiguration(void){return NULL;};
-	virtual void			SetConfiguration(BMessage *message){};
+	virtual	BMessage*		GetConfiguration(void) = 0;
+	virtual void			SetConfiguration(BMessage *message) = 0;
 
 			PEditorManager*	Manager(void){return manager;};
 

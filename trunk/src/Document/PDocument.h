@@ -43,6 +43,7 @@ class PDocumentManager;
  *
  *
  *@todo Helpmanager complete impelementation and integration in PDocument, ToolBar, ToolItem, ToolMenu PWindow and PEditor
+ *@todo Implement Init(BMessage *archive)
  *
  * @see BMessage
  */
@@ -102,7 +103,7 @@ public:
 			BList				*GetSelected(void){return selected;};
 			BList				*GetAllNodes(void){return allNodes;};
 			BList				*GetAllConnections(void){return allConnections;};
-			BList				*GetTrash(void){return trashed;};
+//			BList				*GetTrash(void){return trashed;};
 
 	//* Returns the DocumentSettings in a BMessage
 			BMessage*			DocumentSettings(void){return documentSetting;};
@@ -194,7 +195,7 @@ protected:
 			BList				*allNodes;
 			BList				*allConnections;
 			BList				*selected;
-			BList				*trashed;
+//			BList				*trashed;
 			
 			BList				*valueChanged;
 	

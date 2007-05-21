@@ -47,11 +47,10 @@ void WindowManager::Init()
 	windowRect.OffsetBy(-25,-25);
 }
 
-
-
 status_t WindowManager::Archive(BMessage *archive, bool deep = true) const
 {
 	TRACE();
+	BArchivable::Archive(archive, deep);
 	PWindow*	tmpWindow	= NULL;
 	BMessage*	tmpMessage	= new BMessage();
 	status_t	err			= B_OK;
@@ -90,7 +89,7 @@ void WindowManager::AddPWindow(PWindow* pWindow)
 				windowRect.OffsetBy(20,20);
 				pWindow->MoveTo(windowRect.LeftTop());
 				pWindow->ResizeTo(windowRect.Width(), windowRect.Height());
-				BMessage *docConfig			= document->DocumentSettings();
+//				BMessage *docConfig			= document->DocumentSettings();
 			}
 		}
 	}
@@ -108,6 +107,9 @@ void WindowManager::RemovePWindow(PWindow* pWindow)
 }
 void WindowManager::TitleWindows(int32 flag)
 {
+	switch (flag)
+	{
+	}
 	
 }
 
@@ -139,12 +141,14 @@ PWindow* WindowManager::GetPWindow(PEditor *editor)
 		return NULL;
 	
 }
-
+//** dont konw what this was planned for :)
+/*
 PWindow* WindowManager::GetPWindow(uint32 flag)
 {
 	TRACE();
+
 	return NULL;
-}
+}*/
 
 
 PWindow* WindowManager::GetActivePWindow(void)

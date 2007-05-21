@@ -2,17 +2,17 @@
 #include "ShortCutFilter.h"
 #include <support/ClassInfo.h>
 
-PEditorManager::PEditorManager(PDocument *initDoc)
+PEditorManager::PEditorManager(PDocument *initDoc): BArchivable()
 {
 	TRACE();
 	doc = initDoc;
 	Init();
 }
 
-PEditorManager::PEditorManager(BMessage *archive)
+PEditorManager::PEditorManager(BMessage *archive): BArchivable(archive)
 {
 	TRACE();
-	Init();
+	Init(archive);
 }
 void PEditorManager::Init(void)
 {
@@ -21,6 +21,59 @@ void PEditorManager::Init(void)
 	editorMessenger	= new BList();
 	activeEditor	= new BList();
 }
+void PEditorManager::Init(BMessage *archive)
+{
+	TRACE();
+	BMessage	*editorArchive	= new BMessage();
+	PEditor		*newEditor		= NULL;
+	int32		i				= 0;
+	int32		actEditor		= 0;
+	Init();
+	while (archive->FindMessage("PEditorManager::editors", i, editorArchive) == B_OK)
+	{
+		BArchivable *base = instantiate_object(archive);
+		if ( base )
+		{
+			newEditor = cast_as(base, PEditor); 
+			if (newEditor)
+				RegisterPEditor(newEditor);
+		}
+		i++;
+	}
+	while (archive->FindInt32("PEditorManager::activeEditor", i, &actEditor) == B_OK)
+	{
+		activeEditor->AddItem(editors->ItemAt(actEditor));
+	}
+}
+
+status_t PEditorManager::Archive(BMessage *archive, bool deep) const
+{
+	TRACE();
+	BMessage	*editorArchive	= new BMessage();
+	int32		i				= 0;
+	status_t	err				= B_OK;
+	BArchivable::Archive(archive, deep);
+	archive->AddString("class", "PEditorManager"); 
+	for (i = 0; i < editors->CountItems(); i++ )
+	{
+		if ( ((PEditor *)editors->ItemAt(i))->Archive(editorArchive, deep) == B_OK )
+			err = err | archive->AddMessage("PEditorManager::editors", editorArchive);
+	}
+	for (i = 0; i < activeEditor->CountItems(); i++ )
+	{
+		err = err | archive->AddInt32("PEditorManager::activeEditor", editors->IndexOf(activeEditor->ItemAt(i)));
+	}
+	return err;
+}
+
+BArchivable *PEditorManager::Instantiate(BMessage *archive)
+{
+	if ( validate_instantiation(archive, "PEditorManager"))
+		return new PEditorManager(archive);
+	else
+		return NULL;
+} 
+
 
 void PEditorManager::BroadCast(BMessage *message)
 {

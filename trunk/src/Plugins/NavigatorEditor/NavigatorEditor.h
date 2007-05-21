@@ -33,9 +33,15 @@ public:
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
 
+	virtual void			PreprocessBeforSave(BMessage *container);
+	virtual void			PreprocessAfterLoad(BMessage *container);
+
 	virtual	BView*			GetView(void){return this;};
 	virtual BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
+
+	virtual	BMessage*		GetConfiguration(void){return configMessage;};
+	virtual	void			SetConfiguration(BMessage *message){delete configMessage;configMessage=message;};
 
 	virtual	void			ValueChanged(void);
 
@@ -68,6 +74,8 @@ protected:
 
 			int32			id;
 			char*			renderString;
+
+			BMessage		*configMessage;
 			
 			BMessenger		*sentTo;
 
