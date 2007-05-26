@@ -30,8 +30,6 @@ void ClassRenderer::Init()
 	startMouseDown				= NULL;
 	oldPt						= NULL;
 	doc							= NULL;
-	outgoing					= NULL;
-	incoming					= NULL;
 	parentNode					= NULL;
 
 	xRadius						= 10;

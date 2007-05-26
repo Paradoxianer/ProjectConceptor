@@ -1140,27 +1140,102 @@ bool GraphEditor::ProceedRegion(void *arg,void *region)
 	return false;
 }
 
-void GraphEditor::DeleteFromList(Renderer *wichRenderer)
+void GraphEditor::DeleteFromList(Renderer *whichRenderer)
 {
-	renderer->RemoveItem(wichRenderer);
-	if (wichRenderer->GetMessage()->what == P_C_GROUP_TYPE)
+	BList		*connectionList	= NULL;
+	int32		i				= 0;
+	BMessage	*tmpNode		= NULL;
+	renderer->RemoveItem(whichRenderer);
+	//remove all Connections wich belongs to this node.. so that also the connections  are able to come the from
+	if (whichRenderer->GetMessage()->FindPointer("Incoming",(void **)&connectionList) == B_OK)
+	{
+		for (i = 0; i< connectionList->CountItems();i++)
+		{
+			tmpNode = (BMessage *)connectionList->ItemAt(i);
+			renderer->RemoveItem(FindRenderer(tmpNode));
+		}
+	}
+	if (whichRenderer->GetMessage()->FindPointer("Outgoing",(void **)&connectionList) == B_OK)
+	{
+		for (i = 0; i< connectionList->CountItems();i++)
+		{
+			tmpNode = (BMessage *)connectionList->ItemAt(i);
+			renderer->RemoveItem(FindRenderer(tmpNode));
+		}
+	}
+	if (whichRenderer->GetMessage()->what == P_C_GROUP_TYPE)
 	{
 		//should we dynamic cast this??
-		GroupRenderer	*groupPainter	= (GroupRenderer *)wichRenderer;
+		GroupRenderer	*groupPainter	= (GroupRenderer *)whichRenderer;
 		for (int32 i = 0; i<groupPainter->RenderList()->CountItems();i++)
 			DeleteFromList((Renderer *)groupPainter->RenderList()->ItemAt(i));
 	}
 }
-void GraphEditor::AddToList(Renderer *wichRenderer, int32 pos)
+void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos)
 {
+	BList		*connectionList	= NULL;
+	int32		i				= 0;
+	BMessage	*tmpNode		= NULL;
 	if (pos>renderer->CountItems())
-		renderer->AddItem(wichRenderer);	
+	{
+		renderer->AddItem(whichRenderer);
+		if (whichRenderer->GetMessage()->FindPointer("Incoming",(void **)&connectionList) == B_OK)
+		{
+			for (i = 0; i< connectionList->CountItems();i++)
+			{
+				tmpNode = (BMessage *)connectionList->ItemAt(i);
+				if (FindRenderer(tmpNode))
+				{
+					renderer->AddItem(FindRenderer(tmpNode));
+					pos++;
+				}
+			}
+		}
+		if (whichRenderer->GetMessage()->FindPointer("Outgoing",(void **)&connectionList) == B_OK)
+		{
+			for (i = 0; i< connectionList->CountItems();i++)
+			{
+				tmpNode = (BMessage *)connectionList->ItemAt(i);
+				if (FindRenderer(tmpNode))
+				{
+					renderer->AddItem(FindRenderer(tmpNode));
+					pos++;
+				}
+			}
+		}
+	}
 	else
-		renderer->AddItem(wichRenderer,pos);
-	if (wichRenderer->GetMessage()->what == P_C_GROUP_TYPE)
+	{
+		renderer->AddItem(whichRenderer,pos);
+		if (whichRenderer->GetMessage()->FindPointer("Incoming",(void **)&connectionList) == B_OK)
+		{
+			for (i = 0; i< connectionList->CountItems();i++)
+			{
+				tmpNode = (BMessage *)connectionList->ItemAt(i);
+				if (FindRenderer(tmpNode))
+				{
+					renderer->AddItem(FindRenderer(tmpNode),pos);
+					pos++;
+				}
+			}
+		}
+		if (whichRenderer->GetMessage()->FindPointer("Outgoing",(void **)&connectionList) == B_OK)
+		{
+			for (i = 0; i< connectionList->CountItems();i++)
+			{
+				tmpNode = (BMessage *)connectionList->ItemAt(i);
+				if (FindRenderer(tmpNode))
+				{
+					renderer->AddItem(FindRenderer(tmpNode),pos);
+					pos++;
+				}
+			}
+		}		
+	}
+	if (whichRenderer->GetMessage()->what == P_C_GROUP_TYPE)
 	{
 		//should we dynamic cast this??
-		GroupRenderer	*groupPainter	= (GroupRenderer *)wichRenderer;
+		GroupRenderer	*groupPainter	= (GroupRenderer *)whichRenderer;
 		for (int32 i = 0; i<groupPainter->RenderList()->CountItems();i++)
 				AddToList((Renderer *)groupPainter->RenderList()->ItemAt(i),pos+1);
 	}

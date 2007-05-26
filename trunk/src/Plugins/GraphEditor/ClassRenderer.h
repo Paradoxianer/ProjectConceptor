@@ -79,8 +79,6 @@ protected:
 		PDocument			*doc;
 		BMessenger			*sentTo;
 
-		BList				*outgoing;
-		BList				*incoming;
 		StringRenderer		*name;
 		vector<Renderer*>	*attributes;
 
