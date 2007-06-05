@@ -20,7 +20,7 @@ void Move::Undo(PDocument *doc,BMessage *undo)
 	{
 		if (undoMessage->FindRect("oldFrame",i,oldFrame) == B_OK)
 		{
-			node->ReplaceRect("Frame",*oldFrame);
+			node->ReplaceRect("Node::frame",*oldFrame);
 			changed->AddItem(node);
 		}
 		i++;
@@ -31,35 +31,18 @@ void Move::Undo(PDocument *doc,BMessage *undo)
 BMessage* Move::Do(PDocument *doc, BMessage *settings)
 {
 	
-	BMessage		*undoMessage		= new BMessage();
-	BList			*selected			= doc->GetSelected();
-	BList			*changed			= doc->GetChangedNodes();
-
-	float			dx,dy;
-	BRect			*newFrame			= new BRect(0,0,100,100);
-	BRect			*oldFrame			= new BRect(0,0,100,100);
-	BMessage		*node				= new BMessage();
+	BMessage	*undoMessage	= new BMessage();
+	BList		*selected		= doc->GetSelected();
+	BList		*changed		= doc->GetChangedNodes();
+	float		dx,dy;
+	BMessage	*node			= new BMessage();
 	int32			i					= 0;
 	if ( (settings->FindFloat("dx",&dx)==B_OK) && (settings->FindFloat("dy",&dy)==B_OK) )
 	{
 		for (i=0;i<selected->CountItems();i++)
 		{
 			node=(BMessage *)selected->ItemAt(i);
-			node->FindRect("Frame",oldFrame);
-			undoMessage->AddRect("oldFrame",*oldFrame);
-			*newFrame=*oldFrame;
-			newFrame->OffsetBy(dx,dy);
-			node->ReplaceRect("Frame",*newFrame);
-			undoMessage->AddPointer("node",node);
-			changed->AddItem(node);
-			BRect	docRect			= doc->Bounds();
-			if (newFrame->bottom >= docRect.Height())
-				docRect.bottom= newFrame->bottom+20;
-			if (newFrame->right >= docRect.Width())
-				docRect.right = newFrame->right+20;
-			if (docRect != doc->Bounds())
-				doc->Resize(docRect.right,docRect.bottom);
-			
+			MoveNode(doc, changed,node, dx, dy, undoMessage);
 		}
 	}
 	doc->SetModified();
@@ -79,3 +62,36 @@ void Move::DetachedFromManager(void)
 {
 }
 
+void Move::MoveNode(PDocument *doc, BList *changed, BMessage *node, float dx, float dy, BMessage *undoMessage)
+{
+	BList	*allNodes	= NULL;
+	int32	i			= 0;
+	BRect	*newFrame	= new BRect(0,0,-1,-1);
+	BRect	*oldFrame	= new BRect(0,0,-1,-1);
+	node->FindRect("Node::frame",oldFrame);
+	undoMessage->AddRect("oldFrame",*oldFrame);
+	*newFrame=*oldFrame;
+	newFrame->OffsetBy(dx,dy);
+	node->ReplaceRect("Node::frame",*newFrame);
+	undoMessage->AddPointer("node",node);
+	changed->AddItem(node);
+	BRect	docRect			= doc->Bounds();
+	if (newFrame->bottom >= docRect.Height())
+		docRect.bottom= newFrame->bottom+20;
+	if (newFrame->right >= docRect.Width())
+		docRect.right = newFrame->right+20;
+	if (docRect != doc->Bounds())
+		doc->Resize(docRect.right,docRect.bottom);
+	if ( (node->FindPointer("Node::allNodes",(void **)&allNodes)==B_OK) && (allNodes) )
+	{
+		for (i=0;i<allNodes->CountItems();i++)
+		{
+			MoveNode(doc,changed,(BMessage *)allNodes->ItemAt(i), dx, dy,undoMessage);
+		}
+	}
+}
+
+void Move::ResizeParent(PDocument *doc, BList *changed, BMessage *node, float dx, float dy,BMessage *undoMessage)
+{
+
+}

@@ -39,7 +39,7 @@ void NavigatorEditor::Init(void)
 	dataMessage->AddString("Name","Untitled");
 	//preparing the standart ObjectMessage
 	nodeMessage	= new BMessage(P_C_CLASS_TYPE);
-	nodeMessage->AddMessage("Data",dataMessage);
+	nodeMessage->AddMessage("Node::Data",dataMessage);
 	//Preparing the standart FontMessage
 	fontMessage		= new BMessage();
 	fontMessage->AddInt8("Encoding",be_plain_font->Encoding());
@@ -69,7 +69,7 @@ void NavigatorEditor::Init(void)
 	patternMessage->AddRGBColor("HighColor",highColor);
 	rgb_color 	lowColor			= {128, 128, 128, 255};
 	patternMessage->AddRGBColor("LowColor",lowColor);
-	patternMessage->AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));*/
+	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));*/
 }
 
 void NavigatorEditor::InitGraph()
@@ -114,10 +114,10 @@ void NavigatorEditor::PreprocessBeforSave(BMessage *container)
 	while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
 	{
 		if ((strstr(name,"GraphEditor") != NULL) ||
-			(strcasecmp(name,"Outgoing") == B_OK) ||
-			(strcasecmp(name,"Incoming") == B_OK) ||
+			(strcasecmp(name,"Node::outgoing") == B_OK) ||
+			(strcasecmp(name,"Node::incoming") == B_OK) ||
 			(strcasecmp(name,"Parent") == B_OK)  ||
-			(strcasecmp(name,"doc") == B_OK) )
+			(strcasecmp(name,"ProjectConceptor::doc") == B_OK) )
 		{
 			container->RemoveName(name);
 			i--;

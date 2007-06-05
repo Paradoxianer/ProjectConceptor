@@ -14,14 +14,14 @@ void Find::Undo(PDocument *doc,BMessage *undo)
 	for (i=0;i<selected->CountItems();i++)
 	{
 		currentContainer	= (BMessage *)selected->ItemAt(i);
-		currentContainer->ReplaceBool("selected",0,false);
+		currentContainer->ReplaceBool("Node::selected",0,false);
 	}
 	i = 0;
 	while (	undo->FindPointer("node",i,(void **)&currentContainer) == B_OK)
 	{
 		i++;
 		if (currentContainer)
-			currentContainer->ReplaceBool("selected",0,true);	
+			currentContainer->ReplaceBool("Node::selected",0,true);	
 	}
 }
 
@@ -46,7 +46,7 @@ BMessage* Find::Do(PDocument *doc, BMessage *settings)
 			{
 				changed->AddItem(node);
 				commandMessage->AddPointer("node",node);
-				node->ReplaceBool("selected",0,false);
+				node->ReplaceBool("Node::selected",0,false);
 			}
 		}
 	}
@@ -91,10 +91,10 @@ void Find::DoFind(PDocument *doc,BRect *rect)
 	for (i=0;i<all->CountItems();i++)
 	{
 		currentContainer =(BMessage *) all->ItemAt(i);
-		currentContainer->FindRect("Frame",0,frame);
+		currentContainer->FindRect("Node::frame",0,frame);
 		if (rect->Contains(*frame))
 		{
-			currentContainer->ReplaceBool("selected",0,true);
+			currentContainer->ReplaceBool("Node::selected",0,true);
 			selected->AddItem(currentContainer);
 			changed->AddItem(currentContainer);			
 		}
@@ -108,11 +108,11 @@ void Find::DoFind(PDocument *doc,BMessage *container)
 	BList			*changed			= doc->GetChangedNodes();
 	bool			selectTester		= false;
 	status_t		err					= B_OK;
-	err= container->FindBool("selected",&selectTester);
+	err= container->FindBool("Node::selected",&selectTester);
 	if (err == B_OK)
-		err = container->ReplaceBool("selected",0,true);
+		err = container->ReplaceBool("Node::selected",0,true);
 	else
-		err = container->AddBool("selected",true);
+		err = container->AddBool("Node::selected",true);
 	selected->AddItem(container);
 	changed->AddItem(container);
 	//container->(new BoolContainer(true));
@@ -129,7 +129,7 @@ void Find::DoFindAll(PDocument *doc)
 	for (i=0;i<all->CountItems();i++)
 	{
 		currentContainer =(BMessage *) all->ItemAt(i);
-		currentContainer->ReplaceBool("selected",0,false);
+		currentContainer->ReplaceBool("Node::selected",0,false);
 		selected->AddItem(currentContainer);
 		changed->AddItem(currentContainer);
 	}

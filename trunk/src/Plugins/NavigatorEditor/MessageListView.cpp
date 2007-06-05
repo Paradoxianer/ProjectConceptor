@@ -146,7 +146,7 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 			}
 			case B_POINTER_TYPE:
 			{
-				if (strcmp(name,"Outgoing") == B_OK)
+				if (strcmp(name,"Node::outgoing") == B_OK)
 				{
 					BList		*list		= NULL;
 					BStringItem	*masterItem	= new BStringItem(name);
@@ -161,7 +161,7 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 					for (int32 i=0;i<list->CountItems();i++)
 					{	
 						connection	= (BMessage*)list->ItemAt(i);
-						connection->FindPointer("To",(void **)&toNode);
+						connection->FindPointer("Node::to",(void **)&toNode);
 						AddUnder(new NodeItem(toNode),masterItem);
 					}
 				}

@@ -22,28 +22,28 @@ void ConnectionRenderer::Init()
 	BList		*outgoing	= NULL;
 	BList		*incoming	= NULL;
 	BMessage	*data		= new BMessage();
-	container->FindPointer("From",(void **)&from);
-	container->FindPointer("To",(void **)&to);
+	container->FindPointer("Node::from",(void **)&from);
+	container->FindPointer("Node::to",(void **)&to);
 	PRINT_OBJECT(*from);
 	PRINT_OBJECT(*to);
-	if (from->FindPointer("Outgoing",(void **)&outgoing) != B_OK)
+	if (from->FindPointer("Node::outgoing",(void **)&outgoing) != B_OK)
 	{
 		outgoing = new BList();
-		from->AddPointer("Outgoing",outgoing);
+		from->AddPointer("Node::outgoing",outgoing);
 	}
 	outgoing->AddItem(container);
-	if (to->FindPointer("Incoming",(void **)&incoming) != B_OK)
+	if (to->FindPointer("Node::incoming",(void **)&incoming) != B_OK)
 	{
 		incoming = new BList();
-		to->AddPointer("Incoming",incoming);
+		to->AddPointer("Node::incoming",incoming);
 	}
 	incoming->AddItem(container);
-	if (container->FindMessage("Data",data) != B_OK)
+	if (container->FindMessage("Node::Data",data) != B_OK)
 	{
 		data->AddString("Name","Unbenannt");
-		container->AddMessage("Data",data);
+		container->AddMessage("Node::Data",data);
 	}
-	container->FindPointer("doc",(void **)&doc);
+	container->FindPointer("ProjectConceptor::doc",(void **)&doc);
 	sentTo						= new BMessenger(NULL,doc);
 //	PCommandManager	*commandManager	= doc->GetCommandManager();
 //	selectCommand	= commandManager->GetPCommand("Select");
@@ -110,9 +110,9 @@ void ConnectionRenderer::MessageReceived(BMessage *message)
 		case B_C_NAME_CHANGED:
 		{
 			BMessage	*data= new BMessage();
-			container->FindMessage("Data",data);
+			container->FindMessage("Node::Data",data);
 //			data->ReplaceString("Name",connectionName->Text());
-			container->ReplaceMessage("Data",data);
+			container->ReplaceMessage("Node::Data",data);
 			break;
 		}
 	}
@@ -122,8 +122,8 @@ void ConnectionRenderer::ValueChanged()
 {
 	BRect	*fromRect	= new BRect(0,0,0,0);
 	BRect	*toRect		= new BRect(0,0,0,0);
-	from->FindRect("Frame",fromRect);
-	to->FindRect("Frame",toRect);
+	from->FindRect("Node::frame",fromRect);
+	to->FindRect("Node::frame",toRect);
 	fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->Height()/2));
 	toPoint		=  BPoint(toRect->left,toRect->top+(toRect->Height()/2));
 /*	float		toMiddleX 	=	(toRect->right-toRect->left)/2;
@@ -168,7 +168,7 @@ void ConnectionRenderer::ValueChanged()
 	ay			= (toPoint.x-fromPoint.x)/(toPoint.y-fromPoint.y);
 	my			= fromPoint.x-(fromPoint.y*ay);*/
 
-	container->FindBool("selected",&selected);
+	container->FindBool("Node::selected",&selected);
 }
 
 BRect ConnectionRenderer::Frame()

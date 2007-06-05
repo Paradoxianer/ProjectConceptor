@@ -12,7 +12,7 @@ void Insert::Undo(PDocument *doc,BMessage *undo)
 	BList			*parentAllNodes		= NULL;
 	BList			*allConnectinos		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();
-	BList			*trash				= doc->GetTrash();
+//	BList			*trash				= doc->GetTrash();
 	BList			*changed			= doc->GetChangedNodes();
 	BMessage		*node				= new BMessage();
 	BMessage		*connection			= new BMessage();
@@ -20,7 +20,7 @@ void Insert::Undo(PDocument *doc,BMessage *undo)
 	PCommand::Undo(doc,undo);
 	undo->FindPointer("parentNode", (void **)&parentNode);
 	if (parentNode)
-		parentNode->FindPointer("allNodes", (void **)&parentAllNodes);
+		parentNode->FindPointer("Node::allNodes", (void **)&parentAllNodes);
 	while (undo->FindPointer("node",i,(void **)&node) == B_OK)
 	{
 		if (node->what != P_C_CONNECTION_TYPE)
@@ -31,7 +31,7 @@ void Insert::Undo(PDocument *doc,BMessage *undo)
 		}
 		else
 			allConnectinos->RemoveItem(node);
-		trash->AddItem(node);
+//		trash->AddItem(node);
 		changed->AddItem(node);
 		i++;
 	}
@@ -52,8 +52,8 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings)
 	settings->FindPointer("parentNode", (void **)&parentNode);
 	if (parentNode)
 	{
-		if (parentNode->FindPointer("allNodes", (void **)&parentAllNodes) != B_OK)
-			parentNode->AddPointer("allNodes", new BList());
+		if (parentNode->FindPointer("Node::allNodes", (void **)&parentAllNodes) != B_OK)
+			parentNode->AddPointer("Node::allNodes", new BList());
 	}
 	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
 	{
@@ -68,7 +68,7 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings)
 		//recalc size
 		//**check if there is a passed "docRect"
 		BRect	insertFrame		= BRect(0,0,0,0);
-		if (node->FindRect("Frame",&insertFrame))
+		if (node->FindRect("Node::frame",&insertFrame))
 		{
 			BRect	docRect			= doc->Bounds();
 			if (insertFrame.bottom >= docRect.Height())

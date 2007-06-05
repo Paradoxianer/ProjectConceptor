@@ -559,14 +559,14 @@ void PDocument::Load(void)
 	for (i = 0; i<allNodes->CountItems(); i++)
 	{
 		node=((BMessage*)allNodes->ItemAt(i));
-		node->AddPointer("doc",this);
+		node->AddPointer("ProjectConceptor::doc",this);
 		valueChanged->AddItem(node);
 	}
 	allConnections	= docLoader->GetAllConnections();
 	for (i = 0; i<allConnections->CountItems(); i++)
 	{
 		node= (BMessage *)allConnections->ItemAt(i);
-		node->AddPointer("doc",this);
+		node->AddPointer("ProjectConceptor::doc",this);
 		valueChanged->AddItem(node);
 	}
 	selected = docLoader->GetSelectedNodes();
@@ -631,7 +631,7 @@ BMessage* PDocument::FindObject(BPoint *where)
 	for (int32 i=0;( (i<allNodes->CountItems())&&(!found) );i++)
 	{
 		node=(BMessage *)allNodes->ItemAt(i);
-		node->FindRect("Frame",frame);
+		node->FindRect("Node::frame",frame);
 		if (frame->Contains(*where))
 			found=true;
 	}

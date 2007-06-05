@@ -26,7 +26,7 @@ void AddAttribute::Undo(PDocument *doc,BMessage *undo)
 		i++;
 
 	}
-	if ( (undo->FindBool("selected",&selected) == B_OK) && (selected==true) )
+	if ( (undo->FindBool("Node::selected",&selected) == B_OK) && (selected==true) )
 	{
 		undoMessage->FindMessage("selectedNodes",selectNodes);
 		err 		= B_OK;
@@ -60,7 +60,7 @@ BMessage* AddAttribute::Do(PDocument *doc, BMessage *settings)
 			DoAddAttribute(doc,node,valueContainer);
 		i++;
 	}
-	if ( (settings->FindBool("selected",&selected) == B_OK) && (selected==true) )
+	if ( (settings->FindBool("Node::selected",&selected) == B_OK) && (selected==true) )
 	{
 		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK)
 		{

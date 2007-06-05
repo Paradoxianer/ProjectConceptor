@@ -195,10 +195,10 @@ status_t Converter::WriteConnection(BMessage *connection)
 	bool		closeNode		= false;
 	connection->FindPointer("this",&selfPointer);
 	doneConnection->AddItem(selfPointer);
-	connection->FindPointer("From" ,(void **)&fromNode);
+	connection->FindPointer("Node::to" ,(void **)&fromNode);
 	if (!doneNode->HasItem(fromNode))
 	{
-		fromNode->FindMessage("Data",data);
+		fromNode->FindMessage("Node::Data",data);
 		data->FindString("Name",(const char **)&text);
 		sprintf(line,"<node ID=\"%ld\" TEXT=\"%s\">\n",fromNode,text);
 		doneNode->AddItem(fromNode);
@@ -206,7 +206,7 @@ status_t Converter::WriteConnection(BMessage *connection)
 		FindConnections(fromNode);
 		closeNode;
 	}
-	connection->FindPointer("To" ,(void **)&toNode);
+	connection->FindPointer("Node::to" ,(void **)&toNode);
 	if (doneNode->HasItem(toNode))
 	{
 		sprintf(line,"<arrowlink DESTINATION=\"%ld\"/>\n",toNode,text);
@@ -214,7 +214,7 @@ status_t Converter::WriteConnection(BMessage *connection)
 	}
 	else
 	{
-		toNode->FindMessage("Data",data);
+		toNode->FindMessage("Node::Data",data);
 		data->FindString("Name",(const char **)&text);
 		sprintf(line,"<node ID=\"%ld\" TEXT=\"%s\">\n",toNode,text);
 		doneNode->AddItem(toNode);
@@ -244,8 +244,8 @@ status_t Converter::FindConnections(BMessage *node)
 		connection->FindPointer("this",&selfPointer);
 		if (!doneConnection->HasItem(selfPointer))
 		{
-			connection->FindPointer("From",(void **)&from);
-			connection->FindPointer("To",(void **)&to);
+			connection->FindPointer("Node::from",(void **)&from);
+			connection->FindPointer("Node::to",(void **)&to);
 			if (from == node)
 				WriteConnection(connection);
 			else if (to == node)

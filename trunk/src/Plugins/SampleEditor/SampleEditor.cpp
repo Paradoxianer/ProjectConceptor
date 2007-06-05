@@ -48,7 +48,7 @@ void SampleEditor::Init(void)
 	dataMessage->AddString("Name","Untitled");
 	//preparing the standart ObjectMessage
 	nodeMessage	= new BMessage(P_C_CLASS_TYPE);
-	nodeMessage->AddMessage("Data",dataMessage);
+	nodeMessage->AddMessage("Node::Data",dataMessage);
 	//Preparing the standart FontMessage
 	fontMessage		= new BMessage(B_FONT_TYPE);
 	fontMessage->AddInt8("Encoding",be_plain_font->Encoding());
@@ -78,7 +78,7 @@ void SampleEditor::Init(void)
 	patternMessage->AddRGBColor("HighColor",highColor);
 	rgb_color 	lowColor			= {128, 128, 128, 255};
 	patternMessage->AddRGBColor("LowColor",lowColor);
-	patternMessage->AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
+	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
 	
 	scaleMenu		= new BMenu(_T("Scale"));
 	BMessage	*newScale	= new BMessage(B_E_NEW_SCALE);
@@ -122,7 +122,7 @@ void SampleEditor::AttachedToManager(void)
 	id					= manager->IndexOf(this);
 	sprintf(renderString,"SampleEditor%ld::Renderer",id);
 	//put this in a seperate function??
-	nodeMessage->AddPointer("doc",doc);
+	nodeMessage->AddPointer("ProjectConceptor::doc",doc);
 	
 	BMessage	*shortcuts	= new BMessage();
 	BMessage	*sendMessage;
@@ -159,9 +159,9 @@ void SampleEditor::PreprocessBeforSave(BMessage *container)
 	while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
 	{
 		if ((strstr(name,"SampleEditor") != NULL) || 
-			(strcasecmp(name,"Outgoing") == B_OK) ||
-			(strcasecmp(name,"Incoming") == B_OK) ||
-			(strcasecmp(name,"doc") == B_OK) )
+			(strcasecmp(name,"Node::outgoing") == B_OK) ||
+			(strcasecmp(name,"Node::incoming") == B_OK) ||
+			(strcasecmp(name,"ProjectConceptor::doc") == B_OK) )
 		{
 			container->RemoveName(name);
 			i--;
@@ -465,8 +465,8 @@ void SampleEditor::MessageReceived(BMessage *message)
 		case B_E_CONNECTING:
 		{
 				connecting = true;
-				message->FindPoint("To",toPoint);
-				message->FindPoint("From",fromPoint);
+				message->FindPoint("Node::to",toPoint);
+				message->FindPoint("Node::from",fromPoint);
 				Invalidate();
 			break;
 		}
@@ -484,9 +484,9 @@ void SampleEditor::MessageReceived(BMessage *message)
 			BPoint		*toPointer		= new BPoint(-10,-10);
 			BPoint		*fromPointer	= new BPoint(-10,-10);
 			Renderer	*foundRenderer	= NULL;
-			if (message->FindPointer("From",(void **)&from) == B_OK)
+			if (message->FindPointer("Node::from",(void **)&from) == B_OK)
 			{
-				message->FindPoint("To",toPointer);
+				message->FindPoint("Node::to",toPointer);
 				foundRenderer = FindNodeRenderer(*toPointer);
 				if (foundRenderer)
 					to = foundRenderer->GetMessage();
@@ -494,8 +494,8 @@ void SampleEditor::MessageReceived(BMessage *message)
 			}
 			else
 			{
-				message->FindPointer("To",(void **)&to);
-				message->FindPoint("From",fromPointer);
+				message->FindPointer("Node::to",(void **)&to);
+				message->FindPoint("Node::from",fromPointer);
 				foundRenderer = FindNodeRenderer(*fromPointer);
 				if (foundRenderer)
 					from  = foundRenderer->GetMessage();
@@ -504,10 +504,10 @@ void SampleEditor::MessageReceived(BMessage *message)
 			data->AddString("Name","Unbenannt");
 			if (to != NULL && from!=NULL)
 			{
-				connection->AddPointer("From",from);
-				connection->AddPointer("To",to);
-				connection->AddMessage("Data",data);
-				connection->AddPointer("doc",doc);
+				connection->AddPointer("Node::from",from);
+				connection->AddPointer("Node::to",to);
+				connection->AddMessage("Node::Data",data);
+				connection->AddPointer("ProjectConceptor::doc",doc);
 				//** add the connections to the Nodes :-)
 				commandMessage->AddPointer("node",connection);
 				commandMessage->AddString("Command::Name","Insert");
@@ -531,9 +531,9 @@ void SampleEditor::MessageReceived(BMessage *message)
 		{
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changeColorMessage->AddString("Command::Name","ChangeValue");
-			changeColorMessage->AddBool("selected",true);
+			changeColorMessage->AddBool("Node::selected",true);
 			changeColorMessage->AddString("name","FillColor");
-			changeColorMessage->AddString("subgroup","Pattern");
+			changeColorMessage->AddString("subgroup","Node::Pattern");
 			changeColorMessage->AddInt32("type",B_RGB_COLOR_TYPE);
 			changeColorMessage->AddRGBColor("newValue",colorItem->GetColor()); 
 			sentTo->SendMessage(changeColorMessage);
@@ -570,9 +570,9 @@ void SampleEditor::InsertObject(BPoint where,bool deselect)
 	newPattern->ReplaceRGBColor("FillColor",colorItem->GetColor());
 	BMessage	*selectMessage	= new BMessage();
 
-		newObject->AddRect("Frame",BRect(where,where+BPoint(100,80)));
-	newObject->AddMessage("Font",newFont);
-	newObject->AddMessage("Pattern",newPattern);
+		newObject->AddRect("Node::frame",BRect(where,where+BPoint(100,80)));
+	newObject->AddMessage("Node::Font",newFont);
+	newObject->AddMessage("Node::Pattern",newPattern);
 	//preparing CommandMessage
 	commandMessage->AddPointer("node",(void *)newObject);
 	commandMessage->AddString("Command::Name","Insert");

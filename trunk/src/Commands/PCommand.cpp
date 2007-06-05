@@ -42,7 +42,7 @@ BMessage* PCommand::Do(PDocument *doc,BMessage *settings)
 		}
 		i++;
 	}
-	//settings->AddPointer("doc",doc);
+	//settings->AddPointer("ProjectConceptor::doc",doc);
 	return settings;
 }
 

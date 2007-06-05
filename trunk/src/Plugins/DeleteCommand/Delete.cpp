@@ -29,7 +29,7 @@ void Delete::Undo(PDocument *doc,BMessage *undo)
 			else
 				allConnections->AddItem(node);
 		}
-		(doc->GetTrash())->RemoveItem(node);
+		//(doc->GetTrash())->RemoveItem(node);
 		(doc->GetSelected())->AddItem(node);
 		i++;
 		if (!changed->HasItem(node))
@@ -60,11 +60,11 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings)
 		(doc->GetAllConnections())->RemoveItem(connection);
 	}
 	return commandMessage;*/
+	//**Todo
 	BMessage		*undoMessage		= new BMessage();
 	BList			*selected			= doc->GetSelected();
 	BList			*connections		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();
-	BList			*trash				= doc->GetTrash();
 	BList			*changed			= doc->GetChangedNodes();
 	BMessage		*node				= NULL;
 	BMessage		*connection			= NULL;
@@ -75,27 +75,26 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings)
 	{
 		allNodes->RemoveItem(node);
 		connections->RemoveItem(node);
-		trash->AddItem(node);
 		changed->AddItem(node);
 		undoMessage->AddPointer("node",node);
-		if (node->FindPointer("Outgoing",(void **)&outgoing) == B_OK)
+		if (node->FindPointer("Node::outgoing",(void **)&outgoing) == B_OK)
 		{
 			for (int32 i=0;i<outgoing->CountItems();i++)
 			{
 				connection= (BMessage *)outgoing->ItemAt(i);
 				connections->RemoveItem(connection);
-				trash->AddItem(connection);
+//				trash->AddItem(connection);
 				changed->AddItem(connection);
 				undoMessage->AddPointer("node",connection);
 			}
 		}
-		if (node->FindPointer("Incoming",(void **)&incoming) == B_OK)
+		if (node->FindPointer("Node::incoming",(void **)&incoming) == B_OK)
 		{
 			for (int32 i=0;i<incoming->CountItems();i++)
 			{
 				connection= (BMessage *)incoming->ItemAt(i);
 				connections->RemoveItem(connection);
-				trash->AddItem(connection);
+//				trash->AddItem(connection);
 				changed->AddItem(connection);
 				undoMessage->AddPointer("node",connection);
 			}

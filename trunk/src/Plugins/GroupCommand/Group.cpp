@@ -18,7 +18,7 @@ void Group::Undo(PDocument *doc,BMessage *undo)
 	if ( (undo->FindPointer("node",i,(void **)&node) == B_OK) && (node) )
 	{
 		allNodes->RemoveItem(node);
-		if ( (node->FindPointer("allNodes",(void **)&subList) == B_OK) && (subList) )
+		if ( (node->FindPointer("Node::allNodes",(void **)&subList) == B_OK) && (subList) )
 		{
 			while (subList->CountItems()>0)
 			{
@@ -83,8 +83,8 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings)
 			if (!allNodes->HasItem(node))
 				allNodes->AddItem(node);
 			//try to find the Lists for the Nodes where the grouped Node should go in
-			if (node->FindPointer("allNodes",(void **)&gAllNodes) != B_OK)
-				node->AddPointer("allNodes", gAllNodes = new BList());
+			if (node->FindPointer("Node::allNodes",(void **)&gAllNodes) != B_OK)
+				node->AddPointer("Node::allNodes", gAllNodes = new BList());
 			//all selectetd 
 			for (i=0;i<selected->CountItems();i++)
 			{
@@ -95,7 +95,7 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings)
 					if (groupedNode->FindPointer("parentNode",(void **)&oldParentNode) == B_OK)
 					{
 					/*	BList	*oldAllNodesList	= NULL;
-						oldParentNode->FindPointer("allNodes",(void **) &oldAllNodesList);
+						oldParentNode->FindPointer("Node::allNodes",(void **) &oldAllNodesList);
 						if (oldAllNodesList)
 							oldAllNodesList->RemoveItem(groupedNode);
 						undoMessage->AddPointer("changeNode",groupedNode);
@@ -109,10 +109,10 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings)
 					
 					//calculate the groupFrame
 					if (!groupFrame.IsValid())
-						groupedNode->FindRect("Frame",&groupFrame);
+						groupedNode->FindRect("Node::frame",&groupFrame);
 					else
 					{
-						groupedNode->FindRect("Frame",&groupedNodeFrame);
+						groupedNode->FindRect("Node::frame",&groupedNodeFrame);
 							groupFrame = groupFrame | groupedNodeFrame;
 					}
 					//add this to the changed List
@@ -124,11 +124,11 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings)
 			{
 				groupFrame.InsetBy(-5,-5);
 				groupFrame.top = groupFrame.top-15;
-				node->ReplaceRect("Frame",groupFrame);
+				node->ReplaceRect("Node::frame",groupFrame);
 			}
 			else
 			{
-				node->FindRect("Frame",&groupFrame);
+				node->FindRect("Node::frame",&groupFrame);
 			}
 			if (groupFrame.IsValid())
 			{

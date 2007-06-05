@@ -38,7 +38,7 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 		returnNode = new BMessage(*node);
 		returnNode->AddPointer("this",node);
 			// we need to check for the allNodes List
-		if ((returnNode->FindPointer("allNodes",(void **)&allNodeList) == B_OK) && (allNodeList != NULL) )
+		if ((returnNode->FindPointer("Node::allNodes",(void **)&allNodeList) == B_OK) && (allNodeList != NULL) )
 		{
 			for (i=0; i<allNodeList->CountItems();i++)
 			{
@@ -85,18 +85,18 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 	BMessage *to			= NULL;
 	if (includeNodes)
 	{
-		returnNode->FindPointer("From",(void **)&from);
+		returnNode->FindPointer("Node::from",(void **)&from);
 		if (!included->HasItem(from))
 		{
-			returnNode->RemoveName("From");
-			returnNode->AddMessage("From",IndexNode(from));
+			returnNode->RemoveName("Node::from");
+			returnNode->AddMessage("Node::from",IndexNode(from));
 			included->AddItem(from);
 		}
-		returnNode->FindPointer("To",(void **)&to);
+		returnNode->FindPointer("Node::to",(void **)&to);
 		if (!included->HasItem(to))
 		{
-			returnNode->RemoveName("To");
-			returnNode->AddMessage("To",IndexNode(to));
+			returnNode->RemoveName("Node::to");
+			returnNode->AddMessage("Node::to",IndexNode(to));
 			included->AddItem(to);
 		}
 	}
@@ -193,8 +193,8 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 	int32		i					= 0;
 	void		*tmpPointer			= NULL;
 	i = 0;
-	if (node->FindPointer("allNodes",&tmpPointer) == B_OK)
-			node->RemoveName("allNodes");
+	if (node->FindPointer("Node::allNodes",&tmpPointer) == B_OK)
+			node->RemoveName("Node::allNodes");
 	while (node->FindMessage("allNodesList",i,subContainerEntry) == B_OK)
 	{
 		allNodesList->AddItem(DeIndexNode(subContainerEntry));
@@ -203,7 +203,7 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 	}
 	if (allNodesList->CountItems()>0)
 	{
-		node->AddPointer("allNodes",allNodesList);
+		node->AddPointer("Node::allNodes",allNodesList);
 		node->RemoveName("allNodesList");
 	}	
 	i = 0;
@@ -258,18 +258,18 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 		BMessage	*fromMessage		= new BMessage();
 		BMessage	*toMessage			= new BMessage();	
 		// need to check this for every Pointer individual 
-		if (connection->FindPointer("From",(void **)&fromPointer) != B_OK)
+		if (connection->FindPointer("Node::from",(void **)&fromPointer) != B_OK)
 		{
-			connection->FindMessage("From",fromMessage);
+			connection->FindMessage("Node::from",fromMessage);
 			fromPointer = DeIndexNode(fromMessage);
 		}
-		if (connection->FindPointer("To",(void **)&toPointer) != B_OK)
+		if (connection->FindPointer("Node::to",(void **)&toPointer) != B_OK)
 		{
-			connection->FindMessage("To",toMessage);
+			connection->FindMessage("Node::to",toMessage);
 			toPointer	= DeIndexNode(toMessage);
 		}
-		connection->RemoveName("From");
-		connection->RemoveName("To");
+		connection->RemoveName("Node::from");
+		connection->RemoveName("Node::to");
 		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 		BasePlugin	*plugin		= NULL;
 		PEditor		*editor		= NULL;
@@ -289,15 +289,15 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 //		if we cant find the right Pointer then add the old one
 		int32 indexFrom=sorter->IndexOf((int32)fromPointer);
 		if (indexFrom >= 0)
-			connection->AddPointer("From",sorter->ValueAt(indexFrom));
+			connection->AddPointer("Node::from",sorter->ValueAt(indexFrom));
 		else
-			connection->AddPointer("From",fromPointer);
+			connection->AddPointer("Node::from",fromPointer);
 //		if we cant find the right Pointer then add the old one			
 		int32 indexTo=sorter->IndexOf((int32)toPointer);
 		if (indexTo >= 0)
-			connection->AddPointer("To",sorter->ValueAt(indexTo));
+			connection->AddPointer("Node::to",sorter->ValueAt(indexTo));
 		else
-			connection->AddPointer("To",toPointer);
+			connection->AddPointer("Node::to",toPointer);
 	}
 	connection->FindPointer("this",(void **)&tmpPointer);
 	connection->RemoveName("this");

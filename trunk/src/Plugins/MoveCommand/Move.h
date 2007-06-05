@@ -1,5 +1,5 @@
-#ifndef DELETE_H
-#define DELETE_H
+#ifndef MOVE_H
+#define MOVE_H
 /*
  * @author Paradoxon powered by Jesus Christ
  */
@@ -18,6 +18,9 @@ public:
 	virtual	char*			Name(void){return "Move";};
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
+	
+			void			MoveNode(PDocument *doc, BList *changed, BMessage *node, float dx, float dy,BMessage *undoMessage);
+			void			ResizeParent(PDocument *doc, BList *changed, BMessage *node, float dx, float dy,BMessage *undoMessage);			
 
 protected:
 	//----------------PCommand

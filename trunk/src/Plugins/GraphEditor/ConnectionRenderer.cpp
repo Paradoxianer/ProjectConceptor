@@ -25,30 +25,30 @@ void ConnectionRenderer::Init()
 	BMessage	*fromNode	= NULL;
 	BMessage	*toNode		= NULL;
 	BMessage	*data		= new BMessage();
-	container->FindPointer("From",(void **)&fromNode);
-	container->FindPointer("To",(void **)&toNode);
+	container->FindPointer("Node::from",(void **)&fromNode);
+	container->FindPointer("Node::to",(void **)&toNode);
 	PRINT_OBJECT(*fromNode);
 	PRINT_OBJECT(*toNode);
-	if (fromNode->FindPointer("Outgoing",(void **)&outgoing) != B_OK)
+	if (fromNode->FindPointer("Node::outgoing",(void **)&outgoing) != B_OK)
 	{
 		outgoing = new BList();
-		fromNode->AddPointer("Outgoing",outgoing);
+		fromNode->AddPointer("Node::outgoing",outgoing);
 	}
 	if (!outgoing->HasItem(container))
 		outgoing->AddItem(container);
-	if (toNode->FindPointer("Incoming",(void **)&incoming) != B_OK)
+	if (toNode->FindPointer("Node::incoming",(void **)&incoming) != B_OK)
 	{
 		incoming = new BList();
-		toNode->AddPointer("Incoming",incoming);
+		toNode->AddPointer("Node::incoming",incoming);
 	}
 	if (!incoming->HasItem(container))
 		incoming->AddItem(container);
-	if (container->FindMessage("Data",data) != B_OK)
+	if (container->FindMessage("Node::Data",data) != B_OK)
 	{
 		data->AddString("Name","Unbenannt");
-		container->AddMessage("Data",data);
+		container->AddMessage("Node::Data",data);
 	}
-	container->FindPointer("doc",(void **)&doc);
+	container->FindPointer("ProjectConceptor::doc",(void **)&doc);
 	sentTo						= new BMessenger(NULL,doc);
 //	PCommandManager	*commandManager	= doc->GetCommandManager();
 //	selectCommand	= commandManager->GetPCommand("Select");
@@ -131,9 +131,9 @@ void ConnectionRenderer::MessageReceived(BMessage *message)
 		case B_C_NAME_CHANGED:
 		{
 			BMessage	*data= new BMessage();
-			container->FindMessage("Data",data);
+			container->FindMessage("Node::Data",data);
 //			data->ReplaceString("Name",connectionName->Text());
-			container->ReplaceMessage("Data",data);
+			container->ReplaceMessage("Node::Data",data);
 			break;
 		}
 	}
@@ -142,13 +142,13 @@ void ConnectionRenderer::MessageReceived(BMessage *message)
 void ConnectionRenderer::ValueChanged()
 {
 	BMessage	*tmpNode	= NULL;
-	container->FindPointer("From",(void **)&tmpNode);
+	container->FindPointer("Node::from",(void **)&tmpNode);
 	tmpNode->FindPointer(editor->RenderString(),(void **)&from);
 	tmpNode->PrintToStream();
-	container->FindPointer("To",(void **)&tmpNode);
+	container->FindPointer("Node::to",(void **)&tmpNode);
 	tmpNode->FindPointer(editor->RenderString(),(void **)&to);
 	tmpNode->PrintToStream();
-	container->FindBool("selected",&selected);
+	container->FindBool("Node::selected",&selected);
 }
 
 void ConnectionRenderer::CalcLine()

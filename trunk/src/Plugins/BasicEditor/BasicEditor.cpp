@@ -36,7 +36,7 @@ void BasicEditor::Init(void)
 	dataMessage->AddString("Name","Untitled");
 	//preparing the standart ObjectMessage
 	nodeMessage	= new BMessage(P_C_CLASS_TYPE);
-	nodeMessage->AddMessage("Data",dataMessage);
+	nodeMessage->AddMessage("Node::Data",dataMessage);
 	//Preparing the standart FontMessage
 	fontMessage		= new BMessage(B_FONT_TYPE);
 	fontMessage->AddInt8("Encoding",be_plain_font->Encoding());
@@ -66,7 +66,7 @@ void BasicEditor::Init(void)
 	patternMessage->AddRGBColor("HighColor",highColor);
 	rgb_color 	lowColor			= {128, 128, 128, 255};
 	patternMessage->AddRGBColor("LowColor",lowColor);
-	patternMessage->AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
+	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
 }
 
 void BasicEditor::AttachedToManager(void)
@@ -98,7 +98,7 @@ void BasicEditor::AttachedToManager(void)
 			InsertRenderObject(node);
 		}
 	}	
-	nodeMessage->AddPointer("doc",doc);
+	nodeMessage->AddPointer("ProjectConceptor::doc",doc);
 }
 
 void BasicEditor::DetachedFromManager(void)
@@ -117,9 +117,9 @@ void BasicEditor::PreprocessBeforSave(BMessage *container)
 	while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
 	{
 		if ((strstr(name,"BasicEditor") != NULL) ||
-			(strcasecmp(name,"Outgoing") == B_OK) ||
-			(strcasecmp(name,"Incoming") == B_OK) ||
-			(strcasecmp(name,"doc") == B_OK) )
+			(strcasecmp(name,"Node::outgoing") == B_OK) ||
+			(strcasecmp(name,"Node::incoming") == B_OK) ||
+			(strcasecmp(name,"ProjectConceptor::doc") == B_OK) )
 		{
 			container->RemoveName(name);
 			i--;
@@ -349,8 +349,8 @@ void BasicEditor::MessageReceived(BMessage *message)
 		case B_E_CONNECTING:
 		{
 				connecting = true;
-				message->FindPoint("To",toPoint);
-				message->FindPoint("From",fromPoint);
+				message->FindPoint("Node::to",toPoint);
+				message->FindPoint("Node::to",fromPoint);
 				Invalidate();
 			break;
 		}
@@ -366,16 +366,16 @@ void BasicEditor::MessageReceived(BMessage *message)
 			BMessage	*to			= NULL;
 			BMessage	*data		= new BMessage();
 			BPoint		*toPointer	= new BPoint(-10,-10);
-			message->FindPointer("From",(void **)&from);
-			message->FindPoint("To",toPointer);
+			message->FindPointer("Node::from",(void **)&from);
+			message->FindPoint("Node::to",toPointer);
 			data->AddString("Name","Unbenannt");
 			to = doc->FindObject(toPointer);
 			if (to != NULL && from!=NULL)
 			{
-				connection->AddPointer("From",from);
-				connection->AddPointer("To",to);
-				connection->AddMessage("Data",data);
-				connection->AddPointer("doc",doc);
+				connection->AddPointer("Node::from",from);
+				connection->AddPointer("Node::to",to);
+				connection->AddMessage("Node::Data",data);
+				connection->AddPointer("ProjectConceptor::doc",doc);
 				//** add the connections to the Nodes :-)
 				commandMessage->AddPointer("node",connection);
 				commandMessage->AddString("Command::Name","Insert");
@@ -398,9 +398,9 @@ void BasicEditor::InsertObject(BPoint where,bool deselect)
 	BMessage	*newFont		= new BMessage(*fontMessage);
 	BMessage	*newPattern		= new BMessage(*patternMessage);
 	BMessage	*selectMessage	= new BMessage();
-	newObject->AddRect("Frame",BRect(where,where+BPoint(100,80)));
-	newObject->AddMessage("Font",newFont);
-	newObject->AddMessage("Pattern",newPattern);
+	newObject->AddRect("Node::frame",BRect(where,where+BPoint(100,80)));
+	newObject->AddMessage("Node::Font",newFont);
+	newObject->AddMessage("Node::Pattern",newPattern);
 	//preparing CommandMessage
 	commandMessage->AddPointer("node",(void *)newObject);
 	commandMessage->AddString("Command::Name","Insert");

@@ -69,7 +69,7 @@ void NodeItem::SetExpanded(bool expande)
 void NodeItem::ValueChanged(void)
 {
 	BMessage	*data	= new BMessage();
-	if (node->FindMessage("Data",data) == B_OK)
+	if (node->FindMessage("Node::Data",data) == B_OK)
 	{
 		data->FindString("Name",(const char **)&label);
 	}

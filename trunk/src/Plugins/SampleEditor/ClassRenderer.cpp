@@ -41,12 +41,12 @@ void ClassRenderer::Init()
 	penSize						= 1.0;
 	connecting					= 0;
 	name						= new StringRenderer(editor,"",BRect(0,0,100,100));
-	err 						= container->FindPointer("doc",(void **)&doc);
+	err 						= container->FindPointer("ProjectConceptor::doc",(void **)&doc);
 	sentTo						= new BMessenger(NULL,doc);
-	if (container->FindFloat("xRadius",&xRadius) != B_OK)
-		container->AddFloat("xRadius",7.0);
-	if (container->FindFloat("yRadius",&yRadius) != B_OK)
-		container->AddFloat("yRadius",7.0);
+	if (container->FindFloat("Node::xRadius",&xRadius) != B_OK)
+		container->AddFloat("Node::xRadius",7.0);
+	if (container->FindFloat("Node::yRadius",&yRadius) != B_OK)
+		container->AddFloat("Node::yRadius",7.0);
 	PRINT_OBJECT(*container);
 }
 
@@ -134,8 +134,8 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 //			BMessage *connecter=new BMessage();
 /*			connecter->AddInt64("undoID",when);
 			connecter->AddString("undoName","Connect");*/
-			connecter->AddPoint("From",*startMouseDown);
-			connecter->AddPoint("To",pt);
+			connecter->AddPoint("Node::from",*startMouseDown);
+			connecter->AddPoint("Node::to",pt);
 			(new BMessenger((BView *)editor))->SendMessage(connecter);
 		}
 	}
@@ -178,13 +178,13 @@ void ClassRenderer::MouseUp(BPoint where)
 			BMessage *connecter=new BMessage(B_E_CONNECTED);
 			if (connecting == 2)
 			{
-				connecter->AddPointer("From",container);
-				connecter->AddPoint("To",where);
+				connecter->AddPointer("Node::from",container);
+				connecter->AddPoint("Node::to",where);
 			}
 			else
 			{
-				connecter->AddPoint("From",where);
-				connecter->AddPointer("To",container);
+				connecter->AddPoint("Node::from",where);
+				connecter->AddPointer("Node::to",container);
 			}
 			(new BMessenger((BView *)editor))->SendMessage(connecter);
 		}
@@ -249,13 +249,13 @@ void ClassRenderer::ValueChanged()
 	BMessage	*data			= new BMessage();
 	char		*newName;
 
-	container->FindRect("Frame",&frame);
-	container->FindBool("selected",&selected);
-	container->FindFloat("xRadius",&xRadius);
-	container->FindFloat("yRadius",&yRadius);
-	container->FindMessage("Pattern",pattern);
-	container->FindMessage("Font",messageFont);
-	container->FindMessage("Data",data);
+	container->FindRect("Node::frame",&frame);
+	container->FindBool("Node::selected",&selected);
+	container->FindFloat("Node::xRadius",&xRadius);
+	container->FindFloat("Node::yRadius",&yRadius);
+	container->FindMessage("Node::Pattern",pattern);
+	container->FindMessage("Node::Font",messageFont);
+	container->FindMessage("Node::Data",data);
 	
 	pattern->FindRGBColor("FillColor",&fillColor);
 	pattern->FindRGBColor("BorderColor",&borderColor);
@@ -279,9 +279,9 @@ bool  ClassRenderer::MoveAll(void *arg,void *deltaPoint)
 	BMessage	*node	=(BMessage *)arg;
 	BRect		rect;
 	BPoint		*delta	= (BPoint *)deltaPoint;
-	node->FindRect("Frame",&rect);
+	node->FindRect("Node::frame",&rect);
 	rect.OffsetBy(delta->x,delta->y);
-	node->ReplaceRect("Frame",rect);
+	node->ReplaceRect("Node::frame",rect);
 	return false;
 }
 bool  ClassRenderer::ResizeAll(void *arg,void *deltaPoint)
@@ -289,10 +289,10 @@ bool  ClassRenderer::ResizeAll(void *arg,void *deltaPoint)
 	BMessage	*node	=(BMessage *)arg;
 	BRect		rect;
 	BPoint		*delta	= (BPoint *)deltaPoint;
-	node->FindRect("Frame",&rect);
+	node->FindRect("Node::frame",&rect);
 	rect.right		+=	delta->x;
 	rect.bottom		+=	delta->y;
 	if ( (rect.IsValid()) && (rect.Width()>20) && ((rect.Height()>20)) )
-		node->ReplaceRect("Frame",rect);
+		node->ReplaceRect("Node::frame",rect);
 	return false;
 }

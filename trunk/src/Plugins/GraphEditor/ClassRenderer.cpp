@@ -47,16 +47,16 @@ void ClassRenderer::Init()
 	editMessage->AddString("Command::Name","ChangeValue");
 	BMessage	*valueContainer	= new BMessage();
 	valueContainer->AddString("name","Name");
-	valueContainer->AddString("subgroup","Data");
+	valueContainer->AddString("subgroup","Node::Data");
 	valueContainer->AddInt32("type",B_STRING_TYPE);
 	editMessage->AddMessage("valueContainer",valueContainer);
 	name						= new StringRenderer(editor,"",BRect(0,0,100,100), editMessage);
-	err 						= container->FindPointer("doc",(void **)&doc);
+	err 						= container->FindPointer("ProjectConceptor::doc",(void **)&doc);
 	sentTo						= new BMessenger(NULL,doc);
-	if (container->FindFloat("xRadius",&xRadius) != B_OK)
-		container->AddFloat("xRadius",7.0);
-	if (container->FindFloat("yRadius",&yRadius) != B_OK)
-		container->AddFloat("yRadius",7.0);
+	if (container->FindFloat("Node::xRadius",&xRadius) != B_OK)
+		container->AddFloat("Node::xRadius",7.0);
+	if (container->FindFloat("Node::yRadius",&yRadius) != B_OK)
+		container->AddFloat("Node::yRadius",7.0);
 	container->FindPointer("parentNode", (void **)&parentNode);
 
 }
@@ -189,8 +189,8 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 		{
 			// make connecting Stuff
 			BMessage *connecter=new BMessage(G_E_CONNECTING);
-			connecter->AddPoint("From",*startMouseDown);
-			connecter->AddPoint("To",pt);
+			connecter->AddPoint("Node::from",*startMouseDown);
+			connecter->AddPoint("Node::to",pt);
 			(new BMessenger((BView *)editor))->SendMessage(connecter);
 		}
 	}
@@ -248,13 +248,13 @@ void ClassRenderer::MouseUp(BPoint where)
 			BMessage *connecter=new BMessage(G_E_CONNECTED);
 			if (connecting == 2)
 			{
-				connecter->AddPointer("From",container);
-				connecter->AddPoint("To",where);
+				connecter->AddPointer("Node::from",container);
+				connecter->AddPoint("Node::to",where);
 			}
 			else
 			{
-				connecter->AddPoint("From",where);
-				connecter->AddPointer("To",container);
+				connecter->AddPoint("Node::from",where);
+				connecter->AddPointer("Node::to",container);
 			}
 			(new BMessenger((BView *)editor))->SendMessage(connecter);
 		}
@@ -366,13 +366,13 @@ void ClassRenderer::ValueChanged()
 	int32		count			= 0;
 	bool		found			= false;
 
-	container->FindRect("Frame",&frame);
-	container->FindBool("selected",&selected);
-	container->FindFloat("xRadius",&xRadius);
-	container->FindFloat("yRadius",&yRadius);
-	container->FindMessage("Pattern",pattern);
-	container->FindMessage("Font",messageFont);
-	container->FindMessage("Data",data);
+	container->FindRect("Node::frame",&frame);
+	container->FindBool("Node::selected",&selected);
+	container->FindFloat("Node::xRadius",&xRadius);
+	container->FindFloat("Node::yRadius",&yRadius);
+	container->FindMessage("Node::Pattern",pattern);
+	container->FindMessage("Node::Font",messageFont);
+	container->FindMessage("Node::Data",data);
 	pattern->FindRGBColor("FillColor",&fillColor);
 	pattern->FindRGBColor("BorderColor",&borderColor);
 	pattern->FindFloat("PenSize",&penSize);
@@ -466,7 +466,7 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 			BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 			editMessage->AddPointer("node",container);
 			editMessage->AddString("Command::Name","ChangeValue");
-			editMessage->AddString("subgroup","Data");
+			editMessage->AddString("subgroup","Node::Data");
 			editMessage->AddString("name",attribName);
 			attribute->FindString("Name",(const char **)&realName);
 			BString		*testString 	= new BString(attribName);
@@ -489,7 +489,7 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	editMessage->AddPointer("node",container);
 	editMessage->AddString("Command::Name","ChangeValue");
 	BMessage*	valueContainer	= new BMessage();
-	valueContainer->AddString("subgroup","Data");
+	valueContainer->AddString("subgroup","Node::Data");
 	valueContainer->AddString("subgroup",attribName);
 	editMessage->AddMessage("valueContainer",valueContainer);
 	delete valueContainer;
@@ -497,7 +497,7 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	removeAttribMessage->AddPointer("node",container);
 	removeAttribMessage->AddString("Command::Name","RemoveAttribute");
 	valueContainer	= new BMessage();
-	valueContainer->AddString("subgroup","Data");
+	valueContainer->AddString("subgroup","Node::Data");
 	valueContainer->AddString("name",attribName);
 	valueContainer->AddInt32("index",count);
 	removeAttribMessage->AddMessage("valueContainer",valueContainer);

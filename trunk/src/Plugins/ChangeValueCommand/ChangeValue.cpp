@@ -64,7 +64,7 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 		i++;
 	}
 	i = 0;
-	if ( (undo->FindBool("selected",&selected) == B_OK) && (selected==true) )
+	if ( (undo->FindBool("Node::selected",&selected) == B_OK) && (selected==true) )
 	{
 		undoMessage->FindMessage("selectedNodes",selectNodes);
 		if (undo->FindMessage("valueContainer",i,valueContainer) == B_OK)
@@ -166,7 +166,7 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 		}
 		i++;
 	}
-	if ( (settings->FindBool("selected",&selected) == B_OK) && (selected==true) )
+	if ( (settings->FindBool("Node::selected",&selected) == B_OK) && (selected==true) )
 	{
 		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK)
 		{
