@@ -1,0 +1,667 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="ProjectConceptor" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/ProjectConceptor" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/ProjectConceptor" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="AboutWindow.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="AboutWindow.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Commands/PCommand.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Commands/PCommand.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Commands/PCommandManager.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Commands/PCommandManager.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/BoolItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/BoolItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/ColorItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/ColorItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/ConfigItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/ConfigView.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/ConfigView.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/ConfigWindow.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/ConfigWindow.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/FloatItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/FloatItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/FontItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/FontItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/PatternItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/PatternItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/RectItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/RectItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/StringItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Config/StringItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/HelpManager.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/HelpManager.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/ObjectHelp.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/PDocument.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/PDocument.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/PDocumentManager.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/PDocumentManager.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/PEditor.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/PEditor.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/PEditorManager.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/PEditorManager.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/WindowManager.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Document/WindowManager.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Doku/MainPage.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="MainView.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="MainView.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="PMenuAccess.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="PWindow.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="PWindow.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/AddAttributeCommand/AddAttribute.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/AddAttributeCommand/AddAttribute.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/AddAttributeCommand/AddAttributePlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/AddAttributeCommand/AddAttributePlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasePlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasePlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicEditor.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicEditor.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicEditorPlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicEditorPlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicRenderer/BasicClassView.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicRenderer/BasicClassView.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicRenderer/BasicConnectionView.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicRenderer/BasicConnectionView.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicRenderer/BasicGroupView.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicRenderer/BasicGroupView.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicRenderer/BasicRenderer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/BasicRenderer/BasicRenderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/BasicEditor/Renderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/ChangeValueCommand/ChangeValue.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/ChangeValueCommand/ChangeValue.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/ChangeValueCommand/ChangeValuePlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/ChangeValueCommand/ChangeValuePlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/CopyCommand/Copy.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/CopyCommand/Copy.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/CopyCommand/CopyPlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/CopyCommand/CopyPlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/DeleteCommand/Delete.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/DeleteCommand/Delete.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/DeleteCommand/DeletePlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/DeleteCommand/DeletePlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FindCommand/Find.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FindCommand/Find.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FindCommand/FindPlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FindCommand/FindPlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FreeMindTanslator/ConfigView.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FreeMindTanslator/ConfigView.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FreeMindTanslator/FreeMindTranslator.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FreeMindTanslator/FreeMindTranslator.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FreeMindTanslator/SettingsManager.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FreeMindTanslator/SettingsManager.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/FreeMindTanslator/TranslatorMain.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/AttributRenderer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/AttributRenderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/BoolRenderer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/BoolRenderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/ClassRenderer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/ClassRenderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/ConnectionRenderer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/ConnectionRenderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/GraphEditor.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/GraphEditor.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/GraphEditorPlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/GraphEditorPlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/GroupRenderer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/GroupRenderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/Renderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/StringRenderer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/StringRenderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/TextEditorControl.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GraphEditor/TextEditorControl.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GroupCommand/Group.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GroupCommand/Group.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GroupCommand/GroupPlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/GroupCommand/GroupPlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/InsertCommand/Insert.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/InsertCommand/Insert.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/InsertCommand/InsertPlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/InsertCommand/InsertPlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/MoveCommand/Move.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/MoveCommand/Move.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/MoveCommand/MovePlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/MoveCommand/MovePlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/BaseListItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/BoolItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/BoolItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/FloatItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/FloatItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/MessageListView.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/MessageListView.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/NavigatorEditor.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/NavigatorEditor.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/NavigatorEditorPlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/NavigatorEditorPlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/NodeItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/NodeItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/NodeListView.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/NodeListView.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/PointerItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/PointerItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/RectItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/RectItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/StringItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/NavigatorEditor/StringItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/PasteCommand/Paste.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/PasteCommand/Paste.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/PasteCommand/PastePlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/PasteCommand/PastePlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/PluginManager.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/PluginManager.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/RemoveAttributeCommand/RemoveAttribute.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/RemoveAttributeCommand/RemoveAttribute.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/RemoveAttributeCommand/RemoveAttributePlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/RemoveAttributeCommand/RemoveAttributePlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/ResizeCommand/Resize.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/ResizeCommand/Resize.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/ResizeCommand/ResizePlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/ResizeCommand/ResizePlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/ClassRenderer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/ClassRenderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/ConnectionRenderer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/ConnectionRenderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/Renderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/SampleEditor.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/SampleEditor.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/SampleEditorPlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/SampleEditorPlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/StringRenderer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SampleEditor/StringRenderer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SelectCommand/Select.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SelectCommand/Select.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SelectCommand/SelectPlugin.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/SelectCommand/SelectPlugin.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/StandardTranslator/ConfigView.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/StandardTranslator/ConfigView.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/StandardTranslator/SettingsManager.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/StandardTranslator/SettingsManager.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/StandardTranslator/StandardTranslator.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/StandardTranslator/StandardTranslator.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Plugins/StandardTranslator/TranslatorMain.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ProjectConceptor.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ProjectConceptor.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ProjectConceptorDefs.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ShortCutFilter.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ShortCutFilter.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/BaseItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/BaseItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/ColorToolItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/ColorToolItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/FloatToolItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/FloatToolItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/Mover.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/Mover.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/PatternToolItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/PatternToolItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/ToolBar.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/ToolBar.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/ToolBarSeperator.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/ToolBarSeperator.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/ToolItem.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/ToolItem.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/ToolMenu.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="ToolBar/ToolMenu.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/Indexer.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/Indexer.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/InputRequest.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/InputRequest.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/InputRequestView.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/InputRequestView.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/PCSavePanel.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/PCSavePanel.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/PDocLoader.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/PDocLoader.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/ScreenInfo.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="Tools/ScreenInfo.h">
+			<Option target="Debug" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
