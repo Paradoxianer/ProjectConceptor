@@ -1,0 +1,82 @@
+#ifndef COMMAND_MANAGER_H
+#define COMMAND_MANAGER_H
+
+#include <app/Message.h>
+#include <support/List.h>
+#include <support/KeyedVector.h>
+#include <support/String.h>
+
+#ifdef B_ZETA_VERSION_1_0_0
+	#include <locale/Locale.h>
+	#include <locale/LanguageNotifier.h>
+#else
+	#define _T(a) a
+#endif 
+
+#include "PCommand.h"
+#include "BasePlugin.h"
+#include "Indexer.h"
+class PDocument;
+
+
+/**
+ * @class PCommandManager
+ * @brief  a Class wich manage all PCommands in a Document
+ * 
+ *
+ * @author Paradoxon powered by Jesus Christ
+ * @version 0.01
+ * @date 2005/10/31
+ * @Contact: mail@projectconceptor.de
+ *
+ * Created on: Wed Jun 05  2005
+ *
+ *
+ */
+
+class PCommandManager 
+{
+
+public:
+						PCommandManager(PDocument *initDoc);
+
+	virtual	void		StartMacro(void);
+	virtual	void		StopMacro(void);
+	virtual void		PlayMacro(BMessage *makro);
+	virtual	status_t	RegisterPCommand(BasePlugin *commandPlugin);
+	virtual	void		UnregisterPCommand(char *name);
+
+	virtual status_t	Archive(BMessage *archive, bool deep = true);
+	virtual	status_t	SetMacroList(BList *newMacroList);
+	virtual	status_t	SetUndoList(BList *newUndoList);
+
+	virtual void		SetUndoIndex(uint32 newIndex){undoStatus=newIndex;};
+	virtual	PCommand*	GetPCommand(char* name);
+	virtual BList*		GetUndoList(void){return undoList;};
+	virtual BList*		GetMacroList(void){return macroList;};
+	virtual int32		GetUndoIndex(void){return undoStatus;};
+
+	virtual	void		Undo(BMessage *undo);
+	virtual	void		Redo(BMessage *redo);
+
+	virtual	status_t	Execute(BMessage *settings);
+	
+	virtual	int32		CountPCommand(void){return commandVector->CountItems();};
+	virtual	PCommand*	PCommandAt(int32 index){return (PCommand *)commandVector->ValueAt(index);};
+	
+	virtual PDocument*	BelongTo(void){return doc;};
+
+protected:
+	virtual void		Init(void);
+
+			BList		*undoList;
+			BList		*macroList;
+			int32		undoStatus;
+			BKeyedVector<BString,PCommand *>	*commandVector;
+			PDocument	*doc;
+			BMessage	*recording;
+			Indexer		*macroIndexer;
+private:
+
+};
+#endif
