@@ -12,7 +12,7 @@
 
 #include <Screen.h>
 
-class ScreenInfo : public BScreen
+class ScreenInfo : public EScreen
 {
   public:
 					ScreenInfo();
