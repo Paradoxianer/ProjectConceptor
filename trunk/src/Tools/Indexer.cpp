@@ -15,8 +15,7 @@ Indexer::Indexer(PDocument *document)
 
 Indexer::~Indexer(void)
 {
-	TRACE();
-	delete sorter;
+	TRACE();;
 	delete included;
 
 }
@@ -242,7 +241,7 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 			}
 		}
 	}
-	sorter->AddItem((int32)tmpPointer,node);
+	sorter[(int32)tmpPointer] = node;
 	node->PrintToStream();
 	return node;
 }
@@ -287,21 +286,23 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 		}
 		
 //		if we cant find the right Pointer then add the old one
-		int32 indexFrom=sorter->IndexOf((int32)fromPointer);
-		if (indexFrom >= 0)
-			connection->AddPointer("Node::from",sorter->ValueAt(indexFrom));
+		map<int32,BMessage*>::iterator indexFrom;
+		indexFrom=sorter.find((int32)fromPointer);
+		if (indexFrom != sorter.end())
+			connection->AddPointer("Node::from",indexFrom->second);
 		else
 			connection->AddPointer("Node::from",fromPointer);
-//		if we cant find the right Pointer then add the old one			
-		int32 indexTo=sorter->IndexOf((int32)toPointer);
-		if (indexTo >= 0)
-			connection->AddPointer("Node::to",sorter->ValueAt(indexTo));
+//		if we cant find the right Pointer then add the old one	
+		map<int32,BMessage*>::iterator indexTo;		
+		indexTo=sorter.find((int32)toPointer);
+		if (indexTo != sorter.end())
+			connection->AddPointer("Node::to",indexTo->second);
 		else
 			connection->AddPointer("Node::to",toPointer);
 	}
 	connection->FindPointer("this",(void **)&tmpPointer);
 	connection->RemoveName("this");
-	sorter->AddItem((int32)tmpPointer,connection);
+	sorter[(int32)tmpPointer]=connection;
 	return connection;
 }
 
@@ -340,7 +341,7 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 	//replace the old Pointer with the new ones
 	while (command->FindPointer("node",i,(void **)&node) == B_OK)
 	{
-		command->ReplacePointer("node",i,sorter->ValueFor((int32)node));
+		command->ReplacePointer("node",i,sorter[(int32)node]);
 		i++;
 	}
 	return command;
@@ -357,7 +358,7 @@ BMessage* Indexer::DeIndexUndo(BMessage *undo)
 void Indexer::Init(void)
 {
 	TRACE();
-	sorter				= new BKeyedVector<int32,BMessage*>();
+	sorter				= map<int32,BMessage*>();
 	included			= new BList;
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
 }

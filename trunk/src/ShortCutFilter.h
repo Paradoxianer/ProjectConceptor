@@ -7,7 +7,7 @@
 #include <app/MessageFilter.h>
 #include <app/Messenger.h>
 
-#include <support/KeyedVector.h>
+#include <cpp/map.h>
 struct shortcut
 {
 			
@@ -28,7 +28,7 @@ public:
 	virtual	BMessage*		GetShortcutList(void);
 	virtual	filter_result	Filter(BMessage *message, BHandler **target);
 protected:
-	BKeyedVector<uint32, shortcut*>	*shortcutVector;
+	map<uint32, shortcut*>	shortcutMap;
 private:
 };
 #endif

@@ -3,8 +3,8 @@
 
 #include <app/Message.h>
 #include <support/List.h>
-#include <support/KeyedVector.h>
 #include <support/String.h>
+#include <cpp/map.h>
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
@@ -39,10 +39,11 @@ class PCommandManager
 
 public:
 						PCommandManager(PDocument *initDoc);
+	virtual				~PCommandManager(void);
 
-	virtual	void		StartMacro(void);
-	virtual	void		StopMacro(void);
-	virtual void		PlayMacro(BMessage *makro);
+			void		StartMacro(void);
+			void		StopMacro(void);
+			void		PlayMacro(BMessage *makro);
 	virtual	status_t	RegisterPCommand(BasePlugin *commandPlugin);
 	virtual	void		UnregisterPCommand(char *name);
 
@@ -61,8 +62,8 @@ public:
 
 	virtual	status_t	Execute(BMessage *settings);
 	
-	virtual	int32		CountPCommand(void){return commandVector->CountItems();};
-	virtual	PCommand*	PCommandAt(int32 index){return (PCommand *)commandVector->ValueAt(index);};
+	virtual	int32		CountPCommand(void){return commandMap.size();};
+	virtual	PCommand*	PCommandAt(int32 index);
 	
 	virtual PDocument*	BelongTo(void){return doc;};
 
@@ -72,7 +73,7 @@ protected:
 			BList		*undoList;
 			BList		*macroList;
 			int32		undoStatus;
-			BKeyedVector<BString,PCommand *>	*commandVector;
+			map<BString, PCommand*>	 commandMap;
 			PDocument	*doc;
 			BMessage	*recording;
 			Indexer		*macroIndexer;

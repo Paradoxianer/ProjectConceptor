@@ -24,10 +24,15 @@ PCommandManager::PCommandManager(PDocument *initDoc)
 	Init();
 }
 
+PCommandManager::~PCommandManager(void)
+{
+	delete undoList;
+	delete macroList;
+}
 
 void PCommandManager::Init(void)
 {
-	commandVector	= new BKeyedVector<BString,PCommand *>();
+	commandMap		= map<BString,PCommand *>();
 	undoList		= new BList();
 	macroList		= new BList();
 	undoStatus		= 0;
@@ -75,7 +80,8 @@ status_t PCommandManager::RegisterPCommand(BasePlugin *commandPlugin)
 		{
 			command->SetManager(this);
 			PRINT(("Register Command %s",command->Name()));
-			err=commandVector->AddItem(BString(command->Name()),command);
+			commandMap[BString(command->Name())]=command;
+//			err=commandVector->AddItem(BString(command->Name()),command);
 		}
 		else
 			err = B_ERROR;
@@ -137,7 +143,8 @@ void PCommandManager::UnregisterPCommand(char* name)
 {
 	TRACE();
 	if (name)
-		commandVector->RemoveItemFor(name);
+		commandMap.erase(name);
+//		commandVector->RemoveItemFor(name);
 }
 
 
@@ -254,7 +261,7 @@ status_t PCommandManager::Execute(BMessage *settings)
 PCommand* PCommandManager::GetPCommand(char* name)
 {
 	TRACE();
-	return commandVector->ValueFor(BString(name));
+	return commandMap[BString(name)];
 }
 
 
@@ -331,3 +338,12 @@ void PCommandManager::Redo(BMessage *redo)
 	}
 }
 
+
+PCommand* PCommandManager::PCommandAt(int32 index) 
+{
+	map<BString, PCommand*>::iterator iter;
+	iter=commandMap.begin();
+	for (int i=0;i< index;i++)
+		iter++;
+  	return iter->second;
+}

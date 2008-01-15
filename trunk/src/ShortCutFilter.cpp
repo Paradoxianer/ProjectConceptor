@@ -6,18 +6,19 @@
 
 ShortCutFilter::ShortCutFilter(BMessage* shortcutList):BMessageFilter(B_PROGRAMMED_DELIVERY,B_LOCAL_SOURCE)
 {
-	shortcutVector= new BKeyedVector<uint32, shortcut*>();
+	shortcutMap= map<uint32, shortcut*>();
 	AddShortCutList(shortcutList);
 }
 
 
 BMessage* ShortCutFilter::GetShortcutList(void)
 {
+	map<uint32, shortcut*>::iterator iter;
 	shortcut	*theShortcut	= NULL;
 	BMessage	*returnMessage	= new BMessage();
-	for (uint32 i=0;i<shortcutVector->CountItems();i++)
+	for (iter =shortcutMap.begin();iter != shortcutMap.end();iter++)
 	{
-		theShortcut = shortcutVector->ValueAt(i);
+		theShortcut = iter->second;
 		returnMessage->AddInt32("key",theShortcut->key);
 		returnMessage->AddInt32("modifiers",theShortcut->modifiers);
 		returnMessage->AddMessage("message",theShortcut->sendMessage);
@@ -39,7 +40,7 @@ filter_result ShortCutFilter::Filter(BMessage *message, BHandler **target)
 			{
 				message->FindInt32("modifiers",(int32 *)&modifiers);
 				BMessage	*sendMessage	= NULL;
-				theShortcut	= shortcutVector->ValueFor(key);
+				theShortcut	= shortcutMap[key];
 				if (theShortcut != NULL)
 				{
 					if ( (theShortcut->modifiers == 0) || ((theShortcut->modifiers & modifiers) != 0 ) )
@@ -55,7 +56,7 @@ filter_result ShortCutFilter::Filter(BMessage *message, BHandler **target)
 }
 void ShortCutFilter::SetShortCutList(BMessage *shortcutList)
 {
-	shortcutVector->MakeEmpty();
+	shortcutMap.clear();
 	AddShortCutList(shortcutList);
 }
 
@@ -79,7 +80,7 @@ void ShortCutFilter::AddShortCutList(BMessage *shortcutList)
 		theShortcut->sentTo		= messenger;
 		theShortcut->modifiers	= modifiers;
 		i++;
-		shortcutVector->AddItem(key,theShortcut);
+		shortcutMap[key]=theShortcut;
 	}
 }
 
@@ -89,7 +90,7 @@ void ShortCutFilter::RemoveShortCutList(BMessage *shortcutList)
 	int32 i	= 0;
 	while (shortcutList->FindInt32("key",i,(int32 *)&key) == B_OK)
 	{
-		shortcutVector->RemoveItemFor(key);
+		shortcutMap.erase(key);
 		i++;
 	}
 }

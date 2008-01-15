@@ -4,8 +4,8 @@
 #include <app/Message.h>
 #include <storage/Entry.h>
 #include <storage/File.h>
-#include <support/KeyedVector.h>
 #include <support/List.h>
+#include <cpp/map.h>
 
 class PDocument;
 class PluginManager;
@@ -38,7 +38,7 @@ public:
 //			BMessage*			IndexMacro(BMessage *macro,bool includeNodes=false);
 			BMessage*			IndexMacroCommand(BMessage *macro);
 			BMessage*			IndexCommand(BMessage *command,bool includeNodes=false);	
-			BMessage*			PointerForIndex(int32 index){return sorter->ValueFor(index);};
+			BMessage*			PointerForIndex(int32 index){return sorter[index];};
 			
 			BMessage*			DeIndexNode(BMessage *node);
 			BMessage*			DeIndexConnection(BMessage *connection);	
@@ -53,7 +53,7 @@ protected:
 
 			
 			PDocument			*doc;
-			BKeyedVector<int32,BMessage*>*	sorter;
+			map<int32,BMessage*>	sorter;
 			BList				*included;
 
 			PluginManager		*pluginManager;
