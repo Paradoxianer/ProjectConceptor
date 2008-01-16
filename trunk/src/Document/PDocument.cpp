@@ -11,7 +11,7 @@
 #include "BasePlugin.h"
 #include "Tools/Indexer.h"
 
-PDocument::PDocument(PDocumentManager *initManager):BLooper(),BReadWriteLocker() 
+PDocument::PDocument(PDocumentManager *initManager):BLooper() 
 {
 	TRACE();
 	documentManager=initManager;
@@ -20,7 +20,7 @@ PDocument::PDocument(PDocumentManager *initManager):BLooper(),BReadWriteLocker()
 	windowManager->AddPWindow(new PWindow(BRect(100,100,500,400),this));
 }
 
-PDocument::PDocument(PDocumentManager *initManager,entry_ref *openEntry):BLooper(),BReadWriteLocker() 
+PDocument::PDocument(PDocumentManager *initManager,entry_ref *openEntry):BLooper()
 {
 	TRACE();
 	PRINT(("%d\n",openEntry));
@@ -31,7 +31,7 @@ PDocument::PDocument(PDocumentManager *initManager,entry_ref *openEntry):BLooper
 	
 }
 
-PDocument::PDocument(BMessage *archive):BLooper(archive),BReadWriteLocker()
+PDocument::PDocument(BMessage *archive):BLooper(archive)
 {
 	TRACE();
 	Init(archive);
@@ -248,17 +248,17 @@ void PDocument::Init(BMessage *archive)
 const char* PDocument::Title(void)
 {
 	TRACE();
-	if (ReadLock())
+	if (Lock())
 	{
 		if (entryRef)
 			return entryRef->name;
 		else
 			return "Untitled";
-		ReadUnlock();
+		Unlock();
 	}
 	else
 	{
-		PRINT(("\tDEBUG:\tTitle() - Cant ReadLock()\n"));
+		PRINT(("\tDEBUG:\tTitle() - Cant Lock()\n"));
 		return NULL;
 	}
 }
@@ -291,13 +291,13 @@ BMessage* PDocument::PrintSettings(void)
 	if (! printerSetting) 
 	{
 		result = printJob.ConfigPage();
-		if ((result == B_OK) && (WriteLock())) 
+		if ((result == B_OK) && (Lock())) 
 		{
 			printerSetting	= printJob.Settings();
 			paperRect 		= new BRect(printJob.PaperRect());
 			printableRect	= new BRect(printJob.PrintableRect());
 			SetModified();
-			WriteUnlock();
+			Unlock();
 		}
 	} 
 	return printerSetting;
@@ -305,14 +305,14 @@ BMessage* PDocument::PrintSettings(void)
 void PDocument::SetPrintSettings(BMessage *settings)
 {
 	TRACE();
-	if (ReadLock())
+	if (Lock())
 	{
 		if (settings!=NULL)
 		{
 			delete printerSetting;
 			printerSetting	= settings;
 		}
-		ReadUnlock();
+		Unlock();
 	}
 }
 
@@ -322,7 +322,7 @@ void PDocument::Print(void)
 	TRACE();
 	status_t	result	= B_OK;
 	BPrintJob	printJob("doc_name"); 
-	if (ReadLock())
+	if (Lock())
 	{
 		if (!printerSetting)
 		{
@@ -419,7 +419,7 @@ void PDocument::Print(void)
 				//**error like no active Editor
 			}
 		}
-		ReadUnlock();
+		Unlock();
 	}
 }
 
@@ -428,7 +428,7 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 {
 	TRACE();
 
-	if (ReadLock())
+	if (Lock())
 	{
 		if (saveEntry!=NULL)
 		{
@@ -438,7 +438,7 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 				entryRef= new entry_ref;
 			entry.GetRef(entryRef);
 		}
-		ReadUnlock();
+		Unlock();
 	}
 	else
 	{
@@ -603,7 +603,7 @@ bool PDocument::QuitRequested(void)
 	bool	readLock	= false;
 	if (modified)
 	{
-		readLock = ReadLock();
+		readLock = Lock();
 		BAlert *myAlert = new BAlert("title", "Save changes to ...", _T("Cancel"), _T("Don't save"), _T("Save"), B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT); 
 		myAlert->SetShortcut(0, B_ESCAPE);
 		int32 button_index = myAlert->Go();
@@ -617,7 +617,7 @@ bool PDocument::QuitRequested(void)
 			returnValue	= true;
 		}
 		if (readLock)
-		ReadUnlock();
+		Unlock();
 	}
 	return returnValue;
 }

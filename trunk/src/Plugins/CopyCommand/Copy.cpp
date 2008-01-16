@@ -29,7 +29,7 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 
 	int32		i					= 0;
 	Indexer		*indexer			= new Indexer(doc);
-	if (doc->ReadLock())
+	if (doc->Lock())
 	{
 		for (i=0;i<selected->CountItems();i++)
 		{
@@ -57,7 +57,7 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 			}
 
 		}	
-		doc->ReadUnlock();
+		doc->Unlock();
 	}
 	if (be_clipboard->Lock()) 
 	{

@@ -19,8 +19,6 @@
 	#define _T(a) 
 #endif 
 
-#include <support/ReadWriteLocker.h>
-
 
 #include "WindowManager.h"
 #include "PEditorManager.h"
@@ -47,7 +45,7 @@ class PDocumentManager;
  *
  * @see BMessage
  */
-class PDocument :	public BLooper, public BReadWriteLocker,public PMenuAccess
+class PDocument :	public BLooper,public PMenuAccess
 {
 
 friend class PCommand;
