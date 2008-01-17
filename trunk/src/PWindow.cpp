@@ -1,7 +1,10 @@
 
 #define _ZETA_USING_EXPERIMENTAL_
 #include <interface/PrintJob.h>
-#include <interface/IconMenu.h>
+#ifdef B_ZETA_VERSION_1_0_0
+	#include <interface/IconMenu.h>
+#endif 
+ 
 #include <interface/MenuItem.h>
 #include <interface/ScrollBar.h>
 #include <interface/ScrollView.h>
@@ -92,7 +95,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	BMenu 		*menu;		
 
 	// build AppMenu
-	menu= new BMenu(_T("IconMenu"));
+/*	menu= new BMenu(_T("IconMenu"));
 	BIconMenu *appMenu= new BIconMenu(menu);
 	menu->AddItem(	item = new BMenuItem(_T(P_MENU_APP_ABOUT), new BMessage(MENU_APP_ABOUT)));
 	item->SetTarget(be_app);
@@ -109,7 +112,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	item->SetTarget(be_app);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_QUIT);
-	tmpBar->AddItem(appMenu);
+	tmpBar->AddItem(appMenu);*/
 
 	// build Filemenu
 	menu		= new BMenu(_T(P_MENU_FILE));
@@ -294,19 +297,23 @@ BMenuBar *PWindow::MakeMenu(void)
 	tmpBar->AddItem(menu);
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO);
+	tmpBar->AddItem(menu);
 
-/*	menu=new BMenu(_T(P_MENU_HELP));
+	menu=new BMenu(_T(P_MENU_HELP));
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_HELP_ABOUT),new BMessage(MENU_HELP_ABOUT)));
 	item->SetTarget(be_app_messenger);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_HELP_ABOUT);
-
+	/*menu->AddItem(	item = new BMenuItem(_T(P_MENU_APP_HELP), new BMessage(MENU_APP_HELP)));
+	localizeMenuItems->AddPointer("item",(void *) item);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_HELP);
+	item->SetTarget(be_app_messenger);*/
+	
 	tmpBar->AddItem(menu);
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
-	localizeMenuItems->AddPointer("itemstring",P_MENU_HELP);*/
-
-	savemessage = NULL;
+	localizeMenuItems->AddPointer("itemstring",P_MENU_HELP);
 	tmpBar->SetBorder(B_BORDER_CONTENTS);
+		savemessage = NULL;
 	P_M_MAIN_VIEW_TOP=(tmpBar->Frame()).bottom+1.0;
 	return tmpBar;
 }
@@ -539,7 +546,6 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	tab->SetLabel(name); 
 	mainView->Select(tab);
 	editor->GetView()->MakeFocus(true);
-	
 	(doc->GetEditorManager())->RegisterPEditor(editor);
 	if ((doc->GetEditorManager())->CountPEditors()>1)
 		editor->GetView()->ResizeTo(doc->Bounds().Width(),doc->Bounds().Height());

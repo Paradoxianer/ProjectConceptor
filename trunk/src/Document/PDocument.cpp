@@ -460,45 +460,29 @@ void PDocument::Save(void)
 	int32				tmpInt				= 0;
 	float				tmpFloat			= 0;
 	documentSetting->FindMessage("saveSettings",saveSettings);
-	saveSettings->FindInt32("translator_id",&tmpInt);
-	translatorInfo->translator	= tmpInt;
-	saveSettings->FindString("format::name",(const char**)&formatName);
-	saveSettings->FindString("format::MIME",(const char**)&formatMIME);
-	strcpy((translatorInfo->name),formatName);
-	strcpy((translatorInfo->MIME),formatMIME);
-	saveSettings->FindInt32("format::type",(int32 *)&tmpInt);
-	translatorInfo->type				= tmpInt;
-	saveSettings->FindInt32("format::group",(int32 *)&tmpInt);
-	translatorInfo->group				= tmpInt;
-	saveSettings->FindFloat("format::quality",(float *)&tmpFloat);
-	translatorInfo->quality				= tmpFloat;
-	saveSettings->FindFloat("format::capability",(float *)&tmpFloat);
-	translatorInfo->capability			= tmpFloat;
-
-/*	
-
-	int32				i					= 0;
-	status_t			err					= B_OK;
-	BList	*importExportPlugins	= documentManager->GetPluginManager()->GetPluginsByType(P_C_ITEM_INPORT_EXPORT_TYPE);
-	BasePlugin			*plugin;
-	ImportExport		*exporter;
-	bool				found		= false;
-	if (importExportPlugins!=NULL)
+	if (saveSettings->FindInt32("translator_id",&tmpInt) == B_OK)
 	{
-		while  ( (!found) && (i<importExportPlugins->CountItems()) )
-		{
-			plugin	 = (BasePlugin *)importExportPlugins->ItemAt(i);
-			exporter = (ImportExport *)plugin->GetNewObject(NULL);
-			if ( (exporter) && (strcmp(plugin->GetName(),pluginName) == B_OK ) )
-				found = true;
-			i++;
-		}
-		if (found)
-			exporter->Export(this,format,new BEntry(entryRef));
+		translatorInfo->translator	= tmpInt;
+		saveSettings->FindString("format::name",(const char**)&formatName);
+		saveSettings->FindString("format::MIME",(const char**)&formatMIME);
+		strcpy((translatorInfo->name),formatName);
+		strcpy((translatorInfo->MIME),formatMIME);
+		saveSettings->FindInt32("format::type",(int32 *)&tmpInt);
+		translatorInfo->type				= tmpInt;
+		saveSettings->FindInt32("format::group",(int32 *)&tmpInt);
+		translatorInfo->group				= tmpInt;
+		saveSettings->FindFloat("format::quality",(float *)&tmpFloat);
+		translatorInfo->quality				= tmpFloat;
+		saveSettings->FindFloat("format::capability",(float *)&tmpFloat);
+		translatorInfo->capability			= tmpFloat;
+		Archive(archived,true);
+		BPositionIO		*input	= new BMallocIO();
+		BFile			*file	= new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
+		archived->Flatten(input);
+		err=	roster->Translate(input,translatorInfo,NULL,file,P_C_DOCUMENT_TYPE);
 	}
 	else
 	{
-		BMessage	*archived	=new BMessage();
 		Archive(archived,true);
 		if (entryRef) 
 		{
@@ -514,12 +498,6 @@ void PDocument::Save(void)
 		else
 			PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
 	}
-	delete saveSettings;*/
-	Archive(archived,true);
-	BPositionIO		*input	= new BMallocIO();
-	BFile			*file	= new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
-	archived->Flatten(input);
-	err=	roster->Translate(input,translatorInfo,NULL,file,P_C_DOCUMENT_TYPE);
 
 }
 

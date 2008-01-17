@@ -156,7 +156,7 @@ LEAFDIRS = \
 	src/Plugins/InsertCommand         		\
 	src/Plugins/MoveCommand     		\
 	src/Plugins/NavigatorEditor  			\
-	src/Plugins/RenoveAttributeCommand	\
+	src/Plugins/RemoveAttributeCommand	\
 	src/Plugins/ResizeCommand			\
 	src/Plugins/SampleEditor	  		\
 	src/Plugins/StandardTranslator 	  	\

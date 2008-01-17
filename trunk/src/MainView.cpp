@@ -34,6 +34,17 @@ void MainView::Select(int32 tab)
 void MainView::Select(const BTab *tab)
 {
 	TRACE();
-	BTabView::Select(tab);
+	bool	found		= false;
+	int32	i			= 0;
+	BTab 	*compareTab	= BTabView::TabAt(i);
+	while ((!found) && ( compareTab))
+	{
+		i++;
+		if (compareTab==tab)
+			found = true;
+		compareTab = BTabView::TabAt(i);
+	}
+	if (found) 
+		BTabView::Select(i-1);
 	PRINT(("Select(%ld)\n",tab));
 }

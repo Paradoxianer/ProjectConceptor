@@ -129,6 +129,8 @@ const char*		P_MENU_MACRO_PLAY				= "Play";
 const char*		P_MENU_MACRO_OPEN				= "Open";
 const char*		P_MENU_MACRO_SAVE				= "Save";
 
+const char*		P_MENU_HELP						= "Help";
+const char*		P_MENU_HELP_ABOUT				= "About";
 
 
 const char*		P_C_VERSION						= "0.01.1 Revision 82";
