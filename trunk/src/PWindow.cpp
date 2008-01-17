@@ -86,8 +86,12 @@ BMenuBar *PWindow::MakeMenu(void)
 	font_height height; 
 	tmpBar->GetFontHeight(&height);
 	//** 
-	float left, top,right,bottom;
-	tmpBar->GetItemMargins(&left,&top,&right,&bottom);
+//	float left, top,right,bottom;
+//	tmpBar->GetItemMargins(&left,&top,&right,&bottom);
+	float left 		= 5;
+	float top		= 2;
+	float right		= 5;
+	float bottom	= 2;
 	menuFrame.bottom	= menuFrame.top+(height.ascent+height.descent+height.leading+top+bottom);
 	tmpBar->ResizeTo(menuFrame.Width(),menuFrame.Height());
 	BMenuItem	*item;
@@ -332,8 +336,11 @@ BMenuBar *PWindow::MakeStatusBar(void)
 	font_height height; 
 	font->GetHeight(&height);
 	//DEBUG("statusFrame:\n top: %f\n bottom: %f\n",statusFrame.top,statusFrame.bottom);
-	float left, top,right,bottom;
-	tmpBar->GetItemMargins(&left,&top,&right,&bottom);
+	float left 		= 5;
+	float top		= 2;
+	float right		= 5;
+	float bottom	= 2;
+//	tmpBar->GetItemMargins(&left,&top,&right,&bottom);
 	statusFrame.top=statusFrame.bottom-(height.ascent+height.descent+height.leading+top+bottom);
 	//DEBUG("font_height\n ascent: %f\n descent: %f\n leading: %f\n",height.ascent,height.descent,height.leading);
 	//DEBUG("statusFrame:\n top: %f\n bottom: %f\n",statusFrame.top,statusFrame.bottom);

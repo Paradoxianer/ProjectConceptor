@@ -78,6 +78,12 @@ const uint32	P_C_EDITOR_SWITCHED_INACTIV		= 'pcSI';
 const uint32	P_C_WINDOW_LIST_CHANGED			= 'pcWC';
 const uint32	P_C_TOOLBAR_CHANGED				= 'pcTC';
 
+#ifndef B_ZETA_VERSION_1_0_0
+
+const uint32	B_REDO							= 'redo';
+const uint32	B_UNDO							= 'undo';
+const uint32	B_CLEAN							= 'clean';
+#endif
 
 const uint32	WINDOW_REGISTRY_ADD				= 'WRad';
 const uint32	WINDOW_REGISTRY_SUB				= 'WRsb';
