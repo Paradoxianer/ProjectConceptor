@@ -263,7 +263,11 @@ void GraphEditor::PreprocessBeforSave(BMessage *container)
 	int32	count;
 	int32	i		= 0;
 	//remove all the Pointer to the Renderer so that on the next load a new Renderer are added
-	while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+	#ifdef B_ZETA_VERSION_1_0_0
+		while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+	#else
+		while (container->GetInfo(B_POINTER_TYPE,i ,(char **)&name, &type, &count) == B_OK)
+	#endif
 	{
 		if ((strstr(name,"GraphEditor") != NULL) ||
 			(strcasecmp(name,"Node::outgoing") == B_OK) ||

@@ -29,6 +29,7 @@ public:
 	virtual	filter_result	Filter(BMessage *message, BHandler **target);
 protected:
 	map<uint32, shortcut*>	shortcutMap;
+			void			ShowChoice();
 private:
 };
 #endif

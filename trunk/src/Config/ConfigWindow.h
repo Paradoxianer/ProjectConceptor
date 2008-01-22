@@ -40,5 +40,6 @@ protected:
 		void			SetConfigMessage(void);
 
 private:
+		BMessage		*configMessage;
 };
 #endif

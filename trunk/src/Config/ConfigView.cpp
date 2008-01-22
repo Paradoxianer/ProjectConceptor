@@ -5,6 +5,7 @@ ConfigView::ConfigView(BRect rect,const char *newName,BMessage *forMessage,uint3
 {
 	TRACE();
 	configMessage=forMessage;
+	name=newName;
 	Init();
 }
 

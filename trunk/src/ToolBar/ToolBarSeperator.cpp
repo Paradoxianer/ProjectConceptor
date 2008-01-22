@@ -27,7 +27,7 @@ ToolBarSeperator::~ToolBarSeperator(void)
 {
 }
 
-void ToolBarSeperator::Draw(BRect updateRect)
+void ToolBarSeperator::Draw(BRect /*updateRect*/)
 {
 	if (parentToolBar->GetLayout() == B_ITEMS_IN_ROW)
 	{

@@ -126,7 +126,7 @@ void	InputRequestView::SetText(const char* text)
   fText->SetText(text);
 };
 
-void InputRequestView::Draw(BRect rect)
+void InputRequestView::Draw(BRect /*rect*/)
 {
   //draw our nice gray rect on the left side of the window
   SetHighColor(183, 183, 183, 255);

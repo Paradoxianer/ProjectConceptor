@@ -49,6 +49,7 @@ public:
 
 protected:
 			ToolBar			*parentToolBar;
+
 };
 #endif
 

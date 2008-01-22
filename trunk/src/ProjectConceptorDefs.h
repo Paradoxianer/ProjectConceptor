@@ -81,8 +81,7 @@ const uint32	P_C_TOOLBAR_CHANGED				= 'pcTC';
 #ifndef B_ZETA_VERSION_1_0_0
 
 const uint32	B_REDO							= 'redo';
-const uint32	B_UNDO							= 'undo';
-const uint32	B_CLEAN							= 'clean';
+const uint32	B_CLEAN							= 'clea ';
 #endif
 
 const uint32	WINDOW_REGISTRY_ADD				= 'WRad';

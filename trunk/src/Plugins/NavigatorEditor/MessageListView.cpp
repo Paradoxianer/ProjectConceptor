@@ -44,7 +44,11 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 	char		*name; 
 	uint32		type; 
 	int32		count;
+	#ifdef B_ZETA_VERSION_1_0_0
 	for (int32 i = 0; message->GetInfo(B_ANY_TYPE, i,(const char **) &name, &type, &count) == B_OK; i++)
+	#else
+	for (int32 i = 0; message->GetInfo(B_ANY_TYPE, i,(char **) &name, &type, &count) == B_OK; i++)
+	#endif
 	{
 		switch(type)
 		{

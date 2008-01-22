@@ -124,7 +124,7 @@ void ColorToolItem::Draw(BRect updateRect)
 	StrokeLine(BPoint(buttonFrame.left,buttonFrame.top+5),BPoint(buttonFrame.right,buttonFrame.top+5));
 
 
-	SetHighColor(ui_color(B_UI_CONTROL_BORDER_COLOR));
+	SetHighColor(ui_color(B_KEYBOARD_NAVIGATION_COLOR));
 	StrokeRoundRect(buttonFrame,4,4);
 }
 
@@ -193,7 +193,7 @@ void ColorToolItem::MouseUp(BPoint point)
 	}
 	else
 	{
-		SetEventMask(B_NO_EVENTS,B_LOCK_WINDOW_FOCUS | B_NO_POINTER_HISTORY);
+		SetEventMask(0,B_LOCK_WINDOW_FOCUS | B_NO_POINTER_HISTORY);
 		Invoke();
 		colorWindow->Hide();
 	}

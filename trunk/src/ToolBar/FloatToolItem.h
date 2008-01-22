@@ -48,7 +48,7 @@ virtual		BString			*GetToolTip(void){return toolTip;};
 virtual		void			SetToolTip(BString *toolT){toolTip=toolT;};
 virtual	const	char		*GetName(void){return tName;};
 virtual		float			GetValue(void);
-virtual		void			SetValue(float);
+			void			SetValue(float);
 
 virtual		void			Draw(BRect updateRect);
 

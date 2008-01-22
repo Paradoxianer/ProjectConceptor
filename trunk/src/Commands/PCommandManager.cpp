@@ -14,7 +14,7 @@
 	#include <locale/Locale.h>
 	#include <locale/LanguageNotifier.h>
 #else
-	#define _T(a) 
+	#define _T(a) a
 #endif 
 
 PCommandManager::PCommandManager(PDocument *initDoc)

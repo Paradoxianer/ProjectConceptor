@@ -9,7 +9,7 @@
 ToolBar::ToolBar(BRect rect,  const char *name,menu_layout ori= B_ITEMS_IN_ROW): BControl(rect, name,"ToolBar",NULL, B_FOLLOW_LEFT_RIGHT, B_WILL_DRAW|B_FULL_UPDATE_ON_RESIZE)
 {
 	TRACE();
-	SetViewColor(ui_color(B_UI_MENU_BACKGROUND_COLOR));
+	SetViewColor(ui_color(B_MENU_BACKGROUND_COLOR));
 	SetDrawingMode(B_OP_ALPHA);
 	right_margin			= top_margin=bottom_margin=left_margin=2;
 	toolitems				= new BList();
@@ -254,7 +254,7 @@ void ToolBar::SetLayout(menu_layout justification)
 
 
 
-void ToolBar::Draw(BRect updateRect)
+void ToolBar::Draw(BRect /*updateRect*/)
 {
 //	BView::Draw(updateRect);
 //	int i=0;

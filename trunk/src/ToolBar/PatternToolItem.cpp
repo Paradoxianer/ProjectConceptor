@@ -108,7 +108,7 @@ void PatternToolItem::Draw(BRect updateRect)
 	SetLowColor(255,255,255,255);
 	SetHighColor(0,0,0,255);
 	FillRoundRect(buttonFrame,4,4,value);
-	SetHighColor(ui_color(B_UI_CONTROL_BORDER_COLOR));
+	SetHighColor(ui_color(B_KEYBOARD_NAVIGATION_COLOR));
 	StrokeRoundRect(buttonFrame,4,4);
 }
 

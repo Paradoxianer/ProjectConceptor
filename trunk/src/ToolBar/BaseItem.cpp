@@ -1,11 +1,12 @@
 #include "BaseItem.h"
 
-BaseItem::BaseItem(const char* name)
+BaseItem::BaseItem(const char* /*name*/)
 {
 }
 
-BaseItem::BaseItem(BMessage *archive)
+BaseItem::BaseItem(BMessage* /*archive*/)
 {
+	
 	//+*classe überprüfen????
 //	err = archive->FindRect("BaseItem::base_item_frame", &frame); 
 	//testen ob err OK und ob gültiges Frame...
@@ -26,15 +27,15 @@ void BaseItem::DetachedFromToolBar(ToolBar *tb)
 /**
  *@todo Handle Errors 
  */
-status_t BaseItem::Archive(BMessage *archive,bool deep=true) const
+status_t BaseItem::Archive(BMessage *archive,bool /*deep=true*/) const
 {
 	status_t err;
-//	err = BArchivable::Archive(archive, deep); 
+//	err = BArchivable::Archive(archive, deep);
 	err = archive->AddString("class", "BaseItem"); 
 	return err;
 }
 
-BArchivable* BaseItem::Instantiate(BMessage *archive) 
+BArchivable* BaseItem::Instantiate(BMessage* /*archive*/) 
 {
 /*	if ( !validate_instantiation(archive, "BaseItem") )
 		return NULL;

@@ -168,7 +168,12 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 		char		*name	= NULL;
 		type_code	type	= 0;
 		int32		count	= 0;
+#ifdef B_ZETA_VERSION_1_0_0
 		while (returnCommand->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+#else
+		while (returnCommand->GetInfo(B_MESSAGE_TYPE,i ,(char **)&name, &type, &count) == B_OK)
+#endif 
+
 		{
 			if ( (returnCommand->FindMessage(name,count,subCommand) == B_OK) && (subCommand) )
 			{
@@ -328,7 +333,12 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 	char		*name	= NULL;
 	type_code	type	= 0;
 	int32		count	= 0;
+#ifdef B_ZETA_VERSION_1_0_0
 	while (command->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
+#else
+	while (command->GetInfo(B_MESSAGE_TYPE,i ,(char **)&name, &type, &count) == B_OK)
+#endif
+
 	{
 		if ( (command->FindMessage(name,count-1,subCommand) == B_OK) && (subCommand) )
 		{

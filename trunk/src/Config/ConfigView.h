@@ -33,7 +33,7 @@ protected:
 private:
 			void			Init();
 	BMessage				*configMessage;
-	const char*				*name;
+	const char				*name;
 	float					seperator;
 };
 #endif

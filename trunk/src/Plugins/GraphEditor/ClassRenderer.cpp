@@ -382,7 +382,11 @@ void ClassRenderer::ValueChanged()
 	//delete all "old" Attribs
 	attributes->erase(attributes->begin(),attributes->end());
 	//and add all attribs we found
-	for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(const char **) &attribName, &type, &count) == B_OK; i++)
+	#ifdef B_ZETA_VERSION_1_0_0
+		for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(const char **) &attribName, &type, &count) == B_OK; i++)
+	#else
+		for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(char **) &attribName, &type, &count) == B_OK; i++)
+	#endif
 	{
 		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
 			InsertAttribute(attribName,attribMessage, count-1);

@@ -84,7 +84,7 @@ if (mover_menu_layout != justification)
 }
 
 
-void Mover::Draw(ToolBar *tb,BRect updateRect)
+void Mover::Draw(ToolBar *tb,BRect /*updateRect*/)
 {
 	BRect tbRect=tb->Bounds();
 	if (mover_direction == P_M_VORWARD)

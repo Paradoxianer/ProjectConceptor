@@ -88,9 +88,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	//** 
 //	float left, top,right,bottom;
 //	tmpBar->GetItemMargins(&left,&top,&right,&bottom);
-	float left 		= 5;
 	float top		= 2;
-	float right		= 5;
 	float bottom	= 2;
 	menuFrame.bottom	= menuFrame.top+(height.ascent+height.descent+height.leading+top+bottom);
 	tmpBar->ResizeTo(menuFrame.Width(),menuFrame.Height());
@@ -336,9 +334,7 @@ BMenuBar *PWindow::MakeStatusBar(void)
 	font_height height; 
 	font->GetHeight(&height);
 	//DEBUG("statusFrame:\n top: %f\n bottom: %f\n",statusFrame.top,statusFrame.bottom);
-	float left 		= 5;
 	float top		= 2;
-	float right		= 5;
 	float bottom	= 2;
 //	tmpBar->GetItemMargins(&left,&top,&right,&bottom);
 	statusFrame.top=statusFrame.bottom-(height.ascent+height.descent+height.leading+top+bottom);

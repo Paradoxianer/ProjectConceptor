@@ -2,7 +2,7 @@
 #include <interface/Screen.h>
 
 #include "ToolMenu.h"
-#include "BitmapMenuItem.h"
+//#include "BitmapMenuItem.h"
 
 
 ToolMenu::ToolMenu(const char *name, BBitmap *icon,menu_layout layout = B_ITEMS_IN_MATRIX):ToolItem(name, icon, NULL, P_M_ONE_STATE_ITEM)
@@ -151,7 +151,7 @@ void ToolMenu::MouseUp(BPoint point)
 	if (!Bounds().Contains(point)) 
 	{
 		menuWindow->Hide();
-		SetEventMask(B_NO_EVENTS,B_LOCK_WINDOW_FOCUS | B_NO_POINTER_HISTORY);
+		SetEventMask(0,B_LOCK_WINDOW_FOCUS | B_NO_POINTER_HISTORY);
 		BPoint screenklick		= ConvertToScreen(point);
 		BPoint	menuWindowPoint;
 		int32 i=0;

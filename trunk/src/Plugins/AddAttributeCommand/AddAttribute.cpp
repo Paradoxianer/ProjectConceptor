@@ -129,7 +129,11 @@ void AddAttribute::DoAddAttribute(PDocument *doc, BMessage *node, BMessage *valu
 	delete tmpSubGroup;
 	if (undo)
 	{
-       	while (subGroup->GetInfo(B_ANY_TYPE, index, (const char **)&compareName, &typeFound, &count) == B_OK)
+		#ifdef B_ZETA_VERSION_1_0_0
+       		while (subGroup->GetInfo(B_ANY_TYPE, index, (const char **)&compareName, &typeFound, &count) == B_OK)
+       	#else
+       	    while (subGroup->GetInfo(B_ANY_TYPE, index, (char **)&compareName, &typeFound, &count) == B_OK)
+       	#endif    
     	{
     		if ( (strcmp(name,compareName) == B_OK) && (type == typeFound) )
     			lastIndex = count-1;
