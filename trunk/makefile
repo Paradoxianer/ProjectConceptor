@@ -146,8 +146,6 @@ include /boot/develop/etc/makefile-engine
 
 LEAFDIRS = \
 	src/Plugins/AddAttributeCommand	\
-	src/Plugins/BasicEditor 				\
-	src/Plugins/BasicEditor/BasicRenderer	\
 	src/Plugins/ChangeValueCommand 	\
 	src/Plugins/ClassEditor			 	\
 	src/Plugins/DeleteCommand   		\
@@ -158,7 +156,6 @@ LEAFDIRS = \
 	src/Plugins/NavigatorEditor  			\
 	src/Plugins/RemoveAttributeCommand	\
 	src/Plugins/ResizeCommand			\
-	src/Plugins/SampleEditor	  		\
 	src/Plugins/StandardTranslator 	  	\
 	src/Plugins/SelectCommand			\
 	src/Plugins/CopyCommand			\
