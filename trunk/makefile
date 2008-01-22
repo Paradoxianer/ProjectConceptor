@@ -137,6 +137,8 @@ TARGET_DIR	=  .
 OBJ_DIR		= obj.x86
 
 INSTALL_DIR	= /boot/apps/Development/ProjectConceptor
+PLUGIN_DIR	= Plugins
+
 
 APP_MENU	= Software/Development
 
@@ -165,6 +167,24 @@ default .DEFAULT:
 	-@for f in $(LEAFDIRS); do \
 		$(MAKE) -C $$f $@; \
 	done
+	mkdir -p ./Plugins
+	mkdir -p ./Plugins/Commands
+
+	ln -sf ../src/Plugins/GraphEditor/obj.x86/GraphEditor ./Plugins/GraphEditor
+	ln -sf ../src/Plugins/NavigatorEditor/obj.x86/NavigatorEditor ./Plugins/NavigatorEditor
+
+	ln -sf ../../src/Plugins/AddAttributeCommand/obj.x86/AddAttribute ./Plugins/Commands/AddAttribute
+	ln -sf ../../src/Plugins/ChangeValueCommand/obj.x86/ChangeValue ./Plugins/Commands/ChangeValue
+	ln -sf ../../src/Plugins/CopyCommand/obj.x86/Copy ./Plugins/Commands/Copy
+	ln -sf ../../src/Plugins/DeleteCommand/obj.x86/Delete ./Plugins/Commands/Delete
+	ln -sf ../../src/Plugins/FindCommand/obj.x86/Find ./Plugins/Commands/Find
+	ln -sf ../../src/Plugins/GroupCommand/obj.x86/Group ./Plugins/Commands/Group
+	ln -sf ../../src/Plugins/InsertCommand/obj.x86/Insert ./Plugins/Commands/Insert
+	ln -sf ../../src/Plugins/MoveCommand/obj.x86/Move ./Plugins/Commands/Move
+	ln -sf ../../src/Plugins/PasteCommand/obj.x86/Paste ./Plugins/Commands/Paste
+	ln -sf ../../src/Plugins/RemoveAttributeCommand/obj.x86/RemoveAttribute ./Plugins/Commands/RemoveAttribute
+	ln -sf ../../src/Plugins/ResizeCommand/obj.x86/Resize ./Plugins/Commands/Resize
+	ln -sf ../../src/Plugins/SelectCommand/obj.x86/Select ./Plugins/Commands/Select
 
 clean::
 	-@for f in $(LEAFDIRS); do \
@@ -177,8 +197,9 @@ install::
 	@echo "Copying locale files"
 	@echo $(INSTALL_DIR)
 	@mkdir -p $(INSTALL_DIR)
-	@cp -rf ./Language $(INSTALL_DIR)
-	@cd $(INSTALL_DIR)/Language
+	@cp -rf ./$(NAME) $(INSTALL_DIR)
+#	@cp -rf ./Language $(INSTALL_DIR)
+#	@cd $(INSTALL_DIR)/Language
 	@echo "Done copying."
 
 
