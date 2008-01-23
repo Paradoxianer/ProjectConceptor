@@ -164,6 +164,7 @@ LEAFDIRS = \
 	src/Plugins/PasteCommand		
 
 default .DEFAULT:
+	ln -sf ProjectConceptor ProjectConceptor.a 
 	-@for f in $(LEAFDIRS); do \
 		$(MAKE) -C $$f $@; \
 	done
