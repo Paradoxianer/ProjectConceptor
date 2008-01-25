@@ -25,6 +25,7 @@ TYPE= APP
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
 SRCS= 		src/AboutWindow.cpp \
+		src/AboutView.cpp \
 		src/MainView.cpp \
 		src/ProjectConceptor.cpp \
 		src/PWindow.cpp \

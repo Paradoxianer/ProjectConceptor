@@ -9,6 +9,7 @@
 #include "AboutWindow.h"
 #include "AboutView.h"
 #include "ProjectConceptorDefs.h"
+#include "SvnInfo.h"
 
 AboutWindow::AboutWindow():BWindow(BRect(100,100,500,350),_T("About"),B_FLOATING_WINDOW,0)
 {
@@ -20,7 +21,7 @@ AboutWindow::AboutWindow():BWindow(BRect(100,100,500,350),_T("About"),B_FLOATING
 	#ifdef REV_NUMBER
 	AddChild(new BStringView(Bounds(),"VersionsString",REV_NUMBER));
 	#else
-	AddChild(new BStringView(Bounds(),"VersionsString","TEST"));
+	AddChild(new BStringView(Bounds(),"VersionsString",SVN_REV_STR));
 	#endif
 	
 	AboutView* av = new AboutView(windowRect);

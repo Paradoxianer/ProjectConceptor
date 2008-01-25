@@ -2,7 +2,7 @@
 #define SVN_INFO_H
 
 
-#define SVN_REV $Rev$
+#define SVN_REV_STR "$Rev$"
 
 
 #endif
