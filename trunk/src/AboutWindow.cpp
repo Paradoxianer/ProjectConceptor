@@ -22,6 +22,7 @@ AboutWindow::AboutWindow():BWindow(BRect(100,100,500,350),_T("About"),B_FLOATING
 	AddChild(new BStringView(Bounds(),"VersionsString",REV_NUMBER));
 	#else
 	AddChild(new BStringView(Bounds(),"VersionsString",SVN_REV_STR));
+	AddChild(new BStringView(Bounds(),"VersionsString",SVN_BUILD_DATE_STR));
 	#endif
 	
 	AboutView* av = new AboutView(windowRect);
