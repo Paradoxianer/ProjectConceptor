@@ -171,8 +171,7 @@ LEAFDIRS = \
 
 default .DEFAULT:
 	@echo "Set SVN the propset to a file"
-	@svn propset svn:keywords "Revision" src/SvnInfo.h 
-	@svn propset svn:keywords "LastChangedDate" src/SvnInfo.h 
+	@svn propset svn:keywords "Revision" "LastChangedDate" src/SvnInfo.h 
 	@echo "--------------------------------------------"
 	
 	ln -sf ProjectConceptor ProjectConceptor.a 
