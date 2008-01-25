@@ -3,8 +3,8 @@
 #include <interface/PrintJob.h>
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <interface/IconMenu.h>
-#endif 
- 
+#endif
+
 #include <interface/MenuItem.h>
 #include <interface/ScrollBar.h>
 #include <interface/ScrollView.h>
@@ -35,7 +35,7 @@ PWindow::PWindow(BRect rect,PDocument *document):BWindow(rect,"ProjectConceptor"
 	Show();
 	#ifdef B_ZETA_VERSION_1_0_0
 		languageChanger.SetTarget(this);
-    #endif 
+    #endif
 }
 
 PWindow::PWindow(BMessage *archive):BWindow(archive)
@@ -60,8 +60,8 @@ void PWindow::Init(void)
 	oldShortcutMessage		= new BMessage();;
 	P_M_MAIN_VIEW_LEFT		= 0.0;
 	P_M_MAIN_VIEW_TOP		= 0.0;
-	P_M_MAIN_VIEW_BOTTOM	= Bounds().Height();	
-	P_M_MAIN_VIEW_RIGHT		= Bounds().Width();	
+	P_M_MAIN_VIEW_BOTTOM	= Bounds().Height();
+	P_M_MAIN_VIEW_RIGHT		= Bounds().Width();
 	AddChild(menuBar		= MakeMenu());
 	AddChild(statusBar		= MakeStatusBar());
 
@@ -70,7 +70,7 @@ void PWindow::Init(void)
 	configWindow			= NULL;
 	aboutWindow				= NULL;
 	BRect containerRect		= BRect(P_M_MAIN_VIEW_LEFT+1,P_M_MAIN_VIEW_TOP+2,P_M_MAIN_VIEW_RIGHT-1,P_M_MAIN_VIEW_BOTTOM-1);
-	mainView				= new MainView(doc,containerRect, "tabContainer"); 
+	mainView				= new MainView(doc,containerRect, "tabContainer");
 	SetSizeLimits(300,6000,150,4000);
 	MakeToolbars();
 	AddChild(mainView);
@@ -83,9 +83,9 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems	= new BMessage();
 
 	BMenuBar	*tmpBar = new BMenuBar(menuFrame,P_M_MENU_BAR);
-	font_height height; 
+	font_height height;
 	tmpBar->GetFontHeight(&height);
-	//** 
+	//**
 //	float left, top,right,bottom;
 //	tmpBar->GetItemMargins(&left,&top,&right,&bottom);
 	float top		= 2;
@@ -93,8 +93,8 @@ BMenuBar *PWindow::MakeMenu(void)
 	menuFrame.bottom	= menuFrame.top+(height.ascent+height.descent+height.leading+top+bottom);
 	tmpBar->ResizeTo(menuFrame.Width(),menuFrame.Height());
 	BMenuItem	*item;
-	BMenu		*subMenu;	
-	BMenu 		*menu;		
+	BMenu		*subMenu;
+	BMenu 		*menu;
 
 	// build AppMenu
 /*	menu= new BMenu(_T("IconMenu"));
@@ -137,7 +137,7 @@ BMenuBar *PWindow::MakeMenu(void)
 			subMenu->AddItem(new BMenuItem(_T(editorPlg->GetName()),editorAdd));
 		}
 	}
-	
+
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_NEW_TAB),new BMessage(MENU_FILE_NEW_TAB),'T'));
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_NEW_TAB);
@@ -209,13 +209,13 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_CLEAR);
 	menu->AddSeparatorItem();
-	
+
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_SELECT_ALL),new BMessage(B_SELECT_ALL),'A'));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_SELECT_ALL);
 	menu->AddSeparatorItem();
-	
+
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_PROJECT_SETTINGS),new BMessage(MENU_EDIT_PROJECT_SETTINGS)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
@@ -235,7 +235,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_SEARCH_FIND_NEXT);
 	menu->AddSeparatorItem();
-	
+
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_SEARCH_REPLACE),new BMessage(MENU_SEARCH_REPLACE),'R'));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
@@ -271,7 +271,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_WINDOW);
 
-	
+
 	menu=new BMenu(_T(P_MENU_MACRO));
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_MACRO_START_RECORDING),new BMessage(MENU_MACRO_START_RECORDING)));
 	item->SetTarget(doc);
@@ -281,7 +281,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_STOP_RECORDING);
-	
+
 	subMenu	= new BMenu(_T(P_MENU_MACRO_PLAY));
 	menu->AddItem(subMenu);
 	localizeMenuItems->AddPointer("item",(void *) subMenu->Superitem());
@@ -295,11 +295,10 @@ BMenuBar *PWindow::MakeMenu(void)
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_SAVE);
-	
+
 	tmpBar->AddItem(menu);
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO);
-	tmpBar->AddItem(menu);
 
 	menu=new BMenu(_T(P_MENU_HELP));
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_HELP_ABOUT),new BMessage(MENU_HELP_ABOUT)));
@@ -310,7 +309,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_HELP);
 	item->SetTarget(be_app_messenger);*/
-	
+
 	tmpBar->AddItem(menu);
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_HELP);
@@ -326,12 +325,12 @@ BMenuBar *PWindow::MakeStatusBar(void)
 	BRect statusFrame=Bounds();
 
 	BMenuBar *tmpBar=new BMenuBar(statusFrame,P_M_STATUS_BAR, B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM);
-	//use FontHigh;	
+	//use FontHigh;
 	BFont *font=new BFont();
 	tmpBar->GetFont(font);
 	font->SetSize(font->Size()-3);
 	tmpBar->SetFont(font);
-	font_height height; 
+	font_height height;
 	font->GetHeight(&height);
 	//DEBUG("statusFrame:\n top: %f\n bottom: %f\n",statusFrame.top,statusFrame.bottom);
 	float top		= 2;
@@ -366,7 +365,7 @@ void PWindow::MakeToolbars()
 	BRect statusFrame=Bounds();
 	statusFrame.right=20;
 
-	
+
 	tmpBar		=new ToolBar(statusFrame,P_M_STANDART_TOOL_BAR,B_ITEMS_IN_ROW);
 
 	tmpBitmap	= BTranslationUtils::GetBitmap(B_PNG_FORMAT,"new");
@@ -396,41 +395,41 @@ void PWindow::MakeToolbars()
 		//**Alert that there was no Editor found
 	}
 //	toolItem->SetTarget(this);
-	tmpBar->AddItem(toolMenu);	
+	tmpBar->AddItem(toolMenu);
 	tmpBar->AddSeperator();
 
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"open");
 	toolItem = new ToolItem("open",tmpBitmap,new BMessage(MENU_FILE_OPEN));
 	toolItem->SetTarget(be_app);
-	tmpBar->AddItem(toolItem);		
+	tmpBar->AddItem(toolItem);
 
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"save");
 	toolItem = new ToolItem("save",tmpBitmap,new BMessage(MENU_FILE_SAVE));
-	tmpBar->AddItem(toolItem);	
+	tmpBar->AddItem(toolItem);
 	toolItem->SetTarget(doc);
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"save as");
 	toolItem = new ToolItem("save as",tmpBitmap,new BMessage(MENU_FILE_SAVE));
-	tmpBar->AddItem(toolItem);	
+	tmpBar->AddItem(toolItem);
 	toolItem->SetTarget(doc);
 
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"print");
 	toolItem = new ToolItem("print",tmpBitmap,new BMessage(MENU_FILE_PRINT));
 	toolItem->SetTarget(doc);
-	tmpBar->AddItem(toolItem);	
-	
+	tmpBar->AddItem(toolItem);
+
 
 	tmpBar->AddSeperator();
 	tmpBar->AddSeperator();
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"find");
 	toolItem = new ToolItem("find",tmpBitmap,NULL);
-	tmpBar->AddItem(toolItem);	
+	tmpBar->AddItem(toolItem);
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"trash");
 	toolItem = new ToolItem("find",tmpBitmap,NULL);
-	tmpBar->AddItem(toolItem);	
+	tmpBar->AddItem(toolItem);
 	tmpBar->AddSeperator();
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"font");
 	toolItem = new ToolItem("font",tmpBitmap,new BMessage('font'));
-	tmpBar->AddItem(toolItem);		
+	tmpBar->AddItem(toolItem);
 
 	AddToolBar(tmpBar);
 /*	tmpBar=new	ToolBar(statusFrame,P_M_EDITOR_TOOL_BAR,B_ITEMS_IN_COLUMN);
@@ -440,14 +439,14 @@ void PWindow::MakeToolbars()
 
 	/*tmpBar=new	ToolBar(statusFrame,P_M_FORMAT_TOOL_BAR,B_ITEMS_IN_ROW);
 	AddToolBar(tmpBar);*/
-	
-	
+
+
 /*	tmpBar=new	ToolBar(statusFrame,P_M_STATUS_BAR,B_ITEMS_IN_ROW);
 	AddToolBar(tmpBar);*/
 }
 
 
-bool PWindow::QuitRequested() 
+bool PWindow::QuitRequested()
 {
 	TRACE();
 	if (manager->CountPWindows() > 1)
@@ -464,7 +463,7 @@ bool PWindow::QuitRequested()
  */
 void PWindow::MessageReceived(BMessage *message)
 {
-	switch(message->what) 
+	switch(message->what)
 	{
 		case WINDOW_REGISTRY_ADDED:
 			{
@@ -485,10 +484,10 @@ void PWindow::MessageReceived(BMessage *message)
 				Minimize(false);
 			}
 			break;
-			
+
 		case MENU_FILE_NEW:
 			{
-				
+
 			}
 			break;
 		case MENU_FILE_NEW_TAB:
@@ -516,7 +515,7 @@ void PWindow::MessageReceived(BMessage *message)
 		case B_LANGUAGE_CHANGED:
 				ChangeLanguage();
 			break;
-    #endif 
+    #endif
 		case MENU_APP_SETTINGS:
 				ShowSettings();
 			break;
@@ -540,13 +539,13 @@ void PWindow::MessageReceived(BMessage *message)
 void PWindow::AddEditor(const char *name,PEditor *editor)
 {
 	BTab	*tab = new BTab();
-	BRect	rect = mainView->Bounds(); 
-	rect.InsetBy(5,5); 
-	rect.bottom -= mainView->TabHeight(); 
+	BRect	rect = mainView->Bounds();
+	rect.InsetBy(5,5);
+	rect.bottom -= mainView->TabHeight();
 	(editor->GetView())->ResizeTo(rect.Width()-B_V_SCROLL_BAR_WIDTH ,rect.Height()-B_H_SCROLL_BAR_HEIGHT);
 	(editor->GetView())->MoveTo(5,5);
-	mainView->AddTab(new BScrollView("editorScroller",editor->GetView(),B_FOLLOW_ALL_SIDES,0,true,true), tab); 
-	tab->SetLabel(name); 
+	mainView->AddTab(new BScrollView("editorScroller",editor->GetView(),B_FOLLOW_ALL_SIDES,0,true,true), tab);
+	tab->SetLabel(name);
 	mainView->Select(tab);
 	editor->GetView()->MakeFocus(true);
 	(doc->GetEditorManager())->RegisterPEditor(editor);
@@ -584,7 +583,7 @@ BMenu*	PWindow::GetMenu(const char *signature)
 		err = err | localizeMenuItems->FindPointer("item",i,(void **)&item);
 //		if ((err == B_OK)&&(string == signature))
 		if (strcmp(signature,string) == B_OK)
-			found=true;		
+			found=true;
 		i++;
 	}
 	if (found)
@@ -610,7 +609,7 @@ BMenuItem*	PWindow::GetMenuItem(const char *menuitemSignature)
 		err	= localizeMenuItems->FindPointer("itemstring",i,(void **)&string);
 		err = err | localizeMenuItems->FindPointer("item",i,(void **)&item);
 		if ( (err) && (strcmp(string,menuitemSignature)==B_OK) )
-			found=true;		
+			found=true;
 		i++;
 	}
 	if (found)
@@ -771,7 +770,7 @@ status_t PWindow::AddToolMenu(const char *toolbarSignatur,ToolMenu *toolMenu)
 	else
 		err= B_BAD_VALUE;
 	return err;
-	
+
 }
 
 status_t PWindow::AddToolItem(const char *toolbarSignatur,const char *toolmenuSignatur,ToolItem *toolItem,int32 index = -1)
@@ -812,7 +811,7 @@ status_t	PWindow::RemoveMenu(const char* menuSignature)
 	}
 	else
 		return B_BAD_VALUE;
-	
+
 }
 
 status_t	PWindow::RemoveMenuItem(const char* signature)
@@ -871,7 +870,7 @@ status_t	PWindow::RemoveToolMenu(const char* toolbarSignature,const char* signat
 		toolBar->RemoveItem(tmpToolMenu);
 	else
 		err		= B_BAD_VALUE;
-	return err;	
+	return err;
 }
 
 status_t	PWindow::RemoveToolItem(const char* toolbarSignature,const char* signature)
@@ -883,7 +882,7 @@ status_t	PWindow::RemoveToolItem(const char* toolbarSignature,const char* signat
 		toolBar->RemoveItem(tmpToolItem);
 	else
 		err		= B_BAD_VALUE;
-	return err;	
+	return err;
 }
 
 
