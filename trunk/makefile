@@ -24,7 +24,7 @@ TYPE= APP
 #	if two source files with the same name (source.c or source.cpp)
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
-SRCS= 	src/AboutWindow.cpp \
+SRCS= 		src/AboutWindow.cpp \
 		src/MainView.cpp \
 		src/ProjectConceptor.cpp \
 		src/PWindow.cpp \
@@ -162,6 +162,12 @@ LEAFDIRS = \
 	src/Plugins/SelectCommand			\
 	src/Plugins/CopyCommand			\
 	src/Plugins/PasteCommand		
+
+all : Makefile $(TARGET_DIR)
+	AboutWindow.o : AboutWindow.cpp
+	g++ -c main.cpp -DREV_NUMBER=`svn info | grep Revision | awk '{print $$2}'`
+	$(TARGET_DIR) : AboutWindow.o
+	g++ -o $(TARGET_DIR) AboutWindow.o
 
 default .DEFAULT:
 	ln -sf ProjectConceptor ProjectConceptor.a 
