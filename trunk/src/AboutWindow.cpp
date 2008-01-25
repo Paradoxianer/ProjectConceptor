@@ -14,11 +14,10 @@ AboutWindow::AboutWindow():BWindow(BRect(100,100,500,350),_T("About"),B_FLOATING
 	BRect windowRect	= tmpScreen->Frame();
 	MoveTo((windowRect.Width()-Bounds().Width())/2,(windowRect.Height()-Bounds().Height())/2);
 	
-	AddChild(new BStringView(Bounds(),"VersionsString",SVN_REV_STR));
+	AddChild(new BStringView(Bounds(),"VersionsString",SVN_REV_STR " | " SVN_DATE_STR ));
 	
 	AboutView* av = new AboutView(windowRect);
 	AddChild(av);
-	//test commitsS
 	
 }
 AboutWindow::~AboutWindow()
