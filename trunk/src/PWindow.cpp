@@ -303,7 +303,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	menu=new BMenu(_T(P_MENU_HELP));
 	//menu->AddItem(item = new BMenuItem(_T(P_MENU_HELP_ABOUT),new BMessage(MENU_HELP_ABOUT)));
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_HELP_ABOUT),B_ABOUT_REQUESTED);
-	item->SetTarget(be_app_messenger);
+	item->SetTarget(be_app);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_HELP_ABOUT);
 	/*menu->AddItem(	item = new BMenuItem(_T(P_MENU_APP_HELP), new BMessage(MENU_APP_HELP)));
