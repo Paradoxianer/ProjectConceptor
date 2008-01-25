@@ -301,7 +301,8 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO);
 
 	menu=new BMenu(_T(P_MENU_HELP));
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_HELP_ABOUT),new BMessage(MENU_HELP_ABOUT)));
+	//menu->AddItem(item = new BMenuItem(_T(P_MENU_HELP_ABOUT),new BMessage(MENU_HELP_ABOUT)));
+	menu->AddItem(item = new BMenuItem(_T(P_MENU_HELP_ABOUT),B_ABOUT_REQUESTED);
 	item->SetTarget(be_app_messenger);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_HELP_ABOUT);
