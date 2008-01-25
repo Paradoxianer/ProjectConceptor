@@ -163,7 +163,7 @@ LEAFDIRS = \
 	src/Plugins/CopyCommand			\
 	src/Plugins/PasteCommand		
 
-#all : Makefile $(TARGET_DIR)
+# all : Makefile $(TARGET_DIR)
 #	AboutWindow.o : AboutWindow.cpp
 #	g++ -c AboutWindow.cpp -DREV_NUMBER=`svn info | grep Revision | awk '{print $$2}'`
 #	$(TARGET_DIR) : AboutWindow.o
