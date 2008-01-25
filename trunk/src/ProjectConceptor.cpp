@@ -189,6 +189,8 @@ void ProjektConceptor::MessageReceived(BMessage *message)
 		}
 		case MENU_HELP_ABOUT:
 		{
+			AboutWIndow *aboutWindow = new AboutWindow();
+			aboutWindow->Show();
 		}
 		default:
 			BApplication::MessageReceived(message);
