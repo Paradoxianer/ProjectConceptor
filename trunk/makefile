@@ -170,6 +170,10 @@ LEAFDIRS = \
 #	g++ -o $(TARGET_DIR) AboutWindow.o
 
 default .DEFAULT:
+	@echo "Set SVN the propset to a file"
+	@svn propset svn:keywords "Revision" src/SvnInfo.h 
+	@echo "--------------------------------------------"
+	
 	ln -sf ProjectConceptor ProjectConceptor.a 
 	-@for f in $(LEAFDIRS); do \
 		$(MAKE) -C $$f $@; \
