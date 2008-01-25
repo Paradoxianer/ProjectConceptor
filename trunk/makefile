@@ -54,8 +54,7 @@ SRCS= 		src/AboutWindow.cpp \
 		src/Tools/PDocLoader.cpp \
 		src/Tools/Indexer.cpp \
 		src/Tools/InputRequestView.h \
- 		src/Tools/InputRequest.h \
- 		src/Tools/ScreenInfo.cpp 
+ 		src/Tools/InputRequest.h  
 
 
 #	specify the resource files to use
