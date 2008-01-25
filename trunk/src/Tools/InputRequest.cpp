@@ -36,18 +36,19 @@ void InputRequest::Init(const char* label, const char* text, const char* btn0_la
 {
   BRect frame = Bounds();
   fIrView = new InputRequestView(frame, btn0_label, btn1_label, btn2_label);
-  
+
   // now move and resize the window with the calculated width of our view
-  MoveTo(BPoint(fScreen.GetX()/2-fIrView->Width()/2, fScreen.GetY()/2-IR_WINDOW_HEIGHT/2-125)); 
+  BRect	screenRect = fScreen.Frame();
+  MoveTo(BPoint(screenRect.Width()/2-fIrView->Width()/2, screenRect.Height()/2-IR_WINDOW_HEIGHT/2-125));
   ResizeTo(fIrView->Width(), IR_WINDOW_HEIGHT);
-  
+
   AddChild(fIrView);
 
   SetLabel(label);
   SetText(text);
-  
+
   fIrView->SelectText();
-  
+
   //init
   fButton_index = -1;
 }
@@ -78,7 +79,7 @@ void InputRequest::MessageReceived(BMessage *msg)
 
 void InputRequest::SetLabel(const char* label)
 {
-  fIrView->SetLabel(label);  
+  fIrView->SetLabel(label);
 }
 
 const char* InputRequest::Label()
@@ -104,10 +105,10 @@ int32 InputRequest::Go(char** input)
   {
     snooze(100000);
   }
-  
+
   char* input_value = (char*) calloc(strlen(fIrView->Text()) + 1, 1);
   strcpy(input_value, fIrView->Text());
-  
+
   *input = input_value;
   Hide();
   return fButton_index;

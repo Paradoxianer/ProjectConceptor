@@ -7,15 +7,15 @@
  * @author Christian Lörchner
  * @date 2006/10/04
  *
- * @todo 
+ * @todo
  */
 
 #ifndef _INPUTREQUEST_H
 #define _INPUTREQUEST_H
 
-#include <Window.h>  
+#include <Window.h>
+#include <Screen.h>
 #include "InputRequestView.h"
-#include "ScreenInfo.h"
 
 class InputRequest : public BWindow
 {
@@ -32,11 +32,11 @@ class InputRequest : public BWindow
 	virtual	const char*	Label();
 	virtual	void		SetText(const char* text);
 	virtual	const char*	Text();
-	
+
 	#define	IR_WINDOW_WIDTH		315 // recommend min. value! the view does not take this in every case (button width)
 	#define	IR_WINDOW_HEIGHT	75
 
-	ScreenInfo			fScreen;
+	BScreen				fScreen;
 
 	InputRequestView	*fIrView;
 	int32				fButton_index;
