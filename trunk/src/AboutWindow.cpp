@@ -18,6 +18,7 @@ AboutWindow::AboutWindow():BWindow(BRect(100,100,500,350),_T("About"),B_FLOATING
 	
 	AboutView* av = new AboutView(windowRect);
 	AddChild(av);
+	//test commitsS
 	
 }
 AboutWindow::~AboutWindow()
