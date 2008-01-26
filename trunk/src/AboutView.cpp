@@ -55,7 +55,7 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	
 	//revision and build date stringview
 	//AddChild(new BStringView(BRect(0,kH-20,kW,kH),"VersionsString",fRevNumb.String()));
-	AddChild(new BStringView(BRect((kW+60)/2-(fRevNumb.Length()*5/2),65,kW,75),"VersionsString",fRevNumb.String()));
+	AddChild(new BStringView(BRect((kW+60)/2-(fRevNumb.Length()*5/2),75,kW,85),"VersionsString",fRevNumb.String()));
 }
 
 AboutView::~AboutView()
