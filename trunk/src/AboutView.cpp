@@ -15,6 +15,11 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	kW = frame.Width();
 	kH = frame.Height();
 	
+	//BBitmap
+	
+	
+	//
+	
 	//Debug
 	//char* meinCharSTring;
 	//sprintf(meinCharSTring,"%d",h);
