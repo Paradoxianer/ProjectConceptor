@@ -2,6 +2,7 @@
 #define ABOUT_WINDOW_H
 
 #include <interface/Window.h>
+#include "AboutView.h"
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
@@ -18,11 +19,14 @@
 class AboutWindow: public BWindow
 {
 
-public:
-						AboutWindow();
-						~AboutWindow();
-protected:
-		void			ChangeLanguage(void);
-private:
+	public:
+			AboutWindow();
+			~AboutWindow();
+			
+	protected:
+			void ChangeLanguage(void);
+			
+	private:
+			AboutView* fAboutView;	
 };
 #endif

@@ -2,6 +2,7 @@
 #define ABOUT_VIEW_H
 
 #include <interface/View.h>
+#include <String.h>
  
 class AboutView: public BView
 {
@@ -16,6 +17,9 @@ class AboutView: public BView
 			
 	private:
 			//
+			int kW, kH;
+			BString fRevNumbRaw, fRevNumb;
+			int kStrLength;
 
 
 };
