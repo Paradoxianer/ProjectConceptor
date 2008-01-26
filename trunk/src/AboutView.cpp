@@ -31,8 +31,6 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	AddChild(TitleView);
 	//SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	
-	//test
-	
 	//Debug
 	//char* meinCharSTring;
 	//sprintf(meinCharSTring,"%d",h);
