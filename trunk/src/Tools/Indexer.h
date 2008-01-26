@@ -40,6 +40,8 @@ public:
 			BMessage*			IndexCommand(BMessage *command,bool includeNodes=false);	
 			BMessage*			PointerForIndex(int32 index){return sorter[index];};
 			
+			BMessage*			RegisterDeIndexNode(BMessage *node);
+
 			BMessage*			DeIndexNode(BMessage *node);
 			BMessage*			DeIndexConnection(BMessage *connection);	
 			BMessage*			DeIndexUndo(BMessage *undo);	

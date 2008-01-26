@@ -18,7 +18,7 @@ void Insert::Undo(PDocument *doc,BMessage *undo)
 	BMessage		*connection			= new BMessage();
 	int32			i					= 0;
 	PCommand::Undo(doc,undo);
-	undo->FindPointer("parentNode", (void **)&parentNode);
+	undo->FindPointer("Node::parent", (void **)&parentNode);
 	if (parentNode)
 		parentNode->FindPointer("Node::allNodes", (void **)&parentAllNodes);
 	while (undo->FindPointer("node",i,(void **)&node) == B_OK)
@@ -49,7 +49,7 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings)
 	BList			*allConnections		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();
 	int32			i					= 0;
-	settings->FindPointer("parentNode", (void **)&parentNode);
+	settings->FindPointer("Node::parent", (void **)&parentNode);
 	if (parentNode)
 	{
 		if (parentNode->FindPointer("Node::allNodes", (void **)&parentAllNodes) != B_OK)

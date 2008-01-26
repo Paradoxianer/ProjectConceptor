@@ -42,15 +42,15 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 			for (i=0; i<allNodeList->CountItems();i++)
 			{
 				subNode =(BMessage *) allNodeList->ItemAt(i);
-				returnNode->AddMessage("allNodesList",IndexNode(subNode));
+				returnNode->AddPointer("allNodesList",subNode);
 			}
 		}
-		if ((returnNode->FindPointer("allConnections",(void **)&allConnectionList) == B_OK) && (allConnectionList != NULL) )
+		if ((returnNode->FindPointer("Node::allConnections",(void **)&allConnectionList) == B_OK) && (allConnectionList != NULL) )
 		{
 			for (i=0; i<allConnectionList->CountItems();i++)
 			{
 				subNode =(BMessage *) allConnectionList->ItemAt(i);
-				returnNode->AddMessage("allConnectionsList",IndexNode(subNode));
+				returnNode->AddPointer("allConnectionsList",IndexConnection(subNode));
 			}
 		}
 
@@ -186,6 +186,16 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
 	return returnCommand;
 }
 
+
+BMessage* Indexer::RegisterDeIndexNode(BMessage *node)
+{
+	void		*tmpPointer			= NULL;
+	node->FindPointer("this",(void **)&tmpPointer);
+	node->RemoveName("this");
+	sorter[(int32)tmpPointer] = node;
+	return node;
+}
+
 			
 BMessage* Indexer::DeIndexNode(BMessage *node)
 {
@@ -199,7 +209,7 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 	i = 0;
 	if (node->FindPointer("Node::allNodes",&tmpPointer) == B_OK)
 			node->RemoveName("Node::allNodes");
-	while (node->FindMessage("allNodesList",i,subContainerEntry) == B_OK)
+	while (node->FindPointer("allNodesList",i,(void **)&subContainerEntry) == B_OK)
 	{
 		allNodesList->AddItem(DeIndexNode(subContainerEntry));
 		subContainerEntry	= new BMessage();
@@ -211,8 +221,8 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 		node->RemoveName("allNodesList");
 	}	
 	i = 0;
-	if (node->FindPointer("allConnections",&tmpPointer) == B_OK)
-			node->RemoveName("allConnections");
+	if (node->FindPointer("Node::allConnections",&tmpPointer) == B_OK)
+			node->RemoveName("Node::allConnections");
 	while (node->FindMessage("allConnectionsList",i,subContainerEntry) == B_OK)
 	{
 		allConnectionsList->AddItem(DeIndexNode(subContainerEntry));
@@ -221,13 +231,13 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 	}
 	if (allConnectionsList->CountItems()>0)
 	{
-		node->AddPointer("allConnections",allConnectionsList);
+		node->AddPointer("Node::allConnections",allConnectionsList);
 		node->RemoveName("allConnectionsList");
 	}
-	if (node->FindPointer("parentNode",(void **)&tmpPointer) == B_OK)
+	if (node->FindPointer("Node::parent",(void **)&tmpPointer) == B_OK)
 	{
-		node->RemoveName("parentNode");
-		node->AddPointer("parentNode",DeIndexNode((BMessage *)tmpPointer));
+		node->RemoveName("Node::parent");
+		node->AddPointer("Node::parent",DeIndexNode((BMessage *)tmpPointer));
 	}
 	node->FindPointer("this",(void **)&tmpPointer);
 	node->RemoveName("this");
@@ -246,7 +256,6 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 			}
 		}
 	}
-	sorter[(int32)tmpPointer] = node;
 	node->PrintToStream();
 	return node;
 }

@@ -50,6 +50,7 @@ public:
 protected:
 				void		Init();
 				void		InsertAttribute(char *attribName, BMessage *attribute,int32 count);
+				void		AdjustParents(BMessage* theParent, BMessage *command);
 		BMessage			*viewMessage;
 
 

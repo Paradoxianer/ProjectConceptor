@@ -28,7 +28,7 @@ void Group::Undo(PDocument *doc,BMessage *undo)
 			}
 		}
 
-		if ((node->FindPointer("allConnections",(void **)&subList) == B_OK) && (subList))
+		if ((node->FindPointer("Node::allConnections",(void **)&subList) == B_OK) && (subList))
 		{
 			while (subList->CountItems()>0)
 			{
@@ -92,19 +92,15 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings)
 				if ((groupedNode != NULL) && ( (groupedNode->what == P_C_CLASS_TYPE) || (groupedNode->what == P_C_GROUP_TYPE)) )
 				{
 					//add the parentNode so that we can find out to wich parent the new groupedNode belongs
-					if (groupedNode->FindPointer("parentNode",(void **)&oldParentNode) == B_OK)
+					if (groupedNode->FindPointer("Node::parent",(void **)&oldParentNode) == B_OK)
 					{
-					/*	BList	*oldAllNodesList	= NULL;
-						oldParentNode->FindPointer("Node::allNodes",(void **) &oldAllNodesList);
-						if (oldAllNodesList)
-							oldAllNodesList->RemoveItem(groupedNode);
 						undoMessage->AddPointer("changeNode",groupedNode);
 						undoMessage->AddPointer("oldParentNode",oldParentNode);
-						groupedNode->ReplacePointer("parentNode",node);*/
+						groupedNode->ReplacePointer("Node::parent",node);
 					}
 					else
-						groupedNode->AddPointer("parentNode",node);
-					groupedNode->AddPointer("parentNode",node);
+						groupedNode->AddPointer("Node::parent",node);
+//					groupedNode->AddPointer("Node::parent",node);
 					gAllNodes->AddItem(groupedNode);
 					
 					//calculate the groupFrame

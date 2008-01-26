@@ -988,7 +988,7 @@ void GraphEditor::BringToFront(Renderer *wichRenderer)
 	BList		*groupAllNodeList	= new BList();
 	Renderer	*tmpRenderer		= NULL;
 	
-	if (wichRenderer->GetMessage()->FindPointer("parentNode", (void **)&parentNode) == B_OK)
+	if (wichRenderer->GetMessage()->FindPointer("Node::parent", (void **)&parentNode) == B_OK)
 	{
 		parentNode->FindPointer(renderString,(void **)&tmpRenderer);
 		if (tmpRenderer)
@@ -1021,7 +1021,7 @@ void GraphEditor::SendToBack(Renderer *wichRenderer)
 	BMessage	*parentNode	= NULL;
 	Renderer	*painter	= NULL;
 	int32		i			= -1;
-	if (wichRenderer->GetMessage()->FindPointer("parentNode",(void **) &parentNode)==B_OK)
+	if (wichRenderer->GetMessage()->FindPointer("Node::parent",(void **) &parentNode)==B_OK)
 	{
 		painter	= FindRenderer(parentNode);
 		if (painter)
@@ -1035,7 +1035,7 @@ void GraphEditor::SendToBack(Renderer *wichRenderer)
 	Renderer	*painter	= NULL;
 	int32		i			= -1;
 	renderer->RemoveItem(wichRenderer);
-	if (wichRenderer->GetMessage()->FindPointer("parentNode",(void **) &parentNode)==B_OK)
+	if (wichRenderer->GetMessage()->FindPointer("Node::parent",(void **) &parentNode)==B_OK)
 	{
 		painter	= FindRenderer(parentNode);
 		if (painter)

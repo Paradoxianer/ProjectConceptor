@@ -57,7 +57,7 @@ void ClassRenderer::Init()
 		container->AddFloat("Node::xRadius",7.0);
 	if (container->FindFloat("Node::yRadius",&yRadius) != B_OK)
 		container->AddFloat("Node::yRadius",7.0);
-	container->FindPointer("parentNode", (void **)&parentNode);
+	container->FindPointer("Node::parent", (void **)&parentNode);
 
 }
 
@@ -226,11 +226,13 @@ void ClassRenderer::MouseUp(BPoint where)
 			if (!resizing)
 			{
 				BList		*selected	= doc->GetSelected();
-				BMessage	*mover	= new BMessage(P_C_EXECUTE_COMMAND);
+				BMessage	*mover		= new BMessage(P_C_EXECUTE_COMMAND);
 				mover->AddString("Command::Name","Move");
 				mover->AddFloat("dx",dx);
 				mover->AddFloat("dy",dy);
+				AdjustParents(parentNode,mover);
 				sentTo->SendMessage(mover);
+				
 			}
 			else
 			{
@@ -239,6 +241,7 @@ void ClassRenderer::MouseUp(BPoint where)
 				resizer->AddString("Command::Name","Resize");
 				resizer->AddFloat("dx",dx);
 				resizer->AddFloat("dy",dy);
+				AdjustParents(parentNode,resizer);
 				sentTo->SendMessage(resizer);
 			}
 			resizing		= false;
@@ -391,7 +394,7 @@ void ClassRenderer::ValueChanged()
 		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
 			InsertAttribute(attribName,attribMessage, count-1);
 	}
-	container->FindPointer("parentNode", (void **)&parentNode);
+	container->FindPointer("Node::parent", (void **)&parentNode);
 }
 
 BRect ClassRenderer::Frame( void )
@@ -511,4 +514,36 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	Renderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage,removeAttribMessage);
 	attributes->push_back(testRenderer);
 
+}
+
+void ClassRenderer::AdjustParents(BMessage* theParent, BMessage *command)
+{
+	if (theParent)
+	{
+		BMessage *tmpParent = theParent;
+		BRect		parentRect	= BRect(0,0,0,0);
+
+		//run through all Parents until we find the "Masterparent"
+		while (tmpParent)
+		{
+			tmpParent->FindRect("Node::frame",&parentRect);
+			GroupRenderer	*parent	= NULL;
+			if (tmpParent->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
+			{
+				if (parent->Frame() != parentRect)
+				{
+					BMessage	*changeValue		= new BMessage(P_C_EXECUTE_COMMAND);
+					BMessage	*valueContainer		= new BMessage();
+					changeValue->AddString("Command::Name","ChangeValue");
+					changeValue->AddPointer("node",tmpParent);
+					valueContainer->AddInt32("type",B_RECT_TYPE);
+					valueContainer->AddString("name", "Node::frame" );
+					valueContainer->AddRect("newValue", parent->Frame());
+					changeValue->AddMessage("valueContainer",valueContainer);
+					command->AddMessage("PCommand::subPCommand",changeValue);
+				}	
+			}
+			tmpParent->FindPointer("Node::parent", (void **)&tmpParent);
+		}
+	}
 }
