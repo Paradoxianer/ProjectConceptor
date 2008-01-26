@@ -2,7 +2,10 @@
 #define ABOUT_VIEW_H
 
 #include <interface/View.h>
+#include <TextView.h>
 #include <String.h>
+#include <Bitmap.h>
+#include "AboutLogo_64.h"
  
 class AboutView: public BView
 {
@@ -17,9 +20,12 @@ class AboutView: public BView
 			
 	private:
 			//
+			BBitmap* fBitmapType;
+			BTextView* TitleView;
 			int kW, kH;
 			BString fRevNumbRaw, fRevNumb;
 			int kStrLength;
+			
 
 
 };
