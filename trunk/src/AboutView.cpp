@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 #include <interface/Screen.h>
 #include <interface/Rect.h>
 #include <interface/StringView.h>
@@ -40,6 +40,12 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	
 	//CutString
 	fRevNumbRaw.SetTo(SVN_REV_STR);
+	
+	if(fRevNumbRaw.Length() == 5) 
+	{
+		fRevNumbRaw.SetTo("$Ref: --- $");
+	}
+	 
 	kStrLength = fRevNumbRaw.Length()-7;
 	fRevNumbRaw.MoveInto(fRevNumb, 5, kStrLength);
 	
