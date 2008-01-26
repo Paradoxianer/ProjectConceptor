@@ -17,7 +17,7 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	
 	//BBitmap
 	fBitmapType = new BBitmap(BRect(0,0,64-1,64-1),B_RGBA32);
-	memcpy(fBitmapType->Bits(), kLogogross64Bits, fBitmapType->BitsLength());
+	memcpy(fBitmapType->Bits(), kLogogross_64Bits, fBitmapType->BitsLength());
 	//
 	
 	//TitleTextView
