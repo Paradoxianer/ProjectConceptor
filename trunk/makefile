@@ -176,7 +176,7 @@ default .DEFAULT:
 	@echo "#define SVN_INFO_H" >> src/SvnInfo.h 
 	@echo "" >> src/SvnInfo.h 
 	@echo "//do not edit this" >> src/SvnInfo.h 
-	@echo "#define SVN_REV_STR \"\$$Rev:" `svn info | grep Revision | awk '{print $$2}'` "\$$\"" >> src/SvnInfo.h 
+	@echo "#define SVN_REV_STR \"`svn info | grep Revision | awk '{print $$2}'`\"" >> src/SvnInfo.h 
 	@echo "" >> src/SvnInfo.h 
 	@echo "#endif" >> src/SvnInfo.h 
 	@echo "UPDATED"
