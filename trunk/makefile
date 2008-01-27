@@ -170,9 +170,17 @@ LEAFDIRS = \
 #	g++ -o $(TARGET_DIR) AboutWindow.o
 
 default .DEFAULT:
-	@echo "Set SVN the propset to a file"
-	@svn propset svn:keywords "Revision" src/SvnInfo.h 
-	@echo "--------------------------------------------"
+	@echo "---------SVN INFO GEN-----------"
+	@cd src
+	@echo "" >> SvnInfo.h 
+	@echo "#ifndef SVN_INFO_H" > SvnInfo.h 
+	@echo "#define SVN_INFO_H" >> SvnInfo.h 
+	@echo "" >> SvnInfo.h 
+	@echo "//do not edit this" >> SvnInfo.h 
+	@echo "#define SVN_REV_STR \"\$Rev:" `svn info | grep Revision | awk '{print $2}'` "$"\" >> SvnInfo.h 
+	@echo "" >> SvnInfo.h 
+	@echo "#endif" >> SvnInfo.h 
+	@echo "--------------------------------"
 	
 	ln -sf ProjectConceptor ProjectConceptor.a 
 	-@for f in $(LEAFDIRS); do \
