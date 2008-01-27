@@ -20,11 +20,13 @@ class AboutView: public BView
 			
 	private:
 			//
+			int kW, kH;
 			BBitmap* fBitmapType;
 			BTextView* TitleView;
-			int kW, kH;
-			BString fRevNumbRaw, fRevNumb;
-			int kStrLength;
+			BFont TitleFont;
+			BString fRevNumb;
+			BTextView* SvnInfoView;
+			BFont SvnInfoFont;
 			
 
 
