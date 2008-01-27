@@ -171,15 +171,15 @@ LEAFDIRS = \
 
 default .DEFAULT:
 	@echo "---------SVN INFO GEN-----------"
-	@cd src
-	@echo "" >> SvnInfo.h 
-	@echo "#ifndef SVN_INFO_H" > SvnInfo.h 
-	@echo "#define SVN_INFO_H" >> SvnInfo.h 
-	@echo "" >> SvnInfo.h 
-	@echo "//do not edit this" >> SvnInfo.h 
-	@echo "#define SVN_REV_STR \"\$Rev:" `svn info | grep Revision | awk '{print $2}'` "$"\" >> SvnInfo.h 
-	@echo "" >> SvnInfo.h 
-	@echo "#endif" >> SvnInfo.h 
+	@echo "" >> src/SvnInfo.h 
+	@echo "#ifndef SVN_INFO_H" > src/SvnInfo.h 
+	@echo "#define SVN_INFO_H" >> src/SvnInfo.h 
+	@echo "" >> src/SvnInfo.h 
+	@echo "//do not edit this" >> src/SvnInfo.h 
+	@echo "#define SVN_REV_STR \"\$$Rev:" `svn info | grep Revision | awk '{print $$2}'` "\$$\"" >> src/SvnInfo.h 
+	@echo "" >> src/SvnInfo.h 
+	@echo "#endif" >> src/SvnInfo.h 
+	@echo "UPDATED"
 	@echo "--------------------------------"
 	
 	ln -sf ProjectConceptor ProjectConceptor.a 

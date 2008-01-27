@@ -4,6 +4,4 @@
 //do not edit this
 #define SVN_REV_STR "$Rev$"
 
-
 #endif
-
