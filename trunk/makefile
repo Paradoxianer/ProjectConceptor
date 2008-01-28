@@ -26,6 +26,7 @@ TYPE= APP
 #	in folder names do not work well with this makefile.
 SRCS= 		src/AboutWindow.cpp \
 		src/AboutView.cpp \
+		src/AboutURLView.cpp \
 		src/MainView.cpp \
 		src/ProjectConceptor.cpp \
 		src/PWindow.cpp \

@@ -6,6 +6,7 @@
 
 #include "AboutView.h"
 #include "SvnInfo.h"
+#include "AboutURLView.h"
 
 AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 {
@@ -26,7 +27,7 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	//
 	
 	//TitleTextView
-	TitleView = new BTextView(BRect(80,10,kW-5,50), "titleview",
+	TitleView = new BTextView(BRect(80,10,kW-5,55), "titleview",
 	BRect((kW+60)/2-(16*25/2),10,kW,40), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
 	TitleFont.SetSize(30.0);
 	TitleView->SetFontAndColor(&TitleFont, B_FONT_ALL);
@@ -162,6 +163,39 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	WebsiteNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	AddChild(WebsiteNameView);
 	
+	
+	//ContactTitleView
+	BString fContactTitleString;
+	fContactTitleString.SetTo("contact");
+	BTextView* ContactTitleView = new BTextView(BRect(40,kH-60,40+fContactTitleString.Length()*(12/1.5),kH-45), "contacttetitleview",
+	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
+	BFont ContactTitleFont;
+	ContactTitleFont.SetSize(12.0);
+	ContactTitleView->SetFontAndColor(&ContactTitleFont, B_FONT_ALL);
+	ContactTitleView->Insert(fContactTitleString.String());
+	ContactTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(ContactTitleView);
+	
+	
+	//ContactURLView
+	//This is a link for a web URL.
+	URLView* web = new URLView(BRect(fContactTitleString.Length()+90, kH-60+1, fContactTitleString.Length()*(12/1.5)+90+80, kH-45+1), "Web", "ProjectConceptor.de", "http://www.projectconceptor.de");
+	web->SetFontSize(12.0);
+	web->AddAttribute("META:keyw", "ProjectConceptor.de");
+	web->SetUnderlineThickness(2);
+	AddChild(web);
+	
+	//This is a link for an e-mail address.
+	URLView *email = new URLView( BRect(fContactTitleString.Length()+90+150, kH-60+2, kW-5, kH-45+2), "E-mail", "send me a E-mail", "mail@projectconceptor.de");
+	email->SetHoverEnabled(false);
+	email->SetFontSize(12.0);
+	email->AddAttribute("META:name", "ProjectConceptor");
+	//email->AddAttribute("META:nickname", "xxx");
+	//email->AddAttribute("META:company", "xxx");
+	email->AddAttribute("META:url", "http://www.projectconceptor.de");
+	email->AddAttribute("META:state", "DE");
+	email->AddAttribute("META:country", "Germany");
+	AddChild(email );
 	
 }
 
