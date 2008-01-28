@@ -26,7 +26,7 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	//
 	
 	//TitleTextView
-	TitleView = new BTextView(BRect(80,10,kW-5,55), "titleview",
+	TitleView = new BTextView(BRect(80,10,kW-5,50), "titleview",
 	BRect((kW+60)/2-(16*25/2),10,kW,40), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
 	TitleFont.SetSize(30.0);
 	TitleView->SetFontAndColor(&TitleFont, B_FONT_ALL);
@@ -56,6 +56,113 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	SvnInfoView->Insert(fRevNumb.String());
 	SvnInfoView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	AddChild(SvnInfoView);
+	
+	//String and Length
+	BString fDeveloperTitleString;
+	fDeveloperTitleString.SetTo("developer");
+	int kDL = fDeveloperTitleString.Length();
+	
+	BString fContributorTitleString;
+	fContributorTitleString.SetTo("contributor");
+	int kCL = fContributorTitleString.Length();
+	
+	BString fTranslatorTitleString;
+	fTranslatorTitleString.SetTo("translator");
+	int kTL = fTranslatorTitleString.Length();
+	
+	BString fWebsiteTitleString;
+	fWebsiteTitleString.SetTo("website");
+	int kWL = fWebsiteTitleString.Length();
+	
+	//DeveloperTitleView
+	BTextView* DeveloperTitleView = new BTextView(BRect(10+30,100,kDL*(12/1.5)+30,115), "developertitleview",
+	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
+	BFont DeveloperTitleFont;
+	DeveloperTitleFont.SetSize(12.0);
+	DeveloperTitleView->SetFontAndColor(&DeveloperTitleFont, B_FONT_ALL);
+	DeveloperTitleView->Insert(fDeveloperTitleString.String());
+	DeveloperTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(DeveloperTitleView);
+	
+	//DeveloperNameView
+	BString fDeveloperNameString;
+	fDeveloperNameString.SetTo("- paradoxon\n- beathlon\n- stargater");
+	BTextView* DeveloperNameView = new BTextView(BRect(10+30,120,kDL*(12/1.5)+30,kH-70), "developernameview",
+	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
+	BFont DeveloperNameFont;
+	DeveloperNameFont.SetSize(10.0);
+	DeveloperNameView->SetFontAndColor(&DeveloperNameFont, B_FONT_ALL);
+	DeveloperNameView->Insert(fDeveloperNameString.String());
+	DeveloperNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(DeveloperNameView);
+	
+	//ContributorTitleView
+	BTextView* ContributorTitleView = new BTextView(BRect(20+30+(kDL*(12/1.5)),100,kCL*(12/1.5)+(kDL*(12/1.5)-9+40),115), "contributortitleview",
+	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
+	BFont ContributorTitleFont;
+	ContributorTitleFont.SetSize(12.0);
+	ContributorTitleView->SetFontAndColor(&ContributorTitleFont, B_FONT_ALL);
+	ContributorTitleView->Insert(fContributorTitleString.String());
+	ContributorTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(ContributorTitleView);
+	
+	//ContributorNameView
+	BString fContributorNameString;
+	fContributorNameString.SetTo("- tombhadAC\n- jan__64\n- MauriceK");
+	BTextView* ContributorNameView = new BTextView(BRect(20+30+(kDL*(12/1.5)),120,kCL*(12/1.5)+(kDL*(12/1.5)-9+40),kH-70), "contributornameview",
+	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
+	BFont ContributorNameFont;
+	ContributorNameFont.SetSize(10.0);
+	ContributorNameView->SetFontAndColor(&ContributorNameFont, B_FONT_ALL);
+	ContributorNameView->Insert(fContributorNameString.String());
+	ContributorNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(ContributorNameView);
+	
+	//TranslatorTitleView
+	BTextView* TranslatorTitleView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)),100,kTL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)-9+40),115), "translatortitleview",
+	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
+	BFont TranslatorTitleFont;
+	TranslatorTitleFont.SetSize(12.0);
+	TranslatorTitleView->SetFontAndColor(&TranslatorTitleFont, B_FONT_ALL);
+	TranslatorTitleView->Insert(fTranslatorTitleString.String());
+	TranslatorTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(TranslatorTitleView);
+	
+	//TranslatorNameView
+	BString fTranslatorNameString;
+	fTranslatorNameString.SetTo("- thaflo");
+	BTextView* TranslatorNameView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)),120,kTL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)-9+40),kH-70), "translatornameview",
+	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
+	BFont TranslatorNameFont;
+	TranslatorNameFont.SetSize(10.0);
+	TranslatorNameView->SetFontAndColor(&TranslatorNameFont, B_FONT_ALL);
+	TranslatorNameView->Insert(fTranslatorNameString.String());
+	TranslatorNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(TranslatorNameView);
+	
+	//WebsiteTitleView
+	BTextView* WebsiteTitleView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)),100,kWL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)+40),115), "websitetitleview",
+	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
+	BFont WebsiteTitleFont;
+	WebsiteTitleFont.SetSize(12.0);
+	WebsiteTitleView->SetFontAndColor(&WebsiteTitleFont, B_FONT_ALL);
+	WebsiteTitleView->Insert(fWebsiteTitleString.String());
+	WebsiteTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(WebsiteTitleView);
+	
+	//WebsiteNameView
+	BString fWebsiteNameString;
+	fWebsiteNameString.SetTo("- neilch");
+	BTextView* WebsiteNameView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)),120,kWL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)+40),kH-70), "websitenameview",
+	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
+	BFont WebsiteNameFont;
+	WebsiteNameFont.SetSize(10.0);
+	WebsiteNameView->SetFontAndColor(&WebsiteNameFont, B_FONT_ALL);
+	WebsiteNameView->Insert(fWebsiteNameString.String());
+	WebsiteNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(WebsiteNameView);
+	
+	
 }
 
 AboutView::~AboutView()
