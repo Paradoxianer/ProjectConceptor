@@ -1,11 +1,13 @@
 #ifndef ABOUT_VIEW_H
 #define ABOUT_VIEW_H
 
-#include <interface/View.h>
+#include <View.h>
 #include <TextView.h>
 #include <String.h>
 #include <Bitmap.h>
+
 #include "AboutLogo_64.h"
+#include "AboutURLView.h"
  
 class AboutView: public BView
 {
@@ -22,14 +24,53 @@ class AboutView: public BView
 			//
 			int kW, kH;
 			BBitmap* fBitmapType;
-			BTextView* TitleView;
-			BFont TitleFont;
+			BTextView* fTitleView;
+			BFont fTitleFont;
 			BString fRevNumb;
-			BTextView* SvnInfoView;
-			BFont SvnInfoFont;
+			BTextView* fSvnInfoView;
+			BFont fSvnInfoFont;
 			
-
-
+			BString fDeveloperTitleString;
+			BString fContributorTitleString;
+			BString fTranslatorTitleString;
+			BString fWebsiteTitleString;
+			int kDL, kCL, kTL, kWL;
+			
+			BTextView* fDeveloperTitleView;
+			BFont fDeveloperTitleFont;
+			
+			BString fDeveloperNameString;
+			BTextView* fDeveloperNameView;
+			BFont fDeveloperNameFont;
+			
+			BTextView* fContributorTitleView;
+			BFont fContributorTitleFont;
+			
+			BString fContributorNameString;
+			BTextView* fContributorNameView;
+			BFont fContributorNameFont;
+			
+			BTextView* fTranslatorTitleView;
+			BFont fTranslatorTitleFont;
+			
+			BString fTranslatorNameString;
+			BTextView* fTranslatorNameView;
+			BFont fTranslatorNameFont;
+			
+			BTextView* fWebsiteTitleView;
+			BFont fWebsiteTitleFont;
+			
+			BString fWebsiteNameString;
+			BTextView* fWebsiteNameView;
+			BFont fWebsiteNameFont;
+			
+			BString fContactTitleString;
+			BTextView* fContactTitleView;
+			BFont fContactTitleFont;
+			
+			URLView* fWebView;
+			URLView* fMailView;
+			
 };
 
 #endif

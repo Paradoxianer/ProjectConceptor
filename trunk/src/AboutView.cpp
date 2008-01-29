@@ -1,12 +1,12 @@
 #include <stdio.h>
-#include <interface/Screen.h>
-#include <interface/Rect.h>
-#include <interface/StringView.h>
+
+#include <Screen.h>
+#include <Rect.h>
+#include <StringView.h>
 #include <Alert.h>
 
 #include "AboutView.h"
 #include "SvnInfo.h"
-#include "AboutURLView.h"
 
 AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 {
@@ -27,13 +27,15 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	//
 	
 	//TitleTextView
-	TitleView = new BTextView(BRect(80,10,kW-5,55), "titleview",
+	fTitleView = new BTextView(BRect(80,10,kW-5,55), "titleview",
 	BRect((kW+60)/2-(16*25/2),10,kW,40), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	TitleFont.SetSize(30.0);
-	TitleView->SetFontAndColor(&TitleFont, B_FONT_ALL);
-	TitleView->Insert("ProjectConceptor");
-	TitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(TitleView);
+	fTitleView->MakeSelectable(false);
+	fTitleView->MakeEditable(false);
+	fTitleFont.SetSize(30.0);
+	fTitleView->SetFontAndColor(&fTitleFont, B_FONT_ALL);
+	fTitleView->Insert("ProjectConceptor");
+	fTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fTitleView);
 	
 	//CeckString
 	fRevNumb.SetTo(SVN_REV_STR);
@@ -50,152 +52,154 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	fRevNumb.Insert(__DATE__,fRevNumb.Length());
 	
 	//SvnInfoView
-	SvnInfoView = new BTextView(BRect((kW+60)/2-(fRevNumb.Length()*5/2),60,kW-5,75), "svninfoview",
+	fSvnInfoView = new BTextView(BRect((kW+60)/2-(fRevNumb.Length()*5/2),60,kW-5,75), "svninfoview",
 	BRect(0,0,kW,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	SvnInfoFont.SetSize(10.0);
-	SvnInfoView->SetFontAndColor(&SvnInfoFont, B_FONT_ALL);
-	SvnInfoView->Insert(fRevNumb.String());
-	SvnInfoView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(SvnInfoView);
+	fSvnInfoView->MakeSelectable(false);
+	fSvnInfoView->MakeEditable(false);
+	fSvnInfoFont.SetSize(10.0);
+	fSvnInfoView->SetFontAndColor(&fSvnInfoFont, B_FONT_ALL);
+	fSvnInfoView->Insert(fRevNumb.String());
+	fSvnInfoView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fSvnInfoView);
 	
 	//String and Length
-	BString fDeveloperTitleString;
 	fDeveloperTitleString.SetTo("developer");
-	int kDL = fDeveloperTitleString.Length();
+	kDL = fDeveloperTitleString.Length();
 	
-	BString fContributorTitleString;
 	fContributorTitleString.SetTo("contributor");
-	int kCL = fContributorTitleString.Length();
+	kCL = fContributorTitleString.Length();
 	
-	BString fTranslatorTitleString;
 	fTranslatorTitleString.SetTo("translator");
-	int kTL = fTranslatorTitleString.Length();
+	kTL = fTranslatorTitleString.Length();
 	
-	BString fWebsiteTitleString;
 	fWebsiteTitleString.SetTo("website");
-	int kWL = fWebsiteTitleString.Length();
+	kWL = fWebsiteTitleString.Length();
 	
 	//DeveloperTitleView
-	BTextView* DeveloperTitleView = new BTextView(BRect(10+30,100,kDL*(12/1.5)+30,115), "developertitleview",
+	fDeveloperTitleView = new BTextView(BRect(10+30,100,kDL*(12/1.5)+30,115), "developertitleview",
 	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	BFont DeveloperTitleFont;
-	DeveloperTitleFont.SetSize(12.0);
-	DeveloperTitleView->SetFontAndColor(&DeveloperTitleFont, B_FONT_ALL);
-	DeveloperTitleView->Insert(fDeveloperTitleString.String());
-	DeveloperTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(DeveloperTitleView);
+	fDeveloperTitleView->MakeSelectable(false);
+	fDeveloperTitleView->MakeEditable(false);
+	fDeveloperTitleFont.SetSize(12.0);
+	fDeveloperTitleView->SetFontAndColor(&fDeveloperTitleFont, B_FONT_ALL);
+	fDeveloperTitleView->Insert(fDeveloperTitleString.String());
+	fDeveloperTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fDeveloperTitleView);
 	
 	//DeveloperNameView
-	BString fDeveloperNameString;
 	fDeveloperNameString.SetTo("- paradoxon\n- beathlon\n- stargater");
-	BTextView* DeveloperNameView = new BTextView(BRect(10+30,120,kDL*(12/1.5)+30,kH-70), "developernameview",
+	fDeveloperNameView = new BTextView(BRect(10+30,120,kDL*(12/1.5)+30,kH-70), "developernameview",
 	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	BFont DeveloperNameFont;
-	DeveloperNameFont.SetSize(10.0);
-	DeveloperNameView->SetFontAndColor(&DeveloperNameFont, B_FONT_ALL);
-	DeveloperNameView->Insert(fDeveloperNameString.String());
-	DeveloperNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(DeveloperNameView);
+	fDeveloperNameView->MakeSelectable(false);
+	fDeveloperNameView->MakeEditable(false);
+	fDeveloperNameFont.SetSize(10.0);
+	fDeveloperNameView->SetFontAndColor(&fDeveloperNameFont, B_FONT_ALL);
+	fDeveloperNameView->Insert(fDeveloperNameString.String());
+	fDeveloperNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fDeveloperNameView);
 	
 	//ContributorTitleView
-	BTextView* ContributorTitleView = new BTextView(BRect(20+30+(kDL*(12/1.5)),100,kCL*(12/1.5)+(kDL*(12/1.5)-9+40),115), "contributortitleview",
+	fContributorTitleView = new BTextView(BRect(20+30+(kDL*(12/1.5)),100,kCL*(12/1.5)+(kDL*(12/1.5)-9+40),115), "contributortitleview",
 	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	BFont ContributorTitleFont;
-	ContributorTitleFont.SetSize(12.0);
-	ContributorTitleView->SetFontAndColor(&ContributorTitleFont, B_FONT_ALL);
-	ContributorTitleView->Insert(fContributorTitleString.String());
-	ContributorTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(ContributorTitleView);
+	fContributorTitleView->MakeSelectable(false);
+	fContributorTitleView->MakeEditable(false);
+	fContributorTitleFont.SetSize(12.0);
+	fContributorTitleView->SetFontAndColor(&fContributorTitleFont, B_FONT_ALL);
+	fContributorTitleView->Insert(fContributorTitleString.String());
+	fContributorTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fContributorTitleView);
 	
 	//ContributorNameView
-	BString fContributorNameString;
 	fContributorNameString.SetTo("- tombhadAC\n- jan__64\n- MauriceK");
-	BTextView* ContributorNameView = new BTextView(BRect(20+30+(kDL*(12/1.5)),120,kCL*(12/1.5)+(kDL*(12/1.5)-9+40),kH-70), "contributornameview",
+	fContributorNameView = new BTextView(BRect(20+30+(kDL*(12/1.5)),120,kCL*(12/1.5)+(kDL*(12/1.5)-9+40),kH-70), "contributornameview",
 	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	BFont ContributorNameFont;
-	ContributorNameFont.SetSize(10.0);
-	ContributorNameView->SetFontAndColor(&ContributorNameFont, B_FONT_ALL);
-	ContributorNameView->Insert(fContributorNameString.String());
-	ContributorNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(ContributorNameView);
+	fContributorNameView->MakeSelectable(false);
+	fContributorNameView->MakeEditable(false);
+	fContributorNameFont.SetSize(10.0);
+	fContributorNameView->SetFontAndColor(&fContributorNameFont, B_FONT_ALL);
+	fContributorNameView->Insert(fContributorNameString.String());
+	fContributorNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fContributorNameView);
 	
 	//TranslatorTitleView
-	BTextView* TranslatorTitleView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)),100,kTL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)-9+40),115), "translatortitleview",
+	fTranslatorTitleView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)),100,kTL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)-9+40),115), "translatortitleview",
 	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	BFont TranslatorTitleFont;
-	TranslatorTitleFont.SetSize(12.0);
-	TranslatorTitleView->SetFontAndColor(&TranslatorTitleFont, B_FONT_ALL);
-	TranslatorTitleView->Insert(fTranslatorTitleString.String());
-	TranslatorTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(TranslatorTitleView);
+	fTranslatorTitleView->MakeSelectable(false);
+	fTranslatorTitleView->MakeEditable(false);
+	fTranslatorTitleFont.SetSize(12.0);
+	fTranslatorTitleView->SetFontAndColor(&fTranslatorTitleFont, B_FONT_ALL);
+	fTranslatorTitleView->Insert(fTranslatorTitleString.String());
+	fTranslatorTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fTranslatorTitleView);
 	
 	//TranslatorNameView
-	BString fTranslatorNameString;
 	fTranslatorNameString.SetTo("- thaflo");
-	BTextView* TranslatorNameView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)),120,kTL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)-9+40),kH-70), "translatornameview",
+	fTranslatorNameView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)),120,kTL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)-9+40),kH-70), "translatornameview",
 	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	BFont TranslatorNameFont;
-	TranslatorNameFont.SetSize(10.0);
-	TranslatorNameView->SetFontAndColor(&TranslatorNameFont, B_FONT_ALL);
-	TranslatorNameView->Insert(fTranslatorNameString.String());
-	TranslatorNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(TranslatorNameView);
+	fTranslatorNameView->MakeSelectable(false);
+	fTranslatorNameView->MakeEditable(false);
+	fTranslatorNameFont.SetSize(10.0);
+	fTranslatorNameView->SetFontAndColor(&fTranslatorNameFont, B_FONT_ALL);
+	fTranslatorNameView->Insert(fTranslatorNameString.String());
+	fTranslatorNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fTranslatorNameView);
 	
 	//WebsiteTitleView
-	BTextView* WebsiteTitleView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)),100,kWL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)+40),115), "websitetitleview",
+	fWebsiteTitleView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)),100,kWL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)+40),115), "websitetitleview",
 	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	BFont WebsiteTitleFont;
-	WebsiteTitleFont.SetSize(12.0);
-	WebsiteTitleView->SetFontAndColor(&WebsiteTitleFont, B_FONT_ALL);
-	WebsiteTitleView->Insert(fWebsiteTitleString.String());
-	WebsiteTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(WebsiteTitleView);
+	fWebsiteTitleView->MakeSelectable(false);
+	fWebsiteTitleView->MakeEditable(false);
+	fWebsiteTitleFont.SetSize(12.0);
+	fWebsiteTitleView->SetFontAndColor(&fWebsiteTitleFont, B_FONT_ALL);
+	fWebsiteTitleView->Insert(fWebsiteTitleString.String());
+	fWebsiteTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fWebsiteTitleView);
 	
 	//WebsiteNameView
-	BString fWebsiteNameString;
 	fWebsiteNameString.SetTo("- neilch");
-	BTextView* WebsiteNameView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)),120,kWL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)+40),kH-70), "websitenameview",
+	fWebsiteNameView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)),120,kWL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)+kTL*(12/1.5)+40),kH-70), "websitenameview",
 	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	BFont WebsiteNameFont;
-	WebsiteNameFont.SetSize(10.0);
-	WebsiteNameView->SetFontAndColor(&WebsiteNameFont, B_FONT_ALL);
-	WebsiteNameView->Insert(fWebsiteNameString.String());
-	WebsiteNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(WebsiteNameView);
+	fWebsiteNameView->MakeSelectable(false);
+	fWebsiteNameView->MakeEditable(false);
+	fWebsiteNameFont.SetSize(10.0);
+	fWebsiteNameView->SetFontAndColor(&fWebsiteNameFont, B_FONT_ALL);
+	fWebsiteNameView->Insert(fWebsiteNameString.String());
+	fWebsiteNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fWebsiteNameView);
 	
 	
 	//ContactTitleView
-	BString fContactTitleString;
 	fContactTitleString.SetTo("contact");
-	BTextView* ContactTitleView = new BTextView(BRect(40,kH-60,40+fContactTitleString.Length()*(12/1.5),kH-45), "contacttetitleview",
+	fContactTitleView = new BTextView(BRect(40,kH-60,40+fContactTitleString.Length()*(12/1.5),kH-45), "contacttetitleview",
 	BRect(0,0,kW-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
-	BFont ContactTitleFont;
-	ContactTitleFont.SetSize(12.0);
-	ContactTitleView->SetFontAndColor(&ContactTitleFont, B_FONT_ALL);
-	ContactTitleView->Insert(fContactTitleString.String());
-	ContactTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	AddChild(ContactTitleView);
+	fContactTitleView->MakeSelectable(false);
+	fContactTitleView->MakeEditable(false);
+	fContactTitleFont.SetSize(12.0);
+	fContactTitleView->SetFontAndColor(&fContactTitleFont, B_FONT_ALL);
+	fContactTitleView->Insert(fContactTitleString.String());
+	fContactTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(fContactTitleView);
 	
 	
 	//ContactURLView
 	//This is a link for a web URL.
-	URLView* web = new URLView(BRect(fContactTitleString.Length()+90, kH-60+1, fContactTitleString.Length()*(12/1.5)+90+80, kH-45+1), "Web", "ProjectConceptor.de", "http://www.projectconceptor.de");
-	web->SetFontSize(12.0);
-	web->AddAttribute("META:keyw", "ProjectConceptor.de");
-	web->SetUnderlineThickness(2);
-	AddChild(web);
+	fWebView = new URLView(BRect(fContactTitleString.Length()+90, kH-60+1, fContactTitleString.Length()*(12/1.5)+90+80, kH-45+1), "Web", "ProjectConceptor.de", "http://www.projectconceptor.de");
+	fWebView->SetFontSize(12.0);
+	fWebView->AddAttribute("META:keyw", "ProjectConceptor.de");
+	fWebView->SetUnderlineThickness(2);
+	AddChild(fWebView);
 	
 	//This is a link for an e-mail address.
-	URLView *email = new URLView( BRect(fContactTitleString.Length()+90+150, kH-60+2, kW-5, kH-45+2), "E-mail", "send me a E-mail", "mail@projectconceptor.de");
-	email->SetHoverEnabled(false);
-	email->SetFontSize(12.0);
-	email->AddAttribute("META:name", "ProjectConceptor");
-	//email->AddAttribute("META:nickname", "xxx");
-	//email->AddAttribute("META:company", "xxx");
-	email->AddAttribute("META:url", "http://www.projectconceptor.de");
-	email->AddAttribute("META:state", "DE");
-	email->AddAttribute("META:country", "Germany");
-	AddChild(email );
+	fMailView = new URLView( BRect(fContactTitleString.Length()+90+150, kH-60+2, kW-5, kH-45+2), "E-mail", "send me a E-mail", "mail@projectconceptor.de");
+	fMailView->SetHoverEnabled(false);
+	fMailView->SetFontSize(12.0);
+	fMailView->AddAttribute("META:name", "ProjectConceptor");
+	//fMailView->AddAttribute("META:nickname", "xxx");
+	//fMailView->AddAttribute("META:company", "xxx");
+	fMailView->AddAttribute("META:url", "http://www.projectconceptor.de");
+	fMailView->AddAttribute("META:state", "DE");
+	fMailView->AddAttribute("META:country", "Germany");
+	AddChild(fMailView );
 	
 }
 

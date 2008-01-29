@@ -6,7 +6,7 @@
 #include "ProjectConceptorDefs.h"
 
 
-AboutWindow::AboutWindow():BWindow(BRect(100,100,500,350),_T("About"),B_FLOATING_WINDOW,B_NOT_RESIZABLE | B_NOT_ZOOMABLE,0)
+AboutWindow::AboutWindow():BWindow(BRect(100,100,500,350),_T("About"),B_FLOATING_WINDOW,B_MODAL_APP_WINDOW_FEEL | B_NOT_RESIZABLE | B_NOT_ZOOMABLE,0)
 {
 	TRACE();
 	BScreen *tmpScreen	= new BScreen();
