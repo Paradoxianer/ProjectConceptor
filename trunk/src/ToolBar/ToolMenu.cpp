@@ -5,7 +5,7 @@
 //#include "BitmapMenuItem.h"
 
 
-ToolMenu::ToolMenu(const char *name, BBitmap *icon,menu_layout layout = B_ITEMS_IN_MATRIX):ToolItem(name, icon, NULL, P_M_ONE_STATE_ITEM)
+ToolMenu::ToolMenu(const char *name, BBitmap *icon,menu_layout layout):ToolItem(name, icon, NULL, P_M_ONE_STATE_ITEM)
 {
 	popUpLayout		= layout;
 	menuWindow		= NULL;
@@ -41,7 +41,7 @@ ToolMenu::~ToolMenu(void)
 {
 }
 
-status_t ToolMenu::Archive(BMessage *archive,bool deep = true) const
+status_t ToolMenu::Archive(BMessage *archive,bool deep) const
 {
 	status_t err = B_OK;
 	err = ToolItem::Archive(archive,deep);

@@ -6,7 +6,12 @@
 #include <math.h>
 #include <support/ClassInfo.h>
 
-ToolBar::ToolBar(BRect rect,  const char *name,menu_layout ori= B_ITEMS_IN_ROW): BControl(rect, name,"ToolBar",NULL, B_FOLLOW_LEFT_RIGHT, B_WILL_DRAW|B_FULL_UPDATE_ON_RESIZE)
+#if __GNUC__ >= 3
+#define max(a,b) ((a)>(b))?a:b
+#define min(a,b) ((a)<(b))?a:b
+#endif
+
+ToolBar::ToolBar(BRect rect,  const char *name,menu_layout ori): BControl(rect, name,"ToolBar",NULL, B_FOLLOW_LEFT_RIGHT, B_WILL_DRAW|B_FULL_UPDATE_ON_RESIZE)
 {
 	TRACE();
 	SetViewColor(ui_color(B_MENU_BACKGROUND_COLOR));
@@ -83,7 +88,7 @@ ToolBar::~ToolBar()
 {
 }
 
-status_t ToolBar::Archive(BMessage *archive, bool deep=true) const
+status_t ToolBar::Archive(BMessage *archive, bool deep) const
 {
 	TRACE();
 	status_t err=B_OK;

@@ -1,13 +1,13 @@
 #ifndef WINDOW_MANAGER_H
 #define WINDOW_MANAGER_H
 
-#include <app/Message.h>
-#include <support/Archivable.h>
-#include <support/List.h>
-
 #include "PEditor.h"
 #include "PWindow.h"
 #include "PDocument.h"
+
+#include <app/Message.h>
+#include <support/Archivable.h>
+#include <support/List.h>
 
 /**
  * @class WindowManager

@@ -1,11 +1,11 @@
 #ifndef CONFIG_WINDOW_H
 #define CONFIG_WINDOW_H
 
-#include <app/Message.h>
-#include <interface/Window.h>
-
 #include "ProjectConceptorDefs.h"
 #include "ConfigView.h"
+
+#include <app/Message.h>
+#include <interface/Window.h>
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>

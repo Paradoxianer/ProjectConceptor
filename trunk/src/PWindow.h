@@ -4,6 +4,14 @@
 /*
  * @author Paradoxon powered by Jesus Christ
  */
+
+#include "ToolBar.h"
+#include "PluginManager.h"
+#include "AboutWindow.h"
+#include "ConfigWindow.h"
+#include "PMenuAccess.h"
+#include "ShortCutFilter.h"
+
 #include <app/AppDefs.h>
 #include <interface/MenuBar.h>
 #include <interface/Window.h>
@@ -15,13 +23,6 @@
 #else
 	#define _T(a) a
 #endif 
-
-#include "ToolBar.h"
-#include "PluginManager.h"
-#include "AboutWindow.h"
-#include "ConfigWindow.h"
-#include "PMenuAccess.h"
-#include "ShortCutFilter.h"
 
 class PDocument;
 class PEditor;

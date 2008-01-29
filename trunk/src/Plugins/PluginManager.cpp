@@ -30,7 +30,7 @@ PluginManager::~PluginManager(void)
 	delete	groupNames;*/
 }
 
-void PluginManager::LoadPlugins(BDirectory *startDir, bool deep = true)
+void PluginManager::LoadPlugins(BDirectory *startDir, bool deep)
 {
 	TRACE();
 	BList		*directoryList	= new BList();

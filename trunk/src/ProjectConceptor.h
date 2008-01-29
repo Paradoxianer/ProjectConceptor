@@ -1,10 +1,12 @@
 #ifndef _ProjektConceptor_H_
 #define _ProjektConceptor_H_
 
-#include <Application.h>
-#include <storage/FilePanel.h>
 #include "PluginManager.h"
 #include "PDocumentManager.h"
+
+#include <Application.h>
+#include <storage/FilePanel.h>
+
 /**
  * @class ProjektConceptor
  * @brief Main Application Class

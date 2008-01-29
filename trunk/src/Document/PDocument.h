@@ -1,6 +1,12 @@
 #ifndef P_DOCUMENT_H
 #define P_DOCUMENT_H
 
+#include "WindowManager.h"
+#include "PEditorManager.h"
+#include "PCommandManager.h"
+#include "HelpManager.h"
+#include "PCSavePanel.h"
+
 #include <app/Message.h>
 #include <app/Handler.h>
 #include <app/Looper.h>
@@ -16,15 +22,10 @@
 	#include <locale/Locale.h>
 	#include <locale/LanguageNotifier.h>
 #else
-	#define _T(a) 
+	#define _T(a) a
 #endif 
 
 
-#include "WindowManager.h"
-#include "PEditorManager.h"
-#include "PCommandManager.h"
-#include "HelpManager.h"
-#include "PCSavePanel.h"
 
 
 class PDocumentManager;

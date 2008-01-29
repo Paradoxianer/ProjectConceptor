@@ -49,7 +49,7 @@ void PCommandManager::Init(void)
 	}
 }
 
-status_t PCommandManager::Archive(BMessage *archive, bool deep = true)
+status_t PCommandManager::Archive(BMessage *archive, bool deep)
 {
 	int32	i	= 0;
 	for (i = 0; i<undoList->CountItems(); i++)

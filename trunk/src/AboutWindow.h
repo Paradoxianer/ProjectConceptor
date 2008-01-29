@@ -1,8 +1,9 @@
 #ifndef ABOUT_WINDOW_H
 #define ABOUT_WINDOW_H
 
-#include <interface/Window.h>
 #include "AboutView.h"
+
+#include <interface/Window.h>
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>

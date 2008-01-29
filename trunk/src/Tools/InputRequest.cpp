@@ -10,6 +10,9 @@
 #include "InputRequest.h"
 
 #include <stdlib.h>
+#if __GNUC__ > 3
+#include <cstring>
+#endif
 
 InputRequest::InputRequest(const char* title, const char* label, const char* text, const char* btn0_label)
 	:BWindow(BRect(0, 0, IR_WINDOW_WIDTH, IR_WINDOW_HEIGHT), title,

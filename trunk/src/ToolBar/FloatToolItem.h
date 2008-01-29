@@ -1,6 +1,8 @@
 #ifndef FLOAT_TOOL_ITEM_H
 #define FLOAT_TOOL_ITEM_H
 
+#include "BaseItem.h"
+
 #include <app/Invoker.h>
 #include <app/Message.h>
 #include <interface/Bitmap.h>
@@ -10,8 +12,6 @@
 
 #include <support/Archivable.h>
 #include <support/String.h>
-
-#include "BaseItem.h"
 
 class ToolBar;
 

@@ -13,9 +13,10 @@
 #ifndef _INPUTREQUEST_H
 #define _INPUTREQUEST_H
 
+#include "InputRequestView.h"
+
 #include <Window.h>
 #include <Screen.h>
-#include "InputRequestView.h"
 
 class InputRequest : public BWindow
 {

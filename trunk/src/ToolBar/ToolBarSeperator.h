@@ -1,6 +1,8 @@
 #ifndef TOOLBAR_SEPERATOR_H
 #define TOOLBAR_SEPERATOR_H
 
+#include "BaseItem.h"
+
 #include <app/Message.h>
 #include <interface/InterfaceDefs.h>
 #include <interface/Point.h>
@@ -8,7 +10,6 @@
 #include <interface/Rect.h>
 #include <support/Archivable.h>
 
-#include "BaseItem.h"
 /*
  * @author Paradoxon powered by Jesus Christ
  */

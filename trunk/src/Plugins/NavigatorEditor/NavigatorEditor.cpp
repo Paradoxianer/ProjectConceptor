@@ -21,7 +21,9 @@ NavigatorEditor::NavigatorEditor():PEditor(),BView(BRect(0,0,200,200),"Navigator
 {
 	TRACE();
 	Init();
+#ifdef __ZETA__
 	BView::SetDoubleBuffering(1);
+#endif
 //	SetDrawingMode(B_OP_ALPHA);
 }
 

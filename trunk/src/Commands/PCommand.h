@@ -1,13 +1,10 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include <app/Message.h>
-#include <support/List.h>
-
 #include "ObjectHelp.h"
 
-
-
+#include <app/Message.h>
+#include <support/List.h>
 
 class PCommandManager;
 class PDocument;

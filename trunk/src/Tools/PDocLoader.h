@@ -1,13 +1,12 @@
 #ifndef P_DOC_LOADER_H
 #define P_DOC_LOADER_H
 
-#include <app/Message.h>
-
-
 #include "Commands/PCommandManager.h"
 #include "Document/PEditorManager.h"
 #include "Document/WindowManager.h"
 #include "Tools/Indexer.h"
+
+#include <app/Message.h>
 
 class PDocumen;
 /**

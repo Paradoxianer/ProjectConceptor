@@ -1,13 +1,14 @@
 #ifndef TOOL_MENU_H
 #define TOOL_MENU_H
 
-#include <app/Message.h>
-#include <interface/Window.h>
-#include <interface/Menu.h>
 #include "ToolBar.h"
 #include "ToolItem.h"
 #include "BaseItem.h"
 #include "ProjectConceptorDefs.h"
+
+#include <app/Message.h>
+#include <interface/Window.h>
+#include <interface/Menu.h>
 
 /**
  * @class ToolMenu

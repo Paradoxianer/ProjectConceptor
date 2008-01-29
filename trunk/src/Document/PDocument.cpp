@@ -44,7 +44,7 @@ PDocument::~PDocument()
 	documentManager->RemoveDocument(this);
 }
 
-status_t PDocument::Archive(BMessage* archive, bool deep = true) const
+status_t PDocument::Archive(BMessage* archive, bool deep) const
 {
 	BLooper::Archive(archive, deep);
 	TRACE();
@@ -679,7 +679,7 @@ ToolItem* PDocument::GetToolItem(const char* toolbarSignature,const char *signat
 	return alleToolItems[0];
 }
 
-status_t PDocument::AddMenu(BMenu *menu,int32 index = -1)
+status_t PDocument::AddMenu(BMenu *menu,int32 index)
 {
 	status_t 	err	= B_OK;
 	int32 		i	= 0;
@@ -691,7 +691,7 @@ status_t PDocument::AddMenu(BMenu *menu,int32 index = -1)
 	return err;
 }
 
-status_t PDocument::AddMenuItem(const char *menuSignatur, BMenuItem *menuItem,int32 index = -1)
+status_t PDocument::AddMenuItem(const char *menuSignatur, BMenuItem *menuItem,int32 index)
 {
 	status_t 	err	= B_OK;
 	int32 		i	= 0;
@@ -725,7 +725,7 @@ status_t PDocument::AddToolMenu(const char *toolbarSignatur,ToolMenu *toolMenu)
 	return err;
 }
 
-status_t PDocument::AddToolItem(const char *toolbarSignatur,const char *toolmenuSignatur,ToolItem *toolItem,int32 index = -1)
+status_t PDocument::AddToolItem(const char *toolbarSignatur,const char *toolmenuSignatur,ToolItem *toolItem,int32 index)
 {
 	status_t 	err	= B_OK;
 	int32 		i	= 0;

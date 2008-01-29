@@ -3,15 +3,14 @@
 /*
  * @author Paradoxon powered by Jesus Christ
  */
+#include "ConfigItem.h"
+
 #include <interface/Font.h>
 #include <interface/Rect.h>
 #include <interface/CheckBox.h>
 #include <interface/View.h>
 
 #include <stdlib.h>
-
-#include "ConfigItem.h"
-
 
 class BoolItem : public ConfigItem, BCheckBox
 {

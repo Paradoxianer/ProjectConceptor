@@ -684,7 +684,7 @@ ToolItem* PWindow::GetToolItem(const char* toolbarSignature,const char *signatur
  *
  *@todo
  */
-status_t PWindow::AddMenu(BMenu *menu,int32 index = -1)
+status_t PWindow::AddMenu(BMenu *menu,int32 index)
 {
 	//** need to check if menu is valid
 	if (index <0)
@@ -700,7 +700,7 @@ status_t PWindow::AddMenu(BMenu *menu,int32 index = -1)
 	return B_OK;
 }
 
-status_t PWindow::AddMenuItem(const char *menuSignatur, BMenuItem *menuItem,int32 index = -1)
+status_t PWindow::AddMenuItem(const char *menuSignatur, BMenuItem *menuItem,int32 index)
 {
 	BMenu	*menu =	GetMenu(menuSignatur);
 	if (menu != NULL)
@@ -774,7 +774,7 @@ status_t PWindow::AddToolMenu(const char *toolbarSignatur,ToolMenu *toolMenu)
 
 }
 
-status_t PWindow::AddToolItem(const char *toolbarSignatur,const char *toolmenuSignatur,ToolItem *toolItem,int32 index = -1)
+status_t PWindow::AddToolItem(const char *toolbarSignatur,const char *toolmenuSignatur,ToolItem *toolItem,int32 index)
 {
 	ToolMenu *toolMenu=GetToolMenu(toolbarSignatur,toolmenuSignatur);
 	status_t err = B_OK;

@@ -75,7 +75,7 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 	return returnNode;
 }
 
-BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
+BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes)
 {
 	TRACE();
 	BMessage *returnNode	= new BMessage(*connection);
@@ -122,7 +122,7 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes=false)
 	return returnNode;
 }
 
-BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes=false)
+BMessage*	Indexer::IndexUndo(BMessage *undo,bool includeNodes)
 {
 	TRACE();
 	if (includeNodes)
@@ -146,7 +146,7 @@ BMessage*	Indexer::IndexMacroCommand(BMessage *macro)
 }
 
 
-BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes=false)
+BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes)
 {
 	TRACE();
 	BMessage	*returnCommand	= new BMessage(*command);

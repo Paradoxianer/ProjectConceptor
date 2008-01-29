@@ -66,7 +66,7 @@ void ColorToolItem::DetachedFromToolBar(ToolBar *tb)
 	BaseItem::DetachedFromToolBar(tb);
 }
 
-status_t ColorToolItem::Archive(BMessage *archive, bool deep=true) const
+status_t ColorToolItem::Archive(BMessage *archive, bool deep) const
 {
 	status_t err;
 	err = BaseItem::Archive(archive,deep);
@@ -207,7 +207,7 @@ void ColorToolItem::MessageReceived(BMessage *message)
 	}
 	BButton::MessageReceived(message);
 }
-status_t ColorToolItem::Invoke(BMessage *message = NULL)
+status_t ColorToolItem::Invoke(BMessage *message)
 {
 	status_t err = B_OK;
 	if (colorWindow)

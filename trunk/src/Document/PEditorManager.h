@@ -1,13 +1,13 @@
 #ifndef EDITOR_MANAGER_H
 #define EDITOR_MANAGER_H
 
+#include "PEditor.h"
+#include "PDocument.h"
+
 #include <app/Message.h>
 #include <app/Messenger.h>
 #include <support/Archivable.h>
 #include <support/List.h>
-
-#include "PEditor.h"
-#include "PDocument.h"
 
 /**
  * @class PEditorManager

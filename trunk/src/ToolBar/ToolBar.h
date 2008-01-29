@@ -1,16 +1,22 @@
 #ifndef TOOLBAR_H
 #define TOOLBAR_H
+
+#include "ProjectConceptorDefs.h"
+
 //#include <interface/InterfaceDefs.h>
 #include <interface/Menu.h>
 #include <interface/Rect.h>
 #include <interface/Control.h>
 #include <support/List.h>
-#include "ProjectConceptorDefs.h"
 
 //#include "Mover.h"
 //#include "ToolItem.h"
+// For gcc4 we need to put this one into the cpp to not
+// mess up the stl includes
+#if __GNUC__ < 3
 #define max(a,b) ((a)>(b))?a:b
 #define min(a,b) ((a)<(b))?a:b
+#endif
 
 
 class Mover;

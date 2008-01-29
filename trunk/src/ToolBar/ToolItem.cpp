@@ -2,7 +2,7 @@
 
 #include "ToolBar.h"
 
-ToolItem::ToolItem(const char *name, BBitmap *bmp,BMessage *msg,uint32 behave = P_M_ONE_STATE_ITEM):BaseItem(name),BButton(BRect(0,0,ITEM_WIDTH,ITEM_HEIGHT),name,"",msg)
+ToolItem::ToolItem(const char *name, BBitmap *bmp,BMessage *msg,uint32 behave):BaseItem(name),BButton(BRect(0,0,ITEM_WIDTH,ITEM_HEIGHT),name,"",msg)
 {
 	Init();
 	//**later create a Bitmap with the Size of the IconBitmap then scale the bmp to this size (via BView...)
@@ -73,7 +73,7 @@ void ToolItem::DetachedFromToolBar(ToolBar *tb)
 	BaseItem::DetachedFromToolBar(tb);
 }
 
-status_t ToolItem::Archive(BMessage *archive, bool deep=true) const
+status_t ToolItem::Archive(BMessage *archive, bool deep) const
 {
 	status_t err;
 	err = BaseItem::Archive(archive,deep);

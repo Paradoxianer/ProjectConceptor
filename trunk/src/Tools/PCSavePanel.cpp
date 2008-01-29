@@ -3,7 +3,7 @@
 #include <interface/Window.h>
 
 
-PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target = NULL): BFilePanel(B_SAVE_PANEL,target,NULL,B_FILE_NODE,false,msg,NULL,false,true)
+PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target): BFilePanel(B_SAVE_PANEL,target,NULL,B_FILE_NODE,false,msg,NULL,false,true)
 {
 	float 	height		= 74;
 	Window()->Lock();

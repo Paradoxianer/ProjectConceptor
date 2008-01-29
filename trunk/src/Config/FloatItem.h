@@ -1,15 +1,14 @@
 #ifndef FLOAT_ITEM_H
 #define FLOAT_ITEM_H
 
+#include "ConfigItem.h"
+
 #include <interface/Font.h>
 #include <interface/Rect.h>
 #include <interface/TextControl.h>
 #include <interface/View.h>
 
 #include <stdlib.h>
-
-#include "ConfigItem.h"
-
 
 class FloatItem : public ConfigItem, BTextControl
 {

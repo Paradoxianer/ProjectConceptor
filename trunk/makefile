@@ -55,8 +55,8 @@ SRCS= 		src/AboutWindow.cpp \
 		src/Tools/PCSavePanel.cpp \
 		src/Tools/PDocLoader.cpp \
 		src/Tools/Indexer.cpp \
-		src/Tools/InputRequestView.h \
- 		src/Tools/InputRequest.h  
+		src/Tools/InputRequestView.cpp \
+ 		src/Tools/InputRequest.cpp  
 
 
 #	specify the resource files to use
@@ -94,10 +94,12 @@ SYSTEM_INCLUDE_PATHS =
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS =	src \
 					src/Commands \
+					src/Config \
 					src/DataContainer \
 					src/Document \
 					src/Plugins \
-					src/ToolBar 
+					src/ToolBar \
+					src/Tools
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
@@ -145,6 +147,7 @@ APP_MENU	= Software/Development
 
 ## include the makefile-engine
 include /boot/develop/etc/makefile-engine
+
 # make all Plugins
 
 LEAFDIRS = \
@@ -190,21 +193,21 @@ default .DEFAULT:
 	mkdir -p ./Plugins
 	mkdir -p ./Plugins/Commands
 
-	ln -sf ../src/Plugins/GraphEditor/obj.x86/GraphEditor ./Plugins/GraphEditor
-	ln -sf ../src/Plugins/NavigatorEditor/obj.x86/NavigatorEditor ./Plugins/NavigatorEditor
+	ln -sf ../src/Plugins/GraphEditor/$(OBJ_DIR)/GraphEditor ./Plugins/GraphEditor
+	ln -sf ../src/Plugins/NavigatorEditor/$(OBJ_DIR)/NavigatorEditor ./Plugins/NavigatorEditor
 
-	ln -sf ../../src/Plugins/AddAttributeCommand/obj.x86/AddAttribute ./Plugins/Commands/AddAttribute
-	ln -sf ../../src/Plugins/ChangeValueCommand/obj.x86/ChangeValue ./Plugins/Commands/ChangeValue
-	ln -sf ../../src/Plugins/CopyCommand/obj.x86/Copy ./Plugins/Commands/Copy
-	ln -sf ../../src/Plugins/DeleteCommand/obj.x86/Delete ./Plugins/Commands/Delete
-	ln -sf ../../src/Plugins/FindCommand/obj.x86/Find ./Plugins/Commands/Find
-	ln -sf ../../src/Plugins/GroupCommand/obj.x86/Group ./Plugins/Commands/Group
-	ln -sf ../../src/Plugins/InsertCommand/obj.x86/Insert ./Plugins/Commands/Insert
-	ln -sf ../../src/Plugins/MoveCommand/obj.x86/Move ./Plugins/Commands/Move
-	ln -sf ../../src/Plugins/PasteCommand/obj.x86/Paste ./Plugins/Commands/Paste
-	ln -sf ../../src/Plugins/RemoveAttributeCommand/obj.x86/RemoveAttribute ./Plugins/Commands/RemoveAttribute
-	ln -sf ../../src/Plugins/ResizeCommand/obj.x86/Resize ./Plugins/Commands/Resize
-	ln -sf ../../src/Plugins/SelectCommand/obj.x86/Select ./Plugins/Commands/Select
+	ln -sf ../../src/Plugins/AddAttributeCommand/$(OBJ_DIR)/AddAttribute ./Plugins/Commands/AddAttribute
+	ln -sf ../../src/Plugins/ChangeValueCommand/$(OBJ_DIR)/ChangeValue ./Plugins/Commands/ChangeValue
+	ln -sf ../../src/Plugins/CopyCommand/$(OBJ_DIR)/Copy ./Plugins/Commands/Copy
+	ln -sf ../../src/Plugins/DeleteCommand/$(OBJ_DIR)/Delete ./Plugins/Commands/Delete
+	ln -sf ../../src/Plugins/FindCommand/$(OBJ_DIR)/Find ./Plugins/Commands/Find
+	ln -sf ../../src/Plugins/GroupCommand/$(OBJ_DIR)/Group ./Plugins/Commands/Group
+	ln -sf ../../src/Plugins/InsertCommand/$(OBJ_DIR)/Insert ./Plugins/Commands/Insert
+	ln -sf ../../src/Plugins/MoveCommand/$(OBJ_DIR)/Move ./Plugins/Commands/Move
+	ln -sf ../../src/Plugins/PasteCommand/$(OBJ_DIR)/Paste ./Plugins/Commands/Paste
+	ln -sf ../../src/Plugins/RemoveAttributeCommand/$(OBJ_DIR)/RemoveAttribute ./Plugins/Commands/RemoveAttribute
+	ln -sf ../../src/Plugins/ResizeCommand/$(OBJ_DIR)/Resize ./Plugins/Commands/Resize
+	ln -sf ../../src/Plugins/SelectCommand/$(OBJ_DIR)/Select ./Plugins/Commands/Select
 
 clean::
 	-@for f in $(LEAFDIRS); do \

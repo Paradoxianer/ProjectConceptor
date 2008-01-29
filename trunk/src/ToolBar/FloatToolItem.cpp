@@ -65,7 +65,7 @@ void FloatToolItem::DetachedFromToolBar(ToolBar *tb)
 	BaseItem::DetachedFromToolBar(tb);
 }
 
-status_t FloatToolItem::Archive(BMessage *archive, bool deep=true) const
+status_t FloatToolItem::Archive(BMessage *archive, bool deep) const
 {
 	status_t err;
 	err = BaseItem::Archive(archive,deep);

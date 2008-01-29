@@ -22,7 +22,7 @@ Mover::Mover(BMessage *archive):BArchivable(archive)
 	err = archive->FindBool("Mover::scroll",&scroll);
 }
 
-status_t Mover::Archive(BMessage *archive,bool deep=true) const
+status_t Mover::Archive(BMessage *archive,bool deep) const
 {
 	status_t err;
 	err = BArchivable::Archive(archive,deep);

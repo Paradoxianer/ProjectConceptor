@@ -1,6 +1,8 @@
 #ifndef COLOR_ITEM_H
 #define COLOR_ITEM_H
 
+#include "ConfigItem.h"
+
 #include <interface/Button.h>
 #include <interface/ColorControl.h>
 #include <interface/Font.h>
@@ -8,9 +10,6 @@
 #include <interface/View.h>
 
 #include <stdlib.h>
-
-#include "ConfigItem.h"
-
 
 class ColorItem : public ConfigItem, BView
 {

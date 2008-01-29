@@ -1,10 +1,20 @@
 #ifndef COMMAND_MANAGER_H
 #define COMMAND_MANAGER_H
 
+#include "PCommand.h"
+#include "BasePlugin.h"
+#include "Indexer.h"
+
 #include <app/Message.h>
 #include <support/List.h>
 #include <support/String.h>
+
+#if defined(__HAIKU__) && __GNUC__ > 3
+#include <map>
+using namespace std;
+#else
 #include <cpp/map.h>
+#endif
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
@@ -13,9 +23,6 @@
 	#define _T(a) a
 #endif 
 
-#include "PCommand.h"
-#include "BasePlugin.h"
-#include "Indexer.h"
 class PDocument;
 
 

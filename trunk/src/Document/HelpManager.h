@@ -23,9 +23,15 @@
 #include "ObjectHelp.h"
 
 //using the ugly stl instead of the nice Zeta templates to make it Haiku ready
+#if defined(__HAIKU__) && __GNUC__ > 3
+#include <map>
+#include <iterator>
+using namespace std;
+#else
 #include <cpp/map.h>
 #include <cpp/pair.h>
 #include <cpp/iterator.h>
+#endif
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>

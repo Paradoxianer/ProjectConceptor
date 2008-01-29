@@ -1,6 +1,9 @@
 #ifndef P_DOCUMENT_MANAGER_H
 #define P_DOCUMENT_MANAGER_H
 
+#include "PDocument.h"
+#include "PWindow.h"
+
 #include <app/Roster.h>
 #include <support/List.h>
 #include <storage/Entry.h>
@@ -8,8 +11,6 @@
 /*
  * @author Paradoxon powered by Jesus Christ
  */
-#include "PDocument.h"
-#include "PWindow.h"
 
 class PDocumentManager : public BArchivable
 {

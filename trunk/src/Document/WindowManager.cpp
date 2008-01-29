@@ -47,7 +47,7 @@ void WindowManager::Init()
 	windowRect.OffsetBy(-25,-25);
 }
 
-status_t WindowManager::Archive(BMessage *archive, bool deep = true) const
+status_t WindowManager::Archive(BMessage *archive, bool deep) const
 {
 	TRACE();
 	BArchivable::Archive(archive, deep);

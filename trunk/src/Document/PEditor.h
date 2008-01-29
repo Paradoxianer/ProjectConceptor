@@ -1,6 +1,10 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
+#include "PCommand.h"
+#include "PluginManager.h"
+#include "ProjectConceptorDefs.h"
+
 #include <app/Handler.h>
 #include <app/Message.h>
 #include <interface/Rect.h>
@@ -8,10 +12,6 @@
 #include <interface/View.h>
 #include <support/Archivable.h>
 #include <support/List.h>
-
-#include "PCommand.h"
-#include "PluginManager.h"
-#include "ProjectConceptorDefs.h"
 
 class PEditorManager;
 class PDocument;

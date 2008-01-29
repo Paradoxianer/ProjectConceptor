@@ -36,7 +36,7 @@ void ToolBarSeperator::Draw(BRect /*updateRect*/)
 	{
 	}
 }
-status_t ToolBarSeperator::Archive(BMessage *archive,bool deep=true) const
+status_t ToolBarSeperator::Archive(BMessage *archive,bool deep) const
 {
 	//**Errors ordentlich auswerten
 	status_t err;

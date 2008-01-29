@@ -1,6 +1,8 @@
 #ifndef RECT_ITEM_H
 #define RECT_ITEM_H
 
+#include "ConfigItem.h"
+
 #include <interface/Font.h>
 #include <interface/Rect.h>
 #include <interface/Box.h>
@@ -9,7 +11,6 @@
 
 #include <stdlib.h>
 
-#include "ConfigItem.h"
 /**
  * @class RectItem
  * @brief Generates a ConfigItem for a BRect object

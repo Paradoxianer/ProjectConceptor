@@ -1,7 +1,7 @@
 #include "ConfigView.h"
 #include "ProjectConceptorDefs.h"
 
-ConfigView::ConfigView(BRect rect,const char *newName,BMessage *forMessage,uint32 resizingMode = B_FOLLOW_ALL_SIDES, uint32 flags = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE_JUMP):BBox(rect,NULL,resizingMode,flags)
+ConfigView::ConfigView(BRect rect,const char *newName,BMessage *forMessage,uint32 resizingMode, uint32 flags):BBox(rect,NULL,resizingMode,flags)
 {
 	TRACE();
 	configMessage=forMessage;
