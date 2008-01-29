@@ -1,3 +1,11 @@
+/*
+ * Copyright 2008 ProjectConceptor All rights reserved.
+ * Distributed under the terms of the MIT License.
+ *
+ * Authors:
+ *		Ralf Schülke, teammaui@web.de
+ */
+
 #include <stdio.h>
 
 #include <Screen.h>
