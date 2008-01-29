@@ -209,7 +209,7 @@ AboutView::~AboutView()
 }
 
 void
-AboutView::Draw(BRect updated)
+AboutView::Draw(BRect updateRect)
 {
 	//Draw stuffs	
 	SetDrawingMode(B_OP_ALPHA);

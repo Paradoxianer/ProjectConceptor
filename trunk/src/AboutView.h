@@ -15,14 +15,14 @@ class AboutView: public BView
 	public:
 			AboutView(BRect frame);
 			~AboutView();
-			void Draw(BRect updated);
+			void Draw(BRect updateRect);
 			
 	protected:
 			//
 			
 	private:
 			//
-			int kW, kH;
+			float kW, kH;
 			BBitmap* fBitmapType;
 			BTextView* fTitleView;
 			BFont fTitleFont;
