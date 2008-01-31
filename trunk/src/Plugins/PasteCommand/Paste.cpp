@@ -25,15 +25,15 @@ BMessage* Paste::Do(PDocument *doc, BMessage *settings)
 	int32		messagelen			= 0;
 	int32		i					= 0;
 	Indexer		*indexer			= new Indexer(doc);
-	if (be_clipboard->Lock()) 
+	if (be_clipboard->Lock())
 	{
-		if (clip = be_clipboard->Data()) 
+		if (clip = be_clipboard->Data())
 		{
-//			clip->FindData("application/x-vnd.projectconceptor-document", B_MIME_TYPE, (const void **)&copyMessage, &messagelen); 
-			clip->FindMessage("test",copyMessage); 
+//			clip->FindData("application/x-vnd.projectconceptor-document", B_MIME_TYPE, (const void **)&copyMessage, &messagelen);
+			clip->FindMessage("test",copyMessage);
 			copyMessage->PrintToStream();
 		}
-		be_clipboard->Unlock(); 
+		be_clipboard->Unlock();
 	}
 
 	if (copyMessage)
@@ -48,7 +48,7 @@ BMessage* Paste::Do(PDocument *doc, BMessage *settings)
 				deIndexedNode		= indexer->DeIndexConnection(node);
 			else
 			{
-				deIndexedNode		= indexer->DeIndexNode(node);
+				deIndexedNode		= indexer->RegisterDeIndexNode(node);
 				//only select nodes.. because es the copy and paste funktion with selected nodes dosent work proper
 				select->AddPointer("node",deIndexedNode);
 			}
@@ -56,6 +56,13 @@ BMessage* Paste::Do(PDocument *doc, BMessage *settings)
 
 			i++;
 			node = new BMessage();
+		}
+		i=0;
+		while (inserter->FindPointer("node",i,(void **)&node) == B_OK)
+		{
+			if (node->what != P_C_CONNECTION_TYPE)
+				indexer->DeIndexNode(node);
+			i++
 		}
 		inserter->AddMessage("PCommand::subPCommand",select);
 		PRINT_OBJECT(*inserter);

@@ -32,10 +32,10 @@ void PDocLoader::Init(void)
 	selectedNodes			= NULL;
 	allConnections			= NULL;
 	settings				= new BMessage();
-	
+
 	printerSettings			= new BMessage();
 	commandManagerMessage	= new BMessage();
-	
+
 	editorManager			= NULL;
 	windowManager			= NULL;
 }
@@ -53,7 +53,7 @@ void PDocLoader::Load(void)
 	loadedStuff->FindMessage("PDocument::allConnections",allConnectionsMessage);
 	loadedStuff->FindMessage("PDocument::selected",selectedMessage);
 	commandManagerMessage->FindInt32("undoStatus",(int32 *)&undoIndex);
-				
+
 	allNodes		=	Spread(allNodesMessage);
 	allConnections	=	ReIndexConnections(allConnectionsMessage);
 	selectedNodes	=	ReIndexSelected(selectedMessage);
@@ -68,9 +68,13 @@ BList* PDocLoader::Spread(BMessage *allNodeMessage)
 	int32		i					= 0;
 	while (allNodeMessage->FindMessage("node",i,node) == B_OK)
 	{
-		newAllNodes->AddItem(indexer->DeIndexNode(node));
+		newAllNodes->AddItem(indexer->RegisterDeIndexNode(node));
 		node =	new BMessage();
-		i++;		
+		i++;
+	}
+	for (i=0;i<newAllNodes->CountItems();i++)
+	{
+		indexer->DeIndexNode((BMessage*)newAllNodes->ItemAt(i));
 	}
 	return newAllNodes;
 }
@@ -95,7 +99,7 @@ BList* PDocLoader::ReIndexSelected(BMessage *selectionMessage)
 	BList		*newSelection		= new BList();
 	int32		i					= 0;
 	void		*selectPointer		= NULL;
-	
+
 	while (selectionMessage->FindPointer("node",i,&selectPointer) == B_OK)
 	{
 		newSelection->AddItem(indexer->PointerForIndex((int32)selectPointer));

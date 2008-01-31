@@ -31,7 +31,7 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 		BList		*allConnectionList	= NULL;
 
 		BMessage	*subNode			= NULL;
-		
+
 		if (!included->HasItem(node))
 			included->AddItem(node);
 		returnNode = new BMessage(*node);
@@ -68,7 +68,7 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 					editor=(PEditor *)plugin->GetNewObject(NULL);
 					editor->PreprocessBeforSave(returnNode);
 				}
-				
+
 			}
 		}
 	}
@@ -116,7 +116,7 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes)
 				editor=(PEditor *)plugin->GetNewObject(NULL);
 				editor->PreprocessBeforSave(returnNode);
 			}
-			
+
 		}
 	}
 	return returnNode;
@@ -172,7 +172,7 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes)
 		while (returnCommand->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
 #else
 		while (returnCommand->GetInfo(B_MESSAGE_TYPE,i ,(char **)&name, &type, &count) == B_OK)
-#endif 
+#endif
 
 		{
 			if ( (returnCommand->FindMessage(name,count,subCommand) == B_OK) && (subCommand) )
@@ -196,30 +196,32 @@ BMessage* Indexer::RegisterDeIndexNode(BMessage *node)
 	return node;
 }
 
-			
+
 BMessage* Indexer::DeIndexNode(BMessage *node)
 {
 	TRACE();
-	BMessage	*subContainerEntry	= new BMessage();
+	void		*subContainerEntry	= NULL;
 	BList		*allNodesList		= new BList();
 	BList		*allConnectionsList	= new BList();
 
 	int32		i					= 0;
 	void		*tmpPointer			= NULL;
+	map<int32,BMessage*>::iterator	nodeIndex;
 	i = 0;
 	if (node->FindPointer("Node::allNodes",&tmpPointer) == B_OK)
 			node->RemoveName("Node::allNodes");
-	while (node->FindPointer("allNodesList",i,(void **)&subContainerEntry) == B_OK)
+	while (node->FindPointer("allNodesList",i,&subContainerEntry) == B_OK)
 	{
-		allNodesList->AddItem(DeIndexNode(subContainerEntry));
-		subContainerEntry	= new BMessage();
+		nodeIndex = sorter.find((int32)subContainerEntry);
+		if (nodeIndex != sorter.end())
+			allNodesList->AddItem(nodeIndex->second);
 		i++;
 	}
 	if (allNodesList->CountItems()>0)
 	{
 		node->AddPointer("Node::allNodes",allNodesList);
 		node->RemoveName("allNodesList");
-	}	
+	}
 	i = 0;
 	if (node->FindPointer("Node::allConnections",&tmpPointer) == B_OK)
 			node->RemoveName("Node::allConnections");
@@ -236,11 +238,13 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 	}
 	if (node->FindPointer("Node::parent",(void **)&tmpPointer) == B_OK)
 	{
-		node->RemoveName("Node::parent");
-		node->AddPointer("Node::parent",DeIndexNode((BMessage *)tmpPointer));
+		nodeIndex = sorter.find((int32)subContainerEntry);
+		if (nodeIndex != sorter.end())
+		{
+			node->RemoveName("Node::parent");
+			node->AddPointer("Node::parent",nodeIndex->second);
+		}
 	}
-	node->FindPointer("this",(void **)&tmpPointer);
-	node->RemoveName("this");
 	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 	BasePlugin	*plugin		= NULL;
 	PEditor		*editor		= NULL;
@@ -269,8 +273,8 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 		void		*fromPointer		= NULL;
 		void		*toPointer			= NULL;
 		BMessage	*fromMessage		= new BMessage();
-		BMessage	*toMessage			= new BMessage();	
-		// need to check this for every Pointer individual 
+		BMessage	*toMessage			= new BMessage();
+		// need to check this for every Pointer individual
 		if (connection->FindPointer("Node::from",(void **)&fromPointer) != B_OK)
 		{
 			connection->FindMessage("Node::from",fromMessage);
@@ -298,7 +302,7 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 				}
 			}
 		}
-		
+
 //		if we cant find the right Pointer then add the old one
 		map<int32,BMessage*>::iterator indexFrom;
 		indexFrom=sorter.find((int32)fromPointer);
@@ -306,8 +310,8 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 			connection->AddPointer("Node::from",indexFrom->second);
 		else
 			connection->AddPointer("Node::from",fromPointer);
-//		if we cant find the right Pointer then add the old one	
-		map<int32,BMessage*>::iterator indexTo;		
+//		if we cant find the right Pointer then add the old one
+		map<int32,BMessage*>::iterator indexTo;
 		indexTo=sorter.find((int32)toPointer);
 		if (indexTo != sorter.end())
 			connection->AddPointer("Node::to",indexTo->second);
