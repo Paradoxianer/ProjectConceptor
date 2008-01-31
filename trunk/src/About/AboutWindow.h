@@ -9,7 +9,7 @@
 	#include <locale/Locale.h>
 #else
 	#define _T(a) a
-#endif 
+#endif
 
 /**
  * @class AboutWindow
@@ -21,13 +21,13 @@ class AboutWindow: public BWindow
 {
 
 	public:
-			AboutWindow();
-			~AboutWindow();
-			
+						AboutWindow();
+						~AboutWindow();
+
 	protected:
-			void ChangeLanguage(void);
-			
+			void		ChangeLanguage(void);
+
 	private:
-			AboutView* fAboutView;	
+			AboutView*	fAboutView;
 };
 #endif
