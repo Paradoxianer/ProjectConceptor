@@ -30,7 +30,6 @@ SRCS= 		src/AboutWindow.cpp \
 		src/MainView.cpp \
 		src/ProjectConceptor.cpp \
 		src/PWindow.cpp \
-		src/ShortCutFilter.cpp\
 		src/Commands/PCommand.cpp \
 		src/Commands/PCommandManager.cpp \
 		src/Config/ConfigWindow.cpp \
@@ -56,7 +55,8 @@ SRCS= 		src/AboutWindow.cpp \
 		src/Tools/PDocLoader.cpp \
 		src/Tools/Indexer.cpp \
 		src/Tools/InputRequestView.cpp \
- 		src/Tools/InputRequest.cpp  
+ 		src/Tools/InputRequest.cpp  \
+ 		src/Tools/ShortCutFilter.cpp
 
 
 #	specify the resource files to use
