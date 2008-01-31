@@ -132,7 +132,6 @@ protected:
 			ToolbarView		*horizontalToolbars;*/
 
 			ConfigWindow	*configWindow;
-			AboutWindow		*aboutWindow;
 			BMenuBar		*statusBar;
 	//		ProjektTabView	*tabView;
 			BList			*verticalToolbars;
