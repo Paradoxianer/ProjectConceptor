@@ -7,7 +7,6 @@
 
 #include "ToolBar.h"
 #include "PluginManager.h"
-#include "AboutWindow.h"
 #include "ConfigWindow.h"
 #include "PMenuAccess.h"
 #include "ShortCutFilter.h"
@@ -22,7 +21,7 @@
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
-#endif 
+#endif
 
 class PDocument;
 class PEditor;
@@ -59,7 +58,7 @@ public:
 	/**Add a new Shortcutlist. This means the old Shortcuts are retained. if you set an shortcut wich is already in use it´s been replaced
 	 */
 	virtual void			AddShortCutList(BMessage *shortcutList){shortcutFilter->AddShortCutList(shortcutList);};
-	/**Remove all Shortcuts in the Shortcutlist. 
+	/**Remove all Shortcuts in the Shortcutlist.
 	 * @warning Previous overitten Shortcust are NOT restored!
 	 */
 	virtual void			RemoveShortCutList(BMessage *shortcutList){shortcutFilter->RemoveShortCutList(shortcutList);};
@@ -81,7 +80,7 @@ public:
 
 	virtual	status_t		AddMenu(BMenu *menu,int32 index = -1);
 	virtual	status_t		AddMenuItem(const char *menuSignatur, BMenuItem *menuItem,int32 index = -1);
-	
+
 	virtual	status_t		AddToolBar(ToolBar *toolbar);
 	virtual	status_t		AddToolMenu(const char *toolbarSignatur,ToolMenu *toolMenu);
 	virtual	status_t		AddToolItem(const char *toolbarSignatur,const char *toolmenuSignatur,ToolItem *toolItem,int32 index = -1);
@@ -93,12 +92,12 @@ public:
 	virtual status_t		RemoveToolBar(const char* signature);
 	virtual status_t		RemoveToolMenu(const char* toolbarSignature,const char* toolmenuSignature) ;
 	virtual status_t		RemoveToolItem(const char* toolbarSignature,const char* toolitemSignature);
-	//++++++++++++++++++++++PMenuAcces	
+	//++++++++++++++++++++++PMenuAcces
 
 	virtual void			ShowSettings();
 	virtual	bool			QuitRequested();
 
-						
+
 	virtual void			FrameResized(float width, float height);
 			void			Init(void);
 			void			SetManager(WindowManager *newManager);
@@ -116,11 +115,11 @@ protected:
 			void			MakeToolbars(void);
 			void			ReCalcToolBars(menu_layout layout);
 
-		
+
 			ShortCutFilter	*shortcutFilter;
-	
+
 			BMessage		*savemessage;
-			int32			window_id;	
+			int32			window_id;
 
 			BMenuBar		*menuBar;
 //			BMenu			*menu;
@@ -128,9 +127,9 @@ protected:
 			BMessage		*localizeMenuItems;
 			BMessage		*localizeToolTips;
 			BMessage		*oldShortcutMessage;
-		
+
 	/*		ToolbarView		*verticalToolbars;
-			ToolbarView		*horizontalToolbars;*/	
+			ToolbarView		*horizontalToolbars;*/
 
 			ConfigWindow	*configWindow;
 			AboutWindow		*aboutWindow;
@@ -139,14 +138,14 @@ protected:
 			BList			*verticalToolbars;
 			BList			*horizontalToolbars;
 
-			
+
 			MainView		*mainView;
 			WindowManager	*manager;
 			PDocument		*doc;
 private:
 	#ifdef B_ZETA_VERSION_1_0_0
     	    BLanguageNotifier languageChanger;
-    #endif 
+    #endif
 
 };
 #endif
