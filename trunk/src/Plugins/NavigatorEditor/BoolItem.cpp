@@ -7,7 +7,7 @@
 	#include <locale/Locale.h>
 #else
 	#define _T(a) a
-#endif 
+#endif
 
 BoolItem::BoolItem(char *newLabel, bool newValue, uint32 level = 0, bool expanded = true):BaseListItem(B_BOOL_TYPE,level,expanded)
 {
@@ -17,9 +17,9 @@ BoolItem::BoolItem(char *newLabel, bool newValue, uint32 level = 0, bool expande
 	value			= new BCheckBox(BRect(0,0,100,10),"checker",NULL,inputChanged);
 	value->SetValue(newValue);
 	label			= newLabel;
-	background		= ui_color(B_CONTROL_BACKGROUND_COLOR);
-	backgroundHi	= ui_color(B_CONTROL_HIGHLIGHT_COLOR);
-	foreground		= ui_color(B_CONTROL_TEXT_COLOR);
+	background		= ui_color(B_PANEL_BACKGROUND_COLOR);
+	backgroundHi	= ui_color(B_KEYBOARD_NAVIGATION_COLOR);
+	foreground		= ui_color(B_MENU_ITEM_TEXT_COLOR);
 	ValueChange();
 }
 
@@ -51,10 +51,10 @@ void BoolItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 	value->SetViewColor(color);
 	owner->FillRoundRect(bounds,3,3);
 	if (IsEnabled())
-		owner->SetHighColor(foreground);	
+		owner->SetHighColor(foreground);
 	else
 		owner->SetHighColor(tint_color(foreground,B_DISABLED_LABEL_TINT));
-	owner->MovePenTo(newBounds.left+4, newBounds.bottom-textLine); 
+	owner->MovePenTo(newBounds.left+4, newBounds.bottom-textLine);
 	owner->DrawString(label);
 	if (IsSelected())
 	{
@@ -77,12 +77,12 @@ void BoolItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
 				sprintf(svalue,_T("false"));
 		}
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-textLine);
-		owner->DrawString(svalue); 
+		owner->DrawString(svalue);
 	}
 	owner->SetHighColor(205,205,205,255);
 //	owner->StrokeRoundRect(newBounds,3,3);
 	owner->StrokeLine(BPoint(newBounds.right-SEPERATOR,newBounds.top),BPoint(newBounds.right-SEPERATOR,newBounds.bottom));
-	owner->SetHighColor(foreground);	
+	owner->SetHighColor(foreground);
 }
 
 void BoolItem::Select(void)
@@ -112,7 +112,7 @@ status_t BoolItem::Invoke(BMessage *message = NULL)
 		sendMessage = new BMessage(*Message());
 	else
 		sendMessage = new BMessage(*message);
-	if (sendMessage != NULL)	
+	if (sendMessage != NULL)
 	{
 		sendMessage->FindMessage("valueContainer",valueContainer);
 		valueContainer->AddInt32("type",B_BOOL_TYPE);
