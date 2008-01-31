@@ -99,6 +99,7 @@ LOCAL_INCLUDE_PATHS =	src \
 					src/Document \
 					src/Plugins \
 					src/ToolBar \
+					src/About \
 					src/Tools
 
 #	specify the level of optimization that you desire
@@ -132,7 +133,7 @@ COMPILER_FLAGS =
 #	specify additional linker flags
 LINKER_FLAGS =
 
-SVG_ICON = src/Doku/Logogross.svg
+SVG_ICON = Data/Icons/Logogross.svg
 
 #EXTRA_DEPS = copy
 
@@ -175,14 +176,14 @@ LEAFDIRS = \
 
 default .DEFAULT:
 	@echo "---------SVN INFO GEN-----------"
-	@echo "" >> src/SvnInfo.h 
-	@echo "#ifndef SVN_INFO_H" > src/SvnInfo.h 
-	@echo "#define SVN_INFO_H" >> src/SvnInfo.h 
-	@echo "" >> src/SvnInfo.h 
-	@echo "//do not edit this" >> src/SvnInfo.h 
-	@echo "#define SVN_REV_STR \"`svn info | grep Revision | awk '{print $$2}'`\"" >> src/SvnInfo.h 
-	@echo "" >> src/SvnInfo.h 
-	@echo "#endif" >> src/SvnInfo.h 
+	@echo "" >> src/About/AboutSvnInfo.h 
+	@echo "#ifndef SVN_INFO_H" > src/About/AboutSvnInfo.h 
+	@echo "#define SVN_INFO_H" >> src/About/AboutSvnInfo.h 
+	@echo "" >> src/About/AboutSvnInfo.h  
+	@echo "//do not edit this" >> src/About/AboutSvnInfo.h 
+	@echo "#define SVN_REV_STR \"`svn info | grep Revision | awk '{print $$2}'`\"" >> src/About/AboutSvnInfo.h 
+	@echo "" >> src/About/AboutSvnInfo.h 
+	@echo "#endif" >> src/About/AboutSvnInfo.h 
 	@echo "UPDATED"
 	@echo "--------------------------------"
 	

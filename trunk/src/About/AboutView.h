@@ -30,7 +30,7 @@ class AboutView: public BView
 
 	private:
 			//
-			float frameWidth	frameHeight;
+			float frameWidth,	frameHeight;
 			BBitmap*			fBitmap;
 			BTextView*			fTitleView;
 			BFont				fTitleFont;
