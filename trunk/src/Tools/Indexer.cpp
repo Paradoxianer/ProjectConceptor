@@ -225,9 +225,9 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 	i = 0;
 	if (node->FindPointer("Node::allConnections",&tmpPointer) == B_OK)
 			node->RemoveName("Node::allConnections");
-	while (node->FindMessage("allConnectionsList",i,subContainerEntry) == B_OK)
+	while (node->FindMessage("allConnectionsList",i,(BMessage *)subContainerEntry) == B_OK)
 	{
-		allConnectionsList->AddItem(DeIndexNode(subContainerEntry));
+		allConnectionsList->AddItem(DeIndexNode((BMessage *)subContainerEntry));
 		subContainerEntry	= new BMessage();
 		i++;
 	}
