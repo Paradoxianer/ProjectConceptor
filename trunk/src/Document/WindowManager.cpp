@@ -86,9 +86,9 @@ void WindowManager::AddPWindow(PWindow* pWindow)
 			if (windowList->AddItem(pWindow))
 			{
 				pWindow->SetManager(this);
-				windowRect.OffsetBy(20,20);
+				windowRect.OffsetBy(50,50); //20,20
 				pWindow->MoveTo(windowRect.LeftTop());
-				pWindow->ResizeTo(windowRect.Width(), windowRect.Height());
+				pWindow->ResizeTo(windowRect.Width()-50, windowRect.Height()-50);
 //				BMessage *docConfig			= document->DocumentSettings();
 			}
 		}

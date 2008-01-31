@@ -194,7 +194,7 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	AddChild(fWebView);
 
 	//This is a link for an e-mail address.
-	fMailView = new URLView( BRect(fContactTitleString.Length()+90+150, frameHeight-62, frameWidth-5, frameHeight-47), "E-mail", "send an Email", "mail@projectconceptor.de");
+	fMailView = new URLView(BRect(fContactTitleString.Length()+90+150, frameHeight-60, frameWidth-5, frameHeight-45), "E-mail", "send an Email", "mail@projectconceptor.de");
 	fMailView->SetHoverEnabled(false);
 	fMailView->SetFontSize(12.0);
 	fMailView->AddAttribute("META:name", "ProjectConceptor");
