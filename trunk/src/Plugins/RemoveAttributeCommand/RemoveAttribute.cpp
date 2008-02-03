@@ -123,9 +123,14 @@ void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage
 		i++;
 	}
 	delete tmpSubGroup;
-	while ( (subGroup->GetInfo(B_ANY_TYPE, j, (const char **)&tmpName, &type, &count) == B_OK) && ((count-1) != index) )
+#ifdef B_ZETA_VERSION_1_0_0
+	while ((subGroup->GetInfo(B_ANY_TYPE, j, (const char **)&tmpName, &type, &count) == B_OK) && ((count-1) != index))
+#else
+	while((subGroup->GetInfo(B_ANY_TYPE, j, (char**)&tmpName, &type, &count) == B_OK) && ((count-1) != index))
+#endif
 		j++;
 	subGroup->FindData(name,type,count-1,(const void **)&oldValue,&size);
+
 	undoMessage->AddData("deletedAttribut",type,oldValue,size);
 	undoMessage->AddString("deletedName",name);
 	undoMessage->AddInt32("deletedType",type);
