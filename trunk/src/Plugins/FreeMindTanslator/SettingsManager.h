@@ -1,6 +1,6 @@
 #ifndef SETTINGS_MANAGER_H
 #define SETTINGS_MANAGER_H
-#include <support/StringList.h>
+#include <OS.h>
 
 class SettingsManager 
 {
@@ -19,6 +19,5 @@ private:
 	bool		saveMacro;
 	bool		restoreWinState;
 	bool		changed;
-	BStringList	*stringList;
 };
 #endif

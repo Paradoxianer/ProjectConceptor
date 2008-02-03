@@ -6,7 +6,7 @@
 
 #include "SettingsManager.h"
 
-SettingsManager::SettingsManager(const char * str = NULL)
+SettingsManager::SettingsManager(const char * str)
 {
 }
 
