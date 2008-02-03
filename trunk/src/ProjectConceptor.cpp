@@ -1,3 +1,8 @@
+#include "ProjectConceptor.h"
+#include "ProjectConceptorDefs.h"
+#include "PWindow.h"
+#include "About/AboutWindow.h"
+
 #include <app/Roster.h>
 #include <interface/Alert.h>
 #include <interface/Rect.h>
@@ -7,14 +12,6 @@
 #include <translation/TranslationUtils.h>
 
 #include <string.h>
-
-#include "ProjectConceptor.h"
-#include "ProjectConceptorDefs.h"
-#include "PWindow.h"
-#include "AboutWindow.h"
-
-
-
 
 const char		*APP_SIGNATURE		= "application/ProjectConceptor";
 
