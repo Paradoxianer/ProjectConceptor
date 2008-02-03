@@ -62,7 +62,7 @@ BMessage* Paste::Do(PDocument *doc, BMessage *settings)
 		{
 			if (node->what != P_C_CONNECTION_TYPE)
 				indexer->DeIndexNode(node);
-			i++
+			i++;
 		}
 		inserter->AddMessage("PCommand::subPCommand",select);
 		PRINT_OBJECT(*inserter);
