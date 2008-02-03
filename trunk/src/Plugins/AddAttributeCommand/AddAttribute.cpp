@@ -90,7 +90,7 @@ void AddAttribute::DetachedFromManager(void)
 {
 }
 
-void AddAttribute::DoAddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,bool undo = false)
+void AddAttribute::DoAddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,bool undo)
 {
 	int32 		i				= 0;
 	status_t	err				= B_OK;
