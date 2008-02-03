@@ -7,7 +7,11 @@
 	#define _T(a) a
 #endif 
 
-FloatItem::FloatItem(char *newLabel, float newValue, uint32 level = 0, bool expanded = true):BaseListItem(B_FLOAT_TYPE,level,expanded)
+FloatItem::FloatItem(char *newLabel,
+		float newValue,
+		uint32 level,
+		bool expanded)
+	: BaseListItem(B_FLOAT_TYPE, level, expanded)
 {
 	svalue			= new char[24];
 	sprintf(svalue,"%.2f",newValue);
@@ -33,7 +37,7 @@ void FloatItem::Update(BView *newOwner, const BFont *font)
 	textLine=((height+3)-fontHeight.ascent)/2;
 }
 
-void FloatItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
+void FloatItem::DrawItem(BView *owner, BRect bounds, bool complete)
 {
 	BRect	newBounds=bounds;
 	newBounds.InsetBy(1,1);
@@ -86,11 +90,11 @@ void FloatItem::Deselect(void)
 {
 }
 
-void FloatItem::SetExpanded(bool expande)
+void FloatItem::SetExpanded(bool /*expande*/)
 {
 };
 
-status_t FloatItem::Invoke(BMessage *message = NULL)
+status_t FloatItem::Invoke(BMessage *message)
 {
 	BMessage	*sendMessage	= NULL;
 	BMessage	*valueContainer	= new BMessage();

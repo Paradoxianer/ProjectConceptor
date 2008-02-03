@@ -13,7 +13,12 @@
 #include "PCommandManager.h"
 #include "BoolRenderer.h"
 
-AttributRenderer::AttributRenderer(GraphEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *chgMessage=NULL, BMessage *delMessage=NULL):Renderer(parentEditor,NULL)
+AttributRenderer::AttributRenderer(GraphEditor *parentEditor,
+		BMessage *forAttribut,
+		BRect attribRect,
+		BMessage *chgMessage,
+		BMessage *delMessage)
+	:Renderer(parentEditor, NULL)
 {
 	TRACE();
 	changeMessage	= chgMessage;
@@ -131,7 +136,9 @@ void AttributRenderer::MouseDown(BPoint where)
  		BMessage *copy;
  		editor->ConvertToScreen(&where);
 		selected = kontextMenu->Go(where); 
-		selected->Invoke();
+		// ### We're not allowed to call it as it is protected.
+		// Needs some review.
+		// selected->Invoke();
 	}
 	else
 	{

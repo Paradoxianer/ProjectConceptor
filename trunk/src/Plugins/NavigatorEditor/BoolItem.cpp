@@ -9,7 +9,11 @@
 	#define _T(a) a
 #endif
 
-BoolItem::BoolItem(char *newLabel, bool newValue, uint32 level = 0, bool expanded = true):BaseListItem(B_BOOL_TYPE,level,expanded)
+BoolItem::BoolItem(char *newLabel, 
+		bool newValue,
+		uint32 level,
+		bool expanded)
+	:BaseListItem(B_BOOL_TYPE,level,expanded)
 {
 	BMessage		*inputChanged = new BMessage(ITEM_CHANDED);
 	inputChanged->AddPointer("item",this);
@@ -36,7 +40,7 @@ void BoolItem::Update(BView *newOwner, const BFont *font)
 	textLine=((height+3)-fontHeight.ascent)/2;
 }
 
-void BoolItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
+void BoolItem::DrawItem(BView *owner, BRect bounds, bool complete)
 {
 	BRect	newBounds=bounds;
 	newBounds.InsetBy(1,1);
@@ -104,7 +108,7 @@ void	BoolItem::ValueChange(void)
 		sprintf(svalue,_T("false"));
 }
 
-status_t BoolItem::Invoke(BMessage *message = NULL)
+status_t BoolItem::Invoke(BMessage *message)
 {
 	BMessage	*sendMessage	= NULL;
 	BMessage	*valueContainer	= new BMessage();

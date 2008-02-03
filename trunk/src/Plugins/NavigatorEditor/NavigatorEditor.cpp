@@ -190,7 +190,7 @@ bool NavigatorEditor::IsFocus(void) const
 
 }
 
-void NavigatorEditor::MakeFocus(bool focus = true)
+void NavigatorEditor::MakeFocus(bool focus)
 {
 	TRACE();
 	BView::MakeFocus(focus);

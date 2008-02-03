@@ -3,7 +3,11 @@
 #include <interface/InterfaceDefs.h>
 
 
-PointerItem::PointerItem(char *newLabel, void *newValue, uint32 level = 0, bool expanded = true):BaseListItem(B_POINTER_TYPE,level,expanded)
+PointerItem::PointerItem(char *newLabel,
+		void *newValue,
+		uint32 level,
+		bool expanded)
+	: BaseListItem(B_POINTER_TYPE, level, expanded)
 {
 	label			= newLabel;
 	value			= newValue;
@@ -26,7 +30,7 @@ void PointerItem::Update(BView *newOwner, const BFont *font)
 	textLine=((height+3)-fontHeight.ascent)/2;
 }
 
-void PointerItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
+void PointerItem::DrawItem(BView *owner, BRect bounds, bool complete)
 {
 	BRect	newBounds=bounds;
 	newBounds.InsetBy(1,1);

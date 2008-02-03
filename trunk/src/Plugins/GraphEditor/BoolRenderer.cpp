@@ -14,13 +14,11 @@
 
 //#include <interface/InterfaceDefs.h>*/
 
-
-
-
-
-
-
-BoolRenderer::BoolRenderer(GraphEditor *parentEditor,bool forValue,BRect valueRect,BMessage *message=NULL):Renderer(parentEditor,NULL)
+BoolRenderer::BoolRenderer(GraphEditor *parentEditor,
+			bool forValue,
+			BRect valueRect,
+			BMessage *message)
+	:Renderer(parentEditor, NULL)
 {
 	TRACE();
 	changeMessage	= message;
@@ -85,7 +83,7 @@ void BoolRenderer::MouseUp(BPoint where)
 	valueContainer->AddBool("newValue",!value);
 	sendMessage.ReplaceMessage("valueContainer",valueContainer);
 	BMessenger *sender	= new BMessenger(editor->BelongTo());
-	sender->SendMessage(sendMessage);
+	sender->SendMessage(&sendMessage);
 }
 
 void BoolRenderer::Draw(BView *drawOn, BRect updateRect)

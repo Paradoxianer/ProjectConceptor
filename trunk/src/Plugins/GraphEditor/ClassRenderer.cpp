@@ -376,8 +376,10 @@ void ClassRenderer::ValueChanged()
 	container->FindMessage("Node::Pattern",pattern);
 	container->FindMessage("Node::Font",messageFont);
 	container->FindMessage("Node::Data",data);
+	#ifdef B_ZETA_VERSION_1_0_0
 	pattern->FindRGBColor("FillColor",&fillColor);
 	pattern->FindRGBColor("BorderColor",&borderColor);
+	#endif
 	pattern->FindFloat("PenSize",&penSize);
 	data->FindString("Name",(const char **)&newName);
 	name->SetString(newName);

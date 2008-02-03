@@ -11,7 +11,11 @@
 	#define _T(a) a
 #endif 
 
-RectItem::RectItem(char *newLabel, BRect newRect, uint32 level = 0, bool expanded = true):BaseListItem(B_RECT_TYPE,level,expanded)
+RectItem::RectItem(char *newLabel,
+		BRect newRect,
+		uint32 level,
+		bool expanded)
+	: BaseListItem(B_RECT_TYPE, level, expanded)
 {
 	sleft			= new char[24];
 	stop			= new char[24];
@@ -56,7 +60,7 @@ void RectItem::Update(BView *newOwner, const BFont *font)
 	
 }
 
-void RectItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
+void RectItem::DrawItem(BView *owner, BRect bounds, bool complete)
 {
 	BRect	newBounds=bounds;
 	newBounds.InsetBy(1,1);
@@ -158,7 +162,7 @@ BRect RectItem::GetRect(void)
 	return BRect(rleft,rtop,rright,rbottom);
 }
 
-status_t RectItem::Invoke(BMessage *message = NULL)
+status_t RectItem::Invoke(BMessage *message)
 {
 	BMessage	*sendMessage	= NULL;
 	BMessage	*valueContainer	= new BMessage();

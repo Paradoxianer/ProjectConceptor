@@ -4,7 +4,10 @@
 #include <interface/InterfaceDefs.h>
 
 
-NodeItem::NodeItem(BMessage *newNode, uint32 level = 0, bool expanded = true):BaseListItem(P_C_CLASS_TYPE,level,expanded)
+NodeItem::NodeItem(BMessage *newNode,
+		uint32 level,
+		bool expanded)
+	: BaseListItem(P_C_CLASS_TYPE,level,expanded)
 {
 	node			= newNode;
 	background		= ui_color(B_CONTROL_BACKGROUND_COLOR);
@@ -23,7 +26,7 @@ NodeItem::NodeItem(BMessage *newNode, uint32 level = 0, bool expanded = true):Ba
 	textLine=fontHeight.ascent;
 }*/
 
-void NodeItem::DrawItem(BView *owner, BRect bounds, bool complete = false)
+void NodeItem::DrawItem(BView *owner, BRect bounds, bool complete)
 {
 	BRect	newBounds=bounds;
 	newBounds.InsetBy(1,1);
