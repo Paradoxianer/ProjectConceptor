@@ -1,4 +1,5 @@
 *.o
 ProjectConceptor
 src/SvnInfo.h
+*~
 
