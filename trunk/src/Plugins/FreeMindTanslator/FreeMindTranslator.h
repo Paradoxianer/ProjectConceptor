@@ -5,7 +5,20 @@
 #include <TranslationKit.h>
 #include <app/Message.h>
 #include <List.h>
+#if defined(__HAIKU__) && __GNUC__ > 3
+#include <map>
+#include <set>
+using namespace std;
+#else
+#include <cpp/set.h>
+#include <cpp/map.h>
+using namespace std;
+#endif
 #include "ProjectConceptorDefs.h"
+#include "tinyxml.h"
+
+
+
 //ProjectConceptor Main Type
 
 char translatorName[] = "FreeMindTranslator";
@@ -42,23 +55,22 @@ public:
 	status_t	ConvertFreeMind2PDoc();
 
 protected:
-	status_t	WriteConnection(BMessage *connection);
-	status_t	FindConnections(BMessage *node);
+	TiXmlElement	ProcessNode(BMessage *node);
+//	TiXmlElement	ProcessConnection(BMessage *node);
+	
+	//TiXmlElement	FindConnections(BMessage *node);
+	BMessage	*GuessStartNode(void);
 	
 	BPositionIO *in;
 	BMessage	*config;
 	BPositionIO *out;
-	BList		*doneNode;
-	BList		*doneConnection;
+	set<int32>	processedIDs;
+	map<int32,BMessage*>	nodes;
+	map<int32,BMessage*>	connections;
+
 	BMessage	*allConnections;
 	BMessage	*allNodes;
 	BMessage	*selected;
-	BMessage	*commandManager;
-	// config stuff
-	bool		saveUndo;
-	bool		saveMacro;
-	bool		restoreWindowPos;
-	int32		undoLevel;
 
 };
 
