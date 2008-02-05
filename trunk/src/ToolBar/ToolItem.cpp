@@ -38,7 +38,6 @@ ToolItem::ToolItem(BMessage *archive):BaseItem(""),BButton(archive)
 	//**nachtragen shadow_offset_by..
 	if (err == B_OK)
 		SetTarget(tmpMessenger);
-	fButtonBorder = true;
 }
 
 void ToolItem::Init(void)
@@ -48,6 +47,7 @@ void ToolItem::Init(void)
 	toolTip=NULL;
 	state=P_M_ITEM_UP;
 	shadow_offset_by=2;
+	fButtonBorder=true;
 }
 
 ToolItem::~ToolItem(void)
@@ -146,7 +146,7 @@ BArchivable* ToolItem::Instantiate(BMessage *archive)
 
 void ToolItem::Draw(BRect updateRect)
 {
-	if (fButtonBorder == true)
+	if (fButtonBorder)
 		BButton::Draw(updateRect); //enable button border
 	SetDrawingMode(B_OP_ALPHA);
 	BRect buttonFrame=BRect(0,0,18,18);
