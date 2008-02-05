@@ -780,9 +780,8 @@ status_t PWindow::AddToolItem(const char *toolbarSignatur,const char *toolmenuSi
 	if (toolMenu!= NULL)
 	{
 		if (index<0)
-		{	
-			toolMenu->AddItem(toolItem);	
-			toolItem->SetButtonBorder(true);
+		{
+			toolMenu->AddItem(toolItem);
 			err = B_OK;
 		}
 		else
@@ -793,7 +792,6 @@ status_t PWindow::AddToolItem(const char *toolbarSignatur,const char *toolmenuSi
 	{
 		ToolBar *toolBar = GetToolBar(toolbarSignatur);
 		toolBar->AddItem(toolItem);
-		toolItem->SetButtonBorder(true);
 //		err = B_BAD_VALUE;
 	}
 	return err;
