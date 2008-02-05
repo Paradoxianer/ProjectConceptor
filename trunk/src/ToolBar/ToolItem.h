@@ -65,7 +65,9 @@ virtual		void			Draw(BRect updateRect);
 virtual		BRect			Frame(void) {return BButton::Frame();};
 virtual		void			MoveTo(float x,float y){BButton::MoveTo(x,y);};
 virtual		void			ResizeTo(float width,float height){ResizeTo(width,height);};
-
+void						SetButtonBorder(bool _buttonBorder);
+bool						HasButtonBorder();
+bool                        fButtonBorder;
 protected:
 			void			Init();
 	const	char			*tName;
@@ -75,6 +77,9 @@ protected:
 			uint32			behavior;
 			uint32			state;
 			float			shadow_offset_by;
+			
+private:
+			//bool            fButtonBorder;
 
 };
 #endif

@@ -9,6 +9,7 @@ ToolItem::ToolItem(const char *name, BBitmap *bmp,BMessage *msg,uint32 behave):B
 	toolItemBitmap	= bmp;
 	tName 			= name;
 	behavior 		= behave;
+	//fButtonBorder = true;
 //	SetMessage(msg);
 }
 ToolItem::ToolItem(BMessage *archive):BaseItem(""),BButton(archive)
@@ -141,12 +142,27 @@ BArchivable* ToolItem::Instantiate(BMessage *archive)
 	}
 	toolbar->SetHighColor(old);
 }*/
+bool
+ToolItem::HasButtonBorder()
+{
+	return fButtonBorder;
+}
+
+void
+ToolItem::SetButtonBorder(bool _buttonBorder)
+{
+	fButtonBorder = _buttonBorder;
+}
 
 void ToolItem::Draw(BRect updateRect)
 {
-	BButton::Draw(updateRect);
+	if(HasButtonBorder() == true)
+	{
+		BButton::Draw(updateRect); //enable button border
+	}
 	SetDrawingMode(B_OP_ALPHA);
 	BRect buttonFrame=BRect(0,0,18,18);
+	
 	if (Value() != B_CONTROL_ON)
 		buttonFrame.OffsetTo(4,4);
 	else
@@ -156,7 +172,9 @@ void ToolItem::Draw(BRect updateRect)
 	}
 	if ((toolItemBitmap) && (toolItemBitmap->IsValid()) )
 		DrawBitmap(toolItemBitmap,buttonFrame);
+	
 }
+
 
 void ToolItem::MouseDown(BPoint point)
 {

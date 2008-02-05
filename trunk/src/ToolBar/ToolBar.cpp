@@ -26,6 +26,7 @@ ToolBar::ToolBar(BRect rect,  const char *name,menu_layout ori): BControl(rect, 
 	county					= 1;
 	rightIconBorder			= 1;
 	bottomIconBorder		= 1;
+	
 	if (ori == B_ITEMS_IN_ROW)
 	{
 		BView::ResizeTo(rect.Width()-1, top_margin+ITEM_HEIGHT+bottom_margin);
@@ -55,6 +56,7 @@ ToolBar::ToolBar(BMessage *archive):BControl(archive)
 	BMessage tmpArchive;
 	ToolItem *tmpItem;
 	ToolBarSeperator *tmpSeperator;
+	
 	while (err==B_OK)
 	{
 		err = archive->FindMessage("ToolBar::toolitems",i,&tmpArchive);
@@ -149,14 +151,13 @@ void ToolBar::AddItem(BaseItem *item)
 			rightIconBorder		= item->Frame().right+right_margin;
 			bottomIconBorder	= item->Frame().bottom+bottom_margin;
 		}
-		toolitems->AddItem(item);	
+		toolitems->AddItem(item);
 		if (tool_bar_menu_layout == B_ITEMS_IN_MATRIX)
 		{
 			countx=(uint32)ceil(sqrt(toolitems->CountItems())-0.5);
 			county=(uint32)ceil(sqrt(toolitems->CountItems()));
 			ReorderItems();
 		}
-		
 	}
 }
 

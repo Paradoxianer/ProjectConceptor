@@ -2,6 +2,6 @@
 #define SVN_INFO_H
 
 //do not edit this
-#define SVN_REV_STR "245"
+#define SVN_REV_STR "249"
 
 #endif
