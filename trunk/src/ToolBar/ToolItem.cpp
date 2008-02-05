@@ -9,14 +9,14 @@ ToolItem::ToolItem(const char *name, BBitmap *bmp,BMessage *msg,uint32 behave):B
 	toolItemBitmap	= bmp;
 	tName 			= name;
 	behavior 		= behave;
-	//fButtonBorder = true;
 //	SetMessage(msg);
 }
+
 ToolItem::ToolItem(BMessage *archive):BaseItem(""),BButton(archive)
 {
 	status_t err;
 	Init();
-	err = archive->FindString("ToolItem::tName", &tName); 
+	err = archive->FindString("ToolItem::tName", &tName);
 	//**check if the tName ist good??
 	BMessage tmpArchive;
 	err = archive->FindMessage("ToolItem::toolItemBitmap",&tmpArchive);
@@ -37,9 +37,10 @@ ToolItem::ToolItem(BMessage *archive):BaseItem(""),BButton(archive)
 	err = archive->FindMessenger("ToolItem::Messenger()",&tmpMessenger);
 	//**nachtragen shadow_offset_by..
 	if (err == B_OK)
-		SetTarget(tmpMessenger);	
-			
+		SetTarget(tmpMessenger);
+	fButtonBorder = true;
 }
+
 void ToolItem::Init(void)
 {
 	toolItemBitmap=NULL;
@@ -58,7 +59,7 @@ ToolItem::~ToolItem(void)
 	if (toolItemBitmap!=NULL) delete toolItemBitmap;
 	if (description!=NULL) delete description;
 	if (toolTip!=NULL) delete toolTip;
-	
+
 }
 
 void ToolItem::AttachedToToolBar(ToolBar *tb)
@@ -78,7 +79,7 @@ status_t ToolItem::Archive(BMessage *archive, bool deep) const
 {
 	status_t err;
 	err = BaseItem::Archive(archive,deep);
-	err = archive->AddString("class", "ToolItem"); 
+	err = archive->AddString("class", "ToolItem");
 	err = archive->AddString("ToolItem::tName",tName);
 	BMessage tmpArchive;
 	//**is the NULL - pointer test OK?
@@ -105,7 +106,7 @@ BArchivable* ToolItem::Instantiate(BMessage *archive)
 {
 	if ( !validate_instantiation(archive, "ToolItem") )
 		return NULL;
-	return new ToolItem(archive); 
+	return new ToolItem(archive);
 }
 
 /*void ToolItem::Draw(ToolBar *tp,BRect updateRect)
@@ -118,7 +119,7 @@ BArchivable* ToolItem::Instantiate(BMessage *archive)
 	shadowFrame.OffsetBy(4.0,4.0);
 	toolbar->FillRoundRect(shadowFrame,5,5);
 	BRect buttonFrame=shadowFrame;
-	if ((state&P_M_ITEM_DOWN) == P_M_ITEM_DOWN) 
+	if ((state&P_M_ITEM_DOWN) == P_M_ITEM_DOWN)
 	{
 		buttonFrame.OffsetBy(-4.0,-4.0);
 		toolbar->SetHighColor(itemDarkGray);
@@ -142,27 +143,14 @@ BArchivable* ToolItem::Instantiate(BMessage *archive)
 	}
 	toolbar->SetHighColor(old);
 }*/
-bool
-ToolItem::HasButtonBorder()
-{
-	return fButtonBorder;
-}
-
-void
-ToolItem::SetButtonBorder(bool _buttonBorder)
-{
-	fButtonBorder = _buttonBorder;
-}
 
 void ToolItem::Draw(BRect updateRect)
 {
-	if(HasButtonBorder() == true)
-	{
+	if (fButtonBorder == true)
 		BButton::Draw(updateRect); //enable button border
-	}
 	SetDrawingMode(B_OP_ALPHA);
 	BRect buttonFrame=BRect(0,0,18,18);
-	
+
 	if (Value() != B_CONTROL_ON)
 		buttonFrame.OffsetTo(4,4);
 	else
@@ -172,13 +160,13 @@ void ToolItem::Draw(BRect updateRect)
 	}
 	if ((toolItemBitmap) && (toolItemBitmap->IsValid()) )
 		DrawBitmap(toolItemBitmap,buttonFrame);
-	
+
 }
 
 
 void ToolItem::MouseDown(BPoint point)
 {
-	
+
 /*	if (Bounds().Contains(point))
 	{
 		if (behavior == P_M_ONE_STATE_ITEM)

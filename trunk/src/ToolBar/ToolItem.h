@@ -23,7 +23,7 @@ class ToolBar;
 /**
  * @class ToolItem
  *
- * @brief  ToolItem add a BButton with icon to a ToolBar 
+ * @brief  ToolItem add a BButton with icon to a ToolBar
  *
  * @author Paradoxon powered by Jesus Christ
  * @version 0.01
@@ -33,7 +33,7 @@ class ToolBar;
  * @see ToolBar
  * @see ToolMenu
  */
-class ToolItem: public	BaseItem, 
+class ToolItem: public	BaseItem,
 				public	BButton
 {
 
@@ -65,9 +65,9 @@ virtual		void			Draw(BRect updateRect);
 virtual		BRect			Frame(void) {return BButton::Frame();};
 virtual		void			MoveTo(float x,float y){BButton::MoveTo(x,y);};
 virtual		void			ResizeTo(float width,float height){ResizeTo(width,height);};
-void						SetButtonBorder(bool _buttonBorder);
-bool						HasButtonBorder();
-bool                        fButtonBorder;
+void						SetButtonBorder(bool _buttonBorder){ fButtonBorder = _buttonBorder;};
+bool						HasButtonBorder(void){return fButtonBorder;};
+
 protected:
 			void			Init();
 	const	char			*tName;
@@ -77,9 +77,9 @@ protected:
 			uint32			behavior;
 			uint32			state;
 			float			shadow_offset_by;
-			
+
 private:
-			//bool            fButtonBorder;
+			bool			fButtonBorder;
 
 };
 #endif
