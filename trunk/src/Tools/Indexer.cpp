@@ -15,7 +15,7 @@ Indexer::Indexer(PDocument *document)
 
 Indexer::~Indexer(void)
 {
-	TRACE();;
+	TRACE();
 	delete included;
 
 }
