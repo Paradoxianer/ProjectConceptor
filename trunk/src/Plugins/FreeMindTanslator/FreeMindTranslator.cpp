@@ -45,8 +45,8 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 				{
 					outInfo->group = B_TRANSLATOR_NONE;
 					outInfo->type = P_C_DOCUMENT_RAW_TYPE;
-					outInfo->quality = 0.3;		
-					outInfo->capability = 0.8;	
+					outInfo->quality = 0.3;
+					outInfo->capability = 0.8;
 					strcpy(outInfo->name, "ProjectConceptor nativ format");
 					strcpy(outInfo->MIME, P_C_DOCUMENT_MIMETYPE);
 				}
@@ -98,7 +98,7 @@ status_t Converter::ConvertPDoc2FreeMind()
 	BMessage		*inMessage			= new BMessage();
 	BMessage		*tmpMessage			= new BMessage();
 	void			*id					= NULL;
- 	
+
  	allConnections	= new BMessage();
 	selected		= new BMessage();
 	allNodes		= new BMessage();
@@ -109,7 +109,7 @@ status_t Converter::ConvertPDoc2FreeMind()
 	{
 		inMessage->FindMessage("PDocument::allConnections",allConnections);
 		inMessage->FindMessage("PDocument::selected",selected);
-		inMessage->FindMessage("PDocument::allNodes",allNodes);	
+		inMessage->FindMessage("PDocument::allNodes",allNodes);
 		int32 i = 0;
 		while(allNodes->FindMessage("node",i,tmpMessage)==B_OK)
 		{
@@ -127,7 +127,7 @@ status_t Converter::ConvertPDoc2FreeMind()
 			i++;
 		}
 
-		BMessage	*node= GuessStartNode();	
+		BMessage	*node= GuessStartNode();
 		TiXmlDocument	doc;
 		TiXmlElement	freeMap("map");
 		freeMap.SetAttribute("version","0.9.0");
@@ -149,123 +149,6 @@ status_t Converter::ConvertPDoc2FreeMind()
 	return err;
 }
 
-/*status_t Converter::ConvertPDoc2FreeMind()
-{
-	status_t		err					= B_OK;
-	BMessage		*inMessage			= new BMessage();
-	BMessage		*tmpMessage			= new BMessage();
-	int32			i					= 0;
-	int32			undoLevel			= -1;
-	BMessage		*node				= new BMessage();
-	char			*line				= new char[1024];
-//** Alert lost of Data and Nodes without connection will not be ported 
-	//necessary inits
-	allConnections	= new BMessage();
-	commandManager	= new BMessage();
-	selected		= new BMessage();
-	allNodes		= new BMessage();
-	doneNode		= new BList();
-	doneConnection	= new BList();
-
-	//extract all stuff
-	err = inMessage->Unflatten(in);
-	inMessage->FindMessage("PDocument::allConnections",allConnections);
-	inMessage->FindMessage("PDocument::commandManager",commandManager);
-	inMessage->FindMessage("PDocument::selected",selected);
-	inMessage->FindMessage("PDocument::allNodes",allNodes);	
-	sprintf(line,"%s","<map version=\"0.8.0\">\n<!-- This File was gernerated by ProjectConceptor! - To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->\n");
-	out->Write(line,strlen(line));
-	if (allConnections->FindMessage("node",tmpMessage)==B_OK)
-	{
-		//stores alle Nodes we already have visited
-		WriteConnection(tmpMessage);
-	}
-	sprintf(line,"%s","</map>");
-	out->Write(line,strlen(line));	
-			
-	printf("StandartTranslator - Flatten outMessage - %s\n", strerror(err));
-	return err;
-}
-
-status_t Converter::ConvertFreeMind2PDoc()
-{
-	
-}
-
-status_t Converter::WriteConnection(BMessage *connection)
-{
-	printf("Connection:\n");
-	connection->PrintToStream();
-	BMessage	*fromNode		= NULL;
-	BMessage	*toNode			= NULL;
-	BMessage	*data			= new BMessage;
-	char		*text			= NULL;
-	char		*line			= new char[512];
-	void		*selfPointer	= NULL;
-	bool		closeNode		= false;
-	connection->FindPointer("this",&selfPointer);
-	doneConnection->AddItem(selfPointer);
-	connection->FindPointer("Node::from" ,(void **)&fromNode);
-	if (!doneNode->HasItem(fromNode))
-	{
-		fromNode->FindMessage("Node::Data",data);
-		data->FindString("Name",(const char **)&text);
-		sprintf(line,"<node ID=\"%ld\" TEXT=\"%s\">\n",fromNode,text);
-		doneNode->AddItem(fromNode);
-		out->Write(line,strlen(line));
-		FindConnections(fromNode);
-		closeNode;
-	}
-	connection->FindPointer("Node::to" ,(void **)&toNode);
-	if (doneNode->HasItem(toNode))
-	{
-		sprintf(line,"<arrowlink DESTINATION=\"%ld\"/>\n",toNode,text);
-		out->Write(line,strlen(line));
-	}
-	else
-	{
-		toNode->FindMessage("Node::Data",data);
-		data->FindString("Name",(const char **)&text);
-		sprintf(line,"<node ID=\"%ld\" TEXT=\"%s\">\n",toNode,text);
-		doneNode->AddItem(toNode);
-		out->Write(line,strlen(line));	
-		//**check for all Connections with the same Node in To (or From)
-		FindConnections(toNode);
-		sprintf(line,"</node>\n");
-		out->Write(line,strlen(line));
-	}
-	if (closeNode)
-	{
-		sprintf(line,"</node>\n");
-		out->Write(line,strlen(line));
-	}
-}
-
-status_t Converter::FindConnections(BMessage *node)
-{
-	BMessage	*connection		= new BMessage();
-	BMessage	*from			= NULL;
-	BMessage	*to				= NULL;
-	//we dont check the first Connections because this ist the "root-Connection" at the Moment
-	int32		i				= 1;
-	void		*selfPointer	= NULL;
-	while (allConnections->FindMessage("node",i,connection)==B_OK)
-	{
-		connection->FindPointer("this",&selfPointer);
-		if (!doneConnection->HasItem(selfPointer))
-		{
-			connection->FindPointer("Node::from",(void **)&from);
-			connection->FindPointer("Node::to",(void **)&to);
-			if (from == node)
-				WriteConnection(connection);
-			else if (to == node)
-				WriteConnection(connection);
-			
-		}
-		i++;
-	}
-}*/
-
 
 TiXmlElement Converter::ProcessNode(BMessage *node)
 {
@@ -276,7 +159,7 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 	BMessage		*connection		= NULL;
 	BMessage		*data			= new BMessage();
 	BMessage		*attrib			= new BMessage();
-	
+
 	bool			found			= false;
 	char			*name			= NULL;
 
@@ -287,7 +170,7 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 	//find the data field where name and attributes are stored
 	node->FindMessage("Node::Data",data);
 	data->FindString("Name",(const char **)&name);
-	
+
 	xmlNode.SetAttribute("ID",(int32)tmpNode);
 	xmlNode.SetAttribute("TEXT",(const char *)name);
 	//add all Attributes
@@ -343,7 +226,7 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 					xmlNode.InsertEndChild(ProcessNode((*found).second));
 				}
 			}
-		}	
+		}
 		else if ((toNode == tmpNode) && (processedIDs.find((*iter).first)==processedIDs.end()))
 		{
 			//check if the node was already insert if so we "connect via a arrowlink
@@ -398,6 +281,71 @@ BMessage* Converter::GuessStartNode(void)
 	}
 	iter = nodes.find((int32)nodeID);
 	return (*iter).second;
-	
+
 }
 
+status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent)
+{
+	TiXmlElement	*node;
+	BMessage		*pDocNode = new pDocNode(P_C_CLASS_TYPE);
+	BMessage		*data = new pDocNode();
+	for( node = node.FirstChild("node");
+			node;
+			count++;)
+	{
+		CreateConnecion(connectionS, parent,node);
+		CreateNode(nodeS,connectionS, node);
+		node = node->NextSibling())
+	}8
+	if (parent->Attribute("TEXT"))
+		data->AddString("Name",parent->Attribute("TEXT"));
+	else
+		data->AddString("Name","Unnamed");
+	if (parent->Attribute("ID"))
+	{
+		char	*idString = parent->Attribute("ID");
+		int32	id	= GetID(idString);
+		pDocNode->AddPointer("this",(void *)id);
+	}
+	if (parent->Attribute("CREATED")
+		pDocNode->AddInt("Node::created",atoi(parent->Attribute("CREATED"));
+	if (parent->Attribute("MODIFIED")
+		pDocNode->AddInt("Node::modified",atoi(parent->Attribute("MODIFIED"));
+	//find all Attributes
+	for (node = node.FirstChild("arrowlink");
+		node;
+		count++;)
+	{
+		CreateConnecion(connectionS,parent,node);
+		node = node->NextSibling());
+	}
+	nodeS->AddMessage("node",pDocNode);
+}
+
+status_t Converter::CreateConnecion(BMessage *container,TiXmlElement *start,TiXmlElement *end)
+{
+	BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
+	BMessage	*data	= new BMessage();
+	char	*idFrom = start->Attribute("ID");
+	connection->AddPointer("Node::from",GetID(idFrom));
+	char	*idTo;
+	//** richtige funktion zum vergleichen
+	if (strcmp(node->Value(),"node"))
+		idTo	= end->Attribute("ID");
+	else
+		idTo	= end->Attribute("DESTINATION");
+	connection->AddPointer("Node::to",GetID(idTo));
+	if (parent->Attribute("TEXT"))
+			data->AddString("Name",parent->Attribute("TEXT"));
+	else
+		data->AddString("Name","Unnamed");
+	container-AddMessage("nodes", conncetion);
+}
+
+int32 Converter::IDtoRefference(char *idString)
+{
+	//**find a function to delte the Freemind_Link_ prestring
+	char idNumber;
+	strncpy(idNumber,idString,);
+	return atoi(idNumber);
+}

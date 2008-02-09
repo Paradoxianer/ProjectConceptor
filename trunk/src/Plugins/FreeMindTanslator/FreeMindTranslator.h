@@ -41,36 +41,33 @@ translation_format outputFormats[] = {
 	{	0, 0, 0, 0, "\0", "\0" }
 };
 
-/*status_t ConvertPDoc2FreeMind(BPositionIO * inSource, BMessage * ioExtension,	BPositionIO * outDestination);
-status_t ConvertFreeMind2PDoc(BPositionIO * inSource, BMessage * ioExtension,	BPositionIO * outDestination);
-status_t ConvertPDoc2PDoc(BPositionIO * inSource, BMessage * ioExtension,	BPositionIO * outDestination);
-status_t WriteNode(BList *done,BMessage *connection,BPositionIO * outDestination);
-status_t FindConnections(BList *done,BMessage *node);*/
 
 class Converter
 {
 public:
-				Converter(BPositionIO * inSource, BMessage * ioExtension,	BPositionIO * outDestination);
-	status_t	ConvertPDoc2FreeMind();
-	status_t	ConvertFreeMind2PDoc();
+					Converter(BPositionIO * inSource, BMessage * ioExtension,	BPositionIO * outDestination);
+	status_t		ConvertPDoc2FreeMind();
+	status_t		ConvertFreeMind2PDoc();
 
 protected:
+	//used to convert PDoc 2 FreeMind
 	TiXmlElement	ProcessNode(BMessage *node);
-//	TiXmlElement	ProcessConnection(BMessage *node);
-	
-	//TiXmlElement	FindConnections(BMessage *node);
-	BMessage	*GuessStartNode(void);
-	
-	BPositionIO *in;
-	BMessage	*config;
-	BPositionIO *out;
-	set<int32>	processedIDs;
+	BMessage		*GuessStartNode(void);
+
+	//used to convert FreeMind 2 PDoc
+	BMessage		CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent);
+	BMessage		CreateConnection(BMessage *connectionS,TiXmlElement *start,TiXmlElement *end);
+	int32			GetID(char *idString);
+	BPositionIO 	*in;
+	BMessage		*config;
+	BPositionIO		*out;
+	set<int32>		processedIDs;
 	map<int32,BMessage*>	nodes;
 	map<int32,BMessage*>	connections;
 
-	BMessage	*allConnections;
-	BMessage	*allNodes;
-	BMessage	*selected;
+	BMessage		*allConnections;
+	BMessage		*allNodes;
+	BMessage		*selected;
 
 };
 
