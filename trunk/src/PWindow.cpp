@@ -75,18 +75,18 @@ void PWindow::Init(void)
 	AddChild(mainView);
 }
 
-BMenuBar *PWindow::AttachedToLooper(void)
+void PWindow::CreatEditorList(void)
 {
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*editorPlugins	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
-	PEditor			*editorPlg			= NULL;
+	BasePlugin		*editorPlg			= NULL;
 	if (editorPlugins != NULL)
 	{
 		for (int32 i = 0; i<editorPlugins->CountItems(); i++)
 		{
-			editorPlg	= (PEditor*)editorPlugins->ItemAt(i);
-			AddEditor(editorPlg->GetName(),editorPlg);
-			subMenu->AddItem(new BMenuItem(_T(editorPlg->GetName()),editorAdd));
+			editorPlg	= (BasePlugin*)editorPlugins->ItemAt(i);
+			AddEditor(editorPlg->GetName(),(PEditor *)editorPlg->GetNewObject(NULL));
+//			subMenu->AddItem(new BMenuItem(_T(editorPlg->GetName()),editorAdd));
 		}
 	}
 }
@@ -147,9 +147,10 @@ BMenuBar *PWindow::MakeMenu(void)
 		for (int32 i = 0; i<editorPlugins->CountItems(); i++)
 		{
 			editorPlg	= (BasePlugin*)editorPlugins->ItemAt(i);
-			editorAdd	= new BMessage(P_C_INSERT_EDITOR);
+//			editorAdd	= new BMessage(P_C_INSERT_EDITOR);
 			editorAdd->AddPointer("plugin",editorPlg);
-			subMenu->AddItem(new BMenuItem(_T(editorPlg->GetName()),editorAdd));
+		//	subMenu->AddItem(new BMenuItem(_T(editorPlg->GetName()),editorAdd));
+			AddEditor(editorPlg->GetName(),(PEditor *)editorPlg->GetNewObject(NULL));
 		}
 	}*/
 

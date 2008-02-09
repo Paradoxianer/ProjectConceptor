@@ -49,7 +49,6 @@ public:
 							PWindow(BRect rect,PDocument *doc);
 							PWindow(BMessage *archive);
 							~PWindow(void);
-	virtual	void			AttachedToLooper();
 	virtual	void			AttachedToManager(void){};
 	virtual void			MessageReceived(BMessage *message);
 
@@ -111,6 +110,8 @@ public:
 
 
 protected:
+			void			CreatEditorList(void);
+
 			BMenuBar *		MakeMenu(void);
 			BMenuBar *		MakeStatusBar(void);
 			void			ChangeLanguage(void);
