@@ -100,6 +100,7 @@ public:
 
 
 	virtual void			FrameResized(float width, float height);
+	virtual void			Show(void);
 			void			Init(void);
 			void			SetManager(WindowManager *newManager);
 			WindowManager*	Manager(void){return manager;};

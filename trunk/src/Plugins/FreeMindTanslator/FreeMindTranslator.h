@@ -17,6 +17,7 @@ using namespace std;
 #include "ProjectConceptorDefs.h"
 #include "tinyxml.h"
 
+#define P_C_FREEMIND_TYPE 'free'
 
 
 //ProjectConceptor Main Type
@@ -30,14 +31,14 @@ int32 translatorVersion = 10; /* format is revision+minor*10+major*100 */
 translation_format inputFormats[] = {
 	{	P_C_DOCUMENT_RAW_TYPE,	B_TRANSLATOR_NONE,  0.4, 0.8, P_C_DOCUMENT_MIMETYPE, "ProjectConceptor RAW Document" },
 	{	P_C_DOCUMENT_TYPE,	B_TRANSLATOR_NONE,  0.4, 0.8, P_C_DOCUMENT_MIMETYPE, "ProjectConceptor Document" },
-	{	P_C_DOCUMENT_TYPE,	B_TRANSLATOR_TEXT,  0.4, 0.8, "text/xml", "FreeMind" },
+	{	P_C_FREEMIND_TYPE,	B_TRANSLATOR_TEXT,  0.4, 0.8, "text/xml", "FreeMind" },
 	{	0, 0, 0, 0, "\0", "\0" }
 };
 
 translation_format outputFormats[] = {
 //	{	P_C_DOCUMENT_TYPE,	B_TRANSLATOR_NONE,  0.4, 0.8, P_C_DOCUMENT_MIMETYPE, "ProjectConceptor Document" },
 	{	P_C_DOCUMENT_RAW_TYPE,	B_TRANSLATOR_NONE,  0.4, 0.8, P_C_DOCUMENT_MIMETYPE, "ProjectConceptor RAW Document" },
-	{	P_C_DOCUMENT_TYPE,	B_TRANSLATOR_TEXT,  0.4, 0.8, "text/xml", "FreeMind" },
+	{	P_C_FREEMIND_TYPE,	B_TRANSLATOR_TEXT,  0.4, 0.8, "text/xml", "FreeMind" },
 	{	0, 0, 0, 0, "\0", "\0" }
 };
 
@@ -55,9 +56,9 @@ protected:
 	BMessage		*GuessStartNode(void);
 
 	//used to convert FreeMind 2 PDoc
-	BMessage		CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent);
-	BMessage		CreateConnection(BMessage *connectionS,TiXmlElement *start,TiXmlElement *end);
-	int32			GetID(char *idString);
+	status_t		CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent);
+	status_t		CreateConnection(BMessage *connectionS,TiXmlElement *start,TiXmlElement *end);
+	int32			GetID(const char *idString);
 	BPositionIO 	*in;
 	BMessage		*config;
 	BPositionIO		*out;

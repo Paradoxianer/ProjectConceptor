@@ -60,8 +60,13 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage * ioExtension,	uint32 outType,	BPositionIO * outDestination)
 {
 	status_t		err					= B_OK;
+	if ( (outType != P_C_DOCUMENT_RAW_TYPE) &&  (outType != P_C_FREEMIND_TYPE))
+		return B_NO_TRANSLATOR;
 	Converter	*converter	= new Converter(inSource,ioExtension,outDestination);
-	converter->ConvertPDoc2FreeMind();
+	if (outType != P_C_DOCUMENT_RAW_TYPE)
+		converter->ConvertPDoc2FreeMind();
+	else
+		converter->ConvertFreeMind2PDoc();
 	return err;
 }
 
@@ -147,6 +152,40 @@ status_t Converter::ConvertPDoc2FreeMind()
 		out->Write(printer.CStr(),strlen(printer.CStr()));
 	}
 	return err;
+}
+
+status_t Converter::ConvertFreeMind2PDoc()
+{
+	BMessage	*document;
+	BMessage	*allNodes;
+	BMessage	*allConnections;
+	char		*xmlString;
+	off_t		start,end;
+	in->Seek(0,SEEK_SET);
+	start = in->Position();
+	in->Seek(0,SEEK_END);
+	end = in->Position();
+	in->Seek(0,SEEK_SET);	
+	size_t		size= end-start;
+	xmlString=new char[size+1];
+	in->Read(xmlString, size);
+	TiXmlDocument	doc;
+	doc.Parse(xmlString);
+	delete xmlString;
+	if (doc.Error())
+		return B_ERROR;
+	else
+	{
+		TiXmlNode*		node	= NULL;
+		TiXmlElement*	element	= NULL;
+		node = doc.FirstChild("map");
+		node = node->FirstChild("node");
+		element	= node->ToElement();
+		CreateNode(allNodes, allConnections,element);
+	}
+	document->AddMessage("PDocument::allConnections",allConnections);
+	document->AddMessage("PDocument::allNodes",allNodes);
+	document->Flatten(out);
 }
 
 
@@ -286,66 +325,66 @@ BMessage* Converter::GuessStartNode(void)
 
 status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent)
 {
-	TiXmlElement	*node;
-	BMessage		*pDocNode = new pDocNode(P_C_CLASS_TYPE);
-	BMessage		*data = new pDocNode();
-	for( node = node.FirstChild("node");
-			node;
-			count++;)
+	TiXmlNode		*node;
+	BMessage		*pDocNode	= new BMessage(P_C_CLASS_TYPE);
+	BMessage		*data		= new BMessage();
+	for( node = parent->FirstChild("node"); node;)
 	{
-		CreateConnecion(connectionS, parent,node);
-		CreateNode(nodeS,connectionS, node);
-		node = node->NextSibling())
-	}8
+		CreateConnection(connectionS, parent,node->ToElement());
+		CreateNode(nodeS,connectionS, node->ToElement());
+		node = node->NextSibling();
+	}
 	if (parent->Attribute("TEXT"))
 		data->AddString("Name",parent->Attribute("TEXT"));
 	else
 		data->AddString("Name","Unnamed");
 	if (parent->Attribute("ID"))
 	{
-		char	*idString = parent->Attribute("ID");
+		const char	*idString = parent->Attribute("ID");
 		int32	id	= GetID(idString);
 		pDocNode->AddPointer("this",(void *)id);
 	}
-	if (parent->Attribute("CREATED")
-		pDocNode->AddInt("Node::created",atoi(parent->Attribute("CREATED"));
-	if (parent->Attribute("MODIFIED")
-		pDocNode->AddInt("Node::modified",atoi(parent->Attribute("MODIFIED"));
+	if (parent->Attribute("CREATED"))
+		pDocNode->AddInt32("Node::created",atoi(parent->Attribute("CREATED")));
+	if (parent->Attribute("MODIFIED"))
+		pDocNode->AddInt32("Node::modified",atoi(parent->Attribute("MODIFIED")));
 	//find all Attributes
-	for (node = node.FirstChild("arrowlink");
-		node;
-		count++;)
+	for (node = parent->FirstChild("arrowlink"); node;)
 	{
-		CreateConnecion(connectionS,parent,node);
-		node = node->NextSibling());
+		CreateConnection(connectionS,parent,node->ToElement());
+		node = node->NextSibling();
 	}
 	nodeS->AddMessage("node",pDocNode);
 }
 
-status_t Converter::CreateConnecion(BMessage *container,TiXmlElement *start,TiXmlElement *end)
+status_t Converter::CreateConnection(BMessage *container,TiXmlElement *start,TiXmlElement *end)
 {
 	BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
 	BMessage	*data	= new BMessage();
-	char	*idFrom = start->Attribute("ID");
-	connection->AddPointer("Node::from",GetID(idFrom));
+	char	*idFrom = (char*)start->Attribute("ID");
+	connection->AddPointer("Node::from",(void *)GetID(idFrom));
 	char	*idTo;
-	//** richtige funktion zum vergleichen
-	if (strcmp(node->Value(),"node"))
-		idTo	= end->Attribute("ID");
-	else
-		idTo	= end->Attribute("DESTINATION");
-	connection->AddPointer("Node::to",GetID(idTo));
-	if (parent->Attribute("TEXT"))
-			data->AddString("Name",parent->Attribute("TEXT"));
-	else
+	if (strcmp(end->Value(),"node"))
+	{
+		idTo	=  (char*)end->Attribute("ID");
 		data->AddString("Name","Unnamed");
-	container-AddMessage("nodes", conncetion);
+	}
+	else
+	{
+		idTo	= (char*)end->Attribute("DESTINATION");
+		if (end->Attribute("TEXT"))
+			data->AddString("Name",end->Attribute("TEXT"));
+		else
+			data->AddString("Name","Unnamed");
+	}
+	connection->AddPointer("Node::to",(void *)GetID(idTo));
+	connection->AddMessage("Node::Data",data);
+	container->AddMessage("nodes", connection);
 }
 
-int32 Converter::IDtoRefference(char *idString)
+int32 Converter::GetID(const char *idString)
 {
-	//**find a function to delte the Freemind_Link_ prestring
-	char idNumber;
-	strncpy(idNumber,idString,);
+	char *idNumber;
+	strcpy(idNumber,(const char*)&(idString[14]));
 	return atoi(idNumber);
 }

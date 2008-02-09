@@ -555,6 +555,7 @@ void PWindow::MessageReceived(BMessage *message)
 
 void PWindow::AddEditor(const char *name,PEditor *editor)
 {
+	bool locked = LockLooper();
 	BTab	*tab = new BTab();
 	BRect	rect = mainView->Bounds();
 	rect.InsetBy(5,5);
@@ -572,7 +573,8 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	{
 		doc->Resize((editor->GetView())->Bounds().Width(),(editor->GetView())->Bounds().Height());
 	}
-
+	if (locked)
+		UnlockLooper();
 }
 
 void PWindow::RemoveEditor(void)
@@ -980,3 +982,8 @@ void PWindow::FrameResized(float width, float height)
 		P_M_MAIN_VIEW_RIGHT		= mainView->Frame().right;
 }
 
+void PWindow::Show(void)
+{
+	BWindow::Show(),
+	CreatEditorList();
+}
