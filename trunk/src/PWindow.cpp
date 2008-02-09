@@ -75,6 +75,22 @@ void PWindow::Init(void)
 	AddChild(mainView);
 }
 
+BMenuBar *PWindow::AttachedToLooper(void)
+{
+	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
+	BList 			*editorPlugins	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
+	PEditor			*editorPlg			= NULL;
+	if (editorPlugins != NULL)
+	{
+		for (int32 i = 0; i<editorPlugins->CountItems(); i++)
+		{
+			editorPlg	= (PEditor*)editorPlugins->ItemAt(i);
+			AddEditor(editorPlg->GetName(),editorPlg);
+			subMenu->AddItem(new BMenuItem(_T(editorPlg->GetName()),editorAdd));
+		}
+	}
+}
+
 BMenuBar *PWindow::MakeMenu(void)
 {
 	TRACE();
@@ -122,7 +138,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("item",(void *) subMenu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_NEW);
 	//detecting Editors
-	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
+	/*PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*editorPlugins	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 	BasePlugin		*editorPlg			= NULL;
 	BMessage		*editorAdd		= new BMessage(P_C_INSERT_EDITOR);
@@ -135,7 +151,7 @@ BMenuBar *PWindow::MakeMenu(void)
 			editorAdd->AddPointer("plugin",editorPlg);
 			subMenu->AddItem(new BMenuItem(_T(editorPlg->GetName()),editorAdd));
 		}
-	}
+	}*/
 
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_NEW_TAB),new BMessage(MENU_FILE_NEW_TAB),'T'));
 	localizeMenuItems->AddPointer("item",(void *) item);
@@ -376,7 +392,7 @@ void PWindow::MakeToolbars()
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*editorPlugins	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 	BasePlugin		*editorPlg			= NULL;
-	BMessage		*editorAdd		= new BMessage(P_C_INSERT_EDITOR);
+	/*BMessage		*editorAdd		= new BMessage(P_C_INSERT_EDITOR);
 	if (editorPlugins != NULL)
 	{
 		for (int32 i = 0; i<editorPlugins->CountItems(); i++)
@@ -393,7 +409,7 @@ void PWindow::MakeToolbars()
 	else
 	{
 		//**Alert that there was no Editor found
-	}
+	}*/
 //	toolItem->SetTarget(this);
 	tmpBar->AddItem(toolMenu);
 	tmpBar->AddSeperator();
