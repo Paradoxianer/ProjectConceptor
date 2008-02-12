@@ -31,11 +31,15 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 	if (outType != P_C_FREEMIND_TYPE && outType != P_C_DOCUMENT_RAW_TYPE) {
 		return B_NO_TRANSLATOR;
 	}
+	//read the first 10 chars check if it starts with <map then we suggest it is a freemind file
 	if (inSource->Read(xmlString, 10)==10)
 	{
 		if (strstr(xmlString,"<map")!=NULL)
 			outType = P_C_DOCUMENT_RAW_TYPE;
+		else
+			return B_NO_TRANSLATOR;
 	}
+	//need to rework this... unflattens the whole Datastream to check if PDocument::allNodes are in here
 	else
 	{
 		BMessage	*testMessage	= new BMessage();
@@ -50,13 +54,14 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 					outType = P_C_FREEMIND_TYPE;
 			}
 			if (err != B_OK)
-				err = B_NO_TRANSLATOR;
+				return B_NO_TRANSLATOR;
 		}
 	}
 
-	//outInfo->group = P_C_FREEMIND_TYPE;
 
 	if (outType == P_C_FREEMIND_TYPE) {
+		// outtype is text becaus xml is text
+		outInfo->group = B_TRANSLATOR_TEXT;
 		outInfo->type = P_C_FREEMIND_TYPE;
 		outInfo->quality = 0.3;
 		outInfo->capability = 0.7;
@@ -64,6 +69,8 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 		strcpy(outInfo->MIME, "application/x-freemind");
 	}
 	else {
+	// outtype group ist always B_TRANSLATOR_NONE because we dont support a standart type
+		outInfo->group = B_TRANSLATOR_NONE;
 		outInfo->type = P_C_DOCUMENT_RAW_TYPE;
 		outInfo->quality = 0.4;
 		outInfo->capability = 0.7;
@@ -110,13 +117,13 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	if ( (outType != P_C_DOCUMENT_RAW_TYPE) &&  (outType != P_C_FREEMIND_TYPE))
 		return B_NO_TRANSLATOR;
 	Converter	*converter	= new Converter(inSource,ioExtension,outDestination);
-	if (outType != P_C_DOCUMENT_RAW_TYPE)
-		converter->ConvertPDoc2FreeMind();
-	else
+	if (outType == P_C_DOCUMENT_RAW_TYPE)
 		converter->ConvertFreeMind2PDoc();
-	return err;
+	else
+		converter->ConvertPDoc2FreeMind();
 	inSource->Seek(0, SEEK_SET);
 	outDestination->Seek(0, SEEK_SET);
+	return err;
 }
 
 status_t MakeConfig(BMessage * ioExtension,	BView * * outView, BRect * outExtent)
