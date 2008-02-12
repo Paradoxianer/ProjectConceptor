@@ -26,11 +26,11 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 {
 	status_t err	= B_OK;
 	char		*xmlString = new char[10];
-	if (outType == 0) 
+	if (outType == 0)
 		outType = P_C_FREEMIND_TYPE;
 	if (outType != P_C_FREEMIND_TYPE && outType != P_C_DOCUMENT_RAW_TYPE) {
 		return B_NO_TRANSLATOR;
-	}	
+	}
 	if (inSource->Read(xmlString, 10)==10)
 	{
 		if (strstr(xmlString,"<map")!=NULL)
@@ -53,23 +53,23 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 				err = B_NO_TRANSLATOR;
 		}
 	}
-	
+
 	//outInfo->group = P_C_FREEMIND_TYPE;
-	
+
 	if (outType == P_C_FREEMIND_TYPE) {
 		outInfo->type = P_C_FREEMIND_TYPE;
-		outInfo->quality = 0.3;		
-		outInfo->capability = 0.7;	
+		outInfo->quality = 0.3;
+		outInfo->capability = 0.7;
 		strcpy(outInfo->name, "Freemind Mindmap format");
 		strcpy(outInfo->MIME, "application/x-freemind");
 	}
 	else {
 		outInfo->type = P_C_DOCUMENT_RAW_TYPE;
-		outInfo->quality = 0.4;		
-		outInfo->capability = 0.7;	
+		outInfo->quality = 0.4;
+		outInfo->capability = 0.7;
 		strcpy(outInfo->name, "ProjectConceptor format converted from Freemind");
 		strcpy(outInfo->MIME, P_C_DOCUMENT_MIMETYPE);
-	}		
+	}
 /*	BMessage		*testMessage	= new BMessage();
 	BMessage		*tmpMessage		= new BMessage();
 	if ((!inSource) || (!outInfo))
@@ -115,6 +115,8 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	else
 		converter->ConvertFreeMind2PDoc();
 	return err;
+	inSource->Seek(0, SEEK_SET);
+	outDestination->Seek(0, SEEK_SET);
 }
 
 status_t MakeConfig(BMessage * ioExtension,	BView * * outView, BRect * outExtent)
@@ -212,7 +214,7 @@ status_t Converter::ConvertFreeMind2PDoc()
 	start = in->Position();
 	in->Seek(0,SEEK_END);
 	end = in->Position();
-	in->Seek(0,SEEK_SET);	
+	in->Seek(0,SEEK_SET);
 	size_t		size= end-start;
 	xmlString=new char[size+1];
 	in->Read(xmlString, size);
