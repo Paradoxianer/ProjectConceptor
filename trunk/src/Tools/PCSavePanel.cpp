@@ -125,7 +125,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 				roster->GetOutputFormats(translators[i], &oFormats, &outNum);
 				for (int j=0; j<outNum; j++)
 				{
-					//	and take the first output format that isn't BBitmap
+					//	and take the first output format that isn't P_C_DOCUMENT_RAW_TYPE
 					if( oFormats[j].type != P_C_DOCUMENT_RAW_TYPE)
 					{
 						message	= new BMessage();

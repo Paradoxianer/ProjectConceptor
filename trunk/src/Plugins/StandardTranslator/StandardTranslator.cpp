@@ -49,7 +49,7 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 					outInfo->group = B_TRANSLATOR_NONE;
 					outInfo->type = P_C_DOCUMENT_RAW_TYPE;
 					outInfo->quality = 0.3;		
-					outInfo->capability = 0.8;	
+					outInfo->capability = 1.0;	
 					strcpy(outInfo->name, "ProjectConceptor nativ format");
 					strcpy(outInfo->MIME, P_C_DOCUMENT_MIMETYPE);
 				}

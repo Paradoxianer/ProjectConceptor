@@ -458,28 +458,30 @@ void PDocument::Save(void)
 	char				*formatMIME			= NULL;
 	translator_info		*translatorInfo		= new translator_info;
 	int32				tmpInt				= 0;
+	int32				outType				= 0;
+
 	float				tmpFloat			= 0;
 	documentSetting->FindMessage("saveSettings",saveSettings);
 	if (saveSettings->FindInt32("translator_id",&tmpInt) == B_OK)
 	{
 		translatorInfo->translator	= tmpInt;
 		saveSettings->FindString("format::name",(const char**)&formatName);
-		saveSettings->FindString("format::MIME",(const char**)&formatMIME);
+		//saveSettings->FindString("format::MIME",(const char**)&formatMIME);
 		strcpy((translatorInfo->name),formatName);
-		strcpy((translatorInfo->MIME),formatMIME);
-		saveSettings->FindInt32("format::type",(int32 *)&tmpInt);
-		translatorInfo->type				= tmpInt;
-		saveSettings->FindInt32("format::group",(int32 *)&tmpInt);
-		translatorInfo->group				= tmpInt;
-		saveSettings->FindFloat("format::quality",(float *)&tmpFloat);
-		translatorInfo->quality				= tmpFloat;
-		saveSettings->FindFloat("format::capability",(float *)&tmpFloat);
-		translatorInfo->capability			= tmpFloat;
+		strcpy((translatorInfo->MIME),P_C_DOCUMENT_MIMETYPE);
+		saveSettings->FindInt32("format::type",(int32 *)&outType);
+		translatorInfo->type				= P_C_DOCUMENT_RAW_TYPE;
+//		saveSettings->FindInt32("format::group",(int32 *)&tmpInt);
+		translatorInfo->group				= P_C_DOCUMENT_RAW_TYPE;
+//		saveSettings->FindFloat("format::quality",(float *)&tmpFloat);
+		translatorInfo->quality				= 0.9;
+//		saveSettings->FindFloat("format::capability",(float *)&tmpFloat);
+		translatorInfo->capability			= 0.9;
 		Archive(archived,true);
 		BPositionIO		*input	= new BMallocIO();
 		BFile			*file	= new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
 		archived->Flatten(input);
-		err=	roster->Translate(input,translatorInfo,NULL,file,P_C_DOCUMENT_TYPE);
+		err=	roster->Translate(input,translatorInfo,NULL,file,outType);
 	}
 	else
 	{
@@ -512,14 +514,17 @@ void PDocument::Load(void)
 	BMessage			*loaded			= new BMessage();
 	void				*buffer			= NULL;
 	int32				i				= 0;
+	translator_info		*indentifed		= new translator_info;
 	if (file->InitCheck() == B_OK)
 	{
 		roster	= BTranslatorRoster::Default();
-		err 	= roster->Translate(file,NULL,NULL,output,P_C_DOCUMENT_RAW_TYPE);
-		buffer = (void *)output->Buffer();
+		roster->Identify(file,NULL,indentifed,P_C_DOCUMENT_RAW_TYPE );
+		err 	= roster->Translate(file,indentifed,NULL,output,P_C_DOCUMENT_RAW_TYPE);
+		//buffer = (void *)output->Buffer();
 		if (err == B_OK)
 		{
 			err = loaded->Unflatten(output);
+			printf("%s",strerror(err));
 			loaded->PrintToStream();
 		}
 	}

@@ -6,6 +6,7 @@
 #include <Locker.h>
 #include <FindDirectory.h>
 #include <Path.h>
+#include <Alert.h>
 #include <File.h>
 #include <PopUpMenu.h>
 #include <MenuField.h>
@@ -24,6 +25,51 @@
 status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	BMessage * ioExtension,	translator_info * outInfo, uint32 outType)
 {
 	status_t err	= B_OK;
+	char		*xmlString = new char[10];
+	if (outType == 0) 
+		outType = P_C_FREEMIND_TYPE;
+	if (outType != P_C_FREEMIND_TYPE && outType != P_C_DOCUMENT_RAW_TYPE) {
+		return B_NO_TRANSLATOR;
+	}	
+	if (inSource->Read(xmlString, 10)==10)
+	{
+		if (strstr(xmlString,"<map")!=NULL)
+			outType = P_C_DOCUMENT_RAW_TYPE;
+	}
+	else
+	{
+		BMessage	*testMessage	= new BMessage();
+		BMessage	*tmpMessage		= new BMessage();
+		err = testMessage->Unflatten(inSource);
+		if (err == B_OK)
+		{
+			if (err == B_OK)
+			{
+				err = testMessage->FindMessage("PDocument::allNodes",tmpMessage);
+				if (err==B_OK)
+					outType = P_C_FREEMIND_TYPE;
+			}
+			if (err != B_OK)
+				err = B_NO_TRANSLATOR;
+		}
+	}
+	
+	//outInfo->group = P_C_FREEMIND_TYPE;
+	
+	if (outType == P_C_FREEMIND_TYPE) {
+		outInfo->type = P_C_FREEMIND_TYPE;
+		outInfo->quality = 0.3;		
+		outInfo->capability = 0.7;	
+		strcpy(outInfo->name, "Freemind Mindmap format");
+		strcpy(outInfo->MIME, "application/x-freemind");
+	}
+	else {
+		outInfo->type = P_C_DOCUMENT_RAW_TYPE;
+		outInfo->quality = 0.4;		
+		outInfo->capability = 0.7;	
+		strcpy(outInfo->name, "ProjectConceptor format converted from Freemind");
+		strcpy(outInfo->MIME, P_C_DOCUMENT_MIMETYPE);
+	}		
 /*	BMessage		*testMessage	= new BMessage();
 	BMessage		*tmpMessage		= new BMessage();
 	if ((!inSource) || (!outInfo))
@@ -52,8 +98,9 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 				}
 			}
 		}
-	}*/
+	}
 	err = B_NO_TRANSLATOR;
+	*/
 	return err;
 }
 
@@ -156,9 +203,9 @@ status_t Converter::ConvertPDoc2FreeMind()
 
 status_t Converter::ConvertFreeMind2PDoc()
 {
-	BMessage	*document;
-	BMessage	*allNodes;
-	BMessage	*allConnections;
+	BMessage	*document		= new BMessage();
+	BMessage	*allNodes		= new BMessage();
+	BMessage	*allConnections	= new BMessage();
 	char		*xmlString;
 	off_t		start,end;
 	in->Seek(0,SEEK_SET);
@@ -185,7 +232,7 @@ status_t Converter::ConvertFreeMind2PDoc()
 	}
 	document->AddMessage("PDocument::allConnections",allConnections);
 	document->AddMessage("PDocument::allNodes",allNodes);
-	document->Flatten(out);
+	status_t err= document->Flatten(out);
 }
 
 
@@ -354,6 +401,7 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		CreateConnection(connectionS,parent,node->ToElement());
 		node = node->NextSibling();
 	}
+	pDocNode->AddMessage("Node::Data",data);
 	nodeS->AddMessage("node",pDocNode);
 }
 
@@ -364,7 +412,9 @@ status_t Converter::CreateConnection(BMessage *container,TiXmlElement *start,TiX
 	char	*idFrom = (char*)start->Attribute("ID");
 	connection->AddPointer("Node::from",(void *)GetID(idFrom));
 	char	*idTo;
-	if (strcmp(end->Value(),"node"))
+	const char	*value= end->Value();
+	int32	found	= strcmp(end->Value(),"node");
+	if (found == 0)
 	{
 		idTo	=  (char*)end->Attribute("ID");
 		data->AddString("Name","Unnamed");
@@ -384,7 +434,11 @@ status_t Converter::CreateConnection(BMessage *container,TiXmlElement *start,TiX
 
 int32 Converter::GetID(const char *idString)
 {
-	char *idNumber;
-	strcpy(idNumber,(const char*)&(idString[14]));
-	return atoi(idNumber);
+	char	*idNumber;
+	int32	id;
+	if (strstr(idString,"Freemind")!=NULL)
+		sscanf(idString,"Freemind_Link_%d", &idNumber);
+	else
+		sscanf(idString,"%d",&idNumber);
+	return id;
 }
