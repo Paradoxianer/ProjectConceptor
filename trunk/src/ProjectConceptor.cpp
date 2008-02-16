@@ -184,6 +184,11 @@ void ProjektConceptor::MessageReceived(BMessage *message)
 			openPanel->Show();		// Show the file panel
 			break;
 		}
+		case MENU_FILE_NEW:
+		{
+			documentManager->CreateDocument();
+			break;
+		}
 		default:
 			BApplication::MessageReceived(message);
 			break;
@@ -221,7 +226,6 @@ void ProjektConceptor::RefsReceived(BMessage *msg)
 void ProjektConceptor::AboutRequested()
 {
 	TRACE();
-//	BAlert *alert=new BAlert("about","ProjektConceptor v0.1\n\nCopyright by Author","Oh.");
 	AboutWindow *aboutWindow = new AboutWindow();
 	aboutWindow->Show();
 }

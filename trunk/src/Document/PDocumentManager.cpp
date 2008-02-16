@@ -115,7 +115,7 @@ void PDocumentManager::RemoveDocument(PDocument *doc)
 	}
 }
 
-
+//
 PDocument* PDocumentManager::CreateDocument(void)
 {
 	TRACE();

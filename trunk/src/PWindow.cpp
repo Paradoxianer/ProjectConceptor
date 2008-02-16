@@ -111,52 +111,12 @@ BMenuBar *PWindow::MakeMenu(void)
 	BMenu		*subMenu;
 	BMenu 		*menu;
 
-	// build AppMenu
-/*	menu= new BMenu(_T("IconMenu"));
-	BIconMenu *appMenu= new BIconMenu(menu);
-	menu->AddItem(	item = new BMenuItem(_T(P_MENU_APP_ABOUT), new BMessage(MENU_APP_ABOUT)));
-	item->SetTarget(be_app);
-	localizeMenuItems->AddPointer("item",(void *) item);
-	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_ABOUT);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_APP_SETTINGS),new BMessage(MENU_APP_SETTINGS)));
-	localizeMenuItems->AddPointer("item",(void *) item);
-	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_SETTINGS);
-	menu->AddItem(	item = new BMenuItem(_T(P_MENU_APP_HELP), new BMessage(MENU_APP_HELP)));
-	localizeMenuItems->AddPointer("item",(void *) item);
-	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_HELP);
-	menu->AddSeparatorItem();
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_APP_QUIT),new BMessage(MENU_APP_QUIT)));
-	item->SetTarget(be_app);
-	localizeMenuItems->AddPointer("item",(void *) item);
-	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_QUIT);
-	tmpBar->AddItem(appMenu);*/
-
 	// build Filemenu
 	menu		= new BMenu(_T(P_MENU_FILE));
-	subMenu		= new BMenu(_T(P_MENU_FILE_NEW));
-	menu->AddItem(subMenu);
-	localizeMenuItems->AddPointer("item",(void *) subMenu->Superitem());
-	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_NEW);
-	//detecting Editors
-	/*PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
-	BList 			*editorPlugins	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
-	BasePlugin		*editorPlg			= NULL;
-	BMessage		*editorAdd		= new BMessage(P_C_INSERT_EDITOR);
-	if (editorPlugins != NULL)
-	{
-		for (int32 i = 0; i<editorPlugins->CountItems(); i++)
-		{
-			editorPlg	= (BasePlugin*)editorPlugins->ItemAt(i);
-//			editorAdd	= new BMessage(P_C_INSERT_EDITOR);
-			editorAdd->AddPointer("plugin",editorPlg);
-		//	subMenu->AddItem(new BMenuItem(_T(editorPlg->GetName()),editorAdd));
-			AddEditor(editorPlg->GetName(),(PEditor *)editorPlg->GetNewObject(NULL));
-		}
-	}*/
-
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_NEW_TAB),new BMessage(MENU_FILE_NEW_TAB),'T'));
+	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_NEW),new BMessage(MENU_FILE_NEW),'N'));
 	localizeMenuItems->AddPointer("item",(void *) item);
-	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_NEW_TAB);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_NEW);
+	item->SetTarget(be_app);
 	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_OPEN),new BMessage(MENU_FILE_OPEN),'O'));
 	item->SetTarget(be_app);
 	localizeMenuItems->AddPointer("item",(void *) item);
@@ -322,10 +282,6 @@ BMenuBar *PWindow::MakeMenu(void)
 	item->SetTarget(be_app);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_HELP_ABOUT);
-	/*menu->AddItem(	item = new BMenuItem(_T(P_MENU_APP_HELP), new BMessage(MENU_APP_HELP)));
-	localizeMenuItems->AddPointer("item",(void *) item);
-	localizeMenuItems->AddPointer("itemstring",P_MENU_APP_HELP);
-	item->SetTarget(be_app_messenger);*/
 
 	tmpBar->AddItem(menu);
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
@@ -349,24 +305,13 @@ BMenuBar *PWindow::MakeStatusBar(void)
 	tmpBar->SetFont(font);
 	font_height height;
 	font->GetHeight(&height);
-	//DEBUG("statusFrame:\n top: %f\n bottom: %f\n",statusFrame.top,statusFrame.bottom);
 	float top		= 2;
 	float bottom	= 2;
-//	tmpBar->GetItemMargins(&left,&top,&right,&bottom);
 	statusFrame.top=statusFrame.bottom-(height.ascent+height.descent+height.leading+top+bottom);
-	//DEBUG("font_height\n ascent: %f\n descent: %f\n leading: %f\n",height.ascent,height.descent,height.leading);
-	//DEBUG("statusFrame:\n top: %f\n bottom: %f\n",statusFrame.top,statusFrame.bottom);
 	tmpBar->ResizeTo(statusFrame.Width(),statusFrame.Height());
 	tmpBar->MoveTo(0,statusFrame.top);
 
-/*	menu=new BMenu(_T("Status"));
-	menu->AddItem(new BMenuItem("test1",NULL,0,0));
-	menu->AddItem(new BMenuItem("test2",NULL,0,0));
-	menu->AddItem(new BMenuItem("test2",NULL,0,0));
-	menu->AddItem(new BMenuItem("test3",NULL,0,0));
-	tmpBar->AddItem(menu);*/
 	tmpBar->SetBorder(B_BORDER_CONTENTS);
-//	P_M_MAIN_VIEW_BOTTOM=(tmpBar->Bounds()).top;
 	P_M_MAIN_VIEW_BOTTOM=statusFrame.top-1.0;
 	return tmpBar;
 }
@@ -387,32 +332,9 @@ void PWindow::MakeToolbars()
 
 	tmpBitmap	= BTranslationUtils::GetBitmap(B_PNG_FORMAT,"new");
 
-	toolMenu	= new ToolMenu("new",tmpBitmap,B_ITEMS_IN_COLUMN);
-//	toolMenu	= new ToolMenu("new",tmpBitmap,B_ITEMS_IN_ROW);
-//	toolMenu	= new ToolMenu("new",tmpBitmap);
-	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
-	BList 			*editorPlugins	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
-	BasePlugin		*editorPlg			= NULL;
-	/*BMessage		*editorAdd		= new BMessage(P_C_INSERT_EDITOR);
-	if (editorPlugins != NULL)
-	{
-		for (int32 i = 0; i<editorPlugins->CountItems(); i++)
-		{
-			editorPlg	= (BasePlugin*)editorPlugins->ItemAt(i);
-			tmpBitmap	= pluginManager->GetIcon(editorPlg);
-			editorAdd	= new BMessage(P_C_INSERT_EDITOR);
-			editorAdd->AddPointer("plugin",editorPlg);
-			toolItem	= new ToolItem(editorPlg->GetName(),tmpBitmap,editorAdd);
-			toolItem->SetTarget(this);
-			toolMenu->AddItem(toolItem);
-		}
-	}
-	else
-	{
-		//**Alert that there was no Editor found
-	}*/
-//	toolItem->SetTarget(this);
-	tmpBar->AddItem(toolMenu);
+	toolItem	= new ToolItem("new",tmpBitmap,new BMessage(MENU_FILE_NEW));
+	toolItem->SetTarget(be_app);
+	tmpBar->AddItem(toolItem);
 	tmpBar->AddSeperator();
 
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"open");
@@ -449,17 +371,6 @@ void PWindow::MakeToolbars()
 	tmpBar->AddItem(toolItem);
 
 	AddToolBar(tmpBar);
-/*	tmpBar=new	ToolBar(statusFrame,P_M_EDITOR_TOOL_BAR,B_ITEMS_IN_COLUMN);
-	tmpBar->AddSeperator();
-	tmpBar->AddSeperator();
-	AddToolBar(tmpBar);*/
-
-	/*tmpBar=new	ToolBar(statusFrame,P_M_FORMAT_TOOL_BAR,B_ITEMS_IN_ROW);
-	AddToolBar(tmpBar);*/
-
-
-/*	tmpBar=new	ToolBar(statusFrame,P_M_STATUS_BAR,B_ITEMS_IN_ROW);
-	AddToolBar(tmpBar);*/
 }
 
 
@@ -562,7 +473,8 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	rect.bottom -= mainView->TabHeight();
 	(editor->GetView())->ResizeTo(rect.Width()-B_V_SCROLL_BAR_WIDTH ,rect.Height()-B_H_SCROLL_BAR_HEIGHT);
 	(editor->GetView())->MoveTo(5,5);
-	mainView->AddTab(new BScrollView("editorScroller",editor->GetView(),B_FOLLOW_ALL_SIDES,0,true,true), tab);
+//	mainView->AddTab(new BScrollView("editorScroller",editor->GetView(),B_FOLLOW_ALL_SIDES,0,true,true), tab);
+	mainView->AddTab(editor->GetView(), tab);
 	tab->SetLabel(name);
 	mainView->Select(tab);
 	editor->GetView()->MakeFocus(true);
@@ -863,7 +775,7 @@ status_t	PWindow::RemoveToolBar(const char* signature)
 			err = B_ERROR;
 		else
 		{
-			P_M_MAIN_VIEW_LEFT	-= tmpToolBar->Frame().Width();
+			P_M_MAIN_VIEW_LEFT	-= (tmpToolBar->Frame().Width()+1);
 		}
 	}
 	else if (horizontalToolbars->HasItem(tmpToolBar))
@@ -976,8 +888,9 @@ void PWindow::SetManager(WindowManager* newManager)
 void PWindow::FrameResized(float width, float height)
 {
 		//just to remove the warnings .. from the compiler
-		width	= width;
-		height	= height;
+///		width	= width;
+	//	height	= height;
+		BWindow::FrameResized(width, height);
 		P_M_MAIN_VIEW_LEFT		= mainView->Frame().left;
 		P_M_MAIN_VIEW_TOP 		= mainView->Frame().top;
 		P_M_MAIN_VIEW_BOTTOM	= mainView->Frame().bottom;

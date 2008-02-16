@@ -123,6 +123,8 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 		converter->ConvertPDoc2FreeMind();
 	inSource->Seek(0, SEEK_SET);
 	outDestination->Seek(0, SEEK_SET);
+	inSource->Seek(0,SEEK_SET);
+	outDestination->Seek(0,SEEK_SET);
 	return err;
 }
 
