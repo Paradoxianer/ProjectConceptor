@@ -25,7 +25,8 @@ ToolBar::ToolBar(BRect rect,  const char *name,menu_layout ori): BControl(rect, 
 	countx					= 1;
 	county					= 1;
 	rightIconBorder			= 1;
-	bottomIconBorder		= 1;
+	bottomIconBorder		= 0;
+	fButtonBorder 			= NULL;
 	
 	if (ori == B_ITEMS_IN_ROW)
 	{
@@ -84,6 +85,8 @@ ToolBar::ToolBar(BMessage *archive):BControl(archive)
 	err = archive->FindInt32("ToolBar::border",(int32 *)&border);
 	err = archive->FindInt32("ToolBar::countx",(int32 *)&countx);
 	err = archive->FindInt32("ToolBar::county",(int32 *)&county);
+	
+	archive->AddBool("border", fButtonBorder);
 }
 
 ToolBar::~ToolBar()
@@ -158,6 +161,7 @@ void ToolBar::AddItem(BaseItem *item)
 			county=(uint32)ceil(sqrt(toolitems->CountItems()));
 			ReorderItems();
 		}
+		
 	}
 }
 

@@ -29,6 +29,7 @@ ToolItem::ToolItem(BMessage *archive):BaseItem(""),BButton(archive)
 	err = archive->FindInt32("ToolItem::toolTip",(int32 *)&behavior);
 	err = archive->FindInt32("ToolItem::toolTip",(int32 *)&state);
 	err = archive->FindMessage("ToolItem::Message()",&tmpArchive);
+	
 	if (err == B_OK)
 		SetMessage(new BMessage(tmpArchive));
 	BMessenger tmpMessenger;
@@ -48,6 +49,7 @@ void ToolItem::Init(void)
 	state=P_M_ITEM_UP;
 	shadow_offset_by=2;
 	fButtonBorder=true;
+	//HasButtonBorder();
 }
 
 ToolItem::~ToolItem(void)
@@ -99,7 +101,10 @@ status_t ToolItem::Archive(BMessage *archive, bool deep) const
 	//**shoud we test  if Message or Messenger==NULL???
 	err = archive->AddMessage("ToolItem::Message()",Message());
 	err = archive->AddMessenger("ToolItem::Messenger()",Messenger());
+	 
 	return err;
+	
+		
 }
 
 BArchivable* ToolItem::Instantiate(BMessage *archive)

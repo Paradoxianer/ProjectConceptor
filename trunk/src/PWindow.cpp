@@ -769,6 +769,8 @@ status_t PWindow::AddToolBar(ToolBar *toolBar)
 		mainView->ResizeTo(P_M_MAIN_VIEW_RIGHT-P_M_MAIN_VIEW_LEFT-2,P_M_MAIN_VIEW_BOTTOM-P_M_MAIN_VIEW_TOP-2);
 		mainView->MoveTo(P_M_MAIN_VIEW_LEFT+1,P_M_MAIN_VIEW_TOP+1);
 	}
+	
+	toolBar->SetButtonBorder(false);
 	return B_OK;
 }
 
