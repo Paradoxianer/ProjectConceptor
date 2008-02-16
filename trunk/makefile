@@ -176,6 +176,7 @@ LEAFDIRS = \
 
 default .DEFAULT:
 	@echo "---------SVN INFO GEN-----------"
+	touch src/About/AboutSvnInfo.h
 	rm src/About/AboutSvnInfo.h
 	@echo "" >> src/About/AboutSvnInfo.h 
 	@echo "#ifndef SVN_INFO_H" > src/About/AboutSvnInfo.h 
