@@ -254,7 +254,7 @@ extern const char*		P_MENU_HELP;//						= "Help";
 extern const char*		P_MENU_HELP_ABOUT;//				= "About";
 
 
-extern const char*		P_C_VERSION;//						= "0.01a Revision 132";
+extern const int32		P_C_VERSION;//						= "0.01a Revision 132";
 
 
 #endif

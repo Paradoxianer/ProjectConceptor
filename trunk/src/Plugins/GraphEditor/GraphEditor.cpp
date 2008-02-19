@@ -20,7 +20,7 @@
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
-GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,200,200),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW |B_NAVIGABLE|B_NAVIGABLE_JUMP|B_FRAME_EVENTS)
+GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW |B_FULL_UPDATE_ON_RESIZE|B_NAVIGABLE|B_NAVIGABLE_JUMP)
 {
 	TRACE();
 	pluginID	= newId;
@@ -47,6 +47,7 @@ void GraphEditor::Init(void)
 	renderer		= new BList();
 	scale			= 1.0;
 	configMessage	= new BMessage();
+	myScrollParent	= NULL;
 
 
 	font_family		family;
@@ -215,12 +216,29 @@ void GraphEditor::AttachedToManager(void)
 	else
 		configMessage->AddMessage("Shortcuts",shortcuts);
 	InitAll();
+	if (doc!=NULL)
+		this->ResizeTo(doc->Bounds().Width(),doc->Bounds().Height());
+	UpdateScrollBars();
 }
 
 void GraphEditor::DetachedFromManager(void)
 {
 	TRACE();
 }
+
+BView* GraphEditor::GetView(void)
+{
+	if (myScrollParent)
+		return myScrollParent;
+	else
+	{
+		
+		myScrollParent = new BScrollView("GEScrolly",this,B_FOLLOW_ALL_SIDES,0,true,true);
+		return myScrollParent;
+	}
+	return this;
+}
+
 
 BList* GraphEditor::GetPCommandList(void)
 {
@@ -530,15 +548,8 @@ void GraphEditor::MouseUp(BPoint where)
 	}
 }
 
-void GraphEditor::KeyDown(const char *bytes, int32 numBytes)
-{
-	TRACE();
-}
 
-void GraphEditor::KeyUp(const char *bytes, int32 numBytes)
-{
-	TRACE();
-}
+
 void GraphEditor::AttachedToWindow(void)
 {
 	TRACE();
@@ -569,6 +580,23 @@ void GraphEditor::AttachedToWindow(void)
 	grid->SetTarget(this);
 	penSize->SetTarget(this);
 	colorItem->SetTarget(this);	sentToMe	= new BMessenger((BView *)this);
+	BView *parent = myScrollParent->Parent();
+	if (parent)
+	{
+		BRect rect = parent->Bounds();
+		rect.InsetBy(2.5,2.5);
+		myScrollParent->ResizeTo(rect.Width(),rect.Height());
+	}
+/*	if (doc!=NULL)
+	{
+		BRect rect = doc->Bounds();
+		this->ResizeTo(rect.Width(),rect.Height());
+		BRect		scrollRect	= myScrollParent->Bounds();
+		scrollRect.right	-= (B_V_SCROLL_BAR_WIDTH +2);
+		scrollRect.bottom	-= (B_H_SCROLL_BAR_HEIGHT+2);
+		scrollRect.InsetBy(2,2);
+		this->ConstrainClippingRegion(new BRegion(scrollRect));
+	}*/
 }
 
 
@@ -621,8 +649,18 @@ void GraphEditor::MessageReceived(BMessage *message)
 		}
 		case P_C_DOC_BOUNDS_CHANGED:
 		{
+			UpdateScrollBars();
 			BRect		docRect		= doc->Bounds();
+			BRegion		clipper;
+			BRect		viewRect;
+			BRect		scrollRect	= myScrollParent->Bounds();
+			GetClippingRegion(&clipper); 
+			viewRect= clipper.Frame();
 			ResizeTo(docRect.right,docRect.bottom);
+			viewRect.right	= viewRect.left + (scrollRect.Width() - B_V_SCROLL_BAR_WIDTH)-5;
+			viewRect.bottom	= viewRect.top + (scrollRect.Height() - B_H_SCROLL_BAR_HEIGHT)-5;
+			clipper.Set(viewRect);
+			ConstrainClippingRegion(&clipper);
 			break;
 		}
 		case G_E_CONNECTING:
@@ -792,17 +830,9 @@ void GraphEditor::MessageReceived(BMessage *message)
 void GraphEditor::FrameResized(float width, float height)
 {
 	TRACE();
-	BRect		docRect		= doc->Bounds();
-	BView::FrameResized(width,height);
-	BScrollView	*scrollView = dynamic_cast<BScrollView *> (BView::Parent());
-	if (scrollView)
-	{
-		scrollView->ScrollBar(B_HORIZONTAL)->SetRange(0,docRect.Width()*scale);
-		scrollView->ScrollBar(B_HORIZONTAL)->SetProportion(Bounds().Width()/(docRect.Width()*scale));
-		scrollView->ScrollBar(B_VERTICAL)->SetRange(0,docRect.Height()*scale);
-		scrollView->ScrollBar(B_VERTICAL)->SetProportion(Bounds().Height()/(docRect.Height()*scale));
-	}
+	UpdateScrollBars();
 }
+
 
 void GraphEditor::InsertObject(BPoint where,bool deselect)
 {
@@ -1244,4 +1274,37 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos)
 		for (int32 i = 0; i<groupPainter->RenderList()->CountItems();i++)
 				AddToList((Renderer *)groupPainter->RenderList()->ItemAt(i),pos+1);
 	}
+}
+
+void GraphEditor::UpdateScrollBars()
+{
+	if (doc != NULL)
+	{
+		BRect		docRect		= doc->Bounds();
+		BRect		scrollRect	= myScrollParent->Bounds();
+		if ((myScrollParent) && (doc))
+		{
+			float heightDiff	= docRect.Height()-scrollRect.Height();
+			float widthDiff		= docRect.Width()-scrollRect.Width();
+			float docWidth		= docRect.Width()*scale;
+			float docHeight		= docRect.Height()*scale;
+			if (widthDiff<0)
+				widthDiff = 0;
+			if (heightDiff>0)
+					heightDiff = 0;					
+
+			BScrollBar	*sb	= myScrollParent->ScrollBar(B_HORIZONTAL);
+			sb->SetRange(0,widthDiff*scale);
+			sb->SetProportion(scrollRect.Width()/docWidth);
+			// Steps are 1/8 visible window for small steps
+			//   and 1/2 visible window for large steps
+			sb->SetSteps(docWidth / 8.0, docWidth / 2.0);
+	
+			sb	= myScrollParent->ScrollBar(B_VERTICAL);
+			sb->SetRange(0,heightDiff*scale);
+			sb->SetProportion(scrollRect.Height()/docHeight);
+			sb->SetSteps(docHeight / 8.0, docHeight / 2.0);
+		}
+	}
+
 }

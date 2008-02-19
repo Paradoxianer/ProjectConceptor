@@ -14,6 +14,9 @@
 #include <string.h>
 
 const char		*APP_SIGNATURE		= "application/ProjectConceptor";
+const int32		P_C_VERSION			= 10;
+
+
 
 const char*		P_MENU_APP_HELP					= "Help";
 const char*		P_MENU_APP_ABOUT				= "About";
@@ -130,7 +133,7 @@ const char*		P_MENU_HELP						= "Help";
 const char*		P_MENU_HELP_ABOUT				= "About";
 
 
-const char*		P_C_VERSION						= "0.01.1 Revision 82";
+//const char*		P_C_VERSION						= "0.01.1 Revision 82";
 
 ProjektConceptor::ProjektConceptor():BApplication(APP_SIGNATURE)
 {
@@ -243,16 +246,39 @@ void ProjektConceptor::ArgvReceived(int32 argc, char **argv)
 
 void ProjektConceptor::RegisterMime(void)
 {
-/*	BMimeType		mime;
+	bool			valid = FALSE;
+	BMimeType		mime;
+	BMessage		info;
 	mime.SetType(P_C_DOCUMENT_MIMETYPE);
 	if (!mime.IsInstalled())
 	{
+		if (mime.GetAttrInfo(&info) == B_NO_ERROR) 
+		{
+			int32	mimeVersion;
+			info.FindInt32("version",&mimeVersion);
+			if (mimeVersion<P_C_VERSION);
+				valid = false;
+		}
+		if (!valid)
+			mime.Delete();
+	}
+	if (!valid)
+	{
+		BBitmap *kLargeIcon= BTranslationUtils::GetBitmap(B_LARGE_ICON,"BEOS:L:STD_ICON");
+		BBitmap *kSmallIcon= BTranslationUtils::GetBitmap(B_MINI_ICON,"BEOS:M:STD_ICON");
+
 		mime.Install();
 		mime.SetShortDescription("ProjectConceptor Document");
 		mime.SetLongDescription("Documentfile for the ProjectConceptor");
+		if (kLargeIcon)
+			mime.SetIcon(kLargeIcon, B_LARGE_ICON);
+		if (kLargeIcon)
+			mime.SetIcon(kSmallIcon, B_MINI_ICON);
 		mime.SetPreferredApp(APP_SIGNATURE);
-	}*/
-
+		BMessage msg;
+		msg.AddInt32("version",P_C_VERSION);
+		mime.SetAttrInfo(&msg);
+	}
 }
 
 int main()

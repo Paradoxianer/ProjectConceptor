@@ -17,7 +17,6 @@ PDocument::PDocument(PDocumentManager *initManager):BLooper()
 	documentManager=initManager;
 	Init();
 	Run();
-	windowManager->AddPWindow(new PWindow(BRect(100,100,500,400),this));
 }
 
 PDocument::PDocument(PDocumentManager *initManager,entry_ref *openEntry):BLooper()
@@ -27,8 +26,6 @@ PDocument::PDocument(PDocumentManager *initManager,entry_ref *openEntry):BLooper
 	documentManager=initManager;
 	Init();
 	Run();
-	windowManager->AddPWindow(new PWindow(BRect(100,100,500,400),this));
-	
 }
 
 PDocument::PDocument(BMessage *archive):BLooper(archive)
@@ -216,19 +213,19 @@ void PDocument::Init()
 
 	printerSetting	= NULL;
 	documentSetting	= new BMessage();
-	bounds			= BRect(0,0,100,100);
+	bounds			= BRect(0,0,600,800);
 	printableRect	= NULL;
 	paperRect		= NULL;
 	savePanel		= NULL;
-	width			= 100;
-	height			= 100;
+	width			= 600;
+	height			= 800;
 	dirty			= true;
 	entryRef		= NULL;
 	modified		= false;
-	windowManager	= new WindowManager(this);
 	editorManager	= new PEditorManager(this);
 	commandManager	= new PCommandManager(this);
 	//** to do.. helpManager		= new HelpManager();
+	window			= new PWindow(BRect(100,100,500,400),this);
 }
 
 void PDocument::Init(BMessage *archive)
@@ -455,12 +452,10 @@ void PDocument::Save(void)
 	BMessage			*archived			= new BMessage();
 	BMessage			*saveSettings		= new BMessage();
 	char				*formatName			= NULL;
-	char				*formatMIME			= NULL;
 	translator_info		*translatorInfo		= new translator_info;
 	int32				tmpInt				= 0;
 	int32				outType				= 0;
 
-	float				tmpFloat			= 0;
 	documentSetting->FindMessage("saveSettings",saveSettings);
 	if (saveSettings->FindInt32("translator_id",&tmpInt) == B_OK)
 	{
@@ -493,13 +488,11 @@ void PDocument::Save(void)
 			PRINT(("ERROR\tSave file error %s\n",strerror(err)));
 			err = archived->Flatten(file);
 		}
-		if (err==B_OK)
-		{
-			modified=false;
-		}
-		else
-			PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
 	}
+	if (err==B_OK)
+			modified=false;
+	else
+		PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
 
 }
 
@@ -512,7 +505,6 @@ void PDocument::Load(void)
 	BTranslatorRoster	*roster			= NULL;
 	BMallocIO			*output			= new BMallocIO();
 	BMessage			*loaded			= new BMessage();
-	void				*buffer			= NULL;
 	int32				i				= 0;
 	translator_info		*indentifed		= new translator_info;
 	if (file->InitCheck() == B_OK)
@@ -526,6 +518,7 @@ void PDocument::Load(void)
 			err = loaded->Unflatten(output);
 			printf("%s",strerror(err));
 			loaded->PrintToStream();
+			modified=false;
 		}
 	}
 	else
@@ -626,173 +619,121 @@ BMessage* PDocument::FindObject(BPoint *where)
 
 BMenu *PDocument::GetMenu(const char* signatur)
 {
-	BMenu **alleMenus	= new BMenu*[windowManager->CountPWindows()+1];
-	int32 	i			= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		alleMenus[i]=(windowManager->PWindowAt(i))->GetMenu(signatur);
-	}
-	alleMenus[i+1] = NULL;
-	return alleMenus[0];
+	BMenu *alleMenus	= NULL;
+	if (window)
+		alleMenus=window->GetMenu(signatur);
+	return alleMenus;
 }
 
 BMenuItem*	PDocument::GetMenuItem(const char* signatur)
 {
-	BMenuItem **alleMenuItems	= new BMenuItem*[windowManager->CountPWindows()+1];
-	int32 	i					= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		alleMenuItems[i]=(windowManager->PWindowAt(i))->GetMenuItem(signatur);
-	}
-	alleMenuItems[i+1] = NULL;
-	return alleMenuItems[0];
+	BMenuItem *alleMenuItems	= NULL;
+	if(window)
+		alleMenuItems=window->GetMenuItem(signatur);
+	return alleMenuItems;
 }
 
 ToolBar* PDocument::GetToolBar(const char *signatur)
 {
-	ToolBar **alleToolBars		= new ToolBar*[windowManager->CountPWindows()+1];
-	int32 	i					= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		alleToolBars[i]=(windowManager->PWindowAt(i))->GetToolBar(signatur);
-	}
-	alleToolBars[i+1] = NULL;
-	return alleToolBars[0];
+	ToolBar *alleToolBars		= NULL;
+	if(window)
+		alleToolBars=window->GetToolBar(signatur);
+	return alleToolBars;
 }
 
 ToolMenu* PDocument::GetToolMenu(const char* toolbarSignature,const char *signature)
 {
-	ToolMenu **alleToolMenus	= new ToolMenu*[windowManager->CountPWindows()+1];
-	int32 	i					= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		alleToolMenus[i]=(windowManager->PWindowAt(i))->GetToolMenu(toolbarSignature,signature);
-	}
-	alleToolMenus[i+1] = NULL;
-	return alleToolMenus[0];
+	ToolMenu *alleToolMenus	= NULL;
+	if(window)
+		alleToolMenus=window->GetToolMenu(toolbarSignature,signature);
+	return alleToolMenus;
 }
 
 ToolItem* PDocument::GetToolItem(const char* toolbarSignature,const char *signature)
 {
-	ToolItem **alleToolItems	= new ToolItem*[windowManager->CountPWindows()+1];
-	int32 	i					= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		alleToolItems[i]=(windowManager->PWindowAt(i))->GetToolItem(toolbarSignature,signature);
-	}
-	alleToolItems[i+1] = NULL;
-	return alleToolItems[0];
+	ToolItem *alleToolItems	= NULL;
+	if(window)
+		alleToolItems=window->GetToolItem(toolbarSignature,signature);
+	return alleToolItems;
 }
 
 status_t PDocument::AddMenu(BMenu *menu,int32 index)
 {
 	status_t 	err	= B_OK;
-	int32 		i	= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-//		err = err || (windowManager->PWindowAt(i))->AddMenu(new BMenu(*menu),index);
-		err = err || (windowManager->PWindowAt(i))->AddMenu(menu,index);
-	}
+	if (window)
+		err = err || window->AddMenu(menu,index);
 	return err;
 }
 
 status_t PDocument::AddMenuItem(const char *menuSignatur, BMenuItem *menuItem,int32 index)
 {
 	status_t 	err	= B_OK;
-	int32 		i	= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-//		err = err || (windowManager->PWindowAt(i))->AddMenuItem(menuSignatur,new BMenuItem(*menuItem),index);
-		err = err || (windowManager->PWindowAt(i))->AddMenuItem(menuSignatur,menuItem,index);
-	}
+	if(window)
+		err = err || window->AddMenuItem(menuSignatur,menuItem,index);
 	return err;
 }
 
 status_t PDocument::AddToolBar(ToolBar *toolbar)
 {
 	status_t 	err	= B_OK;
-	int32 		i	= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		err = err || (windowManager->PWindowAt(i))->AddToolBar(toolbar);
-	}
+	if(window)
+		err = err || window->AddToolBar(toolbar);
 	return err;
 }
 
 status_t PDocument::AddToolMenu(const char *toolbarSignatur,ToolMenu *toolMenu)
 {
 	status_t 	err	= B_OK;
-	int32 		i	= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		err = err || (windowManager->PWindowAt(i))->AddToolMenu(toolbarSignatur,toolMenu);
-	}
+	if(window)
+		err = err || window->AddToolMenu(toolbarSignatur,toolMenu);
 	return err;
 }
 
 status_t PDocument::AddToolItem(const char *toolbarSignatur,const char *toolmenuSignatur,ToolItem *toolItem,int32 index)
 {
 	status_t 	err	= B_OK;
-	int32 		i	= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		err = err || (windowManager->PWindowAt(i))->AddToolItem(toolbarSignatur,toolmenuSignatur,toolItem,index);
-	}
+	if (window)
+		err = err || window->AddToolItem(toolbarSignatur,toolmenuSignatur,toolItem,index);
 	return err;
 }
 
 status_t PDocument::RemoveMenu(const char* menuSignature) 
 {
 	status_t 	err	= B_OK;
-	int32 		i	= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		err = err || (windowManager->PWindowAt(i))->RemoveMenu(menuSignature);
-	}
+	if(window)
+		err = err || window->RemoveMenu(menuSignature);
 	return err;
 }
 
 status_t PDocument::RemoveMenuItem(const char* menuItemSignature)
 {
 	status_t 	err	= B_OK;
-	int32 		i	= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		err = err || (windowManager->PWindowAt(i))->RemoveMenuItem(menuItemSignature);
-	}
+	if(window)
+		err = err || window->RemoveMenuItem(menuItemSignature);
 	return err;
 }
 
 status_t PDocument::RemoveToolBar(const char* signature)
 {
 	status_t 	err	= B_OK;
-	int32 		i	= 0;
-	for (i=0 ;i<windowManager->CountPWindows(); i++)
-	{
-		err = err || (windowManager->PWindowAt(i))->RemoveToolBar(signature);
-	}
+	if(window)
+		err = err || window->RemoveToolBar(signature);
 	return err;
 }
 
 status_t PDocument::RemoveToolMenu(const char* toolbarSignature,const char* toolmenuSignature) 
 {
 	status_t 	err	= B_OK;
-	int32 		i	= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		err = err || (windowManager->PWindowAt(i))->RemoveToolMenu(toolbarSignature,toolmenuSignature);
-	}
+	if(window)
+		err = err || window->RemoveToolMenu(toolbarSignature,toolmenuSignature);
 	return err;
 }
 
 status_t PDocument::RemoveToolItem(const char* toolbarSignature,const char* toolitemSignature)
 {
 	status_t 	err	= B_OK;
-	int32 		i	= 0;
-	for (i=0; i<windowManager->CountPWindows(); i++)
-	{
-		err = err || (windowManager->PWindowAt(i))->RemoveToolItem(toolbarSignature,toolitemSignature);
-	}
+	if(window)
+		err = err || window->RemoveToolItem(toolbarSignature,toolitemSignature);
 	return err;
 }
 

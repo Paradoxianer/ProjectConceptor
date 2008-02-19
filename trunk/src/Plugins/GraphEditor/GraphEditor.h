@@ -1,10 +1,11 @@
-#ifndef BASIC_EDITOR_H
-#define BASIC_EDITOR_H
+#ifndef GRAPH_EDITOR_H
+#define GRAPH_EDITOR_H
 /*
  * @author Paradoxon powered by Jesus Christ
  */
 #include <app/Message.h>
 #include <interface/View.h>
+#include <interface/ScrollView.h>
 #include <support/List.h>
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
@@ -58,7 +59,7 @@ public:
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
 
-	virtual	BView*			GetView(void){return this;};
+	virtual	BView*			GetView(void);
 	virtual BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
 
@@ -83,9 +84,6 @@ public:
 	virtual	void			MouseDown(BPoint where);
 	virtual	void			MouseMoved(	BPoint where, uint32 code, const BMessage *a_message);
 	virtual	void			MouseUp(BPoint where);
-
-	virtual	void			KeyDown(const char *bytes, int32 numBytes);
-	virtual	void			KeyUp(const char *bytes, int32 numBytes);
 
 	virtual	void			MessageReceived(BMessage *msg);
 
@@ -119,6 +117,8 @@ protected:
 			
 			void			DeleteFromList(Renderer *wichRenderer);
 			void			AddToList(Renderer *wichRenderer, int32 pos);
+			void			UpdateScrollBars(void);
+
 
 
 	static	bool			ProceedRegion(void *arg,void *region);
@@ -166,6 +166,8 @@ protected:
 
 			bool			gridEnabled;
 			image_id 		pluginID;
+			
+			BScrollView		*myScrollParent;
 
 private:
 };

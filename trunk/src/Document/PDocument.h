@@ -1,11 +1,12 @@
 #ifndef P_DOCUMENT_H
 #define P_DOCUMENT_H
 
-#include "WindowManager.h"
+
 #include "PEditorManager.h"
 #include "PCommandManager.h"
 #include "HelpManager.h"
 #include "PCSavePanel.h"
+#include "PWindow.h"
 
 #include <app/Message.h>
 #include <app/Handler.h>
@@ -13,7 +14,6 @@
 #include <interface/Region.h>
 #include <interface/View.h>
 #include <interface/Menu.h>
-
 #include <storage/File.h>
 #include <storage/FilePanel.h>
 #include <support/Archivable.h>
@@ -147,7 +147,7 @@ public:
 
 			bool				QuitRequested(void);
 
-			WindowManager*		GetWindowManager(void){return windowManager;};
+			PWindow*			GetWindow(void){return window;};
 			PCommandManager*	GetCommandManager(void){return commandManager;};
 			PEditorManager*		GetEditorManager(void){return editorManager;};
 
@@ -208,16 +208,11 @@ protected:
 		 	float				width,height;
 			bool				dirty;
 			entry_ref			*entryRef;
-			bool				modified;
-			BMenu				*fileMenu;
-			BMenu				*editMenu;
-			BMenu				*searchMenu;
-			
+			bool				modified;			
 			
 			PEditorManager		*editorManager;
 			PCommandManager		*commandManager;
-			WindowManager		*windowManager;
-			
+			PWindow				*window;			
 			BMessage			*testMacro;
 			
 			HelpManager			*helpManager;

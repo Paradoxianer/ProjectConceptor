@@ -47,8 +47,6 @@ PWindow::PWindow(BMessage *archive):BWindow(archive)
 PWindow::~PWindow(void)
 {
 	TRACE();
-	manager->RemovePWindow(this);
-
 }
 
 /**
@@ -67,11 +65,13 @@ void PWindow::Init(void)
 
 	verticalToolbars		= new BList();
 	horizontalToolbars		= new BList();
+	MakeToolbars();
+
 	configWindow			= NULL;
 	BRect containerRect		= BRect(P_M_MAIN_VIEW_LEFT+1,P_M_MAIN_VIEW_TOP+2,P_M_MAIN_VIEW_RIGHT-1,P_M_MAIN_VIEW_BOTTOM-1);
 	mainView				= new MainView(doc,containerRect, "tabContainer");
 	SetSizeLimits(300,6000,150,4000);
-	MakeToolbars();
+
 	AddChild(mainView);
 }
 
@@ -322,7 +322,6 @@ void PWindow::MakeToolbars()
 	TRACE();
 	ToolItem	*toolItem	= NULL;
 	ToolBar		*tmpBar		= NULL;
-	ToolMenu	*toolMenu	= NULL;
 	BBitmap		*tmpBitmap	= NULL;
 	BRect statusFrame=Bounds();
 	statusFrame.right=20;
@@ -377,14 +376,8 @@ void PWindow::MakeToolbars()
 bool PWindow::QuitRequested()
 {
 	TRACE();
-	if (manager->CountPWindows() > 1)
-	{
-		manager->RemovePWindow(this);
-		return true;
-	}
-	else
-		(new BMessenger(NULL,doc))->SendMessage(B_QUIT_REQUESTED);
-		return false;
+	(new BMessenger(NULL,doc))->SendMessage(B_QUIT_REQUESTED);
+	return false;
 }
 /**
  *@todo send SAVE and SAVE_AS MEssages to the PDocument
@@ -471,20 +464,14 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	BRect	rect = mainView->Bounds();
 	rect.InsetBy(5,5);
 	rect.bottom -= mainView->TabHeight();
-	(editor->GetView())->ResizeTo(rect.Width()-B_V_SCROLL_BAR_WIDTH ,rect.Height()-B_H_SCROLL_BAR_HEIGHT);
-	(editor->GetView())->MoveTo(5,5);
 //	mainView->AddTab(new BScrollView("editorScroller",editor->GetView(),B_FOLLOW_ALL_SIDES,0,true,true), tab);
 	mainView->AddTab(editor->GetView(), tab);
 	tab->SetLabel(name);
 	mainView->Select(tab);
 	editor->GetView()->MakeFocus(true);
+	(editor->GetView())->ResizeTo(rect.Width()-B_V_SCROLL_BAR_WIDTH -2,rect.Height()-B_H_SCROLL_BAR_HEIGHT-2);
+	(editor->GetView())->MoveTo(2,2);
 	(doc->GetEditorManager())->RegisterPEditor(editor);
-	if ((doc->GetEditorManager())->CountPEditors()>1)
-		editor->GetView()->ResizeTo(doc->Bounds().Width(),doc->Bounds().Height());
-	else
-	{
-		doc->Resize((editor->GetView())->Bounds().Width(),(editor->GetView())->Bounds().Height());
-	}
 	if (locked)
 		UnlockLooper();
 }
