@@ -216,8 +216,8 @@ void GraphEditor::AttachedToManager(void)
 	else
 		configMessage->AddMessage("Shortcuts",shortcuts);
 	InitAll();
-	if (doc!=NULL)
-		this->ResizeTo(doc->Bounds().Width(),doc->Bounds().Height());
+/*	if (doc!=NULL)
+		this->ResizeTo(doc->Bounds().Width(),doc->Bounds().Height());*/
 	UpdateScrollBars();
 }
 
@@ -650,7 +650,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 		case P_C_DOC_BOUNDS_CHANGED:
 		{
 			UpdateScrollBars();
-			BRect		docRect		= doc->Bounds();
+		/*	BRect		docRect		= doc->Bounds();
 			BRegion		clipper;
 			BRect		viewRect;
 			BRect		scrollRect	= myScrollParent->Bounds();
@@ -660,7 +660,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			viewRect.right	= viewRect.left + (scrollRect.Width() - B_V_SCROLL_BAR_WIDTH)-5;
 			viewRect.bottom	= viewRect.top + (scrollRect.Height() - B_H_SCROLL_BAR_HEIGHT)-5;
 			clipper.Set(viewRect);
-			ConstrainClippingRegion(&clipper);
+			ConstrainClippingRegion(&clipper);*/
 			break;
 		}
 		case G_E_CONNECTING:
@@ -723,7 +723,8 @@ void GraphEditor::MessageReceived(BMessage *message)
 		{
 			message->FindFloat("scale",&scale);
 			SetScale(scale);
-			FrameResized(0,0);
+			//FrameResized(0,0);
+			UpdateScrollBars();
 			Invalidate();
 			break;
 		}

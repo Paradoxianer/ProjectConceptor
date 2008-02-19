@@ -93,16 +93,16 @@ COMPILER_FLAGS =
 #	specify additional linker flags
 LINKER_FLAGS =
 
-SVG_ICON = ../../Doku/Move.svg
+SVG_ICON = ../../../Data/Icons/Move.svg
 
 INSTALL_DIR    = /boot/apps/Development/ProjectConceptor/Plugins/Commands
 
-install::
-	@echo "Copying locale files"
-	@echo $(INSTALL_DIR)
-	@mkdir -p $(INSTALL_DIR)
-	@cp -rf ./$(NAME) $(INSTALL_DIR)
-	@echo "Done copying."
+#install::
+#	@echo "Copying locale files"
+#	@echo $(INSTALL_DIR)
+#	@mkdir -p $(INSTALL_DIR)
+#	@cp -rf ./$(NAME) $(INSTALL_DIR)
+#	@echo "Done copying."
 
 ## include the makefile-engine
 include /boot/develop/etc/makefile-engine

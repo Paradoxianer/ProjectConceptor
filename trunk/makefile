@@ -39,7 +39,6 @@ SRCS= 		src/About/AboutWindow.cpp \
 		src/Document/PEditor.cpp \
 		src/Document/PEditorManager.cpp \
 		src/Document/HelpManager.cpp \
-		src/Document/WindowManager.cpp \
 		src/Plugins/BasePlugin.cpp \
 		src/Plugins/PluginManager.cpp \
 		src/ToolBar/BaseItem.cpp \
