@@ -70,7 +70,7 @@ protected:
 		BFont				*font;
 		float				penSize;
 
-	//const char*			name;
+
 	//---------ClassSettings-----------
 		BMessage			*parentNode;
 

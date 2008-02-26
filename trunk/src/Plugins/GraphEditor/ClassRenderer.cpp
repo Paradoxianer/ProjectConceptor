@@ -1,6 +1,5 @@
 #include "ClassRenderer.h"
 #include "ProjectConceptorDefs.h"
-//#include "PCommandManager.h"
 
 #include <math.h>
 
@@ -232,7 +231,7 @@ void ClassRenderer::MouseUp(BPoint where)
 				mover->AddFloat("dy",dy);
 				AdjustParents(parentNode,mover);
 				sentTo->SendMessage(mover);
-				
+
 			}
 			else
 			{
@@ -332,6 +331,7 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->StrokeTriangle(BPoint(frame.left,yOben),BPoint(frame.left+triangleHeight,yMitte),BPoint(frame.left,yUnten));
 	drawOn->StrokeTriangle(BPoint(frame.right-triangleHeight,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-triangleHeight,yUnten));
 	name->Draw(drawOn,updateRect);
+	drawOn->SetFont(font);
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
 	while( allAttributes != attributes->end() )
 	{
@@ -543,7 +543,7 @@ void ClassRenderer::AdjustParents(BMessage* theParent, BMessage *command)
 					valueContainer->AddRect("newValue", parent->Frame());
 					changeValue->AddMessage("valueContainer",valueContainer);
 					command->AddMessage("PCommand::subPCommand",changeValue);
-				}	
+				}
 			}
 			tmpParent->FindPointer("Node::parent", (void **)&tmpParent);
 		}

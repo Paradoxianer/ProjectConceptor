@@ -382,15 +382,18 @@ BMessage* Converter::GuessStartNode(void)
 
 }
 
-status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent,int32 level)
+status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent,int32 level, int32 thisLine)
 {
 	TiXmlNode		*node;
 	BMessage		*pDocNode	= new BMessage(P_C_CLASS_TYPE);
 	BMessage		*data		= new BMessage();
+	BMessage		*pattern	= new BMessage();
+	int32			line		= 0;
 	for( node = parent->FirstChild("node"); node;)
 	{
 		CreateConnection(connectionS, parent,node->ToElement());
-		CreateNode(nodeS,connectionS, node->ToElement(),level++);
+		CreateNode(nodeS,connectionS, node->ToElement(),level+1, line);
+		line++;
 		node = node->NextSibling();
 	}
 	if (parent->Attribute("TEXT"))
@@ -407,6 +410,10 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		pDocNode->AddInt32("Node::created",atoi(parent->Attribute("CREATED")));
 	if (parent->Attribute("MODIFIED"))
 		pDocNode->AddInt32("Node::modified",atoi(parent->Attribute("MODIFIED")));
+	if (parent->Attribute("BACKGROUND_COLOR"))
+		pattern->AddRGBColor("FillColor",parent->Attribute("BACKGROUND_COLOR"));
+	if (parent->Attribute("COLOR"))
+		pattern->AddRGBColor("BorderColor",parent->Attribute("COLOR"));
 	//find all Attributes
 	for (node = parent->FirstChild("arrowlink"); node;)
 	{
@@ -417,10 +424,21 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 	BRect	*nodeRect	= new BRect(100,100,200,200);
 	if (pDocNode->FindRect("Node::frame",nodeRect) !=  B_OK)
 	{
+		int32	left, top, right, bottom;
 		if (level == 0)
-			nodeRect->Set(100,100,200,150);
+			nodeRect->Set(X_START,Y_START,X_START+NODE_WIDTH,Y_WIDTH+NODE_HEIGHT);
 		else
-			nodeRect->Set(level*100+100,100,level*100+200,150);
+		if (parent->Attribute("POSITION"))
+		{
+			if (strcmp(parent->Attribute("POSITION"),"left") != 0)
+				left	= (level*(NODE_WIDTH+10)+X_START;
+			else
+				left=X_START-(level*(NODE_WIDTH+10);
+		}
+		right	= left + NODE_WIDTH;
+		top		= (thisLine*(NODE_HEIGHT+10))+ 10;
+		bottom	= top + NODE_HEIGHT;
+		nodeRect->Set(left, right,top, bottom);
 		pDocNode->AddRect("Node::frame",*nodeRect);
 	}
 	nodeS->AddMessage("node",pDocNode);
@@ -461,4 +479,10 @@ int32 Converter::GetID(const char *idString)
 	else
 		sscanf(idString,"%d",&id);
 	return id;
+}
+
+rgb_color Converter::GetRGB(const char *rgbString)
+{
+	rgb_color	rgb;
+	return rgb;
 }

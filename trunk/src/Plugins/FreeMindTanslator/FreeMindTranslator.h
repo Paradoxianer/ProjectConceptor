@@ -22,8 +22,12 @@ using namespace std;
 
 //ProjectConceptor Main Type
 
-char translatorName[] = "FreeMindTranslator";
-char translatorInfo[] = "Read and write FreeMind data";
+const int32	X_START		= 500;
+const int32	Y_START		= 500;
+const int32	NODE_WIDTH	= 150;
+const int32	NODE_HEIGHT	= 100;
+char translatorName[]	= "FreeMindTranslator";
+char translatorInfo[]	= "Read and write FreeMind data";
 int32 translatorVersion = 10; /* format is revision+minor*10+major*100 */
 
 
@@ -56,9 +60,10 @@ protected:
 	BMessage		*GuessStartNode(void);
 
 	//used to convert FreeMind 2 PDoc
-	status_t		CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent, int32 level);
+	status_t		CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent, int32 level, int32 line);
 	status_t		CreateConnection(BMessage *connectionS,TiXmlElement *start,TiXmlElement *end);
 	int32			GetID(const char *idString);
+	rgb_color		GetRGB(const char *rgbString);
 	BPositionIO 	*in;
 	BMessage		*config;
 	BPositionIO		*out;
