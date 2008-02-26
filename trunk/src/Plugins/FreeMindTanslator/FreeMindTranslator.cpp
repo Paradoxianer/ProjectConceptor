@@ -219,6 +219,7 @@ status_t Converter::ConvertFreeMind2PDoc()
 	BMessage	*allConnections	= new BMessage();
 	char		*xmlString;
 	off_t		start,end;
+	middel.Set(400,400,600,550);
 	in->Seek(0,SEEK_SET);
 	start = in->Position();
 	in->Seek(0,SEEK_END);
@@ -239,7 +240,7 @@ status_t Converter::ConvertFreeMind2PDoc()
 		node = doc.FirstChild("map");
 		node = node->FirstChild("node");
 		element	= node->ToElement();
-		CreateNode(allNodes, allConnections,element);
+		CreateNode(allNodes, allConnections,element,0);
 	}
 	document->AddMessage("PDocument::allConnections",allConnections);
 	document->AddMessage("PDocument::allNodes",allNodes);
@@ -381,7 +382,7 @@ BMessage* Converter::GuessStartNode(void)
 
 }
 
-status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent)
+status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent,int32 level)
 {
 	TiXmlNode		*node;
 	BMessage		*pDocNode	= new BMessage(P_C_CLASS_TYPE);
@@ -389,7 +390,7 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 	for( node = parent->FirstChild("node"); node;)
 	{
 		CreateConnection(connectionS, parent,node->ToElement());
-		CreateNode(nodeS,connectionS, node->ToElement());
+		CreateNode(nodeS,connectionS, node->ToElement(),level++);
 		node = node->NextSibling();
 	}
 	if (parent->Attribute("TEXT"))
@@ -413,6 +414,15 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		node = node->NextSibling();
 	}
 	pDocNode->AddMessage("Node::Data",data);
+	BRect	*nodeRect	= new BRect(100,100,200,200);
+	if (pDocNode->FindRect("Node::frame",nodeRect) !=  B_OK)
+	{
+		if (level == 0)
+			nodeRect->Set(100,100,200,150);
+		else
+			nodeRect->Set(level*100+100,100,level*100+200,150);
+		pDocNode->AddRect("Node::frame",*nodeRect);
+	}
 	nodeS->AddMessage("node",pDocNode);
 }
 
@@ -445,11 +455,10 @@ status_t Converter::CreateConnection(BMessage *container,TiXmlElement *start,TiX
 
 int32 Converter::GetID(const char *idString)
 {
-	char	*idNumber;
 	int32	id;
 	if (strstr(idString,"Freemind")!=NULL)
-		sscanf(idString,"Freemind_Link_%d", &idNumber);
+		sscanf(idString,"Freemind_Link_%d", &id);
 	else
-		sscanf(idString,"%d",&idNumber);
+		sscanf(idString,"%d",&id);
 	return id;
 }

@@ -56,7 +56,7 @@ protected:
 	BMessage		*GuessStartNode(void);
 
 	//used to convert FreeMind 2 PDoc
-	status_t		CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent);
+	status_t		CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent, int32 level);
 	status_t		CreateConnection(BMessage *connectionS,TiXmlElement *start,TiXmlElement *end);
 	int32			GetID(const char *idString);
 	BPositionIO 	*in;
@@ -69,6 +69,7 @@ protected:
 	BMessage		*allConnections;
 	BMessage		*allNodes;
 	BMessage		*selected;
+	BRect			middel;
 
 };
 

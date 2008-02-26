@@ -1,5 +1,6 @@
 #include <interface/Alert.h>
 #include <interface/PrintJob.h>
+#include <interface/Screen.h>
 #include <support/Debug.h>
 #include <storage/NodeInfo.h>
 #include <string.h>
@@ -225,7 +226,11 @@ void PDocument::Init()
 	editorManager	= new PEditorManager(this);
 	commandManager	= new PCommandManager(this);
 	//** to do.. helpManager		= new HelpManager();
-	window			= new PWindow(BRect(100,100,500,400),this);
+	BScreen *tmpScreen	= new BScreen();
+	BRect	windowRect	= tmpScreen->Frame();
+	windowRect.InsetBy(50,50);
+//	windowRect.OffsetBy(-25,-25);
+	window			= new PWindow(windowRect,this);
 }
 
 void PDocument::Init(BMessage *archive)
