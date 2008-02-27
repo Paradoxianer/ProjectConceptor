@@ -77,37 +77,6 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 		strcpy(outInfo->name, "ProjectConceptor format converted from Freemind");
 		strcpy(outInfo->MIME, P_C_DOCUMENT_MIMETYPE);
 	}
-/*	BMessage		*testMessage	= new BMessage();
-	BMessage		*tmpMessage		= new BMessage();
-	if ((!inSource) || (!outInfo))
-		err = B_BAD_VALUE;
-	else
-	{
-		if (err == B_OK)
-		{
-			err = testMessage->Unflatten(inSource);
-			if (err == B_OK)
-			{
-				if (err == B_OK)
-					err = testMessage->FindMessage("PDocument::allNodes",tmpMessage);
-				if (err != B_OK)
-				{
-					err = B_NO_TRANSLATOR;
-				}
-				else
-				{
-					outInfo->group = B_TRANSLATOR_NONE;
-					outInfo->type = P_C_DOCUMENT_RAW_TYPE;
-					outInfo->quality = 0.3;
-					outInfo->capability = 0.8;
-					strcpy(outInfo->name, "ProjectConceptor nativ format");
-					strcpy(outInfo->MIME, P_C_DOCUMENT_MIMETYPE);
-				}
-			}
-		}
-	}
-	err = B_NO_TRANSLATOR;
-	*/
 	return err;
 }
 
@@ -421,24 +390,29 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		node = node->NextSibling();
 	}
 	pDocNode->AddMessage("Node::Data",data);
-	BRect	*nodeRect	= new BRect(100,100,200,200);
+	pDocNode->AddMessage("Node::Pattern",pattern);
+	BRect	*nodeRect	= new BRect(100,100,200,150);
 	if (pDocNode->FindRect("Node::frame",nodeRect) !=  B_OK)
 	{
 		int32	left, top, right, bottom;
 		if (level == 0)
 			nodeRect->Set(X_START,Y_START,X_START+NODE_WIDTH,Y_WIDTH+NODE_HEIGHT);
 		else
-		if (parent->Attribute("POSITION"))
 		{
-			if (strcmp(parent->Attribute("POSITION"),"left") != 0)
-				left	= (level*(NODE_WIDTH+10)+X_START;
-			else
-				left=X_START-(level*(NODE_WIDTH+10);
+			if (parent->Attribute("POSITION"))
+			{
+				if (strcmp(parent->Attribute("POSITION"),"left") != 0)
+					left	= (level*(NODE_WIDTH+10)+X_START;
+				else
+					left	= X_START-(level*(NODE_WIDTH+10);
+			}
 		}
+		else
+			left	=	X_START;
 		right	= left + NODE_WIDTH;
 		top		= (thisLine*(NODE_HEIGHT+10))+ 10;
 		bottom	= top + NODE_HEIGHT;
-		nodeRect->Set(left, right,top, bottom);
+		nodeRect->Set(left,top, right, bottom);
 		pDocNode->AddRect("Node::frame",*nodeRect);
 	}
 	nodeS->AddMessage("node",pDocNode);
