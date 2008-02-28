@@ -209,7 +209,7 @@ status_t Converter::ConvertFreeMind2PDoc()
 		node = doc.FirstChild("map");
 		node = node->FirstChild("node");
 		element	= node->ToElement();
-		CreateNode(allNodes, allConnections,element,0);
+		CreateNode(allNodes, allConnections,element,0,0);
 	}
 	document->AddMessage("PDocument::allConnections",allConnections);
 	document->AddMessage("PDocument::allNodes",allNodes);
@@ -380,9 +380,9 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 	if (parent->Attribute("MODIFIED"))
 		pDocNode->AddInt32("Node::modified",atoi(parent->Attribute("MODIFIED")));
 	if (parent->Attribute("BACKGROUND_COLOR"))
-		pattern->AddRGBColor("FillColor",parent->Attribute("BACKGROUND_COLOR"));
+		pattern->AddRGBColor("FillColor",GetRGB(parent->Attribute("BACKGROUND_COLOR")));
 	if (parent->Attribute("COLOR"))
-		pattern->AddRGBColor("BorderColor",parent->Attribute("COLOR"));
+		pattern->AddRGBColor("BorderColor",GetRGB(parent->Attribute("COLOR")));
 	//find all Attributes
 	for (node = parent->FirstChild("arrowlink"); node;)
 	{
@@ -396,21 +396,22 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 	{
 		int32	left, top, right, bottom;
 		if (level == 0)
-			nodeRect->Set(X_START,Y_START,X_START+NODE_WIDTH,Y_WIDTH+NODE_HEIGHT);
+		{
+			left	= X_START;
+			top		= Y_START;
+		}
 		else
 		{
 			if (parent->Attribute("POSITION"))
 			{
 				if (strcmp(parent->Attribute("POSITION"),"left") != 0)
-					left	= (level*(NODE_WIDTH+10)+X_START;
+					left	= (level*(NODE_WIDTH+10))+X_START;
 				else
-					left	= X_START-(level*(NODE_WIDTH+10);
+					left	= X_START-(level*(NODE_WIDTH+10));
 			}
+			top		= (thisLine*(NODE_HEIGHT+10))+ 10;
 		}
-		else
-			left	=	X_START;
 		right	= left + NODE_WIDTH;
-		top		= (thisLine*(NODE_HEIGHT+10))+ 10;
 		bottom	= top + NODE_HEIGHT;
 		nodeRect->Set(left,top, right, bottom);
 		pDocNode->AddRect("Node::frame",*nodeRect);
