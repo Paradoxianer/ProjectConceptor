@@ -381,7 +381,7 @@ void ClassRenderer::ValueChanged()
 	if (container->FindMessage("Node::Font",messageFont) == B_OK)
 	{
 		delete font;
-		font	= new AFon(messageFont);
+		font	= new AFont(messageFont);
 	}
 	container->FindMessage("Node::Data",data);
 	#ifdef B_ZETA_VERSION_1_0_0

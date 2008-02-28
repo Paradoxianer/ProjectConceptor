@@ -23,6 +23,7 @@ using namespace std;
 #include "PDocument.h"
 #include "Renderer.h"
 #include "StringRenderer.h"
+#include "AFont.h"
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
@@ -67,7 +68,7 @@ protected:
 		rgb_color			fillColor,borderColor;
 		BRect				frame;
 		bool				selected;
-		BFont				*font;
+		AFont				*font;
 		float				penSize;
 
 

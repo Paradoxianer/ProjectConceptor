@@ -16,7 +16,7 @@
  * @Contact: mail@projectconceptor.de
  *
  */
-class AFont : BFont, public BArchivable
+class AFont : public BFont, public BArchivable
 {
 public:
 							AFont();

@@ -29,7 +29,6 @@ SRCS= 		src/About/AboutWindow.cpp \
 		src/About/AboutURLView.cpp \
 		src/MainView.cpp \
 		src/ProjectConceptor.cpp \
-		src/PWindow.cpp \
 		src/Commands/PCommand.cpp \
 		src/Commands/PCommandManager.cpp \
 		src/Config/ConfigWindow.cpp \
@@ -38,6 +37,7 @@ SRCS= 		src/About/AboutWindow.cpp \
 		src/Document/PDocumentManager.cpp \
 		src/Document/PEditor.cpp \
 		src/Document/PEditorManager.cpp \
+		src/Document/PWindow.cpp \
 		src/Document/HelpManager.cpp \
 		src/Plugins/BasePlugin.cpp \
 		src/Plugins/PluginManager.cpp \
