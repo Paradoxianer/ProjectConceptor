@@ -39,9 +39,9 @@ AFont::~AFont()
 }
 
 
-status_t AFont::Archive(BMessage *archive, bool deep) const
+status_t AFont::Archive(BMessage *archive, bool) const
 {
-	deep;
+	status_t	err		= B_OK;
 	archive->AddString("class", "Font");
 	archive->AddFloat("Font::Rotation",Rotation());
 	archive->AddFloat("Font::Size",Size());
@@ -55,6 +55,7 @@ status_t AFont::Archive(BMessage *archive, bool deep) const
 	GetFamilyAndStyle(family, style);
 	archive->AddString("Font::Family",(const char*)family);
 	archive->AddString("Font::Style",(const char*)style);
+	return err;
 }
 
 BArchivable *AFont::Instantiate(BMessage *archive)
