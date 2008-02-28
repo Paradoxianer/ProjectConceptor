@@ -3,7 +3,6 @@
 
 #include "Commands/PCommandManager.h"
 #include "Document/PEditorManager.h"
-#include "Document/WindowManager.h"
 #include "Tools/Indexer.h"
 
 #include <app/Message.h>

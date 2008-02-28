@@ -527,7 +527,7 @@ BMenuItem*	PWindow::GetMenuItem(const char *menuitemSignature)
 	{
 		err	= localizeMenuItems->FindPointer("itemstring",i,(void **)&string);
 		err = err | localizeMenuItems->FindPointer("item",i,(void **)&item);
-		if ( (err) && (strcmp(string,menuitemSignature)==B_OK) )
+		if ( (err == B_OK) && (strcmp(string,menuitemSignature)==B_OK) )
 			found=true;
 		i++;
 	}
