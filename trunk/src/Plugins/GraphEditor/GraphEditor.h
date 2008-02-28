@@ -108,6 +108,8 @@ public:
 			image_id		PluginID(void){return pluginID;};
 			char*			RenderString(void){return renderString;};
 			void			SendMessage(BMessage* msg){sentToMe->SendMessage(msg);};
+			
+			BMessage		*GetStandartPattern(void){return patternMessage;};
 
 protected:
 			void			Init(void);

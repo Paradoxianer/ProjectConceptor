@@ -373,7 +373,11 @@ void ClassRenderer::ValueChanged()
 	container->FindBool("Node::selected",&selected);
 	container->FindFloat("Node::xRadius",&xRadius);
 	container->FindFloat("Node::yRadius",&yRadius);
-	container->FindMessage("Node::Pattern",pattern);
+	if (container->FindMessage("Node::Pattern",pattern) != B_OK)
+	{
+		container->AddMessage("Node::Pattern",editor->GetStandartPattern());
+		pattern = editor->GetStandartPattern();
+	}
 	container->FindMessage("Node::Font",messageFont);
 	container->FindMessage("Node::Data",data);
 	#ifdef B_ZETA_VERSION_1_0_0

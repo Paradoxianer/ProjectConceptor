@@ -600,6 +600,8 @@ bool PDocument::QuitRequested(void)
 		if (readLock)
 		Unlock();
 	}
+	if (returnValue)
+		window->Quit();
 	return returnValue;
 }
 
