@@ -22,6 +22,33 @@ AFont: AFont(): BFont(), BArchivable()
 
 AFont:AFont(BMessage *archive): BFont(), BArchivable()
 {
+	float	tmpFloat;
+	int8	tmpInt8;
+	int16	tmpInt16;
+	int32	tmpInt;
+	char	*family;
+	char	*style;
+	if (archive->FindFloat("Font::Rotation",&tmpFloat) == B_OK)
+		SetRoation(tmpFloat);
+	if (archive->FindFloat("Font::Size",&tmpFloat) == B_OK)
+		SetSize(tmpFloat);
+	if (archive->FindFloat("Font::Spacing",&tmpFloat) == B_OK)
+		SetSpacing(tmpFloat);
+	if (archive->FindFloat("Font::Shear",&tmpFloat) == B_OK)
+		SetShear(tmpFloat);
+	if (archive->FindInt8("Font::Encoding",&tmpInt8) == B_OK)
+		SetEncoding(tmpInt8);
+	if (archive->FindInt16("Font::Face",&tmpInt16) == B_OK)
+		SetRoation(tmpInt16);
+	if (archive->FindInt32("Font::Flags",&tmpInt) == B_OK)
+		SetRoation(tmpInt);
+	if (archive->FindFloat("Font::Rotation",&tmpFloat) == B_OK)
+		SetRoation(tmpFloat);
+	if ((archive->FindString("Font::Family",family) == B_OK) &&
+		(archive->FindString("Font::Style",style) == B_OK))
+	{
+		SetFamilyAndStyle((const font_family)family,(const font_style)style);
+	}
 
 }
 

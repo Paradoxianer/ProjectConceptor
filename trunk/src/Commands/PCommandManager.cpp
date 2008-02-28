@@ -15,7 +15,7 @@
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
-#endif 
+#endif
 
 PCommandManager::PCommandManager(PDocument *initDoc)
 {
@@ -127,7 +127,7 @@ status_t PCommandManager::SetMacroList(BList *newMacroList)
 
 status_t PCommandManager::SetUndoList(BList *newUndoList)
 {
-	status_t	err			= B_OK;	
+	status_t	err			= B_OK;
 	if (newUndoList)
 	{
 		delete undoList;
@@ -151,7 +151,7 @@ void PCommandManager::UnregisterPCommand(char* name)
 void PCommandManager::StartMacro(void)
 {
 	TRACE();
-	if (!recording)	
+	if (!recording)
 	{
 		recording		= new BMessage(P_C_MACRO_TYPE);
 		macroIndexer	= new Indexer(doc);
@@ -162,12 +162,12 @@ void PCommandManager::StartMacro(void)
 		if (choice == 0)
 		{
 			delete macroIndexer;
-			macroIndexer	= new Indexer(doc);		
+			macroIndexer	= new Indexer(doc);
 			delete recording;
 			recording	= new BMessage(P_C_MACRO_TYPE);
 		}
 	}
-	
+
 }
 
 void PCommandManager::StopMacro()
@@ -176,9 +176,9 @@ void PCommandManager::StopMacro()
 	InputRequest	*inputAlert = new InputRequest(_T("Input Macroname"),_T("Name"), _T("Macro"), _T("OK"),_T("Cancel"));
 	char			*input		= NULL;
 	char			*inputstr	= NULL;
-	if  (recording) 
+	if  (recording)
 	{
-		if (inputAlert->Go(&input)<1) 
+		if (inputAlert->Go(&input)<1)
 		{
 			inputstr	= new char[strlen(input)+1];
 			strcpy(inputstr,input);
@@ -242,6 +242,7 @@ status_t PCommandManager::Execute(BMessage *settings)
 					undoStatus	= undoList->CountItems()-1;
 				}
 			}
+			doc->
 			(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 			doc->Unlock();
 		}
@@ -273,12 +274,12 @@ void PCommandManager::Undo(BMessage *undo)
 	int32 			index				= undoList->IndexOf(undo);
 	char			*commandName		= NULL;
 	PCommand		*undoPCommand		= NULL;
-	BMessage		*msg				= NULL;	
+	BMessage		*msg				= NULL;
 	if (doc->Lock())
 	{
 		(doc->GetChangedNodes())->MakeEmpty();
 //		(doc->GetTrash())->MakeEmpty();
-		if (index<0) 
+		if (index<0)
 			index=undoStatus;
 		while (i>=index)
 		{
@@ -311,10 +312,10 @@ void PCommandManager::Redo(BMessage *redo)
 	PCommand		*redoPCommand	= NULL;
 	BMessage		*msg			= NULL;
 	if (doc->Lock())
-	{	
+	{
 		(doc->GetChangedNodes())->MakeEmpty();
 //		(doc->GetTrash())->MakeEmpty();
-		if (index<0)	
+		if (index<0)
 			index=undoStatus+1;
 		while (i<=index)
 		{
@@ -339,7 +340,7 @@ void PCommandManager::Redo(BMessage *redo)
 }
 
 
-PCommand* PCommandManager::PCommandAt(int32 index) 
+PCommand* PCommandManager::PCommandAt(int32 index)
 {
 	map<BString, PCommand*>::iterator iter;
 	iter=commandMap.begin();

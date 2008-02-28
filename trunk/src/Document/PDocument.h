@@ -23,7 +23,7 @@
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
-#endif 
+#endif
 
 
 
@@ -57,14 +57,14 @@ public:
 								PDocument(PDocumentManager *initManager,entry_ref *openEntry);
 
 								PDocument(BMessage *archive);
-							
+
 								~PDocument();
 
 	//+++BHandler+++
 	virtual	status_t			Archive(BMessage* archive, bool deep = true) const;
 	static	BArchivable			*Instantiate(BMessage *from);
 	virtual	void				MessageReceived(BMessage* message);
-	
+
 	/**
 	 * returns the title of the Document.. this is generated from the FileName
 	 */
@@ -72,29 +72,29 @@ public:
 
 	/**
 	 * Bounds returns the Bounds of the Document wicht enclose everey Node in the Document
-	 */	
+	 */
 			BRect				Bounds(void){return bounds;};
 	/**
 	 * Resizes the Document (mostly called from Commands)
-	 */	
+	 */
 			void				Resize(float toX,float toY);
 
 	/**
 	 * Returns if the Document is dirty .. not implemented at the moment
-	 */	
+	 */
 			bool				IsDirty(void){return dirty;};
 	/**
 	 * IsModified returns if there was any change in the document
-	 */	
+	 */
 			bool				IsModified(void){return modified;}
 	/**
-	 * SetModified set the Document to a modified state.. 
+	 * SetModified set the Document to a modified state..
 	 * if the user now try to quit he is asked
-	 */	
-			void				SetModified(void){modified=true;};
+	 */
+			void				SetModified(void);
 	/**
-	 * ResetModified set the Document to a unmodified state.. 
-	 */	
+	 * ResetModified set the Document to a unmodified state..
+	 */
 			void				ResetModified(void){modified=false;};
 
 			BList				*GetChangedNodes(void){return valueChanged;};
@@ -111,7 +111,7 @@ public:
 
 	//* Returns the PrintSettings as a BMessage if there is no PrintSettings a dialog shows up where the printsettings shoud be configured :-)
 			BMessage*			PrintSettings(void);
-	/**Set the PrintSettings 
+	/**Set the PrintSettings
 	 * @warning There is no check if the printersettings are valid!!!!!
 	 */
 			void				SetPrintSettings(BMessage *settings);
@@ -139,7 +139,7 @@ public:
 	 *@see SetEntry
 	 */
 			void				Load(void);
-	
+
 	/**shows a savePanel.. wich pass back an entry and autmatically call SetEntry
 	 *@see SetEntry
 	 */
@@ -151,12 +151,12 @@ public:
 			PCommandManager*	GetCommandManager(void){return commandManager;};
 			PEditorManager*		GetEditorManager(void){return editorManager;};
 
-	
+
 			PDocumentManager	*BelongTo(void){return documentManager;};
 
 
 	//++++++++++++++++++++++PMenuAccess
-	
+
 			BMenu*				GetMenu(const char* signatur);
 			BMenuItem*			GetMenuItem(const char* signatur);
 
@@ -177,7 +177,7 @@ public:
 			status_t			RemoveToolBar(const char* signature);
 			status_t			RemoveToolMenu(const char* toolbarSignature,const char* toolmenuSignature) ;
 			status_t			RemoveToolItem(const char* toolbarSignature,const char* toolitemSignature);
-	
+
 			BRect*				GetPrintRect(void){return printableRect;};
 
 			BMessage*			FindObject(BPoint *where);
@@ -187,37 +187,37 @@ protected:
 			void				Init(BMessage *archive);
 			BMessage			*ReIndex(BList *nodeList);
 
-			
-			
+
+
 			PDocumentManager	*documentManager;
 
 			BList				*allNodes;
 			BList				*allConnections;
 			BList				*selected;
 //			BList				*trashed;
-			
+
 			BList				*valueChanged;
-	
+
 			BRect				bounds;
 			BRect				*paperRect;
 			BRect				*printableRect;
 			BMessage			*printerSetting;
 			BMessage	 	 	*documentSetting;
 			PCSavePanel			*savePanel;
-		
+
 		 	float				width,height;
 			bool				dirty;
 			entry_ref			*entryRef;
-			bool				modified;			
-			
+			bool				modified;
+
 			PEditorManager		*editorManager;
 			PCommandManager		*commandManager;
-			PWindow				*window;			
+			PWindow				*window;
 			BMessage			*testMacro;
-			
+
 			HelpManager			*helpManager;
-			
-			
+
+
 private:
 
 };

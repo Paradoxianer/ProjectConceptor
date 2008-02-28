@@ -12,7 +12,7 @@
 #include "BasePlugin.h"
 #include "Tools/Indexer.h"
 
-PDocument::PDocument(PDocumentManager *initManager):BLooper() 
+PDocument::PDocument(PDocumentManager *initManager):BLooper()
 {
 	TRACE();
 	documentManager=initManager;
@@ -44,8 +44,8 @@ PDocument::~PDocument()
 
 status_t PDocument::Archive(BMessage* archive, bool deep) const
 {
-	BLooper::Archive(archive, deep);
 	TRACE();
+	BLooper::Archive(archive, deep);
 	Indexer		*indexer				= new Indexer((PDocument *)this);
 	int32		i						= 0;
 	BMessage	*commandManage			= new BMessage();
@@ -90,8 +90,8 @@ status_t PDocument::Archive(BMessage* archive, bool deep) const
 
 	}
 	commandManage->AddInt32("undoStatus",commandManager->GetUndoIndex());
-	archive->AddMessage("PDocument::commandManager", commandManage);	
-	
+	archive->AddMessage("PDocument::commandManager", commandManage);
+
 	delete	indexer;
 	delete	commandManage;
 	//delete	tmpNode;
@@ -105,7 +105,7 @@ status_t PDocument::Archive(BMessage* archive, bool deep) const
 BArchivable* PDocument::Instantiate(BMessage* message)
 {
 	TRACE();
-	if (!validate_instantiation(message, "PDocument")) 
+	if (!validate_instantiation(message, "PDocument"))
 		return NULL;
 	else
 		return new PDocument(message);
@@ -114,7 +114,7 @@ BArchivable* PDocument::Instantiate(BMessage* message)
 void PDocument::MessageReceived(BMessage* message)
 {
 	TRACE();
-	switch(message->what) 
+	switch(message->what)
 	{
 		case MENU_FILE_SAVE:
 		{
@@ -200,7 +200,7 @@ void PDocument::MessageReceived(BMessage* message)
 			BLooper::MessageReceived(message);
 			break;
 	}
-	
+
 }
 
 void PDocument::Init()
@@ -229,7 +229,6 @@ void PDocument::Init()
 	BScreen *tmpScreen	= new BScreen();
 	BRect	windowRect	= tmpScreen->Frame();
 	windowRect.InsetBy(50,50);
-//	windowRect.OffsetBy(-25,-25);
 	window			= new PWindow(windowRect,this);
 }
 
@@ -244,7 +243,7 @@ void PDocument::Init(BMessage *archive)
 		printerSetting = NULL;
 	}
 	archive->FindMessage("PDocument::documentSetting",documentSetting);
-	
+
 }
 
 const char* PDocument::Title(void)
@@ -275,6 +274,21 @@ void PDocument::Resize(float toX,float toY)
 	editorManager->BroadCast(new BMessage(P_C_DOC_BOUNDS_CHANGED));
 }
 
+void PDocument::SetModified(void)
+{
+	BMenuItem *saveItem = GetMenuItem(P_MENU_FILE_SAVE);
+	if (saveItem) && (entryRef != NULL)
+		saveItem->SetEnabled(true);
+	modified=true;
+}
+
+void PDocument::ResetModified(void)
+{
+	BMenuItem *saveItem = GetMenuItem(P_MENU_FILE_SAVE);
+	if (saveItem) && (entryRef != NULL)
+		saveItem->SetEnabled(false);
+	modified=false;
+}
 
 void PDocument::SetDocumentSettings(BMessage *settings)
 {
@@ -290,10 +304,10 @@ BMessage* PDocument::PrintSettings(void)
 	TRACE();
 	status_t result = B_OK;
 	BPrintJob printJob("document's name");
-	if (! printerSetting) 
+	if (! printerSetting)
 	{
 		result = printJob.ConfigPage();
-		if ((result == B_OK) && (Lock())) 
+		if ((result == B_OK) && (Lock()))
 		{
 			printerSetting	= printJob.Settings();
 			paperRect 		= new BRect(printJob.PaperRect());
@@ -301,7 +315,7 @@ BMessage* PDocument::PrintSettings(void)
 			SetModified();
 			Unlock();
 		}
-	} 
+	}
 	return printerSetting;
 }
 void PDocument::SetPrintSettings(BMessage *settings)
@@ -323,7 +337,7 @@ void PDocument::Print(void)
 {
 	TRACE();
 	status_t	result	= B_OK;
-	BPrintJob	printJob("doc_name"); 
+	BPrintJob	printJob("doc_name");
 	if (Lock())
 	{
 		if (!printerSetting)
@@ -340,27 +354,27 @@ void PDocument::Print(void)
 		}
 		// Setup the driver with user settings
 		printJob.SetSettings(printerSetting);
-		
+
 		result = printJob.ConfigJob();
 		if (result == B_OK)
 		{
 			// WARNING: here, setup CANNOT be NULL.
-	         if (printerSetting == NULL) 
+	         if (printerSetting == NULL)
 	         {
 	            // something's wrong, handle the error and bail out
 	         }
 //**dont know why this was here :-)      		 delete printerSetting;
 
 			// Get the user Settings
-			printerSetting	= printJob.Settings(); 
+			printerSetting	= printJob.Settings();
 			paperRect 		= new BRect(printJob.PaperRect());
 			printableRect	= new BRect(printJob.PrintableRect());
-  
+
 			// Now you have to calculate the number of pages
 			// (note: page are zero-based)
 			int32 firstPage = printJob.FirstPage();
 			int32 lastPage = printJob.LastPage();
-        
+
 			// Verify the range is correct
 			// 0 ... LONG_MAX -> Print all the document
 			// n ... LONG_MAX -> Print from page n to the end
@@ -391,15 +405,15 @@ void PDocument::Print(void)
 					// Now we can print the page
 					printJob.BeginJob();
 					// Print all pages
-						bool can_continue = printJob.CanContinue(); 
-					for (int i=firstPage-1; can_continue && i<lastPage ; i++) 
+						bool can_continue = printJob.CanContinue();
+					for (int i=firstPage-1; can_continue && i<lastPage ; i++)
 					{
 						float xStart	= (i%xPages)*printableRect->Width();
 						float yStart	= (i/xPages)*printableRect->Height();
 						BRect viewRect(xStart,yStart,xStart+printableRect->Width(),yStart+printableRect->Height());
-//						printJob.DrawView(editorView, viewRect, BPoint(0,0)); 
-						printJob.DrawView(editorView, viewRect, BPoint(printableRect->left,printableRect->top)); 
-						printJob.SpoolPage(); 
+//						printJob.DrawView(editorView, viewRect, BPoint(0,0));
+						printJob.DrawView(editorView, viewRect, BPoint(printableRect->left,printableRect->top));
+						printJob.SpoolPage();
 						/*if (user_has_canceled)
 						{
 		       	        // tell the print_server to cancel the printjob
@@ -407,12 +421,12 @@ void PDocument::Print(void)
 							can_continue = false;
 							break;
    	         		}*/
-						can_continue = printJob.CanContinue(); 
+						can_continue = printJob.CanContinue();
 					}
 					if (can_continue)
 						printJob.CommitJob();
 					else
-						result = B_ERROR; 
+						result = B_ERROR;
 					if (locked) editorView->UnlockLooper();
 				}
 			}
@@ -446,7 +460,7 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 	{
 		new BAlert("",_T("Error setting File"),"Ohh");
 	}
-	
+
 }
 
 void PDocument::Save(void)
@@ -486,7 +500,7 @@ void PDocument::Save(void)
 	else
 	{
 		Archive(archived,true);
-		if (entryRef) 
+		if (entryRef)
 		{
 			BFile *file=	new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
 			err=file->InitCheck();
@@ -495,7 +509,10 @@ void PDocument::Save(void)
 		}
 	}
 	if (err==B_OK)
-			modified=false;
+	{
+			ResetModified();
+			window->SetTitle(Title());
+	}
 	else
 		PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
 
@@ -523,19 +540,19 @@ void PDocument::Load(void)
 			err = loaded->Unflatten(output);
 			printf("%s",strerror(err));
 			loaded->PrintToStream();
-			modified=false;
+			ResetModified()
 		}
 	}
 	else
 	 //**error handling
-	;	
+	;
 	//docloader handles the Format and Stuff also the input translation
 	PDocLoader	*docLoader	= new PDocLoader(this,loaded);
 	delete allNodes;
 	delete allConnections;
 	delete printerSetting;
 	delete selected;
-	
+
 	allNodes 		= docLoader->GetAllNodes();
 	for (i = 0; i<allNodes->CountItems(); i++)
 	{
@@ -585,7 +602,7 @@ bool PDocument::QuitRequested(void)
 	if (modified)
 	{
 		readLock = Lock();
-		BAlert *myAlert = new BAlert("title", "Save changes to ...", _T("Cancel"), _T("Don't save"), _T("Save"), B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT); 
+		BAlert *myAlert = new BAlert("title", "Save changes to ...", _T("Cancel"), _T("Don't save"), _T("Save"), B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
 		myAlert->SetShortcut(0, B_ESCAPE);
 		int32 button_index = myAlert->Go();
 		if (button_index == 0)
@@ -622,7 +639,7 @@ BMessage* PDocument::FindObject(BPoint *where)
 		return node;
 	else
 		return NULL;
-}	
+}
 
 BMenu *PDocument::GetMenu(const char* signatur)
 {
@@ -704,7 +721,7 @@ status_t PDocument::AddToolItem(const char *toolbarSignatur,const char *toolmenu
 	return err;
 }
 
-status_t PDocument::RemoveMenu(const char* menuSignature) 
+status_t PDocument::RemoveMenu(const char* menuSignature)
 {
 	status_t 	err	= B_OK;
 	if(window)
@@ -728,7 +745,7 @@ status_t PDocument::RemoveToolBar(const char* signature)
 	return err;
 }
 
-status_t PDocument::RemoveToolMenu(const char* toolbarSignature,const char* toolmenuSignature) 
+status_t PDocument::RemoveToolMenu(const char* toolbarSignature,const char* toolmenuSignature)
 {
 	status_t 	err	= B_OK;
 	if(window)
@@ -750,7 +767,7 @@ BMessage* PDocument::ReIndex(BList *nodeList)
 	BMessage	*returnMessage	= new BMessage();
 	BMessage	*node			= NULL;
 	BList		*subList		= NULL;
-	for (int32 i=0;i<nodeList->CountItems();i++)	
+	for (int32 i=0;i<nodeList->CountItems();i++)
 	{
 		node =(BMessage *) nodeList->ItemAt(i);
 		node->AddPointer("this",node);
