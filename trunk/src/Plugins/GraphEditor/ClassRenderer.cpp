@@ -36,7 +36,7 @@ void ClassRenderer::Init()
 	attributes					= new vector<Renderer *>();
 	frame						= BRect(0,0,0,0);
 	selected					= false;
-	font						= new BFont();
+	font						= new AFont();
 	penSize						= 1.0;
 	connecting					= 0;
 
@@ -378,7 +378,11 @@ void ClassRenderer::ValueChanged()
 		container->AddMessage("Node::Pattern",editor->GetStandartPattern());
 		pattern = editor->GetStandartPattern();
 	}
-	container->FindMessage("Node::Font",messageFont);
+	if (container->FindMessage("Node::Font",messageFont) == B_OK)
+	{
+		delete font;
+		font	= new AFon(messageFont);
+	}
 	container->FindMessage("Node::Data",data);
 	#ifdef B_ZETA_VERSION_1_0_0
 	pattern->FindRGBColor("FillColor",&fillColor);
