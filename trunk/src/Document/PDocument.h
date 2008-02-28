@@ -95,7 +95,7 @@ public:
 	/**
 	 * ResetModified set the Document to a unmodified state..
 	 */
-			void				ResetModified(void){modified=false;};
+			void				ResetModified(void);
 
 			BList				*GetChangedNodes(void){return valueChanged;};
 

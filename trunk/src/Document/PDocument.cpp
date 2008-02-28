@@ -277,7 +277,7 @@ void PDocument::Resize(float toX,float toY)
 void PDocument::SetModified(void)
 {
 	BMenuItem *saveItem = GetMenuItem(P_MENU_FILE_SAVE);
-	if (saveItem) && (entryRef != NULL)
+	if ((saveItem) && (entryRef != NULL))
 		saveItem->SetEnabled(true);
 	modified=true;
 }
@@ -285,7 +285,7 @@ void PDocument::SetModified(void)
 void PDocument::ResetModified(void)
 {
 	BMenuItem *saveItem = GetMenuItem(P_MENU_FILE_SAVE);
-	if (saveItem) && (entryRef != NULL)
+	if ((saveItem) && (entryRef != NULL))
 		saveItem->SetEnabled(false);
 	modified=false;
 }
@@ -540,7 +540,7 @@ void PDocument::Load(void)
 			err = loaded->Unflatten(output);
 			printf("%s",strerror(err));
 			loaded->PrintToStream();
-			ResetModified()
+			ResetModified();
 		}
 	}
 	else

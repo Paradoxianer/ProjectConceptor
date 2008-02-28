@@ -242,7 +242,7 @@ status_t PCommandManager::Execute(BMessage *settings)
 					undoStatus	= undoList->CountItems()-1;
 				}
 			}
-			doc->
+			doc->SetModified();
 			(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 			doc->Unlock();
 		}
