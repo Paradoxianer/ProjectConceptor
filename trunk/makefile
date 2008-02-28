@@ -50,6 +50,7 @@ SRCS= 		src/About/AboutWindow.cpp \
 		src/ToolBar/ColorToolItem.cpp \
 		src/ToolBar/FloatToolItem.cpp \
 		src/ToolBar/PatternToolItem.cpp \
+		src/Tools/AFont.cpp \
 		src/Tools/PCSavePanel.cpp \
 		src/Tools/PDocLoader.cpp \
 		src/Tools/Indexer.cpp \
