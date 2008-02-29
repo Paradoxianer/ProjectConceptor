@@ -274,7 +274,7 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	BRect		shadowFrame = frame;
 	bool		fitIn		= true;
 	Renderer*	tmpRenderer	= NULL;
-
+	drawOn->SetFont(font);
 	rgb_color	drawColor;
 	shadowFrame.OffsetBy(3,3);
 	drawOn->SetPenSize(penSize);
@@ -331,7 +331,6 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->StrokeTriangle(BPoint(frame.left,yOben),BPoint(frame.left+triangleHeight,yMitte),BPoint(frame.left,yUnten));
 	drawOn->StrokeTriangle(BPoint(frame.right-triangleHeight,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-triangleHeight,yUnten));
 	name->Draw(drawOn,updateRect);
-	drawOn->SetFont(font);
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
 	while( allAttributes != attributes->end() )
 	{

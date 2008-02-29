@@ -22,7 +22,6 @@ public:
 	virtual void		Select(const BTab *tab);
 	virtual void		LanguageChanged(void){};
 protected:
-			BButton		*closeButton;
 			PDocument	*doc;
 };
 #endif

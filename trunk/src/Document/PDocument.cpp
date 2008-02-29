@@ -118,7 +118,7 @@ void PDocument::MessageReceived(BMessage* message)
 	{
 		case MENU_FILE_SAVE:
 		{
-			if (entryRef)
+			if (entryRef == NULL)
 				SavePanel();
 			else
 				Save();

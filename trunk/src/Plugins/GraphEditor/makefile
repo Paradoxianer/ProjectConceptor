@@ -24,15 +24,22 @@ TYPE= SHARED
 #	if two source files with the same name (source.c or source.cpp)
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
-SRCS= 	AttributRenderer.cpp		\
-		BoolRenderer.cpp		\
-		ClassRenderer.cpp		\
-		ConnectionRenderer.cpp	\
-		GraphEditor.cpp			\
-		GraphEditorPlugin.cpp		\
-		GroupRenderer.cpp		\
-		StringRenderer.cpp		\
-		TextEditorControl.cpp
+SRCS= 	AttributRenderer.cpp				\
+		BoolRenderer.cpp				\
+		ClassRenderer.cpp				\
+		ConnectionRenderer.cpp			\
+		GraphEditor.cpp					\
+		GraphEditorPlugin.cpp				\
+		GroupRenderer.cpp				\
+		StringRenderer.cpp				\
+		TextEditorControl.cpp				\
+		MessageView/BoolItem.cpp			\
+		MessageView/FloatItem.cpp			\
+		MessageView/MessageListView.cpp	\
+		MessageView/NodeItem.cpp			\
+		MessageView/PointerItem.cpp		\
+		MessageView/RectItem.cpp			\
+		MessageView/StringItem.cpp
 
 		
 #	specify the resource files to use

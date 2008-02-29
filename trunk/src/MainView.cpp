@@ -15,10 +15,6 @@ MainView::MainView(PDocument *newDoc,
 {
 	TRACE();
 	doc = newDoc;
-	BRect	buttonFrame	= BRect(rect.Width()-20,1,rect.Width()-5,5);
-	closeButton		= new BButton(buttonFrame,"RemoveEditor","x",new BMessage(P_C_REMOVE_EDITOR),B_FOLLOW_RIGHT | B_FOLLOW_TOP);
-	closeButton->ResizeTo(17,17);
-	AddChild(closeButton);
 }
 MainView::~MainView()
 {

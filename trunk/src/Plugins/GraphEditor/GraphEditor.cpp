@@ -37,6 +37,8 @@ void GraphEditor::Init(void)
 	startMouseDown	= NULL;
 	activRenderer	= NULL;
 	mouseReciver	= NULL;
+	showMessage		= NULL;
+
 	rendersensitv	= new BRegion();
 	renderString	= new char[30];
 	key_hold		= false;
@@ -60,16 +62,16 @@ void GraphEditor::Init(void)
 	nodeMessage->AddMessage("Node::Data",dataMessage);
 	//Preparing the standart FontMessage
 	fontMessage		= new BMessage(B_FONT_TYPE);
-	fontMessage->AddInt8("Encoding",be_plain_font->Encoding());
-	fontMessage->AddInt16("Face",be_plain_font->Face());
+	fontMessage->AddInt8("Font::Encoding",be_plain_font->Encoding());
+	fontMessage->AddInt16("Font::Face",be_plain_font->Face());
 	be_plain_font->GetFamilyAndStyle(&family,&style);
-	fontMessage->AddString("Family",(const char*)&family);
-	fontMessage->AddInt32("Flags", be_plain_font->Flags());
-	fontMessage->AddFloat("Rotation",be_plain_font->Rotation());
-	fontMessage->AddFloat("Shear",be_plain_font->Shear());
-	fontMessage->AddFloat("Size",be_plain_font->Size());
-	fontMessage->AddInt8("Spacing",be_plain_font->Spacing());
-	fontMessage->AddString("Style",(const char*)&style);
+	fontMessage->AddString("Font::Family",(const char*)&family);
+	fontMessage->AddInt32("Font::Flags", be_plain_font->Flags());
+	fontMessage->AddFloat("Font::Rotation",be_plain_font->Rotation());
+	fontMessage->AddFloat("Font::Shear",be_plain_font->Shear());
+	fontMessage->AddFloat("Font::Size",be_plain_font->Size());
+	fontMessage->AddInt8("Font::Spacing",be_plain_font->Spacing());
+	fontMessage->AddString("Font::Style",(const char*)&style);
 	rgb_color	fontColor			= {111, 151, 181, 255};
 	fontMessage->AddRGBColor("Color",fontColor);
 
@@ -228,13 +230,17 @@ void GraphEditor::DetachedFromManager(void)
 
 BView* GraphEditor::GetView(void)
 {
-	if (myScrollParent)
-		return myScrollParent;
+	if (viewContainer)
+		return viewContainer;
 	else
 	{
-		
-		myScrollParent = new BScrollView("GEScrolly",this,B_FOLLOW_ALL_SIDES,0,true,true);
-		return myScrollParent;
+		viewContainer	= new BBox(BRect(0,0,550,400),"viewContainer");
+		myScrollParent	= new BScrollView("GEScrolly",this,B_FOLLOW_ALL_SIDES,0,true,true);
+		showMessage		= new MessageListView(doc,BRect(400,0,400+MESSAGE_VIEW_WIDTH,400),NULL);
+
+		viewContainer->AddChild(myScrollParent);
+		viewContainer->AddChild(showMessage);
+		return viewContainer;
 	}
 	return this;
 }
@@ -312,6 +318,7 @@ void GraphEditor::ValueChanged()
 	BList		*changedNodes	= doc->GetChangedNodes();
 	BList		*allNodes		= doc->GetAllNodes();
 	BList		*allConnections	= doc->GetAllConnections();
+	BList		*selected		= doc->GetSelected();
 
 	BMessage	*node			= NULL;
 	Renderer	*painter		= NULL;
@@ -370,7 +377,8 @@ void GraphEditor::ValueChanged()
 			}
 		}
 	}
-
+	if (selected->CountItems() == 1)
+		showMessage->SetContainer((BMessage*)selected->FirstItem());
 	if (BView::LockLooper())
 	{
 		Invalidate();
@@ -585,7 +593,8 @@ void GraphEditor::AttachedToWindow(void)
 	{
 		BRect rect = parent->Bounds();
 		rect.InsetBy(2.5,2.5);
-		myScrollParent->ResizeTo(rect.Width(),rect.Height());
+		myScrollParent->ResizeTo(rect.Width()-MESSAGE_VIEW_WIDTH,rect.Height());
+		showMessage->MoveTo(rect.Width()-MESSAGE_VIEW_WIDTH,0);
 	}
 /*	if (doc!=NULL)
 	{
@@ -597,6 +606,8 @@ void GraphEditor::AttachedToWindow(void)
 		scrollRect.InsetBy(2,2);
 		this->ConstrainClippingRegion(new BRegion(scrollRect));
 	}*/
+	showMessage->SetResizingMode(B_FOLLOW_TOP | B_FOLLOW_BOTTOM | B_FOLLOW_RIGHT);
+	
 }
 
 

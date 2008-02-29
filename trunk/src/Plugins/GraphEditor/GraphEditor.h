@@ -23,6 +23,8 @@
 #include "ColorToolItem.h"
 #include "FloatToolItem.h"
 
+#include "MessageListView.h"
+
 const float			 	max_entfernung			= 50.0;
 const uint32			G_E_RENDERER			= 'geRr';
 const uint32			G_E_CONNECTING			= 'geCG';
@@ -43,6 +45,8 @@ const uint32			G_E_INSERT_NODE 		= 'geIN';
 const uint32            G_E_INSERT_SIBLING      = 'geIS';
 
 extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
+
+const uint32			MESSAGE_VIEW_WIDTH		= 200;
 
 const float		triangleHeight	= 7;
 const float		gridWidth		= 50;
@@ -169,7 +173,9 @@ protected:
 			bool			gridEnabled;
 			image_id 		pluginID;
 			
+			MessageListView	*showMessage;
 			BScrollView		*myScrollParent;
+			BBox			*viewContainer;
 
 private:
 };
