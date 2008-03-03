@@ -618,7 +618,10 @@ bool PDocument::QuitRequested(void)
 		Unlock();
 	}
 	if (returnValue)
+	{
+		window->Lock();	
 		window->Quit();
+	}
 	return returnValue;
 }
 
