@@ -229,7 +229,10 @@ void NodeEditor::ValueChanged()
 void NodeEditor::Draw(BRect updateRect)
 {
 	SetHighColor(230,230,230,255);
+	SetScale(1.0);
+
 	BView::Draw(BRect(updateRect.left/scale,updateRect.top/scale,updateRect.right/scale,updateRect.bottom/scale));
+	SetScale(scale);
 	if (gridEnabled)
 	{
 		int32		xcount		= (Frame().Width()/gridWidth)+1;
@@ -495,7 +498,6 @@ void NodeEditor::MessageReceived(BMessage *message)
 		case G_E_NEW_SCALE:
 		{
 			message->FindFloat("scale",&scale);
-			SetScale(scale);
 			//FrameResized(0,0);
 			UpdateScrollBars();
 			Invalidate();

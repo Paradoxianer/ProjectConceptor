@@ -11,7 +11,7 @@
 #include "BoolItem.h"
 #include "NodeItem.h"
 
-MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forContainer):BOutlineListView(rect,"MessageListView")
+MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forContainer):BOutlineListView(rect,"MessageListView",B_SINGLE_SELECTION_LIST,B_FOLLOW_LEFT | B_FOLLOW_TOP,B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE| B_FULL_UPDATE_ON_RESIZE)
 {
 	doc				= document;
 	container		= forContainer;
