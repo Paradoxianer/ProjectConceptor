@@ -31,6 +31,7 @@ SRCS= 	AttributRenderer.cpp				\
 		GraphEditor.cpp					\
 		GraphEditorPlugin.cpp				\
 		GroupRenderer.cpp				\
+		NodeEditor.cpp					\
 		StringRenderer.cpp				\
 		TextEditorControl.cpp				\
 		MessageView/BoolItem.cpp			\

@@ -16,7 +16,7 @@
 
 
 
-GroupRenderer::GroupRenderer(GraphEditor *parentEditor, BMessage *forContainer):ClassRenderer(parentEditor, forContainer)
+GroupRenderer::GroupRenderer(NodeEditor *parentEditor, BMessage *forContainer):ClassRenderer(parentEditor, forContainer)
 {
 	TRACE();
 	Init();

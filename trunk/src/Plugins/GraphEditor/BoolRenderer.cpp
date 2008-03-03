@@ -14,7 +14,7 @@
 
 //#include <interface/InterfaceDefs.h>*/
 
-BoolRenderer::BoolRenderer(GraphEditor *parentEditor,
+BoolRenderer::BoolRenderer(NodeEditor *parentEditor,
 			bool forValue,
 			BRect valueRect,
 			BMessage *message)

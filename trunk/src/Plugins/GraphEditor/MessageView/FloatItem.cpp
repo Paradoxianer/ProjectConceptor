@@ -15,7 +15,7 @@ FloatItem::FloatItem(char *newLabel,
 {
 	svalue			= new char[24];
 	sprintf(svalue,"%.2f",newValue);
-	BMessage		*inputChanged = new BMessage(ITEM_CHANDED);
+	BMessage		*inputChanged = new BMessage(ITEM_CHANGED);
 	inputChanged->AddPointer("item",this);
 	value			= new BTextControl(BRect(0,0,100,10),"left",NULL,svalue,inputChanged);
 	label			= newLabel;

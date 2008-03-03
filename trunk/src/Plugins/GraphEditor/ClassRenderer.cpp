@@ -14,7 +14,7 @@
 #include "GroupRenderer.h"
 
 
-ClassRenderer::ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer):Renderer(parentEditor, forContainer)
+ClassRenderer::ClassRenderer(NodeEditor *parentEditor, BMessage *forContainer):Renderer(parentEditor, forContainer)
 {
 	TRACE();
 	Init();

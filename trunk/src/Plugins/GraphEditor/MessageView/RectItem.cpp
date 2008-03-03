@@ -26,7 +26,7 @@ RectItem::RectItem(char *newLabel,
 	sprintf(sright,"%.2f",newRect.right);
 	sprintf(sbottom,"%.2f",newRect.bottom);
 
-	BMessage		*inputChanged = new BMessage(ITEM_CHANDED);
+	BMessage		*inputChanged = new BMessage(ITEM_CHANGED);
 	inputChanged->AddPointer("item",this);
 
 	left			= new BTextControl(BRect(0,0,100,10),"left","left",sleft,inputChanged);

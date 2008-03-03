@@ -15,7 +15,7 @@ BoolItem::BoolItem(char *newLabel,
 		bool expanded)
 	:BaseListItem(B_BOOL_TYPE,level,expanded)
 {
-	BMessage		*inputChanged = new BMessage(ITEM_CHANDED);
+	BMessage		*inputChanged = new BMessage(ITEM_CHANGED);
 	inputChanged->AddPointer("item",this);
 	svalue			= new char[24];
 	value			= new BCheckBox(BRect(0,0,100,10),"checker",NULL,inputChanged);

@@ -1,13 +1,13 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-class GraphEditor;
+class NodeEditor;
 
 class Renderer
 {
 
 public:
-						Renderer(GraphEditor *parentEditor, BMessage *forContainer){editor = parentEditor; container = forContainer;};
+						Renderer(NodeEditor *parentEditor, BMessage *forContainer){editor = parentEditor; container = forContainer;};
 
 	virtual	void		ValueChanged(void)										= 0;
 
@@ -30,6 +30,6 @@ public:
 
 protected:
 			BMessage	*container;
-			GraphEditor	*editor;
+			NodeEditor	*editor;
 };
 #endif

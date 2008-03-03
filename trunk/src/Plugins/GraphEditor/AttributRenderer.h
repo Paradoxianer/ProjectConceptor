@@ -13,7 +13,7 @@
 #include <interface/TextControl.h>
 #include <interface/View.h>
 
-#include "GraphEditor.h"
+#include "NodeEditor.h"
 #include "PDocument.h"
 #include "PCommand.h"
 #include "Renderer.h"
@@ -32,7 +32,7 @@ class AttributRenderer: public Renderer
 {
 
 public:
-							AttributRenderer(GraphEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *chgMessage=NULL, BMessage *delMessage=NULL);
+							AttributRenderer(NodeEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *chgMessage=NULL, BMessage *delMessage=NULL);
 			void			ValueChanged(void){};
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetAttribute(BMessage *newAttribut);
@@ -54,7 +54,7 @@ protected:
 		BMessage			*changeMessage;
 		BMessage			*attribut;
 		BMessage			*deleteMessage;
-		GraphEditor 		*editor;
+		NodeEditor 		*editor;
 		BRect				frame;
 		StringRenderer		*name;
 		Renderer			*value;

@@ -8,51 +8,44 @@
 #include <support/DataIO.h>
 
 #include <string.h>
-#include "GraphEditor.h"
+#include "NodeEditor.h"
 #include "PCommandManager.h"
 #include "Renderer.h"
 #include "ClassRenderer.h"
 #include "ConnectionRenderer.h"
 #include "GroupRenderer.h"
 
-#include "ToolBar.h"
 #include "InputRequest.h"
+#include "GraphEditor.h"
 
-const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
-GraphEditor::GraphEditor(image_id newId):PEditor(),BBox(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES)
+NodeEditor::NodeEditor(GraphEditor *_graphEditor,BRect rect):BView(rect,"NodeEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW |B_FULL_UPDATE_ON_RESIZE|B_NAVIGABLE|B_NAVIGABLE_JUMP)
 {
 	TRACE();
-	pluginID	= newId;
+	graphEditor = _graphEditor;
 	Init();
-/*	BView::SetDoubleBuffering(1);
-	SetDrawingMode(B_OP_ALPHA);*/
+	BView::SetDoubleBuffering(1);
+	SetDrawingMode(B_OP_ALPHA);
 }
 
-void GraphEditor::Init(void)
+void NodeEditor::Init(void)
 {
 	TRACE();
-/*	printRect		= NULL;
+	printRect		= NULL;
 	selectRect		= NULL;
 	startMouseDown	= NULL;
 	activRenderer	= NULL;
 	mouseReciver	= NULL;
-	showMessage		= NULL;
+	sentTo			= NULL;
 
-	rendersensitv	= new BRegion();
-	key_hold		= false;
+	renderString	= new char[30];
 	connecting		= false;
 	gridEnabled		= false;
 	fromPoint		= new BPoint(0,0);
 	toPoint			= new BPoint(0,0);
 	renderer		= new BList();
 	scale			= 1.0;
-	myScrollParent	= NULL;*/
-	nodeEditor		= NULL;
-	showMessage		= NULL;
-	renderString	= new char[30];
 	configMessage	= new BMessage();
-	
 
 	font_family		family;
 	font_style		style;
@@ -91,160 +84,15 @@ void GraphEditor::Init(void)
 	rgb_color 	lowColor			= {128, 128, 128, 255};
 	patternMessage->AddRGBColor("LowColor",lowColor);
 	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
+	sprintf(renderString,"NodeEditor::Renderer");
 
-	scaleMenu		= new BMenu(_T("Scale"));
-	BMessage	*newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.1);
-	scaleMenu->AddItem(new BMenuItem("10 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.25);
-	scaleMenu->AddItem(new BMenuItem("25 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.33);
-	scaleMenu->AddItem(new BMenuItem("33 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.5);
-	scaleMenu->AddItem(new BMenuItem("50 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.75);
-	scaleMenu->AddItem(new BMenuItem("75 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",1.00);
-	scaleMenu->AddItem(new BMenuItem("100 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",1.5);
-	scaleMenu->AddItem(new BMenuItem("150 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",2);
-	scaleMenu->AddItem(new BMenuItem("200 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",5);
-	scaleMenu->AddItem(new BMenuItem("500 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",10);
-	scaleMenu->AddItem(new BMenuItem("1000 %",newScale,0,0));
-
-	grid		= new ToolItem("Grid",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
-	penSize		= new FloatToolItem(_T("Pen Size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
-	colorItem	= new ColorToolItem(_T("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
-	patternItem	= new PatternToolItem(_T("Node::Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
-
-	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);
-	//loading ressource_images from the PluginRessource
-	image_info	*info 	= new image_info;
-	BBitmap		*bmp	= NULL;
-	size_t		size;
-	// look up the plugininfos
-	get_image_info(pluginID,info);
-	// init the ressource for the plugin files
-	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
-	// load the addBool icon
-	const void *data=res->LoadResource((type_code)'PNG ',"group",&size);
-	if (data)
-	{
-		//translate the icon because it was png but we ne a bmp
-		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-		if (bmp)
-		{
-			BMessage	*groupMessage = new BMessage(G_E_GROUP);
-			addGroup	= new ToolItem("addGroup",bmp,groupMessage);
-			toolBar->AddItem(addGroup);
-		}
-	}
-	toolBar->AddSeperator();
-	data=res->LoadResource((type_code)'PNG ',"addBool",&size);
-	if (data)
-	{
-		//translate the icon because it was png but we ne a bmp
-		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-		if (bmp)
-		{
-			BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
-			addBoolMessage->AddInt32("type",B_BOOL_TYPE);
-			addBool		= new ToolItem("addBool",bmp,addBoolMessage);
-			toolBar->AddItem(addBool);
-		}
-	}
-
-	data=res->LoadResource((type_code)'PNG ',"addText",&size);
-	if (data)
-	{
-		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-		if (bmp)
-		{
-			BMessage	*addTextMessage = new BMessage(G_E_ADD_ATTRIBUTE);
-			addTextMessage->AddInt32("type",B_STRING_TYPE);
-			addText		= new ToolItem("addText",bmp,addTextMessage);
-			toolBar->AddItem(addText);
-		}
-	}
 }
 
-void GraphEditor::AttachedToManager(void)
+void NodeEditor::InitAll()
 {
 	TRACE();
-
-	//sentTo				= new BMessenger(doc);
-	id					= manager->IndexOf(this);
-	status_t	err		= B_OK;
-	sprintf(renderString,"GraphEditor%ld::Renderer",id);
-	//put this in a seperate function??
-	nodeMessage->AddPointer("ProjectConceptor::doc",doc);
-
-	BMessage	*shortcuts	= new BMessage();
-	BMessage	*tmpMessage	= new BMessage();
-	BMessage	*sendMessage;
-	shortcuts->AddInt32("key",B_DELETE);
-	sendMessage	= new BMessage(P_C_EXECUTE_COMMAND);
-	sendMessage->AddString("Command::Name","Delete");
-	shortcuts->AddInt32("modifiers",0);
-	shortcuts->AddMessage("message",sendMessage);
-	shortcuts->AddPointer("handler",new BMessenger(doc,NULL,&err));
-
-
-	BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
-	addBoolMessage->AddInt32("type",B_BOOL_TYPE);
-	shortcuts->AddInt32("key",'b');
-	shortcuts->AddInt32("modifiers",B_COMMAND_KEY);
-	shortcuts->AddMessage("message",addBoolMessage);
-	shortcuts->AddPointer("handler",new BMessenger(this,NULL,&err));
-
-	BMessage	*insertNode = new BMessage(G_E_INSERT_NODE);
-	shortcuts->AddInt32("key",B_INSERT);
-	shortcuts->AddInt32("modifiers",0);
-	shortcuts->AddMessage("message",insertNode);
-	shortcuts->AddPointer("handler",new BMessenger(this,NULL,&err));
-
-	if (configMessage->FindMessage("Shortcuts",tmpMessage)==B_OK)
-		configMessage->ReplaceMessage("Shortcuts",shortcuts);
-	else
-		configMessage->AddMessage("Shortcuts",shortcuts);
-	InitAll();
-/*	if (doc!=NULL)
-		this->ResizeTo(doc->Bounds().Width(),doc->Bounds().Height());*/
-//	UpdateScrollBars();
-}
-
-void GraphEditor::DetachedFromManager(void)
-{
-	TRACE();
-}
-
-BView* GraphEditor::GetView(void)
-{
-	return this;
-}
-
-
-BList* GraphEditor::GetPCommandList(void)
-{
-	TRACE();
-	//at the Moment we dont support special Commands :-)
-	return NULL;
-}
-void GraphEditor::InitAll()
-{
-/*	TRACE();
+	PDocument	*doc	= graphEditor->BelongTo();
+	//id					= manager->IndexOf(this);
 	BList		*allNodes		= doc->GetAllNodes();
 	BList		*allConnections	= doc->GetAllConnections();
 
@@ -265,15 +113,13 @@ void GraphEditor::InitAll()
 		{
 			InsertRenderObject(node);
 		}
-	}*/
-	if (showMessage)
-		showMessage->SetDoc(doc);
+	}
 }
 
-void GraphEditor::PreprocessBeforSave(BMessage *container)
+void NodeEditor::PreprocessBeforSave(BMessage *container)
 {
 	TRACE();
-	PRINT(("GraphEditor::PreprocessAfterLoad:\n"));
+	PRINT(("NodeEditor::PreprocessAfterLoad:\n"));
 	char	*name;
 	uint32	type;
 	int32	count;
@@ -298,20 +144,20 @@ void GraphEditor::PreprocessBeforSave(BMessage *container)
 	}
 }
 
-void GraphEditor::PreprocessAfterLoad(BMessage *container)
+void NodeEditor::PreprocessAfterLoad(BMessage *container)
 {
 	//**nothing to do jet as i know
 	container=container;
 }
 
-void GraphEditor::ValueChanged()
+void NodeEditor::ValueChanged()
 {
 	TRACE();
-	BList		*selected		= doc->GetSelected();
-
-/*	BList		*changedNodes	= doc->GetChangedNodes();
+	PDocument	*doc			= graphEditor->BelongTo();
+	BList		*changedNodes	= doc->GetChangedNodes();
 	BList		*allNodes		= doc->GetAllNodes();
 	BList		*allConnections	= doc->GetAllConnections();
+	BList		*selected		= doc->GetSelected();
 
 	BMessage	*node			= NULL;
 	Renderer	*painter		= NULL;
@@ -326,42 +172,61 @@ void GraphEditor::ValueChanged()
 			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
 			{
 				painter->ValueChanged();
+				//if we procedded this node than it´s not changed anymore
+//				changedNodes->RemoveItem(i);
+//				i--;
 			}
 			else
 			{
 				RemoveRenderer(FindRenderer(node));
+				//if we procedded this node than it´s not changed anymore
+//				changedNodes->RemoveItem(i);
+//				i--;
 			}
 		}
 		else
 		{
 			//**check if this node is in the node or connection list because if it is not it´s a nodd frome a subgroup or it was deleted
 			if (((allConnections->HasItem(node))||(allNodes->HasItem(node))) && (node->FindPointer("Parent",&pointer) !=B_OK))
+			{
 				InsertRenderObject(node);
+ 				//if we procedded this node than it´s not changed anymore
+//				changedNodes->RemoveItem(i);
+//				i--;
+
+			}
 			else
-				RemoveRenderer(FindRenderer(node));
+			{
+				/*if (node->FindPointer("Parent",&pointer) == B_OK)
+				{
+					//we have to find the father ... wich should be invalidatet :( :) maby there is a nother faster way to do this ..
+					BMessage	*parent		= (BMessage *)pointer;
+					while ( parent->FindPointer("Parent", &pointer)==B_OK)
+					{
+						parent = (BMessage *)pointer;
+					}
+					if ((parent!=NULL)&&(parent->FindPointer(renderString,(void **)&painter) == B_OK))
+					 painter->ValueChanged();
+				}
+				else*/
+					RemoveRenderer(FindRenderer(node));
+				//if we procedded this node than it´s not changed anymore
+//				changedNodes->RemoveItem(i);
+//				i--;
+			}
 		}
 	}
-	if (selected->CountItems() == 1)
-		showMessage->SetContainer((BMessage*)selected->FirstItem());
+	/*if (selected->CountItems() == 1)
+		showMessage->SetContainer((BMessage*)selected->FirstItem());*/
 	if (BView::LockLooper())
 	{
 		Invalidate();
 		BView::UnlockLooper();
-	}*/
-	nodeEditor->ValueChanged();
-	//showMessage->ValueChanged();
-	if (selected->CountItems() == 1)
-		showMessage->SetContainer((BMessage*)selected->FirstItem());
-}
-
-void GraphEditor::SetDirty(BRegion *region)
-{
-	TRACE();
-	BView::Invalidate(region);
+	}
 }
 
 
-/*void GraphEditor::Draw(BRect updateRect)
+void NodeEditor::Draw(BRect updateRect)
 {
 	SetHighColor(230,230,230,255);
 	BView::Draw(BRect(updateRect.left/scale,updateRect.top/scale,updateRect.right/scale,updateRect.bottom/scale));
@@ -401,7 +266,7 @@ void GraphEditor::SetDirty(BRegion *region)
 
 }
 
-void GraphEditor::MouseDown(BPoint where)
+void NodeEditor::MouseDown(BPoint where)
 {
 	BView::MouseDown(where);
 	BView::MakeFocus(true);
@@ -437,7 +302,7 @@ void GraphEditor::MouseDown(BPoint where)
 }
 
 
-void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_message)
+void NodeEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_message)
 {
 	BView::MouseMoved(where,code,a_message);
 	BPoint		scaledWhere;
@@ -483,7 +348,7 @@ void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messa
 	}
 }
 
-void GraphEditor::MouseUp(BPoint where)
+void NodeEditor::MouseUp(BPoint where)
 {
 	BView::MouseUp(where);
 	BPoint		scaledWhere;
@@ -522,121 +387,30 @@ void GraphEditor::MouseUp(BPoint where)
 		mouseReciver->MouseUp(scaledWhere);
 		mouseReciver = NULL;
 	}
-}*/
-
-
-
-void GraphEditor::AttachedToWindow(void)
-{
-	TRACE();
-	BRect		rect(0,0,400,400);
-	if (Parent())
-	{
-		rect = Parent()->Bounds();
-		rect.InsetBy(2,2);
-		MoveTo(rect.left,rect.top);
-		ResizeTo(rect.Width(),rect.Height());
-	}
-	if (nodeEditor == NULL)
-	{
-		rect.right -= MESSAGE_VIEW_WIDTH;
-		rect.InsetBy(5,5);
-		rect.OffsetTo(5,5);
-		rect.bottom = rect.bottom-B_H_SCROLL_BAR_HEIGHT;
-		rect.right -= (B_V_SCROLL_BAR_WIDTH+6);
-		nodeEditor	= new NodeEditor(this,rect);
-		AddChild(new BScrollView("NodeScroller",nodeEditor,B_FOLLOW_ALL_SIDES,0 ,true,true));
-	}
-	if (showMessage == NULL)
-	{
-		rect.left	= (rect.right+B_V_SCROLL_BAR_WIDTH+6);
-		rect.right	= rect.left + MESSAGE_VIEW_WIDTH-B_V_SCROLL_BAR_WIDTH;
-		showMessage	= new MessageListView(doc,rect,NULL);
-		BMessage *invoked 			= new BMessage(G_E_INVOKATION);
-		invoked->AddPointer("ListView",showMessage);
-		showMessage->SetInvocationMessage(invoked);
-		showMessage->SetTarget(this);	
-		AddChild(new BScrollView("MessageScroller",showMessage,B_FOLLOW_TOP | B_FOLLOW_BOTTOM | B_FOLLOW_RIGHT,0 ,true,true));
-	}
-	PWindow 	*pWindow	= (PWindow *)Window();
-	BMenuBar	*menuBar	= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
-	menuBar->AddItem(scaleMenu);
-	scaleMenu->SetTargetForItems(nodeEditor);
-	if (doc)
-	{
-		InitAll();
-		showMessage->ValueChanged();
-		nodeEditor->ValueChanged();
-	}
-	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
-	pWindow->AddToolBar(toolBar);
-	addGroup->SetTarget(nodeEditor);
-	addBool->SetTarget(nodeEditor);
-	addText->SetTarget(nodeEditor);
-	ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddItem(grid);
-	configBar->AddSeperator();
-	configBar->AddItem(penSize);
-	configBar->AddItem(colorItem);
-
-	grid->SetTarget(nodeEditor);
-	penSize->SetTarget(nodeEditor);
-	colorItem->SetTarget(nodeEditor);
-/*	sentToMe	= new BMessenger((BView *)this);
-	BView *parent = myScrollParent->Parent();
-	if (parent)
-	{
-		BRect rect = parent->Bounds();
-		rect.InsetBy(2.5,2.5);
-		myScrollParent->ResizeTo(rect.Width()-MESSAGE_VIEW_WIDTH,rect.Height());
-		showMessage->MoveTo(rect.Width()-MESSAGE_VIEW_WIDTH,0);
-	}
-/*	if (doc!=NULL)
-	{
-		BRect rect = doc->Bounds();
-		this->ResizeTo(rect.Width(),rect.Height());
-		BRect		scrollRect	= myScrollParent->Bounds();
-		scrollRect.right	-= (B_V_SCROLL_BAR_WIDTH +2);
-		scrollRect.bottom	-= (B_H_SCROLL_BAR_HEIGHT+2);
-		scrollRect.InsetBy(2,2);
-		this->ConstrainClippingRegion(new BRegion(scrollRect));
-	}*/
-//	showMessage->SetResizingMode(B_FOLLOW_TOP | B_FOLLOW_BOTTOM | B_FOLLOW_RIGHT);
 }
 
 
 
-void GraphEditor::DetachedFromWindow(void)
+void NodeEditor::AttachedToWindow(void)
+{
+	TRACE();
+	status_t	err;
+	if (sentTo != NULL)
+		delete sentTo;
+	sentTo				= new BMessenger(graphEditor->BelongTo(),NULL,&err);
+	if (err != B_OK)
+		printf("Init BMessagener %s\n",strerror(err));
+	SetViewColor(230,230,230,255);
+}
+
+
+
+void NodeEditor::DetachedFromWindow(void)
 {
 	TRACE();
 	if (Window())
 	{
-		PWindow 	*pWindow		= (PWindow *)Window();
-		BMenuBar	*menuBar		= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
-		if (menuBar)
-			menuBar->RemoveItem(scaleMenu);
-//		pWindow->AddToolBar(toolBar);
-		pWindow->RemoveToolBar(G_E_TOOL_BAR	);
-		ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
-		if (configBar)
-		{
-			configBar->RemoveItem(penSize);
-			configBar->RemoveItem(colorItem);
-			configBar->RemoveItem(patternItem);
-			configBar->RemoveSeperator();
-			configBar->RemoveItem(grid);
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-		}
-/*		Renderer	*nodeRenderer	= NULL;
+		Renderer	*nodeRenderer	= NULL;
 		for (int32 i=0;i<renderer->CountItems();i++)
 		{
 			nodeRenderer = (Renderer *)renderer->ItemAt(i);
@@ -645,11 +419,10 @@ void GraphEditor::DetachedFromWindow(void)
 		{
 			nodeRenderer = (Renderer *)renderer->ItemAt(0);
 			RemoveRenderer(nodeRenderer);
-		}*/
+		}
 	}
 }
-
-void GraphEditor::MessageReceived(BMessage *message)
+void NodeEditor::MessageReceived(BMessage *message)
 {
 	switch(message->what)
 	{
@@ -660,27 +433,10 @@ void GraphEditor::MessageReceived(BMessage *message)
 		}
 		case P_C_DOC_BOUNDS_CHANGED:
 		{
-//			UpdateScrollBars();
-		/*	BRect		docRect		= doc->Bounds();
-			BRegion		clipper;
-			BRect		viewRect;
-			BRect		scrollRect	= myScrollParent->Bounds();
-			GetClippingRegion(&clipper); 
-			viewRect= clipper.Frame();
-			ResizeTo(docRect.right,docRect.bottom);
-			viewRect.right	= viewRect.left + (scrollRect.Width() - B_V_SCROLL_BAR_WIDTH)-5;
-			viewRect.bottom	= viewRect.top + (scrollRect.Height() - B_H_SCROLL_BAR_HEIGHT)-5;
-			clipper.Set(viewRect);
-			ConstrainClippingRegion(&clipper);*/
+			UpdateScrollBars();
 			break;
 		}
-		case G_E_INVOKATION:
-		{
-			TRACE();
-			TRACE();
-			break;
-		}
-/*		case G_E_CONNECTING:
+		case G_E_CONNECTING:
 		{
 				connecting = true;
 				message->FindPoint("Node::to",toPoint);
@@ -725,7 +481,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 				connection->AddPointer("Node::from",from);
 				connection->AddPointer("Node::to",to);
 				connection->AddMessage("Node::Data",data);
-				connection->AddPointer("ProjectConceptor::doc",doc);
+				connection->AddPointer("ProjectConceptor::doc",graphEditor->BelongTo());
 				//** add the connections to the Nodes :-)
 				commandMessage->AddPointer("node",connection);
 				commandMessage->AddString("Command::Name","Insert");
@@ -761,7 +517,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			valueContainer->AddString("name","FillColor");
 			valueContainer->AddString("subgroup","Node::Pattern");
 			valueContainer->AddInt32("type",B_RGB_COLOR_TYPE);
-			valueContainer->AddRGBColor("newValue",colorItem->GetColor());
+			valueContainer->AddRGBColor("newValue",graphEditor->GetColor());
 			changeColorMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changeColorMessage);
 			break;
@@ -775,7 +531,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			valueContainer->AddString("name","PenSize");
 			valueContainer->AddString("subgroup","Node::Pattern");
 			valueContainer->AddInt32("type",B_FLOAT_TYPE);
-			valueContainer->AddFloat("newValue",penSize->GetValue());
+			valueContainer->AddFloat("newValue",graphEditor->GetPenSize());
 			changePenSizeMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changePenSizeMessage);
 			break;
@@ -838,30 +594,29 @@ void GraphEditor::MessageReceived(BMessage *message)
 				sentTo->SendMessage(commandMessage);
 			}
 			break;
-		}*/
+		}
 		default:
-			BBox::MessageReceived(message);
+			BView::MessageReceived(message);
 			break;
 	}
 }
 
-/*void GraphEditor::FrameResized(float width, float height)
+void NodeEditor::FrameResized(float width, float height)
 {
 	TRACE();
-//	UpdateScrollBars();
-	BBox:FrameResized(width,height);
-}*/
+	UpdateScrollBars();
+}
 
 
-/*void GraphEditor::InsertObject(BPoint where,bool deselect)
+void NodeEditor::InsertObject(BPoint where,bool deselect)
 {
 	TRACE();
 	BMessage	*commandMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 	BMessage	*newObject		= new BMessage(*nodeMessage);
 	BMessage	*newFont		= new BMessage(*fontMessage);
 	BMessage	*newPattern		= new BMessage(*patternMessage);
-	newPattern->ReplaceRGBColor("FillColor",colorItem->GetColor());
-	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
+	newPattern->ReplaceRGBColor("FillColor",graphEditor->GetColor());
+	newPattern->ReplaceFloat("PenSize",graphEditor->GetPenSize());
 
 	BMessage	*selectMessage	= new BMessage();
 	if (GridEnabled())
@@ -883,15 +638,15 @@ void GraphEditor::MessageReceived(BMessage *message)
 	sentTo->SendMessage(commandMessage);
 }
 
-void GraphEditor::InsertRenderObject(BMessage *node)
+void NodeEditor::InsertRenderObject(BMessage *node)
 {
 	TRACE();
 	Renderer *newRenderer = NULL;
 	void	*tmpDoc	= NULL;
 	if (node->FindPointer("ProjectConceptor::doc",&tmpDoc)==B_OK)
-		node->ReplacePointer("ProjectConceptor::doc",doc);
+		node->ReplacePointer("ProjectConceptor::doc",graphEditor->BelongTo());
 	else
-		node->AddPointer("ProjectConceptor::doc",doc);
+		node->AddPointer("ProjectConceptor::doc",graphEditor->BelongTo());
 	switch(node->what)
 	{
 		case P_C_CLASS_TYPE:
@@ -906,29 +661,18 @@ void GraphEditor::InsertRenderObject(BMessage *node)
 	}
 	node->AddPointer(renderString,newRenderer);
 	AddRenderer(newRenderer);
-/*	BasePlugin	*theRenderer	= (BasePlugin*)renderPlugins->ItemAt(0);
-
-	BView		*addView		= (BView *)theRenderer->GetNewObject(node);
-	if (addView!=NULL)
-	{
-		AddChild(addView);
-
-	}*/
-//}
+}
 
 
-/*void GraphEditor::AddRenderer(Renderer* newRenderer)
+void NodeEditor::AddRenderer(Renderer* newRenderer)
 {
 	TRACE();
 	renderer->AddItem(newRenderer);
 	BringToFront(newRenderer);
 	activRenderer = newRenderer;
-//	delete rendersensitv;
-//	rendersensitv = new BRegion();
-//	renderer->DoForEach(ProceedRegion,rendersensitv);
 }
 
-void GraphEditor::RemoveRenderer(Renderer *wichRenderer)
+void NodeEditor::RemoveRenderer(Renderer *wichRenderer)
 {
 	TRACE();
 	if (wichRenderer != NULL)
@@ -943,64 +687,60 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer)
 
 		delete wichRenderer;
 	}
-}*/
+}
 
-/*Renderer* GraphEditor::FindRenderer(BPoint where)
+Renderer* NodeEditor::FindRenderer(BPoint where)
 {
 	TRACE();
 	Renderer *currentRenderer = NULL;
 	bool found	=	false;
-		for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	{
+		if (((Renderer*)renderer->ItemAt(i))->Caught(where))
 		{
-			if (((Renderer*)renderer->ItemAt(i))->Caught(where))
-			{
+			found			= true;
+			currentRenderer	= (Renderer*)renderer->ItemAt(i);
+		}
+	}
+	return currentRenderer;
+}
+
+Renderer* NodeEditor::FindNodeRenderer(BPoint where)
+{
+	TRACE();
+	Renderer *currentRenderer = NULL;
+	bool found	=	false;
+	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	{
+		if (((Renderer*)renderer->ItemAt(i))->Caught(where))
+		{
+			currentRenderer	= (Renderer*)renderer->ItemAt(i);
+			if ((currentRenderer->GetMessage()->what == P_C_CLASS_TYPE) || (currentRenderer->GetMessage()->what == P_C_GROUP_TYPE) )
 				found			= true;
-				currentRenderer	= (Renderer*)renderer->ItemAt(i);
-			}
 		}
-//	}
+	}
 	return currentRenderer;
 }
 
-Renderer* GraphEditor::FindNodeRenderer(BPoint where)
+Renderer* NodeEditor::FindConnectionRenderer(BPoint where)
 {
 	TRACE();
 	Renderer *currentRenderer = NULL;
-		bool found	=	false;
-		for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	bool found	=	false;
+	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
+	{
+		if (((Renderer*)renderer->ItemAt(i))->Caught(where))
 		{
-			if (((Renderer*)renderer->ItemAt(i))->Caught(where))
-			{
-				currentRenderer	= (Renderer*)renderer->ItemAt(i);
-				if ((currentRenderer->GetMessage()->what == P_C_CLASS_TYPE) || (currentRenderer->GetMessage()->what == P_C_GROUP_TYPE) )
-					found			= true;
-			}
+			currentRenderer	= (Renderer*)renderer->ItemAt(i);
+			if (currentRenderer->GetMessage()->what == P_C_CONNECTION_TYPE)
+				found			= true;
 		}
-//	}
+	}
 	return currentRenderer;
 }
 
-Renderer* GraphEditor::FindConnectionRenderer(BPoint where)
+Renderer* NodeEditor::FindRenderer(BMessage *container)
 {
-	TRACE();
-	Renderer *currentRenderer = NULL;
-		bool found	=	false;
-		for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0));i--)
-		{
-			if (((Renderer*)renderer->ItemAt(i))->Caught(where))
-			{
-				currentRenderer	= (Renderer*)renderer->ItemAt(i);
-				if (currentRenderer->GetMessage()->what == P_C_CONNECTION_TYPE)
-					found			= true;
-			}
-		}
-//	}
-	return currentRenderer;
-}
-
-Renderer* GraphEditor::FindRenderer(BMessage *container)
-{
-//	int32		i					= 0;
 	Renderer	*currentRenderer	= NULL;
 	if ( (container->FindPointer(renderString,(void **) &currentRenderer) == B_OK) && (currentRenderer) )
 		return currentRenderer;
@@ -1009,7 +749,7 @@ Renderer* GraphEditor::FindRenderer(BMessage *container)
 }
 
 
-void GraphEditor::BringToFront(Renderer *wichRenderer)
+void NodeEditor::BringToFront(Renderer *wichRenderer)
 {
 	//** need complete rewrite... need to make a sortet list... remove all renderer of the renderlist and then add them in the new sorted way.
 	TRACE();
@@ -1030,7 +770,7 @@ void GraphEditor::BringToFront(Renderer *wichRenderer)
 	
 }
 
-void GraphEditor::SendToBack(Renderer *wichRenderer)
+void NodeEditor::SendToBack(Renderer *wichRenderer)
 {
 	BMessage	*parentNode	= NULL;
 	Renderer	*painter	= NULL;
@@ -1045,11 +785,12 @@ void GraphEditor::SendToBack(Renderer *wichRenderer)
 	renderer->RemoveItem(wichRenderer);
 	renderer->AddItem(wichRenderer,i);
 	Invalidate();
-}*/
+}
 
-/*BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat)
+BMessage *NodeEditor::GenerateInsertCommand(uint32 newWhat)
 {
-	BList		*selected			= doc->GetSelected();
+	
+	BList		*selected			= graphEditor->BelongTo()->GetSelected();
 	BMessage	*newNode	    	= new BMessage(*nodeMessage);
 	BMessage	*newFont	    	= new BMessage(*fontMessage);
 	BMessage	*newPattern		    = new BMessage(*patternMessage);
@@ -1066,10 +807,10 @@ void GraphEditor::SendToBack(Renderer *wichRenderer)
 	BPoint      where;
 
     data->AddString("Name","Unbenannt");
-    //insert new Node here
-	newPattern->ReplaceRGBColor("FillColor",colorItem->GetColor());
-	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
-    //** we need a good algorithm to find the best rect for this new node we just put it at 100,100
+    //insert new Node here*/
+	newPattern->ReplaceRGBColor("FillColor",graphEditor->GetColor());
+	newPattern->ReplaceFloat("PenSize",graphEditor->GetPenSize());
+    //** we need a good algorithm to find the best rect for this new node we just put it at 100,100**/
 	where = BPoint(100,100);
 	if (GridEnabled())
 	{
@@ -1099,7 +840,7 @@ void GraphEditor::SendToBack(Renderer *wichRenderer)
             connection->AddPointer("Node::from",from);
             connection->AddPointer("Node::to",to);
             connection->AddMessage("Node::Data",data);
-            connection->AddPointer("ProjectConceptor::doc",doc);
+            connection->AddPointer("ProjectConceptor::doc",graphEditor->BelongTo());
             //** add the connections to the Nodes :-)
             commandMessage->AddPointer("node",connection);
         }
@@ -1127,22 +868,15 @@ void GraphEditor::SendToBack(Renderer *wichRenderer)
 }
 
 
-bool GraphEditor::DrawRenderer(void *arg,void *editor)
+bool NodeEditor::DrawRenderer(void *arg,void *editor)
 {
 	Renderer *painter=(Renderer *)arg;
-	painter->Draw((GraphEditor*)editor,BRect(0,0,0,0));
+	painter->Draw((NodeEditor*)editor,BRect(0,0,0,0));
 	return false;
 }
 
-bool GraphEditor::ProceedRegion(void *arg,void *region)
-{
-	TRACE();
-	Renderer *painter = (Renderer *)arg;
-	((BRegion *)region)->Include(painter->Frame());
-	return false;
-}
 
-void GraphEditor::DeleteFromList(Renderer *whichRenderer)
+void NodeEditor::DeleteFromList(Renderer *whichRenderer)
 {
 	BList		*connectionList	= NULL;
 	int32		i				= 0;
@@ -1173,7 +907,7 @@ void GraphEditor::DeleteFromList(Renderer *whichRenderer)
 			DeleteFromList((Renderer *)groupPainter->RenderList()->ItemAt(i));
 	}
 }
-void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos)
+void NodeEditor::AddToList(Renderer *whichRenderer, int32 pos)
 {
 	BList		*connectionList	= NULL;
 	int32		i				= 0;
@@ -1243,14 +977,15 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos)
 	}
 }
 
-void GraphEditor::UpdateScrollBars()
+void NodeEditor::UpdateScrollBars()
 {
-	if (doc != NULL)
+	if (graphEditor->BelongTo() != NULL)
 	{
-		BRect		docRect		= doc->Bounds();
-		BRect		scrollRect	= myScrollParent->Bounds();
-		if ((myScrollParent) && (doc))
+		BRect		docRect			= graphEditor->BelongTo()->Bounds();
+		BScrollView *myScrollParent	= dynamic_cast<BScrollView*> (Parent());
+		if (myScrollParent)
 		{
+			BRect		scrollRect	= myScrollParent->Bounds();
 			float heightDiff	= docRect.Height()-scrollRect.Height();
 			float widthDiff		= docRect.Width()-scrollRect.Width();
 			float docWidth		= docRect.Width()*scale;
@@ -1259,7 +994,7 @@ void GraphEditor::UpdateScrollBars()
 				widthDiff = 0;
 			if (heightDiff>0)
 					heightDiff = 0;					
-
+			
 			BScrollBar	*sb	= myScrollParent->ScrollBar(B_HORIZONTAL);
 			sb->SetRange(0,widthDiff*scale);
 			sb->SetProportion(scrollRect.Width()/docWidth);
@@ -1274,4 +1009,14 @@ void GraphEditor::UpdateScrollBars()
 		}
 	}
 
-}*/
+}
+
+image_id NodeEditor::PluginID(void)
+{
+	return graphEditor->PluginID();
+};
+PDocument *NodeEditor::BelongTo(void)
+{
+	return graphEditor->BelongTo();
+};
+	

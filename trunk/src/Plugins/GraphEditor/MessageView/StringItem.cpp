@@ -10,7 +10,7 @@ StringItem::StringItem(char *newLabel,
 	: BaseListItem(B_RECT_TYPE, level, expanded)
 {
 
-	BMessage		*inputChanged = new BMessage(ITEM_CHANDED);
+	BMessage		*inputChanged = new BMessage(ITEM_CHANGED);
 	inputChanged->AddPointer("item",this);
 	textControl		= new BTextControl(BRect(0,0,100,10),"StringItem",NULL,newString,inputChanged);
 	label			= newLabel;

@@ -20,7 +20,7 @@ using namespace std;
 #endif
 
 
-#include "GraphEditor.h"
+#include "NodeEditor.h"
 #include "PDocument.h"
 #include "Renderer.h"
 #include "StringRenderer.h"
@@ -41,7 +41,7 @@ class GroupRenderer: public ClassRenderer
 {
 
 public:
-							GroupRenderer(GraphEditor *parentEditor, BMessage *forContainer);
+							GroupRenderer(NodeEditor *parentEditor, BMessage *forContainer);
 /*			void			MouseDown(BPoint where);
 			void			MouseUp(BPoint where);
 			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg);*/

@@ -21,6 +21,8 @@ public:
 	virtual	BMessage*	GetContainer(void){return container;};
 	virtual	void		ValueChanged(void);
 	virtual void		SetContainer(BMessage *message);
+	virtual void		SetDoc(PDocument *document){doc=document;};
+	
 	
 	virtual	void		MessageReceived(BMessage *msg);
 

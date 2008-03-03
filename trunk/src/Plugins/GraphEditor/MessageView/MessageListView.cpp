@@ -101,7 +101,7 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 				}
 				BMessage *tmpMessage = new BMessage(*editMessage);
 				stringItem->SetMessage(tmpMessage);
-				stringItem->SetTarget(doc);
+				status_t err = stringItem->SetTarget(doc);
 				break;
 			}
 			case B_RECT_TYPE:
@@ -200,7 +200,7 @@ void MessageListView::MessageReceived(BMessage *message)
 	BaseListItem	*item;
 	switch(message->what) 
 	{
-		case ITEM_CHANDED:
+		case ITEM_CHANGED:
 		{
 			if ( (message->FindPointer("item",(void **)&item)==B_OK) && (item != NULL) )
 				item->Invoke();
