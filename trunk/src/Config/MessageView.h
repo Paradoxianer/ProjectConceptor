@@ -1,5 +1,5 @@
-#ifndef CONFIG_VIEW_H
-#define CONFIG_VIEW_H
+#ifndef MESSAGE_VIEW_H
+#define MESSAGE_VIEW_H
 
 #include <app/Message.h>
 #include <interface/Box.h>
@@ -8,20 +8,20 @@
 
 
 /**
- * @class ConfigView
- * @brief Generates a ConfigView for a passed BMessage and return a configured BMessage
+ * @class MessageView
+ * @brief Generates a MessageView for a passed BMessage and displays a View to set the properties of this message
  *
  * @author Paradoxon powered by Jesus Christ
  * @todo implemt the hole class
  * @bug dont work :-)
  */
 
-class ConfigView : public BBox
+class MessageView : public BBox
 {
 
 public:
-							ConfigView (BRect rect,const char* newName,BMessage *forMessage,uint32 resizingMode = B_FOLLOW_ALL_SIDES, uint32 flags = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE_JUMP);
-//							~ConfigView();
+							MessageView (BRect rect,const char* newName,BMessage *forMessage,uint32 resizingMode = B_FOLLOW_ALL_SIDES, uint32 flags = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE_JUMP);
+//							~MessageView();
 
 	virtual	void			ChangeLanguage(void);
 	virtual	void			SetConfigMessage(BMessage *configureMessage);
@@ -29,11 +29,11 @@ public:
 	virtual void 			ValueChanged(void);
 
 protected:
-	virtual	void			BuildConfigList(BMessage *confMessage, BListItem *parent);
 
 private:
 			void			Init();
 	BMessage				*configMessage;
+	const char				*name;
 	float					seperator;
 	BOutlineListView		*configList;
 	
