@@ -12,6 +12,8 @@
 #include <interface/View.h>
 #include <support/Archivable.h>
 #include <support/List.h>
+#include "ShortCutFilter.h"
+
 
 class PEditorManager;
 class PDocument;
@@ -125,6 +127,8 @@ public:
 	 
 	virtual	BMessage*		GetConfiguration(void) = 0;
 	virtual void			SetConfiguration(BMessage *message) = 0;
+	
+	virtual	void			SetShortCutFilter(ShortCutFilter *_shortCutFilter) = 0;
 
 			PEditorManager*	Manager(void){return manager;};
 

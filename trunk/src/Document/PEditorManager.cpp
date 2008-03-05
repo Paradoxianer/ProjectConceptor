@@ -123,12 +123,8 @@ status_t PEditorManager::RegisterPEditor(PEditor *editor)
 				{
 					if ((configMessage->FindMessage("Shortcuts",shortcutMessage)==B_OK) && (shortcutMessage))
 					{
-							ShortCutFilter *shortcutFilter	= new ShortCutFilter(shortcutMessage);
-							if ((editor->GetHandler())->LockLooper())
-							{
-								(editor->GetHandler())->AddFilter(shortcutFilter);
-								editor->GetHandler()->UnlockLooper();
-							}
+						ShortCutFilter *shortcutFilter	= new ShortCutFilter(shortcutMessage);
+						editor->SetShortCutFilter(shortcutFilter);
 					}
 				}
 				err=B_OK;

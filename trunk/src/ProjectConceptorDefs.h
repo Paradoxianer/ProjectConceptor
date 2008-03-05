@@ -140,13 +140,13 @@ extern const char		*APP_SIGNATURE;//					= "application/ProjektConceptor";;
  */
 
 
-extern const char*		P_MENU_APP_ABOUT;//				= "About";
-extern const char*		P_MENU_APP_SETTINGS;//			= "Settings";
-extern const char*		P_MENU_APP_HELP;//				= "Help";
+extern const char*		P_MENU_APP_ABOUT;//					= "About";
+extern const char*		P_MENU_APP_SETTINGS;//				= "Settings";
+extern const char*		P_MENU_APP_HELP;//					= "Help";
 
-extern const char*		P_MENU_APP_QUIT;//				= "Quit";
+extern const char*		P_MENU_APP_QUIT;//					= "Quit";
 
-extern const char*		P_M_MENU_BAR;//					= "P_M_MENU_BAR";
+extern const char*		P_M_MENU_BAR;//						= "P_M_MENU_BAR";
 /**string with wich you can find the correspondenting BMenubar wich is used for Status menus and information 
  *@see BMenuBar
  */
@@ -178,7 +178,7 @@ extern const char*		P_MENU_FILE_NEW_TAB;//				= "New Tab";
 /**value to find the BMenu Item "File->Open" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
-extern const char*		P_MENU_FILE_OPEN;//				= "Open";
+extern const char*		P_MENU_FILE_OPEN;//					= "Open";
 /**value to find the BMenu Item "File->Close" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
@@ -186,11 +186,11 @@ extern const char*		P_MENU_FILE_CLOSE;//				= "Close";
 /**value to find the BMenu Item "File->Save" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
-extern const char*		P_MENU_FILE_SAVE;//				= "Save";
+extern const char*		P_MENU_FILE_SAVE;//					= "Save";
 /**value to find the BMenu Item "File->Save As" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
-extern const char*		P_MENU_FILE_SAVE_AS;//			= "Save As";
+extern const char*		P_MENU_FILE_SAVE_AS;//				= "Save As";
 /**value to find the BMenu Item "File->PageSetup" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
@@ -205,17 +205,17 @@ extern const char*		P_MENU_FILE_PRINT;//				= "Print";
 /**value to find the BMenu Item "File->Quit" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
-extern const char*		P_MENU_FILE_QUIT;//				= "Quit";
+extern const char*		P_MENU_FILE_QUIT;//					= "Quit";
 /**value to find the BMenu "Edit" over the PMenuAcces Interface
  *@see PMenuAcces
  */	
 
-extern const char*		P_MENU_EDIT;//					= "Edit";
-extern const char*		P_MENU_EDIT_UNDO;//				= "Undo";
-extern const char*		P_MENU_EDIT_REDO;//				= "Redo";
+extern const char*		P_MENU_EDIT;//						= "Edit";
+extern const char*		P_MENU_EDIT_UNDO;//					= "Undo";
+extern const char*		P_MENU_EDIT_REDO;//					= "Redo";
 
-extern const char*		P_MENU_EDIT_CUT;//				= "Cut";
-extern const char*		P_MENU_EDIT_COPY;//				= "Copy";
+extern const char*		P_MENU_EDIT_CUT;//					= "Cut";
+extern const char*		P_MENU_EDIT_COPY;//					= "Copy";
 extern const char*		P_MENU_EDIT_PASTE;//				= "Paste";
 
 extern const char*		P_MENU_EDIT_CLEAR;//				= "Clear";

@@ -138,6 +138,15 @@ void NavigatorEditor::PreprocessAfterLoad(BMessage *container)
 	container=container;
 }
 
+void NavigatorEditor::SetShortCutFilter(ShortCutFilter *_shortCutFilter)
+{
+	if (LockLooper())
+	{
+		AddFilter(_shortCutFilter);
+		UnlockLooper();
+	}
+}
+
 BList* NavigatorEditor::GetPCommandList(void)
 {
 	TRACE();

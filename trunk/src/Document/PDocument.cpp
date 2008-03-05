@@ -496,6 +496,11 @@ void PDocument::Save(void)
 		BFile			*file	= new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
 		archived->Flatten(input);
 		err=	roster->Translate(input,translatorInfo,NULL,file,outType);
+		if (err == B_OK)
+		{
+			BNodeInfo nodeInfo(file);
+			nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
+		}
 	}
 	else
 	{
@@ -506,6 +511,11 @@ void PDocument::Save(void)
 			err=file->InitCheck();
 			PRINT(("ERROR\tSave file error %s\n",strerror(err)));
 			err = archived->Flatten(file);
+			if (err == B_OK)
+			{
+				BNodeInfo nodeInfo(file);
+				nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
+			}
 		}
 	}
 	if (err==B_OK)

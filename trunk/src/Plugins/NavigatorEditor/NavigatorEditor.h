@@ -49,6 +49,8 @@ public:
 	virtual	void			MakeFocus(bool focus = true);
 	
 	//virtual void			PreprocessBeforSave(BMessage *container);
+	virtual	void			SetShortCutFilter(ShortCutFilter *_shortCutFilter);
+
 
 	//----------------PEditor	
 	
