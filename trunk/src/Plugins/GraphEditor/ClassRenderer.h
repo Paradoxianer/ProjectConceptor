@@ -80,7 +80,8 @@ protected:
 
 		BPoint				*oldPt;
 
-		int					connecting;
+		int32				connecting;
+		bool				showConnecter;
 		bool				resizing;
 
 		PDocument			*doc;
@@ -88,6 +89,11 @@ protected:
 
 		StringRenderer		*name;
 		vector<Renderer*>	*attributes;
+		BRect				leftConnection;
+		BRect				topConnection;
+		BRect				rightConnection;
+		BRect				bottomConnection;
+				
 
 private:
 };

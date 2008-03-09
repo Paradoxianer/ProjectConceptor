@@ -37,7 +37,7 @@ const uint32			G_E_INSERT_NODE 		= 'geIN';
 //*order to Insert and new a Node directly as a sibling to the last selected Node*/
 const uint32            G_E_INSERT_SIBLING      = 'geIS';
 
-const float				triangleHeight			= 7;
+const float				circleSize				= 2;
 const float				gridWidth				= 50;
 
 class Renderer;

@@ -155,47 +155,48 @@ void ConnectionRenderer::CalcLine()
 {
 	BRect	*fromRect	= new BRect(from->Frame());
 	BRect	*toRect		= new BRect(to->Frame());
-	float		toMiddleX 	=	(toRect->right-toRect->left)/2;
-	float		toMiddleY	=	(toRect->bottom-toRect->top)/2;
+	float	toMiddleX 	=	(toRect->right-toRect->left)/2;
+	float	toMiddleY	=	(toRect->bottom-toRect->top)/2;
 	alpha		= atan2((toRect->top-fromRect->top),(toRect->left-fromRect->left));
 	if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) )
 	{
-		first		= BPoint(toRect->right+triangleHeight,toRect->top+toMiddleY-triangleHeight);
-		second		= BPoint(first.x,toRect->top+toMiddleY+triangleHeight);
+		first		= BPoint(toRect->right+circleSize,toRect->top+toMiddleY-circleSize);
+		second		= BPoint(first.x,toRect->top+toMiddleY+circleSize);
 		third		= BPoint(toRect->right,toRect->top+toMiddleY);
 		toPoint		= BPoint(first.x,third.y);
-	//	fromPoint	= BPoint(fromRect->left,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+		fromPoint	= BPoint(fromRect->left,fromRect->top+(fromRect->bottom-fromRect->top)/2);
 	}
 	else if (alpha < -M_PI_4) 
 	{
-		first		= BPoint(toRect->left+toMiddleX-triangleHeight,toRect->bottom+triangleHeight);
-		second		= BPoint(toRect->left+toMiddleX+triangleHeight,toRect->bottom+triangleHeight);
+		first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->bottom+circleSize);
+		second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->bottom+circleSize);
 		third		= BPoint(toRect->left+toMiddleX,toRect->bottom);
 		toPoint		= BPoint(third.x,first.y);
-	//	fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->top);		
+		fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->top);		
 	}
 	else if (alpha> M_PI_4)
 	{
-		first		= BPoint(toRect->left+toMiddleX-triangleHeight,toRect->top-triangleHeight);
-		second		= BPoint(toRect->left+toMiddleX+triangleHeight,toRect->top-triangleHeight);
+		first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->top-circleSize);
+		second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->top-circleSize);
 		third		= BPoint(toRect->left+toMiddleX,toRect->top);
 		toPoint		= BPoint(third.x,first.y);	
-	//	fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->bottom);		
+		fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->bottom);		
 	}
 	else
 	{
-		first		= BPoint(toRect->left-triangleHeight,toRect->top+toMiddleY-triangleHeight);
-		second		= BPoint(toRect->left-triangleHeight,toRect->top+toMiddleY+triangleHeight);
+		first		= BPoint(toRect->left-circleSize,toRect->top+toMiddleY-circleSize);
+		second		= BPoint(toRect->left-circleSize,toRect->top+toMiddleY+circleSize);
 		third		= BPoint(toRect->left,toRect->top+toMiddleY);
 		toPoint		= BPoint(first.x,third.y);
-		//fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+		fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2);
 	}
-	fromPoint	= toPoint;
+//	fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+	/*fromPoint	= toPoint;
 	fromPoint.ConstrainTo(*fromRect);
 	ax			= (toPoint.y-fromPoint.y)/(toPoint.x-fromPoint.x);
 	mx			= fromPoint.y-(fromPoint.x*ax);
 	ay			= (toPoint.x-fromPoint.x)/(toPoint.y-fromPoint.y);
-	my			= fromPoint.x-(fromPoint.y*ay);
+	my			= fromPoint.x-(fromPoint.y*ay);*/
 
 }
 
