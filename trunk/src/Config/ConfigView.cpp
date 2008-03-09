@@ -1,11 +1,13 @@
 #include "ConfigView.h"
 #include "ProjectConceptorDefs.h"
 
-ConfigView::ConfigView(BRect rect,const char *newName,BMessage *forMessage,uint32 resizingMode, uint32 flags):BBox(rect,NULL,resizingMode,flags)
+
+ConfigView::ConfigView(BRect rect,BMessage *forMessage,uint32 resizingMode, uint32 flags):BBox(rect,NULL,resizingMode,flags)
 {
 	TRACE();
 	configMessage=forMessage;
-	name=newName;
+	configList	= NULL;
+	showMessage	= NULL;
 	Init();
 }
 
@@ -30,7 +32,18 @@ void ConfigView::SetConfigMessage(BMessage *configureMessage)
 void ConfigView::ValueChanged(void)
 {
 	TRACE();
-	
+	if (configList == NULL)
+	{
+		configList = new BOutlineListView(BRect(0,0,Bounds().Width()/3,Bounds().Height()),"overview");
+		AddChild(configList);
+	}
+	else
+	{
+		configList->MakeEmpty();
+	}
+	BListItem *general = new BStringItem("General");
+	configList->AddItem(general);
+	BuildConfigList(configMessage,general);
 }
 
 
@@ -40,10 +53,6 @@ void ConfigView::BuildConfigList(BMessage *confMessage, BListItem *parentItem)
 	uint32		type; 
 	int32		count;
 	BListItem	*item;
-	
-	//first find Name
-	if (confMessage->FindString("name",(const char **)&name))
-		configList->AddUnder(item = new BStringItem(name),parentItem);
 	#ifdef B_ZETA_VERSION_1_0_0
 	for (int32 i = 0; confMessage->GetInfo(B_ANY_TYPE, i,(const char **) &name, &type, &count) == B_OK; i++)
 	#else
@@ -54,7 +63,10 @@ void ConfigView::BuildConfigList(BMessage *confMessage, BListItem *parentItem)
 		{
 			BMessage	*tmpMessage		= new BMessage();
 			if (confMessage->FindMessage(name,count-1,tmpMessage)==B_OK)
+			{
+				configList->AddUnder(item = new BStringItem(name),parentItem);
 				BuildConfigList(tmpMessage, item);
+			}
 		}
 	}
 

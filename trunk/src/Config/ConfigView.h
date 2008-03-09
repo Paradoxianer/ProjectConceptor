@@ -6,6 +6,8 @@
 #include <interface/OutlineListView.h>
 #include <interface/Rect.h>
 
+#include "MessageView.h"
+
 
 /**
  * @class ConfigView
@@ -20,7 +22,7 @@ class ConfigView : public BBox
 {
 
 public:
-							ConfigView (BRect rect,const char* newName,BMessage *forMessage,uint32 resizingMode = B_FOLLOW_ALL_SIDES, uint32 flags = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE_JUMP);
+							ConfigView (BRect rect,BMessage *forMessage, uint32 resizingMode = B_FOLLOW_ALL_SIDES, uint32 flags = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE_JUMP);
 //							~ConfigView();
 
 	virtual	void			ChangeLanguage(void);
@@ -36,6 +38,7 @@ private:
 	BMessage				*configMessage;
 	float					seperator;
 	BOutlineListView		*configList;
+	MessageView				*showMessage;
 	
 };
 #endif

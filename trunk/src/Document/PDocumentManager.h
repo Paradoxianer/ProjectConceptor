@@ -3,6 +3,7 @@
 
 #include "PDocument.h"
 #include "PWindow.h"
+#include "ConfigWindow.h"
 
 #include <app/Roster.h>
 #include <support/List.h>
@@ -42,6 +43,7 @@ public:
 	virtual	int32			CountPDocuments(void){return documentList->CountItems();};
 	virtual	PDocument*		PDocumentAt(int32 index){return (PDocument *)documentList->ItemAt(index);};
 	virtual PluginManager*	GetPluginManager(void){return pluginManager;};
+	virtual ConfigWindow*	GetConfigWindow(void);
 	//neeeed QuitRequested!!!!!
 protected:
 			void			Init(void);
@@ -49,6 +51,7 @@ protected:
 
 			BList*			documentList;
 			PluginManager	*pluginManager;
+			ConfigWindow	*configWindow;
 
 private:
 };

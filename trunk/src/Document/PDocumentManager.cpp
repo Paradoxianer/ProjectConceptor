@@ -21,6 +21,7 @@ void PDocumentManager::Init()
 	BPath		path;
 	pluginManager	= new PluginManager();;
 	documentList	= new BList();
+	configWindow	= NULL;
 	be_app->GetAppInfo(&info); 
     BEntry entry(&info.ref); 
     entry.GetPath(&path); 
@@ -122,4 +123,10 @@ PDocument* PDocumentManager::CreateDocument(void)
 	PDocument *doc = new PDocument(this);
 	AddDocument(doc);
 	return doc;
+}
+ConfigWindow *PDocumentManager::GetConfigWindow(void)
+{
+	if (configWindow == NULL)
+		configWindow = new ConfigWindow(NULL);
+	return configWindow;
 }

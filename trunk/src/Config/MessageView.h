@@ -33,9 +33,7 @@ protected:
 private:
 			void			Init();
 	BMessage				*configMessage;
-	const char				*name;
 	float					seperator;
-	BOutlineListView		*configList;
 	
 };
 #endif

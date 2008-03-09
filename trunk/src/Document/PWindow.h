@@ -95,7 +95,6 @@ public:
 	virtual status_t		RemoveToolItem(const char* toolbarSignature,const char* toolitemSignature);
 	//++++++++++++++++++++++PMenuAcces
 
-	virtual void			ShowSettings();
 	virtual	bool			QuitRequested();
 
 

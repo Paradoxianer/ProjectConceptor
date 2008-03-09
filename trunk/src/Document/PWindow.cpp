@@ -190,7 +190,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_SELECT_ALL);
 	menu->AddSeparatorItem();
 
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_PROJECT_SETTINGS),new BMessage(MENU_EDIT_PROJECT_SETTINGS)));
+	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_PROJECT_SETTINGS),new BMessage(MENU_APP_SETTINGS)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_PROJECT_SETTINGS);
@@ -435,9 +435,6 @@ void PWindow::MessageReceived(BMessage *message)
 				ChangeLanguage();
 			break;
     #endif
-		case MENU_APP_SETTINGS:
-				ShowSettings();
-			break;
 		case P_C_INSERT_EDITOR:
 		{
 			BasePlugin	*plugin	= NULL;
@@ -466,6 +463,12 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	mainView->AddTab(editor->GetView(), tab);
 	tab->SetLabel(name);
 	mainView->Select(tab);
+	BMessage *configMessage	= editor->GetConfiguration();
+	if (configMessage)
+	{
+		BMessage *docSettings	= doc->DocumentSettings();
+		docSettings->AddMessage(name,configMessage);
+	}
 	editor->GetView()->MakeFocus(true);
 	(editor->GetView())->ResizeTo(rect.Width()-B_V_SCROLL_BAR_WIDTH -2,rect.Height()-B_H_SCROLL_BAR_HEIGHT-2);
 	(editor->GetView())->MoveTo(2,2);
@@ -851,17 +854,6 @@ void PWindow::ChangeLanguage()
 	}
 	Unlock();
 }
-void PWindow::ShowSettings()
-{
-	TRACE();
-	if (!configWindow)
-	{
-	//	configWindow	= new ConfigWindow();
-	}
-
-
-}
-
 
 void PWindow::SetManager(WindowManager* newManager)
 {

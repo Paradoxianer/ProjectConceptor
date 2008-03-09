@@ -34,12 +34,13 @@ class ConfigWindow : public BWindow
 
 public:
 						ConfigWindow(BMessage *forMessage);
+		void			SetConfigMessage(BMessage *_configMessage);
 virtual	void			Quit(void);
 protected:
 		void			ChangeLanguage(void);
-		void			SetConfigMessage(void);
 
 private:
 		BMessage		*configMessage;
+		ConfigView		*configView;
 };
 #endif

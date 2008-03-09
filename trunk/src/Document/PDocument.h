@@ -107,7 +107,7 @@ public:
 	//* Returns the DocumentSettings in a BMessage
 			BMessage*			DocumentSettings(void){return documentSetting;};
 			void				SetDocumentSettings(BMessage *message);
-
+			void				ShowSettings(void);
 
 	//* Returns the PrintSettings as a BMessage if there is no PrintSettings a dialog shows up where the printsettings shoud be configured :-)
 			BMessage*			PrintSettings(void);

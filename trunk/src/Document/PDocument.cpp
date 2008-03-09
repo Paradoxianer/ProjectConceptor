@@ -54,8 +54,6 @@ status_t PDocument::Archive(BMessage* archive, bool deep) const
 	BMessage	*allConnectionsMessage	= new BMessage();
 	BMessage	*selectedMessage		= new BMessage();
 
-	if (printerSetting)
-		archive->AddMessage("PDocument::printerSetting",printerSetting);
 	archive->AddMessage("PDocument::documentSetting",documentSetting);
 	//save all Nodes
 	for (i=0; i<allNodes->CountItems();i++)
@@ -134,6 +132,9 @@ void PDocument::MessageReceived(BMessage* message)
 			Print();
 			break;
 		}
+		case MENU_APP_SETTINGS:
+				ShowSettings();
+			break;
 		case MENU_MACRO_START_RECORDING:
 		{
 			commandManager->StartMacro();
@@ -237,13 +238,12 @@ void PDocument::Init(BMessage *archive)
 	TRACE();
 	printerSetting	= NULL;
 	documentSetting	= new BMessage();
-	if (archive->FindMessage("PDocument::printerSetting",printerSetting) != B_OK)
+	archive->FindMessage("PDocument::documentSetting",documentSetting);
+	if (documentSetting->FindMessage("Printer Setting",printerSetting) != B_OK)
 	{
 		delete printerSetting;
 		printerSetting = NULL;
 	}
-	archive->FindMessage("PDocument::documentSetting",documentSetting);
-
 }
 
 const char* PDocument::Title(void)
@@ -299,6 +299,15 @@ void PDocument::SetDocumentSettings(BMessage *settings)
 		documentSetting	= settings;
 	}
 }
+
+void PDocument::ShowSettings(void)
+{
+	ConfigWindow *configWin = documentManager->GetConfigWindow();
+	configWin->SetConfigMessage(documentSetting);
+	configWin->Show();
+}
+
+
 BMessage* PDocument::PrintSettings(void)
 {
 	TRACE();
@@ -309,7 +318,7 @@ BMessage* PDocument::PrintSettings(void)
 		result = printJob.ConfigPage();
 		if ((result == B_OK) && (Lock()))
 		{
-			printerSetting	= printJob.Settings();
+			SetPrintSettings (printJob.Settings());
 			paperRect 		= new BRect(printJob.PaperRect());
 			printableRect	= new BRect(printJob.PrintableRect());
 			SetModified();
@@ -325,8 +334,13 @@ void PDocument::SetPrintSettings(BMessage *settings)
 	{
 		if (settings!=NULL)
 		{
-			delete printerSetting;
+			BMessage	*tmpMessage	= new BMessage();
+			if (documentSetting->FindMessage("Printer Setting",tmpMessage) == B_OK)
+				documentSetting->ReplaceMessage("Printer Setting",settings);
+			else
+				documentSetting->AddMessage("Printer Setting",settings);
 			printerSetting	= settings;
+			delete tmpMessage;
 		}
 		Unlock();
 	}
@@ -340,13 +354,13 @@ void PDocument::Print(void)
 	BPrintJob	printJob("doc_name");
 	if (Lock())
 	{
-		if (!printerSetting)
+		if (printerSetting == NULL)
 		{
 			result = printJob.ConfigPage();
 			if (result == B_OK)
 			{
 				// Get the user Settings
-				printerSetting = printJob.Settings();
+				SetPrintSettings(printJob.Settings());
 				// Use the new settings for your internal use
 				paperRect = new BRect(printJob.PaperRect());
 				printableRect = new BRect(printJob.PrintableRect());
@@ -366,7 +380,7 @@ void PDocument::Print(void)
 //**dont know why this was here :-)      		 delete printerSetting;
 
 			// Get the user Settings
-			printerSetting	= printJob.Settings();
+			SetPrintSettings( printJob.Settings());
 			paperRect 		= new BRect(printJob.PaperRect());
 			printableRect	= new BRect(printJob.PrintableRect());
 
@@ -500,6 +514,7 @@ void PDocument::Save(void)
 		{
 			BNodeInfo nodeInfo(file);
 			nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
+			nodeInfo.SetPreferredApp(APP_SIGNATURE);
 		}
 	}
 	else
@@ -515,6 +530,7 @@ void PDocument::Save(void)
 			{
 				BNodeInfo nodeInfo(file);
 				nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
+				nodeInfo.SetPreferredApp(APP_SIGNATURE);
 			}
 		}
 	}
@@ -585,7 +601,7 @@ void PDocument::Load(void)
 	commandManager->SetUndoIndex(docLoader->GetUndoIndex());
 //	commandManager->LoadMacros(docLoader->GetCommandManagerMessage());
 //	commandManager->LoadUndo(docLoader->GetCommandManagerMessage());
-	printerSetting	= docLoader->GetPrinterSetting();
+	SetPrintSettings( docLoader->GetPrinterSetting());
 	editorManager->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 }
 
