@@ -269,8 +269,6 @@ void PDocument::Resize(float toX,float toY)
 	TRACE();
 	bounds.right	= toX;
 	bounds.bottom	= toY;
-	PRINT(("\tDEBUG:\tResize() - new Rect\n"));
-	PRINT_OBJECT(bounds);
 	editorManager->BroadCast(new BMessage(P_C_DOC_BOUNDS_CHANGED));
 }
 

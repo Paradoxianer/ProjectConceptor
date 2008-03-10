@@ -18,6 +18,7 @@
 //main type for Translation
 
 #define	P_C_DOCUMENT_MIMETYPE	"application/x-vnd.projectconceptor-document"
+#define	APP_SIGNATURE			"application/x-vnd.ProjectConceptor"
 
 #define P_C_DOCUMENT_TYPE 'pcDT'
 #define P_C_DOCUMENT_RAW_TYPE 'pcRT'
@@ -134,7 +135,7 @@ const uint32	MENU_MACRO_SAVE					= 'MMsv';
 const uint32	MENU_HELP_ABOUT					= 'MHab';
 
 
-extern const char		*APP_SIGNATURE;//					= "application/ProjektConceptor";;
+//extern const char		*APP_SIGNATURE;//					= "application/ProjektConceptor";;
 /**string with wich you can find the correspondenting BMenubar for entry´s like File, Edit and so on
  *@see BMenuBar
  */

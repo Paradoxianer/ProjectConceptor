@@ -49,8 +49,9 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings)
 	BList			*allConnections		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();
 	int32			i					= 0;
-	settings->FindPointer("Node::parent", (void **)&parentNode);
-	if (parentNode)
+	status_t		err					= B_OK;
+	err = settings->FindPointer("Node::parent", (void **)&parentNode);
+	if ((err==B_OK) && (parentNode != NULL))
 	{
 		if (parentNode->FindPointer("Node::allNodes", (void **)&parentAllNodes) != B_OK)
 			parentNode->AddPointer("Node::allNodes", new BList());
@@ -68,7 +69,7 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings)
 		//recalc size
 		//**check if there is a passed "docRect"
 		BRect	insertFrame		= BRect(0,0,0,0);
-		if (node->FindRect("Node::frame",&insertFrame))
+		if (node->FindRect("Node::frame",&insertFrame)==B_OK)
 		{
 			BRect	docRect			= doc->Bounds();
 			if (insertFrame.bottom >= docRect.Height())

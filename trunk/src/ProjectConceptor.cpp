@@ -13,8 +13,7 @@
 
 #include <string.h>
 
-const char		*APP_SIGNATURE		= "application/ProjectConceptor";
-const int32		P_C_VERSION			= 10;
+const int32		P_C_VERSION			= 11;
 
 
 
@@ -246,7 +245,7 @@ void ProjektConceptor::ArgvReceived(int32 argc, char **argv)
 
 void ProjektConceptor::RegisterMime(void)
 {
-	bool			valid = FALSE;
+	bool			valid = false;
 	BMimeType		mime;
 	BMessage		info;
 	mime.SetType(P_C_DOCUMENT_MIMETYPE);
@@ -274,7 +273,7 @@ void ProjektConceptor::RegisterMime(void)
 			mime.SetIcon(kLargeIcon, B_LARGE_ICON);
 		if (kLargeIcon)
 			mime.SetIcon(kSmallIcon, B_MINI_ICON);
-		mime.SetPreferredApp(APP_SIGNATURE);
+		status_t err = mime.SetPreferredApp(APP_SIGNATURE);
 		BMessage msg;
 		msg.AddInt32("version",P_C_VERSION);
 		mime.SetAttrInfo(&msg);

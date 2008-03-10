@@ -55,6 +55,7 @@ void PWindow::Init(void)
 {
 	TRACE();
 	oldShortcutMessage		= new BMessage();;
+	mainView				= NULL;
 	P_M_MAIN_VIEW_LEFT		= 0.0;
 	P_M_MAIN_VIEW_TOP		= 0.0;
 	P_M_MAIN_VIEW_BOTTOM	= Bounds().Height();
