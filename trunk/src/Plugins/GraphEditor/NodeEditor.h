@@ -99,6 +99,8 @@ public:
 
 	
 			BMessage		*GetStandartPattern(void){return patternMessage;};
+			void			UpdateScrollBars(void);
+
 
 protected:
 			void			Init(void);
@@ -108,7 +110,6 @@ protected:
 			
 			void			DeleteFromList(Renderer *wichRenderer);
 			void			AddToList(Renderer *wichRenderer, int32 pos);
-			void			UpdateScrollBars(void);
 
 
 

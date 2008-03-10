@@ -392,6 +392,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 		}
 		case P_C_DOC_BOUNDS_CHANGED:
 		{
+			nodeEditor->UpdateScrollBars();
 			//** send infos to nodeEditor
 			break;
 		}

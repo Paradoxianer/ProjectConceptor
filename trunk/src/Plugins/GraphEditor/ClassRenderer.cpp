@@ -447,7 +447,22 @@ BRect ClassRenderer::Frame( void )
 
 bool  ClassRenderer::Caught(BPoint where)
 {
-	return frame.Contains(where);
+	 bool contains	= frame.Contains(where);
+	 if (!contains)
+	 {
+	 	contains = leftConnection.Contains(where);
+	 	if (!contains)
+	 	{
+		 	contains = topConnection.Contains(where);
+		 	if (!contains)
+		 	{
+			 	contains = rightConnection.Contains(where);
+				if (!contains)
+	 				contains = bottomConnection.Contains(where);
+		 	}
+	 	}
+	 }
+	 return contains;
 }
 //**implement this
 void  ClassRenderer::SetFrame(BRect newFrame)

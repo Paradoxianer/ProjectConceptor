@@ -776,7 +776,7 @@ void NodeEditor::SendToBack(Renderer *wichRenderer)
 {
 	BMessage	*parentNode	= NULL;
 	Renderer	*painter	= NULL;
-	int32		i			= -1;
+	int32		i			= 0;
 	if (wichRenderer->GetMessage()->FindPointer("Node::parent",(void **) &parentNode)==B_OK)
 	{
 		painter	= FindRenderer(parentNode);
@@ -988,24 +988,24 @@ void NodeEditor::UpdateScrollBars()
 		if (myScrollParent)
 		{
 			BRect		scrollRect	= myScrollParent->Bounds();
-			float heightDiff	= docRect.Height()-scrollRect.Height();
-			float widthDiff		= docRect.Width()-scrollRect.Width();
 			float docWidth		= docRect.Width()*scale;
 			float docHeight		= docRect.Height()*scale;
+			float heightDiff	= docWidth-scrollRect.Height();
+			float widthDiff		= docHeight-scrollRect.Width();
 			if (widthDiff<0)
 				widthDiff = 0;
-			if (heightDiff>0)
-					heightDiff = 0;					
+			if (heightDiff < 0)
+				heightDiff = 0;					
 			
 			BScrollBar	*sb	= myScrollParent->ScrollBar(B_HORIZONTAL);
-			sb->SetRange(0,widthDiff*scale);
+			sb->SetRange(0,widthDiff);
 			sb->SetProportion(scrollRect.Width()/docWidth);
 			// Steps are 1/8 visible window for small steps
 			//   and 1/2 visible window for large steps
 			sb->SetSteps(docWidth / 8.0, docWidth / 2.0);
 	
 			sb	= myScrollParent->ScrollBar(B_VERTICAL);
-			sb->SetRange(0,heightDiff*scale);
+			sb->SetRange(0,heightDiff);
 			sb->SetProportion(scrollRect.Height()/docHeight);
 			sb->SetSteps(docHeight / 8.0, docHeight / 2.0);
 		}
