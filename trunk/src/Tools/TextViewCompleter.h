@@ -41,17 +41,20 @@ public:
 
 			//completition stuff
 			void			AddCompletion(const BString& _string);
+			//Add this List to the Completition List
+			void			AddCompletionList(BList *stringList);
+			//delete the old CompletitionList and add the new one
 			void			SetCompletionList(BList *stringList);
 			BList			CompletionList(void);
 			void			ClearCompletitionList();
-			
+
 			//configure the TextViewCompleter
 			void			SetMatchCase(bool _match){fCaseSensitive = _match;};
-			bool			MatchesCase(){return fCaseSensitive;};		
-			
+			bool			MatchesCase(){return fCaseSensitive;};
+
 			//the filter
 	virtual	filter_result	Filter(BMessage *message, BHandler **target);
-	
+
 protected:
 			void			Init(void);
 			void			ShowChoice(void);
@@ -63,11 +66,11 @@ private:
 
 			BString			fMatch;
 			BWindow			fschowList;
-			BListView		*flistView;			
-			
-			
+			BListView		*flistView;
+
+
 			bool			fCaseSensitive;
-	
+
 
 };
 #endif

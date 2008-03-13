@@ -1,7 +1,7 @@
 #include "TextViewCompleter.h"
 
 
-TextViewCompleter::TextViewCompleter(bool _match_case=true) 
+TextViewCompleter::TextViewCompleter(bool _match_case=true)
 : BMessageFilter(B_PROGRAMMED_DELIVERY,B_ANY_SOURCE,B_KEY_DOWN)
 {
 		Init();
@@ -10,19 +10,27 @@ TextViewCompleter::TextViewCompleter(bool _match_case=true)
 void TextViewCompleter::~TextViewCompleter(void)
 {
 }
-			//delmitier stuff
+
+//delmitier stuff
 void TextViewCompleter::AddDelimiter(const BString& _delimiter)
 {
 	fDelimiters.insert(_delimiter);
 }
 
-void TextViewCompleter::SetDelimiterList(BList *stringList)
+void TextViewCompleter::AddDelimiterList(const BList *stringList)
 {
-	// @todo: need a try catch block 
+	// @todo: need a try catch block
 	for (int32 i=0;i<stringList->CountItems();i++)
 	{
 		fDelimiters.insert((BString *)stringList->ItemAt(i));
 	}
+}
+
+
+void TextViewCompleter::SetDelimiterList(const BList *stringList)
+{
+	fDelimiters.clear();
+	AddDelimiterList(stringList);
 }
 
 BList* TextViewCompleter::DelimiterList(void)
@@ -30,7 +38,7 @@ BList* TextViewCompleter::DelimiterList(void)
 	set<BString>::iterator	iter;
 	BList					*returnList	=new BList();
 	iter = fDelimiters.begin();
-	
+
 	while (iter!=fDelimiters.end())
 	{
 		returnList->AddItem(*iter);
@@ -52,7 +60,7 @@ void TextViewCompleter::AddCompletion(const BString& _string)
 
 void TextViewCompleter::SetCompletionList(BList *stringList)
 {
-		// @todo: need a try catch block 
+		// @todo: need a try catch block
 	for (int32 i=0;i<stringList->CountItems();i++)
 	{
 		fCompletions.insert((BString *)stringList->ItemAt(i));
@@ -76,7 +84,7 @@ void TextViewCompleter::ClearCompletitionList()
 {
 		fCompletions.clear();
 }
-			
+
 
 
 filter_result TextViewCompleter::Filter(BMessage *message, BHandler **target)
@@ -103,7 +111,7 @@ filter_result TextViewCompleter::Filter(BMessage *message, BHandler **target)
 	}
 }
 
-	
+
 void TextViewCompleter::Init(void)
 {
 		fDelimiters		= set<BString>();
@@ -115,6 +123,7 @@ void TextViewCompleter::Init(void)
 
 void TextViewCompleter::ShowChoice()
 {
+	fschowList
 }
 
 void TextViewCompleter::NewChoice()
