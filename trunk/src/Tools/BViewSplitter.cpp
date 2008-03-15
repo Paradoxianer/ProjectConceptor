@@ -23,7 +23,7 @@ void BViewSplitter::AddChild(BView *view){
    }
  if (anz==1){
    view->MoveTo(0,0);
-   //Korrektur weil wir ja bei dem ersten keinen Divider haben...
+   //fixe the size because the Last hase no Divider
    if (direction==B_HORIZONTAL)
      view->ResizeBy(0,10);
    else
@@ -126,13 +126,8 @@ BView *BViewSplitter::GetView(uint32 indx){
     return NULL;
  }
 orientation	BViewSplitter::GetDirection(){
-	
-	printf("B_HORIZONTAL ist %d\n",B_HORIZONTAL);
-	printf("B_VERTICAL ist %d\n",B_VERTICAL);
-	printf("Aktuelle Richtung ist: ist %d\n",direction);
-	
   return direction;
- }
+}
 void BViewSplitter::SetDivPos(uint32 indx,float location){
  if (indx<(anz-1)){
    ((Divider *)ChildAt((indx*2)+1))->SetLocation(location);
@@ -177,5 +172,4 @@ void BViewSplitter::SetDirection(orientation dr){
       }
     }
  }
-
-
+ 

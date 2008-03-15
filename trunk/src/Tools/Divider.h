@@ -9,7 +9,7 @@
 #include <Box.h>
 #include <Cursor.h>
 
-#define B_DIVIDER_WIDTH	10
+#define B_DIVIDER_WIDTH	5
 
 class Divider : public BBox
 {
@@ -50,7 +50,8 @@ private:
 		// This flag will be used in the method MouseMoved() to let know, 
 		// that the direction has changed, therefore the cursor as well
 		bool		fDirectionModified;
-		float		relative,max,min,mx,my;
+		//float		relative,max,min,mx,my;
+		float		max,min,mx,my;
 		BView		*fFirstView;
 		BView		*fSecondView;
 		

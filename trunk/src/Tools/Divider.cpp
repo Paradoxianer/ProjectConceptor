@@ -35,7 +35,7 @@ Divider::Divider(BView *first, BView *second, orientation dir)
 		fHorizontalCursor = new BCursor(sHorizontalCursorData);
 		fDragCursor = fHorizontalCursor;
 
-		ResizeTo(fFirstView->Frame().Width(),10);
+		ResizeTo(fFirstView->Frame().Width(),B_DIVIDER_WIDTH);
 		MoveTo(0,fFirstView->Frame().bottom + 1);
 		fFirstView->SetResizingMode(B_FOLLOW_LEFT_RIGHT);
 		fSecondView->MoveTo(0,Frame().bottom + 1);
@@ -48,7 +48,7 @@ Divider::Divider(BView *first, BView *second, orientation dir)
 		fVerticalCursor = new BCursor(sVerticalCursorData);
 		fDragCursor = fVerticalCursor;
 		
-		ResizeTo(10,fFirstView->Frame().Height());
+		ResizeTo(B_DIVIDER_WIDTH,fFirstView->Frame().Height());
 		MoveTo(fFirstView->Frame().right + 1,0);
 		fFirstView->SetResizingMode(B_FOLLOW_TOP_BOTTOM);
 		fSecondView->MoveTo(Frame().right + 1,0);
@@ -133,11 +133,11 @@ Divider::SetFirstView(BView *first)
 {
 	fFirstView = first;
 	if (fDirection == B_HORIZONTAL) {
-		ResizeTo(fFirstView->Frame().Width(),10);
+		ResizeTo(fFirstView->Frame().Width(),B_DIVIDER_WIDTH);
 		MoveTo(0,fFirstView->Frame().bottom + 1);
 		fFirstView->SetResizingMode(B_FOLLOW_LEFT_RIGHT);
 	} else {
-		ResizeTo(10,fFirstView->Frame().Height());
+		ResizeTo(B_DIVIDER_WIDTH,fFirstView->Frame().Height());
 		MoveTo(fFirstView->Frame().right + 1,0);
 		fFirstView->SetResizingMode(B_FOLLOW_TOP_BOTTOM);
 	}
@@ -283,7 +283,7 @@ Divider::MouseDown(BPoint point)
 
 
 void
-Divider::MouseMoved(BPoint point, uint32 transit, const BMessage *message)
+Divider::MouseMoved(BPoint point, uint32 , const BMessage *)
 {
 	// Just when the direction has changed, set the cursor
 	if ( fDirectionModified ) {

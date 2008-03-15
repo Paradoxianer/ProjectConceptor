@@ -70,12 +70,13 @@ public:
 	virtual	ToolMenu*		GetToolMenu(const char *signature);
 	virtual ToolItem*		GetToolItem(const char *signature);
 	
-	void						SetButtonBorder(bool _buttonBorder){ fButtonBorder = _buttonBorder;};
-	bool						HasButtonBorder(void){return fButtonBorder;};
-	bool 						fButtonBorder;
+			void			SetButtonBorder(bool _buttonBorder){ fButtonBorder = _buttonBorder;};
+			bool			HasButtonBorder(void){return fButtonBorder;};
+	
 	
 	virtual void			GetPreferredSize(float *width, float *height){*width=rightIconBorder;*height=bottomIconBorder;};
 protected:
+			bool 			fButtonBorder;
 			Mover			*vorward_mover;
 			Mover			*backward_mover;
 			BList			*toolitems;

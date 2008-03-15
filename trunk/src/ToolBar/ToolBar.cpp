@@ -26,7 +26,7 @@ ToolBar::ToolBar(BRect rect,  const char *name,menu_layout ori): BControl(rect, 
 	county					= 1;
 	rightIconBorder			= 1;
 	bottomIconBorder		= 0;
-	fButtonBorder 			= NULL;
+	fButtonBorder 			= true;
 	
 	if (ori == B_ITEMS_IN_ROW)
 	{

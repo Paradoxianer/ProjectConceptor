@@ -2,6 +2,8 @@
 #define TEXT_VIEW_COMPLETER_H
 
 #include <app/Message.h>
+#include <interface/ListView.h>
+#include <interface/Window.h>
 #include <storage/Entry.h>
 #include <storage/File.h>
 #include <support/List.h>
@@ -35,17 +37,18 @@ public:
 							~TextViewCompleter(void);
 			//delmitier stuff
 			void			AddDelimiter(const BString& _delimiter);
-			void			SetDelimiterList(BList *stringList);
+			void			AddDelimiterList(const BList *stringList);
+			void			SetDelimiterList(const BList *stringList);
 			BList*			DelimiterList(void);
 			void			ClearDelimiterList();
 
 			//completition stuff
 			void			AddCompletion(const BString& _string);
 			//Add this List to the Completition List
-			void			AddCompletionList(BList *stringList);
+			void			AddCompletionList(const BList *stringList);
 			//delete the old CompletitionList and add the new one
-			void			SetCompletionList(BList *stringList);
-			BList			CompletionList(void);
+			void			SetCompletionList(const BList *stringList);
+			BList*			CompletionList(void);
 			void			ClearCompletitionList();
 
 			//configure the TextViewCompleter
@@ -61,12 +64,13 @@ protected:
 			void			NewChoice(void);
 
 private:
-			set<BString>	fDelimiters;
-			set<BString>	fCompletions;
+			set<BString*>	fDelimiters;
+			set<BString*>	fCompletions;
+			set<BString*>	fMatches;
 
-			BString			fMatch;
-			BWindow			fschowList;
-			BListView		*flistView;
+			BString			fWorkingString;
+			BWindow			*fShowList;
+			BListView		*fListView;
 
 
 			bool			fCaseSensitive;

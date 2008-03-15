@@ -273,7 +273,7 @@ void ProjektConceptor::RegisterMime(void)
 			mime.SetIcon(kLargeIcon, B_LARGE_ICON);
 		if (kLargeIcon)
 			mime.SetIcon(kSmallIcon, B_MINI_ICON);
-		status_t err = mime.SetPreferredApp(APP_SIGNATURE);
+		mime.SetPreferredApp(APP_SIGNATURE);
 		BMessage msg;
 		msg.AddInt32("version",P_C_VERSION);
 		mime.SetAttrInfo(&msg);

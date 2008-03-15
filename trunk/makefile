@@ -51,12 +51,16 @@ SRCS= 	src/About/AboutWindow.cpp \
 		src/ToolBar/FloatToolItem.cpp \
 		src/ToolBar/PatternToolItem.cpp \
 		src/Tools/AFont.cpp \
+		src/Tools/BViewSplitter.cpp \
+		src/Tools/Divider.cpp \
 		src/Tools/PCSavePanel.cpp \
 		src/Tools/PDocLoader.cpp \
 		src/Tools/Indexer.cpp \
 		src/Tools/InputRequestView.cpp \
  		src/Tools/InputRequest.cpp  \
- 		src/Tools/ShortCutFilter.cpp
+ 		src/Tools/ShortCutFilter.cpp \
+		src/Tools/TextViewCompleter.cpp
+
 
 
 #	specify the resource files to use

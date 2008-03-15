@@ -26,6 +26,8 @@
 #include "MessageListView.h"
 #include "NodeEditor.h"
 
+#include "BViewSplitter.h"
+
 /*const float			 	max_entfernung			= 50.0;
 const uint32			G_E_RENDERER			= 'geRr';
 const uint32			G_E_CONNECTING			= 'geCG';
@@ -56,7 +58,7 @@ const float		gridWidth		= 50;*/
 
 class Renderer;
 
-class GraphEditor : public PEditor, public BBox
+class GraphEditor : public PEditor, public BViewSplitter
 {
 
 public:

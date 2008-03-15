@@ -20,7 +20,7 @@
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
-GraphEditor::GraphEditor(image_id newId):PEditor(),BBox(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES)
+GraphEditor::GraphEditor(image_id newId):PEditor(),BViewSplitter(BRect(0,0,400,400),B_VERTICAL,B_FOLLOW_ALL_SIDES,0)
 {
 	TRACE();
 	pluginID	= newId;
@@ -302,18 +302,16 @@ void GraphEditor::AttachedToWindow(void)
 	}
 	if (nodeEditor == NULL)
 	{
-		rect.right -= MESSAGE_VIEW_WIDTH;
-		rect.InsetBy(5,5);
-		rect.OffsetTo(5,5);
+		rect.InsetBy(2,2);
 		rect.bottom = rect.bottom-B_H_SCROLL_BAR_HEIGHT;
-		rect.right -= (B_V_SCROLL_BAR_WIDTH+6);
+		rect.right -= (B_V_SCROLL_BAR_WIDTH);
 		nodeEditor	= new NodeEditor(this,rect);
 		AddChild(new BScrollView("NodeScroller",nodeEditor,B_FOLLOW_ALL_SIDES,0 ,true,true));
 	}
 	if (showMessage == NULL)
 	{
-		rect.left	= (rect.right+B_V_SCROLL_BAR_WIDTH+6);
-		rect.right	= rect.left + MESSAGE_VIEW_WIDTH-B_V_SCROLL_BAR_WIDTH;
+		//rect.right -= (B_V_SCROLL_BAR_WIDTH);
+		rect.right = (rect.Width()/2.1)-B_V_SCROLL_BAR_WIDTH;
 		showMessage	= new MessageListView(doc,rect,NULL);
 		BMessage *invoked 			= new BMessage(G_E_INVOKATION);
 		invoked->AddPointer("ListView",showMessage);
@@ -397,7 +395,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			break;
 		}
 		default:
-			BBox::MessageReceived(message);
+			BViewSplitter::MessageReceived(message);
 			break;
 	}
 }
