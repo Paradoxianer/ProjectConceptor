@@ -136,7 +136,7 @@ void BViewSplitter::SetDivPos(uint32 indx,float location){
 	if (indx>=anz)
 		indx = anz-1;
 	Divider* tmpDivider = dynamic_cast<Divider *> (ChildAt((indx*2)+1));
-	if (tmpDivider)
+	if (tmpDivider != NULL)
    		tmpDivider->SetLocation(location);
 }
 
