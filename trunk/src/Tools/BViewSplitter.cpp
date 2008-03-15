@@ -42,6 +42,7 @@ void BViewSplitter::AddChild(BView *view){
    BView::AddChild(view);
   }
 }
+
 bool BViewSplitter::ForceRemove(int32 i){
   bool ok=false;
   float d;
@@ -118,6 +119,7 @@ bool BViewSplitter::RemoveChild(BView *view){
    }
   return ok;
  }
+ 
 BView *BViewSplitter::GetView(uint32 indx){
   if (indx<anz){
     return ChildAt(indx*2);
@@ -125,33 +127,38 @@ BView *BViewSplitter::GetView(uint32 indx){
   else 
     return NULL;
  }
+
 orientation	BViewSplitter::GetDirection(){
   return direction;
-}
+ }
+ 
 void BViewSplitter::SetDivPos(uint32 indx,float location){
- if (indx<(anz-1)){
-   ((Divider *)ChildAt((indx*2)+1))->SetLocation(location);
-  }
+	if (indx>=anz)
+		indx = anz-1;
+	Divider* tmpDivider = dynamic_cast<Divider *> (ChildAt((indx*2)+1));
+	if (tmpDivider)
+   		tmpDivider->SetLocation(location);
 }
+
 void BViewSplitter::SetDirection(orientation dr){
    uint i;
    BView *tmpView;
    float px,py;
-   //alle Views "umarbeiten" entsprechend ihrer Größe und Position
+   //rework every Views size and Position
    if (direction!=dr){
      direction=dr;
      if (direction==B_HORIZONTAL)
        for (i=0;i<anz;i++){
           tmpView=ChildAt(i*2);
-          //relative x Position bestimmen
+          //calculate relative x Position
           px=tmpView->Frame().left/Bounds().Width();
-          //umrechen in eine entsprechende relative y Position umrechen
+          //recalculate it in a corispondeingne relative y Position
           py=Bounds().Height()*px;
-          //und unser View dahin bewegen
+          //and Move the View there
           tmpView->MoveTo(0,py);
-          //relative Größe ermitteln
+          //calculate the relative Size
           px=tmpView->Frame().Width()/Bounds().Width();
-          // umrechnen und setzen
+          //and set the new size
           py=Bounds().Height()*px;
           tmpView->ResizeTo(Bounds().Width(),py);
         }
