@@ -319,7 +319,7 @@ void GraphEditor::AttachedToWindow(void)
 		invoked->AddPointer("ListView",showMessage);
 		showMessage->SetInvocationMessage(invoked);
 		showMessage->SetTarget(this);	
-		AddChild(new BScrollView("MessageScroller",showMessage,B_FOLLOW_TOP | B_FOLLOW_BOTTOM | B_FOLLOW_RIGHT,0 ,true,true));
+		AddChild(new BScrollView("MessageScroller",showMessage,B_FOLLOW_TOP_BOTTOM | B_FOLLOW_RIGHT,0 ,true,true));
 	}
 	PWindow 	*pWindow	= (PWindow *)Window();
 	BMenuBar	*menuBar	= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
