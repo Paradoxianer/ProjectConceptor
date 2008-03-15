@@ -311,14 +311,17 @@ void GraphEditor::AttachedToWindow(void)
 	if (showMessage == NULL)
 	{
 		//rect.right -= (B_V_SCROLL_BAR_WIDTH);
+		rect.bottom = rect.bottom+B_H_SCROLL_BAR_HEIGHT;
 		rect.right = (rect.Width()/2.1)-B_V_SCROLL_BAR_WIDTH;
 		showMessage	= new MessageListView(doc,rect,NULL);
 		BMessage *invoked 			= new BMessage(G_E_INVOKATION);
 		invoked->AddPointer("ListView",showMessage);
 		showMessage->SetInvocationMessage(invoked);
 		showMessage->SetTarget(this);	
-		AddChild(new BScrollView("MessageScroller",showMessage,B_FOLLOW_TOP_BOTTOM | B_FOLLOW_RIGHT,0 ,true,true));
+		AddChild(new BScrollView("MessageScroller",showMessage,B_FOLLOW_TOP_BOTTOM | B_FOLLOW_RIGHT,0 ,false,true));
+		SetDivPos(0,Parent()->Bounds().Width()*0.7);
 	}
+
 	PWindow 	*pWindow	= (PWindow *)Window();
 	BMenuBar	*menuBar	= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
 	menuBar->AddItem(scaleMenu);
