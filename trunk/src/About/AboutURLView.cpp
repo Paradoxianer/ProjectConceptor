@@ -36,7 +36,7 @@
 
 
 URLView::URLView( BRect frame, const char *name, const char *label,
-				  const char *url, uint32 resizingMode, uint32 flags )
+				  const char *_url, uint32 resizingMode, uint32 flags )
 		: BStringView( frame, name, label, resizingMode, flags ) {
 	
 	// Set the default values for the other definable instance variables.
@@ -55,7 +55,7 @@ URLView::URLView( BRect frame, const char *name, const char *label,
 	
 	// Set the instance variables.
 	this->url = 0;
-	SetURL( url );
+	SetURL( _url );
 	
 	// Create the cursor to use when over the link.
 	this->linkCursor = new BCursor( url_cursor );
@@ -113,7 +113,7 @@ void URLView::AttachedToWindow() {
 
 
 
-void URLView::Draw( BRect updateRect ) {
+void URLView::Draw( BRect ) {
 	BRect rect = Frame();
 	rect.OffsetTo( B_ORIGIN );
 
@@ -222,7 +222,7 @@ void URLView::MouseDown( BPoint point ) {
 
 
 void URLView::MouseMoved( BPoint point, uint32 transit,
-						  const BMessage *message ) {
+						  const BMessage * ) {
 						  
 	// If the link isn't enabled, don't do anything.				  
 	if( !IsEnabled() )
@@ -371,11 +371,11 @@ void URLView::MouseUp( BPoint point ) {
 			point.y = point.y - 6;
 			
 			// Display the popup menu.
-			BMenuItem *selected = popup->Go( ConvertToScreen( point ) , false, true );
+			BMenuItem *selectedMenu = popup->Go( ConvertToScreen( point ) , false, true );
 			
 			// Did the user select an item?
-			if( selected ) {
-				BString label( selected->Label() );
+			if( selectedMenu ) {
+				BString label( selectedMenu->Label() );
 				// Did the user select the first item?  If so, launch the URL.
 				if( label.FindFirst( "Open" ) != B_ERROR  ||
 					label.FindFirst( "Send" ) != B_ERROR  ||
@@ -451,80 +451,80 @@ bool URLView::IsEnabled() {
 
 
 
-void URLView::SetColor( rgb_color color ) {
+void URLView::SetColor( rgb_color _color ) {
 	// Set the normal link color.
-	this->color = color;
+	this->color = _color;
 	if( IsEnabled() ) {
 		Window()->Lock();
-		SetHighColor( color );
+		SetHighColor( _color );
 		Redraw();
 		Window()->Unlock();
 	}
 }
 
 
-void URLView::SetColor( uchar red, uchar green, uchar blue, uchar alpha ) {
+void URLView::SetColor( uchar _red, uchar _green, uchar _blue, uchar _alpha ) {
 	// Set the normal link color.
-	rgb_color color;
-	color.red	= red;
-	color.green	= green;
-	color.blue	= blue;
-	color.alpha	= alpha;
-	SetColor( color );
+	rgb_color _color;
+	color.red	= _red;
+	color.green	= _green;
+	color.blue	= _blue;
+	color.alpha	= _alpha;
+	SetColor( _color );
 }
 
 
-void URLView::SetClickColor( rgb_color color ) {
+void URLView::SetClickColor( rgb_color _color ) {
 	// Set the link color used when the link is clicked.
-	clickColor = color;
+	clickColor = _color;
 }
 
 
-void URLView::SetClickColor( uchar red, uchar green, uchar blue, uchar alpha ) {
+void URLView::SetClickColor( uchar _red, uchar _green, uchar _blue, uchar _alpha ) {
 	// Set the link color used when the link is clicked.
-	rgb_color color;
-	color.red	= red;
-	color.green	= green;
-	color.blue	= blue;
-	color.alpha	= alpha;
-	SetClickColor( color );
+	rgb_color _color;
+	color.red	= _red;
+	color.green	= _green;
+	color.blue	= _blue;
+	color.alpha	= _alpha;
+	SetClickColor( _color );
 }
 
 
-void URLView::SetDisabledColor( rgb_color color ) {
+void URLView::SetDisabledColor( rgb_color _color ) {
 	// Set the color to draw in when the link is disabled.
-	disabledColor = color;
+	disabledColor = _color;
 	Window()->Lock();
 	Redraw();
 	Window()->Unlock();
 }
 
 
-void URLView::SetDisabledColor( uchar red, uchar green, uchar blue, uchar alpha ) {
+void URLView::SetDisabledColor( uchar _red, uchar _green, uchar _blue, uchar _alpha ) {
 	// Set the color to draw in when the link is disabled.
-	rgb_color color;
-	color.red	= red;
-	color.green	= green;
-	color.blue	= blue;
-	color.alpha	= alpha;
-	SetDisabledColor( color );
+	rgb_color _color;
+	color.red	= _red;
+	color.green	= _green;
+	color.blue	= _blue;
+	color.alpha	= _alpha;
+	SetDisabledColor( _color );
 }
 
 
-void URLView::SetDraggable( bool draggable ) {
+void URLView::SetDraggable( bool _draggable ) {
 	// Set whether or not this link is draggable.
-	this->draggable = draggable;
+	this->draggable = _draggable;
 }
 
 
-void URLView::SetEnabled( bool enabled ) {
+void URLView::SetEnabled( bool _enabled ) {
 	// Set whether or not the link is enabled (and therefore clickable).
-	bool redraw = this->enabled != enabled;
+	bool redraw = this->enabled != _enabled;
 	this->enabled = enabled;
 	
 	if( Window() ) {
 		Window()->Lock();
-		if( !enabled )
+		if( !_enabled )
 			SetHighColor( disabledColor );
 		else
 			SetHighColor( color );
@@ -535,20 +535,20 @@ void URLView::SetEnabled( bool enabled ) {
 }
 
 
-void URLView::SetHoverColor( rgb_color color ) {
+void URLView::SetHoverColor( rgb_color _color ) {
 	// Set the link color used when the mouse cursor is over it.
-	hoverColor = color;
+	hoverColor = _color;
 }
 
 
-void URLView::SetHoverColor( uchar red, uchar green, uchar blue, uchar alpha ) {
+void URLView::SetHoverColor( uchar _red, uchar _green, uchar _blue, uchar _alpha ) {
 	// Set the color to draw in when the link is disabled.
-	rgb_color color;
-	color.red	= red;
-	color.green	= green;
-	color.blue	= blue;
-	color.alpha	= alpha;
-	SetHoverColor( color );
+	rgb_color _color;
+	color.red	= _red;
+	color.green	= _green;
+	color.blue	= _blue;
+	color.alpha	= _alpha;
+	SetHoverColor( _color );
 }
 
 
@@ -558,9 +558,9 @@ void URLView::SetHoverEnabled( bool hover ) {
 }
 
 
-void URLView::SetIconSize( icon_size iconSize ) {
+void URLView::SetIconSize( icon_size _iconSize ) {
 	// Set the size of the icon that will be shown when the link is dragged.
-	if( iconSize == B_MINI_ICON ) this->iconSize = 16;
+	if( _iconSize == B_MINI_ICON ) this->iconSize = 16;
 	else this->iconSize = 32;
 }
 
@@ -571,10 +571,10 @@ void URLView::SetUnderlineThickness( int thickness ) {
 }
 
 
-void URLView::SetURL( const char *url ) {
+void URLView::SetURL( const char *_url ) {
 	// Set the URL value.
 	delete this->url;
-	this->url = new BString( url );
+	this->url = new BString( _url );
 	
 	// If it's an e-mail link, we want to insert "mailto:" to the front
 	// if the user did not enter it.
@@ -732,9 +732,9 @@ void URLView::DoBookmarkDrag() {
 	dragMessage->AddString( "be:url", url->String() );
 	
 	// This allows the user to drag the URL into a standard BTextView.
-	BString link = GetImportantURL();
-	dragMessage->AddData( "text/plain", B_MIME_DATA, link.String(),
-						  link.Length() + 1 );
+	BString tmpLink = GetImportantURL();
+	dragMessage->AddData( "text/plain", B_MIME_DATA, tmpLink .String(),
+						  tmpLink .Length() + 1 );
 			
 	// Query for the system's icon for bookmarks.
 	BBitmap *bookmarkIcon = new BBitmap( BRect( 0, 0, iconSize - 1,
@@ -1050,8 +1050,8 @@ void URLView::LaunchURL() {
 	// Is the URL a mail link or HTTP?
 	if( IsEmailLink() ) {
 		// Lock the string buffer and pass it to the mail program.
-		char *link =  url->LockBuffer(url->Length()+1);
-		status_t result = be_roster->Launch( "text/x-email", 1, &link );
+		char *tmpLink =  url->LockBuffer(url->Length()+1);
+		status_t result = be_roster->Launch( "text/x-email", 1, &tmpLink );
 		url->UnlockBuffer();
 		// Make sure the user has an e-mail program.
 		if( result != B_NO_ERROR  &&  result != B_ALREADY_RUNNING ) {
@@ -1065,8 +1065,8 @@ void URLView::LaunchURL() {
 	// Handle an HTTP link.
 	else if( IsHTMLLink() ) {
 		// Lock the string buffer and pass it to the web browser.
-		char *link =  url->LockBuffer(url->Length()+1);
-		status_t result = be_roster->Launch( "text/html", 1, &link );
+		char *tmpLink =  url->LockBuffer(url->Length()+1);
+		status_t result = be_roster->Launch( "text/html", 1, &tmpLink );
 		url->UnlockBuffer();
 		// Make sure the user has a web browser.
 		if( result != B_NO_ERROR  &&  result != B_ALREADY_RUNNING ) {
@@ -1080,9 +1080,9 @@ void URLView::LaunchURL() {
 	// Handle an FTP link.
 	else if( IsFTPLink() ) {
 		// Lock the string buffer and pass it to the FTP client.
-		char *link =  url->LockBuffer(url->Length()+1);
+		char *tmpLink =  url->LockBuffer(url->Length()+1);
 		status_t result = be_roster->Launch( "application/x-vnd.Be.URL.ftp",
-											 1, &link );
+											 1, &tmpLink );
 		url->UnlockBuffer();
 		// Make sure the user has an FTP client.
 		if( result != B_NO_ERROR  &&  result != B_ALREADY_RUNNING ) {
