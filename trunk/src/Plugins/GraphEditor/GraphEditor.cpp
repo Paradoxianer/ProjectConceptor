@@ -25,7 +25,9 @@ GraphEditor::GraphEditor(image_id newId):PEditor(),BViewSplitter(BRect(0,0,400,4
 	TRACE();
 	pluginID	= newId;
 	Init();
-/*	BView::SetDoubleBuffering(1);
+
+	/*
+	BView::SetDoubleBuffering(1);
 	SetDrawingMode(B_OP_ALPHA);*/
 }
 
@@ -260,7 +262,7 @@ void GraphEditor::PreprocessBeforSave(BMessage *container)
 void GraphEditor::PreprocessAfterLoad(BMessage *container)
 {
 	//**nothing to do jet as i know
-	container=container;
+	//container=container; outcomment from stargater
 }
 
 void GraphEditor::SetShortCutFilter(ShortCutFilter *_shortCutFilter)
@@ -305,7 +307,7 @@ void GraphEditor::AttachedToWindow(void)
 		rect.InsetBy(2,2);
 		rect.bottom = rect.bottom-B_H_SCROLL_BAR_HEIGHT;
 		rect.right -= (B_V_SCROLL_BAR_WIDTH);
-		nodeEditor	= new NodeEditor(this,rect);
+		nodeEditor	= new NodeEditor(this,rect); 
 		AddChild(new BScrollView("NodeScroller",nodeEditor,B_FOLLOW_ALL_SIDES,0 ,true,true));
 	}
 	if (showMessage == NULL)

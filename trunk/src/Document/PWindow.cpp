@@ -16,7 +16,8 @@
 #include "MainView.h"
 #include "ToolItem.h"
 #include "ToolMenu.h"
-#include "MainView.h"
+
+
 
 #include <translation/TranslationUtils.h>
 #include <translation/TranslatorFormats.h>
@@ -28,6 +29,7 @@
 
 PWindow::PWindow(BRect rect,PDocument *document):BWindow(rect,"ProjectConceptor",B_TITLED_WINDOW,0)
 {
+	
 	TRACE();
 	doc	= document;
 	Init();
@@ -462,8 +464,9 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	rect.bottom -= mainView->TabHeight();
 //	mainView->AddTab(new BScrollView("editorScroller",editor->GetView(),B_FOLLOW_ALL_SIDES,0,true,true), tab);
 	mainView->AddTab(editor->GetView(), tab);
-	tab->SetLabel(name);
 	mainView->Select(tab);
+	tab->SetLabel(name);
+	
 	BMessage *configMessage	= editor->GetConfiguration();
 	if (configMessage)
 	{

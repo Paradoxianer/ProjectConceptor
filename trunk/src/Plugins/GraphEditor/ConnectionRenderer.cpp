@@ -9,6 +9,7 @@ ConnectionRenderer::ConnectionRenderer(NodeEditor *parentEditor, BMessage *forCo
 	TRACE();
 	Init();
 }
+
 void ConnectionRenderer::Init()
 {	
 	TRACE();
@@ -97,7 +98,8 @@ void ConnectionRenderer::LanguageChanged()
 
 void ConnectionRenderer::Draw(BView *drawOn, BRect updateRect)
 {	
-	//ValueChanged();
+
+	//ValueChanged(); 
 	CalcLine();
 	drawOn->SetPenSize(2.0);
 	BPoint	shadowFrom = fromPoint;
@@ -118,8 +120,9 @@ void ConnectionRenderer::Draw(BView *drawOn, BRect updateRect)
 		drawOn->SetHighColor(fillColor);
 	else
 		drawOn->SetHighColor(tint_color(fillColor,1.5));
-	drawOn->StrokeLine(	fromPoint,toPoint);
-	drawOn->FillTriangle(first,second,third);
+		drawOn->StrokeLine(	fromPoint,toPoint);
+		drawOn->FillTriangle(first,second,third);
+	
 }
 void ConnectionRenderer::MessageReceived(BMessage *message)
 {
