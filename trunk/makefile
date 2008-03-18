@@ -190,7 +190,7 @@ default .DEFAULT:
 	@echo "#define SVN_INFO_H" >> src/About/AboutSvnInfo.h 
 	@echo "" >> src/About/AboutSvnInfo.h  
 	@echo "//do not edit this" >> src/About/AboutSvnInfo.h 
-	@echo "#define SVN_REV_STR \"`svn info | grep Revision | awk '{print $$2}'`\"" >> src/About/AboutSvnInfo.h 
+	@echo "#define SVN_REV_STR \"`svn info svn://svn.berlios.de/projectconcepto/trunk | grep Revision | awk '{print $$2}'`\"" >> src/About/AboutSvnInfo.h 
 	@echo "" >> src/About/AboutSvnInfo.h 
 	@echo "#endif" >> src/About/AboutSvnInfo.h 
 	@echo "UPDATED"
