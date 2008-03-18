@@ -1,4 +1,5 @@
 #include "AFont.h"
+#include <string.h>
 
 AFont::AFont(): BFont(), BArchivable()
 {
@@ -29,7 +30,11 @@ AFont::AFont(BMessage *archive): BFont(), BArchivable()
 	if ((archive->FindString("Font::Family",(const char **)&family) == B_OK) &&
 		(archive->FindString("Font::Style",(const char **)&style) == B_OK))
 	{
-		SetFamilyAndStyle((const font_family)family,(const font_style)style);
+		font_family fontFamily;
+		strcpy(fontFamily , family);
+		font_style fontStyle;
+		strcpy(fontStyle, style);
+		SetFamilyAndStyle(fontFamily,fontStyle);
 	}
 
 }
