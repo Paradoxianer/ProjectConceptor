@@ -1,7 +1,7 @@
 #include "TextViewCompleter.h"
 
 
-TextViewCompleter::TextViewCompleter(bool _match_case=true)
+TextViewCompleter::TextViewCompleter(bool _match_case)
 : BMessageFilter(B_PROGRAMMED_DELIVERY,B_ANY_SOURCE,B_KEY_DOWN)
 {
 	fCaseSensitive = _match_case;
