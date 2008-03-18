@@ -118,4 +118,7 @@ INSTALL_DIR    = /boot/apps/Development/ProjectConceptor/Plugins/
 #	@echo "Done copying."
 
 ## include the makefile-engine
-include /boot/develop/etc/makefile-engine
+ifndef BUILDHOME
+BUILDHOME = /boot/develop
+endif
+include $(BUILDHOME)/etc/makefile-engine
