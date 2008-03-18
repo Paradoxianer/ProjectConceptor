@@ -98,7 +98,7 @@ LINKER_FLAGS =
 
 INSTALL_DIR    = /boot/apps/Development/ProjectConceptor/Plugins/
 
-install::
+install:: $(NAME)
 	@echo "Copying locale files"
 	@echo $(INSTALL_DIR)
 	@mkdir -p $(INSTALL_DIR)

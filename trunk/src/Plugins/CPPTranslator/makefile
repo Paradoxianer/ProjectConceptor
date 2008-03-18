@@ -96,7 +96,7 @@ COMPILER_FLAGS =
 LINKER_FLAGS =
 INSTALL_DIR    = /boot/home/config/add-ons/Translators
 
-install::
+install:: $(NAME)
 	@echo "Copying locale files"
 	@echo $(INSTALL_DIR)
 	@mkdir -p $(INSTALL_DIR)
