@@ -198,7 +198,7 @@ default .DEFAULT:
 	@echo "--------------------------------"
 	mkdir -p ../../bin
 	mv $(NAME) ../../bin
-	ln -sf ../../bin/$(NAME) ../../bin/ProjectConceptor.a
+	ln -sf $(NAME) ../../bin/ProjectConceptor.a
 	#-@for f in $(LEAFDIRS); do \
 	#	$(MAKE) -C $$f $@; \
 	#done
