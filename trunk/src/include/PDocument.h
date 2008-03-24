@@ -1,12 +1,7 @@
 #ifndef P_DOCUMENT_H
 #define P_DOCUMENT_H
 
-
-#include "PEditorManager.h"
-#include "PCommandManager.h"
-#include "HelpManager.h"
-#include "PCSavePanel.h"
-#include "PWindow.h"
+#include "PMenuAccess.h"
 
 #include <app/Message.h>
 #include <app/Handler.h>
@@ -26,9 +21,13 @@
 #endif
 
 
-
-
+class HelpManager;
+class PCommandManager;
+class PCSavePanel;
 class PDocumentManager;
+class PEditorManager;
+class PWindow;
+
 
 /**
  * @class PDocument
@@ -46,7 +45,7 @@ class PDocumentManager;
  *
  * @see BMessage
  */
-class PDocument :	public BLooper,public PMenuAccess
+class PDocument :	public BLooper ,public PMenuAccess
 {
 
 friend class PCommand;

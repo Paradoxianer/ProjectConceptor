@@ -1,13 +1,16 @@
 #ifndef PMENU_ACCESS_H
 #define PMENU_ACCESS_H
 
-#include "ToolBar.h"
-#include "ToolMenu.h"
-#include "ToolItem.h"
 
 #include <interface/MenuBar.h>
 #include <interface/Menu.h>
 #include <interface/MenuItem.h>
+
+
+class ToolBar;
+class ToolItem;
+class ToolMenu;
+
 
 /**
  * @class PMenuAccess

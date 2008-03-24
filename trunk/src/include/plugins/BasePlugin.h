@@ -1,6 +1,8 @@
 #ifndef BASE_PLUGIN_H
 #define BASE_PLUGIN_H
 
+#include "ProjectConceptorDefs.h"
+
 #include <kernel/image.h>
 #include <support/TypeConstants.h>
 /**
