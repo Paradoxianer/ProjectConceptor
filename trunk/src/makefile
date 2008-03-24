@@ -1,6 +1,19 @@
 first: default
 
 app: app/makefile FORCE
+	@echo "---------SVN INFO GEN-----------"
+	touch app/About/AboutSvnInfo.h
+	rm app/About/AboutSvnInfo.h
+	@echo "" >> app/About/AboutSvnInfo.h 
+	@echo "#ifndef SVN_INFO_H" >> app/About/AboutSvnInfo.h 
+	@echo "#define SVN_INFO_H" >> app/About/AboutSvnInfo.h 
+	@echo "" >> app/About/AboutSvnInfo.h  
+	@echo "//do not edit this" >> app/About/AboutSvnInfo.h 
+	@echo "#define SVN_REV_STR \"`svn info | grep Revision | awk '{print $$2}'`\"" >> app/About/AboutSvnInfo.h 
+	@echo "" >> app/About/AboutSvnInfo.h 
+	@echo "#endif" >> app/About/AboutSvnInfo.h 
+	@echo "UPDATED"
+	@echo "--------------------------------"
 	cd app && make
 
 plugins: plugins/makefile FORCE

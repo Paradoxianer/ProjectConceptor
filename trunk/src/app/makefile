@@ -138,7 +138,7 @@ COMPILER_FLAGS =
 #	specify additional linker flags
 LINKER_FLAGS =
 
-SVG_ICON = ../Data/Icons/Logogross.svg
+SVG_ICON = ../../Data/Icons/Logogross.svg
 
 #EXTRA_DEPS = copy
 
@@ -157,85 +157,13 @@ BUILDHOME = /boot/develop
 endif
 include $(BUILDHOME)/etc/makefile-engine
 
-# make all Plugins
-
-#LEAFDIRS = \
-#	src/Plugins/AddAttributeCommand	\
-#	src/Plugins/ChangeValueCommand 	\
-#	src/Plugins/ClassEditor			 	\
-#	src/Plugins/DeleteCommand   		\
-#	src/Plugins/GraphEditor			\
-#	src/Plugins/GroupCommand			\
-#	src/Plugins/InsertCommand         		\
-#	src/Plugins/MoveCommand     		\
-#	src/Plugins/NavigatorEditor  			\
-#	src/Plugins/RemoveAttributeCommand	\
-#	src/Plugins/ResizeCommand			\
-#	src/Plugins/StandardTranslator 	  	\
-#	src/Plugins/SelectCommand			\
-#	src/Plugins/CopyCommand			\
-#	src/Plugins/PasteCommand		
-
-# all : Makefile $(TARGET_DIR)
-#	AboutWindow.o : AboutWindow.cpp
-#	g++ -c AboutWindow.cpp -DREV_NUMBER=`svn info | grep Revision | awk '{print $2}'`
-#	$(TARGET_DIR) : AboutWindow.o
-#	g++ -o $(TARGET_DIR) AboutWindow.o
 
 default .DEFAULT:
-	@echo "---------SVN INFO GEN-----------"
-	touch About/AboutSvnInfo.h
-	rm About/AboutSvnInfo.h
-	@echo "" >> About/AboutSvnInfo.h 
-	@echo "#ifndef SVN_INFO_H" > About/AboutSvnInfo.h 
-	@echo "#define SVN_INFO_H" >> About/AboutSvnInfo.h 
-	@echo "" >> About/AboutSvnInfo.h  
-	@echo "//do not edit this" >> About/AboutSvnInfo.h 
-	@echo "#define SVN_REV_STR \"`svn info svn://svn.berlios.de/projectconcepto/trunk | grep Revision | awk '{print $$2}'`\"" >> About/AboutSvnInfo.h 
-	@echo "" >> About/AboutSvnInfo.h 
-	@echo "#endif" >> About/AboutSvnInfo.h 
-	@echo "UPDATED"
-	@echo "--------------------------------"
+
 	mkdir -p ../../bin
 	mv $(NAME) ../../bin
 	ln -sf $(NAME) ../../bin/ProjectConceptor.a
-	#-@for f in $(LEAFDIRS); do \
-	#	$(MAKE) -C $$f $@; \
-	#done
-	#mkdir -p ./Plugins
-	#mkdir -p ./Plugins/Commands
 
-	#ln -sf ../src/Plugins/GraphEditor/$(OBJ_DIR)/GraphEditor ./Plugins/GraphEditor
-	#ln -sf ../src/Plugins/NavigatorEditor/$(OBJ_DIR)/NavigatorEditor ./Plugins/NavigatorEditor
-
-	#ln -sf ../../src/Plugins/AddAttributeCommand/$(OBJ_DIR)/AddAttribute ./Plugins/Commands/AddAttribute
-	#ln -sf ../../src/Plugins/ChangeValueCommand/$(OBJ_DIR)/ChangeValue ./Plugins/Commands/ChangeValue
-	#ln -sf ../../src/Plugins/CopyCommand/$(OBJ_DIR)/Copy ./Plugins/Commands/Copy
-	#ln -sf ../../src/Plugins/DeleteCommand/$(OBJ_DIR)/Delete ./Plugins/Commands/Delete
-	#ln -sf ../../src/Plugins/FindCommand/$(OBJ_DIR)/Find ./Plugins/Commands/Find
-	#ln -sf ../../src/Plugins/GroupCommand/$(OBJ_DIR)/Group ./Plugins/Commands/Group
-	#ln -sf ../../src/Plugins/InsertCommand/$(OBJ_DIR)/Insert ./Plugins/Commands/Insert
-	#ln -sf ../../src/Plugins/MoveCommand/$(OBJ_DIR)/Move ./Plugins/Commands/Move
-	#ln -sf ../../src/Plugins/PasteCommand/$(OBJ_DIR)/Paste ./Plugins/Commands/Paste
-	#ln -sf ../../src/Plugins/RemoveAttributeCommand/$(OBJ_DIR)/RemoveAttribute ./Plugins/Commands/RemoveAttribute
-	#ln -sf ../../src/Plugins/ResizeCommand/$(OBJ_DIR)/Resize ./Plugins/Commands/Resize
-	#ln -sf ../../src/Plugins/SelectCommand/$(OBJ_DIR)/Select ./Plugins/Commands/Select
-
-#clean::
-#	-@for f in $(LEAFDIRS); do \
-#		$(MAKE) clean -C $$f $@; \
-#	done
-#install::
-#	-@for f in $(LEAFDIRS); do \
-#		$(MAKE) install -C $$f $@; \
-#	done
-#	@echo "Copying locale files"
-#	@echo $(INSTALL_DIR)
-#	@mkdir -p $(INSTALL_DIR)
-#	@cp -rf ./$(NAME) $(INSTALL_DIR)
-##	@cp -rf ./Language $(INSTALL_DIR)
-##	@cd $(INSTALL_DIR)/Language
-#	@echo "Done copying."
 
 
 
