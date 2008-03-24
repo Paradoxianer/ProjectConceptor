@@ -97,6 +97,7 @@ SYSTEM_INCLUDE_PATHS =
 #	thes use the form: #include "header"
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS =	. \
+					../include \
 					../include/plugins \
 					Commands \
 					Config \
