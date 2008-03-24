@@ -1,6 +1,6 @@
 #include "ProjectConceptorDefs.h"
 #include "AddAttribute.h"
-
+#include <string.h>
 
 AddAttribute::AddAttribute():PCommand()
 {

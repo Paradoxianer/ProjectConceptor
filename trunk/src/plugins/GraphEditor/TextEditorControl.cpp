@@ -1,6 +1,11 @@
 #include "TextEditorControl.h"
 
-TextEditorControl::TextEditorControl(BRect rect,const  char *name, BMessage *message, uint32 resizingMode = B_FOLLOW_LEFT | B_FOLLOW_TOP, uint32 flags = B_WILL_DRAW | B_PULSE_NEEDED| B_NAVIGABLE):  BTextView(rect,name,BRect(0,0,rect.Width(),rect.Height()),resizingMode,flags), BInvoker(message,NULL)
+TextEditorControl::TextEditorControl(BRect rect
+		, const char *name
+		, BMessage *message
+		, uint32 resizingMode
+		, uint32 flags)
+	:  BTextView(rect,name,BRect(0,0,rect.Width(),rect.Height()),resizingMode,flags), BInvoker(message,NULL)
 {
 	TRACE();
 	singleLine	= true;
@@ -25,7 +30,7 @@ void TextEditorControl::DetachedFromWindow()
 	TRACE();
 }
 
-void TextEditorControl::MakeFocus(bool flag = true)
+void TextEditorControl::MakeFocus(bool flag)
 {
 	TRACE();
 	PRINT(("%s - MakeFocus(%d)\n",Text(),flag));
@@ -73,7 +78,7 @@ void TextEditorControl::KeyDown(const char *bytes, int32 numBytes)
 	}
 //		BTextView::KeyDown(bytes,numBytes);
 }
-status_t TextEditorControl::Invoke(BMessage *message = NULL)
+status_t TextEditorControl::Invoke(BMessage *message)
 {
 	TRACE();
 	BMessage copy(*Message()); 

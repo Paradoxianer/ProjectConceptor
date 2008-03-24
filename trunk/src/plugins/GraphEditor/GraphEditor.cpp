@@ -1,3 +1,16 @@
+#include "GraphEditor.h"
+#include "PCommandManager.h"
+#include "Renderer.h"
+#include "ClassRenderer.h"
+#include "ConnectionRenderer.h"
+#include "GroupRenderer.h"
+#include "PWindow.h"
+#include "PEditorManager.h"
+
+#include "ToolBar.h"
+#include "ToolItem.h"
+#include "InputRequest.h"
+
 #include <support/List.h>
 #include <interface/Font.h>
 #include <interface/ScrollView.h>
@@ -8,15 +21,6 @@
 #include <support/DataIO.h>
 
 #include <string.h>
-#include "GraphEditor.h"
-#include "PCommandManager.h"
-#include "Renderer.h"
-#include "ClassRenderer.h"
-#include "ConnectionRenderer.h"
-#include "GroupRenderer.h"
-
-#include "ToolBar.h"
-#include "InputRequest.h"
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
@@ -60,22 +64,26 @@ void GraphEditor::Init(void)
 	fontMessage->AddFloat("Font::Size",be_plain_font->Size());
 	fontMessage->AddInt8("Font::Spacing",be_plain_font->Spacing());
 	fontMessage->AddString("Font::Style",(const char*)&style);
+#ifdef B_ZETA_VERSION_1_0_0
 	rgb_color	fontColor			= {111, 151, 181, 255};
 	fontMessage->AddRGBColor("Color",fontColor);
+#endif
 
 	//perparing Pattern Message
 	patternMessage	=new BMessage();
-	//standart Color
 	rgb_color	fillColor			= {152, 180, 190, 255};
-	patternMessage->AddRGBColor("FillColor",fillColor);
 	rgb_color	borderColor			= {0, 0, 0, 255};
+	rgb_color	highColor			= {0, 0, 0, 255};
+	rgb_color 	lowColor			= {128, 128, 128, 255};
+#ifdef B_ZETA_VERSION_1_0_0
+	//standart Color
+	patternMessage->AddRGBColor("FillColor",fillColor);
 	patternMessage->AddRGBColor("BorderColor",borderColor);
+	patternMessage->AddRGBColor("HighColor",highColor);
+	patternMessage->AddRGBColor("LowColor",lowColor);
+#endif
 	patternMessage->AddFloat("PenSize",1.0);
 	patternMessage->AddInt8("DrawingMode",B_OP_ALPHA);
-	rgb_color	highColor			= {0, 0, 0, 255};
-	patternMessage->AddRGBColor("HighColor",highColor);
-	rgb_color 	lowColor			= {128, 128, 128, 255};
-	patternMessage->AddRGBColor("LowColor",lowColor);
 	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
 
 	scaleMenu		= new BMenu(_T("Scale"));

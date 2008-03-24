@@ -1,4 +1,5 @@
 #include "Delete.h"
+#include "ProjectConceptorDefs.h"
 
 Delete::Delete():PCommand()
 {

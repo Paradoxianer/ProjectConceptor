@@ -1,20 +1,17 @@
+#include "ToolItem.h"
+#include "NavigatorEditor.h"
+#include "PCommandManager.h"
+#include "MessageListView.h"
+#include "NodeItem.h"
+#include "PEditorManager.h"
+
 #include <interface/Font.h>
 #include <interface/GraphicsDefs.h>
 #include <interface/ScrollView.h>
 #include <support/List.h>
-
 #include <translation/TranslationUtils.h>
 #include <translation/TranslatorFormats.h>
-
 #include <string.h>
-
-#include "ToolItem.h"
-
-#include "NavigatorEditor.h"
-#include "PCommandManager.h"
-#include "MessageListView.h"
-
-#include "NodeItem.h"
 
 
 NavigatorEditor::NavigatorEditor():PEditor(),BView(BRect(0,0,200,200),"NavigatorEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW|B_NAVIGABLE|B_NAVIGABLE_JUMP)

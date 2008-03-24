@@ -1,4 +1,6 @@
 #include "Group.h"
+#include "ProjectConceptorDefs.h"
+
 
 Group::Group():PCommand()
 {

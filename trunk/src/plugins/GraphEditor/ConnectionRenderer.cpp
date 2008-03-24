@@ -1,5 +1,6 @@
 #include "ConnectionRenderer.h"
 #include "ClassRenderer.h"
+#include "ProjectConceptorDefs.h"
 #include <interface/Window.h>
 #include <stdio.h>
 

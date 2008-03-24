@@ -379,10 +379,12 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		pDocNode->AddInt32("Node::created",atoi(parent->Attribute("CREATED")));
 	if (parent->Attribute("MODIFIED"))
 		pDocNode->AddInt32("Node::modified",atoi(parent->Attribute("MODIFIED")));
+#ifdef B_ZETA_VERSION_1_0_0
 	if (parent->Attribute("BACKGROUND_COLOR"))
 		pattern->AddRGBColor("FillColor",GetRGB(parent->Attribute("BACKGROUND_COLOR")));
 	if (parent->Attribute("COLOR"))
 		pattern->AddRGBColor("BorderColor",GetRGB(parent->Attribute("COLOR")));
+#endif
 	//find all Attributes
 	for (node = parent->FirstChild("arrowlink"); node;)
 	{

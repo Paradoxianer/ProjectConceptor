@@ -67,7 +67,7 @@ SYSTEM_INCLUDE_PATHS =
 #	additional paths to look for local headers
 #	thes use the form: #include "header"
 #	source file directories are automatically included
-LOCAL_INCLUDE_PATHS = ../../
+LOCAL_INCLUDE_PATHS = ../../include
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL

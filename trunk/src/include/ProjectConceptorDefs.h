@@ -81,6 +81,7 @@ const uint32	P_C_TOOLBAR_CHANGED				= 'pcTC';
 
 #ifndef B_ZETA_VERSION_1_0_0
 
+const uint32	B_FONT_TYPE						= 'fOTy';
 #ifndef __HAIKU__ // Avoid Redefinition ???
 const uint32	B_REDO							= 'redo';
 #endif

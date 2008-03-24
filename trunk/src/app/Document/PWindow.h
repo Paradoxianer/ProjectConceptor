@@ -7,7 +7,6 @@
 
 #include "ToolBar.h"
 #include "PluginManager.h"
-#include "ConfigWindow.h"
 #include "PMenuAccess.h"
 #include "ShortCutFilter.h"
 
@@ -27,6 +26,7 @@
 class PDocument;
 class PEditor;
 
+class ConfigWindow;
 class MainView;
 class WindowManager;
 
