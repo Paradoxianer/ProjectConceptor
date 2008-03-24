@@ -97,12 +97,12 @@ LINKER_FLAGS =
 
 INSTALL_DIR    = /boot/apps/Development/ProjectConceptor/Plugins/Commands
 
-install:: $(NAME)
-	@echo "Copying locale files"
-	@echo $(INSTALL_DIR)
-	@mkdir -p $(INSTALL_DIR)
-	@cp -rf ./$(NAME) $(INSTALL_DIR)
-	@echo "Done copying."
+#install:: $(NAME)
+#	@echo "Copying locale files"
+#	@echo $(INSTALL_DIR)
+#	@mkdir -p $(INSTALL_DIR)
+#	@cp -rf ./$(NAME) $(INSTALL_DIR)
+#	@echo "Done copying."
 
 ## include the makefile-engine
 ifndef BUILDHOME
