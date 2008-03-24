@@ -2,4 +2,5 @@
 ProjectConceptor
 src/SvnInfo.h
 *~
-
+ProjectConceptor.a
+src/About/AboutSvnInfo.h
