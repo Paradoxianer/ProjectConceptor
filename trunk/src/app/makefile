@@ -184,16 +184,16 @@ include $(BUILDHOME)/etc/makefile-engine
 
 default .DEFAULT:
 	@echo "---------SVN INFO GEN-----------"
-	#touch src/About/AboutSvnInfo.h
-	#rm src/About/AboutSvnInfo.h
-	#@echo "" >> src/About/AboutSvnInfo.h 
-	#@echo "#ifndef SVN_INFO_H" > src/About/AboutSvnInfo.h 
-	#@echo "#define SVN_INFO_H" >> src/About/AboutSvnInfo.h 
-	#@echo "" >> src/About/AboutSvnInfo.h  
-	#@echo "//do not edit this" >> src/About/AboutSvnInfo.h 
-	#@echo "#define SVN_REV_STR \"`svn info svn://svn.berlios.de/projectconcepto/trunk | grep Revision | awk '{print $$2}'`\"" >> src/About/AboutSvnInfo.h 
-	#@echo "" >> src/About/AboutSvnInfo.h 
-	#@echo "#endif" >> src/About/AboutSvnInfo.h 
+	touch About/AboutSvnInfo.h
+	rm About/AboutSvnInfo.h
+	@echo "" >> About/AboutSvnInfo.h 
+	@echo "#ifndef SVN_INFO_H" > About/AboutSvnInfo.h 
+	@echo "#define SVN_INFO_H" >> About/AboutSvnInfo.h 
+	@echo "" >> About/AboutSvnInfo.h  
+	@echo "//do not edit this" >> About/AboutSvnInfo.h 
+	@echo "#define SVN_REV_STR \"`svn info svn://svn.berlios.de/projectconcepto/trunk | grep Revision | awk '{print $$2}'`\"" >> About/AboutSvnInfo.h 
+	@echo "" >> About/AboutSvnInfo.h 
+	@echo "#endif" >> About/AboutSvnInfo.h 
 	@echo "UPDATED"
 	@echo "--------------------------------"
 	mkdir -p ../../bin
