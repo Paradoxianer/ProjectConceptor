@@ -96,15 +96,16 @@ COMPILER_FLAGS =
 LINKER_FLAGS =
 INSTALL_DIR    = /boot/home/config/add-ons/Translators
 
-#install::
-#	@echo "Copying locale files"
-#	@echo $(INSTALL_DIR)
-#	@mkdir -p $(INSTALL_DIR)
-#	@cp -rf ./$(NAME) $(INSTALL_DIR)
-#	@echo "Done copying."
-
 ## include the makefile-engine
 ifndef BUILDHOME
 BUILDHOME = /boot/develop
 endif
 include $(BUILDHOME)/etc/makefile-engine
+
+install:: $(NAME)
+	@echo "Copying locale files"
+	@echo $(INSTALL_DIR)
+	@mkdir -p $(INSTALL_DIR)
+	@cp -rf ./$(NAME) $(INSTALL_DIR)
+	@echo "Done copying."
+
