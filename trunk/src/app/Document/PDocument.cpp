@@ -3,14 +3,17 @@
 #include <interface/Screen.h>
 #include <support/Debug.h>
 #include <storage/NodeInfo.h>
+#include <TranslationUtils.h>
+#include <TranslatorRoster.h>
 #include <string.h>
 
+#include "PCSavePanel.h"
 #include "PDocument.h"
 #include "PDocLoader.h"
 #include "PDocumentManager.h"
 #include "PluginManager.h"
 #include "BasePlugin.h"
-#include "Tools/Indexer.h"
+#include "Indexer.h"
 
 PDocument::PDocument(PDocumentManager *initManager):BLooper()
 {

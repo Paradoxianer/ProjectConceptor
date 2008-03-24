@@ -16,7 +16,8 @@
 #include "MainView.h"
 #include "ToolItem.h"
 #include "ToolMenu.h"
-
+#include "BasePlugin.h"
+#include "PEditorManager.h"
 
 
 #include <translation/TranslationUtils.h>
