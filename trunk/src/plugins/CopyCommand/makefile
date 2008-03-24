@@ -42,7 +42,7 @@ RSRCS=
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be ../../../ProjectConceptor.a
+LIBS= be ../../../bin/ProjectConceptor.a
 		
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
@@ -60,7 +60,9 @@ SYSTEM_INCLUDE_PATHS =
 #	additional paths to look for local headers
 #	thes use the form: #include "header"
 #	source file directories are automatically included
-LOCAL_INCLUDE_PATHS =	../ ../../ ../../Document ../../Commands ../../ToolBar  ../../Config  ../../Tools
+LOCAL_INCLUDE_PATHS = \
+	../../include \
+	../../include/plugins
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
