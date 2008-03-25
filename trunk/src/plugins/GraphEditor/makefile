@@ -123,6 +123,10 @@ BUILDHOME = /boot/develop
 endif
 include $(BUILDHOME)/etc/makefile-engine
 
+default .DEFAULT:
+	mkdir -p ../../../bin/Plugins
+	mv obj.x86/$(NAME) ../../../bin/Plugins
+
 install:: $(NAME)
 	@echo "Copying locale files"
 	@echo $(INSTALL_DIR)

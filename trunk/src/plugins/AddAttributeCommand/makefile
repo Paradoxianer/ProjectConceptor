@@ -110,3 +110,6 @@ install:: $(NAME)
 	@cp -rf ./$(NAME) $(INSTALL_DIR)
 	@echo "Done copying."
 
+default .DEFAULT:
+	mkdir -p ../../../bin/Plugins/Commands
+	mv obj.x86/$(NAME) ../../../bin/Plugins/Commands
