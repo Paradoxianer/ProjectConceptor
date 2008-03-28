@@ -145,11 +145,11 @@ SVG_ICON = ../../Data/Icons/Logogross.svg
 TARGET_DIR	=  .
 OBJ_DIR		= obj.x86
 
-INSTALL_DIR	= /boot/apps/Development/ProjectConceptor
+INSTALL_DIR	= /boot/apps/ProjectConceptor
 PLUGIN_DIR	= Plugins
 
 
-APP_MENU	= Software/Development
+APP_MENU	= Software
 
 ## include the makefile-engine
 ifndef BUILDHOME
@@ -161,7 +161,7 @@ include $(BUILDHOME)/etc/makefile-engine
 default .DEFAULT:
 
 	mkdir -p ../../bin
-	mv $(NAME) ../../bin
+	cp -rf $(NAME) ../../bin
 	ln -sf $(NAME) ../../bin/ProjectConceptor.a
 
 

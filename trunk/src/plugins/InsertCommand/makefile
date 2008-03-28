@@ -94,7 +94,7 @@ COMPILER_FLAGS =
 
 #	specify additional linker flags
 LINKER_FLAGS =
-INSTALL_DIR    = /boot/apps/Development/ProjectConceptor/Plugins/Commands
+INSTALL_DIR    = /boot/apps/ProjectConceptor/Plugins/Commands
 
 ## include the makefile-engine
 ifndef BUILDHOME
@@ -104,7 +104,7 @@ include $(BUILDHOME)/etc/makefile-engine
 
 default .DEFAULT:
 	mkdir -p ../../../bin/Plugins/Commands
-	mv obj.x86/$(NAME) ../../../bin/Plugins/Commands
+	cp -rf obj.x86/$(NAME) ../../../bin/Plugins/Commands
 	
 install:: $(NAME)
 	@echo "Copying locale files"
