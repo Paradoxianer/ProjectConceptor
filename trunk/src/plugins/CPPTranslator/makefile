@@ -108,3 +108,8 @@ ifndef BUILDHOME
 BUILDHOME = /boot/develop
 endif
 include $(BUILDHOME)/etc/makefile-engine
+
+default .DEFAULT:
+	mkdir -p ../../../bin/Plugins/Translator
+	mv obj.x86/$(NAME) ../../../bin/Plugins/Translator
+	

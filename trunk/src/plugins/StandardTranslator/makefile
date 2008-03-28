@@ -109,3 +109,7 @@ install:: $(NAME)
 	@cp -rf ./$(NAME) $(INSTALL_DIR)
 	@echo "Done copying."
 
+default .DEFAULT:
+	mkdir -p ../../../bin/Plugins/Translator
+	mv obj.x86/$(NAME) ../../../bin/Plugins/Translator
+	
