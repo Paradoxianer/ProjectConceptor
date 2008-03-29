@@ -1,9 +1,0 @@
-Aufbau Connection
-
-BMessage
-	|-"From"	Pointer	"Pointer to the BMessage where the connection comes from"
-	|-"To"	Pointer	"Pointer to the BMessage where it goes to"
-	|-"Data"	BMessage "Contains all visible Data´s"
-	|-"Type"	Int32	"The kinde of connection"
-	|-"Hide"	Bool	"marks wheter this connection is hidden or not"
-
