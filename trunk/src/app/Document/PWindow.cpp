@@ -9,11 +9,12 @@
 #include <interface/ScrollBar.h>
 #include <interface/ScrollView.h>
 #include <stdio.h>
+#include "BasePlugin.h"
 #include "ProjectConceptorDefs.h"
 #include "PWindow.h"
 #include "PEditor.h"
+#include "PEditorManager.h"
 #include "ProjectConceptor.h"
-#include "MainView.h"
 #include "ToolItem.h"
 #include "ToolMenu.h"
 #include "MainView.h"
