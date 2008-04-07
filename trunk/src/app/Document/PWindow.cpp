@@ -16,9 +16,7 @@
 #include "MainView.h"
 #include "ToolItem.h"
 #include "ToolMenu.h"
-#include "BasePlugin.h"
-#include "PEditorManager.h"
-
+#include "MainView.h"
 
 #include <translation/TranslationUtils.h>
 #include <translation/TranslatorFormats.h>
@@ -30,7 +28,6 @@
 
 PWindow::PWindow(BRect rect,PDocument *document):BWindow(rect,"ProjectConceptor",B_TITLED_WINDOW,0)
 {
-	
 	TRACE();
 	doc	= document;
 	Init();
@@ -70,7 +67,6 @@ void PWindow::Init(void)
 	horizontalToolbars		= new BList();
 	MakeToolbars();
 
-	configWindow			= NULL;
 	SetSizeLimits(300,6000,150,4000);
 	BRect containerRect		= BRect(P_M_MAIN_VIEW_LEFT+1,P_M_MAIN_VIEW_TOP+2,P_M_MAIN_VIEW_RIGHT-1,P_M_MAIN_VIEW_BOTTOM-1);
 	mainView				= new MainView(doc,containerRect, "tabContainer");
@@ -465,9 +461,8 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	rect.bottom -= mainView->TabHeight();
 //	mainView->AddTab(new BScrollView("editorScroller",editor->GetView(),B_FOLLOW_ALL_SIDES,0,true,true), tab);
 	mainView->AddTab(editor->GetView(), tab);
-	mainView->Select(tab);
 	tab->SetLabel(name);
-	
+	mainView->Select(tab);
 	BMessage *configMessage	= editor->GetConfiguration();
 	if (configMessage)
 	{
@@ -860,12 +855,6 @@ void PWindow::ChangeLanguage()
 	Unlock();
 }
 
-void PWindow::SetManager(WindowManager* newManager)
-{
-	TRACE();
-	manager=newManager;
-	AttachedToManager();
-}
 
 void PWindow::FrameResized(float width, float height)
 {

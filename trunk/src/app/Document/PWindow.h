@@ -7,6 +7,7 @@
 
 #include "ToolBar.h"
 #include "PluginManager.h"
+#include "ConfigWindow.h"
 #include "PMenuAccess.h"
 #include "ShortCutFilter.h"
 
@@ -26,9 +27,7 @@
 class PDocument;
 class PEditor;
 
-class ConfigWindow;
 class MainView;
-class WindowManager;
 
 /**
  * @class PDocument
@@ -49,7 +48,6 @@ public:
 							PWindow(BRect rect,PDocument *doc);
 							PWindow(BMessage *archive);
 							~PWindow(void);
-	virtual	void			AttachedToManager(void){};
 	virtual void			MessageReceived(BMessage *message);
 
 	/**Set a new Shortcutlist. But Remember if you set a new shortcutlist you also "remove" all default shortcuts from the document.
@@ -101,8 +99,6 @@ public:
 	virtual void			FrameResized(float width, float height);
 	virtual void			Show(void);
 			void			Init(void);
-			void			SetManager(WindowManager *newManager);
-			WindowManager*	Manager(void){return manager;};
 			float			P_M_MAIN_VIEW_LEFT;
 			float			P_M_MAIN_VIEW_TOP;
 			float			P_M_MAIN_VIEW_BOTTOM;
@@ -134,7 +130,6 @@ protected:
 	/*		ToolbarView		*verticalToolbars;
 			ToolbarView		*horizontalToolbars;*/
 
-			ConfigWindow	*configWindow;
 			BMenuBar		*statusBar;
 	//		ProjektTabView	*tabView;
 			BList			*verticalToolbars;
@@ -142,7 +137,6 @@ protected:
 
 
 			MainView		*mainView;
-			WindowManager	*manager;
 			PDocument		*doc;
 private:
 	#ifdef B_ZETA_VERSION_1_0_0

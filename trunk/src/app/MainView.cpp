@@ -14,6 +14,7 @@ MainView::MainView(PDocument *newDoc,
 	   : BTabView(rect,name,width,resizingMode,flags)
 {
 	TRACE();
+	BView::SetDoubleBuffering(1);
 	doc = newDoc;
 }
 MainView::~MainView()

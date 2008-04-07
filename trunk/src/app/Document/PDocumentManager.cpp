@@ -126,7 +126,8 @@ PDocument* PDocumentManager::CreateDocument(void)
 }
 ConfigWindow *PDocumentManager::GetConfigWindow(void)
 {
-	if (configWindow == NULL)
+/*	if (configWindow == NULL)
 		configWindow = new ConfigWindow(NULL);
-	return configWindow;
+	return configWindow;*/
+	return new ConfigWindow(NULL);
 }

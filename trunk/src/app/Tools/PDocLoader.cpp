@@ -16,11 +16,6 @@ PDocLoader::~PDocLoader(void)
 }
 
 
-WindowManager* PDocLoader::GetWindowManager(void)
-{
-	return windowManager;
-}
-
 PEditorManager* PDocLoader::GetEditorManager(void)
 {
 	return editorManager;
@@ -37,7 +32,6 @@ void PDocLoader::Init(void)
 	commandManagerMessage	= new BMessage();
 
 	editorManager			= NULL;
-	windowManager			= NULL;
 }
 
 

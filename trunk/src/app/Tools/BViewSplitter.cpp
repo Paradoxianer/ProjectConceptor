@@ -5,7 +5,6 @@
 BViewSplitter::BViewSplitter(BRect frame,orientation dr,uint32 resizingMode,uint32 flags): BView(frame,"ViewSplitter", resizingMode,flags){
   direction=dr;
   anz=0;
-  SetViewColor(216,216,216,0);
 }
 
 void BViewSplitter::AddChild(BView *view){
