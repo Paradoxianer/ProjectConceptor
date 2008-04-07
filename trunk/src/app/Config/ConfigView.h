@@ -7,6 +7,8 @@
 #include <interface/Rect.h>
 
 #include "MessageView.h"
+#include "BViewSplitter.h"
+
 
 
 /**
@@ -18,7 +20,9 @@
  * @bug dont work :-)
  */
 
-class ConfigView : public BBox
+const uint32 MESSAGE_SELECTED	= 'MEsl';
+
+class ConfigView : public BViewSplitter
 {
 
 public:
@@ -29,6 +33,7 @@ public:
 	virtual	void			SetConfigMessage(BMessage *configureMessage);
 	virtual	BMessage*		GetConfigMessage(void){return configMessage;};
 	virtual void 			ValueChanged(void);
+	virtual void			MessageReceived(BMessage *msg);
 
 protected:
 	virtual	void			BuildConfigList(BMessage *confMessage, BListItem *parent);

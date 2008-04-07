@@ -15,12 +15,14 @@
  * @todo implemt the hole class
  * @bug dont work :-)
  */
+ 
+const float		MARGIN_SPACE		= 10.0;
 
 class MessageView : public BBox
 {
 
 public:
-							MessageView (BRect rect,const char* newName,BMessage *forMessage,uint32 resizingMode = B_FOLLOW_ALL_SIDES, uint32 flags = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE_JUMP);
+							MessageView (BRect rect,BMessage *forMessage,uint32 resizingMode = B_FOLLOW_ALL_SIDES, uint32 flags = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE_JUMP);
 //							~MessageView();
 
 	virtual	void			ChangeLanguage(void);
@@ -32,6 +34,7 @@ protected:
 
 private:
 			void			Init();
+			float			ItemTop();
 	BMessage				*configMessage;
 	float					seperator;
 	

@@ -1,11 +1,19 @@
+#include <interface/CheckBox.h>
+#include <interface/TextControl.h>
+#include <support/String.h>
+
 #include "MessageView.h"
+#include "ColorItem.h"
+#include "FontItem.h"
+#include "PatternItem.h"
+#include "RectItem.h"
+
 #include "ProjectConceptorDefs.h"
 
-MessageView::MessageView(BRect rect,const char *newName,BMessage *forMessage,uint32 resizingMode, uint32 flags):BBox(rect,NULL,resizingMode,flags)
+MessageView::MessageView(BRect rect,BMessage *forMessage,uint32 resizingMode, uint32 flags):BBox(rect,NULL,resizingMode,flags)
 {
 	TRACE();
 	configMessage=forMessage;
-	name=newName;
 	Init();
 }
 
@@ -33,132 +41,103 @@ void MessageView::ValueChanged(void)
 	uint32		type; 
 	int32		count;
 	#ifdef B_ZETA_VERSION_1_0_0
-	for (int32 i = 0; message->GetInfo(B_ANY_TYPE, i,(const char **) &name, &type, &count) == B_OK; i++)
+	for (int32 i = 0; configMessage->GetInfo(B_ANY_TYPE, i,(const char **) &name, &type, &count) == B_OK; i++)
 	#else
-	for (int32 i = 0; message->GetInfo(B_ANY_TYPE, i,(char **) &name, &type, &count) == B_OK; i++)
+	for (int32 i = 0; configMessage->GetInfo(B_ANY_TYPE, i,(char **) &name, &type, &count) == B_OK; i++)
 	#endif
 	{
+		//calculate the Position where to add the next View
+		float top = ItemTop();
+		BRect rect = BRect(MARGIN_SPACE,top,Bounds().right-MARGIN_SPACE,top);
 		switch(type)
 		{
-			case B_MESSAGE_TYPE:
-			{
-				BMessage	*tmpMessage		= new BMessage();
-				BMessage	*valueContainer	= new BMessage();
-				if (message->FindMessage(name,count-1,tmpMessage)==B_OK)
-				{
-					BListItem	*newSuperItem=new BStringItem(name);
-					if (superItem)
-						AddUnder(newSuperItem,superItem);
-					else
-					{
-						AddItem(newSuperItem);
-						delete editMessage;
-						editMessage		= new BMessage(*baseEditMessage);
-					}
-					editMessage->FindMessage("valueContainer",valueContainer);
-					valueContainer->AddString("subgroup",name);
-					editMessage->ReplaceMessage("valueContainer",valueContainer);
-					AddMessage(tmpMessage,newSuperItem);
-				}
-				break;
-			}
 			case B_STRING_TYPE:
 			{
 				char		*string;
-				message->FindString(name,count-1,(const char **)&string);
-				StringItem *stringItem = new StringItem(name,string);
-				if (superItem)
-				{
-					AddUnder(stringItem,superItem);
-				}
-				else
-				{
-					AddItem(stringItem);
-					delete editMessage;
-					editMessage		= new BMessage(*baseEditMessage);
-				}
-				BMessage *tmpMessage = new BMessage(*editMessage);
+				configMessage->FindString(name,count-1,(const char **)&string);
+				BTextControl	*stringItem	= new BTextControl(rect,name,name,string,NULL);
+				AddChild(stringItem);
+				BMessage	*tmpMessage = new BMessage(B_CONTROL_INVOKED);
+				tmpMessage->AddString("name",name);
+				tmpMessage->AddInt32("count",count-1);
+				tmpMessage->AddInt32("type",type);
 				stringItem->SetMessage(tmpMessage);
-				stringItem->SetTarget(doc);
 				break;
 			}
 			case B_RECT_TYPE:
 			{
-				BRect	rect;
-				message->FindRect(name,count-1,&rect);
-				RectItem	*rectItem	= new RectItem(name,rect);
-				if (superItem)
-					AddUnder(rectItem,superItem);
-				else
-				{
-					AddItem(rectItem);
-					delete editMessage;
-					editMessage		= new BMessage(*baseEditMessage);
-				}
-				BMessage *tmpMessage = new BMessage(*editMessage);
+				BRect	valueRect;
+				configMessage->FindRect(name,count-1,&valueRect);
+				RectItem	*rectItem	= new RectItem(rect,name,valueRect);
+				AddChild(rectItem);
+				BMessage	*tmpMessage = new BMessage(B_CONTROL_INVOKED);
+				tmpMessage->AddString("name",name);
+				tmpMessage->AddInt32("count",count-1);
+				tmpMessage->AddInt32("type",type);
 				rectItem->SetMessage(tmpMessage);
-				rectItem->SetTarget(doc);
 				break;
 			}
 			case B_FLOAT_TYPE:
 			{
 				float	value;
-				message->FindFloat(name,count-1,&value);
-				FloatItem *floatItem	= new FloatItem(name,value);
-				if (superItem)
-					AddUnder(floatItem,superItem);
-				else
-				{
-					AddItem(floatItem);
-					delete editMessage;
-					editMessage		= new BMessage(*baseEditMessage);
-				}
-				BMessage *tmpMessage = new BMessage(*editMessage);
-				floatItem->SetMessage(tmpMessage);
-				floatItem->SetTarget(doc);
+				configMessage->FindFloat(name,count-1,&value);
+				BString	floatString;
+				floatString<<value;
+				BTextControl	*stringItem	= new BTextControl(rect,name,name,floatString.String(),NULL);
+				AddChild(stringItem);
+				BMessage	*tmpMessage = new BMessage(B_CONTROL_INVOKED);
+				tmpMessage->AddString("name",name);
+				tmpMessage->AddInt32("count",count-1);
+				tmpMessage->AddInt32("type",type);
+				stringItem->SetMessage(tmpMessage);
+				break;
+			}
+			case B_INT8_TYPE:
+			case B_INT16_TYPE:
+			case B_INT32_TYPE:
+			{
+				int32	value;
+				configMessage->FindInt32(name,count-1,&value);
+				BString	intString;
+				intString<<value;
+				BTextControl	*stringItem	= new BTextControl(rect,name,name,intString.String(),NULL);
+				AddChild(stringItem);
+				BMessage	*tmpMessage = new BMessage(B_CONTROL_INVOKED);
+				tmpMessage->AddString("name",name);
+				tmpMessage->AddInt32("count",count-1);
+				tmpMessage->AddInt32("type",type);
+				stringItem->SetMessage(tmpMessage);
 				break;
 			}
 			case B_BOOL_TYPE:
 			{
 				bool	value;
-				message->FindBool(name,count-1,&value);
-				BoolItem	*boolItem	= new BoolItem(name,value);
-				if (superItem)
-					AddUnder(boolItem,superItem);
-				else
-				{
-					AddItem(boolItem);
-					delete editMessage;
-					editMessage		= new BMessage(*baseEditMessage);
-				}
-				BMessage *tmpMessage = new BMessage(*editMessage);
+				configMessage->FindBool(name,count-1,&value);
+				BCheckBox	*boolItem	= new BCheckBox(rect,name,name,NULL);
+				AddChild(boolItem);
+				boolItem->SetValue(value);
+				BMessage	*tmpMessage = new BMessage(B_CONTROL_INVOKED);
+				tmpMessage->AddString("name",name);
+				tmpMessage->AddInt32("count",count-1);
+				tmpMessage->AddInt32("type",type);
 				boolItem->SetMessage(tmpMessage);
-				boolItem->SetTarget(doc);
 				break;
-			}
-			case B_POINTER_TYPE:
-			{
-				if (strcmp(name,"Node::outgoing") == B_OK)
-				{
-					BList		*list		= NULL;
-					BStringItem	*masterItem	= new BStringItem(name);
-					BMessage	*connection	= NULL;
-					BMessage	*toNode		= NULL;
-					if (superItem)
-						AddUnder(masterItem,superItem);
-					else
-						AddItem(masterItem);
-					message->FindPointer(name,count-1,(void **)&list);
-					
-					for (int32 i=0;i<list->CountItems();i++)
-					{	
-						connection	= (BMessage*)list->ItemAt(i);
-						connection->FindPointer("Node::to",(void **)&toNode);
-						AddUnder(new NodeItem(toNode),masterItem);
-					}
-				}
 			}
 		}
 
 	} 
 }
+
+float MessageView::ItemTop()
+{
+	int32 count	= CountChildren();
+	if (count > 0)
+	{
+		BView *tmpChild = ChildAt(count-1);
+		return tmpChild->Frame().bottom+MARGIN_SPACE;
+		
+	}
+	else
+		return MARGIN_SPACE;	
+}
+

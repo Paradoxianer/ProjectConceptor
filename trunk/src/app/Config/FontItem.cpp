@@ -8,17 +8,15 @@
 	#define _T(a) a
 #endif 
 
-FontItem::FontItem(char *newLabel, char* newValue, BMessage *message):ConfigItem(B_STRING_TYPE),BTextControl(BRect(0,0,100,10),"checker",_T(newLabel),NULL,message)
+FontItem::FontItem(char *, char*, BMessage *)
 {
-	SetValue(newValue);
 }
 
-void* FontItem::GetValue(void)
+AFont* FontItem::GetValue(void)
 {
-	return (void *) Text();
+	return NULL;
 }
 
-void FontItem::SetValue(void* newValue)
+void FontItem::SetValue(AFont* )
 {
-	SetText((char *)newValue);
 }

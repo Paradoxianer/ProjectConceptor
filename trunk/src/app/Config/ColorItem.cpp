@@ -8,11 +8,9 @@
 	#define _T(a) a
 #endif 
 
-ColorItem::ColorItem(char *newLabel, rgb_color newValue, BMessage *message):ConfigItem(B_RGB_COLOR_TYPE),BView(BRect(0,0,30,30),"Color",B_FOLLOW_LEFT |B_FOLLOW_TOP,B_WILL_DRAW)
+ColorItem::ColorItem(BRect frame, char *newLabel, rgb_color newValue, BMessage *message):BControl(frame,"Color",newLabel,message,B_FOLLOW_LEFT_RIGHT , 0)
 {
-	label	= newLabel;
-	SetValue(&newValue);
-
+	SetColor(newValue);
 }
 
 void ColorItem::Draw(BRect updateRect)
@@ -27,12 +25,12 @@ void ColorItem::Draw(BRect updateRect)
 	button->SetViewColor(colorChecker-> ValueAsColor());
 }
 
-void* ColorItem::GetValue(void)
+rgb_color ColorItem::Color(void)
 {
-
+	return rgb_color();
 }
 
-void ColorItem::SetValue(void* newValue)
+void ColorItem::SetColor(rgb_color newValue)
 {
 }
 

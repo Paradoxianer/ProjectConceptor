@@ -3,7 +3,9 @@
 
 #include "ConfigItem.h"
 
+
 #include <interface/Button.h>
+#include <interface/Control.h>
 #include <interface/ColorControl.h>
 #include <interface/Font.h>
 #include <interface/Rect.h>
@@ -11,17 +13,14 @@
 
 #include <stdlib.h>
 
-class ColorItem : public ConfigItem, BView
+class ColorItem : 	BControl
 {
 public:
-						ColorItem(char *newLabel,rgb_color newVlaue, BMessage *message);
-	virtual	void*		GetValue(void);
-	virtual void		SetValue(void* newValue);
-	
-	virtual void		ValueChange(void){};
-	virtual	BView*		ViewForValue(void){return this;};
-	virtual void		Draw(BRect updateRect);
+						ColorItem(BRect frame, char *newLabel, rgb_color newValue, BMessage *message);
+	virtual	rgb_color	Color(void);
+	virtual void		SetColor(rgb_color newValue);
 
+	virtual void		Draw(BRect updateRect);
 protected:
 	char			*label;
 	BButton			*button;

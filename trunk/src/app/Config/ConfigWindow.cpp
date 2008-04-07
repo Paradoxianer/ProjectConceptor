@@ -9,6 +9,8 @@ ConfigWindow::ConfigWindow(BMessage *_configMessage):BWindow(BRect(50,50,600,400
 	AddChild(configView);
 
 }
+
+
 void ConfigWindow::ChangeLanguage()
 {
 	TRACE();
@@ -20,6 +22,7 @@ void ConfigWindow::SetConfigMessage(BMessage *_configMessage)
 	configMessage=_configMessage;
 	configView->SetConfigMessage(configMessage);
 }
+
 void ConfigWindow::Quit()
 {
 	TRACE();
