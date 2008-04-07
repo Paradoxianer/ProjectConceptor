@@ -44,7 +44,6 @@ public:
 	virtual	BMessage*			GetPrinterSetting(void){return printerSettings;};
 	virtual	BMessage*			GetSettings(void){return settings;};
 
-	virtual	WindowManager*		GetWindowManager(void);
 	virtual	PEditorManager*		GetEditorManager(void);
 	virtual	BMessage*			GetCommandManagerMessage(void){return commandManagerMessage;};
 
