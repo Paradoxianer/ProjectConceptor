@@ -80,6 +80,7 @@ LOCAL_INCLUDE_PATHS = \
 		../../include \
 		../../include/plugins \
 		../../app/Commands \
+		../../app/Config \
 		../../app/Document \
 		../../app/ToolBar \
 		../../app/Tools
