@@ -29,11 +29,20 @@ SRCS= 	About/AboutWindow.cpp \
 		About/AboutURLView.cpp \
 		MainView.cpp \
 		ProjectConceptor.cpp \
-		Commands/PCommand.cpp \
-		Commands/PCommandManager.cpp \
 		Config/ConfigWindow.cpp \
 		Config/ConfigView.cpp \
-		Document/PDocument.cpp \
+		Config/BoolItem.cpp \
+		Config/ColorItem.cpp \
+		Config/FloatItem.cpp \
+		Config/FontItem.cpp \
+		Config/MessageView.cpp \
+		Config/PatternItem.cpp \
+		Config/RectItem.cpp \
+		Config/MessageItem.cpp \
+		Config/StringItem.cpp \
+		Commands/PCommand.cpp \
+		Commands/PCommandManager.cpp \
+		Commands/PDocument.cpp \
 		Document/PDocumentManager.cpp \
 		Document/PEditor.cpp \
 		Document/PEditorManager.cpp \
