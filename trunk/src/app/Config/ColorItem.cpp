@@ -20,7 +20,9 @@ void ColorItem::Draw(BRect updateRect)
 	GetFontHeight(&fontHeight);
 	float baseLine=((fontHeight.ascent)-Bounds().Width())*0.75;
 	//draw Label
+#ifndef __HAIKU__
 	SetHighColor(ui_color(B_UI_CONTROL_TEXT_COLOR));
+#endif
 	DrawString(_T(label),BPoint(3,baseLine));
 	button->SetViewColor(colorChecker-> ValueAsColor());
 }

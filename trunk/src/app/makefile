@@ -42,7 +42,7 @@ SRCS= 	About/AboutWindow.cpp \
 		Config/StringItem.cpp \
 		Commands/PCommand.cpp \
 		Commands/PCommandManager.cpp \
-		Commands/PDocument.cpp \
+		Document/PDocument.cpp \
 		Document/PDocumentManager.cpp \
 		Document/PEditor.cpp \
 		Document/PEditorManager.cpp \
@@ -171,7 +171,7 @@ default .DEFAULT:
 
 	mkdir -p ../../bin
 	cp -rf $(NAME) ../../bin
-	ln -sf $(NAME) ../../bin/ProjectConceptor.a
+	ln -sf ../../bin/$(NAME) ../../bin/ProjectConceptor.a
 
 
 

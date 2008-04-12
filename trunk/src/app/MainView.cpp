@@ -14,7 +14,9 @@ MainView::MainView(PDocument *newDoc,
 	   : BTabView(rect,name,width,resizingMode,flags)
 {
 	TRACE();
+#ifdef B_ZETA_VERSION_1_0_0
 	BView::SetDoubleBuffering(1);
+#endif
 	doc = newDoc;
 }
 MainView::~MainView()

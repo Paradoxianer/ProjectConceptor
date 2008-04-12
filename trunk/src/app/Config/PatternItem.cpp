@@ -1,6 +1,7 @@
 #include "PatternItem.h"
 #include <stdio.h>
 #include <interface/InterfaceDefs.h>
+#include <TypeConstants.h>
 
 #ifdef B_ZETA_VERSION_BETA
 	#include <locale/Locale.h>
