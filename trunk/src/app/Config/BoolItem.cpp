@@ -8,7 +8,7 @@
 	#define _T(a) a
 #endif 
 
-BoolItem::BoolItem(char *newLabel, bool newValue, BMessage *message):ConfigItem(B_BOOL_TYPE),BCheckBox(BRect(0,0,100,10),"checker",_T(newLabel),message)
+BoolItem::BoolItem(char *newLabel, bool newValue, BMessage *message):BCheckBox(BRect(0,0,100,10),"checker",_T(newLabel),message)
 {
 	SetValue((void *)newValue);
 }

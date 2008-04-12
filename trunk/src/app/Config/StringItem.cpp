@@ -8,7 +8,7 @@
 	#define _T(a) a
 #endif 
 
-StringItem::StringItem(char *newLabel, char* newValue, BMessage *message):ConfigItem(B_STRING_TYPE),BTextControl(BRect(0,0,100,10),"checker",_T(newLabel),NULL,message)
+StringItem::StringItem(char *newLabel, char* newValue, BMessage *message):BTextControl(BRect(0,0,100,10),"checker",_T(newLabel),NULL,message)
 {
 	SetValue(newValue);
 }

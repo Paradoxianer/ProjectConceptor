@@ -8,7 +8,7 @@
 	#define _T(a) a
 #endif 
 
-FloatItem::FloatItem(char *newLabel, float newValue, BMessage *message):ConfigItem(B_FLOAT_TYPE),BTextControl(BRect(0,0,100,10),"checker",_T(newLabel),"",message)
+FloatItem::FloatItem(char *newLabel, float newValue, BMessage *message):BTextControl(BRect(0,0,100,10),"checker",_T(newLabel),"",message)
 {
 	SetValue((void *)&newValue);
 }

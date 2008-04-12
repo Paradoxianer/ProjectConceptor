@@ -19,7 +19,7 @@
 #include "GraphEditor.h"
 
 
-NodeEditor::NodeEditor(GraphEditor *_graphEditor,BRect rect):BView(rect,"NodeEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW |B_FULL_UPDATE_ON_RESIZE|B_NAVIGABLE|B_NAVIGABLE_JUMP)
+NodeEditor::NodeEditor(GraphEditor *_graphEditor,BRect rect):BView(rect,"NodeEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW |B_NAVIGABLE|B_NAVIGABLE_JUMP)
 {
 	TRACE();
 	graphEditor = _graphEditor;
@@ -928,7 +928,6 @@ void NodeEditor::AddToList(Renderer *whichRenderer, int32 pos)
 	BMessage	*tmpNode		= NULL;
 	if (pos>renderer->CountItems())
 	{
-		renderer->AddItem(whichRenderer);
 		if (whichRenderer->GetMessage()->FindPointer("Node::incoming",(void **)&connectionList) == B_OK)
 		{
 			for (i = 0; i< connectionList->CountItems();i++)
@@ -953,10 +952,10 @@ void NodeEditor::AddToList(Renderer *whichRenderer, int32 pos)
 				}
 			}
 		}
+		renderer->AddItem(whichRenderer);
 	}
 	else
 	{
-		renderer->AddItem(whichRenderer,pos);
 		if (whichRenderer->GetMessage()->FindPointer("Node::incoming",(void **)&connectionList) == B_OK)
 		{
 			for (i = 0; i< connectionList->CountItems();i++)
@@ -980,7 +979,8 @@ void NodeEditor::AddToList(Renderer *whichRenderer, int32 pos)
 					pos++;
 				}
 			}
-		}		
+		}
+		renderer->AddItem(whichRenderer,pos);
 	}
 	if (whichRenderer->GetMessage()->what == P_C_GROUP_TYPE)
 	{

@@ -1,7 +1,6 @@
 #ifndef PATTERN_ITEM_H
 #define PATTERN_ITEM_H
 
-#include "ConfigItem.h"
 
 #include <interface/Font.h>
 #include <interface/Rect.h>
@@ -10,7 +9,7 @@
 
 #include <stdlib.h>
 
-class PatternItem : public ConfigItem, BView
+class PatternItem : BView
 {
 public:
 					PatternItem(char *newLabel,pattern newVlaue, BMessage *message);

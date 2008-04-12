@@ -3,7 +3,6 @@
 /*
  * @author Paradoxon powered by Jesus Christ
  */
-#include "ConfigItem.h"
 
 #include <interface/Font.h>
 #include <interface/Rect.h>
@@ -12,7 +11,7 @@
 
 #include <stdlib.h>
 
-class StringItem : public ConfigItem, BTextControl
+class StringItem : public BTextControl
 {
 public:
 					StringItem(char *newLabel,char* newVlaue, BMessage *message);

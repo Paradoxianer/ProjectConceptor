@@ -29,7 +29,6 @@ GraphEditor::GraphEditor(image_id newId):PEditor(),BViewSplitter(BRect(0,0,400,4
 	TRACE();
 	pluginID	= newId;
 	Init();
-
 	/*
 	BView::SetDoubleBuffering(1);
 	SetDrawingMode(B_OP_ALPHA);*/
@@ -361,6 +360,7 @@ void GraphEditor::AttachedToWindow(void)
 	grid->SetTarget(nodeEditor);
 	penSize->SetTarget(nodeEditor);
 	colorItem->SetTarget(nodeEditor);
+	SetViewColor(B_TRANSPARENT_COLOR);
 }
 
 

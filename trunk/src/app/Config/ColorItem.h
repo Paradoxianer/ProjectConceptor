@@ -1,9 +1,6 @@
 #ifndef COLOR_ITEM_H
 #define COLOR_ITEM_H
 
-#include "ConfigItem.h"
-
-
 #include <interface/Button.h>
 #include <interface/Control.h>
 #include <interface/ColorControl.h>

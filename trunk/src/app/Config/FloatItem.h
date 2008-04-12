@@ -1,7 +1,6 @@
 #ifndef FLOAT_ITEM_H
 #define FLOAT_ITEM_H
 
-#include "ConfigItem.h"
 
 #include <interface/Font.h>
 #include <interface/Rect.h>
@@ -10,7 +9,7 @@
 
 #include <stdlib.h>
 
-class FloatItem : public ConfigItem, BTextControl
+class FloatItem : BTextControl
 {
 public:
 					FloatItem(char *newLabel,float newVlaue, BMessage *message);
