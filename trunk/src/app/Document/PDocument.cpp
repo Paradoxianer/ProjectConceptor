@@ -200,6 +200,11 @@ void PDocument::MessageReceived(BMessage* message)
 			commandManager->Execute(message);
 			break;
 		}
+		case AUTO_SAVE:
+		{
+			AutoSave();
+			break;
+		}
 		default:
 			BLooper::MessageReceived(message);
 			break;
@@ -227,6 +232,7 @@ void PDocument::Init()
 	height			= 800;
 	dirty			= true;
 	entryRef		= NULL;
+	autoSaveRef		= NULL;
 	modified		= false;
 	editorManager	= new PEditorManager(this);
 	commandManager	= new PCommandManager(this);
@@ -822,20 +828,61 @@ status_t PDocument::RemoveToolItem(const char* toolbarSignature,const char* tool
 }
 
 
-BMessage* PDocument::ReIndex(BList *nodeList)
+void PDocument::AutoSave(void)
 {
-	BMessage	*returnMessage	= new BMessage();
-	BMessage	*node			= NULL;
-	BList		*subList		= NULL;
-	for (int32 i=0;i<nodeList->CountItems();i++)
+	//** Use Settingsfolder to
+	if (autoSaveRef == NULL)
 	{
-		node =(BMessage *) nodeList->ItemAt(i);
-		node->AddPointer("this",node);
-		if ((node->FindPointer("SubContainer",(void **)&subList) == B_OK) && (subList != NULL) )
-			node->AddMessage("SubContainerList",ReIndex(subList));
-		returnMessage->AddMessage("node",node);
+		BPath settings;
+		find_directory(B_USER_SETTINGS_DIRECTORY, &settings, true)
+		char p[PATH_MAX];
+		sprintf("%s/ProjectConceptor/AutoSave/%s",settings.Path(),Title());
+		//** check if this file exist already
 	}
-	return returnMessage;
+	BFile	*autoSave	new BFile(autoSaveRef);
+	PushToStream(autoSave);
+	delete autoSave;
 }
 
-
+void PDocument::PushToStream(BPositionIO *pushTo)
+{
+	Indexer		*indexer		= new Indexer((PDocument *)this);
+	BMessage	*commandManage	= new BMessage();
+	BMessage	*selectedMessage		= new BMessage();
+	//**security check if the passed BPositionIO ok is
+	documentSetting->Flatten(pushTo);
+	for (i=0; i<allNodes->CountItems();i++)
+	{
+		tmpNode=(BMessage *)allNodes->ItemAt(i);
+		BMessage *indexed = indexer->IndexNode(tmpNode);
+		indexed->Flatten(pushTo);
+	}
+	for (i=0; i<allConnections->CountItems();i++)
+	{
+		tmpNode=(BMessage *)allConnections->ItemAt(i);
+		BMessage *indexed = indexer->IndexConnection(tmpNode);
+		indexed->Flatten(pushTo);
+	}
+	for (i=0; i<selected->CountItems();i++)
+	{
+		selectedMessage->AddPointer("node",selected->ItemAt(i));
+	}
+	selectedMessage->Flatten(pushTo);
+	for (i=0;i<(commandManager->GetMacroList())->CountItems();i++)
+		{
+			BMessage *macro =(BMessage *)(commandManager->GetMacroList())->ItemAt(i));
+			macro->Flatten(pushTo);
+	}
+	for (i=0;i<(commandManager->GetUndoList())->CountItems();i++)
+	{
+		BMessage *indexed = indexer->IndexMacroCommand((BMessage *)(commandManager->GetUndoList())->ItemAt(i)));
+		indexed->Flatten(pushTo);
+	}
+	//**add the UndoIndex
+	commandManage->AddInt32("undoStatus",commandManager->GetUndoIndex());
+	//add the commandManage
+	archive->AddMessage("PDocument::commandManager", commandManage);
+	delete	indexer;
+	delete	commandManage;
+	delete	selectedMessage;
+}

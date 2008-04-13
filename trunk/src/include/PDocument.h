@@ -184,9 +184,12 @@ public:
 protected:
 			void				Init(void);
 			void				Init(BMessage *archive);
-			BMessage			*ReIndex(BList *nodeList);
-
-
+			/**save the file temporary for restoring
+			 */
+	 		void				AutoSave(void);
+			/* puts all PDocument data to the given Stream;
+			 */
+			void				PushToStream(BPositionIO *pushTo);
 
 			PDocumentManager	*documentManager;
 
@@ -207,6 +210,7 @@ protected:
 		 	float				width,height;
 			bool				dirty;
 			entry_ref			*entryRef;
+			entry_ref			*autoSaveRef;
 			bool				modified;
 
 			PEditorManager		*editorManager;
