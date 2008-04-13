@@ -28,15 +28,15 @@ PDocument::PDocument(PDocumentManager *initManager,entry_ref *openEntry):BLooper
 	TRACE();
 	PRINT(("%d\n",openEntry));
 	documentManager=initManager;
-	Init();
 	Run();
+	Init();
 }
 
 PDocument::PDocument(BMessage *archive):BLooper(archive)
 {
 	TRACE();
-	Init(archive);
 	Run();
+	Init(archive);
 }
 
 PDocument::~PDocument()
@@ -210,6 +210,7 @@ void PDocument::MessageReceived(BMessage* message)
 void PDocument::Init()
 {
 	TRACE();
+	bool locked = Lock();
 	allNodes		= new BList();
 	allConnections	= new BList();
 	selected		= new BList();
@@ -234,11 +235,14 @@ void PDocument::Init()
 	BRect	windowRect	= tmpScreen->Frame();
 	windowRect.InsetBy(50,50);
 	window			= new PWindow(windowRect,this);
+	if (locked)
+		UnlockLooper();
 }
 
 void PDocument::Init(BMessage *archive)
 {
 	TRACE();
+	bool locked = Lock();
 	printerSetting	= NULL;
 	documentSetting	= new BMessage();
 	archive->FindMessage("PDocument::documentSetting",documentSetting);
@@ -247,6 +251,8 @@ void PDocument::Init(BMessage *archive)
 		delete printerSetting;
 		printerSetting = NULL;
 	}
+	if (locked)
+		Unlock();
 }
 
 const char* PDocument::Title(void)
@@ -270,42 +276,60 @@ const char* PDocument::Title(void)
 void PDocument::Resize(float toX,float toY)
 {
 	TRACE();
+	bool locked = Lock();
 	bounds.right	= toX;
 	bounds.bottom	= toY;
 	editorManager->BroadCast(new BMessage(P_C_DOC_BOUNDS_CHANGED));
+	if (locked)
+		Unlock();
 }
 
 void PDocument::SetModified(void)
 {
+	bool locked = Lock();
 	BMenuItem *saveItem = GetMenuItem(P_MENU_FILE_SAVE);
 	if ((saveItem) && (entryRef != NULL))
 		saveItem->SetEnabled(true);
 	modified=true;
+	if (locked)
+		Unlock();
+
 }
 
 void PDocument::ResetModified(void)
 {
+	bool locked = Lock();
 	BMenuItem *saveItem = GetMenuItem(P_MENU_FILE_SAVE);
 	if ((saveItem) && (entryRef != NULL))
 		saveItem->SetEnabled(false);
 	modified=false;
+	if (locked)
+		Unlock();
 }
 
 void PDocument::SetDocumentSettings(BMessage *settings)
 {
 	TRACE();
+	bool locked = Lock();
 	if (settings!=NULL)
 	{
 		delete documentSetting;
 		documentSetting	= settings;
 	}
+	if (locked)
+		Unlock();
+
 }
 
 void PDocument::ShowSettings(void)
 {
+	bool locked = Lock();
 	ConfigWindow *configWin = documentManager->GetConfigWindow();
 	configWin->SetConfigMessage(documentSetting);
 	configWin->Show();
+	if (locked)
+		Unlock();
+
 }
 
 
@@ -313,7 +337,7 @@ BMessage* PDocument::PrintSettings(void)
 {
 	TRACE();
 	status_t result = B_OK;
-	BPrintJob printJob("document's name");
+	BPrintJob printJob(Title());
 	if (! printerSetting)
 	{
 		result = printJob.ConfigPage();
@@ -490,6 +514,7 @@ void PDocument::Save(void)
 	int32				tmpInt				= 0;
 	int32				outType				= 0;
 
+	bool locked = Lock();
 	documentSetting->FindMessage("saveSettings",saveSettings);
 	if (saveSettings->FindInt32("translator_id",&tmpInt) == B_OK)
 	{
@@ -542,7 +567,8 @@ void PDocument::Save(void)
 	}
 	else
 		PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
-
+	if (locked)
+		Unlock();
 }
 
 void PDocument::Load(void)
@@ -556,6 +582,8 @@ void PDocument::Load(void)
 	BMessage			*loaded			= new BMessage();
 	int32				i				= 0;
 	translator_info		*indentifed		= new translator_info;
+	bool locked = Lock();
+
 	if (file->InitCheck() == B_OK)
 	{
 		roster	= BTranslatorRoster::Default();
@@ -604,6 +632,8 @@ void PDocument::Load(void)
 //	commandManager->LoadUndo(docLoader->GetCommandManagerMessage());
 	SetPrintSettings( docLoader->GetPrinterSetting());
 	editorManager->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+	if (locked)
+		Unlock();
 }
 
 void PDocument::SavePanel()
@@ -646,7 +676,7 @@ bool PDocument::QuitRequested(void)
 	}
 	if (returnValue)
 	{
-		window->Lock();	
+		window->Lock();
 		window->Quit();
 	}
 	return returnValue;
