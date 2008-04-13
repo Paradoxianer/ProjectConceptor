@@ -44,6 +44,10 @@ const uint32	P_C_MACRO_TYPE					= 'pcTM';
 
 const uint32	P_C_INSERT_EDITOR				= 'pcIE';
 const uint32	P_C_REMOVE_EDITOR				= 'pcRE';
+
+const uint32	P_C_AUTO_SAVE					= 'pcAS';
+const uint32	P_C_RESTORE_SAVE				= 'pcRS';
+
 /*const uint32	P_C_GROUP_TYPE					= 'pcGr';
 const uint32	P_C_NODE_TYPE					= 'pcNd';
 const uint32	P_C_FUNCTION_TYPE				= 'pcFc';
@@ -134,6 +138,9 @@ const uint32	MENU_MACRO_OPEN					= 'MMop';
 const uint32	MENU_MACRO_SAVE					= 'MMsv';
 
 const uint32	MENU_HELP_ABOUT					= 'MHab';
+
+
+
 
 
 //extern const char		*APP_SIGNATURE;//					= "application/ProjektConceptor";;

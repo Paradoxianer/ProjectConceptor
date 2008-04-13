@@ -210,7 +210,7 @@ protected:
 		 	float				width,height;
 			bool				dirty;
 			entry_ref			*entryRef;
-			entry_ref			*autoSaveRef;
+			BEntry				*autoSaveRef;
 			bool				modified;
 
 			PEditorManager		*editorManager;

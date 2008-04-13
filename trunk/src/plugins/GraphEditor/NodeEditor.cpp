@@ -406,7 +406,8 @@ void NodeEditor::AttachedToWindow(void)
 	status_t	err;
 	if (sentTo != NULL)
 		delete sentTo;
-	sentTo				= new BMessenger(graphEditor->BelongTo(),NULL,&err);
+	//sentTo				= new BMessenger(graphEditor->BelongTo(),NULL,&err);
+	sentTo				= new BMessenger(NULL,graphEditor->BelongTo(),&err);
 	if (err != B_OK)
 		printf("Init BMessagener %s\n",strerror(err));
 	SetViewColor(230,230,230,255);

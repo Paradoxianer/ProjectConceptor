@@ -6,6 +6,8 @@
 #include <TranslationUtils.h>
 #include <TranslatorRoster.h>
 #include <string.h>
+#include <FindDirectory.h>
+
 
 #include "PCSavePanel.h"
 #include "PDocument.h"
@@ -200,11 +202,18 @@ void PDocument::MessageReceived(BMessage* message)
 			commandManager->Execute(message);
 			break;
 		}
-		case AUTO_SAVE:
+		case P_C_AUTO_SAVE:
 		{
 			AutoSave();
 			break;
 		}
+		case P_C_RESTORE_SAVE:
+		{
+			//for the Moment we use autosave ;-)
+			AutoSave();
+			break;
+		}
+
 		default:
 			BLooper::MessageReceived(message);
 			break;
@@ -335,7 +344,6 @@ void PDocument::ShowSettings(void)
 	configWin->Show();
 	if (locked)
 		Unlock();
-
 }
 
 
@@ -834,21 +842,24 @@ void PDocument::AutoSave(void)
 	if (autoSaveRef == NULL)
 	{
 		BPath settings;
-		find_directory(B_USER_SETTINGS_DIRECTORY, &settings, true)
+		find_directory(B_USER_SETTINGS_DIRECTORY, &settings, true);
 		char p[PATH_MAX];
-		sprintf("%s/ProjectConceptor/AutoSave/%s",settings.Path(),Title());
+		sprintf(p,"%s/ProjectConceptor/AutoSave/%s",settings.Path(),Title());
 		//** check if this file exist already
+		autoSaveRef=new BEntry(p);
 	}
-	BFile	*autoSave	new BFile(autoSaveRef);
+	BFile	*autoSave	= new BFile((const BEntry *)autoSaveRef,B_READ_WRITE);
 	PushToStream(autoSave);
 	delete autoSave;
 }
 
 void PDocument::PushToStream(BPositionIO *pushTo)
 {
-	Indexer		*indexer		= new Indexer((PDocument *)this);
-	BMessage	*commandManage	= new BMessage();
-	BMessage	*selectedMessage		= new BMessage();
+	Indexer		*indexer			= new Indexer((PDocument *)this);
+	BMessage	*tmpNode			= NULL;
+	BMessage	*commandManage		= new BMessage();
+	BMessage	*selectedMessage	= new BMessage();
+	int			i					= 0;
 	//**security check if the passed BPositionIO ok is
 	documentSetting->Flatten(pushTo);
 	for (i=0; i<allNodes->CountItems();i++)
@@ -869,19 +880,19 @@ void PDocument::PushToStream(BPositionIO *pushTo)
 	}
 	selectedMessage->Flatten(pushTo);
 	for (i=0;i<(commandManager->GetMacroList())->CountItems();i++)
-		{
-			BMessage *macro =(BMessage *)(commandManager->GetMacroList())->ItemAt(i));
+	{
+			BMessage *macro =(BMessage *)(commandManager->GetMacroList()->ItemAt(i));
 			macro->Flatten(pushTo);
 	}
 	for (i=0;i<(commandManager->GetUndoList())->CountItems();i++)
 	{
-		BMessage *indexed = indexer->IndexMacroCommand((BMessage *)(commandManager->GetUndoList())->ItemAt(i)));
+		BMessage *indexed = indexer->IndexMacroCommand((BMessage *)(commandManager->GetUndoList()->ItemAt(i)));
 		indexed->Flatten(pushTo);
 	}
 	//**add the UndoIndex
 	commandManage->AddInt32("undoStatus",commandManager->GetUndoIndex());
 	//add the commandManage
-	archive->AddMessage("PDocument::commandManager", commandManage);
+	commandManage->Flatten(pushTo);
 	delete	indexer;
 	delete	commandManage;
 	delete	selectedMessage;
