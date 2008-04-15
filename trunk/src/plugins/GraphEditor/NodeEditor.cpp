@@ -19,7 +19,7 @@
 #include "GraphEditor.h"
 
 
-NodeEditor::NodeEditor(GraphEditor *_graphEditor,BRect rect):BView(rect,"NodeEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW |B_NAVIGABLE|B_NAVIGABLE_JUMP)
+NodeEditor::NodeEditor(GraphEditor *_graphEditor,BRect rect):BView(rect,"NodeEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW)
 {
 	TRACE();
 	graphEditor = _graphEditor;
@@ -236,8 +236,8 @@ void NodeEditor::Draw(BRect updateRect)
 {
 	SetHighColor(230,230,230,255);
 	SetScale(1.0);
-
-	BView::Draw(BRect(updateRect.left/scale,updateRect.top/scale,updateRect.right/scale,updateRect.bottom/scale));
+	BView::Draw(updateRect);
+//	BView::Draw(BRect(updateRect.left/scale,updateRect.top/scale,updateRect.right/scale,updateRect.bottom/scale));
 	SetScale(scale);
 	if (gridEnabled)
 	{

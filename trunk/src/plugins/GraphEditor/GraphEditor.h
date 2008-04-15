@@ -90,6 +90,8 @@ public:
 	virtual void			DetachedFromWindow(void);
 
 	virtual	void			MessageReceived(BMessage *msg);
+	virtual	void			Draw(BRect updateRect){};
+
 	//----------------BView
 
 			image_id		PluginID(void){return pluginID;};

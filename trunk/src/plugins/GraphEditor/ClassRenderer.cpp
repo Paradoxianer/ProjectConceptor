@@ -19,6 +19,7 @@ ClassRenderer::ClassRenderer(NodeEditor *parentEditor, BMessage *forContainer):R
 	TRACE();
 	Init();
 	ValueChanged();
+	name->MouseDown(BPoint(0,0));
 }
 void ClassRenderer::Init()
 {
