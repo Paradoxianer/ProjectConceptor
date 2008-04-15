@@ -17,6 +17,13 @@
 #include "BasePlugin.h"
 #include "Indexer.h"
 
+
+#ifdef __BEOS__
+ #ifdef find_directory
+ 	#undef find_directory
+ #endif
+#endif
+
 PDocument::PDocument(PDocumentManager *initManager):BLooper()
 {
 	TRACE();

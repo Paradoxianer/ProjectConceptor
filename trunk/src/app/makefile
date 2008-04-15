@@ -171,7 +171,7 @@ default .DEFAULT:
 
 	mkdir -p ../../bin
 	cp -rf $(NAME) ../../bin
-	ln -sf ../../bin/$(NAME) ../../bin/ProjectConceptor.a
+	ln -sf $(NAME) ../../bin/ProjectConceptor.a
 
 
 
