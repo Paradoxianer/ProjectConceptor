@@ -2,10 +2,12 @@
 #include <math.h>
 
 #include "PagedView.h"
+#include <Debug.h>
 
 
-PagedView::PagedView(BRect rect,char _name):BView(rect,"PagedView",B_FOLLOW_ALL_SIDES,B_WILL_DRAW)
+PagedView::PagedView(BRect _rect,char *_name,uint32 resizingMode,uint32 flags,page_layout _pageLayout):BView(_rect,_name,resizingMode,flags)
 {
+	pageLayout=_pageLayout;
 	TRACE();
 	Init();
 }
@@ -14,12 +16,11 @@ void PagedView::Init(void)
 {
 	TRACE();
 	printRect		= BRect();
-	pageSize		= BRect();;
+	pageRect		= BRect();;
 	renderBitmap	= new BBitmap(Bounds(),B_RGB32,true);
 	colums			= 1;
-	ows				= 1;
-	aged			= false
-	pageMode		= 0;
+	rows			= 1;
+	paged			= false;
 	childList		= vector<PagedRect>();
 }
 
@@ -32,14 +33,23 @@ bool PagedView::RemoveChild(BView *_view){
 	return renderBitmap->RemoveChild(_view);
 }
 
-BView* PagedView::ChildAt(int32 index){
+BView* PagedView::ChildAt(int32 index) const{
 	return renderBitmap->ChildAt(index);
 
 }
 
-int32 PagedView::CountChildren(void){
+int32 PagedView::CountChildren(void) const{
 	return renderBitmap->CountChildren();
 }
+
+BView* PagedView::FindView(const char* name) const{
+	return renderBitmap->FindView(name);
+}
+
+BView*  PagedView::FindView(BPoint point) const{
+	return renderBitmap->FindView(point);
+}
+
 
 void PagedView::Draw(BRect updateRect)
 {
@@ -53,8 +63,8 @@ void PagedView::MouseDown(BPoint where)
 	if (paged){
 		//find the page the user clicked on :)
 		vector<PagedRect>::iterator it;
-		for ( it=myvector.begin() ; (it < myvector.end()) && (found == NULL); it++ ){
-			if (*it.PageRect().Contains(where))
+		for ( it=childList.begin() ; (it < childList.end()) && (found == NULL); it++ ){
+			if ((*it).PageRect().Contains(where))
 				found = renderBitmap->FindView(where-(*it).DiffOffset());
 		}
 	}
@@ -71,8 +81,8 @@ void PagedView::MouseMoved(	BPoint where, uint32 code, const BMessage *a_message
 	if (paged){
 		//find the page the user clicked on :)
 		vector<PagedRect>::iterator it;
-		for ( it=myvector.begin() ; (it < myvector.end()) && (found == NULL); it++ ){
-			if (*it.PageRect().Contains(where))
+		for ( it=childList.begin() ; (it < childList.end()) && (found == NULL); it++ ){
+			if ((*it).PageRect().Contains(where))
 				found = renderBitmap->FindView(where-(*it).DiffOffset());
 		}
 	}
@@ -88,8 +98,8 @@ void PagedView::MouseUp(BPoint where)
 	if (paged){
 		//find the page the user clicked on :)
 		vector<PagedRect>::iterator it;
-		for ( it=myvector.begin() ; (it < myvector.end()) && (found == NULL); it++ ){
-			if (*it.PageRect().Contains(where))
+		for ( it=childList.begin() ; (it < childList.end()) && (found == NULL); it++ ){
+			if ((*it).PageRect().Contains(where))
 				found = renderBitmap->FindView(where-(*it).DiffOffset());
 		}
 	}
@@ -122,8 +132,7 @@ void PagedView::DrawPages(BRect updateRect)
 	BRect						printingRect;
 	BRect						paperRect;
 	rgb_color					restoreHighColor;
-	PageRect
-	for ( it=myvector.begin() ; it < myvector.end(); it++ ){
+	for ( it=childList.begin() ; it < childList.end(); it++ ){
 			paperRect		=(*it).PageRect();
 			printingRect	=(*it).PrintRect();
 			if (paperRect.Intersects(updateRect)){
@@ -138,7 +147,7 @@ void PagedView::DrawPages(BRect updateRect)
 				restoreHighColor=HighColor();
 				SetHighColor(0,0,255,200);
 				SetPenSize(2.0);
-				StrokeRect(targetRect);
+				StrokeRect(printingRect);
 				SetHighColor(restoreHighColor);
 			}
 	}
@@ -153,31 +162,31 @@ void PagedView::CalculatePages(void){
 	int32		q, i, cx, cy,count;
 	float		x, y, nx, ny;
 	float		leftDiff, topDiff;
-	leftDiff	= printRect.left - paperRect.left;
-	topDiff		= printRect.top - paperRect.top;
-	columns = ceil(Bounds->Width()/printRect.Width());
-	row		= ceil(Bounds->Height()/printRect.Height());
+	leftDiff	= printRect.left - pageRect.left;
+	topDiff		= printRect.top - pageRect.top;
+	colums		= ceil(Bounds().Width()/printRect.Width());
+	rows		= ceil(Bounds().Height()/printRect.Height());
 	childList.clear();
 	for (q=0; q< rows; q++)
-		for (i=0;i<columns;i++)
+		for (i=0;i<colums;i++)
 		{
 			x=i*printRect.Width();
 			y=q*printRect.Height();
-			sourceRect	= BRect(x,y,x+printRect.Width(),y+printRect.Heigth());
-			count = q*columns+x;
+			sourceArea	= BRect(x,y,x+printRect.Width(),y+printRect.Height());
+			count = q*colums+x;
 			if (pageLayout == COL_AS_NEEDED){
 				cy = q;
 				cx = i;
 			}
 			else {
 				cx = count % pageLayout;
-				cy = floor(count / pageLayout);
+				cy = (int32)floor(count / pageLayout);
 			}
 
-			nx = (cx*pageSize.Width())+cx*margin;
-			ny = (cy*pageSize.Height())+cy*margin;
+			nx = (cx*pageRect.Width())+cx*margin;
+			ny = (cy*pageRect.Height())+cy*margin;
 			printArea	= BRect (nx+leftDiff,ny+topDiff,nx+printRect.Width(),ny+printRect.Height());
-			paperArea	= BRect(nx,ny,nx+pageSize.Width(),ny+pageSize.Height());
+			paperArea	= BRect(nx,ny,nx+pageRect.Width(),ny+pageRect.Height());
 /*			if (paperRect.Intersects(updateRect))
 			{
 				paperRect.OffsetBy(10,10);
@@ -190,7 +199,7 @@ void PagedView::CalculatePages(void){
 			if (targetRect.Intersects(updateRect))
 				DrawBitmapAsync(renderBitmap,drawRect,targetRect);
 				DrawRect(targetRect);*/
-			pagedArea	= new PagedRect(paperArea,printArea,sourceArea);
+			childList.push_back(PagedRect(paperArea,printArea,sourceArea));
 		}
 
 }

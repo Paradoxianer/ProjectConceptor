@@ -42,6 +42,7 @@ SRCS= 	About/AboutWindow.cpp \
 		Config/StringItem.cpp \
 		Commands/PCommand.cpp \
 		Commands/PCommandManager.cpp \
+		Document/PagedView.cpp \
 		Document/PDocument.cpp \
 		Document/PDocumentManager.cpp \
 		Document/PEditor.cpp \

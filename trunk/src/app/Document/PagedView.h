@@ -36,9 +36,9 @@ class PagedRect
 			BRect			PrintRect(void){return printRect;};
 			BRect			SourceRect(void){return sourceRect;};
 			void			SetPageRect(BRect _pageRect){pageRect=_pageRect;};
-			void			SetPageRect(BRect _printRect){printRect=_printRect;};
+			void			SetPrintRect(BRect _printRect){printRect=_printRect;};
 			void			SetSourceRect(BRect _sourceRect){sourceRect=_sourceRect;};
-			BPoint			DiffOffset(void){return BPoint(sourceRect.lef-printRect.left,sourceRect.top-printRect.top);};
+			BPoint			DiffOffset(void){return BPoint(sourceRect.left-printRect.left,sourceRect.top-printRect.top);};
 
 
 	private:
@@ -46,13 +46,13 @@ class PagedRect
 			BRect			printRect;
 			BRect			sourceRect;
 
-}
+};
 
 class PagedView :  public BView
 {
 
 public:
-							PagedView(BRect _rect,char *_name,uint32 resizingMode,uint32 flags,page_layout _pageLayout);
+							PagedView(BRect _rect,char *_name,uint32 resizingMode,uint32 flags,page_layout _pageLayout = ONE_COL);
 
 	//++++++++++++++++BView
 	virtual void			AddChild(BView *);
