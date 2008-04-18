@@ -55,6 +55,8 @@ public:
 							PagedView(BRect _rect,char *_name,uint32 resizingMode,uint32 flags,page_layout _pageLayout = ONE_COL);
 
 	//++++++++++++++++BView
+	virtual void			AttachedToWindow(void);
+
 	virtual void			AddChild(BView *);
 	virtual bool			RemoveChild(BView *);
 	virtual BView*			ChildAt(int32 index) const;
@@ -72,6 +74,8 @@ public:
 
 	virtual void			FrameResized(float width, float height);
 	//----------------BView
+			void			SetPageRect(BRect _pageRect);
+			void			SetPrintRect(BRect _printRect);
 
 protected:
 			void			Init(void);

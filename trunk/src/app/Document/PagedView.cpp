@@ -5,15 +5,13 @@
 #include <Debug.h>
 
 
-PagedView::PagedView(BRect _rect,char *_name,uint32 resizingMode,uint32 flags,page_layout _pageLayout):BView(_rect,_name,resizingMode,flags)
-{
+PagedView::PagedView(BRect _rect,char *_name,uint32 resizingMode,uint32 flags,page_layout _pageLayout):BView(_rect,_name,resizingMode,flags){
 	pageLayout=_pageLayout;
 	TRACE();
 	Init();
 }
 
-void PagedView::Init(void)
-{
+void PagedView::Init(void){
 	TRACE();
 	printRect		= BRect();
 	pageRect		= BRect();;
@@ -24,29 +22,40 @@ void PagedView::Init(void)
 	childList		= vector<PagedRect>();
 }
 
+void  PagedView::AttachedToWindow(void){
+	TRACE();
+	SetViewColor(230,230,230,255);
+}
+
 
 void PagedView::AddChild(BView* _view){
+	TRACE();
 	renderBitmap->AddChild(_view);
 }
 
 bool PagedView::RemoveChild(BView *_view){
+	TRACE();
 	return renderBitmap->RemoveChild(_view);
 }
 
 BView* PagedView::ChildAt(int32 index) const{
+	TRACE();
 	return renderBitmap->ChildAt(index);
 
 }
 
 int32 PagedView::CountChildren(void) const{
+	TRACE();
 	return renderBitmap->CountChildren();
 }
 
 BView* PagedView::FindView(const char* name) const{
+	TRACE();
 	return renderBitmap->FindView(name);
 }
 
 BView*  PagedView::FindView(BPoint point) const{
+	TRACE();
 	return renderBitmap->FindView(point);
 }
 
@@ -126,6 +135,7 @@ void PagedView::FrameResized(float width, float height)
 {
 	TRACE();
 	//**pass all Resize stuff through;
+	CalculatePages
 }
 
 
@@ -162,7 +172,23 @@ void PagedView::DrawPages(BRect updateRect)
 	Sync();
 }
 
+void PagedView::SetPageRect(BRect _pageRect){
+	if (_pageRect.IsValid()){
+		pageRect=_pageRect;
+		CalculatePages();
+	}
+}
+
+void PagedView::SetPrintRect(BRect _printRect){
+	if (_printRect.IsValid()){
+		printRect=_printRect;
+		CalculatePages();
+	}
+}
+
+
 void PagedView::CalculatePages(void){
+	TRACE();
 	BRect		sourceArea;
 	BRect		printArea;
 	BRect		paperArea;
