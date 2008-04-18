@@ -62,6 +62,17 @@ BView*  PagedView::FindView(BPoint point) const{
 
 void PagedView::Draw(BRect updateRect)
 {
+
+	/**call all draw routines of the BViews
+	wich are added to the BBitmap and sync
+	them to the BBitmap
+	Maby check if the View is Visible
+	and therefore need to be drawn
+	to save RenderTime
+	maby its enought to interset the update Rect,
+	move the offset in pagedView
+	and then call the Childrens Draw with this rect
+	*/
 	if (paged) && (!IsPrinting())
 		DrawPages(updateRect);
 	else

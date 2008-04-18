@@ -56,9 +56,17 @@ public:
 
 	//++++++++++++++++BView
 	virtual void			AttachedToWindow(void);
-
+	/**
+	 * calls the AddChild from renderBitmap
+	 */
 	virtual void			AddChild(BView *);
+	/**
+	 * calls the RemoveChild from renderBitmap
+	 */
 	virtual bool			RemoveChild(BView *);
+	/**
+	 * calls the ChildAt from renderBitmap
+	 */
 	virtual BView*			ChildAt(int32 index) const;
 	virtual int32			CountChildren(void) const;
 	virtual BView*			FindView(BPoint point) const;
@@ -74,7 +82,17 @@ public:
 
 	virtual void			FrameResized(float width, float height);
 	//----------------BView
+	/**
+	 * Pass the Rect wich defines the new Size of the Page
+	 * This Rect must enclose the whole printRect
+	 *@see SetPrintRect(BRect _printRect);
+	 */
 			void			SetPageRect(BRect _pageRect);
+	/**
+	 * Pass the Rect wich defines the new Size of the Printable Rect
+	 * This Rect must be smaller than the PageRect
+	 *@see SetPageRect(BRect _printRect);
+	 */
 			void			SetPrintRect(BRect _printRect);
 
 protected:
