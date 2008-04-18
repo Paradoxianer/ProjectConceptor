@@ -73,7 +73,7 @@ void PagedView::Draw(BRect updateRect)
 	move the offset in pagedView
 	and then call the Childrens Draw with this rect
 	*/
-	if (paged) && (!IsPrinting())
+	if ((paged) && (!IsPrinting()))
 		DrawPages(updateRect);
 	else
 		DrawBitmap(renderBitmap,updateRect,updateRect);
@@ -146,7 +146,7 @@ void PagedView::FrameResized(float width, float height)
 {
 	TRACE();
 	//**pass all Resize stuff through;
-	CalculatePages
+	CalculatePages();
 }
 
 
