@@ -53,8 +53,11 @@ BView*  PagedView::FindView(BPoint point) const{
 
 void PagedView::Draw(BRect updateRect)
 {
-	if (paged)
+	if (paged) && (!IsPrinting())
 		DrawPages(updateRect);
+	else
+		DrawBitmap(renderBitmap,updateRect,updateRect);
+
 }
 
 void PagedView::MouseDown(BPoint where)
@@ -122,6 +125,7 @@ void PagedView::MessageReceived(BMessage *message)
 void PagedView::FrameResized(float width, float height)
 {
 	TRACE();
+	//**pass all Resize stuff through;
 }
 
 
@@ -131,6 +135,7 @@ void PagedView::DrawPages(BRect updateRect)
 	BRect						sourceRect;
 	BRect						printingRect;
 	BRect						paperRect;
+	BRect						drawRect;
 	rgb_color					restoreHighColor;
 	for ( it=childList.begin() ; it < childList.end(); it++ ){
 			paperRect		=(*it).PageRect();
@@ -142,8 +147,11 @@ void PagedView::DrawPages(BRect updateRect)
 				FillRect(paperRect);
 				StrokeRect(paperRect);
 			}
-			if (printingRect.Intersects(updateRect)){
-				DrawBitmapAsync(renderBitmap,(*it).SourceRect(),printingRect);
+			drawRect	= printingRect & updateRect;
+			if (drawRect.IsValid()){
+				sourceRect	= drawRect;
+				sourceRect.OffsetBy((*it).DiffOffset());
+				DrawBitmapAsync(renderBitmap,sourceRect,printingRect);
 				restoreHighColor=HighColor();
 				SetHighColor(0,0,255,200);
 				SetPenSize(2.0);
@@ -187,18 +195,6 @@ void PagedView::CalculatePages(void){
 			ny = (cy*pageRect.Height())+cy*margin;
 			printArea	= BRect (nx+leftDiff,ny+topDiff,nx+printRect.Width(),ny+printRect.Height());
 			paperArea	= BRect(nx,ny,nx+pageRect.Width(),ny+pageRect.Height());
-/*			if (paperRect.Intersects(updateRect))
-			{
-				paperRect.OffsetBy(10,10);
-				FillRect(paperRect);
-				paperRect.OffsetBy(-10,-10);
-				FillRect(paperRect);
-				DrawRect(paperRect);
-				DrawRect(targetRect);
-			}
-			if (targetRect.Intersects(updateRect))
-				DrawBitmapAsync(renderBitmap,drawRect,targetRect);
-				DrawRect(targetRect);*/
 			childList.push_back(PagedRect(paperArea,printArea,sourceArea));
 		}
 
