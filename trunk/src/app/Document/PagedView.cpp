@@ -18,13 +18,16 @@ void PagedView::Init(void){
 	renderBitmap	= new BBitmap(Bounds(),B_RGB32,true);
 	colums			= 1;
 	rows			= 1;
-	paged			= false;
+	paged			= true;
+	margin			= 5.0;
 	childList		= vector<PagedRect>();
 }
 
 void  PagedView::AttachedToWindow(void){
 	TRACE();
 	SetViewColor(230,230,230,255);
+	SetHighColor(0,0,0,255);
+	SetLowColor(255,255,255,255);
 }
 
 
@@ -73,6 +76,12 @@ void PagedView::Draw(BRect updateRect)
 	move the offset in pagedView
 	and then call the Childrens Draw with this rect
 	*/
+	renderBitmap->Lock();
+	for (int32 i = 0; i<renderBitmap->CountChildren(); i++) {
+		renderBitmap->ChildAt(i)->Draw(Bounds());
+		renderBitmap->ChildAt(i)->Sync();
+	}
+	renderBitmap->Unlock();
 	if ((paged) && (!IsPrinting()))
 		DrawPages(updateRect);
 	else
@@ -95,6 +104,7 @@ void PagedView::MouseDown(BPoint where)
 		found = renderBitmap->FindView(where);
 	if (found!=NULL)
 		found->MouseUp(where);
+	Invalidate();
 }
 
 
@@ -130,6 +140,7 @@ void PagedView::MouseUp(BPoint where)
 		found = renderBitmap->FindView(where);
 	if (found!=NULL)
 		found->MouseUp(where);
+	Invalidate();
 }
 
 void PagedView::MessageReceived(BMessage *message)
@@ -162,10 +173,10 @@ void PagedView::DrawPages(BRect updateRect)
 			paperRect		=(*it).PageRect();
 			printingRect	=(*it).PrintRect();
 			if (paperRect.Intersects(updateRect)){
-				paperRect.OffsetBy(10,10);
-				FillRect(paperRect,B_SOLID_LOW);
-				paperRect.OffsetBy(-10,-10);
+				paperRect.OffsetBy(3,3);
 				FillRect(paperRect);
+				paperRect.OffsetBy(-3,-3);
+				FillRect(paperRect,B_SOLID_LOW);
 				StrokeRect(paperRect);
 			}
 			drawRect	= printingRect & updateRect;
@@ -174,7 +185,7 @@ void PagedView::DrawPages(BRect updateRect)
 				sourceRect.OffsetBy((*it).DiffOffset());
 				DrawBitmapAsync(renderBitmap,sourceRect,printingRect);
 				restoreHighColor=HighColor();
-				SetHighColor(0,0,255,200);
+				SetHighColor(0,0,255,100);
 				SetPenSize(2.0);
 				StrokeRect(printingRect);
 				SetHighColor(restoreHighColor);
@@ -218,7 +229,7 @@ void PagedView::CalculatePages(void){
 			x=i*printRect.Width();
 			y=q*printRect.Height();
 			sourceArea	= BRect(x,y,x+printRect.Width(),y+printRect.Height());
-			count = q*colums+x;
+			count = q*colums+i;
 			if (pageLayout == COL_AS_NEEDED){
 				cy = q;
 				cx = i;
@@ -228,8 +239,8 @@ void PagedView::CalculatePages(void){
 				cy = (int32)floor(count / pageLayout);
 			}
 
-			nx = (cx*pageRect.Width())+cx*margin;
-			ny = (cy*pageRect.Height())+cy*margin;
+			nx = (cx*pageRect.Width())+cx*margin+margin;
+			ny = (cy*pageRect.Height())+cy*margin+margin;
 			printArea	= BRect (nx+leftDiff,ny+topDiff,nx+printRect.Width(),ny+printRect.Height());
 			paperArea	= BRect(nx,ny,nx+pageRect.Width(),ny+pageRect.Height());
 			childList.push_back(PagedRect(paperArea,printArea,sourceArea));

@@ -99,9 +99,10 @@ protected:
 			void			Init(void);
 			void			DrawPages(BRect);
 			void			CalculatePages(void);
+			BBitmap			*renderBitmap;
+
 
 private:
-			BBitmap				*renderBitmap;
 			bool				paged;
 			BRect				pageRect;
 			BRect				printRect;
