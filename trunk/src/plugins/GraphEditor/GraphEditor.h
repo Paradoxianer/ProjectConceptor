@@ -27,7 +27,6 @@
 #include "NodeEditor.h"
 
 #include "BViewSplitter.h"
-#include "PagedView.h"
 
 /*const float			 	max_entfernung			= 50.0;
 const uint32			G_E_RENDERER			= 'geRr';
@@ -59,7 +58,7 @@ const float		gridWidth		= 50;*/
 
 class Renderer;
 
-class GraphEditor : public PEditor, public PagedView
+class GraphEditor : public PEditor, public BViewSplitter
 {
 
 public:
@@ -91,7 +90,7 @@ public:
 	virtual void			DetachedFromWindow(void);
 
 	virtual	void			MessageReceived(BMessage *msg);
-	//virtual	void			Draw(BRect updateRect){};
+	virtual	void			Draw(BRect updateRect){};
 
 	//----------------BView
 
