@@ -165,7 +165,7 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	BRect(0,0,frameWidth-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
 	fWebsiteNameView->MakeSelectable(false);
 	fWebsiteNameView->MakeEditable(false);
-	fWebsiteNameFont.SetSize(10.0);
+	fWebsiteNameFont.SetSize(12.0);
 	fWebsiteNameView->SetFontAndColor(&fWebsiteNameFont, B_FONT_ALL);
 	fWebsiteNameView->Insert(fWebsiteNameString.String());
 	fWebsiteNameView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
@@ -174,11 +174,11 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 
 	//ContactTitleView
 	fContactTitleString.SetTo("contact");
-	fContactTitleView = new BTextView(BRect(40,frameHeight-60,40+fContactTitleString.Length()*(12/1.5),frameHeight-45), "contacttetitleview",
+	fContactTitleView = new BTextView(BRect(10,frameHeight-23,10+fContactTitleString.Length()*(12/1.5),frameHeight-10), "contacttetitleview",
 	BRect(0,0,frameWidth-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
 	fContactTitleView->MakeSelectable(false);
 	fContactTitleView->MakeEditable(false);
-	fContactTitleFont.SetSize(12.0);
+	fContactTitleFont.SetSize(10.0);
 	fContactTitleView->SetFontAndColor(&fContactTitleFont, B_FONT_ALL);
 	fContactTitleView->Insert(fContactTitleString.String());
 	fContactTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
@@ -187,16 +187,15 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 
 	//ContactURLView
 	//This is a link for a web URL.
-	fWebView = new URLView(BRect(fContactTitleString.Length()+90, frameHeight-61, fContactTitleString.Length()*(12/1.5)+90+80, frameHeight-46), "Web", "ProjectConceptor.de", "http://www.projectconceptor.de");
-	fWebView->SetFontSize(12.0);
-	fWebView->AddAttribute("META:keyw", "ProjectConceptor.de");
-	fWebView->SetUnderlineThickness(2);
+	fWebView = new URLView(BRect(fContactTitleString.Length()+90, frameHeight-23, fContactTitleString.Length()*(12/1.5)+180, frameHeight-10), "Web", "www.ProjectConceptor.de", "http://www.projectconceptor.de");
+	fWebView->SetFontSize(10.0);
+	fWebView->AddAttribute("META:keyw", "www.ProjectConceptor.de");
 	AddChild(fWebView);
 
 	//This is a link for an e-mail address.
-	fMailView = new URLView(BRect(fContactTitleString.Length()+90+150, frameHeight-60, frameWidth-5, frameHeight-45), "E-mail", "send an Email", "mail@projectconceptor.de");
+	fMailView = new URLView(BRect(fContactTitleString.Length()+90+150, frameHeight-23, frameWidth-5, frameHeight-10), "E-mail", "send an Email", "mail@projectconceptor.de");
 	fMailView->SetHoverEnabled(false);
-	fMailView->SetFontSize(12.0);
+	fMailView->SetFontSize(10.0);
 	fMailView->AddAttribute("META:name", "ProjectConceptor");
 	//fMailView->AddAttribute("META:nickname", "xxx");
 	//fMailView->AddAttribute("META:company", "xxx");
@@ -211,7 +210,7 @@ AboutView::~AboutView()
 {
 	//
 }
-
+ 
 void
 AboutView::Draw(BRect)
 {

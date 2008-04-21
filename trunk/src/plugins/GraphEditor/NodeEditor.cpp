@@ -277,8 +277,10 @@ void NodeEditor::Draw(BRect updateRect)
 
 void NodeEditor::MouseDown(BPoint where)
 {
-	BView::MouseDown(where);
+	//BView::MouseDown(where);
+	LockLooper();
 	BView::MakeFocus(true);
+	UnlockLooper();
 	BPoint		scaledWhere;
 	scaledWhere.x	= where.x / scale;
 	scaledWhere.y	= where.y / scale;
@@ -299,14 +301,14 @@ void NodeEditor::MouseDown(BPoint where)
 	}
 	if (!found)
 	{
-		currentMsg->FindInt32("buttons", (int32 *)&buttons);
-		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
-		if (buttons & B_PRIMARY_MOUSE_BUTTON)
-	 	{
+	//	currentMsg->FindInt32("buttons", (int32 *)&buttons);
+	//	currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
+	//	if (buttons & B_PRIMARY_MOUSE_BUTTON)
+	 //	{
 			startMouseDown=new BPoint(scaledWhere);
 			//EventMaske setzen so dass die Maus auch über den View verfolgt wird
-			SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
-		}
+		//	SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
+		//}
 	}
 }
 
@@ -348,7 +350,9 @@ void NodeEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messag
 				selectRect->top=selectRect->bottom;
 				selectRect->bottom=c;
 			}
+			LockLooper();
 			Invalidate();
+			UnlockLooper();
 		}
 	}
 	else if (mouseReciver != NULL)
@@ -378,18 +382,20 @@ void NodeEditor::MouseUp(BPoint where)
 			BMessage	*currentMsg	= Window()->CurrentMessage();
 			uint32		buttons		= 0;
 			uint32		modifiers	= 0;
-			currentMsg->FindInt32("buttons", (int32 *)&buttons);
-			currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
-			if ((modifiers & B_CONTROL_KEY) != 0)
-				InsertObject(scaledWhere,false);
-			else
+	//		currentMsg->FindInt32("buttons", (int32 *)&buttons);
+	//		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
+//			if ((modifiers & B_CONTROL_KEY) != 0)
+//				InsertObject(scaledWhere,false);
+//			else
 				InsertObject(scaledWhere,true);
 		}
 		delete startMouseDown;
 		startMouseDown=NULL;
 		delete selectRect;
 		selectRect=NULL;
+		LockLooper();
 		Invalidate();
+		UnlockLooper();
 	}
 	else if (mouseReciver != NULL)
 	{
@@ -451,7 +457,9 @@ void NodeEditor::MessageReceived(BMessage *message)
 				connecting = true;
 				message->FindPoint("Node::to",toPoint);
 				message->FindPoint("Node::from",fromPoint);
+				LockLooper();
 				Invalidate();
+				UnlockLooper();
 			break;
 		}
 		case G_E_CONNECTED:

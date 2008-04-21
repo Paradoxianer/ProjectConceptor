@@ -24,7 +24,7 @@
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
-GraphEditor::GraphEditor(image_id newId):PEditor(),BViewSplitter(BRect(0,0,400,400),B_VERTICAL,B_FOLLOW_ALL_SIDES,0)
+GraphEditor::GraphEditor(image_id newId):PEditor(),PagedView(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW,COL_AS_NEEDED)
 {
 	TRACE();
 	pluginID	= newId;
@@ -171,6 +171,10 @@ void GraphEditor::Init(void)
 			toolBar->AddItem(addText);
 		}
 	}
+	BRect printRect(20,20,220,320);
+	BRect pageRect(10,10,230,340);
+	SetPageRect(pageRect);
+	SetPrintRect(printRect);
 }
 
 void GraphEditor::AttachedToManager(void)
@@ -285,10 +289,12 @@ void GraphEditor::ValueChanged()
 {
 	TRACE();
 	BList		*selected		= doc->GetSelected();
+	renderBitmap->Lock();
 	nodeEditor->ValueChanged();
 	//showMessage->ValueChanged();
 	if (selected->CountItems() == 1)
 		showMessage->SetContainer((BMessage*)selected->FirstItem());
+	renderBitmap->Unlock();
 }
 
 void GraphEditor::SetDirty(BRegion *region)
@@ -315,7 +321,8 @@ void GraphEditor::AttachedToWindow(void)
 		rect.bottom = rect.bottom-B_H_SCROLL_BAR_HEIGHT;
 		rect.right -= (B_V_SCROLL_BAR_WIDTH);
 		nodeEditor	= new NodeEditor(this,rect); 
-		AddChild(new BScrollView("NodeScroller",nodeEditor,B_FOLLOW_ALL_SIDES,0 ,true,true));
+		//AddChild(new BScrollView("NodeScroller",nodeEditor,B_FOLLOW_ALL_SIDES,0 ,true,true));
+		AddChild(nodeEditor);
 	}
 	if (showMessage == NULL)
 	{
@@ -327,8 +334,8 @@ void GraphEditor::AttachedToWindow(void)
 		invoked->AddPointer("ListView",showMessage);
 		showMessage->SetInvocationMessage(invoked);
 		showMessage->SetTarget(this);	
-		AddChild(new BScrollView("MessageScroller",showMessage,B_FOLLOW_TOP_BOTTOM | B_FOLLOW_RIGHT,0 ,false,true));
-		SetDivPos(0,Parent()->Bounds().Width()*0.7);
+//		AddChild(new BScrollView("MessageScroller",showMessage,B_FOLLOW_TOP_BOTTOM | B_FOLLOW_RIGHT,0 ,false,true));
+//		SetDivPos(0,Parent()->Bounds().Width()*0.7);
 	}
 
 	PWindow 	*pWindow	= (PWindow *)Window();
@@ -338,8 +345,10 @@ void GraphEditor::AttachedToWindow(void)
 	if (doc)
 	{
 		InitAll();
-		showMessage->ValueChanged();
+		//showMessage->ValueChanged();
+		renderBitmap->Lock();
 		nodeEditor->ValueChanged();
+		renderBitmap->Unlock();
 	}
 	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
 	pWindow->AddToolBar(toolBar);
@@ -408,7 +417,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			break;
 		}
 		default:
-			BViewSplitter::MessageReceived(message);
+			PagedView::MessageReceived(message);
 			break;
 	}
 }

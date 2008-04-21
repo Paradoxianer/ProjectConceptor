@@ -1,8 +1,9 @@
 #include <interface/GraphicsDefs.h>
 #include <math.h>
+#include <Debug.h>
 
 #include "PagedView.h"
-#include <Debug.h>
+
 
 
 PagedView::PagedView(BRect _rect,char *_name,uint32 resizingMode,uint32 flags,page_layout _pageLayout):BView(_rect,_name,resizingMode,flags){
@@ -19,7 +20,7 @@ void PagedView::Init(void){
 	colums			= 1;
 	rows			= 1;
 	paged			= true;
-	margin			= 5.0;
+	margin			= 10.0;
 	childList		= vector<PagedRect>();
 }
 
@@ -28,6 +29,7 @@ void  PagedView::AttachedToWindow(void){
 	SetViewColor(230,230,230,255);
 	SetHighColor(0,0,0,255);
 	SetLowColor(255,255,255,255);
+	SetDrawingMode(B_OP_ALPHA);
 }
 
 
@@ -103,7 +105,7 @@ void PagedView::MouseDown(BPoint where)
 	else
 		found = renderBitmap->FindView(where);
 	if (found!=NULL)
-		found->MouseUp(where);
+		found->MouseDown(where);
 	Invalidate();
 }
 
@@ -174,9 +176,13 @@ void PagedView::DrawPages(BRect updateRect)
 			printingRect	=(*it).PrintRect();
 			if (paperRect.Intersects(updateRect)){
 				paperRect.OffsetBy(3,3);
+				restoreHighColor=HighColor();
+				SetHighColor(100,100,100,100);
 				FillRect(paperRect);
 				paperRect.OffsetBy(-3,-3);
 				FillRect(paperRect,B_SOLID_LOW);
+				SetHighColor(restoreHighColor);
+
 				StrokeRect(paperRect);
 			}
 			drawRect	= printingRect & updateRect;
@@ -185,8 +191,8 @@ void PagedView::DrawPages(BRect updateRect)
 				sourceRect.OffsetBy((*it).DiffOffset());
 				DrawBitmapAsync(renderBitmap,sourceRect,printingRect);
 				restoreHighColor=HighColor();
-				SetHighColor(0,0,255,100);
-				SetPenSize(2.0);
+				SetHighColor(55,55,200,100);
+			//	SetPenSize(1.0);
 				StrokeRect(printingRect);
 				SetHighColor(restoreHighColor);
 			}
@@ -241,7 +247,7 @@ void PagedView::CalculatePages(void){
 
 			nx = (cx*pageRect.Width())+cx*margin+margin;
 			ny = (cy*pageRect.Height())+cy*margin+margin;
-			printArea	= BRect (nx+leftDiff,ny+topDiff,nx+printRect.Width(),ny+printRect.Height());
+			printArea	= BRect (nx+leftDiff,ny+topDiff,nx+leftDiff+printRect.Width(),ny+topDiff+printRect.Height());
 			paperArea	= BRect(nx,ny,nx+pageRect.Width(),ny+pageRect.Height());
 			childList.push_back(PagedRect(paperArea,printArea,sourceArea));
 		}

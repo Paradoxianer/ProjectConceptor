@@ -99,7 +99,7 @@ filter_result TextViewCompleter::Filter(BMessage *message, BHandler **){
 		while ( (iter!=fDelimiters.end()) && (!found) )
 			found = (*iter)->Compare(key);
 		if (found)
-			NewChoice()
+			NewChoice();
 		else{
 			iter 	= fMatches.begin();
 			while (iter!=fMatches.end()) {
@@ -136,7 +136,7 @@ void TextViewCompleter::ShowChoice()
 	{
 		//**calcualte the Postion
 		fShowList	= new BWindow(BRect(100,100,400,400),"choiceList",B_FLOATING_WINDOW,0);
-		fListView->ResizeTo(fShowList->Bounds());
+		fListView->ResizeTo(fShowList->Bounds().Width(),fShowList->Bounds().Height());
 		fShowList->AddChild(fListView);
 	}
 	fShowList->Show();
@@ -144,7 +144,7 @@ void TextViewCompleter::ShowChoice()
 	set<BString*>::iterator	iter;
 	iter 	= fMatches.begin();
 	while (iter!=fMatches.end()) {
-		fListView->AddItem(new BStringItem(*iter));
+		fListView->AddItem(new BStringItem((*iter)->String()));
 	}
 }
 
@@ -153,5 +153,5 @@ void TextViewCompleter::NewChoice()
 
 	fWorkingString.SetTo("");
 	fMatches.clear();
-	fMathces = fCompletions;
+	fMatches = fCompletions;
 }
