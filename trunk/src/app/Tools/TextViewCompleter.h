@@ -68,9 +68,10 @@ private:
 			set<BString*>	fCompletions;
 			set<BString*>	fMatches;
 
-			BString			fWorkingString;
 			BWindow			*fShowList;
 			BListView		*fListView;
+			BString			fWorkingString;
+
 
 
 			bool			fCaseSensitive;

@@ -87,33 +87,31 @@ void TextViewCompleter::ClearCompletitionList()
 
 
 
-filter_result TextViewCompleter::Filter(BMessage *message, BHandler **)
-{
+filter_result TextViewCompleter::Filter(BMessage *message, BHandler **){
+	//iterator used for the delimeterlist and the match list
 	set<BString*>::iterator	iter;
 	bool					startWith 	= false;
 	bool					found		= false;
 	BString					key;
 	iter 	= fDelimiters.begin();
-	if (message->what == B_KEY_DOWN )
-	{
+	if (message->what == B_KEY_DOWN ) {
 		message->FindString("bytes",&key);
 		while ( (iter!=fDelimiters.end()) && (!found) )
-		{
 			found = (*iter)->Compare(key);
-		}
 		if (found)
-			fWorkingString.SetTo("");
-		iter 	= fMatches.begin();
-		while (iter!=fMatches.end())
-		{
-			if (fCaseSensitive)
-				startWith = ((*iter)->Compare(fWorkingString,fWorkingString.Length()) == 0);
-			else
-				startWith = ((*iter)->ICompare(fWorkingString,fWorkingString.Length()) ==0);
-			if (!startWith)
-				fMatches.erase(iter);
-			startWith = false;
-			iter++;
+			NewChoice()
+		else{
+			iter 	= fMatches.begin();
+			while (iter!=fMatches.end()) {
+				if (fCaseSensitive)
+					startWith = ((*iter)->Compare(fWorkingString,fWorkingString.Length()) == 0);
+				else
+					startWith = ((*iter)->ICompare(fWorkingString,fWorkingString.Length()) ==0);
+				if (!startWith)
+					fMatches.erase(iter);
+				startWith = false;
+				iter++;
+			}
 		}
 		//we always allow to pass the message through
 	}
@@ -138,12 +136,22 @@ void TextViewCompleter::ShowChoice()
 	{
 		//**calcualte the Postion
 		fShowList	= new BWindow(BRect(100,100,400,400),"choiceList",B_FLOATING_WINDOW,0);
+		fListView->ResizeTo(fShowList->Bounds());
+		fShowList->AddChild(fListView);
 	}
 	fShowList->Show();
+	fListView->MakeEmpty();
+	set<BString*>::iterator	iter;
+	iter 	= fMatches.begin();
+	while (iter!=fMatches.end()) {
+		fListView->AddItem(new BStringItem(*iter));
+	}
 }
 
 void TextViewCompleter::NewChoice()
 {
 
-	fWorkingString = BString();
+	fWorkingString.SetTo("");
+	fMatches.clear();
+	fMathces = fCompletions;
 }
