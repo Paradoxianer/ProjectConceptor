@@ -63,7 +63,7 @@ protected:
 	status_t		CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent, int32 level, int32 line);
 	status_t		CreateConnection(BMessage *connectionS,TiXmlElement *start,TiXmlElement *end);
 	int32			GetID(const char *idString);
-	rgb_color		GetRGB(const char *rgbString);
+	int32			GetRGB(const char *rgbString);
 	BPositionIO 	*in;
 	BMessage		*config;
 	BPositionIO		*out;

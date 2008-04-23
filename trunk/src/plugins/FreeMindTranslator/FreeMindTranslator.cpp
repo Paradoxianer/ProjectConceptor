@@ -379,12 +379,10 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		pDocNode->AddInt32("Node::created",atoi(parent->Attribute("CREATED")));
 	if (parent->Attribute("MODIFIED"))
 		pDocNode->AddInt32("Node::modified",atoi(parent->Attribute("MODIFIED")));
-#ifdef B_ZETA_VERSION_1_0_0
 	if (parent->Attribute("BACKGROUND_COLOR"))
-		pattern->AddRGBColor("FillColor",GetRGB(parent->Attribute("BACKGROUND_COLOR")));
+		pattern->AddInt32("FillColor",GetRGB(parent->Attribute("BACKGROUND_COLOR")));
 	if (parent->Attribute("COLOR"))
-		pattern->AddRGBColor("BorderColor",GetRGB(parent->Attribute("COLOR")));
-#endif
+		pattern->AddInt32("BorderColor",GetRGB(parent->Attribute("COLOR")));
 	//find all Attributes
 	for (node = parent->FirstChild("arrowlink"); node;)
 	{
@@ -458,8 +456,8 @@ int32 Converter::GetID(const char *idString)
 	return id;
 }
 
-rgb_color Converter::GetRGB(const char *rgbString)
-{
-	rgb_color	rgb;
-	return rgb;
+int32 Converter::GetRGB(const char *rgbString){
+	int rgb[4] = {0,0,0,255};
+	sscanf(rgbString,"#%x%x%x",rgb[0],rgb[1],rgb[2]);
+	return (int32)rgb;
 }

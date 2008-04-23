@@ -63,10 +63,9 @@ void GraphEditor::Init(void)
 	fontMessage->AddFloat("Font::Size",be_plain_font->Size());
 	fontMessage->AddInt8("Font::Spacing",be_plain_font->Spacing());
 	fontMessage->AddString("Font::Style",(const char*)&style);
-#ifdef B_ZETA_VERSION_1_0_0
+
 	rgb_color	fontColor			= {111, 151, 181, 255};
-	fontMessage->AddRGBColor("Color",fontColor);
-#endif
+	fontMessage->AddInt32("Color",(int32)fontColor);
 
 	//perparing Pattern Message
 	patternMessage	=new BMessage();
@@ -74,13 +73,12 @@ void GraphEditor::Init(void)
 	rgb_color	borderColor			= {0, 0, 0, 255};
 	rgb_color	highColor			= {0, 0, 0, 255};
 	rgb_color 	lowColor			= {128, 128, 128, 255};
-#ifdef B_ZETA_VERSION_1_0_0
 	//standart Color
-	patternMessage->AddRGBColor("FillColor",fillColor);
-	patternMessage->AddRGBColor("BorderColor",borderColor);
-	patternMessage->AddRGBColor("HighColor",highColor);
-	patternMessage->AddRGBColor("LowColor",lowColor);
-#endif
+	patternMessage->AddInt32("FillColor",(int32)fillColor);
+	patternMessage->AddInt32("BorderColor",(int32)borderColor);
+	patternMessage->AddInt32("HighColor",(int32)highColor);
+	patternMessage->AddInt32("LowColor",(int32)lowColor);
+
 	patternMessage->AddFloat("PenSize",1.0);
 	patternMessage->AddInt8("DrawingMode",B_OP_ALPHA);
 	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
