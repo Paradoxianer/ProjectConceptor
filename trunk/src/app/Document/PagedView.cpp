@@ -17,6 +17,7 @@ void PagedView::Init(void){
 	printRect		= BRect();
 	pageRect		= BRect();;
 	renderBitmap	= new BBitmap(Bounds(),B_RGB32,true);
+	drawView		= new BView(BRect(Bounds()),"drawView",0,0);
 	colums			= 1;
 	rows			= 1;
 	paged			= true;
@@ -33,51 +34,10 @@ void  PagedView::AttachedToWindow(void){
 }
 
 
-void PagedView::AddChild(BView* _view){
-	TRACE();
-	renderBitmap->AddChild(_view);
-}
-
-bool PagedView::RemoveChild(BView *_view){
-	TRACE();
-	return renderBitmap->RemoveChild(_view);
-}
-
-BView* PagedView::ChildAt(int32 index) const{
-	TRACE();
-	return renderBitmap->ChildAt(index);
-
-}
-
-int32 PagedView::CountChildren(void) const{
-	TRACE();
-	return renderBitmap->CountChildren();
-}
-
-BView* PagedView::FindView(const char* name) const{
-	TRACE();
-	return renderBitmap->FindView(name);
-}
-
-BView*  PagedView::FindView(BPoint point) const{
-	TRACE();
-	return renderBitmap->FindView(point);
-}
-
-
 void PagedView::Draw(BRect updateRect)
 {
 
-	/**call all draw routines of the BViews
-	wich are added to the BBitmap and sync
-	them to the BBitmap
-	Maby check if the View is Visible
-	and therefore need to be drawn
-	to save RenderTime
-	maby its enought to interset the update Rect,
-	move the offset in pagedView
-	and then call the Childrens Draw with this rect
-	*/
+	
 	renderBitmap->Lock();
 	for (int32 i = 0; i<renderBitmap->CountChildren(); i++) {
 		renderBitmap->ChildAt(i)->Draw(Bounds());

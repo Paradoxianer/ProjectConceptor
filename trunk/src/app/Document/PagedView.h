@@ -56,22 +56,7 @@ public:
 
 	//++++++++++++++++BView
 	virtual void			AttachedToWindow(void);
-	/**
-	 * calls the AddChild from renderBitmap
-	 */
-	virtual void			AddChild(BView *);
-	/**
-	 * calls the RemoveChild from renderBitmap
-	 */
-	virtual bool			RemoveChild(BView *);
-	/**
-	 * calls the ChildAt from renderBitmap
-	 */
-	virtual BView*			ChildAt(int32 index) const;
-	virtual int32			CountChildren(void) const;
-	virtual BView*			FindView(BPoint point) const;
-	virtual BView*			FindView(const char* name) const;
-
+	
 	virtual	void			Draw(BRect updateRect);
 
 	virtual	void			MouseDown(BPoint where);
@@ -100,6 +85,7 @@ protected:
 			void			DrawPages(BRect);
 			void			CalculatePages(void);
 			BBitmap			*renderBitmap;
+			BView			*drawView;
 
 
 private:
