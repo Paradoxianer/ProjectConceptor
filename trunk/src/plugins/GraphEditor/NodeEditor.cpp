@@ -70,9 +70,7 @@ void NodeEditor::Init(void)
 	fontMessage->AddInt8("Font::Spacing",be_plain_font->Spacing());
 	fontMessage->AddString("Font::Style",(const char*)&style);
 	rgb_color	fontColor			= {111, 151, 181, 255};
-#ifdef B_ZETA_VERSION_1_0_0
-	fontMessage->AddRGBColor("Color",fontColor);
-#endif
+	fontMessage->AddInt32("Color",*((int32 *)&fontColor));
 
 	//perparing Pattern Message
 	patternMessage	=new BMessage();
@@ -82,10 +80,10 @@ void NodeEditor::Init(void)
 	rgb_color	highColor			= {0, 0, 0, 255};
 	rgb_color 	lowColor			= {128, 128, 128, 255};
 #ifdef B_ZETA_VERSION_1_0_0
-	patternMessage->AddRGBColor("FillColor",fillColor);
-	patternMessage->AddRGBColor("BorderColor",borderColor);
-	patternMessage->AddRGBColor("HighColor",highColor);
-	patternMessage->AddRGBColor("LowColor",lowColor);
+	patternMessage->AddInt32("FillColor",*((int32 *)&fillColor));
+	patternMessage->AddInt32("BorderColor",*((int32 *)&borderColor));
+	patternMessage->AddInt32("HighColor",*((int32 *)&highColor));
+	patternMessage->AddInt32("LowColor",*((int32 *)&lowColor));
 #endif
 	patternMessage->AddFloat("PenSize",1.0);
 	patternMessage->AddInt8("DrawingMode",B_OP_ALPHA);
@@ -533,10 +531,8 @@ void NodeEditor::MessageReceived(BMessage *message)
 			BMessage	*valueContainer	= new BMessage();
 			valueContainer->AddString("name","FillColor");
 			valueContainer->AddString("subgroup","Node::Pattern");
-			valueContainer->AddInt32("type",B_RGB_COLOR_TYPE);
-#ifdef B_ZETA_VERSION_1_0_0
-			valueContainer->AddRGBColor("newValue",graphEditor->GetColor());
-#endif
+			valueContainer->AddInt32("type",B_INT32_TYPE);
+			valueContainer->AddInt32("newValue",*((int32 *)&graphEditor->GetColor()));
 			changeColorMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changeColorMessage);
 			break;
@@ -634,9 +630,7 @@ void NodeEditor::InsertObject(BPoint where,bool deselect)
 	BMessage	*newObject		= new BMessage(*nodeMessage);
 	BMessage	*newFont		= new BMessage(*fontMessage);
 	BMessage	*newPattern		= new BMessage(*patternMessage);
-#ifdef B_ZETA_VERSION_1_0_0
-	newPattern->ReplaceRGBColor("FillColor",graphEditor->GetColor());
-#endif
+	newPattern->ReplaceInt32("FillColor",*((int32 *)&graphEditor->GetColor()));
 	newPattern->ReplaceFloat("PenSize",graphEditor->GetPenSize());
 
 	BMessage	*selectMessage	= new BMessage();
@@ -829,9 +823,7 @@ BMessage *NodeEditor::GenerateInsertCommand(uint32 newWhat)
 
     data->AddString("Name","Unbenannt");
     //insert new Node here*/
-#ifdef B_ZETA_VERSION_1_0_0
-	newPattern->ReplaceRGBColor("FillColor",graphEditor->GetColor());
-#endif
+	newPattern->ReplaceInt32("FillColor",*((int32 *)&graphEditor->GetColor()));
 	newPattern->ReplaceFloat("PenSize",graphEditor->GetPenSize());
     //** we need a good algorithm to find the best rect for this new node we just put it at 100,100**/
 	where = BPoint(100,100);
