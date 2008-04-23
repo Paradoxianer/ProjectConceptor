@@ -38,6 +38,7 @@ void GraphEditor::Init(void)
 {
 	TRACE();
 	nodeEditor		= NULL;
+
 	showMessage		= NULL;
 	renderString	= new char[30];
 	configMessage	= new BMessage();
@@ -220,7 +221,7 @@ void GraphEditor::DetachedFromManager(void)
 
 BView* GraphEditor::GetView(void)
 {
-	return nodeEditor;
+	return this;
 }
 
 
