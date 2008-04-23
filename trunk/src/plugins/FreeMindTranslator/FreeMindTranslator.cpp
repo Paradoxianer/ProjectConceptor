@@ -457,7 +457,7 @@ int32 Converter::GetID(const char *idString)
 }
 
 int32 Converter::GetRGB(const char *rgbString){
-	int rgb[4] = {0,0,0,255};
-	sscanf(rgbString,"#%x%x%x",rgb[0],rgb[1],rgb[2]);
-	return (int32)rgb;
+	rgb_color	rgb;
+	sscanf(rgbString,"#%x%x%x",rgb.red,rgb.green,rgb.blue);
+	return *((int32 *) &rgb);
 }

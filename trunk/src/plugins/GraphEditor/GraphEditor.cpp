@@ -65,7 +65,7 @@ void GraphEditor::Init(void)
 	fontMessage->AddString("Font::Style",(const char*)&style);
 
 	rgb_color	fontColor			= {111, 151, 181, 255};
-	fontMessage->AddInt32("Color",(int32)fontColor);
+	fontMessage->AddInt32("Color",*((int32*) &fontColor));
 
 	//perparing Pattern Message
 	patternMessage	=new BMessage();
@@ -74,10 +74,10 @@ void GraphEditor::Init(void)
 	rgb_color	highColor			= {0, 0, 0, 255};
 	rgb_color 	lowColor			= {128, 128, 128, 255};
 	//standart Color
-	patternMessage->AddInt32("FillColor",(int32)fillColor);
-	patternMessage->AddInt32("BorderColor",(int32)borderColor);
-	patternMessage->AddInt32("HighColor",(int32)highColor);
-	patternMessage->AddInt32("LowColor",(int32)lowColor);
+	patternMessage->AddInt32("FillColor",*((int32*) &fillColor));
+	patternMessage->AddInt32("BorderColor",*((int32*) &borderColor));
+	patternMessage->AddInt32("HighColor",*((int32*) &highColor));
+	patternMessage->AddInt32("LowColor",*((int32*) &lowColor));
 
 	patternMessage->AddFloat("PenSize",1.0);
 	patternMessage->AddInt8("DrawingMode",B_OP_ALPHA);
@@ -220,7 +220,7 @@ void GraphEditor::DetachedFromManager(void)
 
 BView* GraphEditor::GetView(void)
 {
-	return this;
+	return nodeEditor;
 }
 
 
