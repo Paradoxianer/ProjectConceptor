@@ -91,6 +91,14 @@ public:
 	 * it returns the pointer to his View (this shoud be the this pointer :-))
 	 */
 	virtual BView*			GetView(void) 					= 0;
+
+	/**
+	 * if the View wich should be printet is different than the View 
+	 * return by GetView you shoudl overwrite this Method and return the
+	 * View wich should be printed.
+	 */
+	virtual BView*			GetPrintView(void) {return NULL;};
+
 	/**
 	 * if the Editor is an View it returns the pointer to the view (this pointer)
 	 * else it shoud be the pointer to the handler for the Editor (e.g. a Network Client)
@@ -124,14 +132,18 @@ public:
 	 * 
 	 * @see PEditorManager 
 	 */
-	 
+			PEditorManager*	Manager(void){return manager;};
+
 	virtual	BMessage*		GetConfiguration(void) = 0;
 	virtual void			SetConfiguration(BMessage *message) = 0;
 	
 	virtual	void			SetShortCutFilter(ShortCutFilter *_shortCutFilter) = 0;
-
-			PEditorManager*	Manager(void){return manager;};
-
+	
+	/**
+	 * @brief Returns the Document to wich this editor was added
+	 * 
+	 * @see PDocument 
+	 */
 			PDocument		*BelongTo(void){return doc;};
 
 protected:

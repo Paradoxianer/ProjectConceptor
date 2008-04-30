@@ -13,7 +13,7 @@
 
 
 
-StringRenderer::StringRenderer(NodeEditor *parentEditor,char *forString,BRect stringRect,BMessage *message)
+StringRenderer::StringRenderer(GraphEditor *parentEditor,char *forString,BRect stringRect,BMessage *message)
 	: Renderer(parentEditor,message)
 {
 	TRACE();

@@ -10,7 +10,7 @@
 #include <interface/TextView.h>
 #include <interface/TextControl.h>
 
-#include "NodeEditor.h"
+#include "GraphEditor.h"
 #include "PDocument.h"
 #include "PCommand.h"
 #include "Renderer.h"
@@ -29,7 +29,7 @@ class BoolRenderer: public Renderer
 {
 
 public:
-							BoolRenderer(NodeEditor *parentEditor,bool forValue,BRect valueRect,BMessage *message=NULL);
+							BoolRenderer(GraphEditor *parentEditor,bool forValue,BRect valueRect,BMessage *message=NULL);
 			void			ValueChanged(void){};
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetBool(bool newValue);
@@ -49,7 +49,7 @@ public:
 protected:
 			void			Init();
 		BMessage			*changeMessage;
-		NodeEditor 		*editor;
+		GraphEditor 		*editor;
 		BRect				frame;
 		bool				value;
 		BBitmap				*selected;

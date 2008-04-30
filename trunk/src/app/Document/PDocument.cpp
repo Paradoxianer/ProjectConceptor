@@ -257,6 +257,9 @@ void PDocument::Init()
 	BRect	windowRect	= tmpScreen->Frame();
 	windowRect.InsetBy(50,50);
 	window			= new PWindow(windowRect,this);
+	autoSaver		= new BMessageRunner(BMessenger(this),
+										 new BMessage(P_C_AUTO_SAVE),
+										 autoSaveIntervall);
 	if (locked)
 		UnlockLooper();
 }

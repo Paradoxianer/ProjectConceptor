@@ -8,6 +8,9 @@
 #include <support/DataIO.h>
 
 #include <string.h>
+#include "PWindow.h"
+
+
 #include "NodeEditor.h"
 #include "PCommandManager.h"
 #include "Renderer.h"
@@ -17,6 +20,7 @@
 
 #include "InputRequest.h"
 #include "GraphEditor.h"
+
 
 
 NodeEditor::NodeEditor(GraphEditor *_graphEditor,BRect rect):BView(rect,"NodeEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW)
@@ -415,6 +419,7 @@ void NodeEditor::AttachedToWindow(void)
 	if (err != B_OK)
 		printf("Init BMessagener %s\n",strerror(err));
 	SetViewColor(230,230,230,255);
+	graphEditor->AddToolItems();
 }
 
 
@@ -434,7 +439,10 @@ void NodeEditor::DetachedFromWindow(void)
 			nodeRenderer = (Renderer *)renderer->ItemAt(0);
 			RemoveRenderer(nodeRenderer);
 		}
+		((PWindow*)Window())->RemoveToolBar(G_E_TOOL_BAR);
+
 	}
+	//graphEditor->RemoveToolItems();
 }
 void NodeEditor::MessageReceived(BMessage *message)
 {

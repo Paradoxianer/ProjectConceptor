@@ -14,8 +14,12 @@
 #include "ClassRenderer.h"
 #include "ConnectionRenderer.h"
 #include "GroupRenderer.h"
+#include "PWindow.h"
+#include "PEditorManager.h"
+
 
 #include "ToolBar.h"
+#include "ToolItem.h"
 #include "InputRequest.h"
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
@@ -1308,4 +1312,13 @@ void GraphEditor::UpdateScrollBars()
 		}
 	}
 
+}
+
+void GraphEditor::SetShortCutFilter(ShortCutFilter *_shortCutFilter)
+{
+	if (LockLooper())
+	{
+			AddFilter(_shortCutFilter);
+			UnlockLooper();
+	}
 }

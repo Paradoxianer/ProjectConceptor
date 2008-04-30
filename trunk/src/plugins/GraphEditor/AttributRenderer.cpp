@@ -13,7 +13,7 @@
 #include "PCommandManager.h"
 #include "BoolRenderer.h"
 
-AttributRenderer::AttributRenderer(NodeEditor *parentEditor,
+AttributRenderer::AttributRenderer(GraphEditor *parentEditor,
 		BMessage *forAttribut,
 		BRect attribRect,
 		BMessage *chgMessage,

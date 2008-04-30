@@ -10,7 +10,7 @@
 
 const uint32	B_C_NAME_CHANGED	= 'bcNC';
 
-#include "NodeEditor.h"
+#include "GraphEditor.h"
 #include "Renderer.h"
 
 
@@ -21,7 +21,7 @@ class ConnectionRenderer: public Renderer
 {
 
 public:
-						ConnectionRenderer(NodeEditor *parentEditor, BMessage *forContainer);
+						ConnectionRenderer(GraphEditor *parentEditor, BMessage *forContainer);
 	virtual void		Draw(BView *drawOn, BRect updateRect);
 	virtual	void		MouseDown(BPoint where);
 	virtual	void		MouseUp(BPoint where);

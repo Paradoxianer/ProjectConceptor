@@ -460,7 +460,6 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	BRect	rect = mainView->Bounds();
 	rect.InsetBy(5,5);
 	rect.bottom -= mainView->TabHeight();
-//	mainView->AddTab(new BScrollView("editorScroller",editor->GetView(),B_FOLLOW_ALL_SIDES,0,true,true), tab);
 	mainView->AddTab(editor->GetView(), tab);
 	tab->SetLabel(name);
 	mainView->Select(tab);
@@ -757,7 +756,8 @@ status_t	PWindow::RemoveToolBar(const char* signature)
 	status_t	err		= B_OK;
 	bool		removed	= true;
 	ToolBar *tmpToolBar		= GetToolBar(signature);
-	removed = RemoveChild(tmpToolBar);
+	if (tmpToolBar!=NULL)
+		removed = RemoveChild(tmpToolBar);
 	if (verticalToolbars->HasItem(tmpToolBar))
 	{
 		if (!verticalToolbars->RemoveItem(tmpToolBar))

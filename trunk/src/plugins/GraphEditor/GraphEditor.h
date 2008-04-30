@@ -46,6 +46,7 @@ extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
 
 const float		triangleHeight	= 7;
 const float		gridWidth		= 50;
+const float		circleSize		= 3.0;
 
 class Renderer;
 
@@ -72,6 +73,7 @@ public:
 
 	virtual void			PreprocessBeforSave(BMessage *container);
 	virtual void			PreprocessAfterLoad(BMessage *container);
+	virtual	void			SetShortCutFilter(ShortCutFilter *_shortCutFilter);
 
 	//----------------PEditor
 

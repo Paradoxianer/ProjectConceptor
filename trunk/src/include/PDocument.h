@@ -4,6 +4,7 @@
 #include "PMenuAccess.h"
 
 #include <app/Message.h>
+#include <MessageRunner.h>
 #include <app/Handler.h>
 #include <app/Looper.h>
 #include <interface/Region.h>
@@ -219,6 +220,8 @@ protected:
 			BMessage			*testMacro;
 
 			HelpManager			*helpManager;
+			BMessageRunner		*autoSaver;
+			bigtime_t			autoSaveIntervall;
 
 
 private:

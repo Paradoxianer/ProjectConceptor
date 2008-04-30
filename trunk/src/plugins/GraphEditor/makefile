@@ -31,17 +31,8 @@ SRCS= 	AttributRenderer.cpp				\
 		GraphEditor.cpp					\
 		GraphEditorPlugin.cpp				\
 		GroupRenderer.cpp				\
-		NodeEditor.cpp					\
 		StringRenderer.cpp				\
-		TextEditorControl.cpp				\
-		MessageView/BoolItem.cpp			\
-		MessageView/FloatItem.cpp			\
-		MessageView/MessageListView.cpp	\
-		MessageView/NodeItem.cpp			\
-		MessageView/PointerItem.cpp		\
-		MessageView/RectItem.cpp			\
-		MessageView/StringItem.cpp
-
+		TextEditorControl.cpp				
 		
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.

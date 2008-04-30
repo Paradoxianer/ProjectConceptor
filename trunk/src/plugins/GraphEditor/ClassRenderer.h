@@ -19,7 +19,7 @@ using namespace std;
 #include <cpp/iterator.h>
 #endif
 
-#include "NodeEditor.h"
+#include "GraphEditor.h"
 #include "PDocument.h"
 #include "Renderer.h"
 #include "StringRenderer.h"
@@ -36,7 +36,7 @@ class ClassRenderer: public Renderer
 {
 
 public:
-							ClassRenderer(NodeEditor *parentEditor, BMessage *forContainer);
+							ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer);
 				void		Draw(BView *drawOn, BRect updateRect);
 				void		MouseDown(BPoint where);
 				void		MouseUp(BPoint where);

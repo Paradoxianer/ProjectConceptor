@@ -11,7 +11,7 @@
 #include <interface/TextView.h>
 #include <interface/TextControl.h>
 
-#include "NodeEditor.h"
+#include "GraphEditor.h"
 #include "PDocument.h"
 #include "PCommand.h"
 #include "Renderer.h"
@@ -31,7 +31,7 @@ class StringRenderer: public Renderer
 {
 
 public:
-							StringRenderer(NodeEditor *parentEditor,char *forString,BRect stringRect,BMessage *message=NULL);
+							StringRenderer(GraphEditor *parentEditor,char *forString,BRect stringRect,BMessage *message=NULL);
 			void			ValueChanged(void){};
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetString(char *newString);
@@ -51,7 +51,7 @@ public:
 protected:
 			void			Init();
 		BMessage			*changeMessage;
-		NodeEditor 		*editor;
+		GraphEditor 		*editor;
 		BRect				frame;
 		char				*string;
 		BString				*shortString;
