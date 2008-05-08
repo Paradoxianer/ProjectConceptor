@@ -24,7 +24,7 @@
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
-GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW |B_FULL_UPDATE_ON_RESIZE|B_NAVIGABLE|B_NAVIGABLE_JUMP)
+GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW )
 {
 	TRACE();
 	pluginID	= newId;
@@ -75,21 +75,21 @@ void GraphEditor::Init(void)
 	fontMessage->AddInt8("Spacing",be_plain_font->Spacing());
 	fontMessage->AddString("Style",(const char*)&style);
 	rgb_color	fontColor			= {111, 151, 181, 255};
-	fontMessage->AddRGBColor("Color",fontColor);
+	fontMessage->AddInt32("Color",*((int32 *)&fontColor));
 
 	//perparing Pattern Message
 	patternMessage	=new BMessage();
 	//standart Color
 	rgb_color	fillColor			= {152, 180, 190, 255};
-	patternMessage->AddRGBColor("FillColor",fillColor);
+	patternMessage->AddInt32("FillColor",*(int32 *)&fillColor);
 	rgb_color	borderColor			= {0, 0, 0, 255};
-	patternMessage->AddRGBColor("BorderColor",borderColor);
+	patternMessage->AddInt32("BorderColor",*(int32 *)&borderColor);
 	patternMessage->AddFloat("PenSize",1.0);
 	patternMessage->AddInt8("DrawingMode",B_OP_ALPHA);
 	rgb_color	highColor			= {0, 0, 0, 255};
-	patternMessage->AddRGBColor("HighColor",highColor);
+	patternMessage->AddInt32("HighColor",*(int32 *)&highColor);
 	rgb_color 	lowColor			= {128, 128, 128, 255};
-	patternMessage->AddRGBColor("LowColor",lowColor);
+	patternMessage->AddInt32("LowColor",*(int32 *)&lowColor);
 	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
 
 	scaleMenu		= new BMenu(_T("Scale"));
@@ -392,7 +392,9 @@ void GraphEditor::SetDirty(BRegion *region)
 void GraphEditor::Draw(BRect updateRect)
 {
 	SetHighColor(230,230,230,255);
-	BView::Draw(BRect(updateRect.left/scale,updateRect.top/scale,updateRect.right/scale,updateRect.bottom/scale));
+	SetScale(1.0);
+	BView::Draw(updateRect);
+	SetScale(scale);
 	if (gridEnabled)
 	{
 		int32		xcount		= (Frame().Width()/gridWidth)+1;
@@ -747,8 +749,8 @@ void GraphEditor::MessageReceived(BMessage *message)
 			BMessage	*valueContainer	= new BMessage();
 			valueContainer->AddString("name","FillColor");
 			valueContainer->AddString("subgroup","Node::Pattern");
-			valueContainer->AddInt32("type",B_RGB_COLOR_TYPE);
-			valueContainer->AddRGBColor("newValue",colorItem->GetColor());
+			valueContainer->AddInt32("type",B_INT32_TYPE);
+			valueContainer->AddInt32("newValue",*(int32 *)&colorItem->GetColor());
 			changeColorMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changeColorMessage);
 			break;
@@ -846,7 +848,7 @@ void GraphEditor::InsertObject(BPoint where,bool deselect)
 	BMessage	*newObject		= new BMessage(*nodeMessage);
 	BMessage	*newFont		= new BMessage(*fontMessage);
 	BMessage	*newPattern		= new BMessage(*patternMessage);
-	newPattern->ReplaceRGBColor("FillColor",colorItem->GetColor());
+	newPattern->ReplaceInt32("FillColor",*(int32 *)&colorItem->GetColor());
 	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
 
 	BMessage	*selectMessage	= new BMessage();
@@ -1105,7 +1107,7 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat)
 
     data->AddString("Name","Unbenannt");
     //insert new Node here*/
-	newPattern->ReplaceRGBColor("FillColor",colorItem->GetColor());
+	newPattern->ReplaceInt32("FillColor",*(int32 *)&colorItem->GetColor());
 	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
     //** we need a good algorithm to find the best rect for this new node we just put it at 100,100**/
 	where = BPoint(100,100);
@@ -1218,7 +1220,6 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos)
 	BMessage	*tmpNode		= NULL;
 	if (pos>renderer->CountItems())
 	{
-		renderer->AddItem(whichRenderer);
 		if (whichRenderer->GetMessage()->FindPointer("Node::incoming",(void **)&connectionList) == B_OK)
 		{
 			for (i = 0; i< connectionList->CountItems();i++)
@@ -1243,10 +1244,10 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos)
 				}
 			}
 		}
+		renderer->AddItem(whichRenderer);
 	}
 	else
 	{
-		renderer->AddItem(whichRenderer,pos);
 		if (whichRenderer->GetMessage()->FindPointer("Node::incoming",(void **)&connectionList) == B_OK)
 		{
 			for (i = 0; i< connectionList->CountItems();i++)
@@ -1271,6 +1272,7 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos)
 				}
 			}
 		}		
+		renderer->AddItem(whichRenderer,pos);
 	}
 	if (whichRenderer->GetMessage()->what == P_C_GROUP_TYPE)
 	{
