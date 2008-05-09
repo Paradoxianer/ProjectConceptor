@@ -12,7 +12,7 @@ ConnectionRenderer::ConnectionRenderer(GraphEditor *parentEditor, BMessage *forC
 }
 
 void ConnectionRenderer::Init()
-{	
+{
 	TRACE();
 	from			= NULL;
 	to				= NULL;
@@ -20,6 +20,7 @@ void ConnectionRenderer::Init()
 	toPoint			= BPoint(0,0);
 	selected		= false;
 	fillColor		= make_color(187,67,47,255);
+	connectionType	= 0;
 //	connectionName	= new BTextControl(BRect(0,0,100,55),"Name",NULL,"Unbenannt",new BMessage(B_C_NAME_CHANGED));
 //	AddChild(connectionName);
 	BList		*outgoing	= NULL;
@@ -27,6 +28,7 @@ void ConnectionRenderer::Init()
 	BMessage	*fromNode	= NULL;
 	BMessage	*toNode		= NULL;
 	BMessage	*data		= new BMessage();
+
 	container->FindPointer("Node::from",(void **)&fromNode);
 	container->FindPointer("Node::to",(void **)&toNode);
 	PRINT_OBJECT(*fromNode);
@@ -57,7 +59,7 @@ void ConnectionRenderer::Init()
 	PRINT_OBJECT(*container);
 	ValueChanged();
 }
-	
+
 void ConnectionRenderer::MouseDown(BPoint where)
 {
 	uint32 buttons = 0;
@@ -75,10 +77,10 @@ void ConnectionRenderer::MouseDown(BPoint where)
 			editor->BringToFront(this);
 		else if (buttons & B_SECONDARY_MOUSE_BUTTON )
 			editor->SendToBack(this);
-		if  (!selected) 
+		if  (!selected)
 		{
 			BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
-			if  ((modifiers & B_SHIFT_KEY) != 0) 
+			if  ((modifiers & B_SHIFT_KEY) != 0)
 				selectMessage->AddBool("deselect",false);
 			selectMessage->AddPointer("node",container);
 			selectMessage->AddString("Command::Name","Select");
@@ -98,39 +100,27 @@ void ConnectionRenderer::LanguageChanged()
 }
 
 void ConnectionRenderer::Draw(BView *drawOn, BRect updateRect)
-{	
+{
 
-	//ValueChanged(); 
+	//ValueChanged();
 	CalcLine();
-	drawOn->SetPenSize(2.0);
-	BPoint	shadowFrom = fromPoint;
-	BPoint	shadowTo = toPoint;
-	BPoint	shadowfirst		= first;
-	BPoint	shadowsecond	= second;
-	BPoint	shadowthird		= third;
-	shadowFrom.y	+=3;
-	shadowTo.y		+=3;
-	shadowfirst.y	+=3;
-	shadowsecond.y	+=3;
-	shadowthird.y	+=3;
-
-	drawOn->SetHighColor(0,0,0,77);
-	drawOn->StrokeLine(	shadowFrom,shadowTo);
-	drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
-	if (!selected)
-		drawOn->SetHighColor(fillColor);
+	if (connectionType == 0)
+		DrawStraight(drawOn,updateRect);
+	else if (connectionType == 1)
+		DrawBended(drawOn,updateRect);
+	else if (connectionType == 2)
+		DrawAngled(drawOn,updateRect);
 	else
-		drawOn->SetHighColor(tint_color(fillColor,1.5));
-		drawOn->StrokeLine(	fromPoint,toPoint);
-		drawOn->FillTriangle(first,second,third);
-	
+		DrawStraight(drawOn,updateRect);
+
 }
+
 void ConnectionRenderer::MessageReceived(BMessage *message)
 {
-	switch(message->what) 
+	switch(message->what)
 	{
 		case P_C_VALUE_CHANGED:
-				ValueChanged();	
+				ValueChanged();
 			break;
 		case B_C_NAME_CHANGED:
 		{
@@ -153,6 +143,7 @@ void ConnectionRenderer::ValueChanged()
 	tmpNode->FindPointer(editor->RenderString(),(void **)&to);
 	tmpNode->PrintToStream();
 	container->FindBool("Node::selected",&selected);
+	container->FindInt8("Node::type", (int8 *)&connectionType);
 }
 
 void ConnectionRenderer::CalcLine()
@@ -170,21 +161,21 @@ void ConnectionRenderer::CalcLine()
 		toPoint		= BPoint(first.x,third.y);
 		fromPoint	= BPoint(fromRect->left,fromRect->top+(fromRect->bottom-fromRect->top)/2);
 	}
-	else if (alpha < -M_PI_4) 
+	else if (alpha < -M_PI_4)
 	{
 		first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->bottom+circleSize);
 		second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->bottom+circleSize);
 		third		= BPoint(toRect->left+toMiddleX,toRect->bottom);
 		toPoint		= BPoint(third.x,first.y);
-		fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->top);		
+		fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->top);
 	}
 	else if (alpha> M_PI_4)
 	{
 		first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->top-circleSize);
 		second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->top-circleSize);
 		third		= BPoint(toRect->left+toMiddleX,toRect->top);
-		toPoint		= BPoint(third.x,first.y);	
-		fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->bottom);		
+		toPoint		= BPoint(third.x,first.y);
+		fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->bottom);
 	}
 	else
 	{
@@ -209,7 +200,7 @@ BRect ConnectionRenderer::Frame()
 {
 	float	left	= fromPoint.x;
 	float	top		= fromPoint.y;
-	float	right	= toPoint.x;	
+	float	right	= toPoint.x;
 	float	bottom	= toPoint.y;
 	float	c;
 	if (left>right)
@@ -226,8 +217,7 @@ BRect ConnectionRenderer::Frame()
 	}
 	return BRect(left,top,right,bottom);
 }
-bool ConnectionRenderer::Caught(BPoint where)
-{
+bool ConnectionRenderer::Caught(BPoint where){
 	float newy	= (double)where.x*ax+mx;
 	float newx	= (double)where.y*ay+my;
 	float dx	= (newx-where.x);
@@ -246,4 +236,101 @@ bool ConnectionRenderer::Caught(BPoint where)
 		return true;
 	else
 		return false;*/
+}
+
+void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
+		drawOn->SetPenSize(2.0);
+		BPoint	shadowFrom		= fromPoint;
+		BPoint	shadowTo		= toPoint;
+		BPoint	shadowfirst		= first;
+		BPoint	shadowsecond	= second;
+		BPoint	shadowthird		= third;
+		shadowFrom.y			+=3;
+		shadowTo.y				+=3;
+		shadowfirst.y			+=3;
+		shadowsecond.y			+=3;
+		shadowthird.y			+=3;
+
+		drawOn->SetHighColor(0,0,0,77);
+		drawOn->StrokeLine(	shadowFrom,shadowTo);
+		drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
+		if (!selected)
+			drawOn->SetHighColor(fillColor);
+		else
+			drawOn->SetHighColor(tint_color(fillColor,1.5));
+		drawOn->StrokeLine(	fromPoint,toPoint);
+		drawOn->FillTriangle(first,second,third);
+}
+
+void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
+}
+
+void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
+	BPoint	firstBend;
+	BPoint	secondBend;
+	if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) ){
+		firstBend.x		= fromPoint.x - BEND_LENGTH;
+		firstBend.y		= fromPoint.y;
+		secondBend.x	= toPoint.x + BEND_LENGTH;
+		secondBend.y	= toPoint.y;
+	}
+	else if (alpha < -M_PI_4) {
+		firstBend.x		= fromPoint.x;
+		firstBend.y		= fromPoint.y + BEND_LENGTH;
+		secondBend.x	= toPoint.x;
+		secondBend.y	= toPoint.y - BEND_LENGTH;
+	}
+	else if (alpha> M_PI_4) {
+		firstBend.x		= fromPoint.x;
+		firstBend.y		= fromPoint.y - BEND_LENGTH;
+		secondBend.x	= toPoint.x;
+		secondBend.y	= toPoint.y + BEND_LENGTH;
+	}
+	else {
+		firstBend.x		= fromPoint.x + BEND_LENGTH;
+		firstBend.y		= fromPoint.y;
+		secondBend.x	= toPoint.x - BEND_LENGTH;
+		secondBend.y	= toPoint.y;
+	}
+
+	drawOn->SetPenSize(2.0);
+	BPoint	shadowFrom		= fromPoint;
+	BPoint	shadowTo		= toPoint;
+	BPoint	shadowfirst		= first;
+	BPoint	shadowsecond	= second;
+	BPoint	shadowthird		= third;
+	BPoint	sFirstBend		=;firstBend;
+	BPoint	sSecondBend		= secondBend;
+	shadowFrom.y			+=3;
+	shadowTo.y				+=3;
+	shadowfirst.y			+=3;
+	shadowsecond.y			+=3;
+	shadowthird.y			+=3;
+	sFirstBend.x			+=3;
+	sFirstBend.y			+=3;
+	sSecondBend.x			+=3;
+	sSecondBend.y			+=3;
+	drawOn->SetHighColor(0,0,0,77);
+	drawOn->StrokeLine(	shadowFrom,sFirstBend);
+	drawOn->StrokeLine(	sFirstBend,sSecondBend);
+	drawOn->StrokeLine(	sSecondBend,shadowTo);
+	drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
+	if (!selected)
+		drawOn->SetHighColor(fillColor);
+	else
+		drawOn->SetHighColor(tint_color(fillColor,1.5));
+	drawOn->StrokeLine(	fromPoint,firstBend);
+	drawOn->StrokeLine(	firstBend,secondBend);
+	drawOn->StrokeLine(	secondBend,toPoint);
+	drawOn->FillTriangle(first,second,third);
+}
+
+bool ConnectionRenderer::CaughtStraigt(BPoint where){
+}
+
+bool ConnectionRenderer::CaughtBended(BPoint where){
+
+}
+
+bool ConnectionRenderer::CaughtAngled(BPoint where){
 }

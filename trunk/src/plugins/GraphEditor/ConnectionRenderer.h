@@ -2,6 +2,9 @@
 #define CONNECTION_RENDERER_H
 /*
  * @author Paradoxon powered by Jesus Christ
+ *
+ *
+ *
  */
 #include <app/Message.h>
 #include <app/Messenger.h>
@@ -14,7 +17,10 @@ const uint32	B_C_NAME_CHANGED	= 'bcNC';
 #include "Renderer.h"
 
 
-const double M_PI_3_4	= M_PI_2+M_PI_4;
+const double	M_PI_3_4	= M_PI_2+M_PI_4;
+const float		BEND_LENGTH	= 10.0;
+
+
 class ClassRenderer;
 
 class ConnectionRenderer: public Renderer
@@ -25,7 +31,7 @@ public:
 	virtual void		Draw(BView *drawOn, BRect updateRect);
 	virtual	void		MouseDown(BPoint where);
 	virtual	void		MouseUp(BPoint where);
-	virtual	void		MouseMoved(BPoint pt, uint32 code, const BMessage *msg); 
+	virtual	void		MouseMoved(BPoint pt, uint32 code, const BMessage *msg);
 	virtual	void		LanguageChanged();
 	virtual	void		MessageReceived(BMessage *message);
 	virtual	void		ValueChanged(void);
@@ -44,6 +50,13 @@ public:
 protected:
 			void		Init();
 			void		CalcLine();
+			void		DrawStraight(BView *drawOn, BRect updateRect);
+			void		DrawBended(BView *drawOn, BRect updateRect);
+			void		DrawAngled(BView *drawOn, BRect updateRect);
+			bool		CaughtStraigt(BPoint where);
+			bool		CaughtBended(BPoint where);
+			bool		CaughtAngled(BPoint where);
+
 	bool				selected;
 	BPoint				first,second,third;
 	rgb_color			fillColor;
@@ -58,7 +71,8 @@ protected:
 //	PCommand			*selectCommand;
 	PDocument			*doc;
 	BMessenger			*sentTo;
-	
+	uint				connectionType;
+
 
 private:
 };

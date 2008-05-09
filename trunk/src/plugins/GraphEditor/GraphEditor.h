@@ -2,6 +2,11 @@
 #define GRAPH_EDITOR_H
 /*
  * @author Paradoxon powered by Jesus Christ
+ *
+ * For God so loved the world that he gave
+ * his one and only Son, that whoever believes
+ * in him shall not perish but have eternal life.
+ * Joh. 3, 16
  */
 #include <app/Message.h>
 #include <interface/View.h>
@@ -110,7 +115,7 @@ public:
 			image_id		PluginID(void){return pluginID;};
 			char*			RenderString(void){return renderString;};
 			void			SendMessage(BMessage* msg){sentToMe->SendMessage(msg);};
-			
+
 			BMessage		*GetStandartPattern(void){return patternMessage;};
 
 protected:
@@ -118,7 +123,7 @@ protected:
 			void			InsertObject(BPoint where,bool deselect);
 			void			InsertRenderObject(BMessage *node);
 			BMessage        *GenerateInsertCommand(uint32 newWhat);
-			
+
 			void			DeleteFromList(Renderer *wichRenderer);
 			void			AddToList(Renderer *wichRenderer, int32 pos);
 			void			UpdateScrollBars(void);
@@ -170,7 +175,7 @@ protected:
 
 			bool			gridEnabled;
 			image_id 		pluginID;
-			
+
 			BScrollView		*myScrollParent;
 
 private:
