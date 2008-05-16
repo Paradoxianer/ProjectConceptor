@@ -55,8 +55,7 @@ const float		circleSize		= 3.0;
 
 class Renderer;
 
-class GraphEditor : public PEditor, public BView
-{
+class GraphEditor : public PEditor, public BView {
 
 public:
 							GraphEditor(image_id newId);
