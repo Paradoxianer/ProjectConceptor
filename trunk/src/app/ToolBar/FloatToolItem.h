@@ -18,7 +18,7 @@ class ToolBar;
 /**
  * @class FloatToolItem
  *
- * @brief  FloatToolItem add a BButton with a visualisation of a FloatValue to a ToolBar 
+ * @brief  FloatToolItem add a BButton with a visualisation of a FloatValue to a ToolBar
  *
  * @author Paradoxon powered by Jesus Christ
  * @version 0.01
@@ -57,6 +57,8 @@ virtual		BRect			Frame(void) {return BButton::Frame();};
 virtual		void			MoveTo(float x,float y){BButton::MoveTo(x,y);};
 virtual		void			ResizeTo(float width,float height){ResizeTo(width,height);};
 virtual 	void			MessageReceived(BMessage *message);
+virtual		rgb_color		TextViewColor(void){return textValue->TextView()->ViewColor(rgb);};
+virtual		void			SetTextViewColor(rgb_color rgb){textValue->TextView()->SetViewColor(rgb);};
 
 protected:
 			void			Init();
