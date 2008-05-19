@@ -57,7 +57,7 @@ virtual		BRect			Frame(void) {return BButton::Frame();};
 virtual		void			MoveTo(float x,float y){BButton::MoveTo(x,y);};
 virtual		void			ResizeTo(float width,float height){ResizeTo(width,height);};
 virtual 	void			MessageReceived(BMessage *message);
-virtual		rgb_color		TextViewColor(void){return textValue->TextView()->ViewColor(rgb);};
+virtual		rgb_color		TextViewColor(void){return textValue->TextView()->ViewColor();};
 virtual		void			SetTextViewColor(rgb_color rgb){textValue->TextView()->SetViewColor(rgb);};
 
 protected:

@@ -299,7 +299,7 @@ void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
 	BPoint	shadowfirst		= first;
 	BPoint	shadowsecond	= second;
 	BPoint	shadowthird		= third;
-	BPoint	sFirstBend		=;firstBend;
+	BPoint	sFirstBend		= firstBend;
 	BPoint	sSecondBend		= secondBend;
 	shadowFrom.y			+=3;
 	shadowTo.y				+=3;
