@@ -9,6 +9,9 @@ public:
 	ToolBar*		InfoToolBar(void){return infoToolBar;};
 
 private:
+	void			ConnectionToolBar(BMessage *node);
+	void			ClassToolBar(BMessage *node);
+	void			GroupToolBar(BMessage *node);
 	void			Init(void);
 	BList*			selected;
 	ToolBar*		infoToolBar;

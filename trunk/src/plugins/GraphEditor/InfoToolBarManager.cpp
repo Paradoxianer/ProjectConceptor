@@ -10,13 +10,17 @@ void InfoToolBarManager::ValueChanged(void){
 	BMessage	*tmpNode;
 	if (selected->CountItems() == 1){
 		tmpNode	= (BMessage*)selected->ItemAt(0);
-		err = tmpNode->FindRect("Node::frame",&rect);
-		if (err == B_OK) {
-			left->SetValue(rect.left);
-			top->SetValue(rect.top);
-			width->SetValue(rect.Width());
-			height->SetValue(rect.Height());
+		switch(node->what){
+			case P_C_CLASS_TYPE:
+				newRenderer	= new  ClassRenderer(this,node);
+			break;
+			case P_C_GROUP_TYPE:
+				newRenderer = new GroupRenderer(this,node);
+			break;
+			case P_C_CONNECTION_TYPE:
+			break;
 		}
+
 	}
 	else if (selected->CountItems() > 1){
 		bool		widthFit	= true;
@@ -78,4 +82,23 @@ void InfoToolBarManager::Init(void){
 	infoTollBar->AddItem(top);
 	infoTollBar->AddItem(width);
 	infoTollBar->AddItem(height);
+}
+
+void InfoToolBarManager::ClassToolBar(BMessage *node){
+	status_t err = B_OK;
+	err = node->FindRect("Node::frame",&rect);
+	if (err == B_OK) {
+		left->SetValue(rect.left);
+		top->SetValue(rect.top);
+		width->SetValue(rect.Width());
+		height->SetValue(rect.Height());
+	}
+}
+
+void InfoToolBarManager::ConnectionToolBar(BMessage *node){
+
+}
+
+void InfoToolBarManager::GroupToolBar(BMessage *node){
+	ClassToolBar(node);
 }
