@@ -1,6 +1,8 @@
 #include "ConnectionRenderer.h"
 #include "ClassRenderer.h"
 #include "ProjectConceptorDefs.h"
+
+#include <interface/Shape.h>
 #include <interface/Window.h>
 #include <stdio.h>
 
@@ -20,7 +22,7 @@ void ConnectionRenderer::Init()
 	toPoint			= BPoint(0,0);
 	selected		= false;
 	fillColor		= make_color(187,67,47,255);
-	connectionType	= 0;
+	connectionType	= 2;
 //	connectionName	= new BTextControl(BRect(0,0,100,55),"Name",NULL,"Unbenannt",new BMessage(B_C_NAME_CHANGED));
 //	AddChild(connectionName);
 	BList		*outgoing	= NULL;
@@ -160,6 +162,11 @@ void ConnectionRenderer::CalcLine()
 		third		= BPoint(toRect->right,toRect->top+toMiddleY);
 		toPoint		= BPoint(first.x,third.y);
 		fromPoint	= BPoint(fromRect->left,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+		float	bendLength	= BEND_LENGTH* (fromPoint.x-toPoint.x);
+		firstBend.x		= fromPoint.x - bendLength;
+		firstBend.y		= fromPoint.y;
+		secondBend.x	= toPoint.x + bendLength;
+		secondBend.y	= toPoint.y;
 	}
 	else if (alpha < -M_PI_4)
 	{
@@ -168,6 +175,11 @@ void ConnectionRenderer::CalcLine()
 		third		= BPoint(toRect->left+toMiddleX,toRect->bottom);
 		toPoint		= BPoint(third.x,first.y);
 		fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->top);
+		float	bendLength	= BEND_LENGTH* (fromPoint.y-toPoint.y);
+		firstBend.x		= fromPoint.x;
+		firstBend.y		= fromPoint.y - bendLength;
+		secondBend.x	= toPoint.x;
+		secondBend.y	= toPoint.y + bendLength;
 	}
 	else if (alpha> M_PI_4)
 	{
@@ -176,6 +188,12 @@ void ConnectionRenderer::CalcLine()
 		third		= BPoint(toRect->left+toMiddleX,toRect->top);
 		toPoint		= BPoint(third.x,first.y);
 		fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->bottom);
+		float	bendLength	= BEND_LENGTH* (toPoint.y-fromPoint.y);
+		firstBend.x		= fromPoint.x;
+		firstBend.y		= fromPoint.y + bendLength;
+		secondBend.x	= toPoint.x;
+		secondBend.y	= toPoint.y - bendLength;
+
 	}
 	else
 	{
@@ -184,6 +202,11 @@ void ConnectionRenderer::CalcLine()
 		third		= BPoint(toRect->left,toRect->top+toMiddleY);
 		toPoint		= BPoint(first.x,third.y);
 		fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+		float	bendLength	= BEND_LENGTH* (toPoint.x-fromPoint.x);
+		firstBend.x		= fromPoint.x + bendLength;
+		firstBend.y		= fromPoint.y;
+		secondBend.x	= toPoint.x - bendLength;
+		secondBend.y	= toPoint.y;
 	}
 //	fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2);
 	/*fromPoint	= toPoint;
@@ -263,36 +286,23 @@ void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
 }
 
 void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
+	drawOn->SetPenSize(2.0);
+	if (!selected)
+		drawOn->SetHighColor(fillColor);
+	else
+		drawOn->SetHighColor(tint_color(fillColor,1.5));
+	BShape *bezier	= new BShape();
+	bezier->MoveTo(BPoint(0,0));
+	BPoint	controlPoints[3];
+	controlPoints[0]=firstBend-fromPoint;
+	controlPoints[1]=secondBend-fromPoint;
+	controlPoints[2]=toPoint-fromPoint;
+	bezier->BezierTo(controlPoints);
+	drawOn->MovePenTo(fromPoint);
+	drawOn->StrokeShape(bezier);
 }
 
 void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
-	BPoint	firstBend;
-	BPoint	secondBend;
-	if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) ){
-		firstBend.x		= fromPoint.x - BEND_LENGTH;
-		firstBend.y		= fromPoint.y;
-		secondBend.x	= toPoint.x + BEND_LENGTH;
-		secondBend.y	= toPoint.y;
-	}
-	else if (alpha < -M_PI_4) {
-		firstBend.x		= fromPoint.x;
-		firstBend.y		= fromPoint.y + BEND_LENGTH;
-		secondBend.x	= toPoint.x;
-		secondBend.y	= toPoint.y - BEND_LENGTH;
-	}
-	else if (alpha> M_PI_4) {
-		firstBend.x		= fromPoint.x;
-		firstBend.y		= fromPoint.y - BEND_LENGTH;
-		secondBend.x	= toPoint.x;
-		secondBend.y	= toPoint.y + BEND_LENGTH;
-	}
-	else {
-		firstBend.x		= fromPoint.x + BEND_LENGTH;
-		firstBend.y		= fromPoint.y;
-		secondBend.x	= toPoint.x - BEND_LENGTH;
-		secondBend.y	= toPoint.y;
-	}
-
 	drawOn->SetPenSize(2.0);
 	BPoint	shadowFrom		= fromPoint;
 	BPoint	shadowTo		= toPoint;

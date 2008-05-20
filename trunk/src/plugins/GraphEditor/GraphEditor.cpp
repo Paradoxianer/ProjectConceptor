@@ -714,6 +714,8 @@ void GraphEditor::MessageReceived(BMessage *message)
 				connection->AddPointer("Node::from",from);
 				connection->AddPointer("Node::to",to);
 				connection->AddMessage("Node::Data",data);
+				connection->AddInt8("Node::type",1);
+				
 				connection->AddPointer("ProjectConceptor::doc",doc);
 				//** add the connections to the Nodes :-)
 				commandMessage->AddPointer("node",connection);
@@ -1138,7 +1140,11 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat)
             err = B_OK;
             connection->AddPointer("Node::from",from);
             connection->AddPointer("Node::to",to);
+            uint	cType	= 1;
+            connection->AddInt8("Node::type", cType);
+
             connection->AddMessage("Node::Data",data);
+            
             connection->AddPointer("ProjectConceptor::doc",doc);
             //** add the connections to the Nodes :-)
             commandMessage->AddPointer("node",connection);

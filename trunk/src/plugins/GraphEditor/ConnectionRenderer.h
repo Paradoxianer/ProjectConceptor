@@ -18,7 +18,7 @@ const uint32	B_C_NAME_CHANGED	= 'bcNC';
 
 
 const double	M_PI_3_4	= M_PI_2+M_PI_4;
-const float		BEND_LENGTH	= 10.0;
+const float		BEND_LENGTH	= 0.25;
 
 
 class ClassRenderer;
@@ -64,6 +64,8 @@ protected:
 	ClassRenderer		*to;
 	BPoint				fromPoint;
 	BPoint				toPoint;
+	BPoint				firstBend;
+	BPoint				secondBend;
 	bool				mirrorX,mirrorY;
 	double				alpha;
 	double				ax,mx;
