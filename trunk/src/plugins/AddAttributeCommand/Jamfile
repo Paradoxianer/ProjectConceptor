@@ -1,11 +1,11 @@
-SubDir HAIKU_TOP 3rdparty projectconceptor src plugins CopyCommand ;
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins AddAttributeCommand ;
 
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
 
-Addon pc_command_copy :
-	Copy.cpp
-	CopyPlugin.cpp
+Addon pc_command_add_attribute :
+	AddAttribute.cpp
+	AddAttributePlugin.cpp
         : be tracker translation libprojectconceptor.a
 ;
 

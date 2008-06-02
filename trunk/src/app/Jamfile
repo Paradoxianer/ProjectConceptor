@@ -24,7 +24,7 @@ for sourceDir in $(sourceDirs) {
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
 
-Application ProjectConceptor :
+PROJECT_CONCEPTOR_SOURCES = 
 	MainView.cpp
 	ProjectConceptor.cpp
 
@@ -85,16 +85,14 @@ Application ProjectConceptor :
 	InputRequest.cpp
 	ShortCutFilter.cpp
 	TextViewCompleter.cpp
-
+;
+Application ProjectConceptor :
+	$(PROJECT_CONCEPTOR_SOURCES)
 	: be root translation tracker $(TARGET_LIBSTDC++)
 	: ProjectConceptor.rsrc Tools/InputRequest.rsrc
 ;
 
 StaticLibrary libprojectconceptor.a :
-	PCommand.cpp
-	PCommandManager.cpp
-	Indexer.cpp
-	BasePlugin.cpp
-	PluginManager.cpp
+	$(PROJECT_CONCEPTOR_SOURCES)
 ;
 
