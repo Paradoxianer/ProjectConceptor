@@ -90,4 +90,11 @@ Application ProjectConceptor :
 	: ProjectConceptor.rsrc Tools/InputRequest.rsrc
 ;
 
+StaticLibrary libprojectconceptor.a :
+	PCommand.cpp
+	PCommandManager.cpp
+	Indexer.cpp
+	BasePlugin.cpp
+	PluginManager.cpp
+;
 
