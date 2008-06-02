@@ -1,5 +1,8 @@
 SubDir HAIKU_TOP 3rdparty projectconceptor src plugins ;
 
-SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins CopyCommand ;
 SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins AddAttributeCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins ChangeValueCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins CopyCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins DeleteCommand ;
+
 

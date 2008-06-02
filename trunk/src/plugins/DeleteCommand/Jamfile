@@ -1,0 +1,11 @@
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins CopyCommand ;
+
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+
+Addon pc_command_delete :
+	Delete.cpp
+	DeletePlugin.cpp
+        : be tracker translation libprojectconceptor.a
+;
+
