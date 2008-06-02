@@ -1,4 +1,4 @@
-SubDir HAIKU_TOP 3rdparty projectconceptor src plugins AddAttributeCommand ;
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins ChangeValueCommand ;
 
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;

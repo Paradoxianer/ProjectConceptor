@@ -1,4 +1,4 @@
-SubDir HAIKU_TOP 3rdparty projectconceptor src plugins CopyCommand ;
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins DeleteCommand ;
 
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
