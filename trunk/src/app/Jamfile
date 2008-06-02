@@ -1,0 +1,93 @@
+SubDir HAIKU_TOP 3rdparty projectconceptor src app ;
+
+#SetSubDirSupportedPlatformsBeOSCompatible ;
+
+# for BRecentItems
+#UsePublicHeaders [ FDirName be_apps Tracker ] ;
+
+# source directories
+local sourceDirs =
+	About
+	Commands
+	Config
+	Document
+	plugins
+	ToolBar
+	Tools
+;
+
+local sourceDir ;
+for sourceDir in $(sourceDirs) {
+	SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app $(sourceDir) ] ;
+}
+
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+
+Application ProjectConceptor :
+	MainView.cpp
+	ProjectConceptor.cpp
+
+	# About
+	AboutWindow.cpp
+	AboutView.cpp
+	AboutURLView.cpp
+
+	# Config
+	ConfigWindow.cpp
+	ConfigView.cpp
+	BoolItem.cpp
+	ColorItem.cpp
+	FloatItem.cpp
+	FontItem.cpp
+	MessageView.cpp
+	PatternItem.cpp
+	RectItem.cpp
+	MessageItem.cpp
+	StringItem.cpp
+
+	# Commands
+	PCommand.cpp
+	PCommandManager.cpp
+
+	# Document
+	PagedView.cpp
+	PDocument.cpp
+	PDocumentManager.cpp
+	PEditor.cpp
+	PEditorManager.cpp
+	PWindow.cpp
+	HelpManager.cpp
+
+	# plugins
+	BasePlugin.cpp
+	PluginManager.cpp
+
+	# ToolBar
+	BaseItem.cpp
+	Mover.cpp
+	ToolBar.cpp
+	ToolBarSeperator.cpp
+	ToolItem.cpp
+	ToolMenu.cpp
+	ColorToolItem.cpp
+	FloatToolItem.cpp
+	PatternToolItem.cpp
+
+	# Tools
+	AFont.cpp
+	BViewSplitter.cpp
+	Divider.cpp
+	PCSavePanel.cpp
+	PDocLoader.cpp
+	Indexer.cpp
+	InputRequestView.cpp
+	InputRequest.cpp
+	ShortCutFilter.cpp
+	TextViewCompleter.cpp
+
+	: be root translation tracker $(TARGET_LIBSTDC++)
+	: ProjectConceptor.rsrc Tools/InputRequest.rsrc
+;
+
+
