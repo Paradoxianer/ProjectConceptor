@@ -1,4 +1,5 @@
 SubDir HAIKU_TOP 3rdparty projectconceptor src ;
 
 SubInclude HAIKU_TOP 3rdparty projectconceptor src app ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins ;
 
