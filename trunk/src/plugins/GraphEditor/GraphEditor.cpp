@@ -29,7 +29,9 @@ GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"Gra
 	TRACE();
 	pluginID	= newId;
 	Init();
+#ifndef __HAIKU__
 	BView::SetDoubleBuffering(1);
+#endif
 	SetDrawingMode(B_OP_ALPHA);
 }
 
