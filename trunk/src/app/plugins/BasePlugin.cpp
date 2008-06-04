@@ -5,3 +5,7 @@ BasePlugin::BasePlugin(image_id id)
 {
 	pluginID=id;
 }
+
+BasePlugin::~BasePlugin()
+{
+}

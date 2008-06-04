@@ -20,6 +20,7 @@ class BasePlugin
 
 public:
 						BasePlugin(image_id id);
+			virtual		~BasePlugin();
 			image_id	GetPluginID(void){return pluginID;};
 //	virtual void		LanguageChanged(void)=0;
 	/**
@@ -40,10 +41,10 @@ public:
 	 */
 	virtual char*		GetDescription(void)		= 0;
 	/**
-	 *	returns the kind of pluginType e.g.: 
+	 *	returns the kind of pluginType e.g.:
 	 * P_C_EDITOR_PLUGIN_TYPE means this plugins "contains" a PEditorPlugin
  	 * P_C_COMMANDO_PLUGIN_TYPE means this plugins "contains" a PCommandPlugin
- 	 * you also can create your own pluginType (please dont use pc at the beginning this 
+ 	 * you also can create your own pluginType (please dont use pc at the beginning this
  	 * is used for all ProjectConcpetor consts
 	 */
 	virtual uint32		GetType(void)				= 0;
@@ -52,8 +53,8 @@ public:
 	 * instance of a PEditor) you have to cast it for yourself to the right Class
 	 */
 	virtual void*		GetNewObject(void *value)	= 0;
-	
-	
+
+
 
 protected:
 		image_id	pluginID;
