@@ -1,0 +1,11 @@
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins PasteCommand ;
+
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+
+Addon pc_command_paste :
+	Paste.cpp
+	PastePlugin.cpp
+        : be tracker translation libprojectconceptor.a
+;
+

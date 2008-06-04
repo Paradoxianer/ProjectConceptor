@@ -8,5 +8,11 @@ SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins FindCommand ;
 SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins GraphEditor ;
 SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins GroupCommand ;
 SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins InsertCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins MoveCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins NavigatorEditor ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins PasteCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins RemoveAttributeCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins ResizeCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins SelectCommand ;
 
 

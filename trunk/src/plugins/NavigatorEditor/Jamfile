@@ -1,0 +1,27 @@
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins NavigatorEditor ;
+
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src plugins GraphEditor MessageView ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Commands ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Config ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Document ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app ToolBar ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Tools ] ;
+
+Addon pc_navigator_editor :
+	BoolItem.cpp
+	FloatItem.cpp
+	MessageListView.cpp
+	NavigatorEditor.cpp
+	NavigatorEditorPlugin.cpp
+	NodeItem.cpp
+	NodeListView.cpp
+	PointerItem.cpp
+	RectItem.cpp
+	StringItem.cpp
+        : be tracker translation libprojectconceptor.a
+;
+
