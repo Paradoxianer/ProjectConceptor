@@ -4,5 +4,9 @@ SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins AddAttributeCommand ;
 SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins ChangeValueCommand ;
 SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins CopyCommand ;
 SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins DeleteCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins FindCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins GraphEditor ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins GroupCommand ;
+SubInclude HAIKU_TOP 3rdparty projectconceptor src plugins InsertCommand ;
 
 

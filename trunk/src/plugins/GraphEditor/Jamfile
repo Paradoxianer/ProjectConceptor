@@ -1,0 +1,26 @@
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins GraphEditor ;
+
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src plugins GraphEditor MessageView ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Commands ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Config ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Document ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app ToolBar ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Tools ] ;
+
+Addon pc_graph_editor :
+	AttributRenderer.cpp
+	BoolRenderer.cpp
+	ClassRenderer.cpp
+	ConnectionRenderer.cpp
+	GraphEditor.cpp
+	GraphEditorPlugin.cpp
+	GroupRenderer.cpp
+	StringRenderer.cpp
+	TextEditorControl.cpp
+        : be tracker translation libprojectconceptor.a
+;
+

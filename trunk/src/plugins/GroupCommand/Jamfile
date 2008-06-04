@@ -1,0 +1,11 @@
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins GroupCommand ;
+
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+
+Addon pc_command_group :
+	Group.cpp
+	GroupPlugin.cpp
+        : be tracker translation libprojectconceptor.a
+;
+
