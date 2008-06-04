@@ -11,6 +11,8 @@ SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Docum
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app ToolBar ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Tools ] ;
 
+AddResources pc_graph_editor : GraphEditor.rsrc ;
+
 Addon pc_graph_editor :
 	AttributRenderer.cpp
 	BoolRenderer.cpp
