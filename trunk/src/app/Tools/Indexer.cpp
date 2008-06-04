@@ -151,7 +151,7 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes)
 	TRACE();
 	BMessage	*returnCommand	= new BMessage(*command);
 	BMessage	*node			= NULL;
-	BMessage	*subCommand		= NULL;
+	BMessage	subCommand;
 	int32		i				= 0;
 	int32		j				= 0;
 	if (includeNodes)
@@ -175,10 +175,10 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes)
 #endif
 
 		{
-			if ( (returnCommand->FindMessage(name,count,subCommand) == B_OK) && (subCommand) )
+			if ( (returnCommand->FindMessage(name,count,&subCommand) == B_OK))
 			{
-				IndexCommand(subCommand);
-				returnCommand->ReplaceMessage(name,count,subCommand);
+				IndexCommand(&subCommand);
+				returnCommand->ReplaceMessage(name,count,&subCommand);
 			}
 			i++;
 		}
