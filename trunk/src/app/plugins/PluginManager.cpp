@@ -6,7 +6,7 @@
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
-#endif 
+#endif
 
 #include "PluginManager.h"
 #include "BasePlugin.h"
@@ -15,7 +15,7 @@ PluginManager::PluginManager(void)
 {
 	plugins		= new BList();
 	groupNames	= new BList();
-	
+
 }
 
 PluginManager::~PluginManager(void)
@@ -35,7 +35,7 @@ void PluginManager::LoadPlugins(BDirectory *startDir, bool deep)
 	TRACE();
 	BList		*directoryList	= new BList();
 	BList		*dirNames		= new BList();
-	BEntry 		*entry			= new BEntry(); 
+	BEntry 		*entry			= new BEntry();
 	int32		dirCounter		= 0;
 	BDirectory	*dir			= NULL;
 	image_id	addonId;
@@ -66,15 +66,15 @@ void PluginManager::LoadPlugins(BDirectory *startDir, bool deep)
 				{
 					PRINT(("\t%s\t\tloaded\n", path.Leaf()));
 					/*überprüfen ob es ein Addon war, welches unsere Schnittstelle entspricht
-					Schnittstelle heist hier NewImmersiveVideoPlugin und es muss mit dem Protypen
-					(void **)NewImmersiveVideoPlugin gekennzeichnet*/
-					if( get_image_symbol( addonId, 
-										  "NewProjektConceptorPlugin", 
-										   B_SYMBOL_TYPE_TEXT, 
+					Schnittstelle heist hier NewProjektConceptorPlugin und es muss mit dem Protypen
+					(void **)NewProjektConceptorPlugin gekennzeichnet*/
+					if( get_image_symbol( addonId,
+										  "NewProjektConceptorPlugin",
+										   B_SYMBOL_TYPE_TEXT,
 										   (void **)&NewProjektConceptorPlugin) )
 					{
 						// wenn wir ein ungülitges Plugin geladen hatten, wieder wegwerfen ;-)
-						PRINT(("DEBUG:\tget_image_symbol( NewImmersiveVideoPlugin ) failed\n"));
+						PRINT(("DEBUG:\tget_image_symbol( NewProjektConceptorPlugin ) failed\n"));
 						unload_add_on(addonId );
 					}
 					else
