@@ -14,7 +14,7 @@ ConfigManager::ConfigManager(BMessage *newConfig, char *path){
 
 }
 
-
+//rebuild the hole Config View
 void ConfigManager::SetConfigMessage(BMessage *newConfig){
 
 }
