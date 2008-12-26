@@ -14,7 +14,7 @@
  *
  * @author Paradoxon powered by Jesus Christ
  * @version 0.01
- * @date 2005/10/04
+ * @date 2008/10/04
  *
  * @todo Register MimeType and MimeType for the Dokumentenst also register supported mimetypes
  * @todo import/export interface and Translator support
