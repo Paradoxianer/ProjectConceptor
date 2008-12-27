@@ -163,15 +163,16 @@ APP_MENU	= Software
 
 ## include the makefile-engine
 ifndef BUILDHOME
-BUILDHOME = /boot/develop
+BUILDHOME = /boot/home/apps/develop
 endif
 include $(BUILDHOME)/etc/makefile-engine
+
 
 
 default .DEFAULT:
 
 	mkdir -p ../../bin
-	cp -rf $(NAME) ../../bin
+	cp -rf $(OBJ_DIR)/$(NAME) ../../bin
 	ln -sf $(NAME) ../../bin/ProjectConceptor.a
 
 
