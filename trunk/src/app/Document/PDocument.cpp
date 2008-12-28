@@ -250,7 +250,8 @@ void PDocument::Init()
 	entryRef		= NULL;
 	autoSaveRef		= NULL;
 	modified		= false;
-	autoSaveIntervall	= 3000000;
+	//set autosave to 5 minutes for the beginning 5 * 60 = 300 *1000 (miliisek) *1000 =
+	autoSaveIntervall	= 300000000;
 	editorManager	= new PEditorManager(this);
 	commandManager	= new PCommandManager(this);
 	//** to do.. helpManager		= new HelpManager();
@@ -258,9 +259,9 @@ void PDocument::Init()
 	BRect	windowRect	= tmpScreen->Frame();
 	windowRect.InsetBy(50,50);
 	window			= new PWindow(windowRect,this);
-	/*autoSaver		= new BMessageRunner(BMessenger(this),
+	autoSaver		= new BMessageRunner(BMessenger(this),
 										 new BMessage(P_C_AUTO_SAVE),
-										 autoSaveIntervall);*/
+										 autoSaveIntervall);
 	if (locked)
 		UnlockLooper();
 }
