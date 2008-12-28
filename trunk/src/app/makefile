@@ -163,7 +163,7 @@ APP_MENU	= Software
 
 ## include the makefile-engine
 ifndef BUILDHOME
-BUILDHOME = /boot/home/apps/develop
+BUILDHOME = /boot/develop
 endif
 include $(BUILDHOME)/etc/makefile-engine
 

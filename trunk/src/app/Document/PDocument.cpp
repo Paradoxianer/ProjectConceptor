@@ -251,7 +251,7 @@ void PDocument::Init()
 	autoSaveRef		= NULL;
 	modified		= false;
 	//set autosave to 5 minutes for the beginning 5 * 60 = 300 *1000 (miliisek) *1000 =
-	autoSaveIntervall	= 300000000;
+	autoSaveIntervall	= 30000000;
 	editorManager	= new PEditorManager(this);
 	commandManager	= new PCommandManager(this);
 	//** to do.. helpManager		= new HelpManager();
@@ -531,7 +531,7 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 void PDocument::Save(void)
 {
 	TRACE();
-	status_t			err 				= B_OK;
+	status_t err 				= B_OK;
 	BTranslatorRoster	*roster				= BTranslatorRoster::Default();
 	BMessage			*archived			= new BMessage();
 	BMessage			*saveSettings		= new BMessage();
@@ -619,7 +619,7 @@ void PDocument::Load(void)
 		if (err == B_OK)
 		{
 			err = loaded->Unflatten(output);
-			printf("%s",strerror(err));
+			printf("%s\n",strerror(err));
 			loaded->PrintToStream();
 			ResetModified();
 		}
@@ -859,9 +859,10 @@ void PDocument::AutoSave(void)
 		char p[PATH_MAX];
 		sprintf(p,"%s/ProjectConceptor/AutoSave/%s",settings.Path(),Title());
 		//** check if this file exist already
+		printf("autosave to %s\n",p);
 		autoSaveRef=new BEntry(p);
 	}
-	BFile	*autoSave	= new BFile((const BEntry *)autoSaveRef,B_READ_WRITE);
+	BFile	*autoSave	= new BFile((const BEntry *)autoSaveRef,B_READ_WRITE | B_ERASE_FILE | B_CREATE_FILE);
 	PushToStream(autoSave);
 	delete autoSave;
 }
