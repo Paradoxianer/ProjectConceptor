@@ -1059,9 +1059,10 @@ void GraphEditor::BringToFront(Renderer *wichRenderer)
 
 void GraphEditor::SendToBack(Renderer *wichRenderer)
 {
+	TRACE();
 	BMessage	*parentNode	= NULL;
 	Renderer	*painter	= NULL;
-	int32		i			= -1;
+	int32		i			= 0;
 	if (wichRenderer->GetMessage()->FindPointer("Node::parent",(void **) &parentNode)==B_OK)
 	{
 		painter	= FindRenderer(parentNode);
