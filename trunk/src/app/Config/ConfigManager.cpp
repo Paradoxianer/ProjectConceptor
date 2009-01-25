@@ -138,34 +138,33 @@ TiXmlElement  ConfigManager::ProcessMessage(char *name, BMessage *msg){
 					xmlNode.InsertChild(xmlSubNode);
 				}	
 			}	
-			case B_RECT_TYPE:{
-				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					TiXmlElement	xmlSubNode(name);
-					xmlSubNode.SetAttribute("type","BRect");
-					xmlSubNode.SetValue("top",((BRect)*data).top);
-					xmlSubNode.SetValue("left",((BRect)*data).left);
-					xmlSubNode.SetValue("bottom",((BRect)*data).bottom);
-					xmlSubNode.SetValue("right",((BRect)*data).right);
-					xmlNode.InsertChild(xmlSubNode);
-				}	
-			}	
 			case B_REF_TYPE:{
 				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
+					BPath path= new BPath((entry_ref*)data);
 					TiXmlElement	xmlSubNode(name);
 					xmlSubNode.SetAttribute("type","B_REF_TYPE");
-					xmlSubNode.SetValue("top",((BRect)*data).top);
-					xmlSubNode.SetValue("left",((BRect)*data).left);
-					xmlSubNode.SetValue("bottom",((BRect)*data).bottom);
-					xmlSubNode.SetValue("right",((BRect)*data).right);
+					xmlSubNode.SetValue("path",path.Path());
 					xmlNode.InsertChild(xmlSubNode);
 				}	
 			}	
-B_REF_TYPE
-
-FindRef()	an entry_ref	B_REF_TYPE
-FindMessage()	a BMessage object	B_MESSAGE_TYPE
-FindMessenger()	a BMessenger object	B_MESSENGER_TYPE
-FindPointer()	a pointer to anything	B_POINTER_TYPE
+			case B_MESSENGER_TYPE:{
+				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
+					BMessage *messengerArchive;
+					((BMessenger*)data)->Archive(messengerArchive,true);
+					TiXmlElement	xmlSubNode(name);
+					xmlSubNode.SetAttribute("type","B_MESSENGER_TYPE");
+					xmlSubNode.InsertChild(ProcessMessage("MessengerNode",messengerArchive));
+					xmlNode.InsertChild(xmlSubNode);
+				}	
+			}	
+			case B_POINTER_TYPE:{
+				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
+					TiXmlElement	xmlSubNode(name);
+					xmlSubNode.SetAttribute("type","B_POINTER_TYPE");
+					xmlSubNode.SetValue("pointer",(int32)data);
+					xmlNode.InsertChild(xmlSubNode);
+				}	
+			}
 		}
 	}
 }
