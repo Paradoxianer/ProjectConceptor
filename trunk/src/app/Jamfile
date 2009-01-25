@@ -85,6 +85,13 @@ PROJECT_CONCEPTOR_SOURCES =
 	InputRequest.cpp
 	ShortCutFilter.cpp
 	TextViewCompleter.cpp
+	
+	# Tools/tinyxml
+	
+	tinystr.cpp
+ 	tinyxml.cpp
+ 	tinyxmlerror.cpp
+	tinyxmlparser.cpp
 ;
 Application ProjectConceptor :
 	$(PROJECT_CONCEPTOR_SOURCES)

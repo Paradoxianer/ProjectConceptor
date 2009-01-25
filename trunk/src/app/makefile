@@ -69,8 +69,11 @@ SRCS= 	About/AboutWindow.cpp \
 		Tools/InputRequestView.cpp \
  		Tools/InputRequest.cpp  \
  		Tools/ShortCutFilter.cpp \
-		Tools/TextViewCompleter.cpp
-
+		Tools/TextViewCompleter.cpp  \
+		Tools/tinyxml/tinystr.cpp \
+ 		Tools/tinyxml/tinyxml.cpp  \
+ 		Tools/tinyxml/tinyxmlerror.cpp \
+		Tools/tinyxml/tinyxmlparser.cpp
 
 
 #	specify the resource files to use

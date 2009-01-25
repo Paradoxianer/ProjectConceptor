@@ -27,11 +27,7 @@ TYPE= SHARED
 SRCS= 	FreeMindTranslator.cpp \
 		TranslatorMain.cpp \
 		SettingsManager.cpp \
-		ConfigView.cpp \
-		tinystr.cpp \
-		tinyxml.cpp \
-		tinyxmlerror.cpp \
-		tinyxmlparser.cpp \
+		ConfigView.cpp 
 		
 
 		
