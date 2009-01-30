@@ -29,6 +29,7 @@ SRCS= 	About/AboutWindow.cpp \
 		About/AboutURLView.cpp \
 		MainView.cpp \
 		ProjectConceptor.cpp \
+		Config/ConfigManager.cpp \
 		Config/ConfigWindow.cpp \
 		Config/ConfigView.cpp \
 		Config/BoolItem.cpp \
