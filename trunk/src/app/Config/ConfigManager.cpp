@@ -13,7 +13,8 @@
 
 
 ConfigManager::ConfigManager(BMessage *newConfig, char *path){
-
+ config = newConfig;
+ BFile *file = new BFile(path,B_READ_WRITE);
 }
 
 //rebuild the hole Config View
@@ -22,11 +23,32 @@ void ConfigManager::SetConfigMessage(BMessage *newConfig){
 }
 
 void  ConfigManager::LoadDefaults(void){
-
+	char		*xmlString;
+	off_t		start,end;
+	file->Seek(0,SEEK_SET);
+	start = file->Position();
+	file->Seek(0,SEEK_END);
+	end = file->Position();
+	file->Seek(0,SEEK_SET);
+	size_t		size= end-start;
+	xmlString=new char[size+1];
+	file->Read(xmlString, size);
+	TiXmlDocument	doc;
+	doc.Parse(xmlString);
+	delete xmlString;
+	if (doc.Error())
+		//need to do something
+		start=0;
+	else{
+		
+	}	
 }
 
-void ConfigManager::SaveConfig(void){
-
+void ConfigManager::SaveConfig(char *rootName){
+  	TiXmlElement doc=ProcessMessage(rootName, config);
+  	TiXmlPrinter	printer;
+  	doc.Accept( &printer );
+	file->Write(printer.CStr(),strlen(printer.CStr()));
 }
 
 TiXmlElement  ConfigManager::ProcessMessage(char *nodeName, BMessage *msg){

@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 
-#include "tinyxml.h"
+#include "tinyxml/tinyxml.h"
 
 
 class ConfigManager
@@ -20,10 +20,11 @@ public:
 	BMessage*	GetConfigMessage(void){return config;};
 	void				SetConfigMessage(BMessage *newConfig);
 	void				LoadDefaults(void);
-	void				SaveConfig(void);
+	void				SaveConfig(char *rootName);
 
 private:
 	TiXmlElement	ProcessMessage(char *name,BMessage *node);
+	BMessage*		ProcessXML(TiXmlElement);
 
 	BMessage	*config;
 	BFile				*file;

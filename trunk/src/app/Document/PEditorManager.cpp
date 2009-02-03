@@ -1,6 +1,8 @@
 #include "PEditorManager.h"
 #include "ShortCutFilter.h"
 #include <support/ClassInfo.h>
+#include <string.h>
+
 
 PEditorManager::PEditorManager(PDocument *initDoc): BArchivable()
 {

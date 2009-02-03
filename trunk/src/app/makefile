@@ -43,7 +43,6 @@ SRCS= 	About/AboutWindow.cpp \
 		Config/StringItem.cpp \
 		Commands/PCommand.cpp \
 		Commands/PCommandManager.cpp \
-		Document/PagedView.cpp \
 		Document/PDocument.cpp \
 		Document/PDocumentManager.cpp \
 		Document/PEditor.cpp \
@@ -112,6 +111,7 @@ SYSTEM_INCLUDE_PATHS =
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS =	. \
 					../include \
+					../include/tinyxml \
 					../include/plugins \
 					Commands \
 					Config \
