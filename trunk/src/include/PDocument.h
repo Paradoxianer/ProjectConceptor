@@ -193,12 +193,10 @@ protected:
 			void				PushToStream(BPositionIO *pushTo);
 
 			PDocumentManager	*documentManager;
-
+			
 			BList				*allNodes;
 			BList				*allConnections;
 			BList				*selected;
-//			BList				*trashed;
-
 			BList				*valueChanged;
 
 			BRect				bounds;
