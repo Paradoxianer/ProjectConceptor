@@ -9,13 +9,14 @@
 #include <FindDirectory.h>
 
 
+#include "BasePlugin.h"
+#include "ConfigManager.h"
+#include "Indexer.h"
 #include "PCSavePanel.h"
 #include "PDocument.h"
 #include "PDocLoader.h"
 #include "PDocumentManager.h"
 #include "PluginManager.h"
-#include "BasePlugin.h"
-#include "Indexer.h"
 
 
 #ifdef __BEOS__
@@ -121,49 +122,40 @@ BArchivable* PDocument::Instantiate(BMessage* message)
 		return new PDocument(message);
 }
 
-void PDocument::MessageReceived(BMessage* message)
-{
+void PDocument::MessageReceived(BMessage* message) {
 	TRACE();
-	switch(message->what)
-	{
-		case MENU_FILE_SAVE:
-		{
+	switch(message->what) {
+		case MENU_FILE_SAVE: {
 			if (entryRef == NULL)
 				SavePanel();
 			else
 				Save();
 			break;
 		}
-		case MENU_FILE_SAVEAS:
-		{
+		case MENU_FILE_SAVEAS: {
 			SavePanel();
 			break;
 		}
-		case MENU_FILE_PRINT:
-		{
+		case MENU_FILE_PRINT: 	{
 			Print();
 			break;
 		}
 		case MENU_APP_SETTINGS:
 				ShowSettings();
 			break;
-		case MENU_MACRO_START_RECORDING:
-		{
+		case MENU_MACRO_START_RECORDING:{
 			commandManager->StartMacro();
 			break;
 		}
-		case MENU_MACRO_STOP_RECORDING:
-		{
+		case MENU_MACRO_STOP_RECORDING:{
 			commandManager->StopMacro();
 			break;
 		}
-		case P_C_MACRO_TYPE:
-		{
+		case P_C_MACRO_TYPE: {
 			commandManager->PlayMacro(message);
 			break;
 		}
-		case  B_SAVE_REQUESTED:
-		{
+		case  B_SAVE_REQUESTED: {
 				message->PrintToStream();
 				BMessage	*saveSettings	= new BMessage();
 				message->FindMessage("saveSettings",saveSettings);
@@ -177,16 +169,14 @@ void PDocument::MessageReceived(BMessage* message)
 				Save();
 			break;
 		}
-		case B_COPY:
-		{
+		case B_COPY: {
 			BMessage	*copyMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			copyMessage->AddString("Command::Name","Copy");
 			copyMessage->AddBool("shadow",true);
 			commandManager->Execute(copyMessage);
 			break;
 		}
-		case B_PASTE:
-		{
+		case B_PASTE: {
 			BMessage	*pasteMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			pasteMessage->AddString("Command::Name","Paste");
 			pasteMessage->AddBool("shadow",true);
@@ -194,28 +184,23 @@ void PDocument::MessageReceived(BMessage* message)
 			break;
 		}
 
-		case B_UNDO:
-		{
+		case B_UNDO: {
 			commandManager->Undo(NULL);
 			break;
 		}
-		case B_REDO:
-		{
+		case B_REDO: {
 			commandManager->Redo(NULL);
 			break;
 		}
-		case P_C_EXECUTE_COMMAND:
-		{
+		case P_C_EXECUTE_COMMAND: {
 			commandManager->Execute(message);
 			break;
 		}
-		case P_C_AUTO_SAVE:
-		{
+		case P_C_AUTO_SAVE: {
 			AutoSave();
 			break;
 		}
-		case P_C_RESTORE_SAVE:
-		{
+		case P_C_RESTORE_SAVE: {
 			//for the Moment we use autosave ;-)
 			AutoSave();
 			break;
@@ -228,16 +213,14 @@ void PDocument::MessageReceived(BMessage* message)
 
 }
 
-void PDocument::Init()
-{
+void PDocument::Init(){
 	TRACE();
 	bool locked = Lock();
 	allNodes		= new BList();
 	allConnections	= new BList();
 	selected		= new BList();
 	valueChanged	= new BList();
-//	trashed			= new BList();
-
+	//Load Configs
 	printerSetting	= NULL;
 	documentSetting	= new BMessage();
 	bounds			= BRect(0,0,600,800);

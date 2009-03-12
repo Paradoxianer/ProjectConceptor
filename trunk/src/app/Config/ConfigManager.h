@@ -12,12 +12,25 @@
 
 #include "tinyxml/tinyxml.h"
 
-
+/**
+ * @class ProjektConceptor
+ * @brief ConfigManager wich is responsible to create the Bridge for the settings between programm and file and the gui
+ *
+ *
+ * @author Paradoxon powered by Jesus Christ
+ * @version 0.01
+ * @date 2009/10/03
+ *
+ */
 class ConfigManager
 {
 public:
-						ConfigManager(BMessage* newConfig, char *path);
+						ConfigManager( char *path,BMessage* newConfig=NULL);
+	/** returns a Pointer to the BMessage holding the Configuration
+	*/
 	BMessage*	GetConfigMessage(void){return config;};
+	/** pass a komplete new Configration to the Manager causes it to rewrite the Config file and recreate a Config GUI
+	*/
 	void				SetConfigMessage(BMessage *newConfig);
 	void				LoadDefaults(void);
 	void				SaveConfig(char *rootName);

@@ -137,23 +137,20 @@ const char*		P_MENU_HELP_ABOUT				= "About";
 
 //const char*		P_C_VERSION						= "0.01.1 Revision 82";
 
-ProjektConceptor::ProjektConceptor():BApplication(APP_SIGNATURE)
-{
+ProjektConceptor::ProjektConceptor():BApplication(APP_SIGNATURE) {
 	TRACE();
 	RegisterMime();
 	documentManager = new PDocumentManager();
 	openPanel		= new BFilePanel();
 }
 
-ProjektConceptor::~ProjektConceptor()
-{
+ProjektConceptor::~ProjektConceptor() {
 	TRACE();
 	delete documentManager;
 	delete openPanel;
 }
 
-void ProjektConceptor::ReadyToRun()
-{
+void ProjektConceptor::ReadyToRun() {
 	TRACE();
 	//creat settingsfolder
 	BPath settings;
@@ -163,18 +160,22 @@ void ProjektConceptor::ReadyToRun()
 	status_t err= B_OK;
 	err = settingsDir->CreateDirectory("ProjectConceptor", NULL);
 	err = settingsDir->SetTo(settingsDir, "ProjectConceptor");
+	settings.SetTo(settingsDir, "GeneralSettings");
+	ConfigManager		*configManager = new ConfigManager((char *)settings.Path());
+	configManager->GetConfigMessage()->AddInt32("TestInt",32);
+	configManager->GetConfigMessage()->AddString("TestString","BLBLABL");
+	configManager->SaveConfig("Tester");
 	err = settingsDir->CreateDirectory("AutoSave", NULL);
+
 }
 
 /**
  * @todo request the Quit .. don´t simply quit all without asking (so that there is chance to save or abort because the document has changed)
  */
-bool ProjektConceptor::QuitRequested()
-{
+bool ProjektConceptor::QuitRequested() {
 	TRACE();
 	bool quit	= true;
-	for (int32 i=0;i<documentManager->CountPDocuments();i++)
-	{
+	for (int32 i=0;i<documentManager->CountPDocuments();i++) {
 		PDocument * doc=documentManager->PDocumentAt(i);
 		quit= quit | doc->QuitRequested();
 /*		doc->Lock();
@@ -183,13 +184,10 @@ bool ProjektConceptor::QuitRequested()
 	return quit;
 }
 
-void ProjektConceptor::MessageReceived(BMessage *message)
-{
+void ProjektConceptor::MessageReceived(BMessage *message) {
 	TRACE();
-	switch(message->what)
-	{
-		case MENU_FILE_OPEN:
-		{
+	switch(message->what) {
+		case MENU_FILE_OPEN: {
 /*			Documenter *tester;
 			documentPlugins->FindPointer("plugins",(void **)&tester);
 			PWindow *prjWindow=(PWindow *)WindowAt(0);
@@ -198,8 +196,7 @@ void ProjektConceptor::MessageReceived(BMessage *message)
 			openPanel->Show();		// Show the file panel
 			break;
 		}
-		case MENU_FILE_NEW:
-		{
+		case MENU_FILE_NEW: {
 			documentManager->CreateDocument();
 			break;
 		}
@@ -209,8 +206,7 @@ void ProjektConceptor::MessageReceived(BMessage *message)
 	}
 }
 
-void ProjektConceptor::RefsReceived(BMessage *msg)
-{
+void ProjektConceptor::RefsReceived(BMessage *msg) {
 	TRACE();
 	uint32 		type;
 	int32 		count;
@@ -220,15 +216,13 @@ void ProjektConceptor::RefsReceived(BMessage *msg)
 	msg->GetInfo("refs", &type, &count);
 
 	// not a entry_ref?
-	if (type != B_REF_TYPE)
-	{
+	if (type != B_REF_TYPE) {
 		delete entry;
 		return;
 	}
 
 	if (msg->FindRef("refs", 0, &ref) == B_OK)
-		if (entry->SetTo(&ref,true)==B_OK)
-		{
+		if (entry->SetTo(&ref,true)==B_OK) {
 			PDocument *doc=documentManager->PDocumentAt(0);
 			doc->SetEntry(&ref);
 			doc->Load();
@@ -237,17 +231,14 @@ void ProjektConceptor::RefsReceived(BMessage *msg)
 	delete entry;
 }
 
-void ProjektConceptor::AboutRequested()
-{
+void ProjektConceptor::AboutRequested() {
 	TRACE();
 	AboutWindow *aboutWindow = new AboutWindow();
 	aboutWindow->Show();
 }
 
-void ProjektConceptor::ArgvReceived(int32 argc, char **argv)
-{
-	if (argc>1)
-	{
+void ProjektConceptor::ArgvReceived(int32 argc, char **argv) {
+	if (argc>1) {
 		if (strcasecmp(argv[1],"-d") == B_OK)
 			SET_DEBUG_ENABLED(true);
 	}
@@ -255,16 +246,13 @@ void ProjektConceptor::ArgvReceived(int32 argc, char **argv)
 			SET_DEBUG_ENABLED(false);
 }
 
-void ProjektConceptor::RegisterMime(void)
-{
+void ProjektConceptor::RegisterMime(void) {
 	bool			valid = false;
 	BMimeType		mime;
 	BMessage		info;
 	mime.SetType(P_C_DOCUMENT_MIMETYPE);
-	if (!mime.IsInstalled())
-	{
-		if (mime.GetAttrInfo(&info) == B_NO_ERROR) 
-		{
+	if (!mime.IsInstalled()) {
+		if (mime.GetAttrInfo(&info) == B_NO_ERROR)  {
 			int32	mimeVersion;
 			info.FindInt32("version",&mimeVersion);
 			if (mimeVersion<P_C_VERSION);
@@ -273,8 +261,7 @@ void ProjektConceptor::RegisterMime(void)
 		if (!valid)
 			mime.Delete();
 	}
-	if (!valid)
-	{
+	if (!valid) {
 		BBitmap *kLargeIcon= BTranslationUtils::GetBitmap(B_LARGE_ICON,"BEOS:L:STD_ICON");
 		BBitmap *kSmallIcon= BTranslationUtils::GetBitmap(B_MINI_ICON,"BEOS:M:STD_ICON");
 

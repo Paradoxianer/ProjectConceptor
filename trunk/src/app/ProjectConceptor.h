@@ -3,6 +3,7 @@
 
 #include "PluginManager.h"
 #include "PDocumentManager.h"
+#include "ConfigManager.h"
 
 #include <Application.h>
 #include <storage/FilePanel.h>
@@ -36,6 +37,7 @@ public:
 	virtual	void				RegisterMime(void);
 private:
 			PDocumentManager	*documentManager;
+			ConfigManager	*configManager;
 			BFilePanel			*openPanel;
 };
 #endif
