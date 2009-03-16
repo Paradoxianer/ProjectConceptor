@@ -164,7 +164,10 @@ void ProjektConceptor::ReadyToRun() {
 	ConfigManager		*configManager = new ConfigManager((char *)settings.Path());
 	configManager->GetConfigMessage()->AddInt32("TestInt",32);
 	configManager->GetConfigMessage()->AddString("TestString","BLBLABL");
-	configManager->SaveConfig("Tester");
+	configManager->GetConfigMessage()->AddString("Eintrag2","Inhalt2");
+	configManager->GetConfigMessage()->AddBool("Boolinhalt",false);
+
+	configManager->SaveConfig();
 	err = settingsDir->CreateDirectory("AutoSave", NULL);
 
 }

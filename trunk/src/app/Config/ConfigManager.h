@@ -33,10 +33,10 @@ public:
 	*/
 	void				SetConfigMessage(BMessage *newConfig);
 	void				LoadDefaults(void);
-	void				SaveConfig(char *rootName);
+	void				SaveConfig();
 
 private:
-	TiXmlElement	ProcessMessage(char *name,BMessage *node);
+	TiXmlElement	ProcessMessage(BMessage *node);
 	BMessage*		ProcessXML(TiXmlElement);
 
 	BMessage	*config;
