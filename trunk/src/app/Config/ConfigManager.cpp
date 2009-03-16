@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <app/Messenger.h>
 #include <interface/InterfaceDefs.h>
+#include <storage/Entry.h>
 #include <storage/Path.h>
 
 #include <support/Debug.h>
@@ -75,33 +76,29 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 	char		*name;
 	uint32	type;
 	int32		count;
-	void		*data;
 	int32		i =0;
 	ssize_t	numBytes;
 	TRACE();
-	#ifdef B_ZETA_VERSION_1_0_0
-		while (msg->GetInfo(B_ANY_TYPE,i ,(const char **)&name, &type, &count) == B_OK) {
-	#else
 		while (msg->GetInfo(B_ANY_TYPE,i ,(char **)&name, &type, &count) == B_OK) {
-	#endif
 		TRACE();
 		TiXmlElement	xmlSubNode("Data");
 		xmlSubNode.SetAttribute("name",name);
 		switch(type){
 			case B_MESSAGE_TYPE:{
-				TRACE();
+				BMessage tmpMessage;
 				xmlSubNode.SetAttribute("type","BMessage");
-				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes)== B_OK){
-					xmlSubNode.InsertEndChild(ProcessMessage((BMessage*)data));
+				if (msg->FindMessage(name, count-1, &tmpMessage)== B_OK){
+					xmlSubNode.InsertEndChild(ProcessMessage(&tmpMessage));
 				}
 				break;
 			}
 			case B_BOOL_TYPE:{
 		        TRACE();
 		        //FindBool()
+		        bool tmpBool;
 		        xmlSubNode.SetAttribute("type","bool");
-		        if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					if  (*((bool *)data) = true)
+		        if (msg->FindBool(name, count-1, &tmpBool) == B_OK){
+					if  (tmpBool = true)
 						xmlSubNode.SetAttribute("value","true");
 					else
 						xmlSubNode.SetAttribute("value","false");
@@ -111,91 +108,98 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 			case B_INT8_TYPE:{
 		        TRACE();
 		        //FindInt8()	an int8 or uint8	
+		        int8 tmpInt8;
 				xmlSubNode.SetAttribute("type","int8");
-				 if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					xmlSubNode.SetAttribute("value",*(int8*)data);
+				 if (msg->FindInt8(name, count-1, &tmpInt8) == B_OK){
+					xmlSubNode.SetAttribute("value",tmpInt8);
 				}
 				break;	
 			}
 			case B_INT16_TYPE:{
 		        TRACE();
 		        //FindInt16()	an int16 or uint16	
+		        int16 tmpInt16;
 				xmlSubNode.SetAttribute("type","int16");
-				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					xmlSubNode.SetAttribute("value",*((int16*)data));
+				if (msg->FindInt16(name, count-1, &tmpInt16) == B_OK){
+					xmlSubNode.SetAttribute("value",tmpInt16);
 				}
 				break;
 			}
 			case B_INT32_TYPE:{
 				TRACE();
 				xmlSubNode.SetAttribute("type","int32");
-				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					xmlSubNode.SetAttribute("value",*((int32 *)data));
+				int32 tmpInt32;
+				if (msg->FindInt32(name, count-1, &tmpInt32) == B_OK){
+					xmlSubNode.SetAttribute("value",tmpInt32);
 				}	
 				break;
 			}
 			case B_INT64_TYPE:{
 				TRACE();
+				int64 tmpInt64;
 				xmlSubNode.SetAttribute("type","int64");
-				 if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					xmlSubNode.SetAttribute("value",*((int64*)data));
+				 if (msg->FindInt64(name, count-1, &tmpInt64) == B_OK){
+					xmlSubNode.SetAttribute("value",tmpInt64);
 				}	
 				break;
 			}
 			case B_FLOAT_TYPE:{
 		        TRACE();
+		        float	tmpFloat;
 				xmlSubNode.SetAttribute("type","float");
-				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					xmlSubNode.SetDoubleAttribute("value",*((float*)data));
+				if (msg->FindFloat(name, count-1, &tmpFloat) == B_OK){
+					xmlSubNode.SetDoubleAttribute("value",tmpFloat);
 				}
 				break;
 			}
 			case B_DOUBLE_TYPE:{
-					TRACE();
+				TRACE();
+				double tmpDouble;
 				xmlSubNode.SetAttribute("type","double");
-				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					xmlSubNode.SetDoubleAttribute("value",*((double *)data));
+				if (msg->FindDouble(name, count-1, &tmpDouble) == B_OK){
+					xmlSubNode.SetDoubleAttribute("value", tmpDouble);
 				}	
 				break;
 			}	
 			case B_STRING_TYPE:{
 				TRACE();
 				xmlSubNode.SetAttribute("type","string");
-				 if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					printf("Testausgabe %s",(char *)data);
-					xmlSubNode.SetAttribute("value",(char *)data);
+				const char *tmpChar;
+				 if (msg->FindString(name, count-1, &tmpChar) == B_OK){
+					xmlSubNode.SetAttribute("value",tmpChar);
 				}
-				else
-				 	printf("%s", (char *)data);
-				 TRACE();
 				break;
 			}
 			case B_POINT_TYPE:{
 				TRACE();
+				BPoint tmpPoint;
 				xmlSubNode.SetAttribute("type","BPoint");
-				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					xmlSubNode.SetDoubleAttribute("x",((BPoint*)data)->x);
-					xmlSubNode.SetDoubleAttribute("y",((BPoint*)data)->y);
+				if (msg->FindPoint(name, count-1, &tmpPoint) == B_OK){
+					xmlSubNode.SetDoubleAttribute("x",tmpPoint.x);
+					xmlSubNode.SetDoubleAttribute("y",tmpPoint.y);
 				}
 				break;
 			}
 			case B_RECT_TYPE:{
 				TRACE();
-				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
+				BRect tmpRect;
+				if (msg->FindRect(name, count-1, &tmpRect) == B_OK){
 					xmlSubNode.SetAttribute("type","BRect");
-					xmlSubNode.SetDoubleAttribute("top",((BRect*)data)->top);
-					xmlSubNode.SetDoubleAttribute("left",((BRect*)data)->left);
-					xmlSubNode.SetDoubleAttribute("bottom",((BRect*)data)->bottom);
-					xmlSubNode.SetDoubleAttribute("right",((BRect*)data)->right);
+					xmlSubNode.SetDoubleAttribute("top",tmpRect.top);
+					xmlSubNode.SetDoubleAttribute("left",tmpRect.left);
+					xmlSubNode.SetDoubleAttribute("bottom",tmpRect.bottom);
+					xmlSubNode.SetDoubleAttribute("right",tmpRect.right);
 				}	
 				break;
 			}	
 			case B_REF_TYPE:{
 				TRACE();
-				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
-					BPath *path= new BPath((entry_ref*)data);
+				entry_ref tmpRef;
+				if (msg->FindRef(name, count-1, &tmpRef) == B_OK){
+					BPath *path= new BPath(&tmpRef);
 					xmlSubNode.SetAttribute("type","B_REF_TYPE");
 					xmlSubNode.SetAttribute("path",path->Path());
+					delete path;
 				}	
 				break;
 			}	
@@ -209,9 +213,10 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 			}*/	
 			case B_POINTER_TYPE:{
 				TRACE();
-				if (msg->FindData(name, B_ANY_TYPE, i, (const void **)&data, &numBytes) == B_OK){
+				void *tmpPointer;
+				if (msg->FindPointer(name, count-1, &tmpPointer) == B_OK){
 					xmlSubNode.SetAttribute("type","B_POINTER_TYPE");
-					xmlSubNode.SetDoubleAttribute("value",(int32)data);
+					xmlSubNode.SetDoubleAttribute("value",(int32)tmpPointer);
 				}	
 				break;
 			}
