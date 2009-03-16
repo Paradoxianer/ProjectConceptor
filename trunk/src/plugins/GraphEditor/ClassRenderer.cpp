@@ -271,8 +271,7 @@ void ClassRenderer::MouseUp(BPoint where)
 }
 
 
-void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
-{
+void ClassRenderer::Draw(BView *drawOn, BRect updateRect){
 	BRect		shadowFrame = frame;
 	bool		fitIn		= true;
 	Renderer*	tmpRenderer	= NULL;
@@ -282,13 +281,19 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->SetPenSize(penSize);
 	drawOn->SetHighColor(0,0,0,77);
 	drawOn->FillRoundRect(shadowFrame, xRadius, yRadius);
-	if (!selected)
-		drawColor = fillColor;
-
-	else
-		drawColor = tint_color(fillColor,1.35);
+	drawColor=fillColor;
+	if (selected){
+		drawOn->SetPenSize(5.0);
+		drawOn->SetHighColor(200,0,0,150);
+		BRect selectFrame = frame;
+		selectFrame.InsetBy(-2,-2);
+		drawOn->StrokeRoundRect(selectFrame, xRadius, yRadius);
+		drawOn->SetHighColor(drawColor);
+	}
 	drawOn->SetHighColor(drawColor);
 	drawOn->FillRoundRect(frame, xRadius, yRadius);
+
+
 	drawOn->SetPenSize(1.0);
 	drawOn->BeginLineArray(20);
 	drawOn->AddLine(BPoint(frame.left+xRadius,frame.top+1),BPoint(frame.right-xRadius,frame.top+1),tint_color(drawColor,0));
