@@ -7,6 +7,8 @@
 
 #include <app/Message.h>
 #include <storage/File.h>
+#include <map>
+using namespace std;
 
 #include <stdlib.h>
 
@@ -22,6 +24,7 @@
  * @date 2009/10/03
  *
  */
+
 class ConfigManager
 {
 public:
@@ -37,10 +40,13 @@ public:
 
 private:
 	TiXmlElement	ProcessMessage(BMessage *node);
-	BMessage*		ProcessXML(TiXmlElement);
+	BMessage*		ProcessXML(TiXmlElement*);
 
 	BMessage	*config;
 	BFile				*file;
+ 	//**@ToDo make it static const
+ 	map<char*, int>  	bmessageTypes;
+
 
 };
 #endif

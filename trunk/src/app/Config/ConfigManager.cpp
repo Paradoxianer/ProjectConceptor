@@ -6,10 +6,8 @@
 #include <storage/Path.h>
 
 #include <support/Debug.h>
+#include <map>
 
-
-//needed for strerror
-#include <string.h>
 
 #ifdef B_ZETA_VERSION_BETA
 	#include <locale/Locale.h>
@@ -18,9 +16,9 @@
 #endif
 
 
-
 ConfigManager::ConfigManager(char *path, BMessage *newConfig){
 // if no Message was passed we just create a Message :)
+
  if (newConfig==NULL) {
  	config = new BMessage();
  } 
@@ -28,6 +26,22 @@ ConfigManager::ConfigManager(char *path, BMessage *newConfig){
  	config = newConfig;
  BFile *file = new BFile(path,B_READ_WRITE | B_CREATE_FILE);
  //** @todo check for errors if the config file was created*/
+ bmessageTypes["BMessage"]=1;
+ bmessageTypes["bool"]=2;
+ bmessageTypes["int8"]=3;
+ bmessageTypes["nt16"]=4;
+ bmessageTypes["nt32"]=5;
+ bmessageTypes["nt64"]=6;
+ bmessageTypes["float"]=7;
+ bmessageTypes["double"]=8;
+ bmessageTypes["string"]=9;
+ 
+ bmessageTypes["BPoint"]=10;
+ bmessageTypes["BRect"]=11;
+ bmessageTypes["B_REF_TYPE"]=12;
+ bmessageTypes["B_POINTER_REF"]=13;
+ 
+ 
 }
 
 //rebuild the hole Config View
@@ -80,6 +94,7 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 	ssize_t	numBytes;
 	TRACE();
 		while (msg->GetInfo(B_ANY_TYPE,i ,(char **)&name, &type, &count) == B_OK) {
+		printf("%c",type);
 		TRACE();
 		TiXmlElement	xmlSubNode("Data");
 		xmlSubNode.SetAttribute("name",name);
@@ -93,7 +108,6 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				break;
 			}
 			case B_BOOL_TYPE:{
-		        TRACE();
 		        //FindBool()
 		        bool tmpBool;
 		        xmlSubNode.SetAttribute("type","bool");
@@ -106,7 +120,6 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				break;
 			}
 			case B_INT8_TYPE:{
-		        TRACE();
 		        //FindInt8()	an int8 or uint8	
 		        int8 tmpInt8;
 				xmlSubNode.SetAttribute("type","int8");
@@ -116,7 +129,6 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				break;	
 			}
 			case B_INT16_TYPE:{
-		        TRACE();
 		        //FindInt16()	an int16 or uint16	
 		        int16 tmpInt16;
 				xmlSubNode.SetAttribute("type","int16");
@@ -126,7 +138,6 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				break;
 			}
 			case B_INT32_TYPE:{
-				TRACE();
 				xmlSubNode.SetAttribute("type","int32");
 				int32 tmpInt32;
 				if (msg->FindInt32(name, count-1, &tmpInt32) == B_OK){
@@ -135,7 +146,6 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				break;
 			}
 			case B_INT64_TYPE:{
-				TRACE();
 				int64 tmpInt64;
 				xmlSubNode.SetAttribute("type","int64");
 				 if (msg->FindInt64(name, count-1, &tmpInt64) == B_OK){
@@ -144,7 +154,6 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				break;
 			}
 			case B_FLOAT_TYPE:{
-		        TRACE();
 		        float	tmpFloat;
 				xmlSubNode.SetAttribute("type","float");
 				if (msg->FindFloat(name, count-1, &tmpFloat) == B_OK){
@@ -153,7 +162,6 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				break;
 			}
 			case B_DOUBLE_TYPE:{
-				TRACE();
 				double tmpDouble;
 				xmlSubNode.SetAttribute("type","double");
 				if (msg->FindDouble(name, count-1, &tmpDouble) == B_OK){
@@ -162,7 +170,6 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				break;
 			}	
 			case B_STRING_TYPE:{
-				TRACE();
 				xmlSubNode.SetAttribute("type","string");
 				const char *tmpChar;
 				 if (msg->FindString(name, count-1, &tmpChar) == B_OK){
@@ -171,7 +178,6 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				break;
 			}
 			case B_POINT_TYPE:{
-				TRACE();
 				BPoint tmpPoint;
 				xmlSubNode.SetAttribute("type","BPoint");
 				if (msg->FindPoint(name, count-1, &tmpPoint) == B_OK){
@@ -193,7 +199,6 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				break;
 			}	
 			case B_REF_TYPE:{
-				TRACE();
 				entry_ref tmpRef;
 				if (msg->FindRef(name, count-1, &tmpRef) == B_OK){
 					BPath *path= new BPath(&tmpRef);
@@ -225,4 +230,58 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 		i++;
 	}
 	return xmlNode;
+}
+
+
+BMessage* ConfigManager::ProcessXML(TiXmlElement *element){
+	BMessage *bMessage	= new BMessage;
+	bMessage->what = atoi(element->Attribute("what"));
+	for( ; element;){
+		element= element->NextSiblingElement();
+		switch (	bmessageTypes[(char *)element->Attribute("type")]){
+			case 1:{
+			}
+			break;	
+			case 2:{
+			}
+			break;
+			case 3:{
+			}
+			break;
+			case 4:{
+			}
+			break;
+			case 5:{
+			}
+			break;
+			case 6:{
+			}
+			break;
+			case 7:{
+			}
+			break;
+			case 8:{
+			}
+			break;
+			case 9:{
+			}
+			break;
+			case 10:{
+			}
+			break;
+			case 11:{
+			}
+			break;
+			case 12:{
+			}
+			break;
+			case 13:{
+			}
+			break;
+			case 14:{
+			}
+			break;
+		}
+	}
+
 }
