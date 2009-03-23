@@ -214,12 +214,10 @@ void PCommandManager::PlayMacro(BMessage *makro)
 
 }
 
-status_t PCommandManager::Execute(BMessage *settings)
-{
+status_t PCommandManager::Execute(BMessage *settings) {
 	TRACE();
 	status_t	err	= B_OK;
-	if (doc->Lock())
-	{
+	if (doc->Lock()) {
 		(doc->GetChangedNodes())->MakeEmpty();
 //		(doc->GetTrash())->MakeEmpty();
 		bool		shadow				= false;
@@ -227,23 +225,30 @@ status_t PCommandManager::Execute(BMessage *settings)
 		PCommand	*command			= NULL;
 		settings->FindString("Command::Name",(const char**)&commandName);
 		command		= GetPCommand(commandName);
-		if (command != NULL)
-		{
-			BMessage	*tmpMessage		= command->Do(doc, settings);
-			err				= settings->FindBool("shadow",&shadow);
-			if ((err != B_OK) )
-			{
-				if (recording)
-					recording->AddMessage("Macro::Commmand", macroIndexer->IndexMacroCommand(settings));
-				if (!shadow)
-				{
-					undoList->RemoveItems(undoStatus+1,undoList->CountItems()-undoStatus);
-					undoList->AddItem(new BMessage(*tmpMessage));
-					undoStatus	= undoList->CountItems()-1;
-				}
+		if (command != NULL) {
+			BMessage	*tmpMessage;
+			try  {
+				tmpMessage = command->Do(doc, settings);
 			}
-			doc->SetModified();
-			(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+			catch(...){
+				BAlert *alert = new BAlert(commandName, "Error on execution of Command.", "OK");
+				alert->Go();
+				err=B_ERROR;
+			}
+			if (err==B_OK){
+				err				= settings->FindBool("shadow",&shadow);
+				if ((err != B_OK) ) {
+					if (recording)
+						recording->AddMessage("Macro::Commmand", macroIndexer->IndexMacroCommand(settings));
+					if (!shadow) {
+						undoList->RemoveItems(undoStatus+1,undoList->CountItems()-undoStatus);
+						undoList->AddItem(new BMessage(*tmpMessage));
+						undoStatus	= undoList->CountItems()-1;
+					}
+				}
+				doc->SetModified();
+				(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+			}
 			doc->Unlock();
 		}
 		else

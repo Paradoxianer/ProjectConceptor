@@ -327,6 +327,7 @@ void GraphEditor::ValueChanged()
 	for (int32 i=0;i<changedNodes->CountItems();i++)
 	{
 		node = (BMessage *)changedNodes->ItemAt(i);
+		node->PrintToStream();
 		if (node->FindPointer(renderString,(void **)&painter) == B_OK)
 		{
 			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
