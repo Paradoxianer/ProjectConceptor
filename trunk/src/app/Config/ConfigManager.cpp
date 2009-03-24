@@ -4,10 +4,13 @@
 #include <interface/InterfaceDefs.h>
 #include <storage/Entry.h>
 #include <storage/Path.h>
+#include <support/String.h>
 
 #include <support/Debug.h>
 #include <map>
 
+
+//#include "b64.h"
 
 #ifdef B_ZETA_VERSION_BETA
 	#include <locale/Locale.h>
@@ -231,6 +234,17 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 				}	
 				break;
 			}
+			default:{
+					char *code=new char[5];
+					sprintf(code, "%c%c%c%c", (uint8)(type), (uint8)(type >> 8), (uint8)(type >> 16), (uint8)(type >> 24));
+					xmlSubNode.SetAttribute("type",code);
+					void *data;
+					ssize_t size;
+					if (msg->FindData(name, B_ANY_TYPE,i, (const void **)&data, &size)){
+				/**		@ToDo adding data encode   b64_encode()
+						xmlSubNode.SetValue();*/
+					}
+			}
 		}
 		xmlNode.InsertEndChild(xmlSubNode);
 		i++;
@@ -246,24 +260,35 @@ BMessage* ConfigManager::ProcessXML(TiXmlElement *element){
 		element= element->NextSiblingElement();
 		switch (	bmessageTypes[(char *)element->Attribute("type")]){
 			case 1:{
+				bMessage->AddMessage(element->Attribute("name"), (const BMessage *)ProcessXML(element->FirstChildElement("Data")));
 			}
 			break;	
 			case 2:{
+				BString value = BString(element->Attribute("value"));
+				if (value.ICompare("TRUE") == B_OK)
+					bMessage->AddBool(element->Attribute("name"),true);
+				else
+					bMessage->AddBool(element->Attribute("name"),false);
 			}
 			break;
 			case 3:{
+					bMessage->AddInt8(element->Attribute("name"),atoi(element->Attribute("value")));				
 			}
 			break;
 			case 4:{
+					bMessage->AddInt16(element->Attribute("name"),atoi(element->Attribute("value")));
 			}
 			break;
 			case 5:{
+					bMessage->AddInt32(element->Attribute("name"),atoi(element->Attribute("value")));				
 			}
 			break;
 			case 6:{
+					bMessage->AddInt64(element->Attribute("name"),atol(element->Attribute("value")));
 			}
 			break;
 			case 7:{
+					bMessage->AddInt32(element->Attribute("name"),atoi(element->Attribute("value")));				
 			}
 			break;
 			case 8:{
