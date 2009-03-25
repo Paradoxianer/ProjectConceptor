@@ -292,6 +292,7 @@ BMessage* ConfigManager::ProcessXML(TiXmlElement *element){
 			}
 			break;
 			case 8:{
+					bMessage->AddString(element->Attribute("name"),element->Attribute("value"));				
 			}
 			break;
 			case 9:{
