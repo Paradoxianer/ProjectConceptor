@@ -288,20 +288,31 @@ BMessage* ConfigManager::ProcessXML(TiXmlElement *element){
 			}
 			break;
 			case 7:{
-					bMessage->AddInt32(element->Attribute("name"),atoi(element->Attribute("value")));				
+					bMessage->AddInt32(element->Attribute("name"),atof(element->Attribute("value")));				
 			}
 			break;
 			case 8:{
-					bMessage->AddString(element->Attribute("name"),element->Attribute("value"));				
+					bMessage->AddInt32(element->Attribute("name"),atof(element->Attribute("value")));				
 			}
 			break;
 			case 9:{
+					bMessage->AddString(element->Attribute("name"),element->Attribute("value"));	
 			}
 			break;
 			case 10:{
+					BPoint tmpPoint;
+					tmpPoint.x = atof(element->Attribute("x"));
+					tmpPoint.y = atof(element->Attribute("y"));
+					bMessage->AddPoint(element->Attribute("name"),tmpPoint);	
 			}
 			break;
 			case 11:{
+					BRect tmpRect;
+					tmpRect.top			= atof(element->Attribute("top"));
+					tmpRect.left			= atof(element->Attribute("left"));
+					tmpRect.bottom	= atof(element->Attribute("bottom"));
+					tmpRect.right		= atof(element->Attribute("right"));
+					bMessage->AddPoint(element->Attribute("name"),tmpPoint);	
 			}
 			break;
 			case 12:{
