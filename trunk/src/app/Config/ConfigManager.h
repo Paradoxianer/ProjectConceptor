@@ -45,7 +45,7 @@ private:
 	BMessage	*config;
 	BFile				*file;
  	//**@ToDo make it static const
- 	map<char*, int>  	bmessageTypes;
+ 	map<BString, int>  	bmessageTypes;
 
 
 };

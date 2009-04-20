@@ -31,20 +31,19 @@ ConfigManager::ConfigManager(char *path, BMessage *newConfig){
  status_t err = file->InitCheck();
  if (err != B_OK)
  	fprintf(stderr,"File InitCheck() %s\n",strerror(err));
- bmessageTypes["BMessage"]=1;
- bmessageTypes["bool"]=2;
- bmessageTypes["int8"]=3;
- bmessageTypes["nt16"]=4;
- bmessageTypes["nt32"]=5;
- bmessageTypes["nt64"]=6;
- bmessageTypes["float"]=7;
- bmessageTypes["double"]=8;
- bmessageTypes["string"]=9;
- 
- bmessageTypes["BPoint"]=10;
- bmessageTypes["BRect"]=11;
- bmessageTypes["B_REF_TYPE"]=12;
- bmessageTypes["B_POINTER_REF"]=13;
+ bmessageTypes[BString("BMessage")]=1;
+ bmessageTypes[BString("bool")]=2;
+ bmessageTypes[BString("int8")]=3;
+ bmessageTypes[BString("nt16")]=4;
+ bmessageTypes[BString("nt32")]=5;
+ bmessageTypes[BString("nt64")]=6;
+ bmessageTypes[BString("float")]=7;
+ bmessageTypes[BString("double")]=8;
+ bmessageTypes[BString("string")]=9;
+ bmessageTypes[BString("BPoint")]=10;
+ bmessageTypes[BString("BRect")]=11;
+ bmessageTypes[BString("B_REF_TYPE")]=12;
+ bmessageTypes[BString("B_POINTER_REF")]=13;
  
  
 }
@@ -258,7 +257,8 @@ BMessage* ConfigManager::ProcessXML(TiXmlElement *element){
 	bMessage->what = atoi(element->Attribute("what"));
 	for( ; element;){
 		element= element->NextSiblingElement();
-		switch (	bmessageTypes[(char *)element->Attribute("type")]){
+		printf("type %s\n",element->Attribute("type"));
+		switch (	bmessageTypes[BMessage(element->Attribute("type"))]){
 			case 1:{
 				bMessage->AddMessage(element->Attribute("name"), (const BMessage *)ProcessXML(element->FirstChildElement("Data")));
 			}
