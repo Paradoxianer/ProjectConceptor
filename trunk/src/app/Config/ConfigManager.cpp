@@ -54,7 +54,8 @@ void ConfigManager::SetConfigMessage(BMessage *newConfig){
 }
 
 void  ConfigManager::LoadDefaults(void){
-	char		*xmlString;
+	TRACE();
+	/*char		*xmlString;
 	off_t		start,end;
 	file->Seek(0,SEEK_SET);
 	start = file->Position();
@@ -63,15 +64,21 @@ void  ConfigManager::LoadDefaults(void){
 	file->Seek(0,SEEK_SET);
 	size_t		size= end-start;
 	xmlString=new char[size+1];
-	file->Read(xmlString, size);
-	TiXmlDocument	doc;
-	doc.Parse(xmlString);
-	delete xmlString;
+	file->Read(xmlString, size);*/
+	TiXmlDocument	 doc;
+	doc.LoadFile("/boot/home/config/settings/ProjectConceptor/GeneralSettings");
+	//doc.Parse(xmlString);
 	if (doc.Error())
 		//need to do something
-		start=0;
-	else{		
-	}	
+	//	start=0;
+	;
+	else{
+		TRACE();
+		TiXmlElement *element =	 doc.FirstChildElement("BMessage");
+		ProcessXML(element)->PrintToStream();
+	}
+//	delete xmlString;
+		
 }
 
 void ConfigManager::SaveConfig(){
@@ -255,12 +262,12 @@ TiXmlElement  ConfigManager::ProcessMessage( BMessage *msg){
 BMessage* ConfigManager::ProcessXML(TiXmlElement *element){
 	BMessage *bMessage	= new BMessage;
 	bMessage->what = atoi(element->Attribute("what"));
+	element= element->FirstChildElement("Data");
 	for( ; element;){
-		element= element->NextSiblingElement();
 		printf("type %s\n",element->Attribute("type"));
-		switch (	bmessageTypes[BMessage(element->Attribute("type"))]){
+		switch (	bmessageTypes[BString(element->Attribute("type"))]){
 			case 1:{
-				bMessage->AddMessage(element->Attribute("name"), (const BMessage *)ProcessXML(element->FirstChildElement("Data")));
+				bMessage->AddMessage(element->Attribute("name"), (const BMessage *)ProcessXML(element));
 			}
 			break;	
 			case 2:{
@@ -312,7 +319,7 @@ BMessage* ConfigManager::ProcessXML(TiXmlElement *element){
 					tmpRect.left			= atof(element->Attribute("left"));
 					tmpRect.bottom	= atof(element->Attribute("bottom"));
 					tmpRect.right		= atof(element->Attribute("right"));
-					bMessage->AddPoint(element->Attribute("name"),tmpPoint);	
+					bMessage->AddRect(element->Attribute("name"),tmpRect);	
 			}
 			break;
 			case 12:{
@@ -325,6 +332,7 @@ BMessage* ConfigManager::ProcessXML(TiXmlElement *element){
 			}
 			break;
 		}
+		element= element->NextSiblingElement();
 	}
-
+	return bMessage;
 }
