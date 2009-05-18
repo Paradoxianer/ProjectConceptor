@@ -18,7 +18,11 @@ public:
 	static status_t WriteFile(const BString &fileName, const BMessage &message);
 
 protected:
-    BFile file;
+    BString filePath;
+
+private:
+    TiXmlElement	ProcessMessage(BMessage *node);
+
 };
 
 
