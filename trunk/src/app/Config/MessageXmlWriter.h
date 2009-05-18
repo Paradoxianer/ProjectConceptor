@@ -1,6 +1,12 @@
 #ifndef MESSAGEXMLWRITER_H_INCLUDED
 #define MESSAGEXMLWRITER_H_INCLUDED
 
+#include <String.h>
+#include <Message.h>
+
+#include "tinyxml/tinyxml.h"
+
+
 class MessageXmlWriter
 {
 public:
@@ -8,7 +14,7 @@ public:
 	MessageXmlWriter(const BString &fileName);
 	~MessageXmlWriter();
 
-	bool InitCheck();
+	status_t InitCheck();
 	void SetTo(const BString &fileName);
 
 	status_t Write(BMessage &message);
@@ -17,13 +23,11 @@ public:
 	// tut im endeffekt nur obiges
 	static status_t WriteFile(const BString &fileName, const BMessage &message);
 
-protected:
-    BString filePath;
-
 private:
     TiXmlElement	ProcessMessage(BMessage *node);
+    BString *filePath;
 
 };
 
 
-#endif // MESSAGEXMLREADER_H_INCLUDED
+#endif // MESSAGEXMLWRITE_H_INCLUDED

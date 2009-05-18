@@ -8,7 +8,7 @@ public:
 	MessageXmlReader(const BString &fileName);
 	~MessageXmlReader();
 
-	bool InitCheck();
+	status_t InitCheck();
 	void SetTo(const BString &fileName);
 
 	BMessage Read();
@@ -17,8 +17,9 @@ public:
 	// tut im endeffekt nur obiges
 	static BMessage ReadFile(const BString &fileName);
 
-protected:
-    BFile file;
+private:
+    BString *filePath;
+    ProcessXML(TiXmlElement *element)
 };
 
 
