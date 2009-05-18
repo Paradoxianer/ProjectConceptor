@@ -1,7 +1,7 @@
 #include "MessageXmlWriter.h"
 
 MessageXmlReader::MessageXmlWriter(){
-    fileName="";
+    filePath="";
 }
 
 MessageXmlWriter::MessageXmlWriter(const BString &fileName){

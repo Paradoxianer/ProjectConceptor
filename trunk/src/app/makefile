@@ -32,15 +32,7 @@ SRCS= 	About/AboutWindow.cpp \
 		Config/ConfigManager.cpp \
 		Config/ConfigWindow.cpp \
 		Config/ConfigView.cpp \
-		Config/BoolItem.cpp \
-		Config/ColorItem.cpp \
-		Config/FloatItem.cpp \
-		Config/FontItem.cpp \
 		Config/MessageView.cpp \
-		Config/PatternItem.cpp \
-		Config/RectItem.cpp \
-		Config/MessageItem.cpp \
-		Config/StringItem.cpp \
 		Commands/PCommand.cpp \
 		Commands/PCommandManager.cpp \
 		Document/PDocument.cpp \
@@ -86,25 +78,25 @@ RSRCS= 	ProjectConceptor.rsrc \
 #	-	if your library follows the naming pattern of:
 #		libXXX.so or libXXX.a you can simply specify XXX
 #		library: libbe.so entry: be
-#		
+#
 #	- 	if your library does not follow the standard library
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
 LIBS= be root translation tracker
-		
+
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
 #	or paths relative to the makefile.  The paths included may not
 #	be recursive, so include all of the paths where libraries can
 #	be found.  Directories where source files are found are
 #	automatically included.
-LIBPATHS= 
+LIBPATHS=
 
 #	additional paths to look for system headers
 #	thes use the form: #include <header>
 #	source file directories are NOT auto-included here
-SYSTEM_INCLUDE_PATHS = 
+SYSTEM_INCLUDE_PATHS =
 
 #	additional paths to look for local headers
 #	thes use the form: #include "header"

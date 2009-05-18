@@ -1,6 +1,15 @@
 #ifndef MESSAGEXMLREADER_H_INCLUDED
 #define MESSAGEXMLREADER_H_INCLUDED
 
+#include <String.h>
+#include <Message.h>
+
+#include <map>
+
+
+#include "tinyxml/tinyxml.h"
+
+
 class MessageXmlReader
 {
 public:
@@ -19,7 +28,8 @@ public:
 
 private:
     BString *filePath;
-    ProcessXML(TiXmlElement *element)
+    ProcessXML(TiXmlElement *element);
+    map<BString, int>  	bmessageTypes;
 };
 
 

@@ -3,6 +3,20 @@
 
 
 MessageXmlReader::MessageXmlReader(){
+    filePath="";
+    bmessageTypes[BString("BMessage")]=1;
+    bmessageTypes[BString("bool")]=2;
+    bmessageTypes[BString("int8")]=3;
+    bmessageTypes[BString("nt16")]=4;
+    bmessageTypes[BString("nt32")]=5;
+    bmessageTypes[BString("nt64")]=6;
+    bmessageTypes[BString("float")]=7;
+    bmessageTypes[BString("double")]=8;
+    bmessageTypes[BString("string")]=9;
+    bmessageTypes[BString("BPoint")]=10;
+    bmessageTypes[BString("BRect")]=11;
+    bmessageTypes[BString("B_REF_TYPE")]=12;
+    bmessageTypes[BString("B_POINTER_REF")]=13;
 }
 
 MessageXmlReader::MessageXmlReader(const BString &fileName){
