@@ -57,6 +57,7 @@ PROJECT_CONCEPTOR_SOURCES =
 	AboutURLView.cpp
 
 	# Config
+	ConfigManager.cpp
 	ConfigWindow.cpp
 	ConfigView.cpp
 	BoolItem.cpp
