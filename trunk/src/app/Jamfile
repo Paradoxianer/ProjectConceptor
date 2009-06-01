@@ -5,6 +5,26 @@ SubDir HAIKU_TOP 3rdparty projectconceptor src app ;
 # for BRecentItems
 #UsePublicHeaders [ FDirName be_apps Tracker ] ;
 
+#svnupdate
+actions snvupdate
+{
+	echo "---------SVN INFO GEN-----------"
+	touch About/AboutSvnInfo.h
+	rm About/AboutSvnInfo.h
+	echo "" >> About/AboutSvnInfo.h
+	echo "#ifndef SVN_INFO_H" >> About/AboutSvnInfo.h
+	echo "#define SVN_INFO_H" >> About/AboutSvnInfo.h
+	echo "" >> About/AboutSvnInfo.h
+	echo "//do not edit this" >> About/AboutSvnInfo.h
+	echo " #define SVN_REV_STR " \"`svn info | grep Revision | awk '{print $2}'` >> About/AboutSvnInfo.h \"
+	echo "" >> About/AboutSvnInfo.h
+	echo "#endif" >> About/AboutSvnInfo.h
+	echo "UPDATED"
+	echo "--------------------------------"
+}
+
+snvupdate ;
+
 # source directories
 local sourceDirs =
 	About
@@ -24,8 +44,10 @@ for sourceDir in $(sourceDirs) {
 
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include tinyxml ] ;
 
-PROJECT_CONCEPTOR_SOURCES = 
+
+PROJECT_CONCEPTOR_SOURCES =
 	MainView.cpp
 	ProjectConceptor.cpp
 
@@ -52,7 +74,6 @@ PROJECT_CONCEPTOR_SOURCES =
 	PCommandManager.cpp
 
 	# Document
-	PagedView.cpp
 	PDocument.cpp
 	PDocumentManager.cpp
 	PEditor.cpp
@@ -86,9 +107,9 @@ PROJECT_CONCEPTOR_SOURCES =
 	InputRequest.cpp
 	ShortCutFilter.cpp
 	TextViewCompleter.cpp
-	
+
 	# Tools/tinyxml
-	
+
 	tinystr.cpp
  	tinyxml.cpp
  	tinyxmlerror.cpp
@@ -103,4 +124,6 @@ Application ProjectConceptor :
 StaticLibrary libprojectconceptor.a :
 	$(PROJECT_CONCEPTOR_SOURCES)
 ;
+
+
 
