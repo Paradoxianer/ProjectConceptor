@@ -16,10 +16,10 @@ actions snvupdate
 	echo "#define SVN_INFO_H" >> About/AboutSvnInfo.h
 	echo "" >> About/AboutSvnInfo.h
 	echo "//do not edit this" >> About/AboutSvnInfo.h
-	echo " #define SVN_REV_STR " \"`svn info | grep Revision | awk '{print $2}'` >> About/AboutSvnInfo.h \"
+	echo " #define SVN_REV_STR " \"`svn info | grep Revision | awk '{print $2}'`\" >> About/AboutSvnInfo.h
 	echo "" >> About/AboutSvnInfo.h
 	echo "#endif" >> About/AboutSvnInfo.h
-	echo "UPDATED"
+	echo "UPDATED ABOUT"
 	echo "--------------------------------"
 }
 
@@ -60,15 +60,8 @@ PROJECT_CONCEPTOR_SOURCES =
 	ConfigManager.cpp
 	ConfigWindow.cpp
 	ConfigView.cpp
-	BoolItem.cpp
-	ColorItem.cpp
-	FloatItem.cpp
-	FontItem.cpp
-	MessageView.cpp
-	PatternItem.cpp
-	RectItem.cpp
-	MessageItem.cpp
-	StringItem.cpp
+    MessageXmlReader.cpp
+    MessageXmlWriter.cpp
 
 	# Commands
 	PCommand.cpp
