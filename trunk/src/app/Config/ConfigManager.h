@@ -7,11 +7,11 @@
 
 #include <app/Message.h>
 #include <storage/File.h>
-#include <map>
-using namespace std;
-
 #include <stdlib.h>
 
+#include "ConfigWindow.h"
+#include "MessageXmlReader.h"
+#include "MessageXmlWriter.h"
 #include "tinyxml/tinyxml.h"
 
 /**
@@ -31,7 +31,7 @@ public:
 						ConfigManager( char *path,BMessage* newConfig=NULL);
 	/** returns a Pointer to the BMessage holding the Configuration
 	*/
-	BMessage*	GetConfigMessage(void){return config;};
+	BMessage*           GetConfigMessage(void){return config;};
 	/** pass a komplete new Configration to the Manager causes it to rewrite the Config file and recreate a Config GUI
 	*/
 	void				SetConfigMessage(BMessage *newConfig);
@@ -39,14 +39,10 @@ public:
 	void				SaveConfig();
 
 private:
-	TiXmlElement	ProcessMessage(BMessage *node);
-	BMessage*		ProcessXML(TiXmlElement*);
 
-	BMessage	*config;
-	BFile				*file;
- 	//**@ToDo make it static const
- 	map<BString, int>  	bmessageTypes;
-
-
+	BMessage        *config;
+	BString			*path;
+   // ConfigWindow    *configWindow;
+    BMessenger      *configMessenger;
 };
 #endif

@@ -1,22 +1,28 @@
 #include "MessageXmlReader.h"
 #include "tinyxml/tinyxml.h"
+#include <storage/File.h>
+#include <support/Debug.h>
+
+
 
 
 MessageXmlReader::MessageXmlReader(){
-    filePath="";
-    bmessageTypes[BString("BMessage")]=1;
-    bmessageTypes[BString("bool")]=2;
-    bmessageTypes[BString("int8")]=3;
-    bmessageTypes[BString("nt16")]=4;
-    bmessageTypes[BString("nt32")]=5;
-    bmessageTypes[BString("nt64")]=6;
-    bmessageTypes[BString("float")]=7;
-    bmessageTypes[BString("double")]=8;
-    bmessageTypes[BString("string")]=9;
-    bmessageTypes[BString("BPoint")]=10;
-    bmessageTypes[BString("BRect")]=11;
-    bmessageTypes[BString("B_REF_TYPE")]=12;
-    bmessageTypes[BString("B_POINTER_REF")]=13;
+    filePath=new BString("");
+    if (bmessageTypes.size() == 0){
+        bmessageTypes[BString("BMessage")]=1;
+        bmessageTypes[BString("bool")]=2;
+        bmessageTypes[BString("int8")]=3;
+        bmessageTypes[BString("nt16")]=4;
+        bmessageTypes[BString("nt32")]=5;
+        bmessageTypes[BString("nt64")]=6;
+        bmessageTypes[BString("float")]=7;
+        bmessageTypes[BString("double")]=8;
+        bmessageTypes[BString("string")]=9;
+        bmessageTypes[BString("BPoint")]=10;
+        bmessageTypes[BString("BRect")]=11;
+        bmessageTypes[BString("B_REF_TYPE")]=12;
+        bmessageTypes[BString("B_POINTER_REF")]=13;
+    }
 }
 
 MessageXmlReader::MessageXmlReader(const BString &fileName){
@@ -28,14 +34,14 @@ MessageXmlReader::~MessageXmlReader(){
 
 status_t MessageXmlReader::InitCheck(){
     BFile   file (filePath->String(),B_READ_ONLY);
-    return file->InitCheck();
+    return file.InitCheck();
 }
 
 void MessageXmlReader::SetTo(const BString &fileName){
-    filePath=fileNames;
+    filePath->SetTo(fileName);
 }
 
-BMessage MessageXmlReader::Read(){
+BMessage* MessageXmlReader::Read(){
     TiXmlDocument	 doc;
 	doc.LoadFile(filePath->String());
 	if (doc.Error())
@@ -47,7 +53,7 @@ BMessage MessageXmlReader::Read(){
 	}
 }
 
-static BMessage MessageXmlReader::ReadFile(const BString &fileName){
+BMessage* MessageXmlReader::ReadFile(const BString &fileName){
 
 }
 

@@ -6,7 +6,6 @@
 #include <interface/OutlineListView.h>
 #include <interface/Rect.h>
 
-#include "MessageView.h"
 #include "BViewSplitter.h"
 
 
@@ -43,7 +42,6 @@ private:
 	BMessage				*configMessage;
 	float					seperator;
 	BOutlineListView		*configList;
-	MessageView				*showMessage;
-	
+
 };
 #endif
