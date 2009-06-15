@@ -5,9 +5,12 @@
 
 
 
+map<BString, int> MessageXmlReader::bmessageTypes;
 
 MessageXmlReader::MessageXmlReader(){
     filePath=new BString("");
+
+
     if (bmessageTypes.size() == 0){
         bmessageTypes[BString("BMessage")]=1;
         bmessageTypes[BString("bool")]=2;

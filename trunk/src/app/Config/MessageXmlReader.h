@@ -29,9 +29,10 @@ public:
 private:
     BString *filePath;
     BMessage* ProcessXML(TiXmlElement *element);
-    map<BString, int>  	bmessageTypes;
+    static map<BString, int>  	bmessageTypes;
 
 };
+
 
 
 #endif // MESSAGEXMLREADER_H_INCLUDED
