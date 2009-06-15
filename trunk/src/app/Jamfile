@@ -6,24 +6,29 @@ SubDir HAIKU_TOP 3rdparty projectconceptor src app ;
 #UsePublicHeaders [ FDirName be_apps Tracker ] ;
 
 #svnupdate
+rule snvupdate
+{
+Depends all : $(1) ;
+}
+
 actions snvupdate
 {
 	echo "---------SVN INFO GEN-----------"
-	touch About/AboutSvnInfo.h
-	rm About/AboutSvnInfo.h
-	echo "" >> About/AboutSvnInfo.h
-	echo "#ifndef SVN_INFO_H" >> About/AboutSvnInfo.h
-	echo "#define SVN_INFO_H" >> About/AboutSvnInfo.h
-	echo "" >> About/AboutSvnInfo.h
-	echo "//do not edit this" >> About/AboutSvnInfo.h
-	echo " #define SVN_REV_STR " \"`svn info | grep Revision | awk '{print $2}'`\" >> About/AboutSvnInfo.h
-	echo "" >> About/AboutSvnInfo.h
-	echo "#endif" >> About/AboutSvnInfo.h
+	touch About/$(1)
+	rm About/$(1)
+	echo "" >> About/$(1)
+	echo "#ifndef SVN_INFO_H" >> About/$(1)
+	echo "#define SVN_INFO_H" >> About/$(1)
+	echo "" >> About/$(1)
+	echo "//do not edit this" >> About/$(1)
+	echo " #define SVN_REV_STR " \"`svn info | grep Revision | awk '{print $2}'`\" >> About/$(1)
+	echo "" >> About/$(1)
+	echo "#endif" >> About/$(1)
 	echo "UPDATED ABOUT"
 	echo "--------------------------------"
 }
+snvupdate AboutSvnInfo.h ;
 
-snvupdate ;
 
 # source directories
 local sourceDirs =
@@ -110,7 +115,7 @@ PROJECT_CONCEPTOR_SOURCES =
 	tinyxmlparser.cpp
 ;
 Application ProjectConceptor :
-	$(PROJECT_CONCEPTOR_SOURCES)
+	 $(PROJECT_CONCEPTOR_SOURCES)
 	: be root translation tracker $(TARGET_LIBSTDC++)
 	: ProjectConceptor.rsrc Tools/InputRequest.rsrc
 ;
@@ -118,6 +123,3 @@ Application ProjectConceptor :
 StaticLibrary libprojectconceptor.a :
 	$(PROJECT_CONCEPTOR_SOURCES)
 ;
-
-
-
