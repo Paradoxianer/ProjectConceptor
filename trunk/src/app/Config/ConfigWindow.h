@@ -12,7 +12,7 @@
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
-#endif 
+#endif
 
 /**
  * @class ConfigWindow
@@ -40,6 +40,7 @@ protected:
 		void			ChangeLanguage(void);
 
 private:
+        void            CreateViews();
 		BMessage		*configMessage;
 		ConfigView		*configView;
 };
