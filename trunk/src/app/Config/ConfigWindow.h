@@ -6,6 +6,7 @@
 
 #include <app/Message.h>
 #include <interface/Window.h>
+#include <interface/OutlineListView.h>
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>

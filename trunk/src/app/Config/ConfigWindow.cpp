@@ -25,6 +25,7 @@ void ConfigWindow::Quit(){
 	BWindow::Quit();
 }
 
-void CreateViews(){
-
+void ConfigWindow::CreateViews(){
+    BOutlineListView    *chooser    = new BOutlineListView(BRect(1,1,Bounds().Width()/3,Bounds().Height()-2),"PC_Select_Categorie",B_SINGLE_SELECTION_LIST,B_FOLLOW_TOP_BOTTOM | B_FOLLOW_LEFT);
+    AddChild(chooser);
 }
