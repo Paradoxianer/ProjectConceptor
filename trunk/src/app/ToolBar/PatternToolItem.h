@@ -21,7 +21,6 @@ class ToolBar;
  * @author Paradoxon powered by Jesus Christ
  * @version 0.01
  * @date 2005/10/04
- * @Contact: mail@rundumvideo.de
  *
  * @see ToolBar
  * @see ToolMenu

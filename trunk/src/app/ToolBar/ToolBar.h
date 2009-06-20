@@ -31,16 +31,18 @@ class BaseItem;
  * @author Paradoxon powered by Jesus Christ
  * @version 0.01
  * @date 2005/10/04
- * @Contact: mail@rundumvideo.de
  *
  * @see ToolItem
  * @see ToolMenu
- * @todo Implement a Method RemoveSeperator
  */
 class ToolBar : public BControl
 {
 friend class ToolMenu;
 public:
+                       /**
+                         *Creates a new Toolbar.
+                         *@see SetLayout
+                         */
 							ToolBar(BRect rect,const char *name,menu_layout ori=B_ITEMS_IN_ROW);
 							ToolBar(BMessage *msg);
 							~ToolBar();
@@ -48,18 +50,38 @@ public:
 	//inherit from BArchivable
 	virtual	status_t		Archive(BMessage *archive,bool deep=true) const;
 	static	BArchivable*	Instantiate(BMessage *archive);
-	
+                        /**
+                         *Adds a Item to the Toolbar you can easy design your own Item by deriving your Class from BaseItem.
+                         *@see BaseItem
+                         */
+
 			void			AddItem(BaseItem *item);
-			void			AddSeperator(void);
+                        /**
+                         *Adds a seperator after the last insert Item
+                         */
+
+                        void			AddSeperator(void);
 			/** 
 			 *Removes the last inserted Seperator
 			 */
 			void			RemoveSeperator(void);
+                        /**
+                         *Removes the item you passed
+                         */
+
 			void			RemoveItem(BaseItem *item);
 			void			ReorderItems(void);
 
 	virtual	void			Draw(BRect updateRect);
 	virtual	void			DrawAfterChildren(BRect updateRect);
+                         /**
+                         *SetLayout supports three modes
+                         * B_ITEMS_IN_ROW ,B_ITEMS_IN_COLUMN ,B_ITEMS_IN_MATRIX
+                         * it tells the Toolbar how to layout the added Items.
+                         * so B_ITEMS_IN_ROW will place all items in a row, B_ITEMS_IN_COLUMN will place all items ... of course in a Column
+                         * and B_ITEMS_IN_MATRIX will  try to place all imtems like on a check board so that all items fit best.
+                         */
+
 			void			SetLayout(menu_layout justification);
 			menu_layout		GetLayout(void){return tool_bar_menu_layout;};
 	virtual void			MouseDown(BPoint point);
@@ -67,8 +89,18 @@ public:
 	virtual void			SetEventReciver(ToolItem *item){eventReciver=item;};
 	virtual void			SetModificationMessage(BMessage *message){BInvoker::SetMessage(message);};
 			BMessage		*ModificationMessage(){return BInvoker::Message();};
+                        /**
+                         *Trys to find the ToolMenu by the given signature (the name of the BaseItem)
+                         *@see BaseItem
+                         *@see ToolMenu
+                         */
 	virtual	ToolMenu*		GetToolMenu(const char *signature);
-	virtual ToolItem*		GetToolItem(const char *signature);
+                        /**
+                         *Try to find the ToolItem by the given signature (the name of the BaseItem)
+                         *@see BaseItem
+                         *@see ToolItem
+                         */
+        virtual ToolItem*		GetToolItem(const char *signature);
 	
 			void			SetButtonBorder(bool _buttonBorder){ fButtonBorder = _buttonBorder;};
 			bool			HasButtonBorder(void){return fButtonBorder;};

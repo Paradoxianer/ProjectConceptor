@@ -165,9 +165,6 @@ void ToolBar::AddItem(BaseItem *item)
 	}
 }
 
-/**
- * @todo implemet a right version :-)
- */
 void ToolBar::RemoveItem(BaseItem *item)
 {
 	TRACE();

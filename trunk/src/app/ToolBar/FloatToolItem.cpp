@@ -12,7 +12,7 @@ FloatToolItem::FloatToolItem(const char *name, float newValue,BMessage *msg):BBu
 	value			= newValue;
 	tName 			= name;
 	BRect	textControlRect	= Bounds();
-	textControlRect.InsetBy(5,1);
+        textControlRect.InsetBy(5,2);
 	char*	floatToText	= new char[24];
 	sprintf(floatToText,"%.2f",newValue);
 	textValue		= new BTextControl(textControlRect,name,name,"",new BMessage(*msg));
