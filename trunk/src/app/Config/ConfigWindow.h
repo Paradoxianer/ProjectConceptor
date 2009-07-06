@@ -3,10 +3,13 @@
 
 #include "ProjectConceptorDefs.h"
 #include "ConfigView.h"
+#include "PluginView.h"
+#include "ShortCutView.h"
+
 
 #include <app/Message.h>
 #include <interface/Window.h>
-#include <interface/OutlineListView.h>
+#include <interface/TabView.h>
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
@@ -34,15 +37,19 @@ class ConfigWindow : public BWindow
 {
 
 public:
-						ConfigWindow(BMessage *forMessage);
+                                        ConfigWindow(BMessage *forMessage);
 		void			SetConfigMessage(BMessage *_configMessage);
-virtual	void			Quit(void);
+virtual	void                            Quit(void);
 protected:
 		void			ChangeLanguage(void);
 
 private:
-        void            CreateViews();
+                void                    CreateViews();
 		BMessage		*configMessage;
-		ConfigView		*configView;
+                BTabView                *containerView;
+                ConfigView              *mainConfigView;
+                ShortCutView            *shortCutView;
+                PluginView              *pluginConfigView;
+
 };
 #endif

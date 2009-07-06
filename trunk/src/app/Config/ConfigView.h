@@ -5,14 +5,14 @@
 #include <interface/Box.h>
 #include <interface/OutlineListView.h>
 #include <interface/Rect.h>
-
-#include "BViewSplitter.h"
+#include <GridView.h>
+#include <Box.h>
 
 
 
 /**
  * @class ConfigView
- * @brief Generates a ConfigView for a passed BMessage and return a configured BMessage
+ * @brief Generates the main ConfigView and passe back the changed ConfigMessage
  *
  * @author Paradoxon powered by Jesus Christ
  * @todo implemt the hole class
@@ -20,13 +20,16 @@
  */
 
 const uint32 MESSAGE_SELECTED	= 'MEsl';
+const uint32 AUTOSAVE_CHANGED	= 'AScg';
+const uint32 AUTOSAVE_TOGGLED	= 'AStg';
 
-class ConfigView : public BViewSplitter
+
+class ConfigView : public BGridView
 {
 
 public:
-							ConfigView (BRect rect,BMessage *forMessage, uint32 resizingMode = B_FOLLOW_ALL_SIDES, uint32 flags = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE_JUMP);
-//							~ConfigView();
+                                        ConfigView (BMessage *_configMessage);
+//					~ConfigView();
 
 	virtual	void			ChangeLanguage(void);
 	virtual	void			SetConfigMessage(BMessage *configureMessage);
@@ -38,10 +41,7 @@ protected:
 	virtual	void			BuildConfigList(BMessage *confMessage, BListItem *parent);
 
 private:
-			void			Init();
-	BMessage				*configMessage;
-	float					seperator;
-	BOutlineListView		*configList;
-
+            void			Init();
+        BMessage			*configMessage;
 };
 #endif

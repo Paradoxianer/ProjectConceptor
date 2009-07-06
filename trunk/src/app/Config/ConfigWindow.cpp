@@ -1,12 +1,13 @@
+#include <GroupLayout.h>
+#include <Button.h>
+#include <SpaceLayoutItem.h>
 #include "ConfigWindow.h"
 
 
-ConfigWindow::ConfigWindow(BMessage *_configMessage):BWindow(BRect(50,50,600,400),_T("Settings"),B_TITLED_WINDOW,0){
+ConfigWindow::ConfigWindow(BMessage *_configMessage):BWindow(BRect(50,50,600,400),_T("Settings"),B_TITLED_WINDOW,B_AUTO_UPDATE_SIZE_LIMITS){
 	TRACE();
-	configMessage=_configMessage;
-	configView	= new ConfigView(Bounds(),configMessage);
-	AddChild(configView);
-
+        configMessage=_configMessage;
+        CreateViews();
 }
 
 
@@ -17,7 +18,7 @@ void ConfigWindow::ChangeLanguage(){
 
 void ConfigWindow::SetConfigMessage(BMessage *_configMessage){
 	configMessage=_configMessage;
-	configView->SetConfigMessage(configMessage);
+        mainConfigView->SetConfigMessage(configMessage);
 }
 
 void ConfigWindow::Quit(){
@@ -26,6 +27,21 @@ void ConfigWindow::Quit(){
 }
 
 void ConfigWindow::CreateViews(){
-    BOutlineListView    *chooser    = new BOutlineListView(BRect(1,1,Bounds().Width()/3,Bounds().Height()-2),"PC_Select_Categorie",B_SINGLE_SELECTION_LIST,B_FOLLOW_TOP_BOTTOM | B_FOLLOW_LEFT);
-    AddChild(chooser);
+    BGroupLayout *groupLayout =new BGroupLayout(B_VERTICAL);
+    SetLayout(groupLayout);
+
+    //Build mainConfigView
+    containerView       = new BTabView("containerView");
+    BTab    *mainSettingsTab=new BTab();
+    mainSettings->SetLabel("Main Settings");
+    mainConfigView      = new ConfigView(configMessage);
+    containerView->AddTab(mainConfigView, mainSettingsTab);
+
+    //Build PluginConfigView
+    BTab    *pluginSettingsTab=new BTab();
+    pluginSettingsTab->SetLabel("Plugin Settings");
+    pluginConfigView    = new PluginView();
+    containerView->AddTab(mainConfigView,pluginSettingsTab );
+
+    groupLayout->AddView(containerView);
 }
