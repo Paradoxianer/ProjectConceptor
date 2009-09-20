@@ -12,8 +12,6 @@
 #define DEBUG 1
 #include <support/Debug.h>
 
-//extern const Debugger		*myDebugger;
-//		= new Debugger("ProjektConceptor");
 
 //main type for Translation
 

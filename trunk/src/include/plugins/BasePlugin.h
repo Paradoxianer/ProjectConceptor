@@ -2,9 +2,13 @@
 #define BASE_PLUGIN_H
 
 #include "ProjectConceptorDefs.h"
+//#include "PConfigView.h"
+//#include "PConfigurable.h"
 
 #include <kernel/image.h>
+#include <interface/View.h>
 #include <support/TypeConstants.h>
+#include <View.h>
 /**
  * @class BasePlugin
  *
@@ -19,9 +23,9 @@ class BasePlugin
 {
 
 public:
-						BasePlugin(image_id id);
-			virtual		~BasePlugin();
-			image_id	GetPluginID(void){return pluginID;};
+                                BasePlugin(image_id id);
+        virtual                 ~BasePlugin();
+        image_id        	GetPluginID(void){return pluginID;};
 //	virtual void		LanguageChanged(void)=0;
 	/**
 	 * returns the Name of the Plugin .. in the case  of P_C_COMMANDO_PLUGIN_TYPE
@@ -32,7 +36,7 @@ public:
 	 * returns Autor of the Plugin
 	 */
 	virtual	char*		GetAutor(void)				= 0;
-	/**
+        /**
 	 * returns a Versionsstring
 	 */
 	virtual char*		GetVersionsString(void)		= 0;
@@ -44,7 +48,7 @@ public:
 	 *	returns the kind of pluginType e.g.:
 	 * P_C_EDITOR_PLUGIN_TYPE means this plugins "contains" a PEditorPlugin
  	 * P_C_COMMANDO_PLUGIN_TYPE means this plugins "contains" a PCommandPlugin
- 	 * you also can create your own pluginType (please dont use pc at the beginning this
+         * you also can create your own pluginType (please dont use pc at the beginning, this
  	 * is used for all ProjectConcpetor consts
 	 */
 	virtual uint32		GetType(void)				= 0;
@@ -54,7 +58,12 @@ public:
 	 */
 	virtual void*		GetNewObject(void *value)	= 0;
 
-
+        /**
+         * implement this if you want to have a config dialog for your Plugin the change wich where made should be represented in the BMessage
+         */
+	virtual	BView*     GetConfigView(void){
+            return NULL;
+	}
 
 protected:
 		image_id	pluginID;

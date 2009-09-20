@@ -197,6 +197,7 @@ protected:
 			BList				*allNodes;
 			BList				*allConnections;
 			BList				*selected;
+			//** change this to a set<> makes it more perfomrant and dont use duplicated entrys
 			BList				*valueChanged;
 
 			BRect				bounds;

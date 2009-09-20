@@ -1,8 +1,6 @@
 #ifndef PLUGIN_MANAGER_H
 #define PLUGIN_MANAGER_H
 
-//#include <map>
-
 #include <app/Application.h>
 #include <app/Message.h>
 #include <kernel/image.h>
@@ -12,11 +10,10 @@
 
 #include <storage/Entry.h>
 #include <storage/Path.h>
-//using namespace std;
+
 #include "ProjectConceptorDefs.h"
-//#include "BasePlugin.h"
+
 class BasePlugin;
-//typedef multimap < BString* ,BasePlugin *  > PluginMap;
 
 /**
  * @class PluginManager
@@ -25,25 +22,24 @@ class BasePlugin;
  * and return a choice  of plugins
  *
  * @author Paradoxon powered by Jesus Christ
- * @version 0.01
- * @date 2005/10/04
- * @Contact: mail@rundumvideo.de
+ * @version 0.02
+ * @date 2009/07/12
  *
 
  */
 
-class PluginManager	
+class PluginManager
 {
 
 
 public:
 					PluginManager(void);
-					~PluginManager(void);
-		void		LoadPlugins(BDirectory *startDir, bool deep=true);
-		/**
-		 * return all Plugins in one List;
-		 */
-		BList		*GetAllPlugins(void){return plugins;};
+                                        ~PluginManager(void);
+                void		LoadPlugins(BDirectory *startDir, bool deep=true);
+                /**
+                 * return all Plugins in one List;
+                 */
+                BList		*GetAllPlugins(void){return plugins;};
 		/**
 		 * return all Plugins with one special typ 
 		 */
@@ -60,10 +56,8 @@ public:
 		BBitmap		*GetIcon(BasePlugin *plugin);		
 
 private:
-//		void		LoadPlugins(BDirectory *dir, bool deep=true);
 		BList		*plugins;
 		BList		*groupNames;
-		//PluginMap	plugins;
 		
 };
 #endif
