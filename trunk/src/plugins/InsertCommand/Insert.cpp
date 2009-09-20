@@ -2,17 +2,14 @@
 #include "Insert.h"
 
 
-Insert::Insert():PCommand()
-{
+Insert::Insert():PCommand() {
 }
 
-void Insert::Undo(PDocument *doc,BMessage *undo)
-{
+void Insert::Undo(PDocument *doc,BMessage *undo) {
 	BMessage		*parentNode			= NULL;
 	BList			*parentAllNodes		= NULL;
 	BList			*allConnectinos		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();
-//	BList			*trash				= doc->GetTrash();
 	BList			*changed			= doc->GetChangedNodes();
 	BMessage		*node				= new BMessage();
 	BMessage		*connection			= new BMessage();
@@ -21,17 +18,14 @@ void Insert::Undo(PDocument *doc,BMessage *undo)
 	undo->FindPointer("Node::parent", (void **)&parentNode);
 	if (parentNode)
 		parentNode->FindPointer("Node::allNodes", (void **)&parentAllNodes);
-	while (undo->FindPointer("node",i,(void **)&node) == B_OK)
-	{
-		if (node->what != P_C_CONNECTION_TYPE)
-		{
+	while (undo->FindPointer("node",i,(void **)&node) == B_OK) {
+		if (node->what != P_C_CONNECTION_TYPE){
 			allNodes->RemoveItem(node);
 			if (parentAllNodes)
 				parentAllNodes->RemoveItem(node);			
 		}
 		else
 			allConnectinos->RemoveItem(node);
-//		trash->AddItem(node);
 		changed->AddItem(node);
 		i++;
 	}
@@ -40,8 +34,8 @@ void Insert::Undo(PDocument *doc,BMessage *undo)
 	doc->SetModified();
 }
 
-BMessage* Insert::Do(PDocument *doc, BMessage *settings)
-{
+BMessage* Insert::Do(PDocument *doc, BMessage *settings) {
+	TRACE();
 	BMessage		*node				= NULL;
 	BMessage		*parentNode			= NULL;
 	BList			*parentAllNodes		= NULL;
@@ -51,15 +45,12 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings)
 	int32			i					= 0;
 	status_t		err					= B_OK;
 	err = settings->FindPointer("Node::parent", (void **)&parentNode);
-	if ((err==B_OK) && (parentNode != NULL))
-	{
+	if ((err==B_OK) && (parentNode != NULL)) {
 		if (parentNode->FindPointer("Node::allNodes", (void **)&parentAllNodes) != B_OK)
 			parentNode->AddPointer("Node::allNodes", new BList());
 	}
-	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
-	{
-		if (node->what != P_C_CONNECTION_TYPE)
-		{
+	while (settings->FindPointer("node",i,(void **)&node) == B_OK) {
+		if (node->what != P_C_CONNECTION_TYPE) {
 			allNodes->AddItem(node);
 			if (parentAllNodes)
 				parentAllNodes->AddItem(node);
@@ -69,8 +60,7 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings)
 		//recalc size
 		//**check if there is a passed "docRect"
 		BRect	insertFrame		= BRect(0,0,0,0);
-		if (node->FindRect("Node::frame",&insertFrame)==B_OK)
-		{
+		if (node->FindRect("Node::frame",&insertFrame)==B_OK) {
 			BRect	docRect			= doc->Bounds();
 			if (insertFrame.bottom >= docRect.Height())
 				docRect.bottom= insertFrame.bottom+20;
@@ -90,10 +80,8 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings)
 
 
 
-void Insert::AttachedToManager(void)
-{
+void Insert::AttachedToManager(void) {
 }
 
-void Insert::DetachedFromManager(void)
-{
+void Insert::DetachedFromManager(void) {
 }

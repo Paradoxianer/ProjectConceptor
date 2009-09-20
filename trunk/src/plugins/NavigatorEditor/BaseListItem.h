@@ -10,7 +10,7 @@ const float		SEPERATOR				= 100;
 class BaseListItem : public BListItem, public BInvoker
 {
 public:
-						BaseListItem(type_code supportetType, uint32 level = 0, bool expanded = true):BListItem(level,expanded){type=supportetType;};
+                                BaseListItem(type_code supportetType, uint32 level = 0, bool expanded = true):BListItem(level,expanded){type=supportetType;};
 	virtual type_code	GetSupportedType(void){return type;};
 	virtual void		ValueChanged(void){};
 

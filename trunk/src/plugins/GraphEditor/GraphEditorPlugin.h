@@ -25,7 +25,7 @@ public:
 	virtual	char*			GetVersionsString(void){return "0.01preAlpha";};
 	virtual char*			GetAutor(void){return "Paradoxon";};
 	virtual char*			GetName(void){return "GraphEditor";};
-	virtual char*			GetDescription(void){return "This is a simple Editor for ProjectConceptor with basic funktionality";};
+        virtual char*			GetDescription(void){return "GraphEidtor is a  Gaphical interface wich allow you to create, edit nodes. It also supports Attributes for Nodes";};
 	virtual void*			GetNewObject(void *value){return new GraphEditor(GetPluginID());};
 	//----------------BasePlugin
 };

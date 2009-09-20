@@ -20,7 +20,7 @@ void TextEditorControl::AttachedToWindow(void)
 	{
 		SetTarget(Parent());
 	}
-	SetViewColor(B_TRANSPARENT_COLOR);
+//	SetViewColor(B_TRANSPARENT_COLOR);
 	SetEventMask(B_POINTER_EVENTS,B_LOCK_WINDOW_FOCUS | B_NO_POINTER_HISTORY);
 	SelectAll();
 }
@@ -33,8 +33,8 @@ void TextEditorControl::DetachedFromWindow()
 void TextEditorControl::MakeFocus(bool flag)
 {
 	TRACE();
-	PRINT(("%s - MakeFocus(%d)\n",Text(),flag));
-	BTextView::MakeFocus(flag);
+/*	PRINT(("%s - MakeFocus(%d)\n",Text(),flag));
+	BTextView::MakeFocus(flag);*/
 	/*if (flag == false) 
 	{
 		Invoke();

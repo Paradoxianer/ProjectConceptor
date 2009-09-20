@@ -1,12 +1,10 @@
 #include "Select.h"
 
 
-Select::Select():PCommand()
-{
+Select::Select():PCommand() {
 }
 
-void Select::Undo(PDocument *doc,BMessage *undo)
-{
+void Select::Undo(PDocument *doc,BMessage *undo) {
 	int32 			i					= 0;
 	BMessage		*undoMessage		= new BMessage();
 	BMessage		*currentContainer	= NULL;
@@ -14,15 +12,13 @@ void Select::Undo(PDocument *doc,BMessage *undo)
 	BList			*selected			= doc->GetSelected();
 	PCommand::Undo(doc,undo);
 	undo->FindMessage("Select::Undo" ,undoMessage);
-	while (selected->CountItems()>0)
-	{
+	while (selected->CountItems()>0) {
 		currentContainer	= (BMessage *)selected->RemoveItem((int32)0);
 		currentContainer->ReplaceBool("Node::selected",0,false);
 		changed->AddItem(currentContainer);
 	}
 	i = 0;
-	while (	undoMessage->FindPointer("node",i,(void **)&currentContainer) == B_OK)
-	{
+	while (	undoMessage->FindPointer("node",i,(void **)&currentContainer) == B_OK) {
 		i++;
 		if (currentContainer)
 			currentContainer->ReplaceBool("Node::selected",0,true);
@@ -32,8 +28,7 @@ void Select::Undo(PDocument *doc,BMessage *undo)
 	doc->SetModified();
 }
 
-BMessage* Select::Do(PDocument *doc, BMessage *settings)
-{
+BMessage* Select::Do(PDocument *doc, BMessage *settings) {
 	BRect			*selectFrame		= new BRect();
 	BMessage		*node				= NULL;
 	BMessage		*undoMessage		= new BMessage();
@@ -44,13 +39,10 @@ BMessage* Select::Do(PDocument *doc, BMessage *settings)
 	BList			*selected			= doc->GetSelected();
 	BList			*changed			= doc->GetChangedNodes();
 	status_t		err					= settings->FindBool("deselect",&deselect);
-	if ((deselect)|| (err != B_OK))
-	{
-		while (selected->CountItems()>0)
-		{
+	if ((deselect)|| (err != B_OK)) {
+		while (selected->CountItems()>0) {
 			node	= (BMessage *)selected->RemoveItem((int32)0);
-			if (node != NULL)
-			{
+			if (node != NULL) {
 				changed->AddItem(node);
 				undoMessage->AddPointer("node",node);
 				node->ReplaceBool("Node::selected",0,false);
@@ -58,14 +50,12 @@ BMessage* Select::Do(PDocument *doc, BMessage *settings)
 		}
 	}
 	i = 0;
-	while (settings->FindRect("frame",i,selectFrame) == B_OK)
-	{
+	while (settings->FindRect("frame",i,selectFrame) == B_OK) {
 		DoSelect(doc,selectFrame);	
 		i++;
 	}
 	i = 0;
-	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
-	{
+	while (settings->FindPointer("node",i,(void **)&node) == B_OK) 	{
 		DoSelect(doc,node);
 		i++;
 	}
@@ -80,16 +70,13 @@ BMessage* Select::Do(PDocument *doc, BMessage *settings)
 
 
 
-void Select::AttachedToManager(void)
-{
+void Select::AttachedToManager(void) {
 }
 
-void Select::DetachedFromManager(void)
-{
+void Select::DetachedFromManager(void) {
 }
 
-void Select::DoSelect(PDocument *doc,BRect *rect)
-{
+void Select::DoSelect(PDocument *doc,BRect *rect) {
 	BList			*all				= doc->GetAllNodes();
 	BList			*selected			= doc->GetSelected();
 	BList			*changed			= doc->GetChangedNodes();
@@ -97,12 +84,10 @@ void Select::DoSelect(PDocument *doc,BRect *rect)
 	BRect			*frame				= new BRect(0,0,0,0);
 	int32 			i					= 0;
 
-	for (i=0;i<all->CountItems();i++)
-	{
+	for (i=0;i<all->CountItems();i++) {
 		currentContainer =(BMessage *) all->ItemAt(i);
 		currentContainer->FindRect("Node::frame",0,frame);
-		if (rect->Contains(*frame))
-		{
+		if (rect->Contains(*frame)) {
 			currentContainer->ReplaceBool("Node::selected",0,true);
 			selected->AddItem(currentContainer);
 			changed->AddItem(currentContainer);			
@@ -111,8 +96,7 @@ void Select::DoSelect(PDocument *doc,BRect *rect)
 	}
 }
 
-void Select::DoSelect(PDocument *doc,BMessage *container)
-{
+void Select::DoSelect(PDocument *doc,BMessage *container) {
 	BList			*selected			= doc->GetSelected();
 	BList			*changed			= doc->GetChangedNodes();
 	bool			selectTester		= false;
@@ -127,16 +111,14 @@ void Select::DoSelect(PDocument *doc,BMessage *container)
 	//container->(new BoolContainer(true));
 }
 
-void Select::DoSelectAll(PDocument *doc)
-{
+void Select::DoSelectAll(PDocument *doc) {
 	BList			*selected			= doc->GetSelected();
 	BList			*all				= doc->GetAllNodes();
 	BList			*changed			= doc->GetChangedNodes();
 
 	BMessage		*currentContainer	= NULL;
 	int32 			i					= 0;
-	for (i=0;i<all->CountItems();i++)
-	{
+	for (i=0;i<all->CountItems();i++) {
 		currentContainer =(BMessage *) all->ItemAt(i);
 		currentContainer->ReplaceBool("Node::selected",0,false);
 		selected->AddItem(currentContainer);
