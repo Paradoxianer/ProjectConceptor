@@ -51,5 +51,5 @@ void MainView::Select(const BTab *tab)
 	}
 	if (found) 
 		BTabView::Select(i-1);
-	PRINT(("Select(%ld)\n",tab));
+        PRINT(("Select(%ld)\n",i));
 }

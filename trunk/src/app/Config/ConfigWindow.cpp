@@ -17,6 +17,7 @@ void ConfigWindow::ChangeLanguage(){
 }
 
 void ConfigWindow::SetConfigMessage(BMessage *_configMessage){
+TRACE();
 	configMessage=_configMessage;
         mainConfigView->SetConfigMessage(configMessage);
 }
@@ -27,21 +28,22 @@ void ConfigWindow::Quit(){
 }
 
 void ConfigWindow::CreateViews(){
+TRACE();
     BGroupLayout *groupLayout =new BGroupLayout(B_VERTICAL);
     SetLayout(groupLayout);
 
     //Build mainConfigView
     containerView       = new BTabView("containerView");
     BTab    *mainSettingsTab=new BTab();
-    mainSettings->SetLabel("Main Settings");
     mainConfigView      = new ConfigView(configMessage);
     containerView->AddTab(mainConfigView, mainSettingsTab);
+    mainSettingsTab->SetLabel("Main Settings");
 
     //Build PluginConfigView
     BTab    *pluginSettingsTab=new BTab();
-    pluginSettingsTab->SetLabel("Plugin Settings");
     pluginConfigView    = new PluginView();
-    containerView->AddTab(mainConfigView,pluginSettingsTab );
+    containerView->AddTab(pluginConfigView,pluginSettingsTab );
+    pluginSettingsTab->SetLabel("Plugin Settings");
 
     groupLayout->AddView(containerView);
 }

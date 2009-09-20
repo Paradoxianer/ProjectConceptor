@@ -4,6 +4,9 @@
 #include "PCommand.h"
 #include "PluginManager.h"
 #include "ProjectConceptorDefs.h"
+#include "PConfigurable.h"
+
+
 
 #include <app/Handler.h>
 #include <app/Message.h>
@@ -13,7 +16,6 @@
 #include <support/Archivable.h>
 #include <support/List.h>
 #include "ShortCutFilter.h"
-
 
 class PEditorManager;
 class PDocument;
@@ -33,7 +35,7 @@ class PDocument;
  * @see BMessage
  */
 
-class PEditor : public ObjectHelp, public BArchivable
+class PEditor : public ObjectHelp, public PConfigurable, public BArchivable
 {
 
 public:

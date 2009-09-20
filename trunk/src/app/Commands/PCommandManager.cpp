@@ -17,21 +17,18 @@
 	#define _T(a) a
 #endif
 
-PCommandManager::PCommandManager(PDocument *initDoc)
-{
+PCommandManager::PCommandManager(PDocument *initDoc) {
 	TRACE();
 	doc	= initDoc;
 	Init();
 }
 
-PCommandManager::~PCommandManager(void)
-{
+PCommandManager::~PCommandManager(void) {
 	delete undoList;
 	delete macroList;
 }
 
-void PCommandManager::Init(void)
-{
+void PCommandManager::Init(void) {
 	commandMap		= map<BString,PCommand *>();
 	undoList		= new BList();
 	macroList		= new BList();
@@ -40,25 +37,19 @@ void PCommandManager::Init(void)
 
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*commands		= pluginManager->GetPluginsByType(P_C_COMMANDO_PLUGIN_TYPE);
-	if (commands)
-	{
+	if (commands) {
 		for (int32 i=0; i<commands->CountItems();i++)
-		{
 			RegisterPCommand((BasePlugin *)commands->ItemAt(i));
-		}
 	}
 }
 
-status_t PCommandManager::Archive(BMessage *archive, bool deep)
-{
+status_t PCommandManager::Archive(BMessage *archive, bool deep) {
 	int32	i	= 0;
-	for (i = 0; i<undoList->CountItems(); i++)
-	{
+	for (i = 0; i<undoList->CountItems(); i++) {
 		BMessage	*undoMessage	= (BMessage*)undoList->ItemAt(i);
 		archive->AddMessage("undo",undoMessage);
 	}
-	for (i = 0; i<macroList->CountItems(); i++)
-	{
+	for (i = 0; i<macroList->CountItems(); i++) {
 		BMessage	*macroMessage	= (BMessage*)macroList->ItemAt(i);
 		archive->AddMessage("macro",macroMessage);
 	}
@@ -68,16 +59,13 @@ status_t PCommandManager::Archive(BMessage *archive, bool deep)
 	return B_OK;
 }
 
-status_t PCommandManager::RegisterPCommand(BasePlugin *commandPlugin)
-{
+status_t PCommandManager::RegisterPCommand(BasePlugin *commandPlugin) {
 	TRACE();
 	status_t err	= B_OK;
-	if (commandPlugin)
-	{
+	if (commandPlugin) {
 		PCommand *command	= NULL;
 		command = (PCommand *)commandPlugin->GetNewObject(NULL);
-		if (command)
-		{
+		if (command) {
 			command->SetManager(this);
 			PRINT(("Register Command %s",command->Name()));
 			commandMap[BString(command->Name())]=command;
@@ -91,11 +79,9 @@ status_t PCommandManager::RegisterPCommand(BasePlugin *commandPlugin)
 	return err;
 }
 
-status_t PCommandManager::SetMacroList(BList *newMacroList)
-{
+status_t PCommandManager::SetMacroList(BList *newMacroList) {
 	status_t	err			= B_OK;
-	if (newMacroList)
-	{
+	if (newMacroList) {
 //		BMenu 		*macroPlay 		= doc->GetMenu(P_MENU_MACRO_PLAY);
 		BMessage	*macro			= NULL;
 		char		*name			= NULL;
@@ -111,8 +97,7 @@ status_t PCommandManager::SetMacroList(BList *newMacroList)
 		}*/
 		delete macroList;
 		macroList = newMacroList;
-		for (int32 i=0;i<macroList->CountItems();i++)
-		{
+		for (int32 i=0;i<macroList->CountItems();i++) {
 			macro =(BMessage *) macroList->ItemAt(i);
 			macro->FindString("Name",(const char**)&name);
 			BMenuItem	*item	= new BMenuItem(name,macro);
@@ -125,11 +110,9 @@ status_t PCommandManager::SetMacroList(BList *newMacroList)
 	return err;
 }
 
-status_t PCommandManager::SetUndoList(BList *newUndoList)
-{
+status_t PCommandManager::SetUndoList(BList *newUndoList) {
 	status_t	err			= B_OK;
-	if (newUndoList)
-	{
+	if (newUndoList) {
 		delete undoList;
 		undoList	= newUndoList;
 	}
@@ -139,8 +122,7 @@ status_t PCommandManager::SetUndoList(BList *newUndoList)
 }
 
 
-void PCommandManager::UnregisterPCommand(char* name)
-{
+void PCommandManager::UnregisterPCommand(char* name) {
 	TRACE();
 	if (name)
 		commandMap.erase(name);
@@ -148,19 +130,15 @@ void PCommandManager::UnregisterPCommand(char* name)
 }
 
 
-void PCommandManager::StartMacro(void)
-{
+void PCommandManager::StartMacro(void) {
 	TRACE();
-	if (!recording)
-	{
+	if (!recording) {
 		recording		= new BMessage(P_C_MACRO_TYPE);
 		macroIndexer	= new Indexer(doc);
 	}
-	else
-	{
+	else {
 		int32 choice	= (new BAlert("Error!",_T("Macro Recording already started!"),_T("Restart Recording"),_T("Contiune Recording"),NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_STOP_ALERT))->Go();
-		if (choice == 0)
-		{
+		if (choice == 0) {
 			delete macroIndexer;
 			macroIndexer	= new Indexer(doc);
 			delete recording;
@@ -170,16 +148,13 @@ void PCommandManager::StartMacro(void)
 
 }
 
-void PCommandManager::StopMacro()
-{
+void PCommandManager::StopMacro() {
 	TRACE();
 	InputRequest	*inputAlert = new InputRequest(_T("Input Macroname"),_T("Name"), _T("Macro"), _T("OK"),_T("Cancel"));
 	char			*input		= NULL;
 	char			*inputstr	= NULL;
-	if  (recording)
-	{
-		if (inputAlert->Go(&input)<1)
-		{
+	if  (recording)	{
+		if (inputAlert->Go(&input)<1) {
 			inputstr	= new char[strlen(input)+1];
 			strcpy(inputstr,input);
 			recording->AddString("Name",input);
@@ -199,8 +174,7 @@ void PCommandManager::StopMacro()
 
 }
 
-void PCommandManager::PlayMacro(BMessage *makro)
-{
+void PCommandManager::PlayMacro(BMessage *makro) {
 	int32 		i				= 0;
 	BMessage	*message		= new BMessage();
 	Indexer		*playDeIndexer	= new Indexer(doc);
@@ -219,7 +193,6 @@ status_t PCommandManager::Execute(BMessage *settings) {
 	status_t	err	= B_OK;
 	if (doc->Lock()) {
 		(doc->GetChangedNodes())->MakeEmpty();
-//		(doc->GetTrash())->MakeEmpty();
 		bool		shadow				= false;
 		char		*commandName		= NULL;
 		PCommand	*command			= NULL;
@@ -272,25 +245,20 @@ PCommand* PCommandManager::GetPCommand(char* name)
 
 
 
-void PCommandManager::Undo(BMessage *undo)
-{
+void PCommandManager::Undo(BMessage *undo) {
 	TRACE();
 	int32 			i					= undoStatus;
 	int32 			index				= undoList->IndexOf(undo);
 	char			*commandName		= NULL;
 	PCommand		*undoPCommand		= NULL;
 	BMessage		*msg				= NULL;
-	if (doc->Lock())
-	{
+	if (doc->Lock()) {
 		(doc->GetChangedNodes())->MakeEmpty();
-//		(doc->GetTrash())->MakeEmpty();
 		if (index<0)
 			index=undoStatus;
-		while (i>=index)
-		{
+		while (i>=index) {
 			msg	= (BMessage *) undoList->ItemAt(i);
-			if (msg != NULL)
-			{
+			if (msg != NULL) {
 				msg->FindString("Command::Name",(const char**)&commandName);
 				undoPCommand	= GetPCommand(commandName);
 				if (undoPCommand != NULL)
@@ -308,25 +276,20 @@ void PCommandManager::Undo(BMessage *undo)
 	}
 }
 
-void PCommandManager::Redo(BMessage *redo)
-{
+void PCommandManager::Redo(BMessage *redo) {
 	TRACE();
 	int32 			i				= undoStatus+1;
 	int32			index			= undoList->IndexOf(redo);
 	char			*commandName	= NULL;
 	PCommand		*redoPCommand	= NULL;
 	BMessage		*msg			= NULL;
-	if (doc->Lock())
-	{
+	if (doc->Lock()) {
 		(doc->GetChangedNodes())->MakeEmpty();
-//		(doc->GetTrash())->MakeEmpty();
 		if (index<0)
 			index=undoStatus+1;
-		while (i<=index)
-		{
+		while (i<=index) {
 			msg	= (BMessage *) undoList->ItemAt(i);
-			if 	(msg != NULL)
-			{
+			if 	(msg != NULL) {
 				msg->FindString("Command::Name",(const char**)&commandName);
 				redoPCommand	= GetPCommand(commandName);
 				if (redoPCommand)
@@ -345,8 +308,7 @@ void PCommandManager::Redo(BMessage *redo)
 }
 
 
-PCommand* PCommandManager::PCommandAt(int32 index)
-{
+PCommand* PCommandManager::PCommandAt(int32 index) {
 	map<BString, PCommand*>::iterator iter;
 	iter=commandMap.begin();
 	for (int i=0;i< index;i++)

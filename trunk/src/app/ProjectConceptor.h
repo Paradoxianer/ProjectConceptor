@@ -1,7 +1,6 @@
 #ifndef _ProjektConceptor_H_
 #define _ProjektConceptor_H_
 
-#include "PluginManager.h"
 #include "PDocumentManager.h"
 #include "ConfigManager.h"
 
@@ -22,9 +21,8 @@
  * @bug on QuitRequested we shoud not quit all Windows we schoud pass the BQuitRequested to all Documents
  */
 
-class ProjektConceptor :	public BApplication
-{
-public:
+class ProjektConceptor :	public BApplication {
+    public:
 								ProjektConceptor();
 								~ProjektConceptor();
 
@@ -35,9 +33,11 @@ public:
 	virtual	void				AboutRequested(void);
 	virtual void				ArgvReceived(int32 argc, char **argv);
 	virtual	void				RegisterMime(void);
-private:
+	virtual PDocumentManager		*GetPDocumentManager(void){return documentManager;}
+	virtual ConfigManager			*GetConfigManager(void){return configManager;}
+    private:
 			PDocumentManager	*documentManager;
-			ConfigManager	*configManager;
-			BFilePanel			*openPanel;
+                        ConfigManager           *configManager;
+                        BFilePanel		*openPanel;
 };
 #endif

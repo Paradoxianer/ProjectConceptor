@@ -3,20 +3,21 @@
 
 #include <app/Message.h>
 #include <interface/Window.h>
+#include <ListView.h>
+#include <SplitView.h>
 
 
 #include "ProjectConceptorDefs.h"
-#include "PluginManager)"
+#include "PluginManager.h"
 
 
 
 
 
-class PluginView: public BView
-{
+class PluginView: public  BSplitView {
 public:
 
-    PluginView(PluginManager *_pManager,BMessage *forMessage, uint32 resizingMode = B_FOLLOW_ALL_SIDES, uint32 flags = B_WILL_DRAW | B_FRAME_EVENTS | B_NAVIGABLE_JUMP);
+					PluginView();
 
 
 //					~PluginView();
@@ -30,6 +31,7 @@ protected:
 private:
                 void			Init();
         virtual void                    BuildPluginList();
+        PluginManager                   *pluginManager;
         BListView                       *pluginListView;
         BView                           *configContainer;
 };

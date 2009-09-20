@@ -16,7 +16,7 @@
 
 #include <string.h>
 
-const int32		P_C_VERSION			= 11;
+const int32		P_C_VERSION			= 12;
 
 
 
@@ -55,7 +55,7 @@ const char*		P_MENU_FILE						= "File";
  *@see PMenuAcces
  */
 const char*		P_MENU_FILE_NEW					= "New";
-const char*		P_MENU_FILE_NEW_TAB				= "New tab";
+const char*		P_MENU_FILE_NEW_TAB				= "New Tab";
 /**value to find the BMenu Item "File->Open" over the PMenuAcces Interface
  *@see PMenuAcces
  */
@@ -71,14 +71,14 @@ const char*		P_MENU_FILE_SAVE				= "Save";
 /**value to find the BMenu Item "File->Save As" over the PMenuAcces Interface
  *@see PMenuAcces
  */
-const char*		P_MENU_FILE_SAVE_AS				= "Save as";
+const char*		P_MENU_FILE_SAVE_AS				= "Save As";
 /**value to find the BMenu Item "File->PageSetup" over the PMenuAcces Interface
  *@see PMenuAcces
  */
 
 const char*		P_MENU_FILE_EXPORT				= "Export";
 
-const char*		P_MENU_FILE_PAGESETUP			= "Page setup";
+const char*		P_MENU_FILE_PAGESETUP			= "Page Setup";
 /**value to find the BMenu Item "File->Print" over the PMenuAcces Interface
  *@see PMenuAcces
  */
@@ -100,16 +100,16 @@ const char*		P_MENU_EDIT_COPY				= "Copy";
 const char*		P_MENU_EDIT_PASTE				= "Paste";
 
 const char*		P_MENU_EDIT_CLEAR				= "Clear";
-const char*		P_MENU_EDIT_SELECT_ALL			= "Select all";
+const char*		P_MENU_EDIT_SELECT_ALL			= "Select All";
 
-const char*		P_MENU_EDIT_PROJECT_SETTINGS	= "Project settings";
+const char*		P_MENU_EDIT_PROJECT_SETTINGS	= "Settings";
 
 const char*		P_MENU_SEARCH					= "Search";
 const char*		P_MENU_SEARCH_FIND				= "Find";
 const char*		P_MENU_SEARCH_FIND_NEXT			= "Find next";
 const char*		P_MENU_SEARCH_REPLACE			= "Replace";
-const char*		P_MENU_SEARCH_REPLACE_AND_FIND	= "Find & replace";
-const char*		P_MENU_SEARCH_REPLACE_ALL		= "Replace all";
+const char*		P_MENU_SEARCH_REPLACE_AND_FIND	= "Find & Replace";
+const char*		P_MENU_SEARCH_REPLACE_ALL		= "Replace All";
 
 /**value to find the BMenu "Window" over the PMenuAcces Interface
  *@see PMenuAcces
@@ -117,7 +117,7 @@ const char*		P_MENU_SEARCH_REPLACE_ALL		= "Replace all";
 
 const char*		P_MENU_WINDOW					= "Window";
 const char*		P_MENU_WINDOW_TITLE				= "Tile";
-const char*		P_MENU_WINDOW_TITLE_VERTICAL	= "Tile vertical";
+const char*		P_MENU_WINDOW_TITLE_VERTICAL	= "Tile Vertical";
 const char*		P_MENU_WINDOW_CASCADE			= "Cascade";
 
 
@@ -162,12 +162,6 @@ void ProjektConceptor::ReadyToRun() {
 	err = settingsDir->SetTo(settingsDir, "ProjectConceptor");
 	settings.SetTo(settingsDir, "GeneralSettings");
 	ConfigManager		*configManager = new ConfigManager((char *)settings.Path());
-/*	configManager->GetConfigMessage()->AddInt32("TestInt",32);
-	configManager->GetConfigMessage()->AddString("TestString","BLBLABL");
-	configManager->GetConfigMessage()->AddString("Eintrag2","Inhalt2");
-	configManager->GetConfigMessage()->AddBool("Boolinhalt",false);
-
-//	configManager->SaveConfig();*/
 	configManager->LoadDefaults();
 	err = settingsDir->CreateDirectory("AutoSave", NULL);
 
