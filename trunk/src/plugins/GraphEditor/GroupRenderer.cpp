@@ -48,19 +48,17 @@ void GroupRenderer::SendToBack(Renderer *wichRenderer)
 void GroupRenderer::ValueChanged()
 {
 	TRACE();
-	BList		*changedNodes	= doc->GetChangedNodes();
+	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
+	set<BMessage*>::iterator it;
 	BMessage	*node			= NULL;
 	Renderer	*painter		= NULL;
 
 
 	ClassRenderer::ValueChanged();
-	
-	for (int32 i=0;i<changedNodes->CountItems();i++)
-	{
-		node	= (BMessage *)changedNodes->ItemAt(i);
+	for ( it=changedNodes->begin();it!=changedNodes->end();it++) {
+		node	= *it;
 		painter	= FindRenderer(node);
-		if (painter != NULL)
-		{
+		if (painter != NULL) {
 			if (allNodes->HasItem(node))
 				painter->ValueChanged();
 			else
@@ -72,20 +70,14 @@ void GroupRenderer::ValueChanged()
 	}
 }
 
-void GroupRenderer::MoveBy(float dx,float dy)
-{
+void GroupRenderer::MoveBy(float dx,float dy) {
 	frame.OffsetBy(dx,dy);
 	name->MoveBy(dx,dy);
 	for (int32 i=0;i<renderer->CountItems();i++)
-	{
 		((Renderer *)renderer->ItemAt(i))->MoveBy(dx,dy);
-	}
-
-
 }
 
-void GroupRenderer::ResizeBy(float dx,float dy)
-{
+void GroupRenderer::ResizeBy(float dx,float dy) {
 	if ((frame.right+dx-frame.left) > 70)
 		frame.right		+= dx;
 	if  ((frame.bottom+dy-frame.top) > 30)
@@ -94,8 +86,7 @@ void GroupRenderer::ResizeBy(float dx,float dy)
 }
 
 
-void GroupRenderer::InsertRenderObject(BMessage *node)
-{
+void GroupRenderer::InsertRenderObject(BMessage *node) {
 	TRACE();
 	Renderer	*newRenderer = NULL;
 	void		*parentPointer = NULL;	
@@ -109,27 +100,23 @@ void GroupRenderer::InsertRenderObject(BMessage *node)
 }
 
 
-void GroupRenderer::AddRenderer(Renderer* newRenderer)
-{
+void GroupRenderer::AddRenderer(Renderer* newRenderer) {
 	TRACE();
 	renderer->AddItem(newRenderer);
 }
 
-void GroupRenderer::RemoveRenderer(Renderer *wichRenderer)
-{
+void GroupRenderer::RemoveRenderer(Renderer *wichRenderer) {
 	TRACE();
 	renderer->RemoveItem(wichRenderer);
 	delete wichRenderer;
 }
 
 
-Renderer* GroupRenderer::FindRenderer(BMessage *container)
-{
+Renderer* GroupRenderer::FindRenderer(BMessage *container) {
 	int32		i					= 0;
 	Renderer	*currentRenderer	= NULL;
 	bool		found				= false;
-	while ((i<renderer->CountItems()) && (!found))
-	{
+	while ((i<renderer->CountItems()) && (!found)) {
 		currentRenderer= (Renderer*)renderer->ItemAt(i);
 		if (currentRenderer->GetMessage() == container)
 			found=true;
@@ -142,15 +129,12 @@ Renderer* GroupRenderer::FindRenderer(BMessage *container)
 }
 
 
-void GroupRenderer::RecalcFrame(void)
-{
+void GroupRenderer::RecalcFrame(void) {
 	Renderer*	tmpRenderer		= NULL;
 	BRect			groupFrame			= BRect(0,0,-1,-1);
-	for (int32 i=0;(i<renderer->CountItems());i++)
-	{
+	for (int32 i=0;(i<renderer->CountItems());i++) {
 		tmpRenderer = (Renderer *) renderer->ItemAt(i);
-		if ( (tmpRenderer->GetMessage()->what == P_C_CLASS_TYPE) || (tmpRenderer->GetMessage()->what == P_C_GROUP_TYPE) )
-		{
+		if ( (tmpRenderer->GetMessage()->what == P_C_CLASS_TYPE) || (tmpRenderer->GetMessage()->what == P_C_GROUP_TYPE) ) {
 			if (!groupFrame.IsValid())
 				groupFrame = tmpRenderer->Frame();
 			else
@@ -159,12 +143,10 @@ void GroupRenderer::RecalcFrame(void)
 	}
 	groupFrame.InsetBy(-5,-5);
 	groupFrame.top = groupFrame.top-15;
-	if (groupFrame != frame)
-	{
+	if (groupFrame != frame) {
 		frame = groupFrame;
 		//** need to move the Attribs and the Name...
-		if (parentNode)
-		{
+		if (parentNode) {
 			GroupRenderer	*parent	= NULL;
 			if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
 				parent->RecalcFrame();

@@ -1,3 +1,5 @@
+#include <set>
+
 #include <string.h>
 #include <interface/Alert.h>
 #include <interface/MenuItem.h>
@@ -10,12 +12,15 @@
 #include "PDocumentManager.h"
 #include "InputRequest.h"
 
+
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
 #endif
+
+using namespace std;
 
 PCommandManager::PCommandManager(PDocument *initDoc) {
 	TRACE();
@@ -192,7 +197,8 @@ status_t PCommandManager::Execute(BMessage *settings) {
 	TRACE();
 	status_t	err	= B_OK;
 	if (doc->Lock()) {
-		(doc->GetChangedNodes())->MakeEmpty();
+		//(doc->GetChangedNodes())->MakeEmpty();
+		(doc->GetChangedNodes())->empty();
 		bool		shadow				= false;
 		char		*commandName		= NULL;
 		PCommand	*command			= NULL;
@@ -253,7 +259,7 @@ void PCommandManager::Undo(BMessage *undo) {
 	PCommand		*undoPCommand		= NULL;
 	BMessage		*msg				= NULL;
 	if (doc->Lock()) {
-		(doc->GetChangedNodes())->MakeEmpty();
+		(doc->GetChangedNodes())->empty();
 		if (index<0)
 			index=undoStatus;
 		while (i>=index) {
@@ -284,7 +290,7 @@ void PCommandManager::Redo(BMessage *redo) {
 	PCommand		*redoPCommand	= NULL;
 	BMessage		*msg			= NULL;
 	if (doc->Lock()) {
-		(doc->GetChangedNodes())->MakeEmpty();
+		(doc->GetChangedNodes())->empty();
 		if (index<0)
 			index=undoStatus+1;
 		while (i<=index) {

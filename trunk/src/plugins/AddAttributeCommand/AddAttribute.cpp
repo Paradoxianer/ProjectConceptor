@@ -2,12 +2,10 @@
 #include "AddAttribute.h"
 #include <string.h>
 
-AddAttribute::AddAttribute():PCommand()
-{
+AddAttribute::AddAttribute():PCommand() {
 }
 
-void AddAttribute::Undo(PDocument *doc,BMessage *undo)
-{
+void AddAttribute::Undo(PDocument *doc,BMessage *undo) {
 	BMessage	*undoMessage	= new BMessage();
 	BMessage	*selectNodes	= new BMessage();
 	BMessage	*valueContainer	= new BMessage();
@@ -18,23 +16,19 @@ void AddAttribute::Undo(PDocument *doc,BMessage *undo)
 
 	PCommand::Undo(doc,undoMessage);
 	undo->FindMessage("AddAttribute::Undo" ,undoMessage);
-	while (undo->FindPointer("node",i,(void **)&node) == B_OK)
-	{
+	while (undo->FindPointer("node",i,(void **)&node) == B_OK) {
 		err = B_OK;
 		if (undo->FindMessage("valueContainer",i,valueContainer) == B_OK)
 			DoAddAttribute(doc,node,valueContainer,true);
 		i++;
 
 	}
-	if ( (undo->FindBool("Node::selected",&selected) == B_OK) && (selected==true) )
-	{
+	if ( (undo->FindBool("Node::selected",&selected) == B_OK) && (selected==true) ) {
 		undoMessage->FindMessage("selectedNodes",selectNodes);
 		err 		= B_OK;
 		i			= 0;
-		if (undo->FindMessage("valueContainer",valueContainer) == B_OK)
-		{
-			while (selectNodes->FindPointer("node",i,(void **)&node) == B_OK)
-			{
+		if (undo->FindMessage("valueContainer",valueContainer) == B_OK) {
+			while (selectNodes->FindPointer("node",i,(void **)&node) == B_OK) {
 				DoAddAttribute(doc,node,valueContainer,true);
 				i++;				
 			}
@@ -43,9 +37,8 @@ void AddAttribute::Undo(PDocument *doc,BMessage *undo)
 	doc->SetModified();
 }
 
-BMessage* AddAttribute::Do(PDocument *doc, BMessage *settings)
-{
-	BList		*selection		= doc->GetSelected();
+BMessage* AddAttribute::Do(PDocument *doc, BMessage *settings) {
+	BList		*selection	= doc->GetSelected();
 	BMessage	*undoMessage	= new BMessage();
 	BMessage	*node			= NULL;
 	BMessage	*selectedNodes	= new BMessage();
@@ -54,18 +47,14 @@ BMessage* AddAttribute::Do(PDocument *doc, BMessage *settings)
 	bool		selected		= false;
 	status_t	err				= B_OK;
 
-	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
-	{
+	while (settings->FindPointer("node",i,(void **)&node) == B_OK) {
 		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK)
 			DoAddAttribute(doc,node,valueContainer);
 		i++;
 	}
-	if ( (settings->FindBool("Node::selected",&selected) == B_OK) && (selected==true) )
-	{
-		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK)
-		{
-			for (int32 i=0;i<selection->CountItems();i++)
-			{
+	if ( (settings->FindBool("Node::selected",&selected) == B_OK) && (selected==true) ) {
+		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK) {
+			for (int32 i=0;i<selection->CountItems();i++) {
 				node =(BMessage *) selection->ItemAt(i);
 				selectedNodes->AddPointer("node",node);
 				DoAddAttribute(doc,node,valueContainer);
@@ -82,12 +71,10 @@ BMessage* AddAttribute::Do(PDocument *doc, BMessage *settings)
 
 
 
-void AddAttribute::AttachedToManager(void)
-{
+void AddAttribute::AttachedToManager(void) {
 }
 
-void AddAttribute::DetachedFromManager(void)
-{
+void AddAttribute::DetachedFromManager(void) {
 }
 
 void AddAttribute::DoAddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,bool undo)
@@ -97,7 +84,7 @@ void AddAttribute::DoAddAttribute(PDocument *doc, BMessage *node, BMessage *valu
 	BList		*subGroupList	= new BList();
 	BMessage	*subGroup		= NULL;
 	BMessage	*tmpSubGroup	= new BMessage();
-	BList		*changed		= doc->GetChangedNodes();
+	set<BMessage*>	*changed		= doc->GetChangedNodes();
 	
 	//do 
 	char		*name			= NULL;
@@ -151,5 +138,5 @@ void AddAttribute::DoAddAttribute(PDocument *doc, BMessage *node, BMessage *valu
 			tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(i));
 		delete subGroupList->RemoveItem(i);
 	}
-	changed->AddItem(node);
+	changed->insert(node);
 }

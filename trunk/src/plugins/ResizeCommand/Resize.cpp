@@ -9,7 +9,7 @@ Resize::Resize():PCommand()
 void Resize::Undo(PDocument *doc,BMessage *undo)
 {
 	BMessage		*undoMessage		= new BMessage();
-	BList			*changed			= doc->GetChangedNodes();
+	set<BMessage*>		*changed			= doc->GetChangedNodes();
 	BRect			*oldFrame			= new BRect(0,0,100,100);
 	BMessage		*node				= NULL;
 	BMessage		*settings			= new BMessage();
@@ -22,7 +22,7 @@ void Resize::Undo(PDocument *doc,BMessage *undo)
 		if (undoMessage->FindRect("oldFrame",i,oldFrame) == B_OK)
 		{
 			node->ReplaceRect("Node::frame",*oldFrame);
-			changed->AddItem(node);
+			changed->insert(node);
 		}
 		i++;
 	}
@@ -33,7 +33,7 @@ BMessage* Resize::Do(PDocument *doc, BMessage *settings)
 {
 	BMessage		*undoMessage		= new BMessage();
 	BList			*selected			= doc->GetSelected();
-	BList			*changed			= doc->GetChangedNodes();
+	set<BMessage*>		*changed			= doc->GetChangedNodes();
 	float			dx,dy;
 	BRect			*newFrame			= new BRect(0,0,100,100);
 	BRect			*oldFrame			= new BRect(0,0,100,100);
@@ -53,7 +53,7 @@ BMessage* Resize::Do(PDocument *doc, BMessage *settings)
 			if ( (newFrame->IsValid()) && (newFrame->Width()>20) && ((newFrame->Height()>20)) )
 			{
 				node->ReplaceRect("Node::frame",*newFrame);
-				changed->AddItem(node);
+				changed->insert(node);
 			}
 		}
 	}

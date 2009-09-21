@@ -5,19 +5,16 @@ TextEditorControl::TextEditorControl(BRect rect
 		, BMessage *message
 		, uint32 resizingMode
 		, uint32 flags)
-	:  BTextView(rect,name,BRect(0,0,rect.Width(),rect.Height()),resizingMode,flags), BInvoker(message,NULL)
-{
+	:  BTextView(rect,name,BRect(0,0,rect.Width(),rect.Height()),resizingMode,flags), BInvoker(message,NULL) {
 	TRACE();
 	singleLine	= true;
 	changed		= false;
 	commit		= true;
 }
 
-void TextEditorControl::AttachedToWindow(void)
-{
+void TextEditorControl::AttachedToWindow(void) {
 	TRACE();
-	if (Target() == NULL)
-	{
+	if (Target() == NULL) {
 		SetTarget(Parent());
 	}
 //	SetViewColor(B_TRANSPARENT_COLOR);
@@ -25,74 +22,67 @@ void TextEditorControl::AttachedToWindow(void)
 	SelectAll();
 }
 
-void TextEditorControl::DetachedFromWindow()
-{
+void TextEditorControl::DetachedFromWindow() {
 	TRACE();
 }
 
-void TextEditorControl::MakeFocus(bool flag)
-{
+void TextEditorControl::MakeFocus(bool flag) {
 	TRACE();
-/*	PRINT(("%s - MakeFocus(%d)\n",Text(),flag));
-	BTextView::MakeFocus(flag);*/
+	PRINT(("%s - MakeFocus(%d)\n",Text(),flag));
+	BTextView::MakeFocus(flag);
 	/*if (flag == false) 
 	{
 		Invoke();
 	}*/
 }
-void TextEditorControl::MouseDown(BPoint point)
-{
+void TextEditorControl::MouseDown(BPoint point) {
 	TRACE();
 	BTextView::MouseDown(point);
 	if (!Bounds().Contains(point))
-	{
 		Invoke();
-	}
 }
-void TextEditorControl::MouseUp(BPoint point)
-{
+
+void TextEditorControl::MouseUp(BPoint point) {
 	TRACE();
 	BTextView::MouseUp(point);
-	if (!Bounds().Contains(point))
-	{
+	if (!Bounds().Contains(point)) {
 		Invoke();
 	}
 }
 
 void TextEditorControl::KeyDown(const char *bytes, int32 numBytes)
 {
-	if ((singleLine)&&(bytes[0] == B_ENTER))
-	{
+	if ((singleLine)&&(bytes[0] == B_ENTER)) {
 		Invoke();
 	}
-	else if (bytes[0] == B_ESCAPE)
-	{
+	else if (bytes[0] == B_ESCAPE) {
 		commit=false;
 //		Parent()->MakeFocus(true);
 //		Parent()->RemoveChild(this);
 	}
-	else
-	{
-			changed		= true;
-			BTextView::KeyDown(bytes,numBytes);
+	else {
+		changed		= true;
+		BTextView::KeyDown(bytes,numBytes);
 	}
 //		BTextView::KeyDown(bytes,numBytes);
 }
-status_t TextEditorControl::Invoke(BMessage *message)
-{
+
+status_t TextEditorControl::Invoke(BMessage *message) {
 	TRACE();
-	BMessage copy(*Message()); 
+	//** maby we should turn this on
+	//SetEventMask(0);
+	BMessage copy(*Message());
 /*	copy.AddPointer("newValue", Text()); 
 	copy.AddInt32("size",TextLength()+1);*/
 	BMessage *valueContainer	= new BMessage();
 	copy.FindMessage("valueContainer",valueContainer);
 	valueContainer->AddString("newValue",Text());
 	copy.ReplaceMessage("valueContainer",valueContainer);
-	if (Parent())
-	{
+	if (Parent()) {
 		Parent()->MakeFocus(true);
 		Parent()->RemoveChild(this);
 	}
 	if ((changed) && (commit))
 		BInvoker::Invoke(&copy);
+
 }

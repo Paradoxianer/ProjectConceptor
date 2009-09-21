@@ -294,9 +294,9 @@ void GraphEditor::ValueChanged() {
 	TRACE();
 	//try to lock the document during we are painting
 	bool locked = doc->Lock();
-	
-	
-	BList		*changedNodes	= doc->GetChangedNodes();
+	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
+	set<BMessage*>::iterator it;
+
 	BList		*allNodes	= doc->GetAllNodes();
 	BList		*allConnections	= doc->GetAllConnections();
 
@@ -305,25 +305,19 @@ void GraphEditor::ValueChanged() {
 	void		*pointer		= NULL;
 	BRect		frame;
 	BRect		invalid;
-	PRINT(("GraphEditor::changedNode->CountItems() %ld:\n",changedNodes->CountItems()));
-	for (int32 i=0;i<changedNodes->CountItems();i++) {
+	PRINT(("GraphEditor::changedNode->CountItems() %ld:\n",changedNodes->size()));
+	int i=0;
+	for ( it=changedNodes->begin();it!=changedNodes->end();it++) {
+	    i++;
+//	for (int32 i=0;i<changedNodes->CountItems();i++) {
 		PRINT(("GraphEditor::changedNode %ld:\n",i));
-		node = (BMessage *)changedNodes->ItemAt(i);
-		//** This causes the problem
+		node = *it;
 		node->PrintToStream();
 		if (node->FindPointer(renderString,(void **)&painter) == B_OK) {
-			if ((allConnections->HasItem(node))||(allNodes->HasItem(node))) {
+			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
 				painter->ValueChanged();
-				//if we procedded this node than it´s not changed anymore
-//				changedNodes->RemoveItem(i);
-//				i--;
-			}
-			else {
+			else
 				RemoveRenderer(FindRenderer(node));
-				//if we procedded this node than it´s not changed anymore
-//				changedNodes->RemoveItem(i);
-//				i--;
-			}
 		}
 		else {
 			//**check if this node is in the node or connection list because if it is not it´s a nodd frome a subgroup or it was deleted
@@ -337,16 +331,11 @@ void GraphEditor::ValueChanged() {
 	}
 	if (locked)
 	    doc->Unlock();
-//	sentToMe->SendMessage(new BMessage(G_E_INVALIDATE));
-	if (this->LockLooper()) {
-		Invalidate();
-		this->UnlockLooper();
-	}
+	Invalidate();
 }
 
 void GraphEditor::SetDirty(BRegion *region) {
 	TRACE();
-//	sentToMe->SendMessage(new BMessage(G_E_INVALIDATE));
 	BView::Invalidate(region);
 }
 
@@ -373,6 +362,7 @@ void GraphEditor::Draw(BRect updateRect) {
 		}
 		EndLineArray();
 	}
+	PRINT(("RENDERER COUNT %ld",renderer->CountItems()));
 	renderer->DoForEach(DrawRenderer,this);
 	if (selectRect) {
 		SetHighColor(81,131,171,120);
@@ -448,7 +438,6 @@ void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messa
 				selectRect->top=selectRect->bottom;
 				selectRect->bottom=c;
 			}
-//			sentToMe->SendMessage(new BMessage(G_E_INVALIDATE));
 			Invalidate();
 		}
 	}
@@ -485,7 +474,6 @@ void GraphEditor::MouseUp(BPoint where) {
 		startMouseDown=NULL;
 		delete selectRect;
 		selectRect=NULL;
-//		sentToMe->SendMessage(new BMessage(G_E_INVALIDATE));
 		Invalidate();
 	}
 	else if (mouseReciver != NULL) {
@@ -604,13 +592,11 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				connecting = true;
 				message->FindPoint("Node::to",toPoint);
 				message->FindPoint("Node::from",fromPoint);
-//				sentToMe->SendMessage(new BMessage(G_E_INVALIDATE));
 				Invalidate();
 			break;
 		}
 		case G_E_CONNECTED: {
 			connecting = false;
-//			sentToMe->SendMessage(new BMessage(G_E_INVALIDATE));
 			Invalidate();
 			BMessage	*connection		= new BMessage(P_C_CONNECTION_TYPE);
 			BMessage	*commandMessage	= new BMessage(P_C_EXECUTE_COMMAND);
@@ -665,7 +651,6 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		}
 		case G_E_GRID_CHANGED: {
 			gridEnabled =! gridEnabled;
-//			sentToMe->SendMessage(new BMessage(G_E_INVALIDATE));
 			Invalidate();
 			break;
 		}
@@ -813,12 +798,12 @@ void GraphEditor::InsertRenderObject(BMessage *node) {
 
 void GraphEditor::AddRenderer(Renderer* newRenderer) {
 	TRACE();
-	if (BView::LockLooper()==B_OK){
+	//if (BView::LockLooper()==B_OK){
 	    renderer->AddItem(newRenderer);
 	    BringToFront(newRenderer);
 	    activRenderer = newRenderer;
-	    BView::UnlockLooper();
-	}
+	  //  BView::UnlockLooper();
+	//}
 }
 
 void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
@@ -959,7 +944,6 @@ void GraphEditor::SendToBack(Renderer *wichRenderer) {
 	else
 		renderer->AddItem(wichRenderer,0);
 	//**draw all wich are under the Thing redraw*/
-//	sentToMe->SendMessage(new BMessage(G_E_INVALIDATE));
 	Invalidate();
 }
 

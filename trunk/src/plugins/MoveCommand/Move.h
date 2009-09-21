@@ -19,8 +19,8 @@ public:
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
 	
-			void			MoveNode(PDocument *doc, BList *changed, BMessage *node, float dx, float dy,BMessage *undoMessage);
-			void			ResizeParent(PDocument *doc, BList *changed, BMessage *node, float dx, float dy,BMessage *undoMessage);			
+			void			MoveNode(PDocument *doc, set<BMessage*> *changed, BMessage *node, float dx, float dy,BMessage *undoMessage);
+			void			ResizeParent(PDocument *doc, set<BMessage*> *changed, BMessage *node, float dx, float dy,BMessage *undoMessage);
 
 protected:
 	//----------------PCommand

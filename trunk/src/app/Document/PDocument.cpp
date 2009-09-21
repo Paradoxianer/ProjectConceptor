@@ -219,7 +219,7 @@ void PDocument::Init(){
 	allNodes		= new BList();
 	allConnections	= new BList();
 	selected		= new BList();
-	valueChanged	= new BList();
+	valueChanged	= new set<BMessage*>();
 	//Load Configs
 	printerSetting	= NULL;
 	documentSetting	= new BMessage();
@@ -234,7 +234,7 @@ void PDocument::Init(){
 	autoSaveRef		= NULL;
 	modified		= false;
 	//set autosave to 5 minutes for the beginning 5 * 60 = 300 *1000 (miliisek) *1000 =
-	autoSaveIntervall	= 30000000;
+	autoSaveIntervall	= 300000000;
 	editorManager	= new PEditorManager(this);
 	commandManager	= new PCommandManager(this);
 	//** to do.. helpManager		= new HelpManager();
@@ -622,14 +622,14 @@ void PDocument::Load(void)
 	{
 		node=((BMessage*)allNodes->ItemAt(i));
 		node->AddPointer("ProjectConceptor::doc",this);
-		valueChanged->AddItem(node);
+		valueChanged->insert(node);
 	}
 	allConnections	= docLoader->GetAllConnections();
 	for (i = 0; i<allConnections->CountItems(); i++)
 	{
 		node= (BMessage *)allConnections->ItemAt(i);
 		node->AddPointer("ProjectConceptor::doc",this);
-		valueChanged->AddItem(node);
+		valueChanged->insert(node);
 	}
 	selected = docLoader->GetSelectedNodes();
 	delete commandManager;

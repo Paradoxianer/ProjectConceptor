@@ -14,13 +14,14 @@
 #include <storage/FilePanel.h>
 #include <support/Archivable.h>
 #include <support/List.h>
+#include <set>
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>
 	#include <locale/LanguageNotifier.h>
 #else
 	#define _T(a) a
 #endif
-
+using namespace std;
 
 class HelpManager;
 class PCommandManager;
@@ -97,7 +98,7 @@ public:
 	 */
 			void				ResetModified(void);
 
-			BList				*GetChangedNodes(void){return valueChanged;};
+			set<BMessage*>			*GetChangedNodes(void){return valueChanged;};
 
 			BList				*GetSelected(void){return selected;};
 			BList				*GetAllNodes(void){return allNodes;};
@@ -198,7 +199,8 @@ protected:
 			BList				*allConnections;
 			BList				*selected;
 			//** change this to a set<> makes it more perfomrant and dont use duplicated entrys
-			BList				*valueChanged;
+		//	BList				*valueChanged;
+			set<BMessage*>			*valueChanged;
 
 			BRect				bounds;
 			BRect				*paperRect;

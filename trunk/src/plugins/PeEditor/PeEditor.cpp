@@ -249,7 +249,7 @@ void GraphEditor::PreprocessAfterLoad(BMessage *container)
 void GraphEditor::ValueChanged()
 {
 	TRACE();
-	BList		*changedNodes	= doc->GetChangedNodes();
+	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
 	BList		*allNodes		= doc->GetAllNodes();
 	BList		*allConnections	= doc->GetAllConnections();
 
@@ -258,7 +258,7 @@ void GraphEditor::ValueChanged()
 	void		*pointer		= NULL;
 	BRect		frame;
 	BRect		invalid;
-	for (int32 i=0;i<changedNodes->CountItems();i++)
+/*	for (int32 i=0;i<changedNodes->CountItems();i++)
 	{
 		node = (BMessage *)changedNodes->ItemAt(i);
 		if (node->FindPointer(renderString,(void **)&painter) == B_OK)
@@ -302,13 +302,13 @@ void GraphEditor::ValueChanged()
 					if ((parent!=NULL)&&(parent->FindPointer(renderString,(void **)&painter) == B_OK))
 					 painter->ValueChanged();
 				}
-				else*/
+				else
 					RemoveRenderer(FindRenderer(node));
 				//if we procedded this node than it´s not changed anymore
 //				changedNodes->RemoveItem(i);
 //				i--;
 			}
-		}
+		}*/
 	}
 
 	if (BView::LockLooper())
@@ -526,7 +526,8 @@ void GraphEditor::AttachedToWindow(void)
 
 	grid->SetTarget(this);
 	penSize->SetTarget(this);
-	colorItem->SetTarget(this);	sentToMe	= new BMessenger((BView *)this);
+	colorItem->SetTarget(this);
+	sentToMe	= new BMessenger((BView *)this);
 }
 
 

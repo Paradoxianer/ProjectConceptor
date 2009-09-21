@@ -14,7 +14,7 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 	BMessage	*valueContainer	= new BMessage();
 	BMessage	*selectNodes	= new BMessage();
 	BList		*subGroupList	= new BList();
-	BList		*changed		= doc->GetChangedNodes();
+	set<BMessage*>	*changed		= doc->GetChangedNodes();
 	BMessage	*node			= NULL;
 	char		*name			= NULL;
 	char		*subGroupName	= NULL;
@@ -59,7 +59,7 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 					tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(j));
 				delete subGroupList->RemoveItem(j);
 			}
-			changed->AddItem(node);
+			changed->insert(node);
 		}
 		i++;
 	}
@@ -99,7 +99,7 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 						tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(j));
 					delete subGroupList->RemoveItem(j);
 				}
-				changed->AddItem(node);
+				changed->insert(node);
 				i++;
 			}
 		}
@@ -109,7 +109,7 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 
 BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 {
-	BList		*changed		= doc->GetChangedNodes();
+	set<BMessage*>	*changed		= doc->GetChangedNodes();
 	BList		*selection		= doc->GetSelected();
 	BList		*subGroupList	= new BList();
 	BMessage	*node			= NULL;
@@ -162,7 +162,7 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 					tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(j));
 				delete subGroupList->RemoveItem(j);
 			}
-			changed->AddItem(node);
+			changed->insert(node);
 		}
 		i++;
 	}
@@ -184,8 +184,7 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 				j	= 0;		
 				subGroup = node;
 				subGroupList->AddItem(subGroup);
-				while (valueContainer->FindString("subgroup",j,(const char**)&subGroupName) == B_OK)
-				{	
+				while (valueContainer->FindString("subgroup",j,(const char**)&subGroupName) == B_OK) {
 					subGroup->FindMessage(subGroupName,tmpSubGroup);
 					subGroupList->AddItem(tmpSubGroup);
 					subGroup	= tmpSubGroup;
@@ -196,15 +195,14 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 				subGroup->FindData(name,type,index,(const void **)&oldValue,&oldSize);
 				selectedNodes->AddData("oldValue",type,oldValue,oldSize,false);
 				subGroup->ReplaceData(name,type,index,newValue,size);
-				for (j=subGroupList->CountItems()-1;j>0;j--)
-				{
+				for (j=subGroupList->CountItems()-1;j>0;j--) {
 					tmpSubGroup = (BMessage *)subGroupList->ItemAt(j-1);
 					valueContainer->FindString("subgroup",j-1,(const char**)&subGroupName);
 					if (tmpSubGroup)
 						tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(j));
 					delete subGroupList->RemoveItem(j);
 				}
-				changed->AddItem(node);
+				changed->insert(node);
 			}	
 		}
 	}
@@ -218,16 +216,13 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 
 
 
-void ChangeValue::AttachedToManager(void)
-{
+void ChangeValue::AttachedToManager(void) {
 }
 
-void ChangeValue::DetachedFromManager(void)
-{
+void ChangeValue::DetachedFromManager(void) {
 }
 
-void ChangeValue::DoChangeValue(PDocument *doc,BRect *rect,BMessage *settings)
-{
+void ChangeValue::DoChangeValue(PDocument *doc,BRect *rect,BMessage *settings) {
 	type_code		type;
 	settings->FindInt32("type",(int32 *)&type);
 }

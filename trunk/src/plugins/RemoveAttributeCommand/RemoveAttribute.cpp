@@ -100,7 +100,7 @@ void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage
 	BList		*subGroupList	= new BList();
 	BMessage	*subGroup		= NULL;
 	BMessage	*tmpSubGroup	= new BMessage();
-	BList		*changed		= doc->GetChangedNodes();
+	set<BMessage*>	*changed		= doc->GetChangedNodes();
 	//do 
 	char		*name			= NULL;
 	char		*tmpName		= NULL;
@@ -143,7 +143,7 @@ void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage
 			tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(i));
 		delete subGroupList->RemoveItem(i);
 	}
-	changed->AddItem(node);
+	changed->insert(node);
 	
 }
 
@@ -157,7 +157,7 @@ void RemoveAttribute::AddAttribute(PDocument *doc, BMessage *node, BMessage *val
 	BList		*subGroupList	= new BList();
 	BMessage	*subGroup		= NULL;
 	BMessage	*tmpSubGroup	= new BMessage();
-	BList		*changed		= doc->GetChangedNodes();
+	set<BMessage*>	*changed		= doc->GetChangedNodes();
 	//do 
 	char		*name			= NULL;
 	char		*subGroupName	= NULL;
@@ -196,5 +196,5 @@ void RemoveAttribute::AddAttribute(PDocument *doc, BMessage *node, BMessage *val
 			tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(i));
 		delete subGroupList->RemoveItem(i);
 	}
-	changed->AddItem(node);
+	changed->insert(node);
 }

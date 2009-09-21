@@ -10,7 +10,7 @@ void Insert::Undo(PDocument *doc,BMessage *undo) {
 	BList			*parentAllNodes		= NULL;
 	BList			*allConnectinos		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();
-	BList			*changed			= doc->GetChangedNodes();
+	set<BMessage*>		*changed			= doc->GetChangedNodes();
 	BMessage		*node				= new BMessage();
 	BMessage		*connection			= new BMessage();
 	int32			i					= 0;
@@ -26,7 +26,7 @@ void Insert::Undo(PDocument *doc,BMessage *undo) {
 		}
 		else
 			allConnectinos->RemoveItem(node);
-		changed->AddItem(node);
+		changed->insert(node);
 		i++;
 	}
 	i=0;
@@ -39,7 +39,7 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings) {
 	BMessage		*node				= NULL;
 	BMessage		*parentNode			= NULL;
 	BList			*parentAllNodes		= NULL;
-	BList			*changed			= doc->GetChangedNodes();
+	set<BMessage*>		*changed			= doc->GetChangedNodes();
 	BList			*allConnections		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();
 	int32			i					= 0;
@@ -70,8 +70,7 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings) {
 				doc->Resize(docRect.right,docRect.bottom);
 		}
 		i++;
-		if (!changed->HasItem(node))
-			changed->AddItem(node);
+		changed->insert(node);
 	}
 	doc->SetModified();
 	settings = PCommand::Do(doc,settings);
