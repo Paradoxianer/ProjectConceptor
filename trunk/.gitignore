@@ -1,6 +1,0 @@
-*.o
-bin/ProjectConceptor
-src/app/About/AboutSvnInfo.h
-*~
-bin/ProjectConceptor.a
-src/app/About/AboutSvnInfo.h
