@@ -87,7 +87,7 @@ void PDocumentManager::AddDocument(PDocument *doc) {
 			PRINT(("ERROR:\tPDocumentManager Cant Add Document\n"));
 	}
 	else
-		PRINT(("ERROR:\tPDocumentManager","Wrong Value passed\n"));
+		PRINT(("ERROR:\tPDocumentManager - Wrong Value passed\n"));
 }
 
 

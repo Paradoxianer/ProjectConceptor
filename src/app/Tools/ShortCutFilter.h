@@ -7,12 +7,8 @@
 #include <app/MessageFilter.h>
 #include <app/Messenger.h>
 
-#if defined(__HAIKU__) && __GNUC__ > 3
 #include <map>
 using namespace std;
-#else
-#include <cpp/map.h>
-#endif
 struct shortcut
 {
 			

@@ -24,7 +24,7 @@
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
-GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW ) {
+GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW | B_NAVIGABLE) {
 	TRACE();
 	pluginID	= newId;
 	Init();
@@ -64,18 +64,18 @@ void GraphEditor::Init(void) {
 	nodeMessage->AddMessage("Node::Data",dataMessage);
 	//Preparing the standart FontMessage
 	fontMessage		= new BMessage(B_FONT_TYPE);
-	fontMessage->AddInt8("Encoding",be_plain_font->Encoding());
-	fontMessage->AddInt16("Face",be_plain_font->Face());
+	fontMessage->AddInt8("Font::Encoding",be_plain_font->Encoding());
+	fontMessage->AddInt16("Font::Face",be_plain_font->Face());
 	be_plain_font->GetFamilyAndStyle(&family,&style);
-	fontMessage->AddString("Family",(const char*)&family);
-	fontMessage->AddInt32("Flags", be_plain_font->Flags());
-	fontMessage->AddFloat("Rotation",be_plain_font->Rotation());
-	fontMessage->AddFloat("Shear",be_plain_font->Shear());
-	fontMessage->AddFloat("Size",be_plain_font->Size());
-	fontMessage->AddInt8("Spacing",be_plain_font->Spacing());
-	fontMessage->AddString("Style",(const char*)&style);
+	fontMessage->AddString("Font::Family",(const char*)&family);
+	fontMessage->AddInt32("Font::Flags", be_plain_font->Flags());
+	fontMessage->AddFloat("Font::Rotation",be_plain_font->Rotation());
+	fontMessage->AddFloat("Font::Shear",be_plain_font->Shear());
+	fontMessage->AddFloat("Font::Size",be_plain_font->Size());
+	fontMessage->AddInt8("Font::Spacing",be_plain_font->Spacing());
+	fontMessage->AddString("Font::Style",(const char*)&style);
 	rgb_color	fontColor			= {111, 151, 181, 255};
-	fontMessage->AddInt32("Color",*((int32 *)&fontColor));
+	fontMessage->AddInt32("Font::Color",*((int32 *)&fontColor));
 
 	//perparing Pattern Message
 	patternMessage	=new BMessage();
@@ -90,7 +90,7 @@ void GraphEditor::Init(void) {
 	patternMessage->AddInt32("HighColor",*(int32 *)&highColor);
 	rgb_color 	lowColor			= {128, 128, 128, 255};
 	patternMessage->AddInt32("LowColor",*(int32 *)&lowColor);
-	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH));
+	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH),false);
 
 	scaleMenu		= new BMenu(_T("Scale"));
 	BMessage	*newScale	= new BMessage(G_E_NEW_SCALE);
@@ -305,14 +305,9 @@ void GraphEditor::ValueChanged() {
 	void		*pointer		= NULL;
 	BRect		frame;
 	BRect		invalid;
-	PRINT(("GraphEditor::changedNode->CountItems() %ld:\n",changedNodes->size()));
 	int i=0;
 	for ( it=changedNodes->begin();it!=changedNodes->end();it++) {
-	    i++;
-//	for (int32 i=0;i<changedNodes->CountItems();i++) {
-		PRINT(("GraphEditor::changedNode %ld:\n",i));
 		node = *it;
-		node->PrintToStream();
 		if (node->FindPointer(renderString,(void **)&painter) == B_OK) {
 			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
 				painter->ValueChanged();
@@ -320,7 +315,7 @@ void GraphEditor::ValueChanged() {
 				RemoveRenderer(FindRenderer(node));
 		}
 		else {
-			//**check if this node is in the node or connection list because if it is not it´s a nodd frome a subgroup or it was deleted
+			//**check if this node is in the node or connection list because if it is not it´s a node frome a subgroup or it was deleted
 			if (((allConnections->HasItem(node))||
 			     (allNodes->HasItem(node))) &&
 			    (node->FindPointer("Parent",&pointer) !=B_OK))
@@ -362,7 +357,6 @@ void GraphEditor::Draw(BRect updateRect) {
 		}
 		EndLineArray();
 	}
-	PRINT(("RENDERER COUNT %ld",renderer->CountItems()));
 	renderer->DoForEach(DrawRenderer,this);
 	if (selectRect) {
 		SetHighColor(81,131,171,120);
@@ -401,8 +395,16 @@ void GraphEditor::MouseDown(BPoint where) {
 		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
 		if (buttons & B_PRIMARY_MOUSE_BUTTON) {
 			startMouseDown=new BPoint(scaledWhere);
+			oldEventMask = EventMask();
 			//EventMaske setzen so dass die Maus auch über den View verfolgt wird
-			SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
+			SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY  | B_LOCK_WINDOW_FOCUS);
+		}
+		//if any other mousebutton was clicked we just send a deselect command
+		else {
+			BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
+			selectMessage->AddRect("frame", BRect(-10000,-10000,-9999,-9999));
+			selectMessage->AddString("Command::Name","Select");
+			sentTo->SendMessage(selectMessage);
 		}
 	}
 }
@@ -457,6 +459,7 @@ void GraphEditor::MouseUp(BPoint where) {
 			selectMessage->AddRect("frame",*selectRect);
 			selectMessage->AddString("Command::Name","Select");
 			sentTo->SendMessage(selectMessage);
+			SetMouseEventMask(oldEventMask);
 		}
 		else {
 
@@ -567,7 +570,8 @@ void GraphEditor::DetachedFromWindow(void) {
 	}
 }
 void GraphEditor::MessageReceived(BMessage *message) {
-	TRACE();
+	//TRACE();
+	//message->PrintToStream();
 	switch(message->what) {
 		case P_C_VALUE_CHANGED: {
 			ValueChanged();
@@ -575,17 +579,6 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		}
 		case P_C_DOC_BOUNDS_CHANGED: {
 			UpdateScrollBars();
-		/*	BRect		docRect		= doc->Bounds();
-			BRegion		clipper;
-			BRect		viewRect;
-			BRect		scrollRect	= myScrollParent->Bounds();
-			GetClippingRegion(&clipper); 
-			viewRect= clipper.Frame();
-			ResizeTo(docRect.right,docRect.bottom);
-			viewRect.right	= viewRect.left + (scrollRect.Width() - B_V_SCROLL_BAR_WIDTH)-5;
-			viewRect.bottom	= viewRect.top + (scrollRect.Height() - B_H_SCROLL_BAR_HEIGHT)-5;
-			clipper.Set(viewRect);
-			ConstrainClippingRegion(&clipper);*/
 			break;
 		}
 		case G_E_CONNECTING: {
@@ -613,7 +606,6 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				foundRenderer = FindNodeRenderer(*toPointer);
 				if (foundRenderer)
 					to = foundRenderer->GetMessage();
-				//to = doc->FindObject(toPointer);
 			}
 			else {
 				message->FindPointer("Node::to",(void **)&to);
@@ -621,7 +613,6 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				foundRenderer = FindNodeRenderer(*fromPointer);
 				if (foundRenderer)
 					from  = foundRenderer->GetMessage();
-			//	from	= doc->FindObject(fromPointer);
 			}
 			data->AddString("Name","Unbenannt");
 			if (to != NULL && from!=NULL) {
@@ -655,7 +646,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			break;
 		}
 		case G_E_COLOR_CHANGED: {
-			rgb_color	tmpNewColor =	{255, 0, 0, 255};
+			rgb_color	tmpNewColor =	colorItem->GetColor();;
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changeColorMessage->AddString("Command::Name","ChangeValue");
 			changeColorMessage->AddBool("Node::selected",true);
@@ -663,7 +654,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			valueContainer->AddString("name","FillColor");
 			valueContainer->AddString("subgroup","Node::Pattern");
 			valueContainer->AddInt32("type",B_INT32_TYPE);
-			valueContainer->AddInt32("newValue",*(int32 *)&colorItem->GetColor());
+			valueContainer->AddInt32("newValue",*(int32 *)&tmpNewColor);
 			changeColorMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changeColorMessage);
 			break;
@@ -702,7 +693,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				valueContainer->AddString("subgroup","Node::Data");
 				BMessage	*newAttribute	= new BMessage(type);
 				newAttribute->AddString("Name",inputstr);
-				newAttribute->AddData("Value",type,datadummy,sizeof(datadummy));
+				newAttribute->AddData("Value",type,datadummy,sizeof(datadummy),false);
 				valueContainer->AddMessage("newAttribute",newAttribute);
 				addMessage->AddMessage("valueContainer",valueContainer);
 				sentTo->SendMessage(addMessage);
@@ -751,7 +742,9 @@ void GraphEditor::InsertObject(BPoint where,bool deselect) {
 	BMessage	*newObject		= new BMessage(*nodeMessage);
 	BMessage	*newFont		= new BMessage(*fontMessage);
 	BMessage	*newPattern		= new BMessage(*patternMessage);
-	newPattern->ReplaceInt32("FillColor",*(int32 *)&colorItem->GetColor());
+	rgb_color	tmpNewColor =	colorItem->GetColor();;
+
+	newPattern->ReplaceInt32("FillColor",*(int32 *)&tmpNewColor);
 	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
 
 	BMessage	*selectMessage	= new BMessage();
@@ -760,7 +753,7 @@ void GraphEditor::InsertObject(BPoint where,bool deselect) {
 		where.y=where.y-fmod(where.y,GridWidth());
 	}
 
-	newObject->AddRect("Node::frame",BRect(where,where+BPoint(100,80)));
+	newObject->AddRect("Node::frame",BRect(where,where+BPoint(100,40)));
 	newObject->AddMessage("Node::Font",newFont);
 	newObject->AddMessage("Node::Pattern",newPattern);
 	//preparing CommandMessage
@@ -775,8 +768,13 @@ void GraphEditor::InsertObject(BPoint where,bool deselect) {
 
 void GraphEditor::InsertRenderObject(BMessage *node) {
 	TRACE();
-	Renderer *newRenderer = NULL;
+	AddRenderer(CreateRendererFor(node));
+}
+
+Renderer* GraphEditor::CreateRendererFor(BMessage *node)
+{
 	void	*tmpDoc	= NULL;
+	Renderer *newRenderer = NULL;
 	if (node->FindPointer("ProjectConceptor::doc",&tmpDoc)==B_OK)
 		node->ReplacePointer("ProjectConceptor::doc",doc);
 	else
@@ -793,7 +791,7 @@ void GraphEditor::InsertRenderObject(BMessage *node) {
 		break;
 	}
 	node->AddPointer(renderString,newRenderer);
-	AddRenderer(newRenderer);
+	return newRenderer;
 }
 
 void GraphEditor::AddRenderer(Renderer* newRenderer) {
@@ -808,16 +806,26 @@ void GraphEditor::AddRenderer(Renderer* newRenderer) {
 
 void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
 	TRACE();
+	//** Find the Node for the Renderer check if it has a parent... then remove the renderer also from the nodeList of the Groupparent
 	if (wichRenderer != NULL) {
 		if (activRenderer == wichRenderer)
 			activRenderer = NULL;
 		if (mouseReciver == wichRenderer)
 			mouseReciver = NULL;
-		renderer->RemoveItem(wichRenderer);
 		if (wichRenderer->GetMessage())
 			(wichRenderer->GetMessage())->RemoveName(renderString);
-
-		delete wichRenderer;
+		//check if this rendere belongs to the grapheditor or if not it belongs to a group so the group will take care to remove the renderer from its renderlist
+		ClassRenderer* cRenderer = dynamic_cast <ClassRenderer*>(wichRenderer);
+		if (cRenderer != NULL) {
+			GroupRenderer* gRenderer = (GroupRenderer*)FindRenderer(cRenderer->Parent()) ;
+			if (gRenderer != NULL)
+				gRenderer->RemoveRenderer(wichRenderer);
+		}
+		if (renderer->HasItem(wichRenderer)){	
+			renderer->RemoveItem(wichRenderer);
+			delete wichRenderer;
+			wichRenderer=NULL;
+		}
 	}
 /*	delete rendersensitv;
 	rendersensitv = new BRegion();
@@ -876,19 +884,13 @@ Renderer* GraphEditor::FindConnectionRenderer(BPoint where) {
 }
 
 Renderer* GraphEditor::FindRenderer(BMessage *container) {
-//	int32		i					= 0;
 	Renderer	*currentRenderer	= NULL;
-//	bool		found				= false;
-
-	/*while ((i<renderer->CountItems()) && (!found))
-	{
-		currentRenderer= (Renderer*)renderer->ItemAt(i);
-		if (currentRenderer->GetMessage() == container)
-			found=true;
-		i++;
-	}*/
-	if ( (container->FindPointer(renderString,(void **) &currentRenderer) == B_OK) && (currentRenderer) )
-		return currentRenderer;
+	if (container != NULL)
+		if ( (container->FindPointer(renderString,(void **) &currentRenderer) == B_OK) 
+			&& (currentRenderer) && renderer->HasItem(currentRenderer) )
+			return currentRenderer;
+		else
+			return NULL;
 	else
 		return NULL;
 }
@@ -900,18 +902,17 @@ void GraphEditor::BringToFront(Renderer *wichRenderer) {
 	BMessage	*tmpMessage		= NULL;
 	BList		*groupAllNodeList	= new BList();
 	Renderer	*tmpRenderer		= NULL;
-	
 	if ((tmpMessage = wichRenderer->GetMessage()) != NULL) {
-	    if ((tmpMessage->FindPointer("Node::parent", (void **)&parentNode) == B_OK) && (parentNode != NULL) ) {
-		parentNode->FindPointer(renderString,(void **)&tmpRenderer);
-		if (tmpRenderer)
-			((GroupRenderer *)tmpRenderer)->BringToFront(wichRenderer);
-	    }
+	    /*if ((tmpMessage->FindPointer("Node::parent", (void **)&parentNode) == B_OK) && (parentNode != NULL) ) {
+			parentNode->FindPointer(renderString,(void **)&tmpRenderer);
+			if (tmpRenderer)
+				((GroupRenderer *)tmpRenderer)->BringToFront(wichRenderer);
+	    }*/
 	DeleteFromList(wichRenderer);
 	AddToList(wichRenderer,renderer->CountItems()+1);
 	Invalidate();
 	}
-    }
+   }
 
 
 void GraphEditor::SendToBack(Renderer *wichRenderer) {
@@ -963,11 +964,13 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat)
 	BMessage	*data		    	= new BMessage();
 	int32		i                   = 0;
 	status_t    err                 = B_OK;
+	rgb_color	tmpColor			=colorItem->GetColor();
 	BPoint      where;
+	
 
     data->AddString("Name","Unbenannt");
     //insert new Node here*/
-	newPattern->ReplaceInt32("FillColor",*(int32 *)&colorItem->GetColor());
+	newPattern->ReplaceInt32("FillColor",*(int32 *)&tmpColor);
 	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
     //** we need a good algorithm to find the best rect for this new node we just put it at 100,100**/
 	where = BPoint(100,100);
@@ -1051,44 +1054,44 @@ void GraphEditor::DeleteFromList(Renderer *whichRenderer)
 	BList		*connectionList	= NULL;
 	int32		i				= 0;
 	BMessage	*tmpNode		= NULL;
-	renderer->RemoveItem(whichRenderer);
-	//remove all Connections wich belongs to this node.. so that also the connections  are able to come the from
-	if (whichRenderer->GetMessage()->FindPointer("Node::incoming",(void **)&connectionList) == B_OK)
-	{
-		for (i = 0; i< connectionList->CountItems();i++)
-		{
-			tmpNode = (BMessage *)connectionList->ItemAt(i);
-			renderer->RemoveItem(FindRenderer(tmpNode));
+	if (renderer->HasItem(whichRenderer) == true) {
+		renderer->RemoveItem(whichRenderer);
+		//remove all Connections wich belongs to this node..
+		if (whichRenderer->GetMessage()->FindPointer("Node::incoming",(void **)&connectionList) == B_OK) {
+			for (i = 0; i< connectionList->CountItems();i++) {
+				tmpNode = (BMessage *)connectionList->ItemAt(i);
+				renderer->RemoveItem(FindRenderer(tmpNode));
+			}
 		}
-	}
-	if (whichRenderer->GetMessage()->FindPointer("Node::outgoing",(void **)&connectionList) == B_OK)
-	{
-		for (i = 0; i< connectionList->CountItems();i++)
-		{
-			tmpNode = (BMessage *)connectionList->ItemAt(i);
-			renderer->RemoveItem(FindRenderer(tmpNode));
+		if (whichRenderer->GetMessage()->FindPointer("Node::outgoing",(void **)&connectionList) == B_OK) {
+			for (i = 0; i< connectionList->CountItems();i++) {
+				tmpNode = (BMessage *)connectionList->ItemAt(i);
+				renderer->RemoveItem(FindRenderer(tmpNode));
+			}
 		}
-	}
-	// if the deleted Rendere is a list we need to delete all subrendere too
-	if (whichRenderer->GetMessage()->what == P_C_GROUP_TYPE)
-	{
-		//should we dynamic cast this??
-		GroupRenderer	*groupPainter	= (GroupRenderer *)whichRenderer;
-		for (int32 i = 0; i<groupPainter->RenderList()->CountItems();i++)
-			DeleteFromList((Renderer *)groupPainter->RenderList()->ItemAt(i));
+		// if the deleted Rendere is a list we need to delete all subrendere too
+		if (whichRenderer->GetMessage()->what == P_C_GROUP_TYPE) {
+			GroupRenderer	*groupPainter	= dynamic_cast <GroupRenderer *>(whichRenderer);
+			if (groupPainter != NULL){		
+				int32 gcount= groupPainter->RenderList()->CountItems();
+				for (int32 i = 0; i<gcount;i++)
+					DeleteFromList((Renderer *)groupPainter->RenderList()->ItemAt(i));
+			}
+		}
 	}
 }
 
 void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos) {
 	BList		*connectionList	= NULL;
-	int32		i		= 0;
-	BMessage	*tmpNode	= NULL;
+	int32		i				= 0;
+	BMessage	*tmpNode		= NULL;
+	Renderer	*tmpRenderer	= NULL;
 	if (pos>renderer->CountItems()) {
 		if (whichRenderer->GetMessage()->FindPointer("Node::incoming",(void **)&connectionList) == B_OK) {
 			for (i = 0; i< connectionList->CountItems();i++) {
 				tmpNode = (BMessage *)connectionList->ItemAt(i);
-				if (FindRenderer(tmpNode)) {
-					renderer->AddItem(FindRenderer(tmpNode));
+				if (tmpNode->FindPointer(renderString,(void **) &tmpRenderer) == B_OK) {
+					renderer->AddItem(tmpRenderer);
 					pos++;
 				}
 			}
@@ -1096,8 +1099,8 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos) {
 		if (whichRenderer->GetMessage()->FindPointer("Node::outgoing",(void **)&connectionList) == B_OK) {
 			for (i = 0; i< connectionList->CountItems();i++) {
 				tmpNode = (BMessage *)connectionList->ItemAt(i);
-				if (FindRenderer(tmpNode)) {
-					renderer->AddItem(FindRenderer(tmpNode));
+				if (tmpNode->FindPointer(renderString,(void **) &tmpRenderer) == B_OK) {
+					renderer->AddItem(tmpRenderer);
 					pos++;
 				}
 			}

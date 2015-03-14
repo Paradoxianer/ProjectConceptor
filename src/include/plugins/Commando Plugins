@@ -4,7 +4,11 @@ Commands:
 	Insert
 	Delete
 	Select
+<<<<<<< HEAD
 		- BRect ... die im Rechteck liegenden
+=======
+		- BRect ... select all in the rectangle
+>>>>>>> google-master
 		- All
 		- PointerList
 	Copy
@@ -18,4 +22,8 @@ Commands:
 	Replace
 	
 
+<<<<<<< HEAD
 //** bei  Makro  Zeitsteurung einbauen
+=======
+//** bei  Makro  Zeitsteurung einbauen
+>>>>>>> google-master

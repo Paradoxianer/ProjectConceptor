@@ -10,14 +10,9 @@
 #include <interface/TextControl.h>
 
 //using the ugly stl instead of the nice Zeta templates to make it Haiku ready
-#if defined(__HAIKU__) && __GNUC__ > 3
 #include <vector>
 #include <iterator>
 using namespace std;
-#else
-#include <cpp/vector.h>
-#include <cpp/iterator.h>
-#endif
 
 
 #include "GraphEditor.h"
@@ -60,9 +55,6 @@ public:
 				//++++++Group Special Methods
 			void			AddRenderer(Renderer* newRenderer);
 			void			RemoveRenderer(Renderer* wichRenderer);
-/*			Renderer*		FindRenderer(BPoint where);
-			Renderer*		FindNodeRenderer(BPoint where);
-			Renderer*		FindConnectionRenderer(BPoint where);*/
 			Renderer*		FindRenderer(BMessage *container);
 
 
@@ -70,7 +62,7 @@ public:
 			float			Scale(void){return scale;};
 			BList*			RenderList(void){return renderer;};
 	static	bool			DrawRenderer(void *arg,void *editor);
-			void			RecalcFrame(void);
+			void			RecalcFrame(bool toFit=true);
 
 			void			BringToFront(Renderer *wichRenderer);
 			void			SendToBack(Renderer *wichRenderer);

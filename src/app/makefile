@@ -32,7 +32,12 @@ SRCS= 	About/AboutWindow.cpp \
 		Config/ConfigManager.cpp \
 		Config/ConfigWindow.cpp \
 		Config/ConfigView.cpp \
+		Config/PluginView.cpp \
+		Config/PluginItem.cpp \
+		Config/PluginInfoView.cpp \
 		Config/MessageView.cpp \
+		Config/MessageXmlReader.cpp \
+		Config/MessageXmlWriter.cpp \
 		Commands/PCommand.cpp \
 		Commands/PCommandManager.cpp \
 		Document/PDocument.cpp \
@@ -83,7 +88,7 @@ RSRCS= 	ProjectConceptor.rsrc \
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be root translation tracker
+LIBS= be root translation tracker $(STDCPPLIBS)
 
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
@@ -96,7 +101,7 @@ LIBPATHS=
 #	additional paths to look for system headers
 #	thes use the form: #include <header>
 #	source file directories are NOT auto-included here
-SYSTEM_INCLUDE_PATHS =
+SYSTEM_INCLUDE_PATHS = /boot/system/develop/headers/private/support/
 
 #	additional paths to look for local headers
 #	thes use the form: #include "header"
@@ -120,23 +125,23 @@ LOCAL_INCLUDE_PATHS =	. \
 #	specify any preprocessor symbols to be defined.  The symbols
 #	will be set to a value of 1.  For example specify DEBUG if you want
 #	DEBUG=1 to be set when compiling.
-DEFINES =   DEBUG
+#DEFINES =   DEBUG
 
 #	specify special warning levels
 #	if unspecified default warnings will be used
 #	NONE = supress all warnings
 #	ALL = enable all warnings
-WARNINGS = NONE
+WARNINGS = ALL
 
 #	specify whether image symbols will be created
 #	so that stack crawls in the debugger are meaningful
 #	if TRUE symbols will be created
-SYMBOLS = TRUE
+#SYMBOLS = TRUE
 
 #	specify debug settings
 #	if TRUE will allow application to be run from
 #	a source-level debugger
-DEBUGGER = TRUE
+#DEBUGGER = TRUE
 
 #	specify additional compiler flags for all files
 COMPILER_FLAGS =
@@ -149,9 +154,8 @@ SVG_ICON = ../../Data/Icons/Logogross.svg
 #EXTRA_DEPS = copy
 
 TARGET_DIR	=  .
-OBJ_DIR		= obj.x86
 
-INSTALL_DIR	= /boot/apps/ProjectConceptor
+#INSTALL_DIR	= /boot/apps/ProjectConceptor
 PLUGIN_DIR	= Plugins
 
 
@@ -166,11 +170,11 @@ include $(BUILDHOME)/etc/makefile-engine
 
 
 default .DEFAULT:
-
-	mkdir -p ../../bin
-	cp -rf $(OBJ_DIR)/$(NAME) ../../bin
-	ln -sf $(NAME) ../../bin/ProjectConceptor.a
-
-
+	mkdir -p ../../$(APP_DIR)
+	cp -rf $(NAME) ../../$(APP_DIR)
+	ln -sf $(NAME) ../../$(APP_DIR)/ProjectConceptor.a
+	cp -rf ../.PackageInfo ../../bin
+	mkdir -p ../../bin/data/deskbar/menu/Applications
+	ln -sf ../../../../apps/ProjectConceptor/$(NAME) ../../bin/data/deskbar/menu/Applications
 
 

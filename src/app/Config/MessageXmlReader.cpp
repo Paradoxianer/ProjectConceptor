@@ -54,10 +54,21 @@ BMessage* MessageXmlReader::Read(){
 		TiXmlElement *element =	 doc.FirstChildElement("BMessage");
 		return ProcessXML(element);
 	}
+	return NULL;
 }
 
-BMessage* MessageXmlReader::ReadFile(const BString &fileName){
 
+BMessage* MessageXmlReader::ReadFile(const BString &fileName) {
+   	TiXmlDocument	 doc;
+	doc.LoadFile(fileName.String());
+	if (doc.Error())
+        return NULL;
+	else{
+		TRACE();
+		TiXmlElement *element =	 doc.FirstChildElement("BMessage");
+		return ProcessXML(element);
+	}
+	return NULL;
 }
 
 BMessage* MessageXmlReader::ProcessXML(TiXmlElement *element){

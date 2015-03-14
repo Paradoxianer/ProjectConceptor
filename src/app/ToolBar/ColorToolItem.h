@@ -58,7 +58,7 @@ virtual		void			MouseDown(BPoint point);
 virtual		void			MouseUp(BPoint point);
 virtual		void			Draw(BRect updateRect);
 
-virtual 	status_t		Invoke(BMessage *message = NULL);
+//virtual 	status_t		Invoke(BMessage *message = NULL);
 virtual		BRect			Frame(void) {return BButton::Frame();};
 virtual		void			MoveTo(float x,float y){BButton::MoveTo(x,y);};
 virtual		void			ResizeTo(float width,float height){ResizeTo(width,height);};
@@ -74,5 +74,6 @@ protected:
 			uint32			state;
 			BWindow			*colorWindow;
 			BColorControl	*colorPicker;
+			uint32			oldEventMask;
 };
 #endif

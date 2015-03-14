@@ -21,7 +21,7 @@ public:
 
 	// Vielleicht zur convenience
 	// tut im endeffekt nur obiges
-	static status_t WriteFile(const BString &fileName, const BMessage &message);
+	status_t WriteFile(const BString &fileName, const BMessage &message);
 
 private:
     TiXmlElement	ProcessMessage(BMessage *node);

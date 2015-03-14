@@ -2,8 +2,11 @@
 #include <interface/Font.h>
 #include <interface/View.h>
 #include <interface/GraphicsDefs.h>
-//#include <interface/InterfaceDefs.h>*/
 #include <interface/Window.h>
+#include <storage/Resources.h>
+#include <support/DataIO.h>
+#include <translation/TranslationUtils.h>
+#include <translation/TranslatorFormats.h>
 
 #include <support/String.h>
 #include <math.h>
@@ -35,11 +38,23 @@ void AttributRenderer::Init()
 	TRACE();
 	name		= NULL;
 	value		= NULL;
-	deleter		= NULL;
+	image_info	*info 	= new image_info;
+	size_t		size;
+	delBitmap	= NULL;
 	kontextMenu	= new BPopUpMenu("deleter");
-	BMenuItem	*deleter = new BMenuItem(_T("Delete"),deleteMessage);
-	kontextMenu->AddItem(deleter);
+	BMenuItem	*delMenu = new BMenuItem(_T("Delete"),deleteMessage);
+	kontextMenu->AddItem(delMenu);
 	status_t err = kontextMenu->SetTargetForItems(editor->BelongTo());
+
+	// look up the plugininfos
+	get_image_info(editor->PluginID(),info);
+	// init the ressource for the plugin files
+	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
+	// load the addBool icon
+	const void *data=res->LoadResource((type_code)'PNG ',"delete",&size);
+	if (data)
+		//translate the icon because it was png but we ne a bmp 
+		delBitmap	= BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
 }
 
 void AttributRenderer::SetAttribute(BMessage *newAttribut)
@@ -96,12 +111,12 @@ void AttributRenderer::SetFrame(BRect newRect)
 {
 	TRACE();
 	frame			= newRect;
-	divider			= frame.Width()/3;
+	divider			= (frame.Width()-DELETER_WIDTH)/2;
 	float maxBottom	= frame.bottom;
 	if (name)
 		name->SetFrame(BRect(frame.left,frame.top,frame.left+divider-1,frame.bottom));
 	if (value)
-		value->SetFrame(BRect(frame.left+divider,frame.top,frame.right-DELETER_WIDTH,frame.bottom));
+		value->SetFrame(BRect(frame.left+divider+1,frame.top,frame.right-DELETER_WIDTH,frame.bottom));
 	if ( (name) && (value) )
 	{
 		if (name->Frame().bottom>value->Frame().bottom)
@@ -117,8 +132,8 @@ void AttributRenderer::SetFrame(BRect newRect)
 		else if (value)
 			maxBottom	= value->Frame().bottom;
 	}
-	if (deleter)
-		deleter->SetFrame(BRect(frame.right-DELETER_WIDTH,frame.top,frame.right,maxBottom));
+	delRect.Set(frame.right-DELETER_WIDTH,frame.top,frame.right,maxBottom);
+	delRect.InsetBy(2,2);
 	frame.bottom	= maxBottom;	
 }
 
@@ -144,12 +159,11 @@ void AttributRenderer::MouseDown(BPoint where)
 	{
 		if ( (name) && (name->Caught(where)) )
 			name->MouseDown(where);
-		else if ((deleter) && (deleter->Caught(where)) )
-			deleter->MouseDown(where);
+		else if ((value) && (value->Caught(where)) )
+				value->MouseDown(where);
 		else
 		{
-			if (value)
-				value->MouseDown(where);
+			//it must be klicked in the deleter
 		}
 	}
 }
@@ -166,12 +180,15 @@ void AttributRenderer::MouseUp(BPoint where)
 	{
 		if ( (name) && (name->Caught(where)) )
 			name->MouseUp(where);
-		else if ((deleter) && (deleter->Caught(where)) )
-			deleter->MouseUp(where);
-		else
+		else if ((value) && (value->Caught(where)) )
+			value->MouseUp(where);
+		else 
 		{
-			if (value)
-				value->MouseUp(where);
+			if (delRect.Contains(where)){
+				//it was the deleter
+				BMessenger *sender	= new BMessenger(editor->BelongTo());
+				sender->SendMessage(deleteMessage); 
+			}
 		}
 	}
 }
@@ -182,6 +199,7 @@ void AttributRenderer::MoveBy(float dx, float dy)
 	frame.OffsetBy(dx,dy);
 	name->MoveBy(dx,dy);
 	value->MoveBy(dx,dy);
+	delRect.OffsetBy(dx,dy);
 }
 
 void AttributRenderer::Draw(BView *drawOn, BRect updateRect)
@@ -190,11 +208,14 @@ void AttributRenderer::Draw(BView *drawOn, BRect updateRect)
 		name->Draw(drawOn,updateRect);
 	if (value)
 		value->Draw(drawOn,updateRect);
-	if (deleter)
-		deleter->Draw(drawOn,updateRect);
-	/*rgb_color stored = drawOn->HighColor();
+	/*if (deleter)
+		deleter->Draw(drawOn,updateRect);*/
+	if (delBitmap)
+		drawOn->DrawBitmapAsync(delBitmap,delRect);
+	rgb_color stored = drawOn->HighColor();
 	drawOn->SetHighColor(60,50,50,255);
+	drawOn->StrokeRect(frame);
 	drawOn->StrokeLine(BPoint(frame.left+divider,frame.top),BPoint(frame.left+divider,frame.bottom));
-	drawOn->SetHighColor(stored);*/
+	drawOn->SetHighColor(stored);
 }
 

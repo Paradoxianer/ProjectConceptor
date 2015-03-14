@@ -111,6 +111,7 @@ status_t PEditorManager::RegisterPEditor(PEditor *editor)
 				
 				if ( ((editor->GetHandler())->Looper() == NULL) && (doc->Lock()) )
 				{			
+					//** add the Handler from the Plugin
 					doc->AddHandler(editor->GetHandler());
 					doc->Unlock();	
 				}

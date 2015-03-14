@@ -26,7 +26,7 @@ class PDocument;
  * the posibility to edit the value of the individual BMessage
  *
  * @author Paradoxon powered by Jesus Christ
- * @version 0.01
+ * @version 0.02
  * @date 2005/10/04
  * @Contact: mail@projectconceptor.de
  *
@@ -102,8 +102,9 @@ public:
 	virtual BView*			GetPrintView(void) {return NULL;};
 
 	/**
-	 * if the Editor is an View it returns the pointer to the view (this pointer)
+	 * if the Editor is an View, this should not return a link to the BView Handler.
 	 * else it shoud be the pointer to the handler for the Editor (e.g. a Network Client)
+	 * this handler will be added to the PDocument and will informed about all Document Messages
 	 */
 	virtual BHandler*		GetHandler(void) 				= 0;
 	/**

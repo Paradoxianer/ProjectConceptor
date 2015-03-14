@@ -14,8 +14,6 @@
 /**
  * @class AboutWindow
  * @brief Implementaion of the About window from ProjectConceptor
- * @todo implemt the hole class
- * @bug dont work :-)
  */
 class AboutWindow: public BWindow
 {

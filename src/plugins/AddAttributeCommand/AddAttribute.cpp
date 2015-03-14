@@ -129,7 +129,7 @@ void AddAttribute::DoAddAttribute(PDocument *doc, BMessage *node, BMessage *valu
 		subGroup->RemoveData(name,lastIndex);
 	}
 	else
-		subGroup->AddData(name,type,newValue,size);
+		subGroup->AddData(name,type,newValue,size,false);
 	for (i=subGroupList->CountItems()-1;i>0;i--)
 	{
 		tmpSubGroup = (BMessage *)subGroupList->ItemAt(i-1);

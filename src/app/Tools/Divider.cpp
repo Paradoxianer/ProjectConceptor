@@ -256,7 +256,6 @@ Divider::MoveBy(float x, float y)
 		// Look MoveByX for explanations
 		if (((Frame().top + (y - 1)) > fFirstView->Frame().top)&&((Frame().bottom + y + 1) < fSecondView->Frame().bottom)) {
 			BBox::MoveBy(0,y);
-			Frame().bottom = Frame().bottom + y;
 			Invalidate();
 			fFirstView->ResizeBy(0,((Frame().top - 1) - fFirstView->Frame().bottom));
 			fSecondView->ResizeBy(0,(fSecondView->Frame().top - (Frame().bottom + 1)));

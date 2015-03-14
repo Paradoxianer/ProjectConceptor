@@ -7,14 +7,12 @@
 #include <stdio.h>
 
 
-ConnectionRenderer::ConnectionRenderer(GraphEditor *parentEditor, BMessage *forContainer):Renderer(parentEditor, forContainer)
-{
+ConnectionRenderer::ConnectionRenderer(GraphEditor *parentEditor, BMessage *forContainer):Renderer(parentEditor, forContainer) {
 	TRACE();
 	Init();
 }
 
-void ConnectionRenderer::Init()
-{
+void ConnectionRenderer::Init() {
 	TRACE();
 	from			= NULL;
 	to				= NULL;
@@ -35,22 +33,19 @@ void ConnectionRenderer::Init()
 	container->FindPointer("Node::to",(void **)&toNode);
 	PRINT_OBJECT(*fromNode);
 	PRINT_OBJECT(*toNode);
-	if (fromNode->FindPointer("Node::outgoing",(void **)&outgoing) != B_OK)
-	{
+	if (fromNode->FindPointer("Node::outgoing",(void **)&outgoing) != B_OK) {
 		outgoing = new BList();
 		fromNode->AddPointer("Node::outgoing",outgoing);
 	}
 	if (!outgoing->HasItem(container))
 		outgoing->AddItem(container);
-	if (toNode->FindPointer("Node::incoming",(void **)&incoming) != B_OK)
-	{
+	if (toNode->FindPointer("Node::incoming",(void **)&incoming) != B_OK) {
 		incoming = new BList();
 		toNode->AddPointer("Node::incoming",incoming);
 	}
 	if (!incoming->HasItem(container))
 		incoming->AddItem(container);
-	if (container->FindMessage("Node::Data",data) != B_OK)
-	{
+	if (container->FindMessage("Node::Data",data) != B_OK) {
 		data->AddString("Name","Unbenannt");
 		container->AddMessage("Node::Data",data);
 	}
@@ -62,8 +57,7 @@ void ConnectionRenderer::Init()
 	ValueChanged();
 }
 
-void ConnectionRenderer::MouseDown(BPoint where)
-{
+void ConnectionRenderer::MouseDown(BPoint where) {
 	uint32 buttons = 0;
 	BMessage *currentMsg = editor->Window()->CurrentMessage();
 	currentMsg->FindInt32("buttons", (int32 *)&buttons);
@@ -73,14 +67,12 @@ void ConnectionRenderer::MouseDown(BPoint where)
 	float newx	= where.y*ay+my;
 	float dx	= (newx-where.x);
 	float dy	= (newy-where.y);
-	if ((dx*dx+dy*dy)<max_entfernung)
-	{
+	if ((dx*dx+dy*dy)<max_entfernung) {
 		if (buttons & B_PRIMARY_MOUSE_BUTTON)
 			editor->BringToFront(this);
 		else if (buttons & B_SECONDARY_MOUSE_BUTTON )
 			editor->SendToBack(this);
-		if  (!selected)
-		{
+		if  (!selected)  {
 			BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
 			if  ((modifiers & B_SHIFT_KEY) != 0)
 				selectMessage->AddBool("deselect",false);
@@ -90,19 +82,17 @@ void ConnectionRenderer::MouseDown(BPoint where)
 		}
 	}
 }
-void ConnectionRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
-{
-}
-void ConnectionRenderer::MouseUp(BPoint where)
-{
+
+void ConnectionRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
 }
 
-void ConnectionRenderer::LanguageChanged()
-{
+void ConnectionRenderer::MouseUp(BPoint where) {
 }
 
-void ConnectionRenderer::Draw(BView *drawOn, BRect updateRect)
-{
+void ConnectionRenderer::LanguageChanged() {
+}
+
+void ConnectionRenderer::Draw(BView *drawOn, BRect updateRect) {
 
 	//ValueChanged();
 	CalcLine();
@@ -117,10 +107,8 @@ void ConnectionRenderer::Draw(BView *drawOn, BRect updateRect)
 
 }
 
-void ConnectionRenderer::MessageReceived(BMessage *message)
-{
-	switch(message->what)
-	{
+void ConnectionRenderer::MessageReceived(BMessage *message) {
+	switch(message->what) {
 		case P_C_VALUE_CHANGED:
 				ValueChanged();
 			break;
@@ -135,8 +123,7 @@ void ConnectionRenderer::MessageReceived(BMessage *message)
 	}
 }
 
-void ConnectionRenderer::ValueChanged()
-{
+void ConnectionRenderer::ValueChanged() {
 	BMessage	*tmpNode	= NULL;
 	container->FindPointer("Node::from",(void **)&tmpNode);
 	tmpNode->FindPointer(editor->RenderString(),(void **)&from);
@@ -148,15 +135,13 @@ void ConnectionRenderer::ValueChanged()
 	container->FindInt8("Node::type", (int8 *)&connectionType);
 }
 
-void ConnectionRenderer::CalcLine()
-{
+void ConnectionRenderer::CalcLine() {
 	BRect	*fromRect	= new BRect(from->Frame());
 	BRect	*toRect		= new BRect(to->Frame());
 	float	toMiddleX 	=	(toRect->right-toRect->left)/2;
 	float	toMiddleY	=	(toRect->bottom-toRect->top)/2;
 	alpha		= atan2((toRect->top-fromRect->top),(toRect->left-fromRect->left));
-	if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) )
-	{
+	if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) ) {
 		first		= BPoint(toRect->right+circleSize,toRect->top+toMiddleY-circleSize);
 		second		= BPoint(first.x,toRect->top+toMiddleY+circleSize);
 		third		= BPoint(toRect->right,toRect->top+toMiddleY);
@@ -168,8 +153,7 @@ void ConnectionRenderer::CalcLine()
 		secondBend.x	= toPoint.x + bendLength;
 		secondBend.y	= toPoint.y;
 	}
-	else if (alpha < -M_PI_4)
-	{
+	else if (alpha < -M_PI_4) {
 		first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->bottom+circleSize);
 		second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->bottom+circleSize);
 		third		= BPoint(toRect->left+toMiddleX,toRect->bottom);
@@ -181,8 +165,7 @@ void ConnectionRenderer::CalcLine()
 		secondBend.x	= toPoint.x;
 		secondBend.y	= toPoint.y + bendLength;
 	}
-	else if (alpha> M_PI_4)
-	{
+	else if (alpha> M_PI_4) {
 		first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->top-circleSize);
 		second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->top-circleSize);
 		third		= BPoint(toRect->left+toMiddleX,toRect->top);
@@ -195,8 +178,7 @@ void ConnectionRenderer::CalcLine()
 		secondBend.y	= toPoint.y - bendLength;
 
 	}
-	else
-	{
+	else {
 		first		= BPoint(toRect->left-circleSize,toRect->top+toMiddleY-circleSize);
 		second		= BPoint(toRect->left-circleSize,toRect->top+toMiddleY+circleSize);
 		third		= BPoint(toRect->left,toRect->top+toMiddleY);
@@ -208,14 +190,6 @@ void ConnectionRenderer::CalcLine()
 		secondBend.x	= toPoint.x - bendLength;
 		secondBend.y	= toPoint.y;
 	}
-//	fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2);
-	/*fromPoint	= toPoint;
-	fromPoint.ConstrainTo(*fromRect);
-	ax			= (toPoint.y-fromPoint.y)/(toPoint.x-fromPoint.x);
-	mx			= fromPoint.y-(fromPoint.x*ax);
-	ay			= (toPoint.x-fromPoint.x)/(toPoint.y-fromPoint.y);
-	my			= fromPoint.x-(fromPoint.y*ay);*/
-
 }
 
 
@@ -226,20 +200,19 @@ BRect ConnectionRenderer::Frame()
 	float	right	= toPoint.x;
 	float	bottom	= toPoint.y;
 	float	c;
-	if (left>right)
-	{
+	if (left>right) 	{
 		c		= right;
 		right	= left;
 		left	= c;
 	}
-	if (top>bottom)
-	{
+	if (top>bottom) {
 		c		= top;
 		top		= bottom;
 		bottom	= c;
 	}
 	return BRect(left,top,right,bottom);
 }
+
 bool ConnectionRenderer::Caught(BPoint where){
 	float newy	= (double)where.x*ax+mx;
 	float newx	= (double)where.y*ay+my;
@@ -249,16 +222,6 @@ bool ConnectionRenderer::Caught(BPoint where){
 		return true;
 	else
 		return false;
-/*	float newx	= (where.x-fromPoint.x)*cos(alpha)+fromPoint.x;
-	float newy	= (where.y-fromPoint.y)*sin(alpha)+fromPoint.y;
-	printf("newx=%0.3lf\tnewy=%0.3lf\n",newx,newy);
-	float dx	= newx-where.x;
-	float dy	= newy-where.y;
-	printf("dx=%0.3lf\tdy=%0.3lf\n",dx,dy);
-	if ((dx*dx+dy*dy)<max_entfernung)
-		return true;
-	else
-		return false;*/
 }
 
 void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){

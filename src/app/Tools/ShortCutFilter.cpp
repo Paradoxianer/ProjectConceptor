@@ -1,10 +1,11 @@
 #include <app/Handler.h>
 #include <app/Looper.h>
+#include <support/Debug.h>
 
 #include "ShortCutFilter.h"
 
 
-ShortCutFilter::ShortCutFilter(BMessage* shortcutList):BMessageFilter(B_PROGRAMMED_DELIVERY,B_LOCAL_SOURCE)
+ShortCutFilter::ShortCutFilter(BMessage* shortcutList):BMessageFilter(B_ANY_DELIVERY,B_ANY_SOURCE)
 {
 	shortcutMap= map<uint32, shortcut*>();
 	AddShortCutList(shortcutList);
@@ -32,22 +33,19 @@ filter_result ShortCutFilter::Filter(BMessage *message, BHandler **target)
 	uint32		modifiers;
 	shortcut	*theShortcut	= NULL;
 	target = target;
-	switch(message->what) 
+	if (message->what == B_KEY_DOWN)
 	{
-		case B_KEY_DOWN:
+		if (message->FindInt32("raw_char",(int32 *)&key) == B_OK)
 		{
-			if (message->FindInt32("raw_char",(int32 *)&key) == B_OK)
+			message->FindInt32("modifiers",(int32 *)&modifiers);
+			BMessage	*sendMessage	= NULL;
+			theShortcut	= shortcutMap[key];
+			if (theShortcut != NULL)
 			{
-				message->FindInt32("modifiers",(int32 *)&modifiers);
-				BMessage	*sendMessage	= NULL;
-				theShortcut	= shortcutMap[key];
-				if (theShortcut != NULL)
+				if ( (theShortcut->modifiers == 0) || ((theShortcut->modifiers & modifiers) != 0 ) )
 				{
-					if ( (theShortcut->modifiers == 0) || ((theShortcut->modifiers & modifiers) != 0 ) )
-					{
-						sendMessage	= theShortcut->sendMessage;
-						theShortcut->sentTo->SendMessage(sendMessage);
-					}
+					sendMessage	= theShortcut->sendMessage;
+					theShortcut->sentTo->SendMessage(sendMessage);
 				}
 			}
 		}

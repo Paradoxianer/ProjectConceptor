@@ -27,10 +27,6 @@
  * the ConfigWindow simply pass the BMessage to a ConfigView
  * @see CionfigView
  *
- * @todo implemt the hole class
- * @todo define the complete interface ;-(
- *
- * @bug dont work :-)
  */
 
 class ConfigWindow : public BWindow

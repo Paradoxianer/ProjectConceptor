@@ -111,5 +111,5 @@ include $(BUILDHOME)/etc/makefile-engine
 
 default .DEFAULT:
 	mkdir -p ../../../bin/Plugins/Translators
-	cp -rf obj.x86/$(NAME) ../../../bin/Plugins/Translators
+	cp -rf  $(OBJ_DIR)/$(NAME) ../../../bin/Plugins/Translators
 	

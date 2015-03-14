@@ -9,12 +9,8 @@
 #include <support/List.h>
 #include <support/String.h>
 
-#if defined(__HAIKU__) && __GNUC__ > 3
 #include <map>
 using namespace std;
-#else
-#include <cpp/map.h>
-#endif
 
 #ifdef B_ZETA_VERSION_1_0_0
 	#include <locale/Locale.h>

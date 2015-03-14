@@ -35,7 +35,7 @@ public:
 			void			ValueChanged(void){};
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetString(char *newString);
-			char*			GetString(void){return string;};
+			char*			GetString(void){return myString;};
 			void			MouseDown(BPoint where);
 			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg){};
 
@@ -53,7 +53,7 @@ protected:
 		BMessage			*changeMessage;
 		GraphEditor 		*editor;
 		BRect				frame;
-		char				*string;
+		char				*myString;
 		BString				*shortString;
 		BFont				*editorFont;
 		float				fontHeight;

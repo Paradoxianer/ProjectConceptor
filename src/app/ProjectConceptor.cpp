@@ -153,18 +153,18 @@ ProjektConceptor::~ProjektConceptor() {
 void ProjektConceptor::ReadyToRun() {
 	TRACE();
 	//creat settingsfolder
-	BPath settings;
+	BPath		settings;
+	status_t	err				= B_OK;
+	BDirectory	*settingsDir	= NULL;
+	
 	find_directory(B_USER_SETTINGS_DIRECTORY, &settings, true);
-	char p[PATH_MAX];
-	BDirectory *settingsDir = new BDirectory(settings.Path());
-	status_t err= B_OK;
+	settingsDir = new BDirectory(settings.Path());
 	err = settingsDir->CreateDirectory("ProjectConceptor", NULL);
 	err = settingsDir->SetTo(settingsDir, "ProjectConceptor");
 	settings.SetTo(settingsDir, "GeneralSettings");
 	ConfigManager		*configManager = new ConfigManager((char *)settings.Path());
 	configManager->LoadDefaults();
 	err = settingsDir->CreateDirectory("AutoSave", NULL);
-
 }
 
 /**

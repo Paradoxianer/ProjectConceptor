@@ -6,6 +6,7 @@
 #include <app/Message.h>
 #include <app/Messenger.h>
 
+#include <interface/Bitmap.h>
 #include <interface/Menu.h>
 #include <interface/MenuItem.h>
 #include <interface/PopUpMenu.h>
@@ -27,7 +28,7 @@
 	#define _T(a) a
 #endif 
 
-const float		DELETER_WIDTH		= 10;
+const float		DELETER_WIDTH		= 16;
 class AttributRenderer: public Renderer
 {
 
@@ -56,11 +57,14 @@ protected:
 		BMessage			*deleteMessage;
 		GraphEditor 		*editor;
 		BRect				frame;
+		BRect				delRect;
 		StringRenderer		*name;
 		Renderer			*value;
-		Renderer			*deleter;
+		//Renderer			*deleter;
 		float				divider;
 		BPopUpMenu			*kontextMenu;
+		BBitmap				*delBitmap;
+		
 private:
 };
 #endif

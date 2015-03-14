@@ -3,10 +3,10 @@
 #include <support/String.h>
 
 #include "MessageView.h"
-#include "ColorItem.h"
-#include "FontItem.h"
-#include "PatternItem.h"
-#include "RectItem.h"
+//#include "ColorItem.h"
+//#include "FontItem.h"
+//#include "PatternItem.h"
+//#include "RectItem.h"
 
 #include "ProjectConceptorDefs.h"
 
@@ -64,7 +64,7 @@ void MessageView::ValueChanged(void)
 				stringItem->SetMessage(tmpMessage);
 				break;
 			}
-			case B_RECT_TYPE:
+			/*case B_RECT_TYPE:
 			{
 				BRect	valueRect;
 				configMessage->FindRect(name,count-1,&valueRect);
@@ -76,7 +76,7 @@ void MessageView::ValueChanged(void)
 				tmpMessage->AddInt32("type",type);
 				rectItem->SetMessage(tmpMessage);
 				break;
-			}
+			}*/
 			case B_FLOAT_TYPE:
 			{
 				float	value;

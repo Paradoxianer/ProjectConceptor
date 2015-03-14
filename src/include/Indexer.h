@@ -5,12 +5,8 @@
 #include <storage/Entry.h>
 #include <storage/File.h>
 #include <support/List.h>
-#if defined(__HAIKU__) && __GNUC__ > 3
 #include <map>
 using namespace std;
-#else
-#include <cpp/map.h>
-#endif
 
 class PDocument;
 class PluginManager;

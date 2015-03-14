@@ -1267,8 +1267,8 @@ void TiXmlAttribute::SetDoubleValue( double _value )
 	char buf [256];
 	#if defined(TIXML_SNPRINTF)		
 		TIXML_SNPRINTF( buf, sizeof(buf), "%lf", _value);
-	#else
-		sprintf (buf, "%lf", _value);
+		sprintf (buf, "%f", _value);
+
 	#endif
 	SetValue (buf);
 }

@@ -35,34 +35,15 @@ void Delete::Undo(PDocument *doc,BMessage *undo) {
 }
 
 BMessage* Delete::Do(PDocument *doc, BMessage *settings) {
-/*	BMessage	*node				= new BMessage();
-	BMessage	*commandMessage		= PCommand::Do(doc,settings);
-	BList		*parentGroupList	= NULL;
-	BMessage	*connection			= new BMessage();
-	int32		i					= 0;
-	while (settings->FindPointer("node",i,(void **)&node))
-	{
-		if (settings->FindPointer("parentGroupList",i,(void **)&parentGroupList))
-			parentGroupList->RemoveItem(node);
-		else
-			(doc->GetAllNodes())->RemoveItem(node);
-		i++;
-	}
-	i = 0;
-	while (settings->FindPointer("connection",i,(void **)&connection))
-	{
-		i++;
-		(doc->GetAllConnections())->RemoveItem(connection);
-	}
-	return commandMessage;*/
-	//**Todo
 	BMessage		*undoMessage		= new BMessage();
 	BList			*selected			= doc->GetSelected();
 	BList			*connections		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();
-	set<BMessage*>		*changed			= doc->GetChangedNodes();
+	BList			*gallNodes			= NULL;
+	set<BMessage*>	*changed			= doc->GetChangedNodes();
 	BMessage		*node				= NULL;
 	BMessage		*connection			= NULL;
+	BMessage		*parent				= NULL;
 	BList			*outgoing			= NULL;
 	BList			*incoming			= NULL;
 	int32			i					= 0;
@@ -72,7 +53,7 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings) {
 		changed->insert(node);
 		undoMessage->AddPointer("node",node);
 		if (node->FindPointer("Node::outgoing",(void **)&outgoing) == B_OK) {
-			for (int32 i=0;i<outgoing->CountItems();i++) {
+			for (i=0;i<outgoing->CountItems();i++) {
 				connection= (BMessage *)outgoing->ItemAt(i);
 				connections->RemoveItem(connection);
 				changed->insert(connection);
@@ -80,11 +61,29 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings) {
 			}
 		}
 		if (node->FindPointer("Node::incoming",(void **)&incoming) == B_OK) {
-			for (int32 i=0;i<incoming->CountItems();i++) {
+			for (i=0;i<incoming->CountItems();i++) {
 				connection= (BMessage *)incoming->ItemAt(i);
 				connections->RemoveItem(connection);
 				changed->insert(connection);
 				undoMessage->AddPointer("node",connection);
+			}
+		}
+		//** find all NOdes wich belong to a group and delete them - korrekt the undopart??
+		if  (node->what == P_C_GROUP_TYPE){
+			if (node->FindPointer("Node::allNodes", (void **)&gallNodes) == B_OK)
+				for (i=0; i< gallNodes->CountItems(); i++){
+					allNodes->RemoveItem(gallNodes->ItemAt(i));
+					connections->RemoveItem(gallNodes->ItemAt(i));
+					changed->insert((BMessage*)gallNodes->ItemAt(i));
+					undoMessage->AddPointer("node",gallNodes->ItemAt(i));
+					//***somehow store the grouping...
+				}
+		}
+		if (node->FindPointer("Parent",(void **)&parent) != B_OK && parent != NULL) {
+			if (parent->FindPointer("Node::allNodes", (void **)&gallNodes) == B_OK && gallNodes != NULL){
+				gallNodes->RemoveItem(node);
+				changed->insert(parent);
+				//** do the undopart
 			}
 		}
 	}

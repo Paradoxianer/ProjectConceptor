@@ -90,7 +90,7 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 				}
 				delete tmpSubGroup;
 				selectNodes->FindData("oldValue",type,i,(const void **)&oldValue,&oldSize);
-				subGroup->ReplaceData(name,type,index,oldValue,oldSize);
+				err = subGroup->ReplaceData(name,type,index,oldValue,oldSize);
 				for (j=subGroupList->CountItems()-1;j>0;j--)
 				{
 					tmpSubGroup = (BMessage *)subGroupList->ItemAt(j-1);
@@ -153,13 +153,13 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 			delete tmpSubGroup;
 			subGroup->FindData(name,type,index,(const void **)&oldValue,&oldSize);
 			undoMessage->AddData("oldValue",type,oldValue,oldSize,false);
-			subGroup->ReplaceData(name,type,index,newValue,size);
+			err = subGroup->ReplaceData(name,type,index,newValue,size);
 			for (j=subGroupList->CountItems()-1;j>0;j--)
 			{
 				tmpSubGroup = (BMessage *)subGroupList->ItemAt(j-1);
 				valueContainer->FindString("subgroup",j-1,(const char**)&subGroupName);
 				if (tmpSubGroup)
-					tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(j));
+					err=tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(j));
 				delete subGroupList->RemoveItem(j);
 			}
 			changed->insert(node);
@@ -193,8 +193,8 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 				}
 				delete tmpSubGroup;
 				subGroup->FindData(name,type,index,(const void **)&oldValue,&oldSize);
-				selectedNodes->AddData("oldValue",type,oldValue,oldSize,false);
-				subGroup->ReplaceData(name,type,index,newValue,size);
+				err = selectedNodes->AddData("oldValue",type,oldValue,oldSize,false);
+				err = subGroup->ReplaceData(name,type,index,newValue,size);
 				for (j=subGroupList->CountItems()-1;j>0;j--) {
 					tmpSubGroup = (BMessage *)subGroupList->ItemAt(j-1);
 					valueContainer->FindString("subgroup",j-1,(const char**)&subGroupName);

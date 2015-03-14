@@ -34,7 +34,7 @@ void ConfigView::Init(){
    //row 2
    gridLayout->AddItem(textControl->CreateLabelLayoutItem(), 0, 1);
    gridLayout->AddItem(textControl->CreateTextViewLayoutItem(), 1, 1);
-   gridLayout->SetInsets(10,10,10,10);
+   gridLayout->AddItem(BSpaceLayoutItem::CreateGlue(),0,2);
 }
 
 void ConfigView::ChangeLanguage(){

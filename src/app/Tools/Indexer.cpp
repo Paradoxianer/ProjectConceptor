@@ -261,7 +261,7 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 		}
 	}
 	node->PrintToStream();
-	return node;
+	return RegisterDeIndexNode(node);;
 }
 
 BMessage* Indexer::DeIndexConnection(BMessage *connection)

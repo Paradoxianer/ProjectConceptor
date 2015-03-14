@@ -1,4 +1,4 @@
-Insert Protokoll
+Select Protokoll
 settings
 	|-Pointer "node"			-- a BMessage or whatever.. :-) but a node to insert
 	|-Pointer "parentGroup"		-- must be a BList Object to wich one the Node shoud be added :-)

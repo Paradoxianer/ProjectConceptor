@@ -6,8 +6,8 @@
 #include "FloatToolItem.h"
 #include "ToolBar.h"
 
-FloatToolItem::FloatToolItem(const char *name, float newValue,BMessage *msg):BButton(BRect(0,0,ITEM_WIDTH*4,ITEM_HEIGHT),name,"",msg), BaseItem(name)
-{
+FloatToolItem::FloatToolItem(const char *name, float newValue,BMessage *msg)
+			  :BButton(BRect(0,0,ITEM_WIDTH*4,ITEM_HEIGHT),name,"",msg), BaseItem(name) {
 	Init();
 	value			= newValue;
 	tName 			= name;
@@ -19,8 +19,8 @@ FloatToolItem::FloatToolItem(const char *name, float newValue,BMessage *msg):BBu
 	float moveToY=(Bounds().Height()-textValue->Bounds().Height())/2;
 	textValue->MoveTo(textValue->Frame().left,moveToY);
 	AddChild(textValue);
-//	SetMessage(msg);
 }
+
 FloatToolItem::FloatToolItem(BMessage *archive):BButton(archive),BaseItem("")
 {
 	status_t	err;
@@ -35,7 +35,8 @@ FloatToolItem::FloatToolItem(BMessage *archive):BButton(archive),BaseItem("")
 	err = archive->FindString("FloatToolItem::description",description);
 	err = archive->FindString("FloatToolItem::toolTip",toolTip);
 	BMessenger tmpMessenger;
-	err = archive->FindMessenger("FloatToolItem::Messenger()",&tmpMessenger);	//**nachtragen shadow_offset_by..
+	err = archive->FindMessenger("FloatToolItem::Messenger()",&tmpMessenger);	
+	//**nachtragen shadow_offset_by..
 	if (err == B_OK)
 		SetTarget(tmpMessenger);	
 }
@@ -48,8 +49,10 @@ void FloatToolItem::Init(void)
 
 FloatToolItem::~FloatToolItem(void)
 {
-	if (description!=NULL) delete description;
-	if (toolTip!=NULL) delete toolTip;
+	if (description != NULL)
+		delete description;
+	if (toolTip != NULL)
+		delete toolTip;
 }
 
 void FloatToolItem::AttachedToToolBar(ToolBar *tb)

@@ -36,7 +36,7 @@ PDocument::PDocument(PDocumentManager *initManager):BLooper()
 PDocument::PDocument(PDocumentManager *initManager,entry_ref *openEntry):BLooper()
 {
 	TRACE();
-	PRINT(("%d\n",openEntry));
+	PRINT(("%s\n",openEntry->name));
 	documentManager=initManager;
 	Run();
 	Init();
@@ -126,10 +126,7 @@ void PDocument::MessageReceived(BMessage* message) {
 	TRACE();
 	switch(message->what) {
 		case MENU_FILE_SAVE: {
-			if (entryRef == NULL)
-				SavePanel();
-			else
-				Save();
+			Save();
 			break;
 		}
 		case MENU_FILE_SAVEAS: {
@@ -203,6 +200,17 @@ void PDocument::MessageReceived(BMessage* message) {
 		case P_C_RESTORE_SAVE: {
 			//for the Moment we use autosave ;-)
 			AutoSave();
+			break;
+		}
+		case MENU_SEARCH_FIND:
+		{
+			BString		*searchString	= new BString();
+			BMessage	*searchMessage	= new BMessage(P_C_EXECUTE_COMMAND);
+			searchMessage->AddString("Command::Name","Find");
+			if (message->FindString("searchString",searchString)==B_OK)
+				searchMessage->AddString("searchString",*searchString);
+		//	searchMessage->AddBool("shadow",true);
+			commandManager->Execute(searchMessage);
 			break;
 		}
 
@@ -514,6 +522,8 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 void PDocument::Save(void)
 {
 	TRACE();
+	if (entryRef == NULL)
+		SavePanel();
 	status_t err 				= B_OK;
 	BTranslatorRoster	*roster				= BTranslatorRoster::Default();
 	BMessage			*archived			= new BMessage();
@@ -575,7 +585,7 @@ void PDocument::Save(void)
 			window->SetTitle(Title());
 	}
 	else
-		PRINT(("ERROR:\tPDocument","Save error %s\n",strerror(err)));
+		PRINT(("ERROR:\tPDocument -Save error %s\n",strerror(err)));
 	if (locked)
 		Unlock();
 }
@@ -678,6 +688,7 @@ bool PDocument::QuitRequested(void)
 		else
 		{
 			Save();
+			Unlock();
 			returnValue	= true;
 		}
 		if (readLock)

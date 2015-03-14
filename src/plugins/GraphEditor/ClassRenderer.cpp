@@ -63,40 +63,33 @@ void ClassRenderer::Init()
 }
 
 
-void ClassRenderer::MouseDown(BPoint where)
-{
+void ClassRenderer::MouseDown(BPoint where) {
 	bool		found			= false;
 	Renderer*	tmpRenderer		= NULL;
-	if (name->Caught(where))
-	{
+	if (name->Caught(where)) {
 		name->MouseDown(where);
 		found	= true;
 	}
-	for (int32 i = 0; (found == false) && (i < attributes->size());i++)
-	{
+	for (int32 i = 0; (found == false) && (i < attributes->size());i++) {
 		tmpRenderer=(*attributes)[i];
-		if (tmpRenderer->Caught(where))
-		{
+		if (tmpRenderer->Caught(where)) {
 			found = true;
 			tmpRenderer->MouseDown(where);
 		}
 	}
 
-	if ((!found) && (startMouseDown == NULL))
-	{
+	if ((!found) && (startMouseDown == NULL)) {
 		uint32 buttons = 0;
 		uint32 modifiers = 0;
 		BMessage *currentMsg = editor->Window()->CurrentMessage();
 		currentMsg->FindInt32("buttons", (int32 *)&buttons);
 		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
-		if (buttons & B_PRIMARY_MOUSE_BUTTON)
-		{
+		if (buttons & B_PRIMARY_MOUSE_BUTTON) {
 			editor->BringToFront(this);
 			startMouseDown	= new BPoint(where);
 			startLeftTop	= new BPoint(frame.LeftTop());
 			editor->SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
-			if  (!selected)
-			{
+			if  (!selected) {
 				BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
 				if  ((modifiers & B_SHIFT_KEY) != 0)
 					selectMessage->AddBool("deselect",false);
@@ -104,20 +97,6 @@ void ClassRenderer::MouseDown(BPoint where)
 				selectMessage->AddString("Command::Name","Select");
 				sentTo->SendMessage(selectMessage);
 			}
-			/*float	yOben	= frame.top+frame.Height()/2 - circleSize;
-			float	yUnten	= yOben + (circleSize*2);
-			if ((where.y>=yOben)&&(where.y<=yUnten))
-			{
-				if ((where.x >= frame.left)&&(where.x <= (frame.left+(circleSize*2))))
-				{
-					connecting=1;
-				}
-				else if ((where.x >= frame.right-(circleSize*2))&&(where.x <= frame.right))
-				{
-					//then the user hit the "output-connecting-triangle "
-					connecting=2;
-				}
-			}*/
 			if (leftConnection.Contains(where))
 				connecting	= 1;
 			else if (topConnection.Contains(where))
@@ -126,8 +105,7 @@ void ClassRenderer::MouseDown(BPoint where)
 				connecting	= 3;
 			else if (bottomConnection.Contains(where))
 				connecting	= 4;
-			else if ( (where.y >= (frame.bottom-circleSize)) && (where.x >= (frame.right-circleSize)) )
-			{
+			else if ( (where.y >= (frame.bottom-(2*circleSize))) && (where.x >= (frame.right-(2*circleSize))) ) {
 				resizing = true;
 			}
 		}
@@ -135,18 +113,14 @@ void ClassRenderer::MouseDown(BPoint where)
 			editor->SendToBack(this);
 	}
 }
-void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
-{
-	if (startMouseDown)
-	{
-		if (connecting == 0)
-		{
+void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
+	if (startMouseDown) {
+		if (connecting == 0) {
 			float dx	= 0;
 			float dy	= 0;
 			if (!oldPt)
 				oldPt	= startMouseDown;
-			if (editor->GridEnabled())
-			{
+			if (editor->GridEnabled()) {
 
 				float newPosX = startLeftTop->x + (pt.x-startMouseDown->x);
 				float newPosY = startLeftTop->y + (pt.y-startMouseDown->y);
@@ -155,38 +129,31 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 				dx = newPosX - frame.left;
 				dy = newPosY -frame.top ;
 			}
-			else
-			{
+			else {
 				dx = pt.x - oldPt->x;
 				dy = pt.y - oldPt->y;
 			}
 			oldPt	= new BPoint(pt);
-			if (!resizing)
-			{
+			if (!resizing) {
 				BPoint	deltaPoint(dx,dy);
 				BList *renderer	= editor->RenderList();
-				for (int32 i=0;i<renderer->CountItems();i++)
-				{
+				for (int32 i=0;i<renderer->CountItems();i++) {
 					MoveAll(renderer->ItemAt(i),dx,dy);
 				}
-				if (parentNode)
-				{
+				if (parentNode) {
 					GroupRenderer	*parent	= NULL;
 					if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
 						parent->RecalcFrame();
 				}
 				editor->Invalidate();
 			}
-			else
-			{
+			else {
 				BPoint	deltaPoint(dx,dy);
 				BList *renderer	= editor->RenderList();
-				for (int32 i=0;i<renderer->CountItems();i++)
-				{
+				for (int32 i=0;i<renderer->CountItems();i++) {
 					ResizeAll(renderer->ItemAt(i),dx,dy);
 				}
-				if (parentNode)
-				{
+				if (parentNode) {
 					GroupRenderer	*parent	= NULL;
 					if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
 						parent->RecalcFrame();
@@ -194,8 +161,7 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 				editor->Invalidate();
 			}
 		}
-		else
-		{
+		else {
 			// make connecting Stuff
 			BMessage *connecter=new BMessage(G_E_CONNECTING);
 			connecter->AddPoint("Node::from",*startMouseDown);
@@ -204,27 +170,23 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg)
 		}
 	}
 }
-void ClassRenderer::MouseUp(BPoint where)
-{
+
+
+void ClassRenderer::MouseUp(BPoint where) {
 	bool		found			= false;
 	Renderer*	tmpRenderer		= NULL;
-	for (int32 i = 0; (found == false) && (i < attributes->size());i++)
-	{
+	for (int32 i = 0; (found == false) && (i < attributes->size());i++) {
 		tmpRenderer=(*attributes)[i];
-		if (tmpRenderer->Caught(where))
-		{
+		if (tmpRenderer->Caught(where)) {
 			found = true;
 			tmpRenderer->MouseUp(where);
 		}
 	}
-	if ( (!found) && (startMouseDown) )
-	{
-		if (connecting == 0)
-		{
+	if ( (!found) && (startMouseDown) ) {
+		if (connecting == 0) {
 			float dx = where.x - startMouseDown->x;
 			float dy = where.y - startMouseDown->y;
-			if (editor->GridEnabled())
-			{
+			if (editor->GridEnabled()) {
 				float newPosX = startLeftTop->x + dx;
 				float newPosY = startLeftTop->y + dy;
 				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
@@ -232,8 +194,7 @@ void ClassRenderer::MouseUp(BPoint where)
 				dx = newPosX-startLeftTop->x;
 				dy = newPosY-startLeftTop->y;
 			}
-			if (!resizing)
-			{
+			if (!resizing) {
 				BList		*selected	= doc->GetSelected();
 				BMessage	*mover		= new BMessage(P_C_EXECUTE_COMMAND);
 				mover->AddString("Command::Name","Move");
@@ -241,10 +202,8 @@ void ClassRenderer::MouseUp(BPoint where)
 				mover->AddFloat("dy",dy);
 				AdjustParents(parentNode,mover);
 				sentTo->SendMessage(mover);
-
 			}
-			else
-			{
+			else {
 				BList	*selected	= doc->GetSelected();
 				BMessage	*resizer	= new BMessage(P_C_EXECUTE_COMMAND);
 				resizer->AddString("Command::Name","Resize");
@@ -255,8 +214,7 @@ void ClassRenderer::MouseUp(BPoint where)
 			}
 			resizing		= false;
 		}
-		else
-		{
+		else {
 			BMessage *connecter=new BMessage(G_E_CONNECTED);
 			connecter->AddPointer("Node::from",container);
 			connecter->AddPoint("Node::to",where);
@@ -271,7 +229,7 @@ void ClassRenderer::MouseUp(BPoint where)
 }
 
 
-void ClassRenderer::Draw(BView *drawOn, BRect updateRect){
+void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	BRect		shadowFrame = frame;
 	bool		fitIn		= true;
 	Renderer*	tmpRenderer	= NULL;
@@ -282,7 +240,7 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect){
 	drawOn->SetHighColor(0,0,0,77);
 	drawOn->FillRoundRect(shadowFrame, xRadius, yRadius);
 	drawColor=fillColor;
-	if (selected){
+	if (selected) {
 		drawOn->SetPenSize(5.0);
 		drawOn->SetHighColor(200,0,0,150);
 		BRect selectFrame = frame;
@@ -292,63 +250,30 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect){
 	}
 	drawOn->SetHighColor(drawColor);
 	drawOn->FillRoundRect(frame, xRadius, yRadius);
-
-
-	drawOn->SetPenSize(1.0);
-	drawOn->BeginLineArray(20);
-	drawOn->AddLine(BPoint(frame.left+xRadius,frame.top+1),BPoint(frame.right-xRadius,frame.top+1),tint_color(drawColor,0));
-	drawOn->AddLine(BPoint(frame.left,frame.top+2),BPoint(frame.right,frame.top+2),tint_color(drawColor,0.05));
-	drawOn->AddLine(BPoint(frame.left,frame.top+3),BPoint(frame.right,frame.top+3),tint_color(drawColor,0.1));
-	drawOn->AddLine(BPoint(frame.left,frame.top+4),BPoint(frame.right,frame.top+4),tint_color(drawColor,0.15));
-	drawOn->AddLine(BPoint(frame.left,frame.top+5),BPoint(frame.right,frame.top+5),tint_color(drawColor,0.2));
-	drawOn->AddLine(BPoint(frame.left,frame.top+6),BPoint(frame.right,frame.top+6),tint_color(drawColor,0.25));
-	drawOn->AddLine(BPoint(frame.left,frame.top+7),BPoint(frame.right,frame.top+7),tint_color(drawColor,0.3));
-	drawOn->AddLine(BPoint(frame.left,frame.top+8),BPoint(frame.right,frame.top+8),tint_color(drawColor,0.35));
-	drawOn->AddLine(BPoint(frame.left,frame.top+9),BPoint(frame.right,frame.top+9),tint_color(drawColor,0.4));
-	drawOn->AddLine(BPoint(frame.left,frame.top+10),BPoint(frame.right,frame.top+10),tint_color(drawColor,0.45));
-	drawOn->AddLine(BPoint(frame.left,frame.top+11),BPoint(frame.right,frame.top+11),tint_color(drawColor,0.5));
-	drawOn->AddLine(BPoint(frame.left,frame.top+12),BPoint(frame.right,frame.top+12),tint_color(drawColor,0.55));
-	drawOn->AddLine(BPoint(frame.left,frame.top+13),BPoint(frame.right,frame.top+13),tint_color(drawColor,0.6));
-	drawOn->AddLine(BPoint(frame.left,frame.top+14),BPoint(frame.right,frame.top+14),tint_color(drawColor,0.65));
-	drawOn->AddLine(BPoint(frame.left,frame.top+15),BPoint(frame.right,frame.top+15),tint_color(drawColor,0.7));
-	drawOn->AddLine(BPoint(frame.left,frame.top+16),BPoint(frame.right,frame.top+16),tint_color(drawColor,0.75));
-	drawOn->AddLine(BPoint(frame.left,frame.top+17),BPoint(frame.right,frame.top+17),tint_color(drawColor,0.8));
-	drawOn->AddLine(BPoint(frame.left,frame.top+18),BPoint(frame.right,frame.top+18),tint_color(drawColor,0.85));
-	drawOn->AddLine(BPoint(frame.left,frame.top+19),BPoint(frame.right,frame.top+19),tint_color(drawColor,0.9));
-	drawOn->AddLine(BPoint(frame.left,frame.top+20),BPoint(frame.right,frame.top+20),tint_color(drawColor,0.95));
-	drawOn->EndLineArray();
 	
-	//calculate all Stuff for the Konnection renderer
+	//calculate all Stuff for the Connection renderer
 	float	yOben	= frame.top+frame.Height()/2 - circleSize;
 	float	yMitte	= yOben + circleSize;
 	float	yUnten	= yMitte + circleSize;
-	/*drawOn->SetHighColor(255,255,255,255);
-	BRect circleRect(frame.right-(circleSize*2),yOben,frame.right,yUnten);
-	circleRect.OffsetBy(-1,0);
-	drawOn->FillEllipse(circleRect);*/
-
 	
-	#ifdef B_ZETA_VERSION_1_0_0
-		drawOn->SetHighColor(ui_color(B_UI_DOCUMENT_LINK_COLOR));
-	#else
-		drawOn->SetHighColor(0,0,255,255);
-	#endif
+
+	drawOn->SetHighColor(0,0,0,255);
 	
 	/*drawOn->FillTriangle(BPoint(frame.left,yOben),BPoint(frame.left+circleSize,yMitte),BPoint(frame.left,yUnten));
 	drawOn->FillTriangle(BPoint(frame.right-circleSize,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-circleSize,yUnten));
 	//pattern resizePattern = { 0x55, 0x55, 0x55, 0x55, 0x55,0x55, 0x55, 0x55 };*/
 	
-	drawOn->FillTriangle(BPoint(frame.right-circleSize,frame.bottom),BPoint(frame.right,frame.bottom-circleSize),BPoint(frame.right,frame.bottom),B_MIXED_COLORS);
+	drawOn->FillTriangle(BPoint(frame.right-(3*circleSize),frame.bottom),BPoint(frame.right,frame.bottom-(3*circleSize)),BPoint(frame.right,frame.bottom));
 	
 
 	drawOn->SetHighColor(borderColor);
 	drawOn->SetPenSize(penSize);
 	drawOn->StrokeRoundRect(frame, xRadius, yRadius);
-	drawOn->SetPenSize(1.0);
-	drawOn->StrokeTriangle(BPoint(frame.left,yOben),BPoint(frame.left+circleSize,yMitte),BPoint(frame.left,yUnten));
+//	drawOn->SetPenSize(1.0);
+	//drawOn->StrokeTriangle(BPoint(frame.left,yOben),BPoint(frame.left+circleSize,yMitte),BPoint(frame.left,yUnten));
+	//drawOn->StrokeTriangle(BPoint(frame.right-(2*circleSize),frame.bottom),BPoint(frame.right,frame.bottom-(2*circleSize)),BPoint(frame.right,frame.bottom));
 //	drawOn->StrokeTriangle(BPoint(frame.right-circleSize,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-circleSize,yUnten));
-	if (showConnecter)
-	{
+	if (showConnecter) {
 		drawOn->SetHighColor(200,0,0,255);
 
 		drawOn->FillEllipse(leftConnection);
@@ -366,8 +291,7 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect){
 
 	name->Draw(drawOn,updateRect);
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
-	while( allAttributes != attributes->end() )
-	{
+	while( allAttributes != attributes->end() ) {
 		if (frame.Contains((*allAttributes)->Frame()))
 			(*allAttributes)->Draw(drawOn,updateRect);
 		else
@@ -378,18 +302,15 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect){
 		drawOn->DrawString("...",BPoint(frame.left+circleSize+2,frame.bottom-(yRadius/3)));
 }
 
-void ClassRenderer::MessageReceived(BMessage *message)
-{
-	switch(message->what)
-	{
+void ClassRenderer::MessageReceived(BMessage *message) {
+	switch(message->what) {
 		case P_C_VALUE_CHANGED:
 				ValueChanged();
 			break;
 	}
 }
 
-void ClassRenderer::ValueChanged()
-{
+void ClassRenderer::ValueChanged() {
 	TRACE();
 	BMessage	*pattern		= new BMessage();
 	BMessage	*messageFont	= new BMessage();
@@ -406,13 +327,11 @@ void ClassRenderer::ValueChanged()
 	container->FindBool("Node::selected",&selected);
 	container->FindFloat("Node::xRadius",&xRadius);
 	container->FindFloat("Node::yRadius",&yRadius);
-	if (container->FindMessage("Node::Pattern",pattern) != B_OK)
-	{
+	if (container->FindMessage("Node::Pattern",pattern) != B_OK) {
 		container->AddMessage("Node::Pattern",editor->GetStandartPattern());
 		pattern = editor->GetStandartPattern();
 	}
-	if (container->FindMessage("Node::Font",messageFont) == B_OK)
-	{
+	if (container->FindMessage("Node::Font",messageFont) == B_OK) {
 		delete font;
 		font	= new AFont(messageFont);
 	}
@@ -426,12 +345,7 @@ void ClassRenderer::ValueChanged()
 	//delete all "old" Attribs
 	attributes->erase(attributes->begin(),attributes->end());
 	//and add all attribs we found
-	#ifdef B_ZETA_VERSION_1_0_0
-		for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(const char **) &attribName, &type, &count) == B_OK; i++)
-	#else
-		for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(char **) &attribName, &type, &count) == B_OK; i++)
-	#endif
-	{
+	for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(char **) &attribName, &type, &count) == B_OK; i++) {
 		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
 			InsertAttribute(attribName,attribMessage, count-1);
 	}
@@ -444,22 +358,17 @@ void ClassRenderer::ValueChanged()
 	bottomConnection.Set(xMiddle-circleSize,frame.bottom-circleSize,xMiddle+circleSize,frame.bottom+circleSize);
 }
 
-BRect ClassRenderer::Frame( void )
-{
+BRect ClassRenderer::Frame( void ) {
 	return frame;
 }
 
-bool  ClassRenderer::Caught(BPoint where)
-{
+bool  ClassRenderer::Caught(BPoint where) {
 	 bool contains	= frame.Contains(where);
-	 if (!contains)
-	 {
+	 if (!contains) {
 	 	contains = leftConnection.Contains(where);
-	 	if (!contains)
-	 	{
+	 	if (!contains) {
 		 	contains = topConnection.Contains(where);
-		 	if (!contains)
-		 	{
+		 	if (!contains) {
 			 	contains = rightConnection.Contains(where);
 				if (!contains)
 	 				contains = bottomConnection.Contains(where);
@@ -469,28 +378,24 @@ bool  ClassRenderer::Caught(BPoint where)
 	 return contains;
 }
 //**implement this
-void  ClassRenderer::SetFrame(BRect newFrame)
-{
+void  ClassRenderer::SetFrame(BRect newFrame) {
 }
 
-bool  ClassRenderer::MoveAll(void *arg,float dx, float dy)
-{
+bool  ClassRenderer::MoveAll(void *arg,float dx, float dy) {
 	Renderer	*renderer	= (Renderer*)arg;
 	if (renderer->Selected())
 		renderer->MoveBy(dx,dy);
 	return false;
 }
 
-bool  ClassRenderer::ResizeAll(void *arg,float dx, float dy)
-{
+bool  ClassRenderer::ResizeAll(void *arg,float dx, float dy) {
 	Renderer	*renderer	= (Renderer*)arg;
 	if (renderer->Selected())
 		renderer->ResizeBy(dx,dy);
 	return false;
 }
 
-void ClassRenderer::MoveBy(float dx,float dy)
-{
+void ClassRenderer::MoveBy(float dx,float dy) {
 	frame.OffsetBy(dx,dy);
 	leftConnection.OffsetBy(dx,dy);
 	topConnection.OffsetBy(dx,dy);
@@ -498,28 +403,20 @@ void ClassRenderer::MoveBy(float dx,float dy)
 	bottomConnection.OffsetBy(dx,dy);
 	name->MoveBy(dx,dy);
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
-	while( allAttributes != attributes->end() )
-	{
+	while( allAttributes != attributes->end() ) {
 		(*allAttributes)->MoveBy(dx,dy);
 		allAttributes++;
 	}
-/*	for (int32 i=0;i<attributes->size();i++)
-	{
-		(*attributes)[i]->MoveBy(dx,dy);
-	}*/
-
 }
 
-void ClassRenderer::ResizeBy(float dx,float dy)
-{
+void ClassRenderer::ResizeBy(float dx,float dy) {
 	if ((frame.right+dx-frame.left) > 70)
 		frame.right		+= dx;
 	if  ((frame.bottom+dy-frame.top) > 30)
 		frame.bottom	+= dy;
 	name->ResizeBy(dy,dy);
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
-	while( allAttributes != attributes->end() )
-	{
+	while( allAttributes != attributes->end() ) {
 		(*allAttributes)->ResizeBy(dx,dy);
 		allAttributes++;
 	}
@@ -529,10 +426,6 @@ void ClassRenderer::ResizeBy(float dx,float dy)
 	topConnection.Set(xMiddle-circleSize,frame.top-circleSize,xMiddle+circleSize,frame.top+circleSize);
 	rightConnection.Set(frame.right-circleSize,yMiddle-circleSize,frame.right+circleSize,yMiddle+circleSize);
 	bottomConnection.Set(xMiddle-circleSize,frame.bottom-circleSize,xMiddle+circleSize,frame.bottom+circleSize);
-/*	for (int32 i=0;i<attributes->size();i++)
-	{
-		(*attributes)[i]->ResizeBy(dx,dy);
-	}*/
 }
 
 void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 count)
@@ -557,12 +450,12 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	BRect	attributeRect;
 	if (attributes->empty())
 	{
-		attributeRect = BRect(frame.left+circleSize+2,name->Frame().bottom+6,frame.right-circleSize-2,frame.bottom-2);
+		attributeRect = BRect(frame.left+circleSize+2,name->Frame().bottom+6,frame.right-circleSize-2,frame.bottom);
 	}
 	else
 	{
 		Renderer* lastRenderer = (*attributes)[attributes->size()-1];
-		attributeRect = BRect(frame.left+circleSize+2,lastRenderer->Frame().bottom+1,frame.right-circleSize-2,frame.bottom-2);
+		attributeRect = BRect(frame.left+circleSize+2,lastRenderer->Frame().bottom,frame.right-circleSize-2,frame.bottom);
 	}
 	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 	editMessage->AddPointer("node",container);
@@ -580,30 +473,21 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	valueContainer->AddString("name",attribName);
 	valueContainer->AddInt32("index",count);
 	removeAttribMessage->AddMessage("valueContainer",valueContainer);
-
-//	attribute->FindString("Name",(const char **)&realName);
-//	Renderer	*testRenderer	= new StringRenderer(editor,realName,attributeRect, editMessage);
 	Renderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage,removeAttribMessage);
 	attributes->push_back(testRenderer);
-
 }
 
-void ClassRenderer::AdjustParents(BMessage* theParent, BMessage *command)
-{
-	if (theParent)
-	{
+void ClassRenderer::AdjustParents(BMessage* theParent, BMessage *command) {
+	if (theParent) {
 		BMessage *tmpParent = theParent;
 		BRect		parentRect	= BRect(0,0,0,0);
 
 		//run through all Parents until we find the "Masterparent"
-		while (tmpParent)
-		{
+		while (tmpParent) {
 			tmpParent->FindRect("Node::frame",&parentRect);
 			GroupRenderer	*parent	= NULL;
-			if (tmpParent->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
-			{
-				if (parent->Frame() != parentRect)
-				{
+			if (tmpParent->FindPointer(editor->RenderString(), (void **)&parent) == B_OK) {
+				if (parent->Frame() != parentRect) {
 					BMessage	*changeValue		= new BMessage(P_C_EXECUTE_COMMAND);
 					BMessage	*valueContainer		= new BMessage();
 					changeValue->AddString("Command::Name","ChangeValue");

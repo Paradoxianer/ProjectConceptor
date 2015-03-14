@@ -37,10 +37,10 @@ void StringRenderer::Init()
 void StringRenderer::SetString(char *newString)
 {
 	TRACE();
-	string = newString;
+	myString = newString;
 	if (shortString)	
 		delete shortString;
-	shortString	= new BString(string);
+	shortString	= new BString(myString);
 	editorFont->TruncateString(shortString,B_TRUNCATE_MIDDLE,frame.Width()-2);
 }
 	
@@ -50,21 +50,21 @@ void StringRenderer::SetFrame(BRect newRect)
 	frame		= newRect;
 	if (shortString)	
 		delete shortString;
-	shortString	= new BString(string);
+	shortString	= new BString(myString);
 	editorFont->TruncateString(shortString,B_TRUNCATE_MIDDLE,frame.Width()-2);
-	frame.bottom=frame.top+fontHeight+2;
+	frame.bottom=frame.top+fontHeight+4;
 }
 
 void StringRenderer::MouseDown(BPoint where)
 {
 	TRACE();
 	BRect	textRect= frame;
-	textRect.InsetBy(4,0);
-	textRect.OffsetBy(-2,2);
+	textRect.InsetBy(2,0);
+	textRect.OffsetBy(-2,1);
 	TextEditorControl	*editer	= new TextEditorControl(textRect,"StringEditor",changeMessage,B_FOLLOW_LEFT|B_FOLLOW_TOP);
 	editer->SetTarget(editor->BelongTo());
 	editor->AddChild(editer);
-	editer->SetText(string);
+	editer->SetText(myString);
 	editer->MakeFocus(true);
 	editer->SelectAll();
 	
@@ -72,7 +72,7 @@ void StringRenderer::MouseDown(BPoint where)
 
 void StringRenderer::Draw(BView *drawOn, BRect updateRect)
 {	
-	drawOn->MovePenTo(frame.left+2,frame.top+fontHeight);
+	drawOn->MovePenTo(frame.left+2,frame.top+fontHeight+1);
 	drawOn->DrawString(shortString->String());
 }
 

@@ -42,7 +42,7 @@ RSRCS=
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be ../../../bin/ProjectConceptor.a
+LIBS= be ../../../$(APP_DIR)/ProjectConceptor.a
 		
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
@@ -61,28 +61,28 @@ SYSTEM_INCLUDE_PATHS =
 #	thes use the form: #include "header"
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS = \
-	../../include \
-	../../include/plugins
+		../../include \
+		../../include/plugins
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
-OPTIMIZE= FULL
+#OPTIMIZE= FULL
 
 #	specify any preprocessor symbols to be defined.  The symbols
 #	will be set to a value of 1.  For example specify DEBUG if you want
 #	DEBUG=1 to be set when compiling.
-DEFINES= 
+#DEFINES= 
 
 #	specify special warning levels
 #	if unspecified default warnings will be used
 #	NONE = supress all warnings
 #	ALL = enable all warnings
-WARNINGS = NONE
+#WARNINGS = NONE
 
 #	specify whether image symbols will be created
 #	so that stack crawls in the debugger are meaningful
 #	if TRUE symbols will be created
-SYMBOLS = TRUE
+#SYMBOLS = TRUE
 
 #	specify debug settings
 #	if TRUE will allow application to be run from
@@ -111,5 +111,5 @@ install:: $(NAME)
 	@echo "Done copying."
 
 default .DEFAULT:
-	mkdir -p ../../../bin/Plugins/Commands
-	cp -rf obj.x86/$(NAME) ../../../bin/Plugins/Commands
+	mkdir -p ../../../$(APP_DIR)/$(PLUGIN_DIR)/Commands
+	cp -rf  $(OBJ_DIR)/$(NAME) ../../../$(APP_DIR)/$(PLUGIN_DIR)/Commands

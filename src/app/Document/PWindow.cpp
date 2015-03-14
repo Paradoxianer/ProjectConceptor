@@ -573,9 +573,10 @@ ToolBar* PWindow::GetToolBar(const char *signature)
 ToolMenu* PWindow::GetToolMenu(const char* toolbarSignature,const char *signature)
 {
 	ToolBar *toolbar	= GetToolBar(toolbarSignature);
-	if ( (toolbar !=NULL) && (verticalToolbars->HasItem(toolbar)) ||(horizontalToolbars->HasItem(toolbar))&& (signature!=NULL))
-	{
-		return toolbar->GetToolMenu(signature);
+	if ( toolbar != NULL 
+		&& (verticalToolbars->HasItem(toolbar) == true || horizontalToolbars->HasItem(toolbar)== true) 
+		&& signature!=NULL) {
+			return toolbar->GetToolMenu(signature);
 	}
 	else
 		return NULL;
@@ -584,7 +585,9 @@ ToolMenu* PWindow::GetToolMenu(const char* toolbarSignature,const char *signatur
 ToolItem* PWindow::GetToolItem(const char* toolbarSignature,const char *signature)
 {
 	ToolBar *toolbar	= GetToolBar(toolbarSignature);
-	if ( (toolbar != NULL) && (verticalToolbars->HasItem(toolbar)) || (horizontalToolbars->HasItem(toolbar)) && (signature!=NULL))
+	if ( toolbar != NULL 
+		&& (verticalToolbars->HasItem(toolbar)== true || horizontalToolbars->HasItem(toolbar)== true)
+		&& signature!=NULL)
 	{
 		return toolbar->GetToolItem(signature);
 	}
@@ -680,7 +683,7 @@ status_t PWindow::AddToolMenu(const char *toolbarSignatur,ToolMenu *toolMenu)
 	status_t err=B_OK;
 	if (toolbar!=NULL)
 	{
-		if ((verticalToolbars->HasItem(toolbar)) ||(horizontalToolbars->HasItem(toolbar)) && (toolMenu!=NULL))
+		if ((verticalToolbars->HasItem(toolbar) == true || horizontalToolbars->HasItem(toolbar) == true ) && (toolMenu!=NULL))
 		{
 				toolbar->AddItem(toolMenu);
 				//** later implement Tooltip
@@ -756,23 +759,21 @@ status_t	PWindow::RemoveToolBar(const char* signature)
 	status_t	err		= B_OK;
 	bool		removed	= true;
 	ToolBar *tmpToolBar		= GetToolBar(signature);
-	if (tmpToolBar!=NULL)
+	if (tmpToolBar!=NULL){
 		removed = RemoveChild(tmpToolBar);
-	if (verticalToolbars->HasItem(tmpToolBar))
-	{
+		if (removed != true)
+			err = B_ERROR;
+	}
+	if (verticalToolbars->HasItem(tmpToolBar)) {
 		if (!verticalToolbars->RemoveItem(tmpToolBar))
 			err = B_ERROR;
 		else
-		{
 			P_M_MAIN_VIEW_LEFT	-= (tmpToolBar->Frame().Width()+1);
-		}
 	}
-	else if (horizontalToolbars->HasItem(tmpToolBar))
-	{
+	else if (horizontalToolbars->HasItem(tmpToolBar)) {
 		if (!horizontalToolbars->RemoveItem(tmpToolBar))
 			err=B_ERROR;
-		else
-		{
+		else {
 			P_M_MAIN_VIEW_TOP	-= tmpToolBar->Frame().Height();
 			ReCalcToolBars(B_ITEMS_IN_COLUMN);
 		}

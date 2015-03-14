@@ -4,7 +4,7 @@
 #include "ConfigWindow.h"
 
 
-ConfigWindow::ConfigWindow(BMessage *_configMessage):BWindow(BRect(50,50,600,400),_T("Settings"),B_TITLED_WINDOW,B_AUTO_UPDATE_SIZE_LIMITS){
+ConfigWindow::ConfigWindow(BMessage *_configMessage):BWindow(BRect(50,50,600,400),_T("Settings"),B_TITLED_WINDOW,B_OUTLINE_RESIZE){
 	TRACE();
         configMessage=_configMessage;
         CreateViews();

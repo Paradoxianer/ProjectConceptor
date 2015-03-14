@@ -10,14 +10,14 @@
 #include <interface/TextControl.h>
 
 //using the ugly stl instead of the nice Zeta templates to make it Haiku ready
-#if defined(__HAIKU__) && __GNUC__ > 3
+//#if defined(__HAIKU__) && __GNUC__ > 3
 #include <vector>
 #include <iterator>
 using namespace std;
-#else
+/*#else
 #include <cpp/vector.h>
 #include <cpp/iterator.h>
-#endif
+#endif*/
 
 #include "GraphEditor.h"
 #include "PDocument.h"
@@ -52,6 +52,8 @@ public:
 				void		MoveBy(float dx, float dy);
 				void		ResizeBy(float dx,float dy);
 				bool		Selected(void){return selected;};
+				BMessage*	Parent(void){return parentNode;};
+
 
 protected:
 				void		Init();

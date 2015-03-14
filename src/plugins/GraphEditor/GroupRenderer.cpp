@@ -49,10 +49,11 @@ void GroupRenderer::ValueChanged()
 {
 	TRACE();
 	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
+	BList			*allDocNodes	= doc->GetAllNodes();
+
 	set<BMessage*>::iterator it;
 	BMessage	*node			= NULL;
 	Renderer	*painter		= NULL;
-
 
 	ClassRenderer::ValueChanged();
 	for ( it=changedNodes->begin();it!=changedNodes->end();it++) {
@@ -62,17 +63,24 @@ void GroupRenderer::ValueChanged()
 			if (allNodes->HasItem(node))
 				painter->ValueChanged();
 			else
-				RemoveRenderer(FindRenderer(node));
+				RemoveRenderer(painter);
 		}
-		else
-			if (allNodes->HasItem(node))
-				InsertRenderObject(node);		
+		else {
+			if (allNodes->HasItem(node) == true)
+				if (allDocNodes->HasItem(node) == true )
+					InsertRenderObject(node);
+				else
+					allNodes->RemoveItem(node);
+			else
+				RemoveRenderer(painter);
+		}
 	}
 }
 
 void GroupRenderer::MoveBy(float dx,float dy) {
-	frame.OffsetBy(dx,dy);
-	name->MoveBy(dx,dy);
+	//frame.OffsetBy(dx,dy);
+	//name->MoveBy(dx,dy);
+	ClassRenderer::MoveBy(dx,dy);
 	for (int32 i=0;i<renderer->CountItems();i++)
 		((Renderer *)renderer->ItemAt(i))->MoveBy(dx,dy);
 }
@@ -83,6 +91,13 @@ void GroupRenderer::ResizeBy(float dx,float dy) {
 	if  ((frame.bottom+dy-frame.top) > 30)
 		frame.bottom	+= dy;
 	name->ResizeBy(dy,dy);
+	ClassRenderer::ResizeBy(dx,dy);
+	//** ToDo if its getting smaller move all inside nodes toghere
+	/*if ((frame.right+dx-frame.left) > 70)
+		frame.right		+= dx;
+	if  ((frame.bottom+dy-frame.top) > 30)
+		frame.bottom	+= dy;
+	name->ResizeBy(dy,dy);*/
 }
 
 
@@ -95,8 +110,11 @@ void GroupRenderer::InsertRenderObject(BMessage *node) {
 		node->ReplacePointer("ProjectConceptor::doc",doc);
 	else
 		node->AddPointer("ProjectConceptor::doc",doc);
-	node->FindPointer(editor->RenderString(),(void **)&newRenderer);
-	AddRenderer(newRenderer);
+	//find the pointer to the renderobject because the node was somehow added to the Grapheditor and has therefore already a renderobject
+	if (node->FindPointer(editor->RenderString(),(void **)&newRenderer)== B_OK)
+		AddRenderer(newRenderer);
+	else
+		AddRenderer(editor->CreateRendererFor(node));
 }
 
 
@@ -109,27 +127,36 @@ void GroupRenderer::RemoveRenderer(Renderer *wichRenderer) {
 	TRACE();
 	renderer->RemoveItem(wichRenderer);
 	delete wichRenderer;
+	wichRenderer=NULL;
 }
 
 
 Renderer* GroupRenderer::FindRenderer(BMessage *container) {
 	int32		i					= 0;
 	Renderer	*currentRenderer	= NULL;
-	bool		found				= false;
-	while ((i<renderer->CountItems()) && (!found)) {
+	if ( (container->FindPointer(editor->RenderString(),(void **) &currentRenderer) == B_OK) 
+		&& (currentRenderer) && renderer->HasItem(currentRenderer) )
+		return currentRenderer;
+	else
+		return NULL;
+
+/*	bool		found				= false;
+	int32		count				= renderer->CountItems();
+	while ((i<count) && (!found)) {
 		currentRenderer= (Renderer*)renderer->ItemAt(i);
 		if (currentRenderer->GetMessage() == container)
 			found=true;
 		i++;
-	}
+	}po
 	if (found)
 		return currentRenderer;
 	else
-		return NULL;
+		return NULL;*/
 }
 
 
-void GroupRenderer::RecalcFrame(void) {
+void GroupRenderer::RecalcFrame(bool toFit) {
+	
 	Renderer*	tmpRenderer		= NULL;
 	BRect			groupFrame			= BRect(0,0,-1,-1);
 	for (int32 i=0;(i<renderer->CountItems());i++) {
@@ -144,7 +171,7 @@ void GroupRenderer::RecalcFrame(void) {
 	groupFrame.InsetBy(-5,-5);
 	groupFrame.top = groupFrame.top-15;
 	if (groupFrame != frame) {
-		frame = groupFrame;
+		frame =  frame | groupFrame;
 		//** need to move the Attribs and the Name...
 		if (parentNode) {
 			GroupRenderer	*parent	= NULL;

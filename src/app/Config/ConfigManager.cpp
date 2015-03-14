@@ -40,7 +40,7 @@ void ConfigManager::SetConfigMessage(BMessage *newConfig){
 void  ConfigManager::LoadDefaults(void){
 	TRACE();
 	MessageXmlReader *messageXml = new MessageXmlReader();
-	messageXml->SetTo((const BString&)path);
+	messageXml->SetTo(*path);
 	if (messageXml->InitCheck())
         config=messageXml->Read();
 }

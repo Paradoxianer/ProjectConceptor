@@ -5,15 +5,15 @@
 #include <TranslationKit.h>
 #include <app/Message.h>
 #include <List.h>
-#if defined(__HAIKU__) && __GNUC__ > 3
+//#if defined(__HAIKU__) && __GNUC__ > 3
 #include <map>
 #include <set>
 using namespace std;
-#else
-#include <cpp/set.h>
-#include <cpp/map.h>
-using namespace std;
-#endif
+//#else
+//#include <cpp/set.h>
+//#include <cpp/map.h>
+//using namespace std;
+//#endif
 #include "ProjectConceptorDefs.h"
 #include "tinyxml.h"
 

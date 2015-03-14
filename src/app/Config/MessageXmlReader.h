@@ -24,7 +24,7 @@ public:
 
 	// Vielleicht zur convenience
 	// tut im endeffekt nur obiges
-	static BMessage* ReadFile(const BString &fileName);
+	 BMessage* ReadFile(const BString &fileName);
 
 private:
     BString *filePath;
@@ -32,7 +32,6 @@ private:
     static map<BString, int>  	bmessageTypes;
 
 };
-
 
 
 #endif // MESSAGEXMLREADER_H_INCLUDED

@@ -3,18 +3,15 @@
 
 #include <app/Message.h>
 #include <interface/ListView.h>
+#include <interface/StringItem.h>
 #include <interface/Window.h>
 #include <storage/Entry.h>
 #include <storage/File.h>
 #include <support/List.h>
 #include <MessageFilter.h>
 #include <String.h>
-#if defined(__HAIKU__) && __GNUC__ > 3
 #include <set>
 using namespace std;
-#else
-#include <cpp/set.h>
-#endif
 
 
 /**
