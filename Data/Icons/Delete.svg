@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<svg version="1.1" width="64" height="64" color-interpolation="linearRGB"
+     xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <path style="fill:none; stroke:#333333; stroke-width:15; stroke-linecap:round"
+        d="M11 11L52 53"
+        transform="matrix(-0,-1,1,-0,-0.5,67.5)"
+  />
+  <path style="fill:none; stroke:#333333; stroke-width:15; stroke-linecap:round"
+        d="M11 11L52 53"
+        transform="matrix(1,0,0,1,0,3)"
+  />
+  <linearGradient id="gradient0" gradientUnits="userSpaceOnUse" x1="-98.62" y1="-4.99" x2="13.12" y2="-67.41">
+   <stop offset="0.6882" stop-color="#ff0000"/>
+   <stop offset="1" stop-color="#f6f6f6"/>
+  </linearGradient>
+  <path style="fill:none; stroke:url(#gradient0); stroke-width:15; stroke-linecap:round"
+        d="M11 11L52 53"
+        transform="matrix(-0,-1,1,-0,-0.5,63.5)"
+  />
+  <linearGradient id="gradient1" gradientUnits="userSpaceOnUse" x1="-101.46" y1="56.89" x2="-29.08" y2="-48.67">
+   <stop offset="0.6882" stop-color="#ff0000"/>
+   <stop offset="1" stop-color="#f6f6f6"/>
+  </linearGradient>
+  <path style="fill:none; stroke:url(#gradient1); stroke-width:15; stroke-linecap:round"
+        d="M11 11L52 53"
+  />
+ </g>
+</svg>

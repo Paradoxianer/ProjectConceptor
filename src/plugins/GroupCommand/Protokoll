@@ -1,0 +1,5 @@
+group Protokoll
+settings
+	|-Pointer "node"			-- a BMessage the master node where to put in 
+	|-Bool "deselect"			- deselect the nodes after grouping them
+	|-Pointer "children"		- if this Pointerarray is found the  command will use this nodes to add them to the group - else it will use all selected

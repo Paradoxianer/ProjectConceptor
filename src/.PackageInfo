@@ -1,0 +1,24 @@
+name			ProjectConceptor
+version			0.0.6-50
+architecture	x86_gcc2
+summary			"Projectconceptor a Graph editing suite"
+description		"Projectconceptor is modular Graphediting suite with export and import support
+for freemind"
+packager		"paradoxon <.will come later@later.de>"
+vendor			"Paradoxon"
+licenses {
+	"MIT"
+}
+copyrights {
+	"Copyright (C) 2005-2014 by Paradoxon"
+}
+provides {
+        ProjectConceptor = 0.0.6-50
+}
+requires {
+	haiku >= r1~alpha4_pm-1
+}
+source-urls {
+	"Download <http://code.google.com/p/projectconceptor/source/checkout>"
+}
+

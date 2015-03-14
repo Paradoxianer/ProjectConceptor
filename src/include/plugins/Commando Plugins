@@ -1,0 +1,29 @@
+Commands:
+	Connect
+	Move
+	Insert
+	Delete
+	Select
+<<<<<<< HEAD
+		- BRect ... die im Rechteck liegenden
+=======
+		- BRect ... select all in the rectangle
+>>>>>>> google-master
+		- All
+		- PointerList
+	Copy
+	
+	Hide
+	Format?? or doing every Format on its own??
+	Resize
+	Rotate??
+	Scale???
+	Find
+	Replace
+	
+
+<<<<<<< HEAD
+//** bei  Makro  Zeitsteurung einbauen
+=======
+//** bei  Makro  Zeitsteurung einbauen
+>>>>>>> google-master
