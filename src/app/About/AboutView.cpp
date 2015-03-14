@@ -14,7 +14,7 @@
 #include <Alert.h>
 
 #include "AboutView.h"
-#include "AboutSvnInfo.h"
+#include "AboutGitInfo.h"
 
 AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 {
@@ -42,7 +42,7 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	AddChild(fTitleView);
 
 	//CeckString
-	fRevNumb.SetTo(SVN_REV_STR);
+	fRevNumb.SetTo(GIT_REV_STR);
 
 	if(fRevNumb.Length() == 0)
 	{

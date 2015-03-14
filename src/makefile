@@ -2,24 +2,58 @@ first: default
 
 PLNAME = $(shell uname)
 
-ifeq ($(PLNAME), Linux)
-	COMMAND = "\#define SVN_REV_STR \"`svn info http://svn.berlios.de/svnroot/repos/projectconcepto/trunk | grep Revision | awk '{print $$2}'`\""
-else
-	COMMAND = "\#define SVN_REV_STR \"`svn info | grep Revision | awk '{print $$2}'`\""
-endif
+GIT_REV=$(shell git rev-list HEAD --count)
 
-svnupdate:
-	@echo "---------SVN INFO GEN-----------"
-	touch app/About/AboutSvnInfo.h
-	rm app/About/AboutSvnInfo.h
-	@echo "" >> app/About/AboutSvnInfo.h 
-	@echo "#ifndef SVN_INFO_H" >> app/About/AboutSvnInfo.h 
-	@echo "#define SVN_INFO_H" >> app/About/AboutSvnInfo.h 
-	@echo "" >> app/About/AboutSvnInfo.h  
-	@echo "//do not edit this" >> app/About/AboutSvnInfo.h
-	@echo $(COMMAND) >> app/About/AboutSvnInfo.h
-	@echo "" >> app/About/AboutSvnInfo.h 
-	@echo "#endif" >> app/About/AboutSvnInfo.h 
+COMMAND = "\#define GIT_REV_STR \"$(GIT_REV)\""
+
+gitupdate:
+	@echo "---------GIT INFO GEN-----------"
+	touch app/About/AboutGitInfo.h
+	rm app/About/AboutGitInfo.h
+	@echo "" >> app/About/AboutGitInfo.h 
+	@echo "#ifndef GIT_INFO_H" >> app/About/AboutGitInfo.h 
+	@echo "#define GIT_INFO_H" >> app/About/AboutGitInfo.h 
+	@echo "" >> app/About/AboutGitInfo.h  
+	@echo "//do not edit this" >> app/About/AboutGitInfo.h
+	@echo $(COMMAND) >> app/About/AboutGitInfo.h
+	@echo "" >> app/About/AboutGitInfo.h 
+	@echo "#endif" >> app/About/AboutGitInfo.h 
+	@echo "UPDATED"
+	@echo "--------------------------------"
+
+
+pkgupdate:
+	@echo "---------PKG INFO GEN-----------"
+	touch .PackageInfo
+	rm .PackageInfo
+	@echo "" >> .PackageInfo 
+	@echo "#//do not edit this" >> .PackageInfo
+	@echo "name			ProjectConceptor" >> .PackageInfo
+#later use git describe --abbrev=0 --tags to use git tags
+	@echo "version			0.0.6-$(GIT_REV)" >> .PackageInfo
+	@echo "" >> .PackageInfo  
+	@echo "architecture	$(shell getarch)" >> .PackageInfo
+	@echo "summary			\"Projectconceptor a Graph editing suite\"" >> .PackageInfo  
+	@echo "description		\"Projectconceptor is modular Graphediting suite with export and import support for freemind\"" >> .PackageInfo  
+	@echo "packager		\"paradoxon <.will come later@later.de>\"" >> .PackageInfo  
+	@echo "vendor			\"Paradoxon\"" >> .PackageInfo  
+	@echo "licenses {" >> .PackageInfo  
+	@echo "	\"MIT\"" >> .PackageInfo  
+	@echo "}" >> .PackageInfo  
+	@echo "copyrights {" >> .PackageInfo  
+	@echo "	\"Copyright (C) 2005-2015 by Paradoxon\"" >> .PackageInfo  
+	@echo "}" >> .PackageInfo  
+	@echo "provides {" >> .PackageInfo  
+	@echo "        ProjectConceptor = 0.0.6-$$(GIT_REV)" >> .PackageInfo  
+	@echo "}" >> .PackageInfo  
+	@echo "requires {" >> .PackageInfo  
+	@echo "	haiku >= r1~alpha4_pm-1" >> .PackageInfo  
+	@echo "}" >> .PackageInfo  
+	@echo "source-urls {" >> .PackageInfo
+	@echo "	\"Download <https://github.com/Paradoxianer/ProjectConceptor/archive/master.zip>\"" >> .PackageInfo
+	@echo "}" >> .PackageInfo
+	@echo "" >> .PackageInfo
+
 	@echo "UPDATED"
 	@echo "--------------------------------"
 
@@ -52,7 +86,7 @@ export SYMBOLS = TRUE
 #	a source-level debugger
 export DEBUGGER = TRUE
 
-app: svnupdate app/makefile FORCE
+app: gitupdate pkgupdate app/makefile FORCE
 	cd app && make
 
 plugins: plugins/makefile FORCE
@@ -79,9 +113,9 @@ clean: app_clean plugins_clean
 install:: $(NAME)
 	@echo "making a package"
 	@cp .PackageInfo ../bin
-	@package create -C ../bin ProjectConceptor_gcc.hpkg
+	@package create -C ../bin ProjectConceptor-$(shell getarch)-$(if $(DEBUGGER),debug-$(GIT_REV)).hpkg
 	@echo "installing package"
-	@cp ProjectConceptor_gcc.hpkg $(INSTALL_DIR)
+	@cp ProjectConceptor-$(shell getarch)-$(if $(DEBUGGER),debug-$(GIT_REV)).hpkg $(INSTALL_DIR)
 	@echo "Installation done."
 
 
