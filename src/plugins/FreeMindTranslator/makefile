@@ -96,13 +96,12 @@ COMPILER_FLAGS =
 
 #	specify additional linker flags
 LINKER_FLAGS =
-INSTALL_DIR    = /boot/home/config/add-ons/Translators
+#INSTALL_DIR    = /boot/home/config/add-ons/Translators
 
 ## include the makefile-engine
-ifndef BUILDHOME
-BUILDHOME = /boot/develop
-endif
-include $(BUILDHOME)/etc/makefile-engine
+DEVEL_DIRECTORY := \
+	$(shell findpaths -r "makefile_engine" B_FIND_PATH_DEVELOP_DIRECTORY)
+include $(DEVEL_DIRECTORY)/etc/makefile-engine
 
 default .DEFAULT:
 	mkdir -p ../../../bin/add-ons/Translators

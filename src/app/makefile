@@ -163,9 +163,10 @@ APP_MENU	= Software
 
 ## include the makefile-engine
 ifndef BUILDHOME
-BUILDHOME = /boot/develop
-endif
-include $(BUILDHOME)/etc/makefile-engine
+DEVEL_DIRECTORY := \
+	$(shell findpaths -r "makefile_engine" B_FIND_PATH_DEVELOP_DIRECTORY)
+include $(DEVEL_DIRECTORY)/etc/makefile-engine
+
 
 
 
