@@ -78,7 +78,7 @@ protected:
 		BMessage			*parentNode;
 
 		BPoint				*startMouseDown;
-		BPoint				*startLeftTop;
+		BRect				*startFrame;
 
 		BPoint				*oldPt;
 

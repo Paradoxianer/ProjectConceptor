@@ -87,7 +87,7 @@ void ClassRenderer::MouseDown(BPoint where) {
 		if (buttons & B_PRIMARY_MOUSE_BUTTON) {
 			editor->BringToFront(this);
 			startMouseDown	= new BPoint(where);
-			startLeftTop	= new BPoint(frame.LeftTop());
+			startFrame		= new BRect(frame);
 			editor->SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
 			if  (!selected) {
 				BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
@@ -118,24 +118,33 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
 		if (connecting == 0) {
 			float dx	= 0;
 			float dy	= 0;
+			//resizedifferenze
+			float rdx	= 0;
+			float rdy	= 0;
+
 			if (!oldPt)
 				oldPt	= startMouseDown;
 			if (editor->GridEnabled()) {
-
-				float newPosX = startLeftTop->x + (pt.x-startMouseDown->x);
-				float newPosY = startLeftTop->y + (pt.y-startMouseDown->y);
+				float newPosX = startFrame->left + (pt.x-startMouseDown->x);
+				float newPosY = startFrame->top + (pt.y-startMouseDown->y);
 				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
 				newPosY = newPosY - fmod(newPosY,editor->GridWidth());
-				dx = newPosX - frame.left;
-				dy = newPosY -frame.top ;
+				dx	= newPosX - frame.left;
+				dy	= newPosY - frame.top;
+
+				newPosX = startFrame->right + (pt.x-startMouseDown->x);
+				newPosY = startFrame->bottom + (pt.y-startMouseDown->y);
+				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
+				newPosY = newPosY - fmod(newPosY,editor->GridWidth());
+				rdx	= newPosX - frame.right;
+				rdy	= newPosY - frame.bottom;
 			}
 			else {
 				dx = pt.x - oldPt->x;
-				dy = pt.y - oldPt->y;
+				dy = pt.y - oldPt->y;	
 			}
 			oldPt	= new BPoint(pt);
-			if (!resizing) {
-				BPoint	deltaPoint(dx,dy);
+			if (!resizing) { 
 				BList *renderer	= editor->RenderList();
 				for (int32 i=0;i<renderer->CountItems();i++) {
 					MoveAll(renderer->ItemAt(i),dx,dy);
@@ -148,11 +157,15 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
 				editor->Invalidate();
 			}
 			else {
-				BPoint	deltaPoint(dx,dy);
 				BList *renderer	= editor->RenderList();
-				for (int32 i=0;i<renderer->CountItems();i++) {
-					ResizeAll(renderer->ItemAt(i),dx,dy);
-				}
+				if (editor->GridEnabled())
+					for (int32 i=0;i<renderer->CountItems();i++) {
+						ResizeAll(renderer->ItemAt(i),rdx,rdy);
+					}
+				else
+					for (int32 i=0;i<renderer->CountItems();i++) {
+						ResizeAll(renderer->ItemAt(i),dx,dy);
+					}
 				if (parentNode) {
 					GroupRenderer	*parent	= NULL;
 					if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
@@ -187,12 +200,12 @@ void ClassRenderer::MouseUp(BPoint where) {
 			float dx = where.x - startMouseDown->x;
 			float dy = where.y - startMouseDown->y;
 			if (editor->GridEnabled()) {
-				float newPosX = startLeftTop->x + dx;
-				float newPosY = startLeftTop->y + dy;
+				float newPosX = startFrame->left + dx;
+				float newPosY = startFrame->top + dy;
 				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
 				newPosY = newPosY - fmod(newPosY,editor->GridWidth());
-				dx = newPosX-startLeftTop->x;
-				dy = newPosY-startLeftTop->y;
+				dx = newPosX-startFrame->left;
+				dy = newPosY-startFrame->top;
 			}
 			if (!resizing) {
 				BList		*selected	= doc->GetSelected();
