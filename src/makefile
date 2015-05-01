@@ -44,7 +44,7 @@ pkgupdate:
 	@echo "	\"Copyright (C) 2005-2015 by Paradoxon\"" >> .PackageInfo  
 	@echo "}" >> .PackageInfo  
 	@echo "provides {" >> .PackageInfo  
-	@echo "        ProjectConceptor = 0.0.6-$$(GIT_REV)" >> .PackageInfo  
+	@echo "        ProjectConceptor = 0.0.6-$(GIT_REV)" >> .PackageInfo  
 	@echo "}" >> .PackageInfo  
 	@echo "requires {" >> .PackageInfo  
 	@echo "	haiku >= r1~alpha4_pm-1" >> .PackageInfo  
