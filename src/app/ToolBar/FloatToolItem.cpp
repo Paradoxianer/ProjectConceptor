@@ -7,21 +7,16 @@
 #include "ToolBar.h"
 
 FloatToolItem::FloatToolItem(const char *name, float newValue,BMessage *msg)
-			  :BButton(BRect(0,0,ITEM_WIDTH*4,ITEM_HEIGHT),name,"",msg), BaseItem(name) {
+			  :BTextControl(BRect(1,1,ITEM_WIDTH*4,ITEM_HEIGHT),name,name,"",msg), BaseItem(name) {
 	Init();
 	value			= newValue;
 	tName 			= name;
-	BRect	textControlRect	= Bounds();
-        textControlRect.InsetBy(5,2);
 	char*	floatToText	= new char[24];
+	SetDivider(ITEM_WIDTH*2.5);
 	sprintf(floatToText,"%.2f",newValue);
-	textValue		= new BTextControl(textControlRect,name,name,"",new BMessage(*msg));
-	float moveToY=(Bounds().Height()-textValue->Bounds().Height())/2;
-	textValue->MoveTo(textValue->Frame().left,moveToY);
-	AddChild(textValue);
 }
 
-FloatToolItem::FloatToolItem(BMessage *archive):BButton(archive),BaseItem("")
+FloatToolItem::FloatToolItem(BMessage *archive):BTextControl(archive),BaseItem("")
 {
 	status_t	err;
 	ssize_t		size;
@@ -40,6 +35,7 @@ FloatToolItem::FloatToolItem(BMessage *archive):BButton(archive),BaseItem("")
 	if (err == B_OK)
 		SetTarget(tmpMessenger);	
 }
+
 void FloatToolItem::Init(void)
 {
 	description			= NULL;
@@ -96,12 +92,19 @@ BArchivable* FloatToolItem::Instantiate(BMessage *archive)
 
 void FloatToolItem::Draw(BRect updateRect)
 {
-	BButton::Draw(updateRect);
+	BTextControl::Draw(updateRect);
 }
+
+/*status_t FloatToolItem::Invoke(BMessage *message)
+{
+	MakeFocus(false);
+	BTextControl::Invoke(message);
+}*/
+
 
 void FloatToolItem::MessageReceived(BMessage *message)
 {
-	BButton::MessageReceived(message);
+	BTextControl::MessageReceived(message);
 }
 
 void FloatToolItem::SetValue(float newValue)
@@ -109,15 +112,15 @@ void FloatToolItem::SetValue(float newValue)
 	value=newValue;
 	char*	floatToText	= new char[24];
 	sprintf(floatToText,"%.2f",newValue);
-	textValue->SetText(floatToText);
+	SetText(floatToText);
 }
 
 float FloatToolItem::GetValue(void)
 {
-	float returnVal =atof(textValue->Text());
+	float returnVal =atof(Text());
 	char*	floatToText	= new char[24];
 	sprintf(floatToText,"%.2f",returnVal);
-	textValue->SetText(floatToText);
+	SetText(floatToText);
 	return returnVal;
 }
 

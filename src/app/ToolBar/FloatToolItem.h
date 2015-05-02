@@ -27,7 +27,7 @@ class ToolBar;
  * @see ToolBar
  * @see ToolMenu
  */
-class FloatToolItem: public	BButton, public BaseItem
+class FloatToolItem: public	BTextControl, public BaseItem
 {
 
 public:
@@ -52,12 +52,13 @@ virtual		float			GetValue(void);
 virtual		void			Draw(BRect updateRect);
 
 
-virtual		BRect			Frame(void) {return BButton::Frame();};
-virtual		void			MoveTo(float x,float y){BButton::MoveTo(x,y);};
-virtual		void			ResizeTo(float width,float height){ResizeTo(width,height);};
+virtual		BRect			Frame(void) {return BTextControl::Frame();};
+virtual		void			MoveTo(float x,float y){BTextControl::MoveTo(x,y);};
+virtual		void			ResizeTo(float width,float height){BTextControl::ResizeTo(width,height);};
 virtual 	void			MessageReceived(BMessage *message);
-virtual		rgb_color		TextViewColor(void){return textValue->TextView()->ViewColor();};
-virtual		void			SetTextViewColor(rgb_color rgb){textValue->TextView()->SetViewColor(rgb);};
+/*virtual		rgb_color		TextViewColor(void){return textValue->TextView()->ViewColor();};
+virtual		void			SetTextViewColor(rgb_color rgb){textValue->TextView()->SetViewColor(rgb);};*/
+//virtual status_t			Invoke(BMessage *message = NULL);
 
 protected:
 			void			Init();
@@ -65,6 +66,6 @@ protected:
 			float			value;
 			BString			*description;
 			BString			*toolTip;
-			BTextControl	*textValue;
+		//	BTextControl	*textValue;
 };
 #endif
