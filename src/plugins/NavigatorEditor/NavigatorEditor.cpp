@@ -78,9 +78,9 @@ void NavigatorEditor::InitGraph()
 		BRect		rootrect		= Bounds();
 		rootrect.right				= 200;
 		root						= new NodeListView(rootrect,allNodes);
-		BMessage *invoked 			= new BMessage(N_A_INVOKATION);
-		invoked->AddPointer("ListView",root);
-		root->SetInvocationMessage(invoked);
+		BMessage *selected 			= new BMessage(N_A_INVOKATION);
+		selected->AddPointer("ListView",root);
+		root->SetSelectionMessage(selected);
 		root->SetTarget(this);
 		AddChild(new BScrollView("root",root,B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true));
 		SetViewColor(255,255,255,255);
@@ -110,11 +110,7 @@ void NavigatorEditor::PreprocessBeforSave(BMessage *container)
 	int32	count;
 	int32	i		= 0;
 	//remove all the Pointer to the Renderer so that on the next load a new Renderer are added
-	#ifdef B_ZETA_VERSION_1_0_0
-		while (container->GetInfo(B_POINTER_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
-	#else
-		while (container->GetInfo(B_POINTER_TYPE,i ,(char **)&name, &type, &count) == B_OK)
-	#endif
+	while (container->GetInfo(B_POINTER_TYPE,i ,(char **)&name, &type, &count) == B_OK)
 	{
 		if ((strstr(name,"GraphEditor") != NULL) ||
 			(strcasecmp(name,"Node::outgoing") == B_OK) ||
