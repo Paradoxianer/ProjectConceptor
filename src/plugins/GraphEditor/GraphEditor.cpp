@@ -1150,18 +1150,17 @@ void GraphEditor::UpdateScrollBars()
 			float docHeight		= docRect.Height()*scale;
 			if (widthDiff<0)
 				widthDiff = 0;
-			if (heightDiff>0)
+			if (heightDiff<0)
 					heightDiff = 0;					
-
 			BScrollBar	*sb	= myScrollParent->ScrollBar(B_HORIZONTAL);
-			sb->SetRange(0,widthDiff*scale);
+			sb->SetRange(docRect.left,widthDiff*scale);
 			sb->SetProportion(scrollRect.Width()/docWidth);
 			// Steps are 1/8 visible window for small steps
 			//   and 1/2 visible window for large steps
 			sb->SetSteps(docWidth / 8.0, docWidth / 2.0);
 	
 			sb	= myScrollParent->ScrollBar(B_VERTICAL);
-			sb->SetRange(0,heightDiff*scale);
+			sb->SetRange(docRect.top,heightDiff*scale);
 			sb->SetProportion(scrollRect.Height()/docHeight);
 			sb->SetSteps(docHeight / 8.0, docHeight / 2.0);
 		}
