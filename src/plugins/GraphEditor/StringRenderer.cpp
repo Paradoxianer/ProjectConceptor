@@ -55,7 +55,7 @@ void StringRenderer::SetFrame(BRect newRect)
 	frame.bottom=frame.top+fontHeight+4;
 }
 
-void StringRenderer::MouseDown(BPoint where)
+void StringRenderer::MouseDown(BPoint where,int32 buttons, int32 clicks,int32 modifiers)
 {
 	TRACE();
 	BRect	textRect= frame;

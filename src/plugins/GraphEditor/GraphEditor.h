@@ -116,15 +116,16 @@ public:
 			image_id		PluginID(void){return pluginID;};
 			char*			RenderString(void){return renderString;};
 			void			SendMessage(BMessage* msg){sentToMe->SendMessage(msg);};
-
+			void			SendMessageToDoc(BMessage* msg){sentTo->SendMessage(msg);};
 			BMessage		*GetStandartPattern(void){return patternMessage;};
+			BMessage        *GenerateInsertCommand(uint32 newWhat);
+
 
 protected:
 			void			Init(void);
 			void			InsertObject(BPoint where,bool deselect);
 			void			InsertRenderObject(BMessage *node);
-			BMessage        *GenerateInsertCommand(uint32 newWhat);
-
+			
 			void			DeleteFromList(Renderer *wichRenderer);
 			void			AddToList(Renderer *wichRenderer, int32 pos);
 			void			UpdateScrollBars(void);

@@ -57,12 +57,8 @@ void ConnectionRenderer::Init() {
 	ValueChanged();
 }
 
-void ConnectionRenderer::MouseDown(BPoint where) {
-	uint32 buttons = 0;
-	BMessage *currentMsg = editor->Window()->CurrentMessage();
-	currentMsg->FindInt32("buttons", (int32 *)&buttons);
-	uint32 modifiers = 0;
-	currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
+void ConnectionRenderer::MouseDown(BPoint where, int32 buttons,
+	                              int32 clicks,int32 modifiers) {
 	float newy	= where.x*ax+mx;
 	float newx	= where.y*ay+my;
 	float dx	= (newx-where.x);
@@ -299,11 +295,13 @@ void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
 }
 
 bool ConnectionRenderer::CaughtStraigt(BPoint where){
+	return false;
 }
 
 bool ConnectionRenderer::CaughtBended(BPoint where){
-
+	return false;
 }
 
 bool ConnectionRenderer::CaughtAngled(BPoint where){
+	return false;
 }

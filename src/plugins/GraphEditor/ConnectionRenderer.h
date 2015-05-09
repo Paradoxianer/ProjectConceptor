@@ -29,7 +29,8 @@ class ConnectionRenderer: public Renderer
 public:
 						ConnectionRenderer(GraphEditor *parentEditor, BMessage *forContainer);
 	virtual void		Draw(BView *drawOn, BRect updateRect);
-	virtual	void		MouseDown(BPoint where);
+	virtual	void		MouseDown(BPoint where, int32 buttons =0,
+	                              int32 clicks =0,int32 modifiers =0);
 	virtual	void		MouseUp(BPoint where);
 	virtual	void		MouseMoved(BPoint pt, uint32 code, const BMessage *msg);
 	virtual	void		LanguageChanged();
@@ -44,7 +45,7 @@ public:
 	//**implement this
 	virtual	void		ResizeBy(float dx,float dy){};
 
-	virtual bool		Selected(void){};
+	virtual bool		Selected(void){return selected;};
 	virtual bool		Caught(BPoint where);
 
 protected:

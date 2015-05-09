@@ -374,19 +374,24 @@ void GraphEditor::Draw(BRect updateRect) {
 void GraphEditor::MouseDown(BPoint where) {
 	BView::MouseDown(where);
 	BView::MakeFocus(true);
+	
 	BPoint		scaledWhere;
 	scaledWhere.x	= where.x / scale;
 	scaledWhere.y	= where.y / scale;
 
 	BMessage *currentMsg = Window()->CurrentMessage();
-	uint32 modifiers = 0;
-	uint32 buttons	= 0;
-//	GetMouse(&where,&buttons);
+	int32 modifiers		= 0;
+	int32 buttons		= 0;
+	int32 clicks		= 0;
+	
+	currentMsg->FindInt32("buttons", &buttons);
+	currentMsg->FindInt32("clicks", &clicks);
+	currentMsg->FindInt32("modifiers", &modifiers);
 	bool found	=	false;
 	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0) );i--) {
 		if (((Renderer*)renderer->ItemAt(i))->Caught(scaledWhere)) {
 			mouseReciver = (Renderer*)renderer->ItemAt(i);
-			mouseReciver->MouseDown(scaledWhere);
+			mouseReciver->MouseDown(scaledWhere,buttons, clicks, modifiers);
 			found			= true;
 		}
 	}

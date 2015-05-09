@@ -38,7 +38,8 @@ class ClassRenderer: public Renderer
 public:
 							ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer);
 				void		Draw(BView *drawOn, BRect updateRect);
-				void		MouseDown(BPoint where);
+				void		MouseDown(BPoint where, int32 buttons =0,
+	                              int32 clicks =0,int32 modifiers =0);
 				void		MouseUp(BPoint where);
 				void		MouseMoved(BPoint pt, uint32 code, const BMessage *msg);
 				void		LanguageChanged();

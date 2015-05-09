@@ -168,3 +168,19 @@ void GroupRenderer::RecalcFrame(bool toFit) {
 		}
 	}
 }
+
+
+void GroupRenderer::MouseDown(BPoint where, int32 buttons,
+	                              int32 clicks,int32 modifiers){
+	/*if (clicks == 2)
+	{	
+		//insert a new Subnode	
+		TRACE();
+		BMessage *newNodeCommand=editor->GenerateInsertCommand(P_C_CLASS_TYPE);
+		BMessage *node;
+		newNodeCommand->FindPointer("node",(void **)&node);
+		node->AddPointer("Node::parent",viewMessage);
+		editor->SendMessageToDoc(newNodeCommand);
+	}*/
+	ClassRenderer::MouseDown(where,buttons,clicks,modifiers);
+}

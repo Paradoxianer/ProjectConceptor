@@ -63,14 +63,16 @@ void ClassRenderer::Init()
 }
 
 
-void ClassRenderer::MouseDown(BPoint where) {
+void ClassRenderer::MouseDown(BPoint where, int32 buttons,
+	                              int32 clicks,int32 modifiers)
+{
 	bool		found			= false;
 	Renderer*	tmpRenderer		= NULL;
 	if (name->Caught(where)) {
 		name->MouseDown(where);
 		found	= true;
 	}
-	for (int32 i = 0; (found == false) && (i < attributes->size());i++) {
+	for (uint32 i = 0; (found == false) && (i < attributes->size());i++) {
 		tmpRenderer=(*attributes)[i];
 		if (tmpRenderer->Caught(where)) {
 			found = true;
@@ -188,7 +190,7 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
 void ClassRenderer::MouseUp(BPoint where) {
 	bool		found			= false;
 	Renderer*	tmpRenderer		= NULL;
-	for (int32 i = 0; (found == false) && (i < attributes->size());i++) {
+	for (uint32 i = 0; (found == false) && (i < attributes->size());i++) {
 		tmpRenderer=(*attributes)[i];
 		if (tmpRenderer->Caught(where)) {
 			found = true;
@@ -208,7 +210,6 @@ void ClassRenderer::MouseUp(BPoint where) {
 				dy = newPosY-startFrame->top;
 			}
 			if (!resizing) {
-				BList		*selected	= doc->GetSelected();
 				BMessage	*mover		= new BMessage(P_C_EXECUTE_COMMAND);
 				mover->AddString("Command::Name","Move");
 				mover->AddFloat("dx",dx);
@@ -217,7 +218,6 @@ void ClassRenderer::MouseUp(BPoint where) {
 				sentTo->SendMessage(mover);
 			}
 			else {
-				BList	*selected	= doc->GetSelected();
 				BMessage	*resizer	= new BMessage(P_C_EXECUTE_COMMAND);
 				resizer->AddString("Command::Name","Resize");
 				resizer->AddFloat("dx",dx);
@@ -245,7 +245,6 @@ void ClassRenderer::MouseUp(BPoint where) {
 void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	BRect		shadowFrame = frame;
 	bool		fitIn		= true;
-	Renderer*	tmpRenderer	= NULL;
 	drawOn->SetFont(font);
 	rgb_color	drawColor;
 	shadowFrame.OffsetBy(3,3);
@@ -264,28 +263,15 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	drawOn->SetHighColor(drawColor);
 	drawOn->FillRoundRect(frame, xRadius, yRadius);
 	
-	//calculate all Stuff for the Connection renderer
-	float	yOben	= frame.top+frame.Height()/2 - circleSize;
-	float	yMitte	= yOben + circleSize;
-	float	yUnten	= yMitte + circleSize;
 	
 
-	drawOn->SetHighColor(0,0,0,255);
-	
-	/*drawOn->FillTriangle(BPoint(frame.left,yOben),BPoint(frame.left+circleSize,yMitte),BPoint(frame.left,yUnten));
-	drawOn->FillTriangle(BPoint(frame.right-circleSize,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-circleSize,yUnten));
-	//pattern resizePattern = { 0x55, 0x55, 0x55, 0x55, 0x55,0x55, 0x55, 0x55 };*/
-	
+	drawOn->SetHighColor(0,0,0,255);	
 	drawOn->FillTriangle(BPoint(frame.right-(3*circleSize),frame.bottom),BPoint(frame.right,frame.bottom-(3*circleSize)),BPoint(frame.right,frame.bottom));
 	
 
 	drawOn->SetHighColor(borderColor);
 	drawOn->SetPenSize(penSize);
 	drawOn->StrokeRoundRect(frame, xRadius, yRadius);
-//	drawOn->SetPenSize(1.0);
-	//drawOn->StrokeTriangle(BPoint(frame.left,yOben),BPoint(frame.left+circleSize,yMitte),BPoint(frame.left,yUnten));
-	//drawOn->StrokeTriangle(BPoint(frame.right-(2*circleSize),frame.bottom),BPoint(frame.right,frame.bottom-(2*circleSize)),BPoint(frame.right,frame.bottom));
-//	drawOn->StrokeTriangle(BPoint(frame.right-circleSize,yOben),BPoint(frame.right,yMitte),BPoint(frame.right-circleSize,yUnten));
 	if (showConnecter) {
 		drawOn->SetHighColor(200,0,0,255);
 
@@ -334,7 +320,6 @@ void ClassRenderer::ValueChanged() {
 	BMessage	*attribMessage	= new BMessage();
 	uint32		type			= B_ANY_TYPE;
 	int32		count			= 0;
-	bool		found			= false;
 
 	container->FindRect("Node::frame",&frame);
 	container->FindBool("Node::selected",&selected);
@@ -443,7 +428,6 @@ void ClassRenderer::ResizeBy(float dx,float dy) {
 
 void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 count)
 {
-	char	*realName	= NULL;
 	/*switch(attribute->what)
 	{
 		case B_STRING_TYPE:

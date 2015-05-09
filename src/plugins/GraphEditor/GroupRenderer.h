@@ -37,8 +37,9 @@ class GroupRenderer: public ClassRenderer
 
 public:
 							GroupRenderer(GraphEditor *parentEditor, BMessage *forContainer);
-/*			void			MouseDown(BPoint where);
-			void			MouseUp(BPoint where);
+			void			MouseDown(BPoint where, int32 buttons =0,
+	                              int32 clicks =0,int32 modifiers =0);
+/*			void			MouseUp(BPoint where);
 			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg);*/
 			void			LanguageChanged();
 //			void			MessageReceived(BMessage *message);

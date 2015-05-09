@@ -68,7 +68,8 @@ void BoolRenderer::SetFrame(BRect newRect)
 	}
 }
 
-void BoolRenderer::MouseDown(BPoint where)
+void BoolRenderer::MouseDown(BPoint where, int32 buttons,
+	                              int32 clicks,int32 modifiers)
 {
 	TRACE();
 

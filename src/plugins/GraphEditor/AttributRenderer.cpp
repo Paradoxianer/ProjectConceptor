@@ -44,7 +44,7 @@ void AttributRenderer::Init()
 	kontextMenu	= new BPopUpMenu("deleter");
 	BMenuItem	*delMenu = new BMenuItem(_T("Delete"),deleteMessage);
 	kontextMenu->AddItem(delMenu);
-	status_t err = kontextMenu->SetTargetForItems(editor->BelongTo());
+	kontextMenu->SetTargetForItems(editor->BelongTo());
 
 	// look up the plugininfos
 	get_image_info(editor->PluginID(),info);
@@ -137,18 +137,13 @@ void AttributRenderer::SetFrame(BRect newRect)
 	frame.bottom	= maxBottom;	
 }
 
-void AttributRenderer::MouseDown(BPoint where)
+void AttributRenderer::MouseDown(BPoint where,
+								 int32 buttons, int32 clicks,int32 modifiers)
 {
 	TRACE();
-	uint32 modifiers = 0;
-	uint32 buttons = 0;
-	BMessage *currentMsg = editor->Window()->CurrentMessage();
-	currentMsg->FindInt32("buttons", (int32 *)&buttons);
-	currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
 	if (buttons & B_SECONDARY_MOUSE_BUTTON)
  	{
  		BMenuItem *selected;
- 		BMessage *copy;
  		editor->ConvertToScreen(&where);
 		selected = kontextMenu->Go(where); 
 		// ### We're not allowed to call it as it is protected.

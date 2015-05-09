@@ -12,7 +12,8 @@ public:
 	virtual	void		ValueChanged(void)										= 0;
 
 
-	virtual	void		MouseDown(BPoint where)									= 0;
+	virtual	void		MouseDown(BPoint where, int32 buttons =0,
+	                              int32 clicks =0,int32 modifiers =0)			= 0;
 	virtual	void		MouseMoved(BPoint pt, uint32 code, const BMessage *msg)	= 0;
 	virtual	void		MouseUp(BPoint where) 									= 0;
 

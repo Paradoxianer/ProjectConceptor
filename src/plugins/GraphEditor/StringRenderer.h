@@ -36,7 +36,8 @@ public:
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetString(char *newString);
 			char*			GetString(void){return myString;};
-			void			MouseDown(BPoint where);
+			void			MouseDown(BPoint where, int32 buttons =0,
+	                              	  int32 clicks =0, int32 modifiers =0);
 			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg){};
 
 			void			MouseUp(BPoint where){};
@@ -46,7 +47,7 @@ public:
 			void			ResizeBy(float dx,float dy){frame.right+=dx;SetFrame(frame);};
 
 			bool			Selected(void){return false;};
-			bool			Caught(BPoint where){frame.Contains(where);};
+			bool			Caught(BPoint where){return frame.Contains(where);};
 
 protected:
 			void			Init();
