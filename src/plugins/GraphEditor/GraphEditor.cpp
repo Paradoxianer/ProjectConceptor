@@ -902,16 +902,17 @@ void GraphEditor::BringToFront(Renderer *wichRenderer) {
 	BMessage	*tmpMessage		= NULL;
 	BList		*groupAllNodeList	= new BList();
 	Renderer	*tmpRenderer		= NULL;
-	if ((tmpMessage = wichRenderer->GetMessage()) != NULL) {
+	if (wichRenderer!=NULL)
+		if ((tmpMessage = wichRenderer->GetMessage()) != NULL) {
 	    /*if ((tmpMessage->FindPointer("Node::parent", (void **)&parentNode) == B_OK) && (parentNode != NULL) ) {
 			parentNode->FindPointer(renderString,(void **)&tmpRenderer);
 			if (tmpRenderer)
 				((GroupRenderer *)tmpRenderer)->BringToFront(wichRenderer);
 	    }*/
-	DeleteFromList(wichRenderer);
-	AddToList(wichRenderer,renderer->CountItems()+1);
-	Invalidate();
-	}
+		DeleteFromList(wichRenderer);
+		AddToList(wichRenderer,renderer->CountItems()+1);
+		Invalidate();
+		}
    }
 
 
@@ -1036,8 +1037,11 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat)
 
 bool GraphEditor::DrawRenderer(void *arg,void *editor)
 {
-	Renderer *painter=(Renderer *)arg;
-	painter->Draw((GraphEditor*)editor,BRect(0,0,0,0));
+	Renderer	*painter	=(Renderer *)arg;
+	GraphEditor	*gEditor	= (GraphEditor*)editor;
+	BRegion		region;
+	gEditor->GetClippingRegion(&region);
+	painter->Draw(gEditor,region.Frame());
 	return false;
 }
 
