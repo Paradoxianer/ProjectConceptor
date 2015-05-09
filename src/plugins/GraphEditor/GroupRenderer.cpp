@@ -78,26 +78,14 @@ void GroupRenderer::ValueChanged()
 }
 
 void GroupRenderer::MoveBy(float dx,float dy) {
-	//frame.OffsetBy(dx,dy);
-	//name->MoveBy(dx,dy);
 	ClassRenderer::MoveBy(dx,dy);
 	for (int32 i=0;i<renderer->CountItems();i++)
 		((Renderer *)renderer->ItemAt(i))->MoveBy(dx,dy);
 }
 
 void GroupRenderer::ResizeBy(float dx,float dy) {
-	if ((frame.right+dx-frame.left) > 70)
-		frame.right		+= dx;
-	if  ((frame.bottom+dy-frame.top) > 30)
-		frame.bottom	+= dy;
-	name->ResizeBy(dy,dy);
 	ClassRenderer::ResizeBy(dx,dy);
-	//** ToDo if its getting smaller move all inside nodes toghere
-	/*if ((frame.right+dx-frame.left) > 70)
-		frame.right		+= dx;
-	if  ((frame.bottom+dy-frame.top) > 30)
-		frame.bottom	+= dy;
-	name->ResizeBy(dy,dy);*/
+	RecalcFrame(true);
 }
 
 
