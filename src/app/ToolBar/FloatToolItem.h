@@ -59,6 +59,9 @@ virtual 	void			MessageReceived(BMessage *message);
 virtual		rgb_color		TextViewColor(void){return textValue->TextView()->ViewColor();};
 virtual		void			SetTextViewColor(rgb_color rgb){textValue->TextView()->SetViewColor(rgb);};
 
+
+virtual		status_t		SetTarget(BMessenger messenger);
+
 protected:
 			void			Init();
 	const	char			*tName;

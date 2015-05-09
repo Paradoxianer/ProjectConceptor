@@ -12,12 +12,25 @@ FloatToolItem::FloatToolItem(const char *name, float newValue,BMessage *msg)
 	value			= newValue;
 	tName 			= name;
 	BRect	textControlRect	= Bounds();
-        textControlRect.InsetBy(5,2);
+			textControlRect.InsetBy(5,2);
 	char*	floatToText	= new char[24];
 	sprintf(floatToText,"%.2f",newValue);
 	textValue		= new BTextControl(textControlRect,name,name,"",new BMessage(*msg));
 	float moveToY=(Bounds().Height()-textValue->Bounds().Height())/2;
 	textValue->MoveTo(textValue->Frame().left,moveToY);
+	for (uint32 i = 0; i < 256; ++i)
+		textValue->TextView()->DisallowChar(i);
+	textValue->TextView()->AllowChar('1');
+	textValue->TextView()->AllowChar('2');
+	textValue->TextView()->AllowChar('3');
+	textValue->TextView()->AllowChar('4');
+	textValue->TextView()->AllowChar('5');
+	textValue->TextView()->AllowChar('6');
+	textValue->TextView()->AllowChar('7');
+	textValue->TextView()->AllowChar('8');
+	textValue->TextView()->AllowChar('9');
+	textValue->TextView()->AllowChar('0');
+	textValue->TextView()->AllowChar('.');
 	AddChild(textValue);
 }
 
@@ -60,6 +73,7 @@ void FloatToolItem::AttachedToToolBar(ToolBar *tb)
 	//**check if parentToolBar==NULL or any other error
 	BaseItem::AttachedToToolBar(tb);
 	parentToolBar->AddChild(this);
+	
 }
 
 void FloatToolItem::DetachedFromToolBar(ToolBar *tb)
@@ -121,3 +135,8 @@ float FloatToolItem::GetValue(void)
 	return returnVal;
 }
 
+status_t FloatToolItem::SetTarget(BMessenger messenger)
+{
+	textValue->SetTarget(messenger);
+	return BButton::SetTarget(messenger);
+}
