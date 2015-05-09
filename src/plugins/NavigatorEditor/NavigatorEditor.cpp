@@ -257,7 +257,7 @@ void NavigatorEditor::InsertNewList(BListView *source)
 		{
 			BRect		listrect		= Bounds();
 			listrect.left				= source->Parent()->Frame().right+5;
-			listrect.right				= listrect.left	+200;
+			listrect.right				= listrect.left	+400;
 			if (listrect.right > Bounds().right)
 			{
 				ResizeTo(listrect.right+B_V_SCROLL_BAR_WIDTH+5,Bounds().bottom);
