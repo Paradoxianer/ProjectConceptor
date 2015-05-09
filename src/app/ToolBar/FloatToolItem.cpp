@@ -7,16 +7,21 @@
 #include "ToolBar.h"
 
 FloatToolItem::FloatToolItem(const char *name, float newValue,BMessage *msg)
-			  :BTextControl(BRect(1,1,ITEM_WIDTH*4,ITEM_HEIGHT),name,name,"",msg), BaseItem(name) {
+			  :BButton(BRect(0,0,ITEM_WIDTH*4,ITEM_HEIGHT),name,"",msg), BaseItem(name) {
 	Init();
 	value			= newValue;
 	tName 			= name;
+	BRect	textControlRect	= Bounds();
+        textControlRect.InsetBy(5,2);
 	char*	floatToText	= new char[24];
-	SetDivider(ITEM_WIDTH*2.5);
 	sprintf(floatToText,"%.2f",newValue);
+	textValue		= new BTextControl(textControlRect,name,name,"",new BMessage(*msg));
+	float moveToY=(Bounds().Height()-textValue->Bounds().Height())/2;
+	textValue->MoveTo(textValue->Frame().left,moveToY);
+	AddChild(textValue);
 }
 
-FloatToolItem::FloatToolItem(BMessage *archive):BTextControl(archive),BaseItem("")
+FloatToolItem::FloatToolItem(BMessage *archive):BButton(archive),BaseItem("")
 {
 	status_t	err;
 	ssize_t		size;
@@ -35,7 +40,6 @@ FloatToolItem::FloatToolItem(BMessage *archive):BTextControl(archive),BaseItem("
 	if (err == B_OK)
 		SetTarget(tmpMessenger);	
 }
-
 void FloatToolItem::Init(void)
 {
 	description			= NULL;
@@ -92,13 +96,12 @@ BArchivable* FloatToolItem::Instantiate(BMessage *archive)
 
 void FloatToolItem::Draw(BRect updateRect)
 {
-	BTextControl::Draw(updateRect);
+	BButton::Draw(updateRect);
 }
-
 
 void FloatToolItem::MessageReceived(BMessage *message)
 {
-	BTextControl::MessageReceived(message);
+	BButton::MessageReceived(message);
 }
 
 void FloatToolItem::SetValue(float newValue)
@@ -106,16 +109,15 @@ void FloatToolItem::SetValue(float newValue)
 	value=newValue;
 	char*	floatToText	= new char[24];
 	sprintf(floatToText,"%.2f",newValue);
-	PRINT(("FloatToolItem::SetValue(%s)",floatToText));
-	SetText(floatToText);
+	textValue->SetText(floatToText);
 }
 
 float FloatToolItem::GetValue(void)
 {
-	float returnVal =atof(Text());
+	float returnVal =atof(textValue->Text());
 	char*	floatToText	= new char[24];
 	sprintf(floatToText,"%.2f",returnVal);
-	SetText(floatToText);
+	textValue->SetText(floatToText);
 	return returnVal;
 }
 
