@@ -95,12 +95,6 @@ void FloatToolItem::Draw(BRect updateRect)
 	BTextControl::Draw(updateRect);
 }
 
-/*status_t FloatToolItem::Invoke(BMessage *message)
-{
-	MakeFocus(false);
-	BTextControl::Invoke(message);
-}*/
-
 
 void FloatToolItem::MessageReceived(BMessage *message)
 {
@@ -112,6 +106,7 @@ void FloatToolItem::SetValue(float newValue)
 	value=newValue;
 	char*	floatToText	= new char[24];
 	sprintf(floatToText,"%.2f",newValue);
+	PRINT(("FloatToolItem::SetValue(%s)",floatToText));
 	SetText(floatToText);
 }
 
