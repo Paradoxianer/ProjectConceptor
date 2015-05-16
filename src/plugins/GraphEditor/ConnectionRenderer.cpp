@@ -132,59 +132,62 @@ void ConnectionRenderer::ValueChanged() {
 }
 
 void ConnectionRenderer::CalcLine() {
-	BRect	*fromRect	= new BRect(from->Frame());
-	BRect	*toRect		= new BRect(to->Frame());
-	float	toMiddleX 	=	(toRect->right-toRect->left)/2;
-	float	toMiddleY	=	(toRect->bottom-toRect->top)/2;
-	alpha		= atan2((toRect->top-fromRect->top),(toRect->left-fromRect->left));
-	if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) ) {
-		first		= BPoint(toRect->right+circleSize,toRect->top+toMiddleY-circleSize);
-		second		= BPoint(first.x,toRect->top+toMiddleY+circleSize);
-		third		= BPoint(toRect->right,toRect->top+toMiddleY);
-		toPoint		= BPoint(first.x,third.y);
-		fromPoint	= BPoint(fromRect->left,fromRect->top+(fromRect->bottom-fromRect->top)/2);
-		float	bendLength	= BEND_LENGTH* (fromPoint.x-toPoint.x);
-		firstBend.x		= fromPoint.x - bendLength;
-		firstBend.y		= fromPoint.y;
-		secondBend.x	= toPoint.x + bendLength;
-		secondBend.y	= toPoint.y;
-	}
-	else if (alpha < -M_PI_4) {
-		first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->bottom+circleSize);
-		second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->bottom+circleSize);
-		third		= BPoint(toRect->left+toMiddleX,toRect->bottom);
-		toPoint		= BPoint(third.x,first.y);
-		fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->top);
-		float	bendLength	= BEND_LENGTH* (fromPoint.y-toPoint.y);
-		firstBend.x		= fromPoint.x;
-		firstBend.y		= fromPoint.y - bendLength;
-		secondBend.x	= toPoint.x;
-		secondBend.y	= toPoint.y + bendLength;
-	}
-	else if (alpha> M_PI_4) {
-		first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->top-circleSize);
-		second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->top-circleSize);
-		third		= BPoint(toRect->left+toMiddleX,toRect->top);
-		toPoint		= BPoint(third.x,first.y);
-		fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->bottom);
-		float	bendLength	= BEND_LENGTH* (toPoint.y-fromPoint.y);
-		firstBend.x		= fromPoint.x;
-		firstBend.y		= fromPoint.y + bendLength;
-		secondBend.x	= toPoint.x;
-		secondBend.y	= toPoint.y - bendLength;
+	if (from != NULL &&  to != NULL)
+	{
+		BRect	*fromRect	= new BRect(from->Frame());
+		BRect	*toRect		= new BRect(to->Frame());
+		float	toMiddleX 	=	(toRect->right-toRect->left)/2;
+		float	toMiddleY	=	(toRect->bottom-toRect->top)/2;
+		alpha		= atan2((toRect->top-fromRect->top),(toRect->left-fromRect->left));
+		if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) ) {
+			first		= BPoint(toRect->right+circleSize,toRect->top+toMiddleY-circleSize);
+			second		= BPoint(first.x,toRect->top+toMiddleY+circleSize);
+			third		= BPoint(toRect->right,toRect->top+toMiddleY);
+			toPoint		= BPoint(first.x,third.y);
+			fromPoint	= BPoint(fromRect->left,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+			float	bendLength	= BEND_LENGTH* (fromPoint.x-toPoint.x);
+			firstBend.x		= fromPoint.x - bendLength;
+			firstBend.y		= fromPoint.y;
+			secondBend.x	= toPoint.x + bendLength;
+			secondBend.y	= toPoint.y;
+		}
+		else if (alpha < -M_PI_4) {
+			first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->bottom+circleSize);
+			second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->bottom+circleSize);
+			third		= BPoint(toRect->left+toMiddleX,toRect->bottom);
+			toPoint		= BPoint(third.x,first.y);
+			fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->top);
+			float	bendLength	= BEND_LENGTH* (fromPoint.y-toPoint.y);
+			firstBend.x		= fromPoint.x;
+			firstBend.y		= fromPoint.y - bendLength;
+			secondBend.x	= toPoint.x;
+			secondBend.y	= toPoint.y + bendLength;
+		}
+		else if (alpha> M_PI_4) {
+			first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->top-circleSize);
+			second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->top-circleSize);
+			third		= BPoint(toRect->left+toMiddleX,toRect->top);
+			toPoint		= BPoint(third.x,first.y);
+			fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->bottom);
+			float	bendLength	= BEND_LENGTH* (toPoint.y-fromPoint.y);
+			firstBend.x		= fromPoint.x;
+			firstBend.y		= fromPoint.y + bendLength;
+			secondBend.x	= toPoint.x;
+			secondBend.y	= toPoint.y - bendLength;
 
-	}
-	else {
-		first		= BPoint(toRect->left-circleSize,toRect->top+toMiddleY-circleSize);
-		second		= BPoint(toRect->left-circleSize,toRect->top+toMiddleY+circleSize);
-		third		= BPoint(toRect->left,toRect->top+toMiddleY);
-		toPoint		= BPoint(first.x,third.y);
-		fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2);
-		float	bendLength	= BEND_LENGTH* (toPoint.x-fromPoint.x);
-		firstBend.x		= fromPoint.x + bendLength;
-		firstBend.y		= fromPoint.y;
-		secondBend.x	= toPoint.x - bendLength;
-		secondBend.y	= toPoint.y;
+		}
+		else {
+			first		= BPoint(toRect->left-circleSize,toRect->top+toMiddleY-circleSize);
+			second		= BPoint(toRect->left-circleSize,toRect->top+toMiddleY+circleSize);
+			third		= BPoint(toRect->left,toRect->top+toMiddleY);
+			toPoint		= BPoint(first.x,third.y);
+			fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+			float	bendLength	= BEND_LENGTH* (toPoint.x-fromPoint.x);
+			firstBend.x		= fromPoint.x + bendLength;
+			firstBend.y		= fromPoint.y;
+			secondBend.x	= toPoint.x - bendLength;
+			secondBend.y	= toPoint.y;
+		}
 	}
 }
 
