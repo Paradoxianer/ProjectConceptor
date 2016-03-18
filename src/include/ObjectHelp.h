@@ -7,7 +7,7 @@
  *
  * @brief  ObjectHelp is the interface for every object wicht provide a programmewide help
  *
- * @author Paradoxon powered by Jesus Christ
+ * @author Paradoxon
  * @version 0.01
  * @date 2005/10/04
  *
