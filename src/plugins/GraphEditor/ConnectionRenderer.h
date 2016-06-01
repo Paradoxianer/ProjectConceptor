@@ -10,6 +10,8 @@
 #include <app/Messenger.h>
 #include <interface/View.h>
 #include <math.h>
+#include <interface/Shape.h>
+
 
 const uint32	B_C_NAME_CHANGED	= 'bcNC';
 
@@ -57,6 +59,9 @@ protected:
 			bool		CaughtStraigt(BPoint where);
 			bool		CaughtBended(BPoint where);
 			bool		CaughtAngled(BPoint where);
+			
+			BPoint		PointOnBezier(float t);
+			float		Distance(BPoint one, BPoint two);
 
 	bool				selected;
 	BPoint				first,second,third;
@@ -67,10 +72,9 @@ protected:
 	BPoint				toPoint;
 	BPoint				firstBend;
 	BPoint				secondBend;
+	BShape				bezier;
 	bool				mirrorX,mirrorY;
 	double				alpha;
-	double				ax,mx;
-	double				ay,my;
 //	PCommand			*selectCommand;
 	PDocument			*doc;
 	BMessenger			*sentTo;

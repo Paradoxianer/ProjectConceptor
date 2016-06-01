@@ -2,7 +2,6 @@
 #include "ClassRenderer.h"
 #include "ProjectConceptorDefs.h"
 
-#include <interface/Shape.h>
 #include <interface/Window.h>
 #include <stdio.h>
 #include <math.h>
@@ -22,6 +21,8 @@ void ConnectionRenderer::Init() {
 	selected		= false;
 	fillColor		= make_color(187,67,47,255);
 	connectionType	= 2;
+	bezier			= BShape();
+
 //	connectionName	= new BTextControl(BRect(0,0,100,55),"Name",NULL,"Unbenannt",new BMessage(B_C_NAME_CHANGED));
 //	AddChild(connectionName);
 	BList		*outgoing	= NULL;
@@ -210,15 +211,12 @@ BRect ConnectionRenderer::Frame()
 }
 
 bool ConnectionRenderer::Caught(BPoint where){
-	float newy	= (double)where.x*ax+mx;
-	float newx	= (double)where.y*ay+my;
-	float dx	= (newx-where.x);
-	float dy	= (newy-where.y);
-	float dist	= sqrt(dx*dx+dy*dy);
-	if (dist<max_entfernung)
-		return true;
-	else
-		return false;
+	if (connectionType == 0)
+		return CaughtStraigt(where);
+	else if (connectionType == 1)
+		return CaughtBended(where);
+	else if (connectionType == 2)
+		return CaughtAngled(where);
 }
 
 void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
@@ -251,15 +249,15 @@ void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
 		drawOn->SetHighColor(fillColor);
 	else
 		drawOn->SetHighColor(tint_color(fillColor,1.5));
-	BShape *bezier	= new BShape();
-	bezier->MoveTo(BPoint(0,0));
+	bezier=BShape();
+	bezier.MoveTo(BPoint(0,0));
 	BPoint	controlPoints[3];
 	controlPoints[0]=firstBend-fromPoint;
 	controlPoints[1]=secondBend-fromPoint;
 	controlPoints[2]=toPoint-fromPoint;
-	bezier->BezierTo(controlPoints);
+	bezier.BezierTo(controlPoints);
 	drawOn->MovePenTo(fromPoint);
-	drawOn->StrokeShape(bezier);
+	drawOn->StrokeShape(&bezier);
 }
 
 void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
@@ -296,108 +294,55 @@ void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
 }
 
 bool ConnectionRenderer::CaughtStraigt(BPoint where){
-	float newy	= (double)where.x*ax+mx;
+	/*float newy	= (double)where.x*ax+mx;
 	float newx	= (double)where.y*ay+my;
 	float dx	= (newx-where.x);
 	float dy	= (newy-where.y);
 	float dist	= sqrt(dx*dx+dy*dy);
 	if (dist<max_entfernung)
 		return true;
-	else
+	else*/
 		return false;
 }
 
 bool ConnectionRenderer::CaughtBended(BPoint where){
-		// a temporary util vect = p0 - (x,y)
-/*		BPoint pos;
-		pos.x = first.x - where.x;
-		pos.y = first.y - where.y;
-		// search points P of bezier curve with PM.(dP / dt) = 0
-		// a calculus leads to a 3d degree equation :
-		var a:Number = B.x * B.x + B.y * B.y;
-		var b:Number = 3 * (A.x * B.x + A.y * B.y);
-		var c:Number = 2 * (A.x * A.x + A.y * A.y) + pos.x * B.x + pos.y * B.y;
-		var d:Number = pos.x * A.x + pos.y * A.y;
-		var sol:Object = thirdDegreeEquation(a, b, c, d);
-		
-		var t:Number;
-		var dist:Number;
-		var tMin:Number;
-		var distMin:Number = Number.MAX_VALUE;
-		var d0:Number = getDist(x, y, p0.x, p0.y);
-		var d2:Number = getDist(x, y, p2.x, p2.y);
-		var orientedDist:Number;
-		
-		if (sol != null)
+	/*if (bezier.Bounds().Contains(where) == true )
+	{
+		float t = 0;
+		float minDist=999999;
+		for ( t=0; t<1.0; t+=0.01)
 		{
-			// find the closest point:
-			for (var i = 1; i <= sol.count; i++)
-			{
-				t = sol["s" + i];
-				if (t >= 0 && t <= 1)
-				{
-					pos = getPos(t);
-					dist = getDist(x, y, pos.x, pos.y);
-					if (dist < distMin)
-					{
-						// minimum found!
-						tMin = t;
-						distMin = dist;
-						posMin.x = pos.x;
-						posMin.y = pos.y;
-					}
-				}
-			}
-			if (tMin != null && distMin < d0 && distMin < d2) 
-			{
-				// the closest point is on the curve
-				nor.x = A.y + tMin * B.y;
-				nor.y = -(A.x + tMin * B.x);
-				nor.normalize(1);
-				orientedDist = distMin;
-				if ((x - posMin.x) * nor.x + (y - posMin.y) * nor.y < 0) 
-				{
-					nor.x *= -1;
-					nor.y *= -1;
-					orientedDist *= -1;
-				}
-				
-				nearest.t = tMin;
-				nearest.pos = posMin;
-				nearest.nor = nor;
-				nearest.dist = distMin;
-				nearest.orientedDist = orientedDist;
-				nearest.onCurve = true;
-				return nearest;
-			}
-			
-		} 
-		// the closest point is one of the 2 end points
-		if (d0 < d2) 
-		{
-			distMin = d0;
-			tMin = 0;
-			posMin.x = p0.x;
-			posMin.y = p0.y;	
-		} else 
-		{
-			distMin = d2;
-			tMin = 1;
-			posMin.x = p2.x;
-			posMin.y = p2.y;
+			minDist =fmin(minDist, Distance(where,PointOnBezier(t)));
+			if (minDist < max_entfernung)
+				return true;
 		}
-		nor.x = x - posMin.x;
-		nor.y = y - posMin.y;
-		nor.normalize(1);
-		
-		nearest.t = tMin;
-		nearest.pos = posMin;
-		nearest.nor = nor;
-		nearest.orientedDist = nearest.dist = distMin;
-		nearest.onCurve = false;
-		return nearest;
-*/
+		return false;
+	}*/
+	//just for now ;-)
 	return false;
+}
+
+float ConnectionRenderer::Distance(BPoint one, BPoint two)
+{
+	float dx = one.x - two.x;
+	float dy = one.y - two.y;
+	return sqrt(dx*dx+dy*dy);
+}
+
+BPoint ConnectionRenderer::PointOnBezier(float t)
+{
+	double x1=fromPoint.x, y1=fromPoint.y;
+	double cx1=firstBend.x, cy1=firstBend.y;
+	double cx2=secondBend.x, cy2=secondBend.y;
+	double x2=toPoint.x, y2=toPoint.x;
+	double ax=cx1-x1, ay=cy1-y1;
+	double bx=cx2-cx1-ax, by=cy2-cy1-ay;
+	double cx=x2-cx2-ax-bx-bx; // instead of ...-ax-2*bx. Does it worth?
+	double cy=y2-cy2-ay-by-by;
+	
+	double x=x1+(t*((3*ax)+(t*((3*bx)+(t*cx)))));
+	double y=y1+(t*((3*ay)+(t*((3*by)+(t*cy)))));	
+	return BPoint(x,y);
 }
 
 bool ConnectionRenderer::CaughtAngled(BPoint where){
