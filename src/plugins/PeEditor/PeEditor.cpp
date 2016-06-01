@@ -8,11 +8,17 @@
 #include <support/DataIO.h>
 
 #include <string.h>
+#include <Catalog.h>
+
 #include "PeEditor.h"
 #include "PCommandManager.h"
 
 #include "ToolBar.h"
 #include "InputRequest.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "PeEditor"
+
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
@@ -689,7 +695,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			char	*datadummy	= new char[4];
 			strcpy(datadummy,"    ");
 			message->FindInt32("type",&type);
-			InputRequest	*inputAlert = new InputRequest(_T("Input AttributName"),_T("Name"), _T("Attribut"), _T("OK"),_T("Cancel"));
+			InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input AttributName"),B_TRANSLATE("Name"), B_TRANSLATE("Attribut"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
 			char			*input		= NULL;
 			char			*inputstr	= NULL;
 			if (inputAlert->Go(&input)<1)

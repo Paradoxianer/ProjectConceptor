@@ -25,12 +25,6 @@ using namespace std;
 #include "ConnectionRenderer.h"
 #include "GroupRenderer.h"
 
-#ifdef B_ZETA_VERSION_1_0_0
-	#include <locale/Locale.h>
-	#include <locale/LanguageNotifier.h>
-#else
-	#define _T(a) a
-#endif
 
 class GroupRenderer: public ClassRenderer
 {

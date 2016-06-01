@@ -18,12 +18,6 @@
 #include "Renderer.h"
 #include "TextEditorControl.h"
 
-#ifdef B_ZETA_VERSION
-	#include <locale/Locale.h>
-	#include <locale/LanguageNotifier.h>
-#else
-	#define _T(a) a
-#endif 
 
 const uint32	B_C_V_NAME_CHANGED	= 'bcNC';
 

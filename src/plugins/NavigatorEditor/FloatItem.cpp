@@ -1,12 +1,6 @@
 #include "FloatItem.h"
 #include <interface/InterfaceDefs.h>
 
-#ifdef B_ZETA_VERSION_BETA
-	#include <locale/Locale.h>
-#else
-	#define _T(a) a
-#endif 
-
 FloatItem::FloatItem(char *newLabel,
 		float newValue,
 		uint32 level,

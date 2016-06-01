@@ -10,11 +10,15 @@
 
 #include <support/String.h>
 #include <math.h>
+#include <Catalog.h>
 
 #include "AttributRenderer.h"
 #include "ProjectConceptorDefs.h"
 #include "PCommandManager.h"
 #include "BoolRenderer.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "AttributeRenderer"
 
 AttributRenderer::AttributRenderer(GraphEditor *parentEditor,
 		BMessage *forAttribut,
@@ -42,7 +46,7 @@ void AttributRenderer::Init()
 	size_t		size;
 	delBitmap	= NULL;
 	kontextMenu	= new BPopUpMenu("deleter");
-	BMenuItem	*delMenu = new BMenuItem(_T("Delete"),deleteMessage);
+	BMenuItem	*delMenu = new BMenuItem(B_TRANSLATE("Delete"),deleteMessage);
 	kontextMenu->AddItem(delMenu);
 	kontextMenu->SetTargetForItems(editor->BelongTo());
 

@@ -15,12 +15,7 @@
 #include <support/Archivable.h>
 #include <support/List.h>
 #include <set>
-#ifdef B_ZETA_VERSION_1_0_0
-	#include <locale/Locale.h>
-	#include <locale/LanguageNotifier.h>
-#else
-	#define _T(a) a
-#endif
+
 using namespace std;
 
 class HelpManager;

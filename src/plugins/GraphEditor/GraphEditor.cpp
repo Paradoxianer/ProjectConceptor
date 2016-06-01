@@ -6,8 +6,9 @@
 #include <translation/TranslatorFormats.h>
 #include <storage/Resources.h>
 #include <support/DataIO.h>
-
 #include <string.h>
+#include <Catalog.h>
+
 #include "GraphEditor.h"
 #include "PCommandManager.h"
 #include "Renderer.h"
@@ -21,6 +22,10 @@
 #include "ToolBar.h"
 #include "ToolItem.h"
 #include "InputRequest.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "GraphEditor"
+
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
@@ -92,7 +97,7 @@ void GraphEditor::Init(void) {
 	patternMessage->AddInt32("LowColor",*(int32 *)&lowColor);
 	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH),false);
 
-	scaleMenu		= new BMenu(_T("Scale"));
+	scaleMenu		= new BMenu(B_TRANSLATE("Scale"));
 	BMessage	*newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",0.1);
 	scaleMenu->AddItem(new BMenuItem("10 %",newScale,0,0));
@@ -124,10 +129,10 @@ void GraphEditor::Init(void) {
 	newScale->AddFloat("scale",10);
 	scaleMenu->AddItem(new BMenuItem("1000 %",newScale,0,0));
 
-	grid		= new ToolItem("Grid",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
-	penSize		= new FloatToolItem(_T("Pen Size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
-	colorItem	= new ColorToolItem(_T("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
-	patternItem	= new PatternToolItem(_T("Node::Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
+	grid		= new ToolItem(B_TRANSLATE("Grid"),BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
+	penSize		= new FloatToolItem(B_TRANSLATE("Pen Size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
+	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
+	patternItem	= new PatternToolItem(B_TRANSLATE("Node::Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 
 	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);
 	//loading ressource_images from the PluginRessource
@@ -681,7 +686,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			int32	type;
 			BString datadummy	= BString("   ");
 			message->FindInt32("type",&type);
-			InputRequest	*inputAlert = new InputRequest(_T("Input AttributName"),_T("Name"), _T("Attribut"), _T("OK"),_T("Cancel"));
+			InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input AttributName"),B_TRANSLATE("Name"), B_TRANSLATE("Attribut"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
 			char			*input		= NULL;
 			char			*inputstr	= NULL;
 			if (inputAlert->Go(&input)<1) {

@@ -2,12 +2,11 @@
 #include <stdio.h>
 #include <app/Message.h>
 #include <interface/InterfaceDefs.h>
+#include <Catalog.h>
 
-#ifdef B_ZETA_VERSION_BETA
-	#include <locale/Locale.h>
-#else
-	#define _T(a) a
-#endif
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "BoolItem"
+
 
 BoolItem::BoolItem(char *newLabel, 
 		bool newValue,
@@ -76,9 +75,9 @@ void BoolItem::DrawItem(BView *owner, BRect bounds, bool complete)
 		{
 			owner->RemoveChild(value);
 			if (value->Value())
-				sprintf(svalue,_T("true"));
+				sprintf(svalue,B_TRANSLATE("true"));
 			else
-				sprintf(svalue,_T("false"));
+				sprintf(svalue,B_TRANSLATE("false"));
 		}
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-textLine);
 		owner->DrawString(svalue);
@@ -103,9 +102,9 @@ void BoolItem::SetExpanded(bool expande)
 void	BoolItem::ValueChange(void)
 {
 	if (value->Value())
-		sprintf(svalue,_T("true"));
+		sprintf(svalue,B_TRANSLATE("true"));
 	else
-		sprintf(svalue,_T("false"));
+		sprintf(svalue,B_TRANSLATE("false"));
 }
 
 status_t BoolItem::Invoke(BMessage *message)

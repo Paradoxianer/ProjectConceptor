@@ -5,7 +5,7 @@
  * @version 0.01
  * @date 2005/10/04
  */
-#define _ZETA_USING_EXPERIMENTAL_
+
 #include <app/AppDefs.h>
 #include <support/TypeConstants.h>
 
@@ -81,14 +81,13 @@ const uint32	P_C_EDITOR_SWITCHED_INACTIV		= 'pcSI';
 const uint32	P_C_WINDOW_LIST_CHANGED			= 'pcWC';
 const uint32	P_C_TOOLBAR_CHANGED				= 'pcTC';
 
-#ifndef B_ZETA_VERSION_1_0_0
 
 const uint32	B_FONT_TYPE						= 'fOTy';
 #ifndef __HAIKU__ // Avoid Redefinition ???
 const uint32	B_REDO							= 'redo';
 #endif
 const uint32	B_CLEAR							= 'clea';
-#endif
+
 
 const uint32	WINDOW_REGISTRY_ADD				= 'WRad';
 const uint32	WINDOW_REGISTRY_SUB				= 'WRsb';

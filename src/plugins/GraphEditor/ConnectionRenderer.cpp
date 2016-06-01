@@ -5,6 +5,7 @@
 #include <interface/Shape.h>
 #include <interface/Window.h>
 #include <stdio.h>
+#include <math.h>
 
 
 ConnectionRenderer::ConnectionRenderer(GraphEditor *parentEditor, BMessage *forContainer):Renderer(parentEditor, forContainer) {
@@ -59,11 +60,7 @@ void ConnectionRenderer::Init() {
 
 void ConnectionRenderer::MouseDown(BPoint where, int32 buttons,
 	                              int32 clicks,int32 modifiers) {
-	float newy	= where.x*ax+mx;
-	float newx	= where.y*ay+my;
-	float dx	= (newx-where.x);
-	float dy	= (newy-where.y);
-	if ((dx*dx+dy*dy)<max_entfernung) {
+	if (Caught(where)==true) {
 		if (buttons & B_PRIMARY_MOUSE_BUTTON)
 			editor->BringToFront(this);
 		else if (buttons & B_SECONDARY_MOUSE_BUTTON )
@@ -217,7 +214,8 @@ bool ConnectionRenderer::Caught(BPoint where){
 	float newx	= (double)where.y*ay+my;
 	float dx	= (newx-where.x);
 	float dy	= (newy-where.y);
-	if ((dx*dx+dy*dy)<max_entfernung)
+	float dist	= sqrt(dx*dx+dy*dy);
+	if (dist<max_entfernung)
 		return true;
 	else
 		return false;
@@ -298,10 +296,107 @@ void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
 }
 
 bool ConnectionRenderer::CaughtStraigt(BPoint where){
-	return false;
+	float newy	= (double)where.x*ax+mx;
+	float newx	= (double)where.y*ay+my;
+	float dx	= (newx-where.x);
+	float dy	= (newy-where.y);
+	float dist	= sqrt(dx*dx+dy*dy);
+	if (dist<max_entfernung)
+		return true;
+	else
+		return false;
 }
 
 bool ConnectionRenderer::CaughtBended(BPoint where){
+		// a temporary util vect = p0 - (x,y)
+/*		BPoint pos;
+		pos.x = first.x - where.x;
+		pos.y = first.y - where.y;
+		// search points P of bezier curve with PM.(dP / dt) = 0
+		// a calculus leads to a 3d degree equation :
+		var a:Number = B.x * B.x + B.y * B.y;
+		var b:Number = 3 * (A.x * B.x + A.y * B.y);
+		var c:Number = 2 * (A.x * A.x + A.y * A.y) + pos.x * B.x + pos.y * B.y;
+		var d:Number = pos.x * A.x + pos.y * A.y;
+		var sol:Object = thirdDegreeEquation(a, b, c, d);
+		
+		var t:Number;
+		var dist:Number;
+		var tMin:Number;
+		var distMin:Number = Number.MAX_VALUE;
+		var d0:Number = getDist(x, y, p0.x, p0.y);
+		var d2:Number = getDist(x, y, p2.x, p2.y);
+		var orientedDist:Number;
+		
+		if (sol != null)
+		{
+			// find the closest point:
+			for (var i = 1; i <= sol.count; i++)
+			{
+				t = sol["s" + i];
+				if (t >= 0 && t <= 1)
+				{
+					pos = getPos(t);
+					dist = getDist(x, y, pos.x, pos.y);
+					if (dist < distMin)
+					{
+						// minimum found!
+						tMin = t;
+						distMin = dist;
+						posMin.x = pos.x;
+						posMin.y = pos.y;
+					}
+				}
+			}
+			if (tMin != null && distMin < d0 && distMin < d2) 
+			{
+				// the closest point is on the curve
+				nor.x = A.y + tMin * B.y;
+				nor.y = -(A.x + tMin * B.x);
+				nor.normalize(1);
+				orientedDist = distMin;
+				if ((x - posMin.x) * nor.x + (y - posMin.y) * nor.y < 0) 
+				{
+					nor.x *= -1;
+					nor.y *= -1;
+					orientedDist *= -1;
+				}
+				
+				nearest.t = tMin;
+				nearest.pos = posMin;
+				nearest.nor = nor;
+				nearest.dist = distMin;
+				nearest.orientedDist = orientedDist;
+				nearest.onCurve = true;
+				return nearest;
+			}
+			
+		} 
+		// the closest point is one of the 2 end points
+		if (d0 < d2) 
+		{
+			distMin = d0;
+			tMin = 0;
+			posMin.x = p0.x;
+			posMin.y = p0.y;	
+		} else 
+		{
+			distMin = d2;
+			tMin = 1;
+			posMin.x = p2.x;
+			posMin.y = p2.y;
+		}
+		nor.x = x - posMin.x;
+		nor.y = y - posMin.y;
+		nor.normalize(1);
+		
+		nearest.t = tMin;
+		nearest.pos = posMin;
+		nearest.nor = nor;
+		nearest.orientedDist = nearest.dist = distMin;
+		nearest.onCurve = false;
+		return nearest;
+*/
 	return false;
 }
 

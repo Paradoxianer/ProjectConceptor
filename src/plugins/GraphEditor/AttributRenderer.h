@@ -21,12 +21,6 @@
 #include "StringRenderer.h"
 #include "TextEditorControl.h"
 
-#ifdef B_ZETA_VERSION
-	#include <locale/Locale.h>
-	#include <locale/LanguageNotifier.h>
-#else
-	#define _T(a) a
-#endif 
 
 const float		DELETER_WIDTH		= 16;
 class AttributRenderer: public Renderer

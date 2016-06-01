@@ -17,14 +17,6 @@
 #include "Renderer.h"
 #include "TextEditorControl.h"
 
-#ifdef B_ZETA_VERSION
-	#include <locale/Locale.h>
-	#include <locale/LanguageNotifier.h>
-#else
-	#define _T(a) a
-#endif 
-
-
 class BoolRenderer: public Renderer
 {
 

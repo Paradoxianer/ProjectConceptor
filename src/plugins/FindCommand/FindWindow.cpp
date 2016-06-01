@@ -6,10 +6,14 @@
 #include <interface/SplitView.h>
 #include <interface/StringView.h>
 #include <interface/SpaceLayoutItem.h>
+#include <Catalog.h>
 
 #include "FindWindow.h"
 
-FindWindow::FindWindow(PDocument *tmpDoc):BWindow(BRect(50,50,600,400),_T("Find"),B_FLOATING_WINDOW_LOOK,B_MODAL_APP_WINDOW_FEEL,B_AUTO_UPDATE_SIZE_LIMITS)
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "FindWindow"
+
+FindWindow::FindWindow(PDocument *tmpDoc):BWindow(BRect(50,50,600,400),B_TRANSLATE("Find"),B_FLOATING_WINDOW_LOOK,B_MODAL_APP_WINDOW_FEEL,B_AUTO_UPDATE_SIZE_LIMITS)
 {
 	TRACE();
 	doc=tmpDoc;
@@ -40,8 +44,8 @@ void FindWindow::CreateViews() {
 			.Add(new BBox("Advanced Search"))
 		)
 		.Add(BGroupLayoutBuilder(B_HORIZONTAL)
-			.Add(new BButton("okButton",_T("OK"), new BMessage('ok')))
-			.Add(new BButton("channelButton",_T("Cancel"), new BMessage('cl')))
+			.Add(new BButton("okButton",B_TRANSLATE("OK"), new BMessage('ok')))
+			.Add(new BButton("channelButton",B_TRANSLATE("Cancel"), new BMessage('cl')))
 		)
 	);
 

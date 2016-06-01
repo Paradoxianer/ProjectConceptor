@@ -2,14 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <interface/InterfaceDefs.h>
+#include <Catalog.h>
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "RectItem"
 /*
- * @author Paradoxon powered by Jesus Christ
+ * @author Paradoxon
  */
-#ifdef B_ZETA_VERSION_BETA
-	#include <locale/Locale.h>
-#else
-	#define _T(a) a
-#endif 
+
 
 RectItem::RectItem(char *newLabel,
 		BRect newRect,
@@ -119,19 +119,19 @@ void RectItem::DrawItem(BView *owner, BRect bounds, bool complete)
 			owner->RemoveChild(bottom);
 		}
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-(textControlHeight*3)-textLine);
-		owner->DrawString(_T("left")); 
+		owner->DrawString(B_TRANSLATE("left")); 
 		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-(textControlHeight*3)-textLine);
 		owner->DrawString(left->Text());
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-(textControlHeight*2)-textLine);
-		owner->DrawString(_T("top")); 
+		owner->DrawString(B_TRANSLATE("top")); 
 		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-(textControlHeight*2)-textLine);
 		owner->DrawString(top->Text());
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-(textControlHeight)-textLine);
-		owner->DrawString(_T("right")); 
+		owner->DrawString(B_TRANSLATE("right")); 
 		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-(textControlHeight)-textLine);
 		owner->DrawString(right->Text());
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-textLine);
-		owner->DrawString(_T("bottom")); 
+		owner->DrawString(B_TRANSLATE("bottom")); 
 		owner->MovePenTo(newBounds.right-SEPERATOR+52, newBounds.bottom-textLine);
 		owner->DrawString(bottom->Text());
 

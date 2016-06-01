@@ -9,15 +9,9 @@
 #include <interface/TextView.h>
 #include <interface/TextControl.h>
 
-//using the ugly stl instead of the nice Zeta templates to make it Haiku ready
-//#if defined(__HAIKU__) && __GNUC__ > 3
 #include <vector>
 #include <iterator>
 using namespace std;
-/*#else
-#include <cpp/vector.h>
-#include <cpp/iterator.h>
-#endif*/
 
 #include "GraphEditor.h"
 #include "PDocument.h"
@@ -25,12 +19,6 @@ using namespace std;
 #include "StringRenderer.h"
 #include "AFont.h"
 
-#ifdef B_ZETA_VERSION_1_0_0
-	#include <locale/Locale.h>
-	#include <locale/LanguageNotifier.h>
-#else
-	#define _T(a) a
-#endif
 
 class ClassRenderer: public Renderer
 {
