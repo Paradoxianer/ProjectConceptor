@@ -46,7 +46,7 @@ BMessage* AddAttribute::Do(PDocument *doc, BMessage *settings) {
 	int32		i				= 0;
 	bool		selected		= false;
 	status_t	err				= B_OK;
-
+	
 	while (settings->FindPointer("node",i,(void **)&node) == B_OK) {
 		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK)
 			DoAddAttribute(doc,node,valueContainer);
