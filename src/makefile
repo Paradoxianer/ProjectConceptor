@@ -41,7 +41,7 @@ pkgupdate:
 	@echo "	\"MIT\"" >> .PackageInfo  
 	@echo "}" >> .PackageInfo  
 	@echo "copyrights {" >> .PackageInfo  
-	@echo "	\"Copyright (C) 2005-2015 by Paradoxon\"" >> .PackageInfo  
+	@echo "	\"Copyright (C) 2005-2016 by Paradoxon\"" >> .PackageInfo  
 	@echo "}" >> .PackageInfo  
 	@echo "provides {" >> .PackageInfo  
 	@echo "        ProjectConceptor = 0.0.6-$(GIT_REV)" >> .PackageInfo  
