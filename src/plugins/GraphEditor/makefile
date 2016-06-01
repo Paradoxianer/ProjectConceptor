@@ -51,7 +51,7 @@ RSRCS= GraphEditor.rsrc
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be localestub ../../../$(APP_DIR)/ProjectConceptor.a
+LIBS= be  localestub ../../../$(APP_DIR)/ProjectConceptor.a
 		
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
