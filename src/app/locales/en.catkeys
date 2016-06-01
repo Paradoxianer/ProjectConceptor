@@ -1,0 +1,55 @@
+1	English	application/x-vnd.ProjectConceptor	2397978915
+Save As	MainWindow		Save As
+Title	MainWindow		Title
+New	MainWindow		New
+Project Settings	MainWindow		Project Settings
+Save	MainWindow		Save
+Open	MainWindow		Open
+Settings	SavePanel		Settings
+Settings	ConfigWindow		Settings
+Could not find Plugins	SavePanel		Could not find Plugins
+Search	MainWindow		Search
+Print	MainWindow		Print
+Window	MainWindow		Window
+File	MainWindow		File
+Save	Document		Save
+Fileformat	SavePanel		Fileformat
+Find Next	MainWindow		Find Next
+Cant find Plugins	PluginManager		Cant find Plugins
+Replace All	MainWindow		Replace All
+Select All	MainWindow		Select All
+Input Macroname	CommandManager		Input Macroname
+Play	MainWindow		Play
+Coud not Find Command	CommandManager		Coud not Find Command
+Quit	MainWindow		Quit
+Redo	MainWindow		Redo
+ProjectConceptor	PluginManager		ProjectConceptor
+Paste	MainWindow		Paste
+OK	CommandManager		OK
+Edit	MainWindow		Edit
+Page Setup	MainWindow		Page Setup
+Title Vertical	MainWindow		Title Vertical
+Replace	MainWindow		Replace
+Cascade	MainWindow		Cascade
+Replace & Find	MainWindow		Replace & Find
+Undo	MainWindow		Undo
+Find	MainWindow		Find
+Cancel	CommandManager		Cancel
+Macro	CommandManager		Macro
+Start Recording	MainWindow		Start Recording
+Copy	MainWindow		Copy
+Help	HelpWindow		Help
+Close	MainWindow		Close
+Help	MainWindow		Help
+Macro Recording already started!	CommandManager		Macro Recording already started!
+Clear	MainWindow		Clear
+Restart Recording	CommandManager		Restart Recording
+Contiune Recording	CommandManager		Contiune Recording
+Cut	MainWindow		Cut
+Cancel	Document		Cancel
+Error setting File	Document		Error setting File
+Stop Recording	MainWindow		Stop Recording
+Name	CommandManager		Name
+Save As	SavePanel		Save As
+About	MainWindow		About
+Don't save	Document		Don't save
