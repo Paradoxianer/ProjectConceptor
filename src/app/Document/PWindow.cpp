@@ -131,8 +131,8 @@ BMenuBar *PWindow::MakeMenu(void)
 	/*menu->AddItem(item = new BMenuItem(B_TRANSLATE(P_MENU_FILE_EXPORT),new BMessage(MENU_FILE_EXPORT)));
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_EXPORT);
-	item->SetTarget(doc);*/
-	menu->AddSeparatorItem();
+	item->SetTarget(doc);
+	menu->AddSeparatorItem();*/
 	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Page Setup"),new BMessage(MENU_FILE_PAGESETUP)));
 	item->SetEnabled(false);
 	item->SetTarget(doc);

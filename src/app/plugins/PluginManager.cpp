@@ -1,15 +1,13 @@
 #include <string.h>
 #include <interface/Alert.h>
 #include <storage/Resources.h>
-#ifdef B_ZETA_VERSION_1_0_0
-	#include <locale/Locale.h>
-	#include <locale/LanguageNotifier.h>
-#else
-	#define _T(a) a
-#endif
+#include <Catalog.h>
 
 #include "PluginManager.h"
 #include "BasePlugin.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "PluginManager"
 
 PluginManager::PluginManager(void)
 {
@@ -51,7 +49,6 @@ void PluginManager::LoadPlugins(BDirectory *startDir, bool deep)
 			if ((entry->InitCheck() == B_OK) && (entry->GetPath(&path) == B_OK))
 			{
 				//Versuch die über path angegebene Datei als Addon zu laden
-//				DE_BUG("PluginManager","Plugin   %s\n",path.Path());
 				addonId = load_add_on( path.Path() );
 				if( addonId < 0 )
 				{
@@ -99,7 +96,7 @@ void PluginManager::LoadPlugins(BDirectory *startDir, bool deep)
 		dirCounter++;
 	}
 	if (plugins->CountItems()<1)
-	  (new BAlert(_T("ProjectConceptor"), _T("Cant find Plugins"), "OK",NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go();
+	  (new BAlert(B_TRANSLATE("ProjectConceptor"), B_TRANSLATE("Cant find Plugins"), "OK",NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go();
 }
 
 
