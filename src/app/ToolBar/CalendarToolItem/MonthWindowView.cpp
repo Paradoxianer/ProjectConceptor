@@ -12,12 +12,13 @@
 #include <Bitmap.h>
 #include <View.h>
 #include <time.h>
+#include <Catalog.h>
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "MontWindowView"
+
 #include "MouseSenseStringView.cpp"
 
-#ifdef __LANG_LOCALE // __ZETA__ is defined in this case
-                     // because it is verified while defining __LANG_LOCALE
- #include <locale/Locale.h>
-#endif
 
 #define VIEW_COLOR 216, 216, 216, 255
 #define ACTIVE_COLOR 0, 0, 200
@@ -108,26 +109,26 @@ MonthWindowView::MonthWindowView(int day, int month, int year,
  twday=dat->tm_wday;
 
 #ifdef __LANG_LOCALE
- weekdayNames[0]=(char*)_T("Mo");
- weekdayNames[1]=(char*)_T("Tu");
- weekdayNames[2]=(char*)_T("We");
- weekdayNames[3]=(char*)_T("Th");
- weekdayNames[4]=(char*)_T("Fr");
- weekdayNames[5]=(char*)_T("Sa");
- weekdayNames[6]=(char*)_T("Su");
+ weekdayNames[0]=(char*)B_TRANSLATE("Mo");
+ weekdayNames[1]=(char*)B_TRANSLATE("Tu");
+ weekdayNames[2]=(char*)B_TRANSLATE("We");
+ weekdayNames[3]=(char*)B_TRANSLATE("Th");
+ weekdayNames[4]=(char*)B_TRANSLATE("Fr");
+ weekdayNames[5]=(char*)B_TRANSLATE("Sa");
+ weekdayNames[6]=(char*)B_TRANSLATE("Su");
  
- monthNames[0]=(char*)_T("January");
- monthNames[1]=(char*)_T("February");
- monthNames[2]=(char*)_T("March");
- monthNames[3]=(char*)_T("April");
- monthNames[4]=(char*)_T("May");
- monthNames[5]=(char*)_T("June");
- monthNames[6]=(char*)_T("July");
- monthNames[7]=(char*)_T("August");
- monthNames[8]=(char*)_T("September");
- monthNames[9]=(char*)_T("October");
- monthNames[10]=(char*)_T("November");
- monthNames[11]=(char*)_T("December");
+ monthNames[0]=(char*)B_TRANSLATE("January");
+ monthNames[1]=(char*)B_TRANSLATE("February");
+ monthNames[2]=(char*)B_TRANSLATE("March");
+ monthNames[3]=(char*)B_TRANSLATE("April");
+ monthNames[4]=(char*)B_TRANSLATE("May");
+ monthNames[5]=(char*)B_TRANSLATE("June");
+ monthNames[6]=(char*)B_TRANSLATE("July");
+ monthNames[7]=(char*)B_TRANSLATE("August");
+ monthNames[8]=(char*)B_TRANSLATE("September");
+ monthNames[9]=(char*)B_TRANSLATE("October");
+ monthNames[10]=(char*)B_TRANSLATE("November");
+ monthNames[11]=(char*)B_TRANSLATE("December");
 #endif
 
 #ifdef __LANG_ENGLISH

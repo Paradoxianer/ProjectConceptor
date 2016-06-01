@@ -16,6 +16,9 @@ NAME= ProjectConceptor
 #	DRIVER: Kernel Driver
 TYPE= APP
 
+# 	If you plan to use localization, specify the application's MIME signature.
+APP_MIME_SIG = application/x-vnd.ProjectConceptor
+
 #	specify the source files to use
 #	full paths or paths relative to the makefile can be included
 # 	all files, regardless of directory, will have their object
@@ -88,7 +91,7 @@ RSRCS= 	ProjectConceptor.rsrc \
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be root translation tracker $(STDCPPLIBS)
+LIBS= be root translation tracker localestub $(STDCPPLIBS)
 
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths

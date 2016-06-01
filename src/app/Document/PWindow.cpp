@@ -1,14 +1,12 @@
-
-#define _ZETA_USING_EXPERIMENTAL_
-#include <interface/PrintJob.h>
-#ifdef B_ZETA_VERSION_1_0_0
-	#include <interface/IconMenu.h>
-#endif
-
 #include <interface/MenuItem.h>
 #include <interface/ScrollBar.h>
 #include <interface/ScrollView.h>
 #include <stdio.h>
+#include <translation/TranslationUtils.h>
+#include <translation/TranslatorFormats.h>
+#include <BeBuild.h>
+#include <Catalog.h>
+
 #include "BasePlugin.h"
 #include "ProjectConceptorDefs.h"
 #include "PWindow.h"
@@ -19,12 +17,11 @@
 #include "ToolMenu.h"
 #include "MainView.h"
 
-#include <translation/TranslationUtils.h>
-#include <translation/TranslatorFormats.h>
-#include <BeBuild.h>
 
 
 
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "MainWindow"
 
 
 PWindow::PWindow(BRect rect,PDocument *document):BWindow(rect,"ProjectConceptor",B_TITLED_WINDOW,0)
@@ -33,9 +30,6 @@ PWindow::PWindow(BRect rect,PDocument *document):BWindow(rect,"ProjectConceptor"
 	doc	= document;
 	Init();
 	Show();
-	#ifdef B_ZETA_VERSION_1_0_0
-		languageChanger.SetTarget(this);
-    #endif
 }
 
 PWindow::PWindow(BMessage *archive):BWindow(archive)
@@ -85,7 +79,7 @@ void PWindow::CreatEditorList(void)
 		{
 			editorPlg	= (BasePlugin*)editorPlugins->ItemAt(i);
 			AddEditor(editorPlg->GetName(),(PEditor *)editorPlg->GetNewObject(NULL));
-//			subMenu->AddItem(new BMenuItem(_T(editorPlg->GetName()),editorAdd));
+//			subMenu->AddItem(new BMenuItem(B_TRANSLATE(editorPlg->GetName()),editorAdd));
 		}
 	}
 }
@@ -111,87 +105,87 @@ BMenuBar *PWindow::MakeMenu(void)
 	BMenu 		*menu;
 
 	// build Filemenu
-	menu		= new BMenu(_T(P_MENU_FILE));
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_NEW),new BMessage(MENU_FILE_NEW),'N'));
+	menu		= new BMenu(B_TRANSLATE("File"));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("New"),new BMessage(MENU_FILE_NEW),'N'));
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_NEW);
 	item->SetTarget(be_app);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_OPEN),new BMessage(MENU_FILE_OPEN),'O'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Open"),new BMessage(MENU_FILE_OPEN),'O'));
 	item->SetTarget(be_app);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_OPEN);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_CLOSE),new BMessage(MENU_FILE_CLOSE),'W'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Close"),new BMessage(MENU_FILE_CLOSE),'W'));
 	menu->AddSeparatorItem();
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_CLOSE);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_SAVE), new BMessage(MENU_FILE_SAVE), 'S'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Save"), new BMessage(MENU_FILE_SAVE), 'S'));
 	item->SetEnabled(false);
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_SAVE);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_SAVE_AS),new BMessage(MENU_FILE_SAVEAS)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Save As"),new BMessage(MENU_FILE_SAVEAS)));
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_SAVE_AS);
 	item->SetTarget(doc);
 	menu->AddSeparatorItem();
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_EXPORT),new BMessage(MENU_FILE_EXPORT)));
+	/*menu->AddItem(item = new BMenuItem(B_TRANSLATE(P_MENU_FILE_EXPORT),new BMessage(MENU_FILE_EXPORT)));
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_EXPORT);
-	item->SetTarget(doc);
+	item->SetTarget(doc);*/
 	menu->AddSeparatorItem();
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_PAGESETUP),new BMessage(MENU_FILE_PAGESETUP)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Page Setup"),new BMessage(MENU_FILE_PAGESETUP)));
 	item->SetEnabled(false);
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_PAGESETUP);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_PRINT),new BMessage(MENU_FILE_PRINT), 'P'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Print"),new BMessage(MENU_FILE_PRINT), 'P'));
 //	item->SetEnabled(false);
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_PRINT);
 	menu->AddSeparatorItem();
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_FILE_QUIT), new BMessage(MENU_FILE_QUIT), 'Q'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Quit"), new BMessage(MENU_FILE_QUIT), 'Q'));
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_QUIT);
 	tmpBar->AddItem(menu);
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE);
 
-	menu=new BMenu(_T(P_MENU_EDIT));
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_UNDO),new BMessage(B_UNDO),'Z'));
+	menu=new BMenu(B_TRANSLATE("Edit"));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Undo"),new BMessage(B_UNDO),'Z'));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_UNDO);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_REDO),new BMessage(B_REDO),'Z',B_SHIFT_KEY));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Redo"),new BMessage(B_REDO),'Z',B_SHIFT_KEY));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_REDO);
 	menu->AddSeparatorItem();
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_CUT),new BMessage(B_CUT),'X'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Cut"),new BMessage(B_CUT),'X'));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_CUT);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_COPY),new BMessage(B_COPY),'C'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Copy"),new BMessage(B_COPY),'C'));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_COPY);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_PASTE),new BMessage(B_PASTE),'V'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Paste"),new BMessage(B_PASTE),'V'));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_PASTE);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_CLEAR),new BMessage(B_CLEAR)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Clear"),new BMessage(B_CLEAR)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_CLEAR);
 	menu->AddSeparatorItem();
 
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_SELECT_ALL),new BMessage(B_SELECT_ALL),'A'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Select All"),new BMessage(B_SELECT_ALL),'A'));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_SELECT_ALL);
 	menu->AddSeparatorItem();
 
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_EDIT_PROJECT_SETTINGS),new BMessage(MENU_APP_SETTINGS)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Project Settings"),new BMessage(MENU_APP_SETTINGS)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT_PROJECT_SETTINGS);
@@ -200,26 +194,26 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("itemstring",P_MENU_EDIT);
 
 
-	menu=new BMenu(_T(P_MENU_SEARCH));
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_SEARCH_FIND),new BMessage(MENU_SEARCH_FIND),'F'));
+	menu=new BMenu(B_TRANSLATE("Search"));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Find"),new BMessage(MENU_SEARCH_FIND),'F'));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_SEARCH_FIND);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_SEARCH_FIND_NEXT),new BMessage(MENU_SEARCH_FIND_NEXT),'G'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Find Next"),new BMessage(MENU_SEARCH_FIND_NEXT),'G'));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_SEARCH_FIND_NEXT);
 	menu->AddSeparatorItem();
 
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_SEARCH_REPLACE),new BMessage(MENU_SEARCH_REPLACE),'R'));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Replace"),new BMessage(MENU_SEARCH_REPLACE),'R'));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_SEARCH_REPLACE);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_SEARCH_REPLACE_AND_FIND),new BMessage(MENU_SEARCH_REPLACE_AND_FIND)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Replace & Find"),new BMessage(MENU_SEARCH_REPLACE_AND_FIND)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_SEARCH_REPLACE_AND_FIND);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_SEARCH_REPLACE_ALL),new BMessage(MENU_SEARCH_REPLACE_ALL)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Replace All"),new BMessage(MENU_SEARCH_REPLACE_ALL)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_SEARCH_REPLACE_ALL);
@@ -227,16 +221,16 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_SEARCH);
 
-	menu=new BMenu(_T(P_MENU_WINDOW));
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_WINDOW_TITLE),new BMessage(MENU_WINDOW_TITLE)));
+	menu=new BMenu(B_TRANSLATE("Window"));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Title"),new BMessage(MENU_WINDOW_TITLE)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_WINDOW_TITLE);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_WINDOW_TITLE_VERTICAL),new BMessage(MENU_WINDOW_TITLE_VERTICAL)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Title Vertical"),new BMessage(MENU_WINDOW_TITLE_VERTICAL)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_WINDOW_TITLE_VERTICAL);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_WINDOW_CASCADE),new BMessage(MENU_WINDOW_CASCADE)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Cascade"),new BMessage(MENU_WINDOW_CASCADE)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_WINDOW_CASCADE);
@@ -247,26 +241,26 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("itemstring",P_MENU_WINDOW);
 
 
-	menu=new BMenu(_T(P_MENU_MACRO));
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_MACRO_START_RECORDING),new BMessage(MENU_MACRO_START_RECORDING)));
+	menu=new BMenu(B_TRANSLATE("Macro"));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Start Recording"),new BMessage(MENU_MACRO_START_RECORDING)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_START_RECORDING);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_MACRO_STOP_RECORDING),new BMessage(MENU_MACRO_STOP_RECORDING)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Stop Recording"),new BMessage(MENU_MACRO_STOP_RECORDING)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_STOP_RECORDING);
 
-	subMenu	= new BMenu(_T(P_MENU_MACRO_PLAY));
+	subMenu	= new BMenu(B_TRANSLATE("Play"));
 	menu->AddItem(subMenu);
 	localizeMenuItems->AddPointer("item",(void *) subMenu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_PLAY);
 
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_MACRO_OPEN),new BMessage(MENU_MACRO_OPEN)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Open"),new BMessage(MENU_MACRO_OPEN)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_OPEN);
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_MACRO_SAVE),new BMessage(MENU_MACRO_SAVE)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Save"),new BMessage(MENU_MACRO_SAVE)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_SAVE);
@@ -275,9 +269,9 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO);
 
-	menu=new BMenu(_T(P_MENU_HELP));
-	//menu->AddItem(item = new BMenuItem(_T(P_MENU_HELP_ABOUT),new BMessage(MENU_HELP_ABOUT)));
-	menu->AddItem(item = new BMenuItem(_T(P_MENU_HELP_ABOUT),new BMessage(B_ABOUT_REQUESTED)));
+	menu=new BMenu(B_TRANSLATE("Help"));
+	//menu->AddItem(item = new BMenuItem(B_TRANSLATE(P_MENU_HELP_ABOUT),new BMessage(MENU_HELP_ABOUT)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("About"),new BMessage(B_ABOUT_REQUESTED)));
 	item->SetTarget(be_app);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_HELP_ABOUT);
@@ -431,11 +425,6 @@ void PWindow::MessageReceived(BMessage *message)
 		case B_SAVE_REQUESTED:
 		//	Save(message);
 			break;
-	#ifdef B_ZETA_VERSION_1_0_0
-		case B_LANGUAGE_CHANGED:
-				ChangeLanguage();
-			break;
-    #endif
 		case P_C_INSERT_EDITOR:
 		{
 			BasePlugin	*plugin	= NULL;
@@ -598,10 +587,8 @@ ToolItem* PWindow::GetToolItem(const char* toolbarSignature,const char *signatur
 
 /**
  *Adds a BMenu to the ToolBar of the PWindow, if inxed<0 its insert "at the end"!
- *It shoud always be an untranslated BMenu so please dont use the LocaleKit to create
+ *It shoud always be an translated BMenu so please use the LocaleKit to create
  *the BMenu
- *This Method also register your BMEnu to the localisation System of ProjectConceptor, so
- *that you dont need to Take care of the localisation of the BMenus
  *
  *@todo
  */
@@ -617,7 +604,7 @@ status_t PWindow::AddMenu(BMenu *menu,int32 index)
 	char	*itemString= new char[strlen(menuItem->Label())];
 	strcpy(itemString, menuItem->Label());
 	localizeMenuItems->AddPointer("itemstring",itemString);
-	menuItem->SetLabel(_T(itemString));
+	menuItem->SetLabel(B_TRANSLATE(itemString));
 	return B_OK;
 }
 
@@ -634,7 +621,6 @@ status_t PWindow::AddMenuItem(const char *menuSignatur, BMenuItem *menuItem,int3
 		char	*itemString= new char[strlen(menuItem->Label())];
 		strcpy(itemString, menuItem->Label());
 		localizeMenuItems->AddPointer("itemstring",itemString);
-//		menuItem->SetLabel(_T(itemString));
 		return B_OK;
 	}
 	else
@@ -838,24 +824,6 @@ void PWindow::ReCalcToolBars(menu_layout layout)
 	}
 }
 
-void PWindow::ChangeLanguage()
-{
-	TRACE();
-	BMenuItem	*item;
-	const char	*string;
-	int32 		i	= 0;
-	status_t err	= B_OK;
-	Lock();
-	while (err==B_OK)
-	{
-		err = localizeMenuItems->FindPointer("item",i,(void **)&item);
-		err = err | localizeMenuItems->FindPointer("itemstring",i,(void **)&string);
-		printf("%s\n",string);
-		if (string!=NULL) item->SetLabel(_T(string));
-		i++;
-	}
-	Unlock();
-}
 
 
 void PWindow::FrameResized(float width, float height)

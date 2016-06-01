@@ -1,6 +1,11 @@
+#include <Catalog.h>
+
 #include "HelpManager.h"
 
-HelpManager::HelpManager(void): BWindow(BRect(100,100,400,200), _T("Help"), B_DOCUMENT_WINDOW,0)
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "HelpWindow"
+
+HelpManager::HelpManager(void): BWindow(BRect(100,100,400,200), B_TRANSLATE("Help"), B_DOCUMENT_WINDOW,0)
 {
 	TRACE();
 //	helpObjects	= new map<char*,ObjectHelp*>();

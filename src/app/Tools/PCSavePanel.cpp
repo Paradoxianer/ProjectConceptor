@@ -1,6 +1,12 @@
+#include <interface/Window.h>
+#include <Catalog.h>
+
 #include "PCSavePanel.h"
 #include "BasePlugin.h"
-#include <interface/Window.h>
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "SavePanel"
+
 
 
 PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target): BFilePanel(B_SAVE_PANEL,target,NULL,B_FILE_NODE,false,msg,NULL,false,true)
@@ -9,7 +15,7 @@ PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target): BFilePanel(B_SAVE_
 	Window()->Lock();
 	BView 	*background = Window()->ChildAt(0);
 	BView	*textView;
-	Window()->SetTitle(_T("Save As"));
+	Window()->SetTitle(B_TRANSLATE("Save As"));
 
 
 	BRect limit 				= background->Bounds();
@@ -47,7 +53,7 @@ PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target): BFilePanel(B_SAVE_
 	
 	BRect sRect=background->FindView("cancel button")->Frame();
 	sRect.OffsetTo(textView->Frame().right+10,sRect.top);
-	settings	= new BButton(sRect,"Settings",_T("Settings"),NULL);
+	settings	= new BButton(sRect,"Settings",B_TRANSLATE("Settings"),NULL);
 	background->AddChild(settings);
 	Window()->Unlock();
 }
@@ -65,7 +71,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 	const	translation_format	*iFormats;
 	translation_format			*allFormats			= NULL;
 	BMessage					*message			= NULL;
-	BMenu						*menu				= new BMenu(_T("Fileformat") );
+	BMenu						*menu				= new BMenu(B_TRANSLATE("Fileformat") );
 	BMenuItem					*item				= NULL;
 /*	BList	*importExportPlugins	= pluginManager->GetPluginsByType(P_C_ITEM_INPORT_EXPORT_TYPE);
 	if (importExportPlugins!=NULL)
@@ -112,7 +118,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 		}
 	}
 	else
-		menu->AddItem(new BMenuItem(_T("Could not find Plugins"),NULL));*/
+		menu->AddItem(new BMenuItem(B_TRANSLATE("Could not find Plugins"),NULL));*/
 	roster->GetAllTranslators(&translators, &num_translators);
 	allFormats	=	new translation_format[num_translators];
 	for (i=0;i<num_translators;i++) 
@@ -145,7 +151,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 	}
 	delete [] translators; 
 	if (menu->CountItems() == 0)
-		menu->AddItem(new BMenuItem(_T("Could not find Plugins"),NULL));
+		menu->AddItem(new BMenuItem(B_TRANSLATE("Could not find Plugins"),NULL));
 	return menu;
 }
 

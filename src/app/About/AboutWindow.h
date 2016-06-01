@@ -5,12 +5,6 @@
 
 #include <interface/Window.h>
 
-#ifdef B_ZETA_VERSION_1_0_0
-	#include <locale/Locale.h>
-#else
-	#define _T(a) a
-#endif
-
 /**
  * @class AboutWindow
  * @brief Implementaion of the About window from ProjectConceptor

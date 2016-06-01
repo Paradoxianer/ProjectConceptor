@@ -8,18 +8,12 @@
 
 #include <support/Debug.h>
 #include <map>
+#include <Catalog.h>
 
 #include "MessageXmlReader.h"
 #include "MessageXmlWriter.h"
 
 
-//#include "b64.h"
-
-#ifdef B_ZETA_VERSION_BETA
-	#include <locale/Locale.h>
-#else
-	#define _T(a) a
-#endif
 
 
 ConfigManager::ConfigManager(char *_path, BMessage *newConfig){

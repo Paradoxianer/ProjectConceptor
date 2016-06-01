@@ -1,10 +1,15 @@
 #include <GroupLayout.h>
 #include <Button.h>
 #include <SpaceLayoutItem.h>
+#include <Catalog.h>
+
 #include "ConfigWindow.h"
 
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "ConfigWindow"
 
-ConfigWindow::ConfigWindow(BMessage *_configMessage):BWindow(BRect(50,50,600,400),_T("Settings"),B_TITLED_WINDOW,B_OUTLINE_RESIZE){
+
+ConfigWindow::ConfigWindow(BMessage *_configMessage):BWindow(BRect(50,50,600,400),B_TRANSLATE("Settings"),B_TITLED_WINDOW,B_OUTLINE_RESIZE){
 	TRACE();
         configMessage=_configMessage;
         CreateViews();

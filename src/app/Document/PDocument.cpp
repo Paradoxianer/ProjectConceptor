@@ -7,6 +7,7 @@
 #include <TranslatorRoster.h>
 #include <string.h>
 #include <FindDirectory.h>
+#include <Catalog.h>
 
 
 #include "BasePlugin.h"
@@ -18,6 +19,9 @@
 #include "PDocumentManager.h"
 #include "PluginManager.h"
 
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "Document"
 
 #ifdef __BEOS__
  #ifdef find_directory
@@ -514,7 +518,7 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 	}
 	else
 	{
-		new BAlert("",_T("Error setting File"),"Ohh");
+		new BAlert("",B_TRANSLATE("Error setting File"),"Ohh");
 	}
 
 }
@@ -678,7 +682,7 @@ bool PDocument::QuitRequested(void)
 	if (modified)
 	{
 		readLock = Lock();
-		BAlert *myAlert = new BAlert("title", "Save changes to ...", _T("Cancel"), _T("Don't save"), _T("Save"), B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
+		BAlert *myAlert = new BAlert("title", "Save changes to ...", B_TRANSLATE("Cancel"), B_TRANSLATE("Don't save"), B_TRANSLATE("Save"), B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
 		myAlert->SetShortcut(0, B_ESCAPE);
 		int32 button_index = myAlert->Go();
 		if (button_index == 0)

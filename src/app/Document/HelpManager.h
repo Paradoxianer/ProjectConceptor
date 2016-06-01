@@ -27,12 +27,6 @@
 #include <iterator>
 using namespace std;
 
-#ifdef B_ZETA_VERSION_1_0_0
-	#include <locale/Locale.h>
-	#include <locale/LanguageNotifier.h>
-#else
-	#define _T(a) a
-#endif 
 
 typedef pair<char*,ObjectHelp*> *Id_Help;
 

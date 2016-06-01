@@ -1,8 +1,7 @@
 #ifndef PROJEKT_CONCEPTOR_WINDOW_H
 #define PROJEKT_CONCEPTOR_WINDOW_H
-#define _ZETA_USING_EXPERIMENTAL_
 /*
- * @author Paradoxon powered by Jesus Christ
+ * @author Paradoxon
  */
 
 #include "ToolBar.h"
@@ -15,13 +14,6 @@
 #include <interface/MenuBar.h>
 #include <interface/Window.h>
 #include <interface/TabView.h>
-
-#ifdef B_ZETA_VERSION_1_0_0
-	#include <locale/Locale.h>
-	#include <locale/LanguageNotifier.h>
-#else
-	#define _T(a) a
-#endif
 
 class PDocument;
 class PEditor;
