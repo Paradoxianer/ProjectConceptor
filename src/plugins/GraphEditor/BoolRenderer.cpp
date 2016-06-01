@@ -78,10 +78,11 @@ void BoolRenderer::MouseDown(BPoint where, int32 buttons,
 void BoolRenderer::MouseUp(BPoint where)
 {
 	TRACE();	
+	value=!value;
 	BMessage	*valueContainer	= new BMessage();
 	BMessage	sendMessage	= BMessage(*changeMessage);
 	sendMessage.FindMessage("valueContainer",valueContainer);
-	valueContainer->AddBool("newValue",!value);
+	valueContainer->AddBool("newValue",value);
 	sendMessage.ReplaceMessage("valueContainer",valueContainer);
 	BMessenger *sender	= new BMessenger(editor->BelongTo());
 	sender->SendMessage(&sendMessage);

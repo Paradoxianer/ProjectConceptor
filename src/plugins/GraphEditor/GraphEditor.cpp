@@ -679,8 +679,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		}
 		case G_E_ADD_ATTRIBUTE: {
 			int32	type;
-			char	*datadummy	= new char[4];
-			strcpy(datadummy,"    ");
+			BString datadummy	= BString("   ");
 			message->FindInt32("type",&type);
 			InputRequest	*inputAlert = new InputRequest(_T("Input AttributName"),_T("Name"), _T("Attribut"), _T("OK"),_T("Cancel"));
 			char			*input		= NULL;
@@ -698,7 +697,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				valueContainer->AddString("subgroup","Node::Data");
 				BMessage	*newAttribute	= new BMessage(type);
 				newAttribute->AddString("Name",inputstr);
-				newAttribute->AddData("Value",type,datadummy,sizeof(datadummy),false);
+				newAttribute->AddData("Value",type,datadummy.String(), datadummy.Length() + 1,false);
 				valueContainer->AddMessage("newAttribute",newAttribute);
 				addMessage->AddMessage("valueContainer",valueContainer);
 				sentTo->SendMessage(addMessage);
