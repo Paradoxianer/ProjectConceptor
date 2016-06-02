@@ -306,7 +306,7 @@ bool ConnectionRenderer::CaughtStraigt(BPoint where){
 }
 
 bool ConnectionRenderer::CaughtBended(BPoint where){
-	/*if (bezier.Bounds().Contains(where) == true )
+	if (bezier.Bounds().Contains(where) == true )
 	{
 		float t = 0;
 		float minDist=999999;
@@ -317,9 +317,9 @@ bool ConnectionRenderer::CaughtBended(BPoint where){
 				return true;
 		}
 		return false;
-	}*/
-	//just for now ;-)
-	return false;
+	}
+	else
+		return false;
 }
 
 float ConnectionRenderer::Distance(BPoint one, BPoint two)
