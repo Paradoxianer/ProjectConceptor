@@ -92,7 +92,7 @@ LOCAL_INCLUDE_PATHS = \
 #	if unspecified default warnings will be used
 #	NONE = supress all warnings
 #	ALL = enable all warnings
-#WARNINGS = NONE
+#WARNINGS = ALL
 
 #	specify whether image symbols will be created
 #	so that stack crawls in the debugger are meaningful

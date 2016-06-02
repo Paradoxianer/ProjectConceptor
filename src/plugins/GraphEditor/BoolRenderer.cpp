@@ -40,6 +40,7 @@ void BoolRenderer::Init()
 	image_info	*info 	= new image_info;
 	selected	= NULL;
 	unselected	= NULL;
+	value		= false;
 	size_t		size;
 	// look up the plugininfos
 	//** this should be done globaly to safe ressources

@@ -702,7 +702,10 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				valueContainer->AddString("subgroup","Node::Data");
 				BMessage	*newAttribute	= new BMessage(type);
 				newAttribute->AddString("Name",inputstr);
-				newAttribute->AddData("Value",type,datadummy.String(), datadummy.Length() + 1,false);
+				if (type == B_STRING_TYPE)
+					newAttribute->AddData("Value",type,datadummy.String(), datadummy.Length() + 1,false);
+				else if (type == B_BOOL_TYPE)
+					newAttribute->AddBool("Value",true);
 				valueContainer->AddMessage("newAttribute",newAttribute);
 				addMessage->AddMessage("valueContainer",valueContainer);
 				sentTo->SendMessage(addMessage);
