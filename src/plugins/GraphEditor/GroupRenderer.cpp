@@ -120,26 +120,12 @@ void GroupRenderer::RemoveRenderer(Renderer *wichRenderer) {
 
 
 Renderer* GroupRenderer::FindRenderer(BMessage *container) {
-	int32		i					= 0;
 	Renderer	*currentRenderer	= NULL;
 	if ( (container->FindPointer(editor->RenderString(),(void **) &currentRenderer) == B_OK) 
 		&& (currentRenderer) && renderer->HasItem(currentRenderer) )
 		return currentRenderer;
 	else
 		return NULL;
-
-/*	bool		found				= false;
-	int32		count				= renderer->CountItems();
-	while ((i<count) && (!found)) {
-		currentRenderer= (Renderer*)renderer->ItemAt(i);
-		if (currentRenderer->GetMessage() == container)
-			found=true;
-		i++;
-	}po
-	if (found)
-		return currentRenderer;
-	else
-		return NULL;*/
 }
 
 
