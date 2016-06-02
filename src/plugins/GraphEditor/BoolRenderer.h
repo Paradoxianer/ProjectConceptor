@@ -22,6 +22,7 @@ class BoolRenderer: public Renderer
 
 public:
 							BoolRenderer(GraphEditor *parentEditor,bool forValue,BRect valueRect,BMessage *message=NULL);
+virtual						~BoolRenderer();
 			void			ValueChanged(void){};
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetBool(bool newValue);

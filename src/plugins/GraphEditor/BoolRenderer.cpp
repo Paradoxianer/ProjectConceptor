@@ -27,12 +27,22 @@ BoolRenderer::BoolRenderer(GraphEditor *parentEditor,
 	SetBool(forValue);
 	SetFrame(valueRect);
 }
+
+BoolRenderer::~BoolRenderer()
+{
+	delete selected;
+	delete unselected;
+}
+
 void BoolRenderer::Init()
 {
 	TRACE();
 	image_info	*info 	= new image_info;
+	selected	= NULL;
+	unselected	= NULL;
 	size_t		size;
 	// look up the plugininfos
+	//** this should be done globaly to safe ressources
 	get_image_info(editor->PluginID(),info);
 	// init the ressource for the plugin files
 	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
@@ -44,6 +54,8 @@ void BoolRenderer::Init()
 	data=res->LoadResource((type_code)'PNG ',"unselectedBool",&size);
 	if (data)
 		unselected	= BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
+	delete res;
+	delete info;
 }
 
 void BoolRenderer::SetBool(bool newValue)
@@ -78,7 +90,7 @@ void BoolRenderer::MouseDown(BPoint where, int32 buttons,
 void BoolRenderer::MouseUp(BPoint where)
 {
 	TRACE();	
-	value=!value;
+	value = !value;
 	BMessage	*valueContainer	= new BMessage();
 	BMessage	sendMessage	= BMessage(*changeMessage);
 	sendMessage.FindMessage("valueContainer",valueContainer);
