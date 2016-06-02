@@ -309,6 +309,13 @@ void ClassRenderer::MessageReceived(BMessage *message) {
 	}
 }
 
+/* \todo dont delete all Attributes and create them new.. 
+ * check if all Attributes where set up and
+ * just set the  new values of attributes
+ * and if there is none such attribute in the list then create
+ * a new one
+ */
+
 void ClassRenderer::ValueChanged() {
 	TRACE();
 	BMessage	*pattern		= new BMessage();
@@ -340,6 +347,8 @@ void ClassRenderer::ValueChanged() {
 	data->FindString("Name",(const char **)&newName);
 	name->SetString(newName);
 	name->SetFrame(BRect(frame.left+(xRadius/3),frame.top+(yRadius/3),frame.right-(xRadius/3),frame.top+12));
+	
+	
 	//delete all "old" Attribs
 	attributes->erase(attributes->begin(),attributes->end());
 	//and add all attribs we found

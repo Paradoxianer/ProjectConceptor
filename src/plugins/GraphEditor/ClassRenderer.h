@@ -20,6 +20,17 @@ using namespace std;
 #include "AFont.h"
 
 
+/**
+ * @class ClassRenderer
+ * @brief Renders a node for the GrapEditorView
+ *
+ * @author Paradoxon 
+ * @todo improve @ClassRenderer::ValueChanged() Method to not create all Attributerender news
+ * @bug the name of Attributerenderes are change to be the same when the class get resized
+ */
+
+
+
 class ClassRenderer: public Renderer
 {
 
