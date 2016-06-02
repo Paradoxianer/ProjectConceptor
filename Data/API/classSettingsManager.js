@@ -1,0 +1,27 @@
+var classSettingsManager =
+[
+    [ "SettingsManager", "classSettingsManager.html#aca5c0b316d7b6662f796d2dcbed1399d", null ],
+    [ "~SettingsManager", "classSettingsManager.html#a00f848310bc1f31a896580d1ea4c2e1c", null ],
+    [ "SettingsManager", "classSettingsManager.html#aca5c0b316d7b6662f796d2dcbed1399d", null ],
+    [ "~SettingsManager", "classSettingsManager.html#a00f848310bc1f31a896580d1ea4c2e1c", null ],
+    [ "SettingsManager", "classSettingsManager.html#aca5c0b316d7b6662f796d2dcbed1399d", null ],
+    [ "~SettingsManager", "classSettingsManager.html#a00f848310bc1f31a896580d1ea4c2e1c", null ],
+    [ "RestoreWinState", "classSettingsManager.html#a231242545f99eb2573ec54ed4016ec6c", null ],
+    [ "RestoreWinState", "classSettingsManager.html#a231242545f99eb2573ec54ed4016ec6c", null ],
+    [ "RestoreWinState", "classSettingsManager.html#a231242545f99eb2573ec54ed4016ec6c", null ],
+    [ "SaveMacro", "classSettingsManager.html#a4e0f96a0eea44167aa61d22f1fe9656e", null ],
+    [ "SaveMacro", "classSettingsManager.html#a4e0f96a0eea44167aa61d22f1fe9656e", null ],
+    [ "SaveMacro", "classSettingsManager.html#a4e0f96a0eea44167aa61d22f1fe9656e", null ],
+    [ "SaveUndo", "classSettingsManager.html#a809ac016f56ac8bd5fa6267f390d7da0", null ],
+    [ "SaveUndo", "classSettingsManager.html#a809ac016f56ac8bd5fa6267f390d7da0", null ],
+    [ "SaveUndo", "classSettingsManager.html#a809ac016f56ac8bd5fa6267f390d7da0", null ],
+    [ "SetRestoreWinState", "classSettingsManager.html#a1499738c5d47c810357ca352a0edf939", null ],
+    [ "SetRestoreWinState", "classSettingsManager.html#a1499738c5d47c810357ca352a0edf939", null ],
+    [ "SetRestoreWinState", "classSettingsManager.html#a1499738c5d47c810357ca352a0edf939", null ],
+    [ "SetSaveMacro", "classSettingsManager.html#a2e82225803f7e8b70ed1385924b990ae", null ],
+    [ "SetSaveMacro", "classSettingsManager.html#a2e82225803f7e8b70ed1385924b990ae", null ],
+    [ "SetSaveMacro", "classSettingsManager.html#a2e82225803f7e8b70ed1385924b990ae", null ],
+    [ "SetSaveUndo", "classSettingsManager.html#a9b3c73e3e1b809db6455e1a348734f39", null ],
+    [ "SetSaveUndo", "classSettingsManager.html#a9b3c73e3e1b809db6455e1a348734f39", null ],
+    [ "SetSaveUndo", "classSettingsManager.html#a9b3c73e3e1b809db6455e1a348734f39", null ]
+];

@@ -1,0 +1,25 @@
+var classPTextBuffer =
+[
+    [ "PTextBuffer", "classPTextBuffer.html#a026901e8756dccf9cac598d50e6db3d0", null ],
+    [ "~PTextBuffer", "classPTextBuffer.html#a42a8fca47e83278a2ce0f204b52a296a", null ],
+    [ "Buffer", "classPTextBuffer.html#a83322dc770e936031ae80c3634880548", null ],
+    [ "ChangeToNL", "classPTextBuffer.html#a003765a61d5448676464c5a05e816756", null ],
+    [ "CharInfo", "classPTextBuffer.html#ada619c16c7fce4ef4994c7b274a4c96d", null ],
+    [ "CharLen", "classPTextBuffer.html#a1d9d1f98c54088c70cc8553cd085825f", null ],
+    [ "Copy", "classPTextBuffer.html#a1e020fa3348abc1fe6c86cbc7b9ae7ec", null ],
+    [ "Delete", "classPTextBuffer.html#aad0c991829afa9c54862453af41de79f", null ],
+    [ "Insert", "classPTextBuffer.html#ad442e94deda6af46bb02784eb73cfa7a", null ],
+    [ "MoveGap", "classPTextBuffer.html#ac20bc78e85dfe539275f27ea83d31231", null ],
+    [ "operator=", "classPTextBuffer.html#a12032837b92f9b142c6f232319a54ed7", null ],
+    [ "operator[]", "classPTextBuffer.html#a0a6786499dbb2fb4e291d555d9736bcc", null ],
+    [ "PrevCharLen", "classPTextBuffer.html#ae332a665eaa654622c8ba950b3c02696", null ],
+    [ "PrintToStream", "classPTextBuffer.html#a81eca60f108301db0b0d582b42cedbc2", null ],
+    [ "Replace", "classPTextBuffer.html#ae8fb0fe1e9977fe9a70f0fd4268cdd5b", null ],
+    [ "ResizeGap", "classPTextBuffer.html#a6d77a4a2ac006d751d1237d4f22a6402", null ],
+    [ "Size", "classPTextBuffer.html#a61694933f30fea03e59a58c6aafdc36a", null ],
+    [ "fGap", "classPTextBuffer.html#a617c94e0b3d9ee451eec48ee2628a11a", null ],
+    [ "fGapSize", "classPTextBuffer.html#aa86987d5ed828713e814cd5d914795c8", null ],
+    [ "fLogicalSize", "classPTextBuffer.html#a6a4e73be8f60abcbe062384ab8fc98c1", null ],
+    [ "fPhysicalSize", "classPTextBuffer.html#accc1a17397da48ac69d7e105115c5bba", null ],
+    [ "fText", "classPTextBuffer.html#aee6bde1ed3c341f02bbce616f06c8c5a", null ]
+];
