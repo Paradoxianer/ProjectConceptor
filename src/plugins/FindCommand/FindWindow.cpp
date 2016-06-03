@@ -29,25 +29,41 @@ void FindWindow::Init() {
 
 void FindWindow::CreateViews() {
 	TRACE();
-    searchText		= new BTextControl("searchText", "Search","",new BMessage('find'));
+    searchText				= new BTextControl("searchText", B_TRANSLATE("Search"),"",new BMessage('find'));
+    BBox		*advView	= new BBox("Advanced Search");
+    BSplitView	*splitter	= new BSplitView(B_VERTICAL);
+   
     searchText->SetModificationMessage(new BMessage('live'));
-	SetLayout(new BGroupLayout(B_HORIZONTAL));
-	AddChild(
-		BGroupLayoutBuilder(B_VERTICAL)
+    advView->SetLabel(B_TRANSLATE("Advanced Search"));
+    splitter->SetCollapsible(true);
+    splitter->AddChild(advView);
+    splitter->AddChild(BGroupLayoutBuilder(B_HORIZONTAL)
+						.Add(new BButton("okButton",B_TRANSLATE("OK"), new BMessage('ok')))
+						.Add(new BButton("channelButton",B_TRANSLATE("Cancel"), new BMessage('cl')))
+				);
+	splitter->SetItemCollapsed(0,true);
+	SetLayout(new BGroupLayout(B_VERTICAL));
+	AddChild(BGroupLayoutBuilder(B_VERTICAL)
+				.Add(BGroupLayoutBuilder(B_HORIZONTAL)
+					.SetInsets(10,10,10,0)
+					.Add(searchText)
+				)
+				.Add(splitter)
+			);
+/*		BGroupLayoutBuilder(B_VERTICAL)
 		.Add(BGroupLayoutBuilder(B_HORIZONTAL)
 			.SetInsets(10,10,10,10)
-			.Add(new BStringView("findLabel","Find"))
 			.Add(searchText)
 			
 		)
-		.Add(BSplitLayoutBuilder(B_VERTICAL)
-			.Add(new BBox("Advanced Search"))
+			.Add(BSplitLayoutBuilder(B_VERTICAL)
+			.Add(advView)
 		)
 		.Add(BGroupLayoutBuilder(B_HORIZONTAL)
 			.Add(new BButton("okButton",B_TRANSLATE("OK"), new BMessage('ok')))
 			.Add(new BButton("channelButton",B_TRANSLATE("Cancel"), new BMessage('cl')))
 		)
-	);
+	);*/
 
 }
 
