@@ -130,7 +130,7 @@ void GraphEditor::Init(void) {
 	scaleMenu->AddItem(new BMenuItem("1000 %",newScale,0,0));
 
 	grid		= new ToolItem(B_TRANSLATE("Grid"),BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
-	penSize		= new FloatToolItem(B_TRANSLATE("Pen Size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
+	penSize		= new FloatToolItem(B_TRANSLATE("Pen size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
 	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
 	patternItem	= new PatternToolItem(B_TRANSLATE("Node::Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 
@@ -686,7 +686,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			int32	type;
 			BString datadummy	= BString("   ");
 			message->FindInt32("type",&type);
-			InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input AttributName"),B_TRANSLATE("Name"), B_TRANSLATE("Attribut"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
+			InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input attributname"),B_TRANSLATE("Name"), B_TRANSLATE("Attribut"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
 			char			*input		= NULL;
 			char			*inputstr	= NULL;
 			if (inputAlert->Go(&input)<1) {

@@ -695,7 +695,7 @@ void GraphEditor::MessageReceived(BMessage *message)
 			char	*datadummy	= new char[4];
 			strcpy(datadummy,"    ");
 			message->FindInt32("type",&type);
-			InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input AttributName"),B_TRANSLATE("Name"), B_TRANSLATE("Attribut"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
+			InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input attributname"),B_TRANSLATE("Name"), B_TRANSLATE("Attribut"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
 			char			*input		= NULL;
 			char			*inputstr	= NULL;
 			if (inputAlert->Go(&input)<1)

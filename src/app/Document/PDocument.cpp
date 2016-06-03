@@ -518,7 +518,7 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 	}
 	else
 	{
-		new BAlert("",B_TRANSLATE("Error setting File"),"Ohh");
+		new BAlert(B_TRANSLATE("Error"),B_TRANSLATE("Problems while trying to save the file"),"Ohh");
 	}
 
 }
@@ -682,7 +682,7 @@ bool PDocument::QuitRequested(void)
 	if (modified)
 	{
 		readLock = Lock();
-		BAlert *myAlert = new BAlert("title", "Save changes to ...", B_TRANSLATE("Cancel"), B_TRANSLATE("Don't save"), B_TRANSLATE("Save"), B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
+		BAlert *myAlert = new BAlert(B_TRANSLATE("Save before close"), B_TRANSLATE("Save changes to ..."), B_TRANSLATE("Cancel"), B_TRANSLATE("Don't save"), B_TRANSLATE("Save"), B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
 		myAlert->SetShortcut(0, B_ESCAPE);
 		int32 button_index = myAlert->Go();
 		if (button_index == 0)

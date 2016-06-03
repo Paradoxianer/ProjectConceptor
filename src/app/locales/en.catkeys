@@ -1,55 +1,61 @@
-1	English	application/x-vnd.ProjectConceptor	2397978915
-Save As	MainWindow		Save As
+1	English	application/x-vnd.ProjectConceptor	530206262
+Select all	MainWindow		Select all
+Macro	MainWindow		Macro
 Title	MainWindow		Title
 New	MainWindow		New
-Project Settings	MainWindow		Project Settings
 Save	MainWindow		Save
 Open	MainWindow		Open
 Settings	SavePanel		Settings
+Stop recording	MainWindow		Stop recording
+Page setup	MainWindow		Page setup
 Settings	ConfigWindow		Settings
-Could not find Plugins	SavePanel		Could not find Plugins
+Coud not find command	CommandManager		Coud not find command
 Search	MainWindow		Search
+Project settings	MainWindow		Project settings
+Problems while trying to save the file	Document		Problems while trying to save the file
 Print	MainWindow		Print
 Window	MainWindow		Window
+Find next	MainWindow		Find next
 File	MainWindow		File
 Save	Document		Save
 Fileformat	SavePanel		Fileformat
-Find Next	MainWindow		Find Next
-Cant find Plugins	PluginManager		Cant find Plugins
-Replace All	MainWindow		Replace All
-Select All	MainWindow		Select All
-Input Macroname	CommandManager		Input Macroname
+Cant find plugins	PluginManager		Cant find plugins
 Play	MainWindow		Play
-Coud not Find Command	CommandManager		Coud not Find Command
 Quit	MainWindow		Quit
 Redo	MainWindow		Redo
+Input macroname	CommandManager		Input macroname
 ProjectConceptor	PluginManager		ProjectConceptor
 Paste	MainWindow		Paste
 OK	CommandManager		OK
 Edit	MainWindow		Edit
-Page Setup	MainWindow		Page Setup
-Title Vertical	MainWindow		Title Vertical
+Macro recording already started!	CommandManager		Macro recording already started!
 Replace	MainWindow		Replace
+Title vertical	MainWindow		Title vertical
 Cascade	MainWindow		Cascade
 Replace & Find	MainWindow		Replace & Find
 Undo	MainWindow		Undo
 Find	MainWindow		Find
+Save before close	Document		Save before close
+Save as	SavePanel		Save as
 Cancel	CommandManager		Cancel
+Error	Document		Error
 Macro	CommandManager		Macro
-Start Recording	MainWindow		Start Recording
 Copy	MainWindow		Copy
 Help	HelpWindow		Help
 Close	MainWindow		Close
 Help	MainWindow		Help
-Macro Recording already started!	CommandManager		Macro Recording already started!
+Contiune recording	CommandManager		Contiune recording
+OK	PluginManager		OK
+Save changes to ...	Document		Save changes to ...
 Clear	MainWindow		Clear
-Restart Recording	CommandManager		Restart Recording
-Contiune Recording	CommandManager		Contiune Recording
 Cut	MainWindow		Cut
 Cancel	Document		Cancel
-Error setting File	Document		Error setting File
-Stop Recording	MainWindow		Stop Recording
+Restart recording	CommandManager		Restart recording
 Name	CommandManager		Name
-Save As	SavePanel		Save As
+Start recording	MainWindow		Start recording
+Error!	CommandManager		Error!
 About	MainWindow		About
+Replace all	MainWindow		Replace all
+Could not find plugins	SavePanel		Could not find plugins
 Don't save	Document		Don't save
+Save as	MainWindow		Save as

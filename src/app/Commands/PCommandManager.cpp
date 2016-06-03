@@ -139,7 +139,7 @@ void PCommandManager::StartMacro(void) {
 		macroIndexer	= new Indexer(doc);
 	}
 	else {
-		int32 choice	= (new BAlert("Error!",B_TRANSLATE("Macro Recording already started!"),B_TRANSLATE("Restart Recording"),B_TRANSLATE("Contiune Recording"),NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_STOP_ALERT))->Go();
+		int32 choice	= (new BAlert(B_TRANSLATE("Error!"),B_TRANSLATE("Macro recording already started!"),B_TRANSLATE("Restart recording"),B_TRANSLATE("Contiune recording"),NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_STOP_ALERT))->Go();
 		if (choice == 0) {
 			delete macroIndexer;
 			macroIndexer	= new Indexer(doc);
@@ -152,7 +152,7 @@ void PCommandManager::StartMacro(void) {
 
 void PCommandManager::StopMacro() {
 	TRACE();
-	InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input Macroname"),B_TRANSLATE("Name"), B_TRANSLATE("Macro"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
+	InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input macroname"),B_TRANSLATE("Name"), B_TRANSLATE("Macro"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
 	char			*input		= NULL;
 	char			*inputstr	= NULL;
 	if  (recording)	{
@@ -231,8 +231,8 @@ status_t PCommandManager::Execute(BMessage *settings) {
 		else
 		{
 			char	*error	= new char[255];
-			sprintf(error,"%s: %s",B_TRANSLATE("Coud not Find Command"),commandName);
-			(new BAlert("Error!",error, "OK",NULL,NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_STOP_ALERT))->Go();
+			sprintf(error,"%s: %s",B_TRANSLATE("Coud not find command"),commandName);
+			(new BAlert(B_TRANSLATE("Error!"),error, B_TRANSLATE("OK"),NULL,NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_STOP_ALERT))->Go();
 			delete error;
 			err = B_ERROR;
 		}

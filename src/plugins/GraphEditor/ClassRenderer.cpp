@@ -309,12 +309,6 @@ void ClassRenderer::MessageReceived(BMessage *message) {
 	}
 }
 
-/* \todo dont delete all Attributes and create them new.. 
- * check if all Attributes where set up and
- * just set the  new values of attributes
- * and if there is none such attribute in the list then create
- * a new one
- */
 
 void ClassRenderer::ValueChanged() {
 	TRACE();

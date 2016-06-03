@@ -15,7 +15,7 @@ PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target): BFilePanel(B_SAVE_
 	Window()->Lock();
 	BView 	*background = Window()->ChildAt(0);
 	BView	*textView;
-	Window()->SetTitle(B_TRANSLATE("Save As"));
+	Window()->SetTitle(B_TRANSLATE("Save as"));
 
 
 	BRect limit 				= background->Bounds();
@@ -151,7 +151,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 	}
 	delete [] translators; 
 	if (menu->CountItems() == 0)
-		menu->AddItem(new BMenuItem(B_TRANSLATE("Could not find Plugins"),NULL));
+		menu->AddItem(new BMenuItem(B_TRANSLATE("Could not find plugins"),NULL));
 	return menu;
 }
 
