@@ -6,6 +6,8 @@
 #include <interface/MenuItem.h>
 #include <interface/TextView.h>
 #include <support/ClassInfo.h>
+#include <Catalog.h>
+
 #include "PCommandManager.h"
 #include "PDocument.h"
 #include "PluginManager.h"
@@ -207,7 +209,7 @@ status_t PCommandManager::Execute(BMessage *settings) {
 				tmpMessage = command->Do(doc, settings);
 			}
 			catch(...){
-				BAlert *alert = new BAlert(commandName, "Error on execution of Command.", "OK");
+				BAlert *alert = new BAlert(commandName, B_TRANSLATE("Error on execution of Command."), B_TRANSLATE("OK"));
 				alert->Go();
 				err=B_ERROR;
 			}
@@ -218,7 +220,8 @@ status_t PCommandManager::Execute(BMessage *settings) {
 						recording->AddMessage("Macro::Commmand", macroIndexer->IndexMacroCommand(settings));
 					if (!shadow) {
 						undoList->RemoveItems(undoStatus+1,undoList->CountItems()-undoStatus);
-						undoList->AddItem(new BMessage(*tmpMessage));
+						if (tmpMessage!= NULL)
+							undoList->AddItem(new BMessage(*tmpMessage));
 						undoStatus	= undoList->CountItems()-1;
 					}
 					err=B_OK;
