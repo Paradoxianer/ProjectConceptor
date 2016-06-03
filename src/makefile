@@ -86,6 +86,13 @@ export SYMBOLS = TRUE
 #	a source-level debugger
 export DEBUGGER = TRUE
 
+# 	Specify the codes for languages you are going to support in this
+# 	application. The default "en" one must be provided too. "make catkeys"
+# 	will recreate only the "locales/en.catkeys" file. Use it as a template
+# 	for creating catkeys for other languages. All localization files must be
+# 	placed in the "locales" subdirectory.
+export LOCALE = en
+
 app: gitupdate pkgupdate app/makefile FORCE
 	cd app && make
 
@@ -100,7 +107,6 @@ plugins_clean:
 
 app_install: app/makefile FORCE
 	cd app && make install
-
 
 plugins_install: plugins/makefile FORCE
 	cd plugins && make install

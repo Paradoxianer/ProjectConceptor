@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor	530206262
+1	English	application/x-vnd.ProjectConceptor	4259708206
 Select all	MainWindow		Select all
 Macro	MainWindow		Macro
 Title	MainWindow		Title
@@ -7,18 +7,24 @@ Save	MainWindow		Save
 Open	MainWindow		Open
 Settings	SavePanel		Settings
 Stop recording	MainWindow		Stop recording
+Error on execution of Command.	CommandManager		Error on execution of Command.
 Page setup	MainWindow		Page setup
 Settings	ConfigWindow		Settings
 Coud not find command	CommandManager		Coud not find command
 Search	MainWindow		Search
 Project settings	MainWindow		Project settings
+FTP Warning	AboutURLView		FTP Warning
 Problems while trying to save the file	Document		Problems while trying to save the file
+Web Browser Warning	AboutURLView		Web Browser Warning
 Print	MainWindow		Print
+Ok	AboutURLView		Ok
 Window	MainWindow		Window
 Find next	MainWindow		Find next
 File	MainWindow		File
 Save	Document		Save
+E-mail Warning	AboutURLView		E-mail Warning
 Fileformat	SavePanel		Fileformat
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		There is no web browser on your machine that is configured as the default program to view web pages.
 Cant find plugins	PluginManager		Cant find plugins
 Play	MainWindow		Play
 Quit	MainWindow		Quit
@@ -36,6 +42,7 @@ Replace & Find	MainWindow		Replace & Find
 Undo	MainWindow		Undo
 Find	MainWindow		Find
 Save before close	Document		Save before close
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		There is no FTP client on your machine that is configured as the default program to connect to an FTP server.
 Save as	SavePanel		Save as
 Cancel	CommandManager		Cancel
 Error	Document		Error
@@ -43,6 +50,7 @@ Macro	CommandManager		Macro
 Copy	MainWindow		Copy
 Help	HelpWindow		Help
 Close	MainWindow		Close
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		There is no e-mail program on your machine that is configured as the default program to send e-mail.
 Help	MainWindow		Help
 Contiune recording	CommandManager		Contiune recording
 OK	PluginManager		OK

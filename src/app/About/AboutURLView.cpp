@@ -16,7 +16,6 @@
 */
 
 
-
 #include "AboutURLView.h"
 
 #include <Alert.h>
@@ -28,10 +27,15 @@
 #include <NodeInfo.h>
 #include <Path.h>
 #include <Roster.h>
+#include <Catalog.h>
 
 #include <unistd.h>
 
 #include <stdio.h>
+
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "AboutURLView"
 
 
 
@@ -1055,8 +1059,8 @@ void URLView::LaunchURL() {
 		url->UnlockBuffer();
 		// Make sure the user has an e-mail program.
 		if( result != B_NO_ERROR  &&  result != B_ALREADY_RUNNING ) {
-			BAlert *alert = new BAlert( "E-mail Warning",
-										"There is no e-mail program on your machine that is configured as the default program to send e-mail.",
+			BAlert *alert = new BAlert( B_TRANSLATE("E-mail Warning"),
+										B_TRANSLATE("There is no e-mail program on your machine that is configured as the default program to send e-mail."),
 										"Ok", NULL, NULL, B_WIDTH_AS_USUAL,
 										B_WARNING_ALERT );
 			alert->Go();
@@ -1070,9 +1074,9 @@ void URLView::LaunchURL() {
 		url->UnlockBuffer();
 		// Make sure the user has a web browser.
 		if( result != B_NO_ERROR  &&  result != B_ALREADY_RUNNING ) {
-			BAlert *alert = new BAlert( "Web Browser Warning",
-										"There is no web browser on your machine that is configured as the default program to view web pages.",
-										"Ok", NULL, NULL, B_WIDTH_AS_USUAL,
+			BAlert *alert = new BAlert(B_TRANSLATE("Web Browser Warning"),
+										B_TRANSLATE("There is no web browser on your machine that is configured as the default program to view web pages."),
+										B_TRANSLATE("Ok"), NULL, NULL, B_WIDTH_AS_USUAL,
 										B_WARNING_ALERT );
 			alert->Go();
 		}
@@ -1086,9 +1090,9 @@ void URLView::LaunchURL() {
 		url->UnlockBuffer();
 		// Make sure the user has an FTP client.
 		if( result != B_NO_ERROR  &&  result != B_ALREADY_RUNNING ) {
-			BAlert *alert = new BAlert( "FTP Warning",
-										"There is no FTP client on your machine that is configured as the default program to connect to an FTP server.",
-										"Ok", NULL, NULL, B_WIDTH_AS_USUAL,
+			BAlert *alert = new BAlert( B_TRANSLATE("FTP Warning"),
+										B_TRANSLATE("There is no FTP client on your machine that is configured as the default program to connect to an FTP server."),
+										B_TRANSLATE("Ok"), NULL, NULL, B_WIDTH_AS_USUAL,
 										B_WARNING_ALERT );
 			alert->Go();
 		}
