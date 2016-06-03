@@ -163,7 +163,7 @@ void ProjektConceptor::ReadyToRun() {
 	err = settingsDir->SetTo(settingsDir, "ProjectConceptor");
 	settings.SetTo(settingsDir, "GeneralSettings");
 	ConfigManager		*configManager = new ConfigManager((char *)settings.Path());
-	configManager->LoadDefaults();
+	configManager->LoadConfig();
 	err = settingsDir->CreateDirectory("AutoSave", NULL);
 }
 

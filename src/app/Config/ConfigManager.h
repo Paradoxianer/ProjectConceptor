@@ -35,7 +35,7 @@ public:
 	/** pass a komplete new Configration to the Manager causes it to rewrite the Config file and recreate a Config GUI
 	*/
 	void				SetConfigMessage(BMessage *newConfig);
-	void				LoadDefaults(void);
+	void				LoadConfig(void);
 	void				SaveConfig();
 
 private:
