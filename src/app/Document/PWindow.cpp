@@ -352,7 +352,9 @@ void PWindow::MakeToolbars()
 	tmpBar->AddSeperator();
 	tmpBar->AddSeperator();
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"find");
-	toolItem = new ToolItem("find",tmpBitmap,NULL);
+	toolItem = new ToolItem("find",tmpBitmap,new BMessage(MENU_SEARCH_FIND));
+	toolItem->SetTarget(doc);
+
 	tmpBar->AddItem(toolItem);
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"trash");
 	toolItem = new ToolItem("find",tmpBitmap,NULL);
