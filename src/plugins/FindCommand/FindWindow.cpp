@@ -13,7 +13,7 @@
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "FindWindow"
 
-FindWindow::FindWindow(PDocument *tmpDoc):BWindow(BRect(50,50,600,400),B_TRANSLATE("Find"),B_FLOATING_WINDOW_LOOK,B_MODAL_APP_WINDOW_FEEL,B_AUTO_UPDATE_SIZE_LIMITS)
+FindWindow::FindWindow(PDocument *tmpDoc):BWindow(BRect(50,50,600,400),B_TRANSLATE("Find"),B_FLOATING_WINDOW_LOOK,B_FLOATING_APP_WINDOW_FEEL,B_AUTO_UPDATE_SIZE_LIMITS)
 {
 	TRACE();
 	doc=tmpDoc;
@@ -67,11 +67,6 @@ void FindWindow::CreateViews() {
 
 }
 
-void FindWindow::ChangeLanguage()
-{
-	TRACE();
-
-}
 
 void FindWindow::MessageReceived(BMessage *message)
 {
@@ -110,7 +105,10 @@ void FindWindow::MessageReceived(BMessage *message)
 			BMessenger	sender(doc);
 			sender.SendMessage(searchMessage);
 		}
-		break; 
+		break;
+		default:
+			BWindow::MessageReceived(message);
+			break;
 	}
 }
 

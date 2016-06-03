@@ -18,8 +18,9 @@
  * @class FindWindow
  * @brief Defines a Window to type in a search phrase 
  *
- * @author Paradoxon powered by Jesus Christ
+ * @author Paradoxon
  *
+ * 
  * the FindWindow enables life searching
  * The first and standart mode is a Simple TextControl
  * the advanced mode offers you plenty of posibilitys either search for values of attributes
@@ -44,7 +45,6 @@ public:
                                         
 	virtual	void			Quit(void);
 protected:
-			void			ChangeLanguage(void);
 		/*	void			FindNodes(BMessage *node, BString *string);
 			bool			FindInNode(BMessage *node,BString *string);*/
 			bool			advanced;
