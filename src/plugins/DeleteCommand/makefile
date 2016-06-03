@@ -16,6 +16,9 @@ NAME= Delete
 #	DRIVER: Kernel Driver
 TYPE= SHARED
 
+APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
+
+
 #	specify the source files to use
 #	full paths or paths relative to the makefile can be included
 # 	all files, regardless of directory, will have their object

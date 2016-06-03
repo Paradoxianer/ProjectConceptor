@@ -102,13 +102,27 @@ app_install: app/makefile FORCE
 	cd app && make install
 
 
-
 plugins_install: plugins/makefile FORCE
 	cd plugins && make install
 
+app_catkeys: app/makefile FORCE
+	cd app & make catkeys
+
+plugins_catkeys: plugins/makefile FORCE
+	cd plugins && make catkeys
+	
+app_bindcat: app/makefile FORCE
+	cd app & make bindcatalogs
+
+plugins_bincat: plugins/makefile FORCE
+	cd plugins && make bindcatalogs
+
+
 default: app plugins
 clean: app_clean plugins_clean
-#install: app_install plugins_install
+catkeys: app_catkeys plugins_catkeys
+
+bindcatalogs: app_bindcat plugins_bindcat
 
 install:: $(NAME)
 	@echo "making a package"

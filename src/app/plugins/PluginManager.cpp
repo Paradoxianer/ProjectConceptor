@@ -96,7 +96,7 @@ void PluginManager::LoadPlugins(BDirectory *startDir, bool deep)
 		dirCounter++;
 	}
 	if (plugins->CountItems()<1)
-	  (new BAlert(B_TRANSLATE("ProjectConceptor"), B_TRANSLATE("Cant find Plugins"), "OK",NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go();
+	  (new BAlert(B_TRANSLATE("ProjectConceptor"), B_TRANSLATE("Cant find plugins"), B_TRANSLATE("OK"),NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go();
 }
 
 
