@@ -95,7 +95,7 @@ void GraphEditor::Init(void) {
 	patternMessage->AddInt32("HighColor",*(int32 *)&highColor);
 	rgb_color 	lowColor			= {128, 128, 128, 255};
 	patternMessage->AddInt32("LowColor",*(int32 *)&lowColor);
-	patternMessage->AddData("Node::Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH),false);
+	patternMessage->AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH),false);
 
 	scaleMenu		= new BMenu(B_TRANSLATE("Scale"));
 	BMessage	*newScale	= new BMessage(G_E_NEW_SCALE);
