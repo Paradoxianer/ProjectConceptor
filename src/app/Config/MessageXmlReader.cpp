@@ -2,35 +2,41 @@
 #include "tinyxml/tinyxml.h"
 #include <storage/File.h>
 #include <support/Debug.h>
-
+#include <mail/mail_encoding.h>
+#include <string.h>
 
 
 map<BString, int> MessageXmlReader::bmessageTypes;
 
 MessageXmlReader::MessageXmlReader(){
-    filePath=new BString("");
+    Init();
+}
 
-
-    if (bmessageTypes.size() == 0){
+MessageXmlReader::MessageXmlReader(const BString &fileName){
+    Init();
+    SetTo(fileName);
+}
+// @todo implement B_REF_TYPE and B_POINTER_REF
+void MessageXmlReader::Init()
+{
+	filePath = new BString("");
+	   if (bmessageTypes.size() == 0){
         bmessageTypes[BString("BMessage")]=1;
         bmessageTypes[BString("bool")]=2;
         bmessageTypes[BString("int8")]=3;
-        bmessageTypes[BString("nt16")]=4;
-        bmessageTypes[BString("nt32")]=5;
-        bmessageTypes[BString("nt64")]=6;
+        bmessageTypes[BString("int16")]=4;
+        bmessageTypes[BString("int32")]=5;
+        bmessageTypes[BString("int64")]=6;
         bmessageTypes[BString("float")]=7;
         bmessageTypes[BString("double")]=8;
         bmessageTypes[BString("string")]=9;
         bmessageTypes[BString("BPoint")]=10;
         bmessageTypes[BString("BRect")]=11;
         bmessageTypes[BString("B_REF_TYPE")]=12;
-        bmessageTypes[BString("B_POINTER_REF")]=13;
+        bmessageTypes[BString("B_POINTER_TYPE")]=13;
     }
 }
 
-MessageXmlReader::MessageXmlReader(const BString &fileName){
-    SetTo(fileName);
-}
 
 MessageXmlReader::~MessageXmlReader(){
 }
@@ -71,80 +77,107 @@ BMessage* MessageXmlReader::ReadFile(const BString &fileName) {
 	return NULL;
 }
 
-BMessage* MessageXmlReader::ProcessXML(TiXmlElement *element){
+BMessage* MessageXmlReader::ProcessXML(TiXmlElement *element, BMessage *nodeMessage){
 	BMessage *bMessage	= new BMessage;
-	bMessage->what = atoi(element->Attribute("what"));
-	element= element->FirstChildElement("Data");
-	for( ; element;){
-		printf("type %s\n",element->Attribute("type"));
-		switch (	bmessageTypes[BString(element->Attribute("type"))]){
+	const char *what=element->Attribute("what");
+	if (what == NULL)
+		bMessage->what = 0;
+	else	
+		bMessage->what = atoi(what);
+	TiXmlElement *child;
+	child= element->FirstChildElement ();
+	for( ; child;){
+		printf("type: %s\n",child->Attribute("type"));
+		switch (	bmessageTypes[BString(child->Attribute("type"))]){
 			case 1:{
-				bMessage->AddMessage(element->Attribute("name"), (const BMessage *)ProcessXML(element));
+				const char *cName = child->Attribute("name");
+				bMessage->AddMessage(cName, (const BMessage *)ProcessXML(child));
 			}
 			break;
 			case 2:{
-				BString value = BString(element->Attribute("value"));
+				BString value = BString(child->Attribute("value"));
 				if (value.ICompare("TRUE") == B_OK)
-					bMessage->AddBool(element->Attribute("name"),true);
+					bMessage->AddBool(child->Attribute("name"),true);
 				else
-					bMessage->AddBool(element->Attribute("name"),false);
+					bMessage->AddBool(child->Attribute("name"),false);
 			}
 			break;
 			case 3:{
-					bMessage->AddInt8(element->Attribute("name"),atoi(element->Attribute("value")));
+					bMessage->AddInt8(child->Attribute("name"),atoi(child->Attribute("value")));
 			}
 			break;
 			case 4:{
-					bMessage->AddInt16(element->Attribute("name"),atoi(element->Attribute("value")));
+					bMessage->AddInt16(child->Attribute("name"),atoi(child->Attribute("value")));
 			}
 			break;
 			case 5:{
-					bMessage->AddInt32(element->Attribute("name"),atoi(element->Attribute("value")));
+					bMessage->AddInt32(child->Attribute("name"),atoi(child->Attribute("value")));
 			}
 			break;
 			case 6:{
-					bMessage->AddInt64(element->Attribute("name"),atol(element->Attribute("value")));
+					bMessage->AddInt64(child->Attribute("name"),atol(child->Attribute("value")));
 			}
 			break;
 			case 7:{
-					bMessage->AddInt32(element->Attribute("name"),atof(element->Attribute("value")));
+					bMessage->AddFloat(child->Attribute("name"),atof(child->Attribute("value")));
 			}
 			break;
 			case 8:{
-					bMessage->AddInt32(element->Attribute("name"),atof(element->Attribute("value")));
+					bMessage->AddDouble(child->Attribute("name"),atof(child->Attribute("value")));
 			}
 			break;
 			case 9:{
-					bMessage->AddString(element->Attribute("name"),element->Attribute("value"));
+					bMessage->AddString(child->Attribute("name"),child->Attribute("value"));
 			}
 			break;
 			case 10:{
 					BPoint tmpPoint;
-					tmpPoint.x = atof(element->Attribute("x"));
-					tmpPoint.y = atof(element->Attribute("y"));
-					bMessage->AddPoint(element->Attribute("name"),tmpPoint);
+					tmpPoint.x = atof(child->Attribute("x"));
+					tmpPoint.y = atof(child->Attribute("y"));
+					bMessage->AddPoint(child->Attribute("name"),tmpPoint);
 			}
 			break;
 			case 11:{
 					BRect tmpRect;
-					tmpRect.top			= atof(element->Attribute("top"));
-					tmpRect.left			= atof(element->Attribute("left"));
-					tmpRect.bottom	= atof(element->Attribute("bottom"));
-					tmpRect.right		= atof(element->Attribute("right"));
-					bMessage->AddRect(element->Attribute("name"),tmpRect);
+					tmpRect.top			= atof(child->Attribute("top"));
+					tmpRect.left			= atof(child->Attribute("left"));
+					tmpRect.bottom	= atof(child->Attribute("bottom"));
+					tmpRect.right		= atof(child->Attribute("right"));
+					bMessage->AddRect(child->Attribute("name"),tmpRect);
 			}
 			break;
 			case 12:{
-			}
-			break;
+				printf("type: %s not yet implementd\n",child->Attribute("type"));
+				break;
+ 			}
 			case 13:{
+				bMessage->AddPointer(child->Attribute("name"),(const void*)atoi(child->Attribute("value")));
+				break;
 			}
-			break;
 			case 14:{
+				printf("type: %s not yet implementd\n",child->Attribute("type"));
+
 			}
 			break;
+			default :{
+				char 		code[4];
+				const char 	*value	= child->Attribute("value");
+				ssize_t		size	= strlen(value);
+				ssize_t		len;
+				char		*data	= new char[((size*2)/3)+1];
+				const char	*encode	= child->Attribute("encode");
+				//first make shure we only have 4 chars
+				strncpy((char*)&code, child->Attribute("type"), 4);
+				uint32		type = code[3] << 24 | code[2] << 16 | code[1] << 8 | code[0];
+				//for  now we just do a base64 decode
+				if (value != NULL)
+				len=decode_base64(data, value,size);
+				if (len >0)
+					bMessage->AddData(child->Attribute("name"), type,(const void*)data,len);
+				bMessage->PrintToStream();
+			}
 		}
-		element= element->NextSiblingElement();
+		child= child->NextSiblingElement();
 	}
 	return bMessage;
 }
