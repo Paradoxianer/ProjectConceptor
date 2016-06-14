@@ -14,7 +14,7 @@ NAME= libProjectConceptor.so
 #	SHARED:	Shared library or add-on
 #	STATIC:	Static library archive
 #	DRIVER: Kernel Driver
-TYPE= APP
+TYPE= Shared
 
 # 	If you plan to use localization, specify the application's MIME signature.
 APP_MIME_SIG = application/x-vnd.ProjectConceptor
@@ -30,11 +30,7 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor
 SRCS= 	AFont.cpp \
 		FontPanel.cpp \
 		FontView.cpp \
-		BViewSplitter.cpp \
-		Divider.cpp \
 		PCSavePanel.cpp \
-		PDocLoader.cpp \
-		Indexer.cpp \
 		InputRequestView.cpp \
  		InputRequest.cpp  \
  		ShortCutFilter.cpp \
@@ -54,6 +50,7 @@ SRCS= 	AFont.cpp \
 #		ToolBar/ColorToolItem.cpp \
 #		ToolBar/FloatToolItem.cpp \
 #		ToolBar/PatternToolItem.cpp \
+#		Indexer.cpp \
 		
 
 #	specify the resource files to use
@@ -70,7 +67,9 @@ RSRCS= 	InputRequest.rsrc
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be root translation tracker localestub $(STDCPPLIBS)
+LIBS= be  translation tracker localestub $(STDCPPLIBS)
+#LIBS= be root translation tracker localestub $(STDCPPLIBS)
+
 
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths

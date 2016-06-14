@@ -67,7 +67,7 @@ export PLUGIN_DIR	=	Plugins
 #global settings for setting the level of debug and optimization
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
-export OPTIMIZE= FULL
+export OPTIMIZE= NONE
 #	specify any preprocessor symbols to be defined.  The symbols
 #	will be set to a value of 1.  For example specify DEBUG if you want
 #	DEBUG=1 to be set when compiling.
