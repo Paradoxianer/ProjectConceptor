@@ -39,12 +39,11 @@ SRCS= 	About/AboutWindow.cpp \
 		Config/PluginItem.cpp \
 		Config/PluginInfoView.cpp \
 		Config/MessageView.cpp \
-		Config/MessageXmlReader.cpp \
-		Config/MessageXmlWriter.cpp \
 		Commands/PCommand.cpp \
 		Commands/PCommandManager.cpp \
 		Document/PDocument.cpp \
 		Document/PDocumentManager.cpp \
+		Document/PDocLoader.cpp \
 		Document/PEditor.cpp \
 		Document/PEditorManager.cpp \
 		Document/PWindow.cpp \
@@ -66,11 +65,12 @@ SRCS= 	About/AboutWindow.cpp \
 		Tools/BViewSplitter.cpp \
 		Tools/Divider.cpp \
 		Tools/PCSavePanel.cpp \
-		Tools/PDocLoader.cpp \
 		Tools/Indexer.cpp \
 		Tools/InputRequestView.cpp \
  		Tools/InputRequest.cpp  \
- 		Tools/ShortCutFilter.cpp \
+ 		Tools/MessageXmlReader.cpp \
+		Tools/MessageXmlWriter.cpp \
+		Tools/ShortCutFilter.cpp \
 		Tools/TextViewCompleter.cpp  \
 		Tools/tinyxml/tinystr.cpp \
  		Tools/tinyxml/tinyxml.cpp  \
