@@ -3,7 +3,6 @@
 /*
  * @author Paradoxon powered by Jesus Christ
  */
-#define DEBUG 1
 #include <support/Debug.h>
 
 #include <app/Invoker.h>

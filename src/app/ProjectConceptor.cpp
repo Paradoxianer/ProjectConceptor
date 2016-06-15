@@ -237,11 +237,8 @@ void ProjektConceptor::AboutRequested() {
 
 void ProjektConceptor::ArgvReceived(int32 argc, char **argv) {
 	if (argc>1) {
-		if (strcasecmp(argv[1],"-d") == B_OK)
-			SET_DEBUG_ENABLED(true);
+		//@todo process loading the passed file
 	}
-	else
-			SET_DEBUG_ENABLED(false);
 }
 
 void ProjektConceptor::RegisterMime(void) {
@@ -279,7 +276,7 @@ void ProjektConceptor::RegisterMime(void) {
 
 int main()
 {
-//	SET_DEBUG_ENABLED(false);
+
 	new ProjektConceptor();
 	/*	freopen ("/boot/var/log/ProjectConceptor.log","w",stdout);
 	freopen ("/boot/var/log/ProjectConceptor.log","a+",stderr);*/

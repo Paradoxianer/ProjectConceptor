@@ -8,8 +8,6 @@
 
 #include <app/AppDefs.h>
 #include <support/TypeConstants.h>
-
-#define DEBUG 1
 #include <support/Debug.h>
 
 
