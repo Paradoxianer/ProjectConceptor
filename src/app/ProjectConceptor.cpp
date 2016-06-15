@@ -237,7 +237,7 @@ void ProjektConceptor::AboutRequested() {
 
 void ProjektConceptor::ArgvReceived(int32 argc, char **argv) {
 	if (argc>1) {
-		//@todo process loading the passed file
+		//@todo process loading if ther was a file passed
 	}
 }
 
