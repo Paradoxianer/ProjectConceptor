@@ -342,9 +342,11 @@ void GraphEditor::SetDirty(BRegion *region) {
 
 void GraphEditor::Draw(BRect updateRect) {
 	SetHighColor(230,230,230,255);
-	SetScale(1.0);
+	SetScale((1.0/scale));
+	PushState();
 	BView::Draw(updateRect);
 	SetScale(scale);
+	PushState();
 	if (gridEnabled) {
 		int32		xcount		= (Frame().Width()/gridWidth)+1;
 		int32		ycount		= (Frame().Height()/gridWidth)+1;
@@ -643,8 +645,12 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			break;
 		}
 		case G_E_NEW_SCALE: {
+			//reset to our 100%
+			SetScale((1.0/scale));
 			message->FindFloat("scale",&scale);
+			//now we can set the new scale
 			SetScale(scale);
+			PushState();
 			//FrameResized(0,0);
 			UpdateScrollBars();
 			Invalidate();
