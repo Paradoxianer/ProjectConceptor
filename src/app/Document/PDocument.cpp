@@ -423,7 +423,7 @@ void PDocument::Print(void)
 	         {
 	            // something's wrong, handle the error and bail out
 	         }
-//**dont know why this was here :-)      		 delete printerSetting;
+			//**dont know why this was here :-)      		 delete printerSetting;
 
 			// Get the user Settings
 			SetPrintSettings( printJob.Settings());

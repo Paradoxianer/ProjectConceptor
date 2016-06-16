@@ -16,7 +16,7 @@ NAME= ProjectConceptorTranslator
 #	DRIVER: Kernel Driver
 TYPE= SHARED
 
-APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
+APP_MIME_SIG = application/x-vnd.ProjectConceptor-Translator
 
 
 #	specify the source files to use
