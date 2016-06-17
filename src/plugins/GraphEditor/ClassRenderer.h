@@ -59,8 +59,6 @@ protected:
 				void		Init();
 				void		InsertAttribute(char *attribName, BMessage *attribute,int32 count);
 				void		AdjustParents(BMessage* theParent, BMessage *command);
-		BMessage			*viewMessage;
-
 
 		virtual	bool		MoveAll(void *arg,float dx, float dy);
 		virtual	bool		ResizeAll(void *arg, float dx, float dy);
