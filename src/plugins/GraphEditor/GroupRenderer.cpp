@@ -165,7 +165,7 @@ void GroupRenderer::MouseDown(BPoint where, int32 buttons,
 		BMessage *newNodeCommand=editor->GenerateInsertCommand(P_C_CLASS_TYPE);
 		BMessage *node;
 		newNodeCommand->FindPointer("node",(void **)&node);
-		node->AddPointer("Node::parent",viewMessage);
+		node->AddPointer("Node::parent",container);
 		editor->SendMessageToDoc(newNodeCommand);
 	}
 	ClassRenderer::MouseDown(where,buttons,clicks,modifiers);
