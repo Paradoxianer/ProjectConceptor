@@ -31,16 +31,18 @@ void StringRenderer::Init()
 	font_height fHeight;
 	editor->GetFont(editorFont);
 	editorFont->GetHeight(&fHeight);
-	fontHeight = fHeight.ascent+2;
+	fontHeight	= fHeight.ascent+2;
+	myString	= new BString();
+	shortString	= new BString();
 }
 
 void StringRenderer::SetString(char *newString)
 {
 	TRACE();
-	myString = newString;
+	myString = new BString(newString);
 	if (shortString)	
 		delete shortString;
-	shortString	= new BString(myString);
+	shortString	= new BString(*myString);
 	editorFont->TruncateString(shortString,B_TRUNCATE_MIDDLE,frame.Width()-2);
 }
 	
@@ -50,7 +52,7 @@ void StringRenderer::SetFrame(BRect newRect)
 	frame		= newRect;
 	if (shortString)	
 		delete shortString;
-	shortString	= new BString(myString);
+	shortString	= new BString(*myString);
 	editorFont->TruncateString(shortString,B_TRUNCATE_MIDDLE,frame.Width()-2);
 	frame.bottom=frame.top+fontHeight+4;
 }
@@ -69,7 +71,7 @@ void StringRenderer::MouseDown(BPoint where,int32 buttons, int32 clicks,int32 mo
 	editer->SetTarget(editor->BelongTo());
 	editer->SetScale(editor->Scale());
 	editor->AddChild(editer);
-	editer->SetText(myString);
+	editer->SetText(*myString);
 	editer->MakeFocus(true);
 	editer->SelectAll();
 }
