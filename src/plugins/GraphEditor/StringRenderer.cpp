@@ -59,15 +59,19 @@ void StringRenderer::MouseDown(BPoint where,int32 buttons, int32 clicks,int32 mo
 {
 	TRACE();
 	BRect	textRect= frame;
-	textRect.InsetBy(2,0);
-	textRect.OffsetBy(-2,1);
+	textRect.left=textRect.left*editor->Scale();
+	textRect.top=textRect.top*editor->Scale();
+	textRect.right=textRect.right*editor->Scale();
+	textRect.bottom=textRect.bottom*editor->Scale();
+	textRect.InsetBy((2*editor->Scale()),0);
+	textRect.OffsetBy((-2*editor->Scale()),editor->Scale());
 	TextEditorControl	*editer	= new TextEditorControl(textRect,"StringEditor",changeMessage,B_FOLLOW_LEFT|B_FOLLOW_TOP);
 	editer->SetTarget(editor->BelongTo());
+	editer->SetScale(editor->Scale());
 	editor->AddChild(editer);
 	editer->SetText(myString);
 	editer->MakeFocus(true);
 	editer->SelectAll();
-	
 }
 
 void StringRenderer::Draw(BView *drawOn, BRect updateRect)
