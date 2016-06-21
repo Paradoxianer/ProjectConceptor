@@ -6,6 +6,7 @@
 #include "BasePlugin.h"
 #include "PEditor.h"
 
+
 Indexer::Indexer(PDocument *document)
 {
 	TRACE();
@@ -193,6 +194,9 @@ BMessage* Indexer::RegisterDeIndexNode(BMessage *node)
 	node->FindPointer("this",(void **)&tmpPointer);
 	node->RemoveName("this");
 	sorter[(int32)tmpPointer] = node;
+	//@todo introduce a noneindexd list as soon as we are index this node
+	//we should scan throught the none_indexed list to find all
+	//nodes where this node pointer wasnt replaced yet
 	return node;
 }
 
@@ -203,7 +207,6 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 	void		*subContainerEntry	= NULL;
 	BList		*allNodesList		= new BList();
 	BList		*allConnectionsList	= new BList();
-
 	int32		i					= 0;
 	void		*tmpPointer			= NULL;
 	map<int32,BMessage*>::iterator	nodeIndex;
@@ -215,6 +218,9 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 		nodeIndex = sorter.find((int32)subContainerEntry);
 		if (nodeIndex != sorter.end())
 			allNodesList->AddItem(nodeIndex->second);
+		else 
+			notIndexed[(int32)tmpPointer]=node;
+
 		i++;
 	}
 	if (allNodesList->CountItems()>0)
@@ -244,6 +250,8 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 			node->RemoveName("Node::parent");
 			node->AddPointer("Node::parent",nodeIndex->second);
 		}
+		else
+			notIndexed[(int32)tmpPointer]=node;
 	}
 	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 	BasePlugin	*plugin		= NULL;
@@ -260,7 +268,6 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 			}
 		}
 	}
-	node->PrintToStream();
 	return RegisterDeIndexNode(node);;
 }
 
@@ -382,6 +389,7 @@ void Indexer::Init(void)
 {
 	TRACE();
 	sorter				= map<int32,BMessage*>();
-	included			= new BList;
+	notIndexed			= map<int32,BMessage*>();
+	included			= new BList();
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
 }

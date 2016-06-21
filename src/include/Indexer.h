@@ -57,6 +57,7 @@ protected:
 			
 			PDocument			*doc;
 			map<int32,BMessage*>	sorter;
+			multimap<int32,BMessage*>	notIndexed;
 			BList				*included;
 
 			PluginManager		*pluginManager;
