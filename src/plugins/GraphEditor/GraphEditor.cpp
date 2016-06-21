@@ -967,7 +967,7 @@ void GraphEditor::SendToBack(Renderer *wichRenderer) {
 	Invalidate();
 }
 
-BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat)
+BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 {
 	BList		*selected			= doc->GetSelected();
 	BMessage	*newNode	    	= new BMessage(*nodeMessage);
@@ -1006,49 +1006,49 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat)
 	commandMessage->AddPointer("node",newNode);
     subCommandMessage->AddPointer("node",newNode);
 
-    while (i<selected->CountItems())
-	{
-		from	= (BMessage *)selected->ItemAt(i);
-        if (to != NULL && from!=NULL)
-        {
-            connection		    = new BMessage(P_C_CONNECTION_TYPE);
-            err = from->FindRect("Node::frame",fromRect);
-            if (!selectRect)
-                selectRect = new BRect(*fromRect);
-            else
-                *selectRect = *selectRect | *fromRect;
-            err = B_OK;
-            connection->AddPointer("Node::from",from);
-            connection->AddPointer("Node::to",to);
-            uint	cType	= 1;
-            connection->AddInt8("Node::type", cType);
+	//if (connected == true){
+    	while (i<selected->CountItems())
+		{
+			from	= (BMessage *)selected->ItemAt(i);
+       		if (to != NULL && from!=NULL)
+       	 	{
+				connection		    = new BMessage(P_C_CONNECTION_TYPE);
+            	err = from->FindRect("Node::frame",fromRect);
+            	if (!selectRect)
+                	selectRect = new BRect(*fromRect);
+            	else
+                	*selectRect = *selectRect | *fromRect;
+            	err = B_OK;
+            	connection->AddPointer("Node::from",from);
+            	connection->AddPointer("Node::to",to);
+            	uint	cType	= 1;
+            	connection->AddInt8("Node::type", cType);
 
-            connection->AddMessage("Node::Data",data);
+            	connection->AddMessage("Node::Data",data);
             
-            connection->AddPointer("ProjectConceptor::doc",doc);
-            //** add the connections to the Nodes :-)
-            commandMessage->AddPointer("node",connection);
-        }
-		i++;
-	}
-	if (selectRect)
-	{
-		where.x         = selectRect->right+100;
-		int32 middle    = selectRect->top+(selectRect->Height()/2);
-		where.y         = middle;
-		int32 step      = -1;
-		while (FindRenderer(where)!=NULL)
-		{	
-		   	 where.y = middle + (step*85);
-			if (step>0)
-   				step++;
-			step=-step;
+            	connection->AddPointer("ProjectConceptor::doc",doc);
+            	//** add the connections to the Nodes :-)
+            	commandMessage->AddPointer("node",connection);
+        	}
+			i++;
 		}
-		newNode->AddRect("Node::frame",BRect(where,where+BPoint(100,80)));
-		commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
-	}
-	else
-		commandMessage = NULL;
+		if (selectRect)
+		{
+			where.x         = selectRect->right+100;
+			int32 middle    = selectRect->top+(selectRect->Height()/2);
+			where.y         = middle;
+			int32 step      = -1;
+			while (FindRenderer(where)!=NULL)
+			{	
+				where.y = middle + (step*85);
+				if (step>0)
+	   				step++;
+				step=-step;
+			}
+			newNode->AddRect("Node::frame",BRect(where,where+BPoint(100,80)));
+			commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
+		}
+	//}
 	return commandMessage;
 }
 

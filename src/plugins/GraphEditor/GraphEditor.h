@@ -112,7 +112,7 @@ public:
 			void			SendMessage(BMessage* msg){sentToMe->SendMessage(msg);};
 			void			SendMessageToDoc(BMessage* msg){sentTo->SendMessage(msg);};
 			BMessage		*GetStandartPattern(void){return patternMessage;};
-			BMessage        *GenerateInsertCommand(uint32 newWhat);
+			BMessage        *GenerateInsertCommand(uint32 newWhat, bool connected = false);
 
 
 protected:
