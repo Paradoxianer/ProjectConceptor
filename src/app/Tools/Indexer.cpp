@@ -219,7 +219,7 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 		if (nodeIndex != sorter.end())
 			allNodesList->AddItem(nodeIndex->second);
 		else 
-			notIndexed[(int32)tmpPointer]=node;
+			notIndexed.insert(pair<int32,BMessage*>((int32)tmpPointer,node));
 
 		i++;
 	}
@@ -251,7 +251,7 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 			node->AddPointer("Node::parent",nodeIndex->second);
 		}
 		else
-			notIndexed[(int32)tmpPointer]=node;
+			notIndexed.insert(pair<int32,BMessage*>((int32)tmpPointer,node));
 	}
 	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 	BasePlugin	*plugin		= NULL;
@@ -389,7 +389,7 @@ void Indexer::Init(void)
 {
 	TRACE();
 	sorter				= map<int32,BMessage*>();
-	notIndexed			= map<int32,BMessage*>();
+	notIndexed			= multimap<int32,BMessage*>();
 	included			= new BList();
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
 }
