@@ -1,0 +1,61 @@
+1	English	application/x-vnd.ProjectConceptor	530206262
+Select all	MainWindow		Seleccionar todo
+Macro	MainWindow		Macro
+Title	MainWindow		Título
+New	MainWindow		Nuevo
+Save	MainWindow		Guardar
+Open	MainWindow		Abrir
+Settings	SavePanel		Configuración
+Stop recording	MainWindow		Detener grabación
+Page setup	MainWindow		Configuración de página
+Settings	ConfigWindow		Configuración
+Coud not find command	CommandManager		No se pudo encontrar el comando
+Search	MainWindow		Buscar
+Project settings	MainWindow		Configuración del proyecto
+Problems while trying to save the file	Document		Hubo un problema al intentar guardar el archivo
+Print	MainWindow		Imprimir
+Window	MainWindow		Ventana
+Find next	MainWindow		Buscar siguiente
+File	MainWindow		Archivo
+Save	Document		Guardar
+Fileformat	SavePanel		Formato de archivo
+Cant find plugins	PluginManager		Plugins no encontrados
+Play	MainWindow		Ejecutar
+Quit	MainWindow		Salir
+Redo	MainWindow		Rehacer
+Input macroname	CommandManager		Ingresar nombre de macro
+ProjectConceptor	PluginManager		ProjectConceptor
+Paste	MainWindow		Pegar
+OK	CommandManager		OK
+Edit	MainWindow		Editar
+Macro recording already started!	CommandManager		Grabador de macro ya ha sido iniciado!
+Replace	MainWindow		Reemplazar
+Title vertical	MainWindow		Título vertical
+Cascade	MainWindow		Cascada
+Replace & Find	MainWindow		Buscar y reemplazar
+Undo	MainWindow		Deshacer
+Find	MainWindow		Buscar
+Save before close	Document		Guardar antes de cerrar
+Save as	SavePanel		Guardar como
+Cancel	CommandManager		Cancelar
+Error	Document		Error
+Macro	CommandManager		Macro
+Copy	MainWindow		Copiar
+Help	HelpWindow		Ayuda
+Close	MainWindow		Cerrar
+Help	MainWindow		Ayuda
+Contiune recording	CommandManager		Continuar grabación
+OK	PluginManager		OK
+Save changes to ...	Document		Guardar cambios a ...
+Clear	MainWindow		Limpiar
+Cut	MainWindow		Cortar
+Cancel	Document		Cancelar
+Restart recording	CommandManager		Reiniciar grabación
+Name	CommandManager		Nombre
+Start recording	MainWindow		Iniciar grabación
+Error!	CommandManager		Error!
+About	MainWindow		Acerca de
+Replace all	MainWindow		Reemplazar todo
+Could not find plugins	SavePanel		Plugins no encontrados
+Don't save	Document		No guardar
+Save as	MainWindow		Guardar como

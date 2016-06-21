@@ -1,0 +1,7 @@
+1	English	application/x-vnd.ProjectConceptor-plugin	2724668264
+true	BoolItem		verdadero
+bottom	RectItem		abajo
+left	RectItem		izquierda
+false	BoolItem		falso
+right	RectItem		derecha
+top	RectItem		arriba

@@ -91,7 +91,7 @@ export DEBUGGER = TRUE
 # 	will recreate only the "locales/en.catkeys" file. Use it as a template
 # 	for creating catkeys for other languages. All localization files must be
 # 	placed in the "locales" subdirectory.
-export LOCALE = en
+export LOCALE = en es
 
 app: gitupdate pkgupdate app/makefile FORCE
 	cd app && make
@@ -118,9 +118,9 @@ plugins_catkeys: plugins/makefile FORCE
 	cd plugins && make catkeys
 	
 app_bindcat: app/makefile FORCE
-	cd app & make bindcatalogs
+	cd app && make bindcatalogs
 
-plugins_bincat: plugins/makefile FORCE
+plugins_bindcat: plugins/makefile FORCE
 	cd plugins && make bindcatalogs
 
 
