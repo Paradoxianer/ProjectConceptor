@@ -10,6 +10,7 @@ using namespace std;
 
 class PDocument;
 class PluginManager;
+typedef multimap<int32, BMessage*>::iterator iter;
 /**
  * @class Indexer
  *
@@ -57,26 +58,9 @@ protected:
 			
 			PDocument			*doc;
 			map<int32,BMessage*>	sorter;
-			multimap<int32,BMessage*>	notIndexed;
 			BList				*included;
 
 			PluginManager		*pluginManager;
-/*		BList*					allNodes;
-		BList*					selectedNodes;
-		BList*					allConnections;
-
-		BMessage*				settings;
-		
-		BMessage*				printerSettings;
-
-
-		BMessage*				commandManagerMessage;
-
-		PEditorManager*			editorManager;
-		WindowManager*			windowManager;
-		
-		BFile*					toLoad;
-		BMessage*				loadedStuff;*/
 		
 
 private:

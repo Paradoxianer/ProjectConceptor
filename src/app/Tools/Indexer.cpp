@@ -169,13 +169,7 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes)
 		char		*name	= NULL;
 		type_code	type	= 0;
 		int32		count	= 0;
-#ifdef B_ZETA_VERSION_1_0_0
-		while (returnCommand->GetInfo(B_MESSAGE_TYPE,i ,(const char **)&name, &type, &count) == B_OK)
-#else
-		while (returnCommand->GetInfo(B_MESSAGE_TYPE,i ,(char **)&name, &type, &count) == B_OK)
-#endif
-
-		{
+		while (returnCommand->GetInfo(B_MESSAGE_TYPE,i ,(char **)&name, &type, &count) == B_OK) {
 			if ( (returnCommand->FindMessage(name,count,&subCommand) == B_OK))
 			{
 				IndexCommand(&subCommand);
@@ -194,12 +188,8 @@ BMessage* Indexer::RegisterDeIndexNode(BMessage *node)
 	node->FindPointer("this",(void **)&tmpPointer);
 	node->RemoveName("this");
 	sorter[(int32)tmpPointer] = node;
-	//@todo introduce a noneindexd list as soon as we are index this node
-	//we should scan throught the none_indexed list to find all
-	//nodes where this node pointer wasnt replaced yet
 	return node;
 }
-
 
 BMessage* Indexer::DeIndexNode(BMessage *node)
 {
@@ -207,68 +197,43 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 	void		*subContainerEntry	= NULL;
 	BList		*allNodesList		= new BList();
 	BList		*allConnectionsList	= new BList();
-	int32		i					= 0;
 	void		*tmpPointer			= NULL;
+	int32		i					= 0;
 	map<int32,BMessage*>::iterator	nodeIndex;
-	i = 0;
 	if (node->FindPointer("Node::allNodes",&tmpPointer) == B_OK)
 			node->RemoveName("Node::allNodes");
-	while (node->FindPointer("allNodesList",i,&subContainerEntry) == B_OK)
-	{
+	
+	while (node->FindPointer("allNodesList",i,&subContainerEntry) == B_OK) {
 		nodeIndex = sorter.find((int32)subContainerEntry);
-		if (nodeIndex != sorter.end())
+		if (nodeIndex != sorter.end()){
 			allNodesList->AddItem(nodeIndex->second);
-		else 
-			notIndexed.insert(pair<int32,BMessage*>((int32)tmpPointer,node));
-
-		i++;
+			//delete just this entry from the Message
+			node->RemoveData("allNodesList",i);
+		}
 	}
-	if (allNodesList->CountItems()>0)
-	{
-		node->AddPointer("Node::allNodes",allNodesList);
-		node->RemoveName("allNodesList");
+	if (allNodesList->CountItems()>0){
+			node->AddPointer("Node::allNodes",allNodesList);
 	}
-	i = 0;
-	if (node->FindPointer("Node::allConnections",&tmpPointer) == B_OK)
-			node->RemoveName("Node::allConnections");
-	while (node->FindMessage("allConnectionsList",i,(BMessage *)subContainerEntry) == B_OK)
-	{
-		allConnectionsList->AddItem(DeIndexNode((BMessage *)subContainerEntry));
-		subContainerEntry	= new BMessage();
-		i++;
-	}
-	if (allConnectionsList->CountItems()>0)
-	{
-		node->AddPointer("Node::allConnections",allConnectionsList);
-		node->RemoveName("allConnectionsList");
-	}
-	if (node->FindPointer("Node::parent",(void **)&tmpPointer) == B_OK)
-	{
-		nodeIndex = sorter.find((int32)subContainerEntry);
-		if (nodeIndex != sorter.end())
-		{
+	if (node->FindPointer("Node::parent",(void **)&tmpPointer) == B_OK) {
+		nodeIndex = sorter.find((int32)tmpPointer);
+		if (nodeIndex != sorter.end()) {
 			node->RemoveName("Node::parent");
 			node->AddPointer("Node::parent",nodeIndex->second);
 		}
-		else
-			notIndexed.insert(pair<int32,BMessage*>((int32)tmpPointer,node));
 	}
 	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 	BasePlugin	*plugin		= NULL;
 	PEditor		*editor		= NULL;
-	if (editorList)
-	{
-		for (i=0;i<editorList->CountItems();i++)
-		{
+	if (editorList) {
+		for (i=0;i<editorList->CountItems();i++) {
 			plugin = (BasePlugin *) editorList->ItemAt(i);
-			if (plugin)
-			{
+			if (plugin){
 				editor=(PEditor *)plugin->GetNewObject(NULL);
 				editor->PreprocessAfterLoad(node);
 			}
 		}
 	}
-	return RegisterDeIndexNode(node);;
+	return node;
 }
 
 BMessage* Indexer::DeIndexConnection(BMessage *connection)
@@ -389,7 +354,6 @@ void Indexer::Init(void)
 {
 	TRACE();
 	sorter				= map<int32,BMessage*>();
-	notIndexed			= multimap<int32,BMessage*>();
 	included			= new BList();
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
 }
