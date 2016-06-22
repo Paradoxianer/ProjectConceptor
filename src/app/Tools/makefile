@@ -14,7 +14,7 @@ NAME= libProjectConceptor.so
 #	SHARED:	Shared library or add-on
 #	STATIC:	Static library archive
 #	DRIVER: Kernel Driver
-TYPE= Shared
+TYPE= SHARED
 
 # 	If you plan to use localization, specify the application's MIME signature.
 APP_MIME_SIG = application/x-vnd.ProjectConceptor
