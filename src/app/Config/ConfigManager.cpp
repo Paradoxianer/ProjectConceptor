@@ -17,11 +17,9 @@
 
 ConfigManager::ConfigManager(char *_path, BMessage *newConfig){
 // if no Message was passed we just create a Message :)
-    if (newConfig==NULL) {
+    if (newConfig == NULL) {
         config = new BMessage();
-        config->AddBool("AutoSave",true);
-        config->AddString("Test","TestString");
-        config->AddPoint("My nice Point", BPoint(55,77));
+        TestInit();
     }
     else
         config = newConfig;
@@ -29,9 +27,38 @@ ConfigManager::ConfigManager(char *_path, BMessage *newConfig){
     SaveConfig();
 }
 
-//rebuild the whole Config View
-void ConfigManager::SetConfigMessage(BMessage *newConfig){
+BMessage* ConfigManager::GetConfigMessage(const char *name){
+	BMessage	*tmpMessage = NULL;
+	status_t	err			= B_OK;
+	ssize_t		size;
+	
+	if (name == NULL)
+		return config;
+	else {
+		err = config->FindData(name, B_MESSAGE_TYPE,(const void **)&tmpMessage,&size);
+		if (size<=0)
+		err = B_ERROR;
+	}
+	if (err != B_OK)
+		return NULL;
+	else
+		return tmpMessage;
+}
 
+
+status_t ConfigManager::SetConfigMessage(const char *name,BMessage *newConfig){
+	status_t err	= B_OK;
+	if (name == NULL) {
+		delete config;
+		config =newConfig;
+	}
+	else{
+		err = config->ReplaceMessage(name,newConfig);
+		if (err == B_NAME_NOT_FOUND || err ==B_BAD_INDEX) {
+			err = config->AddMessage(name,newConfig);
+		}
+	}
+	return err;
 }
 
 void  ConfigManager::LoadConfig(void){
@@ -52,3 +79,13 @@ void ConfigManager::SaveConfig(){
         messageXml.Write(*config);
 }
 
+void ConfigManager::TestInit(){
+	BMessage	* subMessage = new BMessage();
+	subMessage->AddBool("TestBool",false);
+	subMessage->AddString("TestString","This is a TestString");
+	subMessage->AddInt32("TestInt32",42);
+	config->AddBool("AutoSave",true);
+    config->AddString("Test","TestString");
+    config->AddPoint("My nice Point", BPoint(55,77));
+    config->AddMessage("SubConfig",subMessage);
+}

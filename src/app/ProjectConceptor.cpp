@@ -184,8 +184,6 @@ bool ProjektConceptor::QuitRequested() {
 	for (int32 i=0;i<documentManager->CountPDocuments();i++) {
 		PDocument * doc=documentManager->PDocumentAt(i);
 		quit = quit | doc->QuitRequested();
-/*		doc->Lock();
-		doc->Quit();*/
 	}
 	return quit;
 }

@@ -73,34 +73,28 @@ status_t PDocument::Archive(BMessage* archive, bool deep) const
 
 	archive->AddMessage("PDocument::documentSetting",documentSetting);
 	//save all Nodes
-	for (i=0; i<allNodes->CountItems();i++)
-	{
+	for (i=0; i<allNodes->CountItems();i++) {
 		tmpNode=(BMessage *)allNodes->ItemAt(i);
 		allNodesMessage->AddMessage("node",indexer->IndexNode(tmpNode));
 	}
 	archive->AddMessage("PDocument::allNodes",allNodesMessage);
 	//save all Connections
-	for (i=0; i<allConnections->CountItems();i++)
-	{
+	for (i=0; i<allConnections->CountItems();i++) {
 		tmpNode=(BMessage *)allConnections->ItemAt(i);
 		allConnectionsMessage->AddMessage("node",indexer->IndexConnection(tmpNode));
 	}
 	archive->AddMessage("PDocument::allConnections",allConnectionsMessage);
 	//save the selected List
-	for (i=0; i<selected->CountItems();i++)
-	{
+	for (i=0; i<selected->CountItems();i++) {
 		selectedMessage->AddPointer("node",selected->ItemAt(i));
 	}
 	archive->AddMessage("PDocument::selected",selectedMessage);
 	//save all Command related Stuff like Undo/Makor
 //	commandManager->Archive(commandManage);
-	for (i=0;i<(commandManager->GetUndoList())->CountItems();i++)
-	{
+	for (i=0;i<(commandManager->GetUndoList())->CountItems();i++) {
 		commandManage->AddMessage("undo",indexer->IndexMacroCommand((BMessage *)(commandManager->GetUndoList())->ItemAt(i)));
-
 	}
-	for (i=0;i<(commandManager->GetMacroList())->CountItems();i++)
-	{
+	for (i=0;i<(commandManager->GetMacroList())->CountItems();i++) {
 		commandManage->AddMessage("macro",(BMessage *)(commandManager->GetMacroList())->ItemAt(i));
 
 	}
@@ -268,8 +262,7 @@ void PDocument::Init(BMessage *archive)
 	printerSetting	= NULL;
 	documentSetting	= new BMessage();
 	archive->FindMessage("PDocument::documentSetting",documentSetting);
-	if (documentSetting->FindMessage("Printer Setting",printerSetting) != B_OK)
-	{
+	if (documentSetting->FindMessage("Printer Setting",printerSetting) != B_OK) {
 		delete printerSetting;
 		printerSetting = NULL;
 	}
@@ -280,16 +273,14 @@ void PDocument::Init(BMessage *archive)
 const char* PDocument::Title(void)
 {
 	TRACE();
-	if (Lock())
-	{
+	if (Lock()) {
 		if (entryRef)
 			return entryRef->name;
 		else
 			return "Untitled";
 		Unlock();
 	}
-	else
-	{
+	else {
 		PRINT(("\tDEBUG:\tTitle() - Cant Lock()\n"));
 		return NULL;
 	}
@@ -333,8 +324,7 @@ void PDocument::SetDocumentSettings(BMessage *settings)
 {
 	TRACE();
 	bool locked = Lock();
-	if (settings!=NULL)
-	{
+	if (settings!=NULL) {
 		delete documentSetting;
 		documentSetting	= settings;
 	}
@@ -359,11 +349,9 @@ BMessage* PDocument::PrintSettings(void)
 	TRACE();
 	status_t result = B_OK;
 	BPrintJob printJob(Title());
-	if (! printerSetting)
-	{
+	if (! printerSetting) {
 		result = printJob.ConfigPage();
-		if ((result == B_OK) && (Lock()))
-		{
+		if ((result == B_OK) && (Lock())) {
 			SetPrintSettings (printJob.Settings());
 			paperRect 		= new BRect(printJob.PaperRect());
 			printableRect	= new BRect(printJob.PrintableRect());
@@ -373,13 +361,12 @@ BMessage* PDocument::PrintSettings(void)
 	}
 	return printerSetting;
 }
+
 void PDocument::SetPrintSettings(BMessage *settings)
 {
 	TRACE();
-	if (Lock())
-	{
-		if (settings!=NULL)
-		{
+	if (Lock()){
+		if (settings!=NULL) {
 			BMessage	*tmpMessage	= new BMessage();
 			if (documentSetting->FindMessage("Printer Setting",tmpMessage) == B_OK)
 				documentSetting->ReplaceMessage("Printer Setting",settings);
@@ -398,33 +385,27 @@ void PDocument::Print(void)
 	TRACE();
 	status_t	result	= B_OK;
 	BPrintJob	printJob("doc_name");
-	if (Lock())
-	{
-		if (printerSetting == NULL)
-		{
-			result = printJob.ConfigPage();
-			if (result == B_OK)
-			{
-				// Get the user Settings
-				SetPrintSettings(printJob.Settings());
-				// Use the new settings for your internal use
-				paperRect = new BRect(printJob.PaperRect());
-				printableRect = new BRect(printJob.PrintableRect());
+	if (Lock()) {
+		if (printerSetting == NULL) {
+				result = printJob.ConfigPage();
+				if (result == B_OK) {
+					// Get the user Settings
+					SetPrintSettings(printJob.Settings());
+					//	 Use the new settings for your internal use
+					paperRect = new BRect(printJob.PaperRect());
+					printableRect = new BRect(printJob.PrintableRect());
+				}
 			}
-		}
-		// Setup the driver with user settings
-		printJob.SetSettings(printerSetting);
+			// Setup the driver with user settings
+			printJob.SetSettings(printerSetting);
 
-		result = printJob.ConfigJob();
-		if (result == B_OK)
-		{
-			// WARNING: here, setup CANNOT be NULL.
-	         if (printerSetting == NULL)
-	         {
-	            // something's wrong, handle the error and bail out
+			result = printJob.ConfigJob();
+			if (result == B_OK) {
+				// WARNING: here, setup CANNOT be NULL.
+	         if (printerSetting == NULL) {
+				(new BAlert(B_TRANSLATE("Error"),B_TRANSLATE("I had problems while setting up the Printer!"),"Ohh"))->Go();
 	         }
 			//**dont know why this was here :-)      		 delete printerSetting;
-
 			// Get the user Settings
 			SetPrintSettings( printJob.Settings());
 			paperRect 		= new BRect(printJob.PaperRect());
@@ -440,11 +421,9 @@ void PDocument::Print(void)
 			// n ... LONG_MAX -> Print from page n to the end
 			// n ... m -> Print from page n to page m
 			PEditor *activePEditor=editorManager->GetActivPEditor();
-			if (activePEditor != NULL)
-			{
+			if (activePEditor != NULL) {
 				BView *editorView=activePEditor->GetView();
-				if (editorView != NULL)
-				{
+				if (editorView != NULL) {
 					// calculate the Number of Pages
 					bool locked	= editorView->LockLooper();
 					int32 xPages,yPages;
@@ -465,9 +444,8 @@ void PDocument::Print(void)
 					// Now we can print the page
 					printJob.BeginJob();
 					// Print all pages
-						bool can_continue = printJob.CanContinue();
-					for (int i=firstPage-1; can_continue && i<lastPage ; i++)
-					{
+					bool can_continue = printJob.CanContinue();
+					for (int i=firstPage-1; can_continue && i<lastPage ; i++) {
 						float xStart	= (i%xPages)*printableRect->Width();
 						float yStart	= (i/xPages)*printableRect->Height();
 						BRect viewRect(xStart,yStart,xStart+printableRect->Width(),yStart+printableRect->Height());
@@ -490,9 +468,8 @@ void PDocument::Print(void)
 					if (locked) editorView->UnlockLooper();
 				}
 			}
-			else
-			{
-				//**error like no active Editor
+			else{
+				(new BAlert(B_TRANSLATE("Error"),B_TRANSLATE("No active Editor Pleas install a Editor Plugin."),"Ohh"))->Go();
 			}
 		}
 		Unlock();
@@ -504,10 +481,8 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 {
 	TRACE();
 
-	if (Lock())
-	{
-		if (saveEntry!=NULL)
-		{
+	if (Lock()) {
+		if (saveEntry!=NULL) {
 			BDirectory dir(saveEntry);
 			BEntry entry(&dir, name);
 			if (entryRef == NULL)
@@ -516,8 +491,7 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 		}
 		Unlock();
 	}
-	else
-	{
+	else {
 		new BAlert(B_TRANSLATE("Error"),B_TRANSLATE("Problems while trying to save the file"),"Ohh");
 	}
 
@@ -539,8 +513,7 @@ void PDocument::Save(void)
 
 	bool locked = Lock();
 	documentSetting->FindMessage("saveSettings",saveSettings);
-	if (saveSettings->FindInt32("translator_id",&tmpInt) == B_OK)
-	{
+	if (saveSettings->FindInt32("translator_id",&tmpInt) == B_OK){
 		translatorInfo->translator	= tmpInt;
 		saveSettings->FindString("format::name",(const char**)&formatName);
 		//saveSettings->FindString("format::MIME",(const char**)&formatMIME);
@@ -559,32 +532,27 @@ void PDocument::Save(void)
 		BFile			*file	= new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
 		archived->Flatten(input);
 		err=	roster->Translate(input,translatorInfo,NULL,file,outType);
-		if (err == B_OK)
-		{
+		if (err == B_OK) {
 			BNodeInfo nodeInfo(file);
 			nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
 			nodeInfo.SetPreferredApp(APP_SIGNATURE);
 		}
 	}
-	else
-	{
+	else {
 		Archive(archived,true);
-		if (entryRef)
-		{
+		if (entryRef) {
 			BFile *file=	new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
 			err=file->InitCheck();
 			PRINT(("ERROR\tSave file error %s\n",strerror(err)));
 			err = archived->Flatten(file);
-			if (err == B_OK)
-			{
+			if (err == B_OK) {
 				BNodeInfo nodeInfo(file);
 				nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
 				nodeInfo.SetPreferredApp(APP_SIGNATURE);
 			}
 		}
 	}
-	if (err==B_OK)
-	{
+	if (err==B_OK) {
 			ResetModified();
 			window->SetTitle(Title());
 	}
@@ -607,14 +575,12 @@ void PDocument::Load(void)
 	translator_info		*indentifed		= new translator_info;
 	bool locked = Lock();
 
-	if (file->InitCheck() == B_OK)
-	{
+	if (file->InitCheck() == B_OK) {
 		roster	= BTranslatorRoster::Default();
 		roster->Identify(file,NULL,indentifed,P_C_DOCUMENT_RAW_TYPE );
 		err 	= roster->Translate(file,indentifed,NULL,output,P_C_DOCUMENT_RAW_TYPE);
 		//buffer = (void *)output->Buffer();
-		if (err == B_OK)
-		{
+		if (err == B_OK) {
 			err = loaded->Unflatten(output);
 			printf("%s\n",strerror(err));
 			loaded->PrintToStream();
@@ -632,15 +598,13 @@ void PDocument::Load(void)
 	delete selected;
 
 	allNodes 		= docLoader->GetAllNodes();
-	for (i = 0; i<allNodes->CountItems(); i++)
-	{
+	for (i = 0; i<allNodes->CountItems(); i++) {
 		node=((BMessage*)allNodes->ItemAt(i));
 		node->AddPointer("ProjectConceptor::doc",this);
 		valueChanged->insert(node);
 	}
 	allConnections	= docLoader->GetAllConnections();
-	for (i = 0; i<allConnections->CountItems(); i++)
-	{
+	for (i = 0; i<allConnections->CountItems(); i++) {
 		node= (BMessage *)allConnections->ItemAt(i);
 		node->AddPointer("ProjectConceptor::doc",this);
 		valueChanged->insert(node);
@@ -662,8 +626,7 @@ void PDocument::Load(void)
 void PDocument::SavePanel()
 {
 	TRACE();
-	if (!savePanel)
-	{
+	if (!savePanel) {
 //		savePanel = new PCSavePanel(B_SAVE_PANEL, new BMessenger(this),NULL,0,false);
 		savePanel = new PCSavePanel(NULL,new BMessenger(this));
 	}
@@ -679,8 +642,7 @@ bool PDocument::QuitRequested(void)
 	//check modified if there are changes wich we need to save
 	bool	returnValue = true;
 	bool	readLock	= false;
-	if (modified)
-	{
+	if (modified) {
 		readLock = Lock();
 		BAlert *myAlert = new BAlert(B_TRANSLATE("Save before close"), B_TRANSLATE("Save changes to ..."), B_TRANSLATE("Cancel"), B_TRANSLATE("Don't save"), B_TRANSLATE("Save"), B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
 		myAlert->SetShortcut(0, B_ESCAPE);
@@ -689,17 +651,16 @@ bool PDocument::QuitRequested(void)
 			returnValue = false;
 		else if (button_index == 1)
 			returnValue =  true;
-		else
-		{
+		else {
+			//check if there is a ref set if not show a Save file dialog
 			Save();
 			Unlock();
 			returnValue	= true;
 		}
 		if (readLock)
-		Unlock();
+			Unlock();
 	}
-	if (returnValue)
-	{
+	if (returnValue == true) {
 		window->Lock();
 		window->Quit();
 	}
@@ -712,8 +673,7 @@ BMessage* PDocument::FindObject(BPoint *where)
 	BRect		*frame	= new BRect(-10,-10,-10,-10);
 	BMessage	*node	= NULL;
 	bool		found	= false;
-	for (int32 i=0;( (i<allNodes->CountItems())&&(!found) );i++)
-	{
+	for (int32 i=0;( (i<allNodes->CountItems())&&(!found) );i++) {
 		node=(BMessage *)allNodes->ItemAt(i);
 		node->FindRect("Node::frame",frame);
 		if (frame->Contains(*where))
@@ -850,8 +810,7 @@ void PDocument::AutoSave(void)
 {
 	TRACE();
 	//** Use Settingsfolder to
-	if (autoSaveRef == NULL)
-	{
+	if (autoSaveRef == NULL) {
 		BPath settings;
 		find_directory(B_USER_SETTINGS_DIRECTORY, &settings, true);
 		char p[PATH_MAX];
@@ -865,8 +824,7 @@ void PDocument::AutoSave(void)
 	delete autoSave;
 }
 
-void PDocument::PushToStream(BPositionIO *pushTo)
-{
+void PDocument::PushToStream(BPositionIO *pushTo) {
 	Indexer		*indexer			= new Indexer((PDocument *)this);
 	BMessage	*tmpNode			= NULL;
 	BMessage	*commandManage		= new BMessage();
@@ -874,30 +832,25 @@ void PDocument::PushToStream(BPositionIO *pushTo)
 	int			i					= 0;
 	//**security check if the passed BPositionIO ok is
 	documentSetting->Flatten(pushTo);
-	for (i=0; i<allNodes->CountItems();i++)
-	{
+	for (i=0; i<allNodes->CountItems();i++) {
 		tmpNode=(BMessage *)allNodes->ItemAt(i);
 		BMessage *indexed = indexer->IndexNode(tmpNode);
 		indexed->Flatten(pushTo);
 	}
-	for (i=0; i<allConnections->CountItems();i++)
-	{
+	for (i=0; i<allConnections->CountItems();i++) {
 		tmpNode=(BMessage *)allConnections->ItemAt(i);
 		BMessage *indexed = indexer->IndexConnection(tmpNode);
 		indexed->Flatten(pushTo);
 	}
-	for (i=0; i<selected->CountItems();i++)
-	{
+	for (i=0; i<selected->CountItems();i++) {
 		selectedMessage->AddPointer("node",selected->ItemAt(i));
 	}
 	selectedMessage->Flatten(pushTo);
-	for (i=0;i<(commandManager->GetMacroList())->CountItems();i++)
-	{
+	for (i=0;i<(commandManager->GetMacroList())->CountItems();i++) {
 			BMessage *macro =(BMessage *)(commandManager->GetMacroList()->ItemAt(i));
 			macro->Flatten(pushTo);
 	}
-	for (i=0;i<(commandManager->GetUndoList())->CountItems();i++)
-	{
+	for (i=0;i<(commandManager->GetUndoList())->CountItems();i++) {
 		BMessage *indexed = indexer->IndexMacroCommand((BMessage *)(commandManager->GetUndoList()->ItemAt(i)));
 		indexed->Flatten(pushTo);
 	}

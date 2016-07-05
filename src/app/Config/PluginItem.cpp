@@ -28,10 +28,10 @@ void PluginItem::DrawItem(BView *owner,BRect bounds,bool complete){
     //Draw Background
     owner->SetHighColor(color);
     owner->FillRect(bounds);
-/*    if (icon != NULL){
-	BRect iconRect=BRect(bounds.left,bounds.top,bounds.Height(),bounds.bottom);
-	owner->DrawBitmap(icon,iconRect);
-    }*/
+	if (icon != NULL){
+		BRect iconRect=BRect(bounds.left,bounds.top,bounds.Height(),bounds.bottom);
+		owner->DrawBitmap(icon,iconRect);
+    }
     color=ui_color(B_CONTROL_TEXT_COLOR);
     if (!IsEnabled()) {
 	color = tint_color(color,B_DISABLED_MARK_TINT);

@@ -59,6 +59,9 @@ void PluginView::BuildPluginList(){
 		BasePlugin* plugin = (BasePlugin *)allPlugins->ItemAt(i);
 		pluginListView->AddItem(new PluginItem(plugin,pluginManager));
 	//	pluginListView->AddItem(new BStringItem(plugin->GetName()));
+		//if the plugin returns a configView we should creat a nother tab
+		//with the settings for this plugins.. in futzer it should only return 
+		//a BMessage an we build a view out of it :)
 		if (plugin->GetConfigView()!=NULL){
 		    BSplitView *splitView = new BSplitView(B_VERTICAL);
 		    splitView->AddChild(new BScrollView("PluginConfigScroller",plugin->GetConfigView()));

@@ -21,23 +21,23 @@
  * @bug on QuitRequested we shoud not quit all Windows we schoud pass the BQuitRequested to all Documents
  */
 
-class ProjektConceptor :	public BApplication {
+class ProjektConceptor : public BApplication {
     public:
-								ProjektConceptor();
-								~ProjektConceptor();
+									ProjektConceptor();
+									~ProjektConceptor();
 
-	virtual	void				ReadyToRun(void);
-	virtual	bool				QuitRequested(void);
-	virtual	void				MessageReceived(BMessage *message);
-	virtual	void				RefsReceived(BMessage *message);
-	virtual	void				AboutRequested(void);
-	virtual void				ArgvReceived(int32 argc, char **argv);
-	virtual	void				RegisterMime(void);
+	virtual	void					ReadyToRun(void);
+	virtual	bool					QuitRequested(void);
+	virtual	void					MessageReceived(BMessage *message);
+	virtual	void					RefsReceived(BMessage *message);
+	virtual	void					AboutRequested(void);
+	virtual void					ArgvReceived(int32 argc, char **argv);
+	virtual	void					RegisterMime(void);
 	virtual PDocumentManager		*GetPDocumentManager(void){return documentManager;}
 	virtual ConfigManager			*GetConfigManager(void){return configManager;}
     private:
-			PDocumentManager	*documentManager;
-                        ConfigManager           *configManager;
-                        BFilePanel		*openPanel;
+			PDocumentManager		*documentManager;
+			ConfigManager           *configManager;
+			BFilePanel				*openPanel;
 };
 #endif

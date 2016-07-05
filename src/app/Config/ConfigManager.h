@@ -12,7 +12,6 @@
 #include "ConfigWindow.h"
 #include "MessageXmlReader.h"
 #include "MessageXmlWriter.h"
-#include "tinyxml/tinyxml.h"
 
 /**
  * @class ProjektConceptor
@@ -20,8 +19,8 @@
  *
  *
  * @author Paradoxon powered by Jesus Christ
- * @version 0.01
- * @date 2009/10/03
+ * @version 0.02
+ * @date 2016/06/25
  *
  */
 
@@ -29,20 +28,22 @@ class ConfigManager
 {
 public:
 						ConfigManager( char *path,BMessage* newConfig=NULL);
-	/** returns a Pointer to the BMessage holding the Configuration
-	*/
-	BMessage*           GetConfigMessage(void){return config;};
+	/** returns a Pointer to the BMessage holding the Configuration for the given name
+	 *  if the name is NULL all goes to the main settings)
+	 */
+	BMessage*           GetConfigMessage(const char *name=NULL);
 	/** pass a komplete new Configration to the Manager causes it to rewrite the Config file and recreate a Config GUI
-	*/
-	void				SetConfigMessage(BMessage *newConfig);
+	 *  if you pass a NULL for the char it replaces the whole config Message
+	 */
+	status_t			SetConfigMessage(const char *name,BMessage *newConfig);
 	void				LoadConfig(void);
 	void				SaveConfig();
 
 private:
-
-	BMessage        *config;
-	BString			*path;
-   // ConfigWindow    *configWindow;
-    BMessenger      *configMessenger;
+	void				TestInit(void);
+	BMessage			*config;
+	BString				*path;
+   // ConfigWindow		*configWindow;
+    BMessenger			 *configMessenger;
 };
 #endif
