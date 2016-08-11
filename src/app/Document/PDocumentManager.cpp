@@ -42,13 +42,17 @@ void PDocumentManager::Init(BMessage *archive) {
 }
 
 PDocumentManager::~PDocumentManager(void) {
-	PDocument *currentDocument	= NULL;
+	PDocument	*currentDocument	= NULL;
+	status_t	err					= B_OK;
 	for (int32 i=0; i<documentList->CountItems();i++) {
 		currentDocument		= (PDocument *)documentList->ItemAt(i);
-		if (currentDocument->Lock()) {
+		err = currentDocument->LockWithTimeout(TIMEOUT_LOCK);
+		if (err == B_OK) {
 			currentDocument->Quit();
 			delete currentDocument;
 		}
+		else
+			printf("Error Locking PDocument - %s",strerror(err));
 	}
 	delete pluginManager;
 }

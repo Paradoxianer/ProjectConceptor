@@ -31,13 +31,13 @@ class ProjektConceptor : public BApplication {
 	virtual	void					MessageReceived(BMessage *message);
 	virtual	void					RefsReceived(BMessage *message);
 	virtual	void					AboutRequested(void);
-	virtual void					ArgvReceived(int32 argc, char **argv);
+	virtual	void					ArgvReceived(int32 argc, char **argv);
 	virtual	void					RegisterMime(void);
-	virtual PDocumentManager		*GetPDocumentManager(void){return documentManager;}
-	virtual ConfigManager			*GetConfigManager(void){return configManager;}
+	virtual	PDocumentManager		*GetPDocumentManager(void){return documentManager;}
+	virtual	ConfigManager			*GetConfigManager(void){return configManager;}
     private:
 			PDocumentManager		*documentManager;
-			ConfigManager           *configManager;
+			ConfigManager			*configManager;
 			BFilePanel				*openPanel;
 };
 #endif

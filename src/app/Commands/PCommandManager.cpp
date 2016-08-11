@@ -194,8 +194,8 @@ void PCommandManager::PlayMacro(BMessage *makro) {
 
 status_t PCommandManager::Execute(BMessage *settings) {
 	TRACE();
-	status_t	err	= B_OK;
-	if (doc->Lock()) {
+	status_t	err	= doc->LockWithTimeout(TIMEOUT_LOCK);
+	if (err == B_OK) {
 		//(doc->GetChangedNodes())->MakeEmpty();
 		(doc->GetChangedNodes())->empty();
 		bool		shadow				= false;
@@ -240,6 +240,8 @@ status_t PCommandManager::Execute(BMessage *settings) {
 			err = B_ERROR;
 		}
 	}
+	else
+		printf("Error Locking PDocument - %s\n",strerror(err));
 	return err;
 }
 
@@ -259,7 +261,8 @@ void PCommandManager::Undo(BMessage *undo) {
 	char			*commandName		= NULL;
 	PCommand		*undoPCommand		= NULL;
 	BMessage		*msg				= NULL;
-	if (doc->Lock()) {
+	status_t		err					= doc->LockWithTimeout(TIMEOUT_LOCK);
+	if (err == B_OK) {
 		(doc->GetChangedNodes())->empty();
 		if (index<0)
 			index=undoStatus;
@@ -281,6 +284,8 @@ void PCommandManager::Undo(BMessage *undo) {
 		(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 		doc->Unlock();
 	}
+	else
+		printf("Error Locking PDocument - %s\n",strerror(err));
 }
 
 void PCommandManager::Redo(BMessage *redo) {
@@ -290,7 +295,8 @@ void PCommandManager::Redo(BMessage *redo) {
 	char			*commandName	= NULL;
 	PCommand		*redoPCommand	= NULL;
 	BMessage		*msg			= NULL;
-	if (doc->Lock()) {
+	status_t		err				= doc->LockWithTimeout(TIMEOUT_LOCK);
+	if (err == B_OK) {
 		(doc->GetChangedNodes())->empty();
 		if (index<0)
 			index=undoStatus+1;
@@ -312,6 +318,8 @@ void PCommandManager::Redo(BMessage *redo) {
 		(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 		doc->Unlock();
 	}
+	else
+		printf("Error Locking PDocument - %s\n",strerror(err));
 }
 
 

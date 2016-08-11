@@ -298,7 +298,11 @@ void GraphEditor::PreprocessAfterLoad(BMessage *container) {
 void GraphEditor::ValueChanged() {
 	TRACE();
 	//try to lock the document during we are painting
-	bool locked = doc->Lock();
+	printf("ValueChanged - trying to Lock the Document now\n");
+
+	status_t err = doc->LockWithTimeout(TIMEOUT_LOCK);
+	printf("DocLocError - %s\n",strerror(err));
+	
 	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
 	set<BMessage*>::iterator it;
 
@@ -329,7 +333,7 @@ void GraphEditor::ValueChanged() {
 				RemoveRenderer(FindRenderer(node));
 		}
 	}
-	if (locked)
+	if (err == B_OK)
 	    doc->Unlock();
 	Invalidate();
 }

@@ -93,6 +93,9 @@ export DEBUGGER = TRUE
 # 	placed in the "locales" subdirectory.
 export LOCALE = en es
 
+lib: 	app/Tools/makefile FORCE
+	cd app/Tools && make
+
 app: gitupdate pkgupdate app/makefile FORCE
 	cd app && make
 

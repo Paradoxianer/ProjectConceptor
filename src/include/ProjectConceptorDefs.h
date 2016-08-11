@@ -134,8 +134,7 @@ const uint32	MENU_MACRO_SAVE					= 'MMsv';
 
 const uint32	MENU_HELP_ABOUT					= 'MHab';
 
-
-
+const bigtime_t	TIMEOUT_LOCK					= 10;
 
 
 //extern const char		*APP_SIGNATURE;//					= "application/ProjektConceptor";;

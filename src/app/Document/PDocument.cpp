@@ -2,6 +2,7 @@
 #include <interface/PrintJob.h>
 #include <interface/Screen.h>
 #include <support/Debug.h>
+#include <support/String.h>
 #include <storage/NodeInfo.h>
 #include <TranslationUtils.h>
 #include <TranslatorRoster.h>
@@ -500,6 +501,7 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 void PDocument::Save(void)
 {
 	TRACE();
+	//we ned to mkae this think blocking somehowe if quit is reuqw
 	if (entryRef == NULL)
 		SavePanel();
 	status_t err 				= B_OK;
@@ -644,7 +646,9 @@ bool PDocument::QuitRequested(void)
 	bool	readLock	= false;
 	if (modified) {
 		readLock = Lock();
-		BAlert *myAlert = new BAlert(B_TRANSLATE("Save before close"), B_TRANSLATE("Save changes to ..."), B_TRANSLATE("Cancel"), B_TRANSLATE("Don't save"), B_TRANSLATE("Save"), B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
+		BString saveText = BString(B_TRANSLATE("Save changes to  "));
+		saveText.Append(Title());
+		BAlert *myAlert = new BAlert(B_TRANSLATE("Save before close"),  saveText.String(), B_TRANSLATE("Cancel"), B_TRANSLATE("Don't save"), B_TRANSLATE("Save"), B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_WARNING_ALERT);
 		myAlert->SetShortcut(0, B_ESCAPE);
 		int32 button_index = myAlert->Go();
 		if (button_index == 0)
