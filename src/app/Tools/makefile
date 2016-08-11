@@ -35,10 +35,10 @@ SRCS= 	AFont.cpp \
  		InputRequest.cpp  \
  		ShortCutFilter.cpp \
 		TextViewCompleter.cpp  \
-		tinyxml/tinystr.cpp \
- 		tinyxml/tinyxml.cpp  \
- 		tinyxml/tinyxmlerror.cpp \
-		tinyxml/tinyxmlparser.cpp
+#		tinyxml/tinystr.cpp \
+# 		tinyxml/tinyxml.cpp  \
+# 		tinyxml/tinyxmlerror.cpp \
+#		tinyxml/tinyxmlparser.cpp*/
 
 
 # ToolBar/BaseItem.cpp \
@@ -67,7 +67,7 @@ RSRCS= 	InputRequest.rsrc
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be  translation tracker localestub $(STDCPPLIBS)
+LIBS= be translation tracker tinyxml localestub $(STDCPPLIBS)
 #LIBS= be root translation tracker localestub $(STDCPPLIBS)
 
 
@@ -89,7 +89,7 @@ SYSTEM_INCLUDE_PATHS = /boot/system/develop/headers/private/support/
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS =	. \
 					../../include \
-					../../include/tinyxml \
+#					../../include/tinyxml \
 					../../include/plugins 
 
 #	specify the level of optimization that you desire

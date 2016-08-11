@@ -25,12 +25,10 @@ PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target): BFilePanel(B_SAVE_
 	format_menu->SetLabelFromMarked(true);
 	BRect rect;
 	textView=Window()->FindView("text view");
-	if(textView!=NULL)
-	{
+	if(textView!=NULL) {
 		rect=textView->ConvertToParent(textView->Bounds());
 	}
-	else
-	{
+	else {
 		//use view coordinates to set base for drop-down menu
 		BRect taille=background->Bounds();
 		float x_center=taille.right-100;
@@ -73,67 +71,16 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 	BMessage					*message			= NULL;
 	BMenu						*menu				= new BMenu(B_TRANSLATE("Fileformat") );
 	BMenuItem					*item				= NULL;
-/*	BList	*importExportPlugins	= pluginManager->GetPluginsByType(P_C_ITEM_INPORT_EXPORT_TYPE);
-	if (importExportPlugins!=NULL)
-	{
-		BasePlugin			*plugin;
-		ImportExport		*exporter;
-		translation_format	*formatStart;
-		translation_format	*format;
-		int32				countFormat;
-		for (int32 i = 0;i<importExportPlugins->CountItems();i++)	
-		{
-			plugin	 = (BasePlugin *)importExportPlugins->ItemAt(i);
-			exporter = (ImportExport *)plugin->GetNewObject(NULL);
-			if (exporter)
-			{
-				if (menu->CountItems()>0)
-					menu->AddSeparatorItem();
-				exporter->GetOutputFormats((const translation_format **)&formatStart,&countFormat);
-				if (formatStart != NULL)
-				{
-					format = formatStart;
-					for (int32 q = 0;q<countFormat;q++)
-					{
-						message	= new BMessage();
-						message->AddString("plugin::Name",plugin->GetName());
-						message->AddString("format::name",format->name);
-						message->AddString("format::MIME",format->MIME);
-						message->AddInt32("format::type",format->type);
-						message->AddInt32("format::group",format->group);
-						message->AddFloat("format::quality",format->quality);
-						message->AddFloat("format::capability",format->capability);
-						
-
-						item = new BMenuItem(format->name, message);
-						menu->AddItem( item );
-						format++;
-					}
-					delete[] formatStart;
-					formatStart = NULL;
-				}
-				countFormat	= 0;
-			}
-			delete	exporter;
-		}
-	}
-	else
-		menu->AddItem(new BMenuItem(B_TRANSLATE("Could not find Plugins"),NULL));*/
 	roster->GetAllTranslators(&translators, &num_translators);
 	allFormats	=	new translation_format[num_translators];
-	for (i=0;i<num_translators;i++) 
-	{
+	for (i=0;i<num_translators;i++)  {
 		roster->GetInputFormats(translators[i], &iFormats, &inNum);
-		for (q=0;q<inNum;q++) 
-		{
-			if (iFormats[q].type == P_C_DOCUMENT_RAW_TYPE)
-			{
+		for (q=0;q<inNum;q++)  {
+			if (iFormats[q].type == P_C_DOCUMENT_RAW_TYPE) {
 				roster->GetOutputFormats(translators[i], &oFormats, &outNum);
-				for (int j=0; j<outNum; j++)
-				{
+				for (int j=0; j<outNum; j++) {
 					//	and take the first output format that isn't P_C_DOCUMENT_RAW_TYPE
-					if( oFormats[j].type != P_C_DOCUMENT_RAW_TYPE)
-					{
+					if( oFormats[j].type != P_C_DOCUMENT_RAW_TYPE) {
 						message	= new BMessage();
 						message->AddInt32("translator_id",translators[i]);
 						message->AddString("format::name",oFormats[j].name);
@@ -158,8 +105,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 void	PCSavePanel::SendMessage(const BMessenger* messenger, BMessage *message)
 {
 	BMenuItem *selected = formatMenu->Menu()->FindMarked();
-	if ( (selected) && (selected->Message()) )
-	{
+	if ( (selected) && (selected->Message()) ) {
 		message->AddMessage("saveSettings",selected->Message());
 	}
 	BFilePanel::SendMessage(messenger,message);
