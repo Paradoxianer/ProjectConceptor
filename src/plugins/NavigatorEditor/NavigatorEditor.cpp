@@ -104,7 +104,6 @@ void NavigatorEditor::DetachedFromManager(void)
 void NavigatorEditor::PreprocessBeforSave(BMessage *container)
 {
 	TRACE();
-	PRINT(("GraphEditor::PreprocessAfterLoad:\n"));
 	char	*name;
 	uint32	type;
 	int32	count;
@@ -212,7 +211,6 @@ void NavigatorEditor::KeyUp(const char *bytes, int32 numBytes)
 void NavigatorEditor::MessageReceived(BMessage *message)
 {
 	TRACE();
-	PRINT_OBJECT(*message);
 	switch(message->what) 
 	{
 		case P_C_VALUE_CHANGED:

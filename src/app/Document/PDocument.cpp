@@ -152,7 +152,6 @@ void PDocument::MessageReceived(BMessage* message) {
 			break;
 		}
 		case  B_SAVE_REQUESTED: {
-				message->PrintToStream();
 				BMessage	*saveSettings	= new BMessage();
 				message->FindMessage("saveSettings",saveSettings);
 				entry_ref *ref	= new entry_ref;
@@ -593,8 +592,8 @@ void PDocument::Load(void)
 		//buffer = (void *)output->Buffer();
 		if (err == B_OK) {
 			err = loaded->Unflatten(output);
-			printf("%s\n",strerror(err));
-			loaded->PrintToStream();
+			if (err != B_OK)
+				printf("Loading error: %s\n",strerror(err));
 			ResetModified();
 		}
 	}

@@ -91,9 +91,6 @@ void RemoveAttribute::DetachedFromManager(void)
 
 void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage)
 {
-	node->PrintToStream();
-	valueContainer->PrintToStream();
-	undoMessage->PrintToStream();
 	status_t	err				= B_OK;
 	int32 		i				= 0;
 	int32		j				= 0;

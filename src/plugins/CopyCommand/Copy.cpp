@@ -29,26 +29,18 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 
 	int32		i					= 0;
 	Indexer		*indexer			= new Indexer(doc);
-	if (doc->Lock())
-	{
-		for (i=0;i<selected->CountItems();i++)
-		{
-			if (node=(BMessage *)selected->ItemAt(i))
-			{
+	if (doc->Lock()) {
+		for (i=0;i<selected->CountItems();i++) {
+			if (node=(BMessage *)selected->ItemAt(i)) {
 				if (node->what != P_C_CONNECTION_TYPE)
 					copyMessage->AddMessage("node",indexer->IndexNode(node));
 			}
-
 		}
-		for (i=0;i<allConnections->CountItems();i++ )
-		{
-
+		for (i=0;i<allConnections->CountItems();i++ ) {
 			node = (BMessage *)allConnections->ItemAt(i);
-			if ( (node->FindPointer("From",(void **)&from) == B_OK) &&
-				 (node->FindPointer("To",(void **)&to) == B_OK) )
-			{
-				if ((from->FindBool("selected",&fselect)==B_OK) && (to->FindBool("selected",&tselect) == B_OK) )
-				{
+			if ( (node->FindPointer("Node::from",(void **)&from) == B_OK) &&
+				 (node->FindPointer("Node::to",(void **)&to) == B_OK) ) {
+				if ((from->FindBool("selected",&fselect)==B_OK) && (to->FindBool("selected",&tselect) == B_OK) ) {
 					if (fselect && tselect)
 						copyMessage->AddMessage("node",indexer->IndexConnection(node,true));
 					else if (fselect || tselect)
@@ -59,18 +51,16 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 		}	
 		doc->Unlock();
 	}
-	if (be_clipboard->Lock()) 
-	{
+	if (be_clipboard->Lock()) {
 		be_clipboard->Clear();
-		if (clip = be_clipboard->Data()) 
-		{
+		if (clip = be_clipboard->Data())  {
 			clip->AddData("application/x-vnd.projectconceptor-document", B_MIME_TYPE, copyMessage, sizeof(copyMessage));
 			clip->AddMessage("test",copyMessage);
 			PRINT_OBJECT(*clip);
 			be_clipboard->Commit();
 		}
 		be_clipboard->Unlock();
-	} 
+	}
 	settings = PCommand::Do(doc,settings);
 	return settings;
 }

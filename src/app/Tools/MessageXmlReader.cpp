@@ -174,7 +174,6 @@ BMessage* MessageXmlReader::ProcessXML(TiXmlElement *element, BMessage *nodeMess
 				len=decode_base64(data, value,size);
 				if (len >0)
 					bMessage->AddData(child->Attribute("name"), type,(const void*)data,len);
-				bMessage->PrintToStream();
 			}
 		}
 		child= child->NextSiblingElement();

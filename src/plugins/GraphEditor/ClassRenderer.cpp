@@ -24,7 +24,6 @@ ClassRenderer::ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer):
 void ClassRenderer::Init()
 {
 	TRACE();
-	PRINT_OBJECT(*container);
 	status_t	err			 	= B_OK;
 	resizing					= false;
 	showConnecter				= true;

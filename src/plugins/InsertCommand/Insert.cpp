@@ -20,10 +20,8 @@ void Insert::Undo(PDocument *doc,BMessage *undo) {
 	err = undo->FindPointer("Node::parent", (void **)&parentNode);
 	if (parentNode)
 		err = parentNode->FindPointer("Node::allNodes", (void **)&parentAllNodes);
-	while (undo->FindPointer("node",i,(void **)&node) == B_OK)
-	{
-		if (node!=NULL)
-		{
+	while (undo->FindPointer("node",i,(void **)&node) == B_OK){
+		if (node!=NULL) {
 			if (node->what != P_C_CONNECTION_TYPE){
 				allNodes->RemoveItem(node);
 				if (parentAllNodes)

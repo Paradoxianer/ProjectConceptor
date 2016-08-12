@@ -266,7 +266,6 @@ void GraphEditor::InitAll() {
 
 void GraphEditor::PreprocessBeforSave(BMessage *container) {
 	TRACE();
-	PRINT(("GraphEditor::PreprocessAfterLoad:\n"));
 	char	*name;
 	uint32	type;
 	int32	count;
@@ -587,7 +586,6 @@ void GraphEditor::DetachedFromWindow(void) {
 }
 void GraphEditor::MessageReceived(BMessage *message) {
 	//TRACE();
-	//message->PrintToStream();
 	switch(message->what) {
 		case P_C_VALUE_CHANGED: {
 			ValueChanged();

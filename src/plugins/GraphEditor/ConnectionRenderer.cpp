@@ -33,8 +33,6 @@ void ConnectionRenderer::Init() {
 
 	container->FindPointer("Node::from",(void **)&fromNode);
 	container->FindPointer("Node::to",(void **)&toNode);
-	PRINT_OBJECT(*fromNode);
-	PRINT_OBJECT(*toNode);
 	if (fromNode->FindPointer("Node::outgoing",(void **)&outgoing) != B_OK) {
 		outgoing = new BList();
 		fromNode->AddPointer("Node::outgoing",outgoing);
@@ -55,7 +53,6 @@ void ConnectionRenderer::Init() {
 	sentTo						= new BMessenger(NULL,doc);
 //	PCommandManager	*commandManager	= doc->GetCommandManager();
 //	selectCommand	= commandManager->GetPCommand("Select");
-	PRINT_OBJECT(*container);
 	ValueChanged();
 }
 
@@ -121,10 +118,8 @@ void ConnectionRenderer::ValueChanged() {
 	BMessage	*tmpNode	= NULL;
 	container->FindPointer("Node::from",(void **)&tmpNode);
 	tmpNode->FindPointer(editor->RenderString(),(void **)&from);
-	tmpNode->PrintToStream();
 	container->FindPointer("Node::to",(void **)&tmpNode);
 	tmpNode->FindPointer(editor->RenderString(),(void **)&to);
-	tmpNode->PrintToStream();
 	container->FindBool("Node::selected",&selected);
 	container->FindInt8("Node::type", (int8 *)&connectionType);
 }
