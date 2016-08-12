@@ -40,7 +40,7 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 			node = (BMessage *)allConnections->ItemAt(i);
 			if ( (node->FindPointer("Node::from",(void **)&from) == B_OK) &&
 				 (node->FindPointer("Node::to",(void **)&to) == B_OK) ) {
-				if ((from->FindBool("selected",&fselect)==B_OK) && (to->FindBool("selected",&tselect) == B_OK) ) {
+				if ((from->FindBool("Node::selected",&fselect)==B_OK) && (to->FindBool("Node::selected",&tselect) == B_OK) ) {
 					if (fselect && tselect)
 						copyMessage->AddMessage("node",indexer->IndexConnection(node,true));
 					else if (fselect || tselect)
