@@ -1,0 +1,108 @@
+1	English	application/x-vnd.ProjectConceptor	2706318720
+New Tab	ProjectConceptor		Neuer Tab
+Settings	ProjectConceptor		Einstellungen
+Select all	MainWindow		Alle Auswählen
+Macro	ProjectConceptor		Makro
+Macro	MainWindow		Makro
+Title	MainWindow		Title
+New	MainWindow		Neu
+Save	MainWindow		Speichern
+Open	MainWindow		Öffnen
+Settings	SavePanel		Einstellungen
+Cut	ProjectConceptor		Cut
+Save Macro	ProjectConceptor		Save Macro
+Stop recording	MainWindow		Stop recording
+Error on execution of Command.	CommandManager		Error on execution of Command.
+Replace all	ProjectConceptor		Replace all
+Page setup	MainWindow		Page setup
+Paste	ProjectConceptor		Paste
+Settings	ConfigWindow		Settings
+Coud not find command	CommandManager		Coud not find command
+Search	MainWindow		Search
+Project settings	MainWindow		Project settings
+FTP Warning	AboutURLView		FTP Warning
+Problems while trying to save the file	Document		Problems while trying to save the file
+Help	ProjectConceptor		Help
+Web Browser Warning	AboutURLView		Web Browser Warning
+Print	MainWindow		Print
+Save as	ProjectConceptor		Save as
+Ok	AboutURLView		Ok
+Window	MainWindow		Window
+Find next	MainWindow		Find next
+File	MainWindow		File
+Play	ProjectConceptor		Play
+Find & Replace	ProjectConceptor		Find & Replace
+New	ProjectConceptor		New
+Save	Document		Save
+E-mail Warning	AboutURLView		E-mail Warning
+Save changes to  	Document		Save changes to  
+Tile Vertical	ProjectConceptor		Tile Vertical
+Copy	ProjectConceptor		Copy
+Fileformat	SavePanel		Fileformat
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		There is no web browser on your machine that is configured as the default program to view web pages.
+About	ProjectConceptor		About
+Cant find plugins	PluginManager		Konnte keine Plugins finden
+Play	MainWindow		Play
+Quit	MainWindow		Quit
+Find	ProjectConceptor		Find
+Redo	MainWindow		Redo
+Input macroname	CommandManager		Makronamen eingeben
+Stop recording	ProjectConceptor		Aufnahme anhalten
+Export	ProjectConceptor		Export
+ProjectConceptor	PluginManager		ProjectConceptor
+Paste	MainWindow		Paste
+OK	CommandManager		OK
+Edit	MainWindow		Edit
+Macro recording already started!	CommandManager		Macro recording already started!
+Replace	MainWindow		Replace
+Title vertical	MainWindow		Title vertical
+Cascade	MainWindow		Cascade
+Replace & Find	MainWindow		Replace & Find
+Undo	MainWindow		Undo
+Find	MainWindow		Find
+Save	ProjectConceptor		Save
+Find next	ProjectConceptor		Find next
+Save before close	Document		Save before close
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		There is no FTP client on your machine that is configured as the default program to connect to an FTP server.
+Undo	ProjectConceptor		Undo
+Save as	SavePanel		Save as
+File	ProjectConceptor		File
+Cancel	CommandManager		Cancel
+Error	Document		Error
+Macro	CommandManager		Macro
+Copy	MainWindow		Copy
+Help	HelpWindow		Help
+Close	MainWindow		Close
+I had problems while setting up the Printer!	Document		I had problems while setting up the Printer!
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		There is no e-mail program on your machine that is configured as the default program to send e-mail.
+Help	MainWindow		Help
+Print	ProjectConceptor		Print
+Contiune recording	CommandManager		Contiune recording
+Open	ProjectConceptor		Open
+Window	ProjectConceptor		Window
+OK	PluginManager		OK
+Replace	ProjectConceptor		Replace
+Clear	MainWindow		Clear
+Edit	ProjectConceptor		Edit
+Tile	ProjectConceptor		Tile
+Cut	MainWindow		Cut
+Cancel	Document		Cancel
+Close	ProjectConceptor		Close
+Redo	ProjectConceptor		Redo
+Restart recording	CommandManager		Restart recording
+Quit	ProjectConceptor		Quit
+Name	CommandManager		Name
+Start recording	MainWindow		Start recording
+Error!	CommandManager		Error!
+Page setup	ProjectConceptor		Page setup
+No active Editor Pleas install a Editor Plugin.	Document		No active Editor Pleas install a Editor Plugin.
+Search	ProjectConceptor		Search
+About	MainWindow		About
+Replace all	MainWindow		Replace all
+Start recording	ProjectConceptor		Start recording
+Cascade	ProjectConceptor		Cascade
+Could not find plugins	SavePanel		Could not find plugins
+Don't save	Document		Don't save
+Clear	ProjectConceptor		Clear
+Save as	MainWindow		Save as
+Select all	ProjectConceptor		Select all
