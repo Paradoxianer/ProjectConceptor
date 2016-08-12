@@ -481,14 +481,23 @@ void PDocument::Print(void)
 void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 {
 	TRACE();
-
+	status_t err	= B_OK;
 	if (Lock()) {
 		if (saveEntry!=NULL) {
-			BDirectory dir(saveEntry);
-			BEntry entry(&dir, name);
-			if (entryRef == NULL)
-				entryRef= new entry_ref;
-			entry.GetRef(entryRef);
+			BEntry entry;
+			if (name != NULL){
+				BDirectory dir(saveEntry);
+				err = entry.SetTo(&dir, name);
+			}
+			else
+				err = entry.SetTo(saveEntry);
+			if (err == B_OK){
+				if (entryRef == NULL)
+						entryRef= new entry_ref;
+				entry.GetRef(entryRef);
+			}
+			else
+				entryRef == NULL;
 		}
 		Unlock();
 	}

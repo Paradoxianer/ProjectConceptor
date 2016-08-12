@@ -118,9 +118,7 @@ public:
 
 	/**Set the save and load entry
 	 */
-			void				SetEntry(entry_ref *saveEntry,const char *name);
-	/**Set the save and load entry*/
-			void				SetEntry(entry_ref *newEntry){entryRef = newEntry;};
+			void				SetEntry(entry_ref *saveEntry,const char *name = NULL);
 	/**return the save and load entry*/
 			entry_ref*			Entry(void){return entryRef;};
 
