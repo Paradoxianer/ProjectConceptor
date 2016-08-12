@@ -3,9 +3,9 @@
 
 #include "ProjectConceptorDefs.h"
 #include "PDocument.h"
-#include "ColumnListView.h"
 
 
+#include <ColumnListView.h>
 #include <app/Message.h>
 #include <interface/Window.h>
 #include <interface/TabView.h>
