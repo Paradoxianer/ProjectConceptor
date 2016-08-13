@@ -21,7 +21,7 @@ void Resize::Undo(PDocument *doc,BMessage *undo)
 	{
 		if (undoMessage->FindRect("oldFrame",i,oldFrame) == B_OK)
 		{
-			node->ReplaceRect("Node::frame",*oldFrame);
+			node->ReplaceRect(P_C_NODE_FRAME,*oldFrame);
 			changed->insert(node);
 		}
 		i++;
@@ -44,7 +44,7 @@ BMessage* Resize::Do(PDocument *doc, BMessage *settings)
 		for (i=0;i<selected->CountItems();i++)
 		{
 			node=(BMessage *)selected->ItemAt(i);
-			node->FindRect("Node::frame",oldFrame);
+			node->FindRect(P_C_NODE_FRAME,oldFrame);
 			undoMessage->AddRect("oldFrame",*oldFrame);
 			undoMessage->AddPointer("node",node);
 			*newFrame			=	*oldFrame;
@@ -52,7 +52,7 @@ BMessage* Resize::Do(PDocument *doc, BMessage *settings)
 			newFrame->bottom	+=	dy;
 			if ( (newFrame->IsValid()) && (newFrame->Width()>20) && ((newFrame->Height()>20)) )
 			{
-				node->ReplaceRect("Node::frame",*newFrame);
+				node->ReplaceRect(P_C_NODE_FRAME,*newFrame);
 				changed->insert(node);
 			}
 		}

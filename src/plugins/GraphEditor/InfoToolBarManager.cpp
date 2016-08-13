@@ -31,10 +31,10 @@ void InfoToolBarManager::ValueChanged(void){
 		rgb_color	normal		= ;
 		BRect	lastRect;
 		tmpNode	= (BMessage*)selected->ItemAt(i);
-		err = tmpNode->FindRect("Node::frame",&lastRect);
+		err = tmpNode->FindRect(P_C_NODE_FRAME,&lastRect);
 		for (int32 i=1; i<selected->CountItems();i++){
 			tmpNode	= (BMessage*)selected->ItemAt(i);
-			err = tmpNode->FindRect("Node::frame",&rect);
+			err = tmpNode->FindRect(P_C_NODE_FRAME,&rect);
 			if ((leftFit) && (rect.x != lastRect.x))
 				leftFit = false;
 			if ((topFit) && (rect.x != lastRect.x))
@@ -86,7 +86,7 @@ void InfoToolBarManager::Init(void){
 
 void InfoToolBarManager::ClassToolBar(BMessage *node){
 	status_t err = B_OK;
-	err = node->FindRect("Node::frame",&rect);
+	err = node->FindRect(P_C_NODE_FRAME,&rect);
 	if (err == B_OK) {
 		left->SetValue(rect.left);
 		top->SetValue(rect.top);

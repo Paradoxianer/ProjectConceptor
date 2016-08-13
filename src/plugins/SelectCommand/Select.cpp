@@ -1,5 +1,5 @@
 #include "Select.h"
-
+#include "ProjectConceptorDefs.h"
 
 Select::Select():PCommand() {
 }
@@ -14,14 +14,14 @@ void Select::Undo(PDocument *doc,BMessage *undo) {
 	undo->FindMessage("Select::Undo" ,undoMessage);
 	while (selected->CountItems()>0) {
 		currentContainer	= (BMessage *)selected->RemoveItem((int32)0);
-		currentContainer->ReplaceBool("Node::selected",0,false);
+		currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,false);
 		changed->insert(currentContainer);
 	}
 	i = 0;
 	while (	undoMessage->FindPointer("node",i,(void **)&currentContainer) == B_OK) {
 		i++;
 		if (currentContainer)
-			currentContainer->ReplaceBool("Node::selected",0,true);
+			currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,true);
 		changed->insert(currentContainer);
 		selected->AddItem(currentContainer);
 	}
@@ -45,7 +45,7 @@ BMessage* Select::Do(PDocument *doc, BMessage *settings) {
 			if (node != NULL) {
 				changed->insert(node);
 				undoMessage->AddPointer("node",node);
-				node->ReplaceBool("Node::selected",0,false);
+				node->ReplaceBool(P_C_NODE_SELECTED,0,false);
 			}
 		}
 	}
@@ -86,9 +86,9 @@ void Select::DoSelect(PDocument *doc,BRect *rect) {
 
 	for (i=0;i<all->CountItems();i++) {
 		currentContainer =(BMessage *) all->ItemAt(i);
-		currentContainer->FindRect("Node::frame",0,frame);
+		currentContainer->FindRect(P_C_NODE_FRAME,0,frame);
 		if (rect->Contains(*frame)) {
-			currentContainer->ReplaceBool("Node::selected",0,true);
+			currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,true);
 			selected->AddItem(currentContainer);
 			changed->insert(currentContainer);
 		}
@@ -101,11 +101,11 @@ void Select::DoSelect(PDocument *doc,BMessage *container) {
 	set<BMessage*>		*changed			= doc->GetChangedNodes();
 	bool			selectTester		= false;
 	status_t		err					= B_OK;
-	err= container->FindBool("Node::selected",&selectTester);
+	err= container->FindBool(P_C_NODE_SELECTED,&selectTester);
 	if (err == B_OK)
-		err = container->ReplaceBool("Node::selected",0,true);
+		err = container->ReplaceBool(P_C_NODE_SELECTED,0,true);
 	else
-		err = container->AddBool("Node::selected",true);
+		err = container->AddBool(P_C_NODE_SELECTED,true);
 	selected->AddItem(container);
 	changed->insert(container);
 	//container->(new BoolContainer(true));
@@ -120,7 +120,7 @@ void Select::DoSelectAll(PDocument *doc) {
 	int32 			i					= 0;
 	for (i=0;i<all->CountItems();i++) {
 		currentContainer =(BMessage *) all->ItemAt(i);
-		currentContainer->ReplaceBool("Node::selected",0,false);
+		currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,false);
 		selected->AddItem(currentContainer);
 		changed->insert(currentContainer);
 	}

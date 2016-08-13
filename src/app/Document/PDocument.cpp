@@ -687,7 +687,7 @@ BMessage* PDocument::FindObject(BPoint *where)
 	bool		found	= false;
 	for (int32 i=0;( (i<allNodes->CountItems())&&(!found) );i++) {
 		node=(BMessage *)allNodes->ItemAt(i);
-		node->FindRect("Node::frame",frame);
+		node->FindRect(P_C_NODE_FRAME,frame);
 		if (frame->Contains(*where))
 			found=true;
 	}

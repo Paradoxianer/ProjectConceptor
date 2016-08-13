@@ -245,7 +245,8 @@ extern const char*		P_MENU_WINDOW_CASCADE;//			= "Cascade";
 
 /**value to find the BMenu "Makrko" over the PMenuAcces Interface
  *@see PMenuAcces
- */	
+ */
+
 extern const char*		P_MENU_MACRO;//					= "Macro";
 extern const char*		P_MENU_MACRO_START_RECORDING;//	= "Start Recording";
 extern const char*		P_MENU_MACRO_STOP_RECORDING;//		= "Stop Recording";
@@ -255,6 +256,36 @@ extern const char*		P_MENU_MACRO_SAVE;//				= "Save";
 
 extern const char*		P_MENU_HELP;//						= "Help";
 extern const char*		P_MENU_HELP_ABOUT;//				= "About";
+
+
+
+
+extern const char*		P_C_NODE_NAME;		//				= "Node::name"
+extern const char*		P_C_NODE_DATA;		//				= "Node::Data"
+extern const char*		P_C_NODE_FONT;		//				= "Node::Font"
+extern const char*		P_C_NODE_FRAME;		//				= "Node::Frame"
+
+
+extern const char*		P_C_NODE_PATTERN;	//				= "Node::Pattern"
+extern const char*		P_C_NODE_SELECTED;	//				= "Node::selected"
+extern const char*		P_C_NODE_X_RADIUS;	//				= "Node::xRadius"
+extern const char*		P_C_NODE_Y_RADIUS;	//				= "Node::yRadius"
+
+extern const char*		P_C_NODE_CONNECTION_FROM;	//		= "Node::from"
+extern const char*		P_C_NODE_CONNECTION_TO;		//		= "Node::to"
+
+extern const char*		P_C_NODE_CREATED;			//		= "Node::created"
+extern const char*		P_C_NODE_MODIFIED;			//		= "Node::modified"
+extern const char*		P_C_NODE_PARENT;			//		= "Node::parent"
+extern const char*		P_C_NODE_ALLNODES;			//		= "Node::allNodes"
+extern const char*		P_C_NODE_ALLCONNECTIONS;	//		= "Node::allConnections"
+
+
+extern const char*		P_C_NODE_CONNECTION_TYPE;	//		= "Connection::type"
+
+extern const char*		P_C_NODE_INCOMING;			//		= "Node::incoming"
+extern const char*		P_C_NODE_OUTGOING;			//		= "Node::outgoing"
+
 
 
 extern const int32		P_C_VERSION;//						= "0.01a Revision 132";

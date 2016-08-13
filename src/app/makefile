@@ -31,6 +31,7 @@ SRCS= 	About/AboutWindow.cpp \
 		About/AboutView.cpp \
 		About/AboutURLView.cpp \
 		MainView.cpp \
+		ProjectConceptorDefs.cpp \
 		ProjectConceptor.cpp \
 		Config/ConfigManager.cpp \
 		Config/ConfigWindow.cpp \

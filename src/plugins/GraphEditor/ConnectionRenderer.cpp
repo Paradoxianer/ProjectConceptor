@@ -31,23 +31,23 @@ void ConnectionRenderer::Init() {
 	BMessage	*toNode		= NULL;
 	BMessage	*data		= new BMessage();
 
-	container->FindPointer("Node::from",(void **)&fromNode);
-	container->FindPointer("Node::to",(void **)&toNode);
-	if (fromNode->FindPointer("Node::outgoing",(void **)&outgoing) != B_OK) {
+	container->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&fromNode);
+	container->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&toNode);
+	if (fromNode->FindPointer(P_C_NODE_OUTGOING,(void **)&outgoing) != B_OK) {
 		outgoing = new BList();
-		fromNode->AddPointer("Node::outgoing",outgoing);
+		fromNode->AddPointer(P_C_NODE_OUTGOING,outgoing);
 	}
 	if (!outgoing->HasItem(container))
 		outgoing->AddItem(container);
-	if (toNode->FindPointer("Node::incoming",(void **)&incoming) != B_OK) {
+	if (toNode->FindPointer(P_C_NODE_INCOMING,(void **)&incoming) != B_OK) {
 		incoming = new BList();
-		toNode->AddPointer("Node::incoming",incoming);
+		toNode->AddPointer(P_C_NODE_INCOMING,incoming);
 	}
 	if (!incoming->HasItem(container))
 		incoming->AddItem(container);
-	if (container->FindMessage("Node::Data",data) != B_OK) {
-		data->AddString("Name","Unbenannt");
-		container->AddMessage("Node::Data",data);
+	if (container->FindMessage(P_C_NODE_DATA,data) != B_OK) {
+		data->AddString(P_C_NODE_NAME,"Unbenannt");
+		container->AddMessage(P_C_NODE_DATA,data);
 	}
 	container->FindPointer("ProjectConceptor::doc",(void **)&doc);
 	sentTo						= new BMessenger(NULL,doc);
@@ -103,25 +103,25 @@ void ConnectionRenderer::MessageReceived(BMessage *message) {
 		case P_C_VALUE_CHANGED:
 				ValueChanged();
 			break;
-		case B_C_NAME_CHANGED:
+/*		case B_C_NAME_CHANGED:
 		{
 			BMessage	*data= new BMessage();
-			container->FindMessage("Node::Data",data);
+			container->FindMessage(P_C_NODE_DATA,data);
 //			data->ReplaceString("Name",connectionName->Text());
-			container->ReplaceMessage("Node::Data",data);
+			container->ReplaceMessage(P_C_NODE_DATA,data);
 			break;
-		}
+		}*/
 	}
 }
 
 void ConnectionRenderer::ValueChanged() {
 	BMessage	*tmpNode	= NULL;
-	container->FindPointer("Node::from",(void **)&tmpNode);
+	container->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&tmpNode);
 	tmpNode->FindPointer(editor->RenderString(),(void **)&from);
-	container->FindPointer("Node::to",(void **)&tmpNode);
+	container->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&tmpNode);
 	tmpNode->FindPointer(editor->RenderString(),(void **)&to);
-	container->FindBool("Node::selected",&selected);
-	container->FindInt8("Node::type", (int8 *)&connectionType);
+	container->FindBool(P_C_NODE_SELECTED,&selected);
+	container->FindInt8(P_C_NODE_CONNECTION_TYPE, (int8 *)&connectionType);
 }
 
 void ConnectionRenderer::CalcLine() {

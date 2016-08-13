@@ -29,8 +29,8 @@ void GroupRenderer::Init()
 	scale							= 1.0;
 	renderer						= new BList();
 	father							= NULL;
-	if (container->FindPointer("Node::allNodes", (void **)&allNodes) !=B_OK)
-		container->AddPointer("Node::allNodes",allNodes=new BList());
+	if (container->FindPointer(P_C_NODE_ALLNODES, (void **)&allNodes) !=B_OK)
+		container->AddPointer(P_C_NODE_ALLNODES,allNodes=new BList());
 }
 
 void GroupRenderer::BringToFront(Renderer *wichRenderer)
@@ -165,7 +165,7 @@ void GroupRenderer::MouseDown(BPoint where, int32 buttons,
 		BMessage *newNodeCommand=editor->GenerateInsertCommand(P_C_CLASS_TYPE);
 		BMessage *node;
 		newNodeCommand->FindPointer("node",(void **)&node);
-		node->AddPointer("Node::parent",container);
+		node->AddPointer(P_C_NODE_PARENT,container);
 		editor->SendMessageToDoc(newNodeCommand);
 	}
 	ClassRenderer::MouseDown(where,buttons,clicks,modifiers);

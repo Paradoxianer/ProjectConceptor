@@ -35,10 +35,10 @@ void NavigatorEditor::Init(void)
 
 
 /*	BMessage		*dataMessage	= new BMessage();
-	dataMessage->AddString("Name","Untitled");
+	dataMessage->AddString(P_C_NODE_NAME,"Untitled");
 	//preparing the standart ObjectMessage
 	nodeMessage	= new BMessage(P_C_CLASS_TYPE);
-	nodeMessage->AddMessage("Node::Data",dataMessage);
+	nodeMessage->AddMessage(P_C_NODE_DATA,dataMessage);
 	//Preparing the standart FontMessage
 	fontMessage		= new BMessage();
 	fontMessage->AddInt8("Encoding",be_plain_font->Encoding());
@@ -112,9 +112,9 @@ void NavigatorEditor::PreprocessBeforSave(BMessage *container)
 	while (container->GetInfo(B_POINTER_TYPE,i ,(char **)&name, &type, &count) == B_OK)
 	{
 		if ((strstr(name,"GraphEditor") != NULL) ||
-			(strcasecmp(name,"Node::outgoing") == B_OK) ||
-			(strcasecmp(name,"Node::incoming") == B_OK) ||
-			(strcasecmp(name,"Parent") == B_OK)  ||
+			(strcasecmp(name,P_C_NODE_OUTGOING) == B_OK) ||
+			(strcasecmp(name,P_C_NODE_INCOMING) == B_OK) ||
+			(strcasecmp(name,P_C_NODE_PARENT) == B_OK)  ||
 			(strcasecmp(name,"ProjectConceptor::doc") == B_OK) )
 		{
 			container->RemoveName(name);

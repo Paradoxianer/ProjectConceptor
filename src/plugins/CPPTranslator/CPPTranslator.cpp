@@ -190,7 +190,6 @@ status_t Converter::ConvertFreeMind2PDoc()
 status_t Converter::WriteConnection(BMessage *connection)
 {
 	printf("Connection:\n");
-	connection->PrintToStream();
 	BMessage	*fromNode		= NULL;
 	BMessage	*toNode			= NULL;
 	BMessage	*data			= new BMessage;
@@ -200,18 +199,18 @@ status_t Converter::WriteConnection(BMessage *connection)
 	bool		closeNode		= false;
 	connection->FindPointer("this",&selfPointer);
 	doneConnection->AddItem(selfPointer);
-	connection->FindPointer("Node::to" ,(void **)&fromNode);
+	connection->FindPointer(P_C_NODE_CONNECTION_TO ,(void **)&fromNode);
 	if (!doneNode->HasItem(fromNode))
 	{
-		fromNode->FindMessage("Node::Data",data);
-		data->FindString("Name",(const char **)&text);
+		fromNode->FindMessage(P_C_NODE_DATA,data);
+		data->FindString(P_C_NODE_NAME,(const char **)&text);
 		sprintf(line,"<node ID=\"%ld\" TEXT=\"%s\">\n",fromNode,text);
 		doneNode->AddItem(fromNode);
 		out->Write(line,strlen(line));
 		FindConnections(fromNode);
 		closeNode;
 	}
-	connection->FindPointer("Node::to" ,(void **)&toNode);
+	connection->FindPointer(P_C_NODE_CONNECTION_TO ,(void **)&toNode);
 	if (doneNode->HasItem(toNode))
 	{
 		sprintf(line,"<arrowlink DESTINATION=\"%ld\"/>\n",toNode,text);
@@ -219,8 +218,8 @@ status_t Converter::WriteConnection(BMessage *connection)
 	}
 	else
 	{
-		toNode->FindMessage("Node::Data",data);
-		data->FindString("Name",(const char **)&text);
+		toNode->FindMessage("P_C_NODE_DATA",data);
+		data->FindString("P_C_NODE_NAME",(const char **)&text);
 		sprintf(line,"<node ID=\"%ld\" TEXT=\"%s\">\n",toNode,text);
 		doneNode->AddItem(toNode);
 		out->Write(line,strlen(line));
@@ -249,8 +248,8 @@ status_t Converter::FindConnections(BMessage *node)
 		connection->FindPointer("this",&selfPointer);
 		if (!doneConnection->HasItem(selfPointer))
 		{
-			connection->FindPointer("Node::from",(void **)&from);
-			connection->FindPointer("Node::to",(void **)&to);
+			connection->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&from);
+			connection->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&to);
 			if (from == node)
 				WriteConnection(connection);
 			else if (to == node)

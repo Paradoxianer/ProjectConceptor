@@ -26,7 +26,7 @@ void RemoveAttribute::Undo(PDocument *doc,BMessage *undo)
 		i++;
 
 	}
-	if ( (undo->FindBool("Node::selected",&selected) == B_OK) && (selected==true) )
+	if ( (undo->FindBool(P_C_NODE_SELECTED,&selected) == B_OK) && (selected==true) )
 	{
 		undoMessage->FindMessage("selectedNodes",selectNodes);
 		err 		= B_OK;
@@ -60,7 +60,7 @@ BMessage* RemoveAttribute::Do(PDocument *doc, BMessage *settings)
 			DoRemoveAttribute(doc,node,valueContainer,undoMessage);
 		i++;
 	}
-	if ( (settings->FindBool("Node::selected",&selected) == B_OK) && (selected==true) )
+	if ( (settings->FindBool(P_C_NODE_SELECTED,&selected) == B_OK) && (selected==true) )
 	{
 		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK)
 		{

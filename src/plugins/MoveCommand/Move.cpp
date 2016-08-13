@@ -17,7 +17,7 @@ void Move::Undo(PDocument *doc,BMessage *undo) {
 	//settings is placed by the default implentation of PCommand::Do(...) into the undo MEssage
 	while (undoMessage->FindPointer("node",i,(void **)&node) == B_OK) {
 		if (undoMessage->FindRect("oldFrame",i,oldFrame) == B_OK) {
-			node->ReplaceRect("Node::frame",*oldFrame);
+			node->ReplaceRect(P_C_NODE_FRAME,*oldFrame);
 			changed->insert(node);
 		}
 		i++;
@@ -59,11 +59,11 @@ void Move::MoveNode(PDocument *doc, set<BMessage*> *changed, BMessage *node, flo
 	int32	i			= 0;
 	BRect	*newFrame	= new BRect(0,0,-1,-1);
 	BRect	*oldFrame	= new BRect(0,0,-1,-1);
-	node->FindRect("Node::frame",oldFrame);
+	node->FindRect(P_C_NODE_FRAME,oldFrame);
 	undoMessage->AddRect("oldFrame",*oldFrame);
 	*newFrame=*oldFrame;
 	newFrame->OffsetBy(dx,dy);
-	node->ReplaceRect("Node::frame",*newFrame);
+	node->ReplaceRect(P_C_NODE_FRAME,*newFrame);
 	undoMessage->AddPointer("node",node);
 	changed->insert(node);
 	BRect	docRect			= doc->Bounds();
@@ -73,7 +73,7 @@ void Move::MoveNode(PDocument *doc, set<BMessage*> *changed, BMessage *node, flo
 		docRect.right = newFrame->right+20;
 	if (docRect != doc->Bounds())
 		doc->Resize(docRect.right,docRect.bottom);
-	if ( (node->FindPointer("Node::allNodes",(void **)&allNodes)==B_OK) && (allNodes) ) {
+	if ( (node->FindPointer(P_C_NODE_ALLNODES,(void **)&allNodes)==B_OK) && (allNodes) ) {
 		for (i=0;i<allNodes->CountItems();i++) {
 			MoveNode(doc,changed,(BMessage *)allNodes->ItemAt(i), dx, dy,undoMessage);
 		}

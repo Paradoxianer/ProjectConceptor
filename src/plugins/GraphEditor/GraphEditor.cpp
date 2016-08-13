@@ -63,10 +63,10 @@ void GraphEditor::Init(void) {
 	font_style		style;
 
 	BMessage		*dataMessage	= new BMessage();
-	dataMessage->AddString("Name","Untitled");
+	dataMessage->AddString(P_C_NODE_NAME,"Untitled");
 	//preparing the standart ObjectMessage
 	nodeMessage	= new BMessage(P_C_CLASS_TYPE);
-	nodeMessage->AddMessage("Node::Data",dataMessage);
+	nodeMessage->AddMessage(P_C_NODE_DATA,dataMessage);
 	//Preparing the standart FontMessage
 	fontMessage		= new BMessage(B_FONT_TYPE);
 	fontMessage->AddInt8("Font::Encoding",be_plain_font->Encoding());
@@ -132,7 +132,7 @@ void GraphEditor::Init(void) {
 	grid		= new ToolItem(B_TRANSLATE("Grid"),BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
 	penSize		= new FloatToolItem(B_TRANSLATE("Pen size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
 	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
-	patternItem	= new PatternToolItem(B_TRANSLATE("Node::Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
+	patternItem	= new PatternToolItem(B_TRANSLATE("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 
 	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);
 	//loading ressource_images from the PluginRessource
@@ -278,9 +278,9 @@ void GraphEditor::PreprocessBeforSave(BMessage *container) {
 	#endif
 	{
 		if ((strstr(name,"GraphEditor") != NULL) ||
-			(strcasecmp(name,"Node::outgoing") == B_OK) ||
-			(strcasecmp(name,"Node::incoming") == B_OK) ||
-			(strcasecmp(name,"Parent") == B_OK)  ||
+			(strcasecmp(name,P_C_NODE_OUTGOING) == B_OK) ||
+			(strcasecmp(name,P_C_NODE_INCOMING) == B_OK) ||
+			(strcasecmp(name,P_C_NODE_PARENT) == B_OK)  ||
 			(strcasecmp(name,"ProjectConceptor::doc") == B_OK) ){
 			container->RemoveName(name);
 			i--;
@@ -316,6 +316,7 @@ void GraphEditor::ValueChanged() {
 	int i=0;
 	for ( it=changedNodes->begin();it!=changedNodes->end();it++) {
 		node = *it;
+		node->PrintToStream();
 		if (node->FindPointer(renderString,(void **)&painter) == B_OK) {
 			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
 				painter->ValueChanged();
@@ -326,7 +327,7 @@ void GraphEditor::ValueChanged() {
 			//**check if this node is in the node or connection list because if it is not it´s a node frome a subgroup or it was deleted
 			if (((allConnections->HasItem(node))||
 			     (allNodes->HasItem(node))) &&
-			    (node->FindPointer("Parent",&pointer) !=B_OK))
+			    (node->FindPointer(P_C_NODE_PARENT,&pointer) !=B_OK))
 				InsertRenderObject(node);
 			else
 				RemoveRenderer(FindRenderer(node));
@@ -597,8 +598,8 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		}
 		case G_E_CONNECTING: {
 				connecting = true;
-				message->FindPoint("Node::to",toPoint);
-				message->FindPoint("Node::from",fromPoint);
+				message->FindPoint(P_C_NODE_CONNECTION_TO,toPoint);
+				message->FindPoint(P_C_NODE_CONNECTION_FROM,fromPoint);
 				Invalidate();
 			break;
 		}
@@ -615,25 +616,25 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			BPoint		*toPointer		= new BPoint(-10,-10);
 			BPoint		*fromPointer	= new BPoint(-10,-10);
 			Renderer	*foundRenderer	= NULL;
-			if (message->FindPointer("Node::from",(void **)&from) == B_OK) {
-				message->FindPoint("Node::to",toPointer);
+			if (message->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&from) == B_OK) {
+				message->FindPoint(P_C_NODE_CONNECTION_TO,toPointer);
 				foundRenderer = FindNodeRenderer(*toPointer);
 				if (foundRenderer)
 					to = foundRenderer->GetMessage();
 			}
 			else {
-				message->FindPointer("Node::to",(void **)&to);
-				message->FindPoint("Node::from",fromPointer);
+				message->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&to);
+				message->FindPoint(P_C_NODE_CONNECTION_FROM,fromPointer);
 				foundRenderer = FindNodeRenderer(*fromPointer);
 				if (foundRenderer)
 					from  = foundRenderer->GetMessage();
 			}
-			data->AddString("Name","Unbenannt");
+			data->AddString(P_C_NODE_NAME,"Unbenannt");
 			if (to != NULL && from!=NULL) {
-				connection->AddPointer("Node::from",from);
-				connection->AddPointer("Node::to",to);
-				connection->AddMessage("Node::Data",data);
-				connection->AddInt8("Node::type",1);
+				connection->AddPointer(P_C_NODE_CONNECTION_FROM,from);
+				connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
+				connection->AddMessage(P_C_NODE_DATA,data);
+				connection->AddInt8(P_C_NODE_CONNECTION_TYPE,1);
 				
 				connection->AddPointer("ProjectConceptor::doc",doc);
 				//** add the connections to the Nodes :-)
@@ -667,10 +668,10 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			rgb_color	tmpNewColor =	colorItem->GetColor();;
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changeColorMessage->AddString("Command::Name","ChangeValue");
-			changeColorMessage->AddBool("Node::selected",true);
+			changeColorMessage->AddBool(P_C_NODE_SELECTED,true);
 			BMessage	*valueContainer	= new BMessage();
 			valueContainer->AddString("name","FillColor");
-			valueContainer->AddString("subgroup","Node::Pattern");
+			valueContainer->AddString("subgroup",P_C_NODE_PATTERN);
 			valueContainer->AddInt32("type",B_INT32_TYPE);
 			valueContainer->AddInt32("newValue",*(int32 *)&tmpNewColor);
 			changeColorMessage->AddMessage("valueContainer",valueContainer);
@@ -680,10 +681,10 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		case G_E_PEN_SIZE_CHANGED: {
 			BMessage	*changePenSizeMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changePenSizeMessage->AddString("Command::Name","ChangeValue");
-			changePenSizeMessage->AddBool("Node::selected",true);
+			changePenSizeMessage->AddBool(P_C_NODE_SELECTED,true);
 			BMessage	*valueContainer	= new BMessage();
 			valueContainer->AddString("name","PenSize");
-			valueContainer->AddString("subgroup","Node::Pattern");
+			valueContainer->AddString("subgroup",P_C_NODE_PATTERN);
 			valueContainer->AddInt32("type",B_FLOAT_TYPE);
 			valueContainer->AddFloat("newValue",penSize->GetValue());
 			changePenSizeMessage->AddMessage("valueContainer",valueContainer);
@@ -702,12 +703,12 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				strcpy(inputstr,input);
 				BMessage	*addMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 				addMessage->AddString("Command::Name","AddAttribute");
-				addMessage->AddBool("Node::selected",true);
+				addMessage->AddBool(P_C_NODE_SELECTED,true);
 				BMessage	*valueContainer	= new BMessage();
 
 				valueContainer->AddInt32("type",B_MESSAGE_TYPE);
 				valueContainer->AddString("name",inputstr);
-				valueContainer->AddString("subgroup","Node::Data");
+				valueContainer->AddString("subgroup",P_C_NODE_DATA);
 				BMessage	*newAttribute	= new BMessage(type);
 				newAttribute->AddString("Name",inputstr);
 				if (type == B_STRING_TYPE)
@@ -773,9 +774,9 @@ void GraphEditor::InsertObject(BPoint where,bool deselect) {
 		where.y=where.y-fmod(where.y,GridWidth());
 	}
 
-	newObject->AddRect("Node::frame",BRect(where,where+BPoint(100,40)));
-	newObject->AddMessage("Node::Font",newFont);
-	newObject->AddMessage("Node::Pattern",newPattern);
+	newObject->AddRect(P_C_NODE_FRAME,BRect(where,where+BPoint(100,40)));
+	newObject->AddMessage(P_C_NODE_FONT,newFont);
+	newObject->AddMessage(P_C_NODE_PATTERN,newPattern);
 	//preparing CommandMessage
 	commandMessage->AddPointer("node",(void *)newObject);
 	commandMessage->AddString("Command::Name","Insert");
@@ -924,7 +925,7 @@ void GraphEditor::BringToFront(Renderer *wichRenderer) {
 	Renderer	*tmpRenderer		= NULL;
 	if (wichRenderer!=NULL)
 		if ((tmpMessage = wichRenderer->GetMessage()) != NULL) {
-	    /*if ((tmpMessage->FindPointer("Node::parent", (void **)&parentNode) == B_OK) && (parentNode != NULL) ) {
+	    /*if ((tmpMessage->FindPointer(P_C_NODE_PARENT, (void **)&parentNode) == B_OK) && (parentNode != NULL) ) {
 			parentNode->FindPointer(renderString,(void **)&tmpRenderer);
 			if (tmpRenderer)
 				((GroupRenderer *)tmpRenderer)->BringToFront(wichRenderer);
@@ -941,7 +942,7 @@ void GraphEditor::SendToBack(Renderer *wichRenderer) {
 	BMessage	*parentNode	= NULL;
 	Renderer	*painter	= NULL;
 	int32		i			= 0;
-	if (wichRenderer->GetMessage()->FindPointer("Node::parent",(void **) &parentNode)==B_OK) {
+	if (wichRenderer->GetMessage()->FindPointer(P_C_NODE_PARENT,(void **) &parentNode)==B_OK) {
 		painter	= FindRenderer(parentNode);
 		if (painter)
 			((GroupRenderer *)painter)->SendToBack(wichRenderer);
@@ -949,23 +950,6 @@ void GraphEditor::SendToBack(Renderer *wichRenderer) {
 	}
 	renderer->RemoveItem(wichRenderer);
 	renderer->AddItem(wichRenderer,i);
-	/*TRACE();
-	BMessage	*parentNode	= NULL;
-	Renderer	*painter	= NULL;
-	int32		i			= -1;
-	renderer->RemoveItem(wichRenderer);
-	if (wichRenderer->GetMessage()->FindPointer("Node::parent",(void **) &parentNode)==B_OK)
-	{
-		painter	= FindRenderer(parentNode);
-		if (painter)
-			((GroupRenderer *)tmpRenderer)->SendToBack(wichRenderer);
-		i = renderer->IndexOf(painter);
-		parentNode->FindPointer(renderString,(void **)&tmpRenderer);
-		renderer->AddItem(wichRenderer,i+1);
-	}
-	else
-		renderer->AddItem(wichRenderer,0);
-	//**draw all wich are under the Thing redraw*/
 	Invalidate();
 }
 
@@ -989,7 +973,7 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 	BPoint      where;
 	
 
-    data->AddString("Name","Unbenannt");
+    data->AddString(P_C_NODE_NAME,"Unbenannt");
     //insert new Node here*/
 	newPattern->ReplaceInt32("FillColor",*(int32 *)&tmpColor);
 	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
@@ -1001,8 +985,8 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 		where.y = where.y-fmod(where.y,GridWidth());
 	}
 	newNode->what = newWhat;
-	newNode->AddMessage("Node::Font",newFont);
-	newNode->AddMessage("Node::Pattern",newPattern);
+	newNode->AddMessage(P_C_NODE_FONT,newFont);
+	newNode->AddMessage(P_C_NODE_PATTERN,newPattern);
 	commandMessage->AddString("Command::Name","Insert");
     subCommandMessage->AddString("Command::Name","Select");
 	commandMessage->AddPointer("node",newNode);
@@ -1015,18 +999,18 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
        		if (to != NULL && from!=NULL)
        	 	{
 				connection		    = new BMessage(P_C_CONNECTION_TYPE);
-            	err = from->FindRect("Node::frame",fromRect);
+            	err = from->FindRect(P_C_NODE_FRAME,fromRect);
             	if (!selectRect)
                 	selectRect = new BRect(*fromRect);
             	else
                 	*selectRect = *selectRect | *fromRect;
             	err = B_OK;
-            	connection->AddPointer("Node::from",from);
-            	connection->AddPointer("Node::to",to);
+            	connection->AddPointer(P_C_NODE_CONNECTION_FROM,from);
+            	connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
             	uint	cType	= 1;
-            	connection->AddInt8("Node::type", cType);
+            	connection->AddInt8(P_C_NODE_CONNECTION_TYPE, cType);
 
-            	connection->AddMessage("Node::Data",data);
+            	connection->AddMessage(P_C_NODE_DATA,data);
             
             	connection->AddPointer("ProjectConceptor::doc",doc);
             	//** add the connections to the Nodes :-)
@@ -1047,7 +1031,7 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 	   				step++;
 				step=-step;
 			}
-			newNode->AddRect("Node::frame",BRect(where,where+BPoint(100,80)));
+			newNode->AddRect(P_C_NODE_FRAME,BRect(where,where+BPoint(100,80)));
 			commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
 		}
 	//}
@@ -1081,13 +1065,13 @@ void GraphEditor::DeleteFromList(Renderer *whichRenderer)
 	if (renderer->HasItem(whichRenderer) == true) {
 		renderer->RemoveItem(whichRenderer);
 		//remove all Connections wich belongs to this node..
-		if (whichRenderer->GetMessage()->FindPointer("Node::incoming",(void **)&connectionList) == B_OK) {
+		if (whichRenderer->GetMessage()->FindPointer(P_C_NODE_INCOMING,(void **)&connectionList) == B_OK) {
 			for (i = 0; i< connectionList->CountItems();i++) {
 				tmpNode = (BMessage *)connectionList->ItemAt(i);
 				renderer->RemoveItem(FindRenderer(tmpNode));
 			}
 		}
-		if (whichRenderer->GetMessage()->FindPointer("Node::outgoing",(void **)&connectionList) == B_OK) {
+		if (whichRenderer->GetMessage()->FindPointer(P_C_NODE_OUTGOING,(void **)&connectionList) == B_OK) {
 			for (i = 0; i< connectionList->CountItems();i++) {
 				tmpNode = (BMessage *)connectionList->ItemAt(i);
 				renderer->RemoveItem(FindRenderer(tmpNode));
@@ -1111,7 +1095,7 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos) {
 	BMessage	*tmpNode		= NULL;
 	Renderer	*tmpRenderer	= NULL;
 	if (pos>renderer->CountItems()) {
-		if (whichRenderer->GetMessage()->FindPointer("Node::incoming",(void **)&connectionList) == B_OK) {
+		if (whichRenderer->GetMessage()->FindPointer(P_C_NODE_INCOMING,(void **)&connectionList) == B_OK) {
 			for (i = 0; i< connectionList->CountItems();i++) {
 				tmpNode = (BMessage *)connectionList->ItemAt(i);
 				if (tmpNode->FindPointer(renderString,(void **) &tmpRenderer) == B_OK) {
@@ -1120,7 +1104,7 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos) {
 				}
 			}
 		}
-		if (whichRenderer->GetMessage()->FindPointer("Node::outgoing",(void **)&connectionList) == B_OK) {
+		if (whichRenderer->GetMessage()->FindPointer(P_C_NODE_OUTGOING,(void **)&connectionList) == B_OK) {
 			for (i = 0; i< connectionList->CountItems();i++) {
 				tmpNode = (BMessage *)connectionList->ItemAt(i);
 				if (tmpNode->FindPointer(renderString,(void **) &tmpRenderer) == B_OK) {
@@ -1132,7 +1116,7 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos) {
 		renderer->AddItem(whichRenderer);
 	}
 	else {
-		if (whichRenderer->GetMessage()->FindPointer("Node::incoming",(void **)&connectionList) == B_OK) {
+		if (whichRenderer->GetMessage()->FindPointer(P_C_NODE_INCOMING,(void **)&connectionList) == B_OK) {
 			for (i = 0; i< connectionList->CountItems();i++) {
 				tmpNode = (BMessage *)connectionList->ItemAt(i);
 				if (FindRenderer(tmpNode)){
@@ -1141,7 +1125,7 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos) {
 				}
 			}
 		}
-		if (whichRenderer->GetMessage()->FindPointer("Node::outgoing",(void **)&connectionList) == B_OK) {
+		if (whichRenderer->GetMessage()->FindPointer(P_C_NODE_OUTGOING,(void **)&connectionList) == B_OK) {
 			for (i = 0; i< connectionList->CountItems();i++) {
 				tmpNode = (BMessage *)connectionList->ItemAt(i);
 				if (FindRenderer(tmpNode)) {

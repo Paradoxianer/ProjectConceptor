@@ -235,8 +235,8 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 	//add this node to the processed List
 	processedIDs.insert((int32)tmpNode);
 	//find the data field where name and attributes are stored
-	node->FindMessage("Node::Data",data);
-	data->FindString("Name",(const char **)&name);
+	node->FindMessage(P_C_NODE_DATA,data);
+	data->FindString(P_C_NODE_NAME,(const char **)&name);
 
 	xmlNode.SetAttribute("ID",(int32)tmpNode);
 	xmlNode.SetAttribute("TEXT",(const char *)name);
@@ -270,8 +270,8 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 	while (iter!=connections.end())
 	{
 		connection=(*iter).second;
-		connection->FindPointer("Node::from",&fromNode);
-		connection->FindPointer("Node::to", &toNode);
+		connection->FindPointer(P_C_NODE_CONNECTION_FROM,&fromNode);
+		connection->FindPointer(P_C_NODE_CONNECTION_TO, &toNode);
 		if ((fromNode == tmpNode) && (processedIDs.find((*iter).first) == processedIDs.end()))
 		{
 			//check if the node was already insert if so we "connect via a arrowlink
@@ -322,7 +322,7 @@ BMessage* Converter::GuessStartNode(void)
 	iter = connections.begin();
 	//if there is a node given... we search for a Connection wich points to this node
 	connection = (*iter).second;
-	if (connection->FindPointer("Node::from", &fromNode) == B_OK)
+	if (connection->FindPointer(P_C_NODE_CONNECTION_FROM, &fromNode) == B_OK)
 	{
 		nodeID = fromNode;
 		visited.insert((int32)fromNode);
@@ -335,7 +335,7 @@ BMessage* Converter::GuessStartNode(void)
 		while ((iter!=connections.end()) && (!found))
 		{
 			connection=(*iter).second;
-			connection->FindPointer("Node::To",&toNode);
+			connection->FindPointer(P_C_NODE_CONNECTION_TO,&toNode);
 			if (toNode == fromNode)
 			{
 				visited.insert((int32)fromNode);
@@ -366,9 +366,9 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		node = node->NextSibling();
 	}
 	if (parent->Attribute("TEXT"))
-		data->AddString("Name",parent->Attribute("TEXT"));
+		data->AddString(P_C_NODE_NAME,parent->Attribute("TEXT"));
 	else
-		data->AddString("Name","Unnamed");
+		data->AddString(P_C_NODE_NAME,"Unnamed");
 	if (parent->Attribute("ID"))
 	{
 		const char	*idString = parent->Attribute("ID");
@@ -376,9 +376,9 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		pDocNode->AddPointer("this",(void *)id);
 	}
 	if (parent->Attribute("CREATED"))
-		pDocNode->AddInt32("Node::created",atoi(parent->Attribute("CREATED")));
+		pDocNode->AddInt32(P_C_NODE_CREATED,atoi(parent->Attribute("CREATED")));
 	if (parent->Attribute("MODIFIED"))
-		pDocNode->AddInt32("Node::modified",atoi(parent->Attribute("MODIFIED")));
+		pDocNode->AddInt32(P_C_NODE_MODIFIED,atoi(parent->Attribute("MODIFIED")));
 	if (parent->Attribute("BACKGROUND_COLOR"))
 		pattern->AddInt32("FillColor",GetRGB(parent->Attribute("BACKGROUND_COLOR")));
 	if (parent->Attribute("COLOR"))
@@ -389,10 +389,10 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		CreateConnection(connectionS,parent,node->ToElement());
 		node = node->NextSibling();
 	}
-	pDocNode->AddMessage("Node::Data",data);
-	pDocNode->AddMessage("Node::Pattern",pattern);
+	pDocNode->AddMessage(P_C_NODE_DATA,data);
+	pDocNode->AddMessage(P_C_NODE_PATTERN,pattern);
 	BRect	*nodeRect	= new BRect(100,100,200,150);
-	if (pDocNode->FindRect("Node::frame",nodeRect) !=  B_OK)
+	if (pDocNode->FindRect(P_C_NODE_FRAME,nodeRect) !=  B_OK)
 	{
 		int32	left, top, right, bottom;
 		if (level == 0)
@@ -414,7 +414,7 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		right	= left + NODE_WIDTH;
 		bottom	= top + NODE_HEIGHT;
 		nodeRect->Set(left,top, right, bottom);
-		pDocNode->AddRect("Node::frame",*nodeRect);
+		pDocNode->AddRect(P_C_NODE_FRAME,*nodeRect);
 	}
 	nodeS->AddMessage("node",pDocNode);
 }
@@ -424,25 +424,25 @@ status_t Converter::CreateConnection(BMessage *container,TiXmlElement *start,TiX
 	BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
 	BMessage	*data	= new BMessage();
 	char	*idFrom = (char*)start->Attribute("ID");
-	connection->AddPointer("Node::from",(void *)GetID(idFrom));
+	connection->AddPointer(P_C_NODE_CONNECTION_FROM,(void *)GetID(idFrom));
 	char	*idTo;
 	const char	*value= end->Value();
 	int32	found	= strcmp(end->Value(),"node");
 	if (found == 0)
 	{
 		idTo	=  (char*)end->Attribute("ID");
-		data->AddString("Name","Unnamed");
+		data->AddString(P_C_NODE_NAME,"Unnamed");
 	}
 	else
 	{
 		idTo	= (char*)end->Attribute("DESTINATION");
 		if (end->Attribute("TEXT"))
-			data->AddString("Name",end->Attribute("TEXT"));
+			data->AddString(P_C_NODE_NAME,end->Attribute("TEXT"));
 		else
-			data->AddString("Name","Unnamed");
+			data->AddString(P_C_NODE_NAME,"Unnamed");
 	}
-	connection->AddPointer("Node::to",(void *)GetID(idTo));
-	connection->AddMessage("Node::Data",data);
+	connection->AddPointer(P_C_NODE_CONNECTION_TO,(void *)GetID(idTo));
+	connection->AddMessage(P_C_NODE_DATA,data);
 	container->AddMessage("nodes", connection);
 }
 

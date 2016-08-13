@@ -17,7 +17,7 @@ void Group::Undo(PDocument *doc,BMessage *undo) {
 	BList			*allNodes			= doc->GetAllNodes();
 	if ( (undo->FindPointer("node",i,(void **)&node) == B_OK) && (node) ) {
 		allNodes->RemoveItem(node);
-		if ( (node->FindPointer("Node::allNodes",(void **)&subList) == B_OK) && (subList) ) {
+		if ( (node->FindPointer(P_C_NODE_ALLNODES,(void **)&subList) == B_OK) && (subList) ) {
 			while (subList->CountItems()>0) {
 				subNode	= (BMessage *)subList->RemoveItem((int32)0);
 				allNodes->AddItem(subNode);
@@ -25,7 +25,7 @@ void Group::Undo(PDocument *doc,BMessage *undo) {
 			}
 		}
 
-		if ((node->FindPointer("Node::allConnections",(void **)&subList) == B_OK) && (subList))	{
+		if ((node->FindPointer(P_C_NODE_ALLCONNECTIONS,(void **)&subList) == B_OK) && (subList))	{
 			while (subList->CountItems()>0) {
 				subNode	= (BMessage *)subList->RemoveItem((int32)0);
 				changed->insert(subNode);
@@ -74,22 +74,22 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings) {
 			if (!allNodes->HasItem(node))
 				allNodes->AddItem(node);
 			//try to find the Lists for the Nodes where the grouped Node should go in
-			if (node->FindPointer("Node::allNodes",(void **)&gAllNodes) != B_OK){
+			if (node->FindPointer(P_C_NODE_ALLNODES,(void **)&gAllNodes) != B_OK){
 				gAllNodes = new BList();
-				node->AddPointer("Node::allNodes", gAllNodes);
+				node->AddPointer(P_C_NODE_ALLNODES, gAllNodes);
 			}
 			//all selectetd 
 			for (i=0;i<selected->CountItems();i++) {
 				groupedNode = (BMessage *)selected->ItemAt(i);
 				if ((groupedNode != NULL) && ( (groupedNode->what == P_C_CLASS_TYPE) || (groupedNode->what == P_C_GROUP_TYPE)) ) {
-					if (groupedNode->FindPointer("Node::parent",(void **)&oldParentNode) != B_OK) {
-						groupedNode->AddPointer("Node::parent",node);
+					if (groupedNode->FindPointer(P_C_NODE_PARENT,(void **)&oldParentNode) != B_OK) {
+						groupedNode->AddPointer(P_C_NODE_PARENT,node);
 						gAllNodes->AddItem(groupedNode);					
 						//calculate the groupFrame
 						if (!groupFrame.IsValid())
-							groupedNode->FindRect("Node::frame",&groupFrame);
+							groupedNode->FindRect(P_C_NODE_FRAME,&groupFrame);
 						else {
-							groupedNode->FindRect("Node::frame",&groupedNodeFrame);
+							groupedNode->FindRect(P_C_NODE_FRAME,&groupedNodeFrame);
 							groupFrame = groupFrame | groupedNodeFrame;
 						}
 						//add this to the changed List
@@ -100,10 +100,10 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings) {
 			if (groupedNodeFrame.IsValid()) {
 				groupFrame.InsetBy(-5,-5);
 				groupFrame.top = groupFrame.top-15;
-				node->ReplaceRect("Node::frame",groupFrame);
+				node->ReplaceRect(P_C_NODE_FRAME,groupFrame);
 			}
 			else
-			    node->FindRect("Node::frame",&groupFrame);
+			    node->FindRect(P_C_NODE_FRAME,&groupFrame);
 			if (groupFrame.IsValid()) {
 				BRect	docRect			= doc->Bounds();
 				if (groupFrame.bottom >= docRect.Height())

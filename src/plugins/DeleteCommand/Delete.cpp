@@ -52,7 +52,7 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings) {
 		connections->RemoveItem(node);
 		changed->insert(node);
 		undoMessage->AddPointer("node",node);
-		if (node->FindPointer("Node::outgoing",(void **)&outgoing) == B_OK) {
+		if (node->FindPointer(P_C_NODE_OUTGOING,(void **)&outgoing) == B_OK) {
 			for (i=0;i<outgoing->CountItems();i++) {
 				connection= (BMessage *)outgoing->ItemAt(i);
 				connections->RemoveItem(connection);
@@ -60,7 +60,7 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings) {
 				undoMessage->AddPointer("node",connection);
 			}
 		}
-		if (node->FindPointer("Node::incoming",(void **)&incoming) == B_OK) {
+		if (node->FindPointer(P_C_NODE_INCOMING,(void **)&incoming) == B_OK) {
 			for (i=0;i<incoming->CountItems();i++) {
 				connection= (BMessage *)incoming->ItemAt(i);
 				connections->RemoveItem(connection);
@@ -70,7 +70,7 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings) {
 		}
 		//** find all NOdes wich belong to a group and delete them - korrekt the undopart??
 		if  (node->what == P_C_GROUP_TYPE){
-			if (node->FindPointer("Node::allNodes", (void **)&gallNodes) == B_OK)
+			if (node->FindPointer(P_C_NODE_ALLNODES, (void **)&gallNodes) == B_OK)
 				for (i=0; i< gallNodes->CountItems(); i++){
 					allNodes->RemoveItem(gallNodes->ItemAt(i));
 					connections->RemoveItem(gallNodes->ItemAt(i));
@@ -79,8 +79,8 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings) {
 					//***somehow store the grouping...
 				}
 		}
-		if (node->FindPointer("Parent",(void **)&parent) != B_OK && parent != NULL) {
-			if (parent->FindPointer("Node::allNodes", (void **)&gallNodes) == B_OK && gallNodes != NULL){
+		if (node->FindPointer(P_C_NODE_PARENT,(void **)&parent) != B_OK && parent != NULL) {
+			if (parent->FindPointer(P_C_NODE_ALLNODES, (void **)&gallNodes) == B_OK && gallNodes != NULL){
 				gallNodes->RemoveItem(node);
 				changed->insert(parent);
 				//** do the undopart

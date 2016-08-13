@@ -5,6 +5,7 @@
  */
 #include "PCommand.h"
 #include "PDocument.h"
+#include "ProjectConceptorDefs.h"
 
 class Move : public PCommand
 {

@@ -46,18 +46,18 @@ void ClassRenderer::Init()
 
 	editMessage->AddString("Command::Name","ChangeValue");
 	BMessage	*valueContainer	= new BMessage();
-	valueContainer->AddString("name","Name");
-	valueContainer->AddString("subgroup","Node::Data");
+	valueContainer->AddString("name",P_C_NODE_NAME);
+	valueContainer->AddString("subgroup",P_C_NODE_DATA);
 	valueContainer->AddInt32("type",B_STRING_TYPE);
 	editMessage->AddMessage("valueContainer",valueContainer);
 	name						= new StringRenderer(editor,"",BRect(0,0,100,100), editMessage);
 	err 						= container->FindPointer("ProjectConceptor::doc",(void **)&doc);
 	sentTo						= new BMessenger(NULL,doc);
-	if (container->FindFloat("Node::xRadius",&xRadius) != B_OK)
-		container->AddFloat("Node::xRadius",7.0);
-	if (container->FindFloat("Node::yRadius",&yRadius) != B_OK)
-		container->AddFloat("Node::yRadius",7.0);
-	container->FindPointer("Node::parent", (void **)&parentNode);
+	if (container->FindFloat(P_C_NODE_X_RADIUS,&xRadius) != B_OK)
+		container->AddFloat(P_C_NODE_X_RADIUS,7.0);
+	if (container->FindFloat(P_C_NODE_Y_RADIUS,&yRadius) != B_OK)
+		container->AddFloat(P_C_NODE_Y_RADIUS,7.0);
+	container->FindPointer(P_C_NODE_PARENT, (void **)&parentNode);
 
 }
 
@@ -178,8 +178,8 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
 		else {
 			// make connecting Stuff
 			BMessage *connecter=new BMessage(G_E_CONNECTING);
-			connecter->AddPoint("Node::from",*startMouseDown);
-			connecter->AddPoint("Node::to",pt);
+			connecter->AddPoint(P_C_NODE_CONNECTION_FROM,*startMouseDown);
+			connecter->AddPoint(P_C_NODE_CONNECTION_TO,pt);
 			(new BMessenger((BView *)editor))->SendMessage(connecter);
 		}
 	}
@@ -228,8 +228,8 @@ void ClassRenderer::MouseUp(BPoint where) {
 		}
 		else {
 			BMessage *connecter=new BMessage(G_E_CONNECTED);
-			connecter->AddPointer("Node::from",container);
-			connecter->AddPoint("Node::to",where);
+			connecter->AddPointer(P_C_NODE_CONNECTION_FROM,container);
+			connecter->AddPoint(P_C_NODE_CONNECTION_TO,where);
 			(new BMessenger((BView *)editor))->SendMessage(connecter);
 		}
 		if (startMouseDown) delete startMouseDown;
@@ -321,23 +321,23 @@ void ClassRenderer::ValueChanged() {
 	uint32		type			= B_ANY_TYPE;
 	int32		count			= 0;
 
-	container->FindRect("Node::frame",&frame);
-	container->FindBool("Node::selected",&selected);
-	container->FindFloat("Node::xRadius",&xRadius);
-	container->FindFloat("Node::yRadius",&yRadius);
-	if (container->FindMessage("Node::Pattern",pattern) != B_OK) {
-		container->AddMessage("Node::Pattern",editor->GetStandartPattern());
+	container->FindRect(P_C_NODE_FRAME,&frame);
+	container->FindBool(P_C_NODE_SELECTED,&selected);
+	container->FindFloat(P_C_NODE_X_RADIUS,&xRadius);
+	container->FindFloat(P_C_NODE_Y_RADIUS,&yRadius);
+	if (container->FindMessage(P_C_NODE_PATTERN,pattern) != B_OK) {
+		container->AddMessage(P_C_NODE_PATTERN,editor->GetStandartPattern());
 		pattern = editor->GetStandartPattern();
 	}
-	if (container->FindMessage("Node::Font",messageFont) == B_OK) {
+	if (container->FindMessage(P_C_NODE_FONT,messageFont) == B_OK) {
 		delete font;
 		font	= new AFont(messageFont);
 	}
-	container->FindMessage("Node::Data",data);
+	container->FindMessage(P_C_NODE_DATA,data);
 	pattern->FindInt32("FillColor",(int32 *)&fillColor);
 	pattern->FindInt32("BorderColor",(int32 *)&borderColor);
 	pattern->FindFloat("PenSize",&penSize);
-	data->FindString("Name",(const char **)&newName);
+	data->FindString(P_C_NODE_NAME,(const char **)&newName);
 	name->SetString(newName);
 	name->SetFrame(BRect(frame.left+(xRadius/3),frame.top+(yRadius/3),frame.right-(xRadius/3),frame.top+12));
 	
@@ -349,7 +349,7 @@ void ClassRenderer::ValueChanged() {
 		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
 			InsertAttribute(attribName,attribMessage, count-1);
 	}
-	container->FindPointer("Node::parent", (void **)&parentNode);
+	container->FindPointer(P_C_NODE_PARENT, (void **)&parentNode);
 	float yMiddle = frame.top+(frame.Height()/2);
 	float xMiddle = frame.left+(frame.Width()/2);
 	leftConnection.Set(frame.left-circleSize,yMiddle-circleSize,frame.left+circleSize,yMiddle+circleSize);
@@ -437,9 +437,9 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 			BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 			editMessage->AddPointer("node",container);
 			editMessage->AddString("Command::Name","ChangeValue");
-			editMessage->AddString("subgroup","Node::Data");
+			editMessage->AddString("subgroup",P_C_NODE_DATA);
 			editMessage->AddString("name",attribName);
-			attribute->FindString("Name",(const char **)&realName);
+			attribute->FindString(P_C_NODE_NAME,(const char **)&realName);
 			BString		*testString 	= new BString(attribName);
 			Renderer	*testRenderer	= new StringRenderer(editor,"",BRect(frame.left+2,frame.top+10,frame.right-2,frame.bottom-2), editMessage);
 			attributes->insert(pair<BString *,Renderer*>(testString,testRenderer));
@@ -460,7 +460,7 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	editMessage->AddPointer("node",container);
 	editMessage->AddString("Command::Name","ChangeValue");
 	BMessage*	valueContainer	= new BMessage();
-	valueContainer->AddString("subgroup","Node::Data");
+	valueContainer->AddString("subgroup",P_C_NODE_DATA);
 	valueContainer->AddString("subgroup",attribName);
 	editMessage->AddMessage("valueContainer",valueContainer);
 	delete valueContainer;
@@ -468,7 +468,7 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	removeAttribMessage->AddPointer("node",container);
 	removeAttribMessage->AddString("Command::Name","RemoveAttribute");
 	valueContainer	= new BMessage();
-	valueContainer->AddString("subgroup","Node::Data");
+	valueContainer->AddString("subgroup",P_C_NODE_DATA);
 	valueContainer->AddString("name",attribName);
 	valueContainer->AddInt32("index",count);
 	removeAttribMessage->AddMessage("valueContainer",valueContainer);
@@ -483,7 +483,7 @@ void ClassRenderer::AdjustParents(BMessage* theParent, BMessage *command) {
 
 		//run through all Parents until we find the "Masterparent"
 		while (tmpParent) {
-			tmpParent->FindRect("Node::frame",&parentRect);
+			tmpParent->FindRect(P_C_NODE_FRAME,&parentRect);
 			GroupRenderer	*parent	= NULL;
 			if (tmpParent->FindPointer(editor->RenderString(), (void **)&parent) == B_OK) {
 				if (parent->Frame() != parentRect) {
@@ -492,13 +492,13 @@ void ClassRenderer::AdjustParents(BMessage* theParent, BMessage *command) {
 					changeValue->AddString("Command::Name","ChangeValue");
 					changeValue->AddPointer("node",tmpParent);
 					valueContainer->AddInt32("type",B_RECT_TYPE);
-					valueContainer->AddString("name", "Node::frame" );
+					valueContainer->AddString("name", P_C_NODE_FRAME );
 					valueContainer->AddRect("newValue", parent->Frame());
 					changeValue->AddMessage("valueContainer",valueContainer);
 					command->AddMessage("PCommand::subPCommand",changeValue);
 				}
 			}
-			tmpParent->FindPointer("Node::parent", (void **)&tmpParent);
+			tmpParent->FindPointer(P_C_NODE_PARENT, (void **)&tmpParent);
 		}
 	}
 }

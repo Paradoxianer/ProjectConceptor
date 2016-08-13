@@ -38,9 +38,9 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 		}
 		for (i=0;i<allConnections->CountItems();i++ ) {
 			node = (BMessage *)allConnections->ItemAt(i);
-			if ( (node->FindPointer("Node::from",(void **)&from) == B_OK) &&
-				 (node->FindPointer("Node::to",(void **)&to) == B_OK) ) {
-				if ((from->FindBool("Node::selected",&fselect)==B_OK) && (to->FindBool("Node::selected",&tselect) == B_OK) ) {
+			if ( (node->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&from) == B_OK) &&
+				 (node->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&to) == B_OK) ) {
+				if ((from->FindBool(P_C_NODE_SELECTED,&fselect)==B_OK) && (to->FindBool(P_C_NODE_SELECTED,&tselect) == B_OK) ) {
 					if (fselect && tselect)
 						copyMessage->AddMessage("node",indexer->IndexConnection(node,true));
 					else if (fselect || tselect)
