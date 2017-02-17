@@ -1,0 +1,7 @@
+[submodule "src/app/Tools/FontPanel"] 
+  path = src/app/Tools/FontPanel
+  url = https://github.com/Paradoxianer/FontPanel
+
+[submodule "src/app/Tools/Settings"] 
+  path = src/app/Tools/Settings 
+  url = https://github.com/Paradoxianer/Settings
