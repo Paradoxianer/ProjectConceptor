@@ -28,13 +28,15 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
 SRCS= 	AFont.cpp \
-		FontPanel.cpp \
-		FontView.cpp \
+		
 		PCSavePanel.cpp \
 		InputRequestView.cpp \
  		InputRequest.cpp  \
  		ShortCutFilter.cpp \
 		TextViewCompleter.cpp  \
+		FontPanel/FontPanel.cpp \
+		FontPanel/FontView.cpp \
+		FontPanel/FontWindow.cpp
 #		tinyxml/tinystr.cpp \
 # 		tinyxml/tinyxml.cpp  \
 # 		tinyxml/tinyxmlerror.cpp \
