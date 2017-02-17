@@ -61,8 +61,9 @@ SRCS= 	About/AboutWindow.cpp \
 		ToolBar/FloatToolItem.cpp \
 		ToolBar/PatternToolItem.cpp \
 		Tools/AFont.cpp \
-		Tools/FontPanel.cpp \
-		Tools/FontView.cpp \
+		Tools/FontPanel/FontPanel.cpp \
+		Tools/FontPanel/FontView.cpp \
+		Tools/FontPanel/FontWindow.cpp \
 		Tools/PCSavePanel.cpp \
 		Tools/Indexer.cpp \
 		Tools/InputRequestView.cpp \
@@ -105,7 +106,9 @@ LIBPATHS=
 #	additional paths to look for system headers
 #	thes use the form: #include <header>
 #	source file directories are NOT auto-included here
-SYSTEM_INCLUDE_PATHS = /boot/system/develop/headers/private/support/
+SYSTEM_INCLUDE_PATHS =	/boot/system/develop/headers/private/support \
+						/boot/system/develop/headers/private/shared \
+						/boot/system/develop/headers/private/interface
 
 #	additional paths to look for local headers
 #	thes use the form: #include "header"
