@@ -62,6 +62,7 @@ SRCS= 	About/AboutWindow.cpp \
 		ToolBar/PatternToolItem.cpp \
 		Tools/AFont.cpp \
 		Tools/FontPanel/FontPanel.cpp \
+		Tools/FontPanel/FontPreview.cpp \
 		Tools/FontPanel/FontView.cpp \
 		Tools/FontPanel/FontWindow.cpp \
 		Tools/PCSavePanel.cpp \
