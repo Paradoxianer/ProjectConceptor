@@ -5,7 +5,7 @@
 #include "PDocument.h"
 
 
-#include <ColumnListView.h>
+#include <private/interface/ColumnListView.h>
 #include <app/Message.h>
 #include <interface/Window.h>
 #include <interface/TabView.h>
