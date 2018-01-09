@@ -64,21 +64,23 @@ SRCS= 	About/AboutWindow.cpp \
 		Tools/PCSavePanel.cpp \
 		Tools/Indexer.cpp \
 		Tools/InputRequestView.cpp \
- 		Tools/InputRequest.cpp  \
+ 		Tools/InputRequest.cpp \
  		Tools/MessageXmlReader.cpp \
 		Tools/MessageXmlWriter.cpp \
 		Tools/ShortCutFilter.cpp \
-		Tools/TextViewCompleter.cpp  \
+		Tools/TextViewCompleter.cpp \
 		Tools/tinyxml/tinystr.cpp \
- 		Tools/tinyxml/tinyxml.cpp  \
+ 		Tools/tinyxml/tinyxml.cpp \
  		Tools/tinyxml/tinyxmlerror.cpp \
 		Tools/tinyxml/tinyxmlparser.cpp
 
+#	Specify the resource definition files to use. Full or relative paths can be
+#	used.
+RDEFS= ProjectConceptor.rdef Tools/InputRequest.rdef
 
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.
-RSRCS= 	ProjectConceptor.rsrc \
-		Tools/InputRequest.rsrc
+RSRCS= 
 
 #	specify additional libraries to link against
 #	there are two acceptable forms of library specifications
