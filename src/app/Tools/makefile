@@ -53,11 +53,14 @@ SRCS= 	AFont.cpp \
 #		ToolBar/FloatToolItem.cpp \
 #		ToolBar/PatternToolItem.cpp \
 #		Indexer.cpp \
-		
+
+#	Specify the resource definition files to use. Full or relative paths can be
+#	used.
+RDEFS= InputRequest.rdef
 
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.
-RSRCS= 	InputRequest.rsrc
+RSRCS= 
 
 #	specify additional libraries to link against
 #	there are two acceptable forms of library specifications

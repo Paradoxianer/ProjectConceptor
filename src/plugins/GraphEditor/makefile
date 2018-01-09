@@ -27,19 +27,23 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
 #	if two source files with the same name (source.c or source.cpp)
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
-SRCS= 	AttributRenderer.cpp				\
-		BoolRenderer.cpp				\
-		ClassRenderer.cpp				\
-		ConnectionRenderer.cpp			\
-		GraphEditor.cpp					\
-		GraphEditorPlugin.cpp				\
-		GroupRenderer.cpp				\
-		StringRenderer.cpp				\
-		TextEditorControl.cpp				
-		
+SRCS=	AttributRenderer.cpp	\
+		BoolRenderer.cpp		\
+		ClassRenderer.cpp		\
+		ConnectionRenderer.cpp	\
+		GraphEditor.cpp			\
+		GraphEditorPlugin.cpp	\
+		GroupRenderer.cpp		\
+		StringRenderer.cpp		\
+		TextEditorControl.cpp
+
+#	Specify the resource definition files to use. Full or relative paths can be
+#	used.
+RDEFS= GraphEditor.rdef
+
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.
-RSRCS= GraphEditor.rsrc
+RSRCS= 
 
 #	specify additional libraries to link against
 #	there are two acceptable forms of library specifications
