@@ -69,7 +69,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 	const	translation_format	*iFormats;
 	translation_format			*allFormats			= NULL;
 	BMessage					*message			= NULL;
-	BMenu						*menu				= new BMenu(B_TRANSLATE("Fileformat") );
+	BMenu						*menu				= new BMenu(B_TRANSLATE("File format") );
 	BMenuItem					*item				= NULL;
 	roster->GetAllTranslators(&translators, &num_translators);
 	allFormats	=	new translation_format[num_translators];

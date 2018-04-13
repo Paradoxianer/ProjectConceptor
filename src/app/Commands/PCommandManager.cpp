@@ -141,7 +141,7 @@ void PCommandManager::StartMacro(void) {
 		macroIndexer	= new Indexer(doc);
 	}
 	else {
-		int32 choice	= (new BAlert(B_TRANSLATE("Error!"),B_TRANSLATE("Macro recording already started!"),B_TRANSLATE("Restart recording"),B_TRANSLATE("Contiune recording"),NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_STOP_ALERT))->Go();
+		int32 choice	= (new BAlert(B_TRANSLATE("Error!"),B_TRANSLATE("Macro recording already started!"),B_TRANSLATE("Restart recording"),B_TRANSLATE("Continue recording"),NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_STOP_ALERT))->Go();
 		if (choice == 0) {
 			delete macroIndexer;
 			macroIndexer	= new Indexer(doc);
@@ -154,7 +154,7 @@ void PCommandManager::StartMacro(void) {
 
 void PCommandManager::StopMacro() {
 	TRACE();
-	InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input macroname"),B_TRANSLATE("Name"), B_TRANSLATE("Macro"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
+	InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input macro name"),B_TRANSLATE("Name"), B_TRANSLATE("Macro"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
 	char			*input		= NULL;
 	char			*inputstr	= NULL;
 	if  (recording)	{
