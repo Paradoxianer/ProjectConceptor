@@ -4,7 +4,6 @@ plugins = \
 	CopyCommand \
 	DeleteCommand \
 	FindCommand \
-	FreeMindTranslator \
 	GraphEditor \
 	GroupCommand \
 	InsertCommand \
@@ -13,8 +12,7 @@ plugins = \
 	PasteCommand \
 	RemoveAttributeCommand \
 	ResizeCommand \
-	SelectCommand \
-	StandardTranslator
+	SelectCommand 
 
 
 default:
