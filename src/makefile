@@ -96,41 +96,58 @@ export LOCALES = en es de
 app: gitupdate pkgupdate app/makefile FORCE
 	cd app && make
 
-plugins: plugins/makefile FORCE
-	cd plugins && make
-
 app_clean:
 	cd app && make clean
-
-plugins_clean:
-	cd plugins && make clean
 
 app_install: app/makefile FORCE
 	cd app && make install
 
-plugins_install: plugins/makefile FORCE
-	cd plugins && make install
-
 app_catkeys: app/makefile FORCE
 	cd app && make catkeys
+
+app_bindcat: app/makefile FORCE
+	cd app && make bindcatalogs
+
+
+plugins: plugins/makefile FORCE
+	cd plugins && make
+
+plugins_clean:
+	cd plugins && make clean
+
+plugins_install: plugins/makefile FORCE
+	cd plugins && make install
 
 plugins_catkeys: plugins/makefile FORCE
 	cd plugins && make catkeys
 	
-app_bindcat: app/makefile FORCE
-	cd app && make bindcatalogs
-
 plugins_bindcat: plugins/makefile FORCE
 	cd plugins && make bindcatalogs
 
 
-default: app plugins
+translators: translators/makefile FORCE
+	cd translators && make
 
-clean: app_clean plugins_clean
+translators_clean:
+	cd translators && make clean
 
-catkeys: app_catkeys plugins_catkeys
+translators_install: translators/makefile FORCE
+	cd translators && make install
 
-bindcatalogs: app_bindcat plugins_bindcat
+translators_catkeys: translators/makefile FORCE
+	cd translators && make catkeys
+	
+translators_bindcat: translators/makefile FORCE
+	cd translators && make bindcatalogs
+
+
+default: app plugins translators
+
+clean: app_clean plugins_clean translators_clean
+
+catkeys: app_catkeys plugins_catkeys translators_clean
+
+bindcatalogs: app_bindcat plugins_bindcat translators_clean
 
 install:: $(NAME)
 	@echo "making a package"
@@ -139,7 +156,6 @@ install:: $(NAME)
 	@echo "installing package"
 	@cp ProjectConceptor-$(shell getarch)-$(if $(DEBUGGER),debug-$(GIT_REV)).hpkg $(INSTALL_DIR)
 	@echo "Installation done."
-
 
 
 FORCE:
