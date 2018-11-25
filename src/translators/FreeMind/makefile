@@ -95,7 +95,7 @@ LOCAL_INCLUDE_PATHS =	../../include  \
 #DEBUGGER = TRUE
 
 #	specify additional compiler flags for all files
-COMPILER_FLAGS =
+COMPILER_FLAGS = -fpermissive
 
 #	specify additional linker flags
 LINKER_FLAGS =
