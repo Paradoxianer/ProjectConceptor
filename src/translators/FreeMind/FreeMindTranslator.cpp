@@ -169,8 +169,10 @@ status_t Converter::ConvertPDoc2FreeMind()
 
 		tmpMessage=GuessStartNode();
 	//	tmpMessage = nodes.begin()->second;
-		freeMap.InsertEndChild(ProcessNode(tmpMessage));
-		doc.InsertEndChild(freeMap);
+		if (tmpMessage != NULL) {
+			freeMap.InsertEndChild(ProcessNode(tmpMessage));
+			doc.InsertEndChild(freeMap);
+		}
 		TiXmlPrinter	printer;
 //		printer.SetStreamPrinting();
 //		printer.SetLineBreak("\n");
@@ -347,8 +349,11 @@ BMessage* Converter::GuessStartNode(void)
 		}
 	}
 	iter = nodes.find((int32)nodeID);
+	//we didnt find a node while searching through the connections...
+	if ((*iter).second == NULL){
+		iter=nodes.begin();
+	}
 	return (*iter).second;
-
 }
 
 status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent,int32 level, int32 thisLine)
