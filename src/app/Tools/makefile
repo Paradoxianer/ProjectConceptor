@@ -33,10 +33,9 @@ SRCS = 	AFont.cpp \
  		InputRequest.cpp  \
  		ShortCutFilter.cpp \
 		TextViewCompleter.cpp  \
+		FontPanel/FontListView.cpp \
 		FontPanel/FontPanel.cpp \
-		FontPanel/FontView.cpp \
-		FontPanel/FontWindow.cpp
-
+		FontPanel/FontView.cpp  
 
 
 # ToolBar/BaseItem.cpp \
@@ -83,7 +82,7 @@ LIBPATHS=
 #	additional paths to look for system headers
 #	thes use the form: #include <header>
 #	source file directories are NOT auto-included here
-SYSTEM_INCLUDE_PATHS = /boot/system/develop/headers/private/support/
+SYSTEM_INCLUDE_PATHS = /boot/system/develop/headers/private/support/ /boot/system/develop/headers/private/interface
 
 #	additional paths to look for local headers
 #	thes use the form: #include "header"
