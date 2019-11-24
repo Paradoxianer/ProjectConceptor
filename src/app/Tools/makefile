@@ -17,7 +17,7 @@ NAME= libProjectConceptor.so
 TYPE= SHARED
 
 # 	If you plan to use localization, specify the application's MIME signature.
-APP_MIME_SIG = application/x-vnd.ProjectConceptor
+# APP_MIME_SIG = application/x-vnd.ProjectConceptor
 
 #	specify the source files to use
 #	full paths or paths relative to the makefile can be included
@@ -27,8 +27,7 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor
 #	if two source files with the same name (source.c or source.cpp)
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
-SRCS= 	AFont.cpp \
-		
+SRCS = 	AFont.cpp \
 		PCSavePanel.cpp \
 		InputRequestView.cpp \
  		InputRequest.cpp  \
@@ -37,10 +36,7 @@ SRCS= 	AFont.cpp \
 		FontPanel/FontPanel.cpp \
 		FontPanel/FontView.cpp \
 		FontPanel/FontWindow.cpp
-#		tinyxml/tinystr.cpp \
-# 		tinyxml/tinyxml.cpp  \
-# 		tinyxml/tinyxmlerror.cpp \
-#		tinyxml/tinyxmlparser.cpp*/
+
 
 
 # ToolBar/BaseItem.cpp \
