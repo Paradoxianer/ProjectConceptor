@@ -1,7 +1,7 @@
 #ifndef P_C_SAVE_PANEL_H
 #define P_C_SAVE_PANEL_H
 
-#include "PluginManager.h"
+//#include "PluginManager.h"
 
 #include <app/Application.h>
 #include <interface/Menu.h>

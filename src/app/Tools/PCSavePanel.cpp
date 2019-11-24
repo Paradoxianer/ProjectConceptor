@@ -2,7 +2,8 @@
 #include <Catalog.h>
 
 #include "PCSavePanel.h"
-#include "BasePlugin.h"
+#include "ProjectConceptorDefs.h"
+//#include "BasePlugin.h"
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "SavePanel"
