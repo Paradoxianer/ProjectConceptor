@@ -151,6 +151,12 @@ void PDocument::MessageReceived(BMessage* message) {
 			commandManager->PlayMacro(message);
 			break;
 		}
+		case MENU_MACRO_SAVE:{
+			break;
+		}
+		case MENU_MACRO_OPEN:{
+			break;
+		}
 		case  B_SAVE_REQUESTED: {
 				BMessage	*saveSettings	= new BMessage();
 				message->FindMessage("saveSettings",saveSettings);
