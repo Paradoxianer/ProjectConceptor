@@ -49,8 +49,6 @@ SRCS= 	About/AboutWindow.cpp \
 		Document/PEditorManager.cpp \
 		Document/PWindow.cpp \
 		Document/HelpManager.cpp \
-		plugins/BasePlugin.cpp \
-		plugins/PluginManager.cpp \
 		ToolBar/BaseItem.cpp \
 		ToolBar/Mover.cpp \
 		ToolBar/ToolBar.cpp \
@@ -69,10 +67,8 @@ SRCS= 	About/AboutWindow.cpp \
 		Tools/MessageXmlWriter.cpp \
 		Tools/ShortCutFilter.cpp \
 		Tools/TextViewCompleter.cpp \
-		Tools/tinyxml/tinystr.cpp \
- 		Tools/tinyxml/tinyxml.cpp \
- 		Tools/tinyxml/tinyxmlerror.cpp \
-		Tools/tinyxml/tinyxmlparser.cpp
+		Tools/plugins/BasePlugin.cpp \
+		Tools/plugins/PluginManager.cpp
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
@@ -92,7 +88,7 @@ RSRCS=
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be root translation tracker localestub $(STDCPPLIBS)
+LIBS= be root translation tracker localestub $(STDCPPLIBS) tinyxml
 
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
