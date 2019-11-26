@@ -259,8 +259,10 @@ TiXmlElement  MessageXmlWriter::ProcessMessage(const char* bName, BMessage *msg)
 					xmlSubNode=TiXmlElement("Data");
 		        	xmlSubNode.SetAttribute("name",name);
 					if (msg->FindPointer(name, q, &tmpPointer) == B_OK){
+						char *str = new char[64];
+						sprintf(str, "%p", *(void**)tmpPointer);
 						xmlSubNode.SetAttribute("type","B_POINTER_TYPE");
-						xmlSubNode.SetAttribute("value",(int32)tmpPointer);
+						xmlSubNode.SetAttribute("value",str);
 					}
 					xmlNode.InsertEndChild(xmlSubNode);
 				}

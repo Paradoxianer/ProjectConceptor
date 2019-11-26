@@ -187,7 +187,7 @@ BMessage* Indexer::RegisterDeIndexNode(BMessage *node)
 	void		*tmpPointer			= NULL;
 	node->FindPointer("this",(void **)&tmpPointer);
 	node->RemoveName("this");
-	sorter[(int32)tmpPointer] = node;
+	sorter[tmpPointer] = node;
 	return node;
 }
 
@@ -199,12 +199,12 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 	BList		*allConnectionsList	= new BList();
 	void		*tmpPointer			= NULL;
 	int32		i					= 0;
-	map<int32,BMessage*>::iterator	nodeIndex;
+	map<void*,BMessage*>::iterator	nodeIndex;
 	if (node->FindPointer(P_C_NODE_ALLNODES,&tmpPointer) == B_OK)
 			node->RemoveName(P_C_NODE_ALLNODES);
 	
 	while (node->FindPointer("allNodesList",i,&subContainerEntry) == B_OK) {
-		nodeIndex = sorter.find((int32)subContainerEntry);
+		nodeIndex = sorter.find(subContainerEntry);
 		if (nodeIndex != sorter.end()){
 			allNodesList->AddItem(nodeIndex->second);
 			//delete just this entry from the Message
@@ -215,7 +215,7 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 			node->AddPointer(P_C_NODE_ALLNODES,allNodesList);
 	}
 	if (node->FindPointer(P_C_NODE_PARENT,(void **)&tmpPointer) == B_OK) {
-		nodeIndex = sorter.find((int32)tmpPointer);
+		nodeIndex = sorter.find(tmpPointer);
 		if (nodeIndex != sorter.end()) {
 			node->RemoveName(P_C_NODE_PARENT);
 			node->AddPointer(P_C_NODE_PARENT,nodeIndex->second);
@@ -276,15 +276,15 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 		}
 
 //		if we cant find the right Pointer then add the old one
-		map<int32,BMessage*>::iterator indexFrom;
-		indexFrom=sorter.find((int32)fromPointer);
+		map<void*,BMessage*>::iterator indexFrom;
+		indexFrom=sorter.find(fromPointer);
 		if (indexFrom != sorter.end())
 			connection->AddPointer(P_C_NODE_CONNECTION_FROM,indexFrom->second);
 		else
 			connection->AddPointer(P_C_NODE_CONNECTION_FROM,fromPointer);
 //		if we cant find the right Pointer then add the old one
-		map<int32,BMessage*>::iterator indexTo;
-		indexTo=sorter.find((int32)toPointer);
+		map<void*,BMessage*>::iterator indexTo;
+		indexTo=sorter.find(toPointer);
 		if (indexTo != sorter.end())
 			connection->AddPointer(P_C_NODE_CONNECTION_TO,indexTo->second);
 		else
@@ -292,7 +292,7 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 	}
 	connection->FindPointer("this",(void **)&tmpPointer);
 	connection->RemoveName("this");
-	sorter[(int32)tmpPointer]=connection;
+	sorter[tmpPointer]=connection;
 	return connection;
 }
 
@@ -336,7 +336,7 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 	//replace the old Pointer with the new ones
 	while (command->FindPointer("node",i,(void **)&node) == B_OK)
 	{
-		command->ReplacePointer("node",i,sorter[(int32)node]);
+		command->ReplacePointer("node",i,sorter[node]);
 		i++;
 	}
 	return command;
@@ -353,7 +353,7 @@ BMessage* Indexer::DeIndexUndo(BMessage *undo)
 void Indexer::Init(void)
 {
 	TRACE();
-	sorter				= map<int32,BMessage*>();
+	sorter				= map<void* ,BMessage*>();
 	included			= new BList();
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
 }

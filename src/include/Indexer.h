@@ -40,7 +40,7 @@ public:
 //			BMessage*			IndexMacro(BMessage *macro,bool includeNodes=false);
 			BMessage*			IndexMacroCommand(BMessage *macro);
 			BMessage*			IndexCommand(BMessage *command,bool includeNodes=false);	
-			BMessage*			PointerForIndex(int32 index){return sorter[index];};
+			BMessage*			PointerForIndex(void* index){return sorter[index];};
 			
 			BMessage*			RegisterDeIndexNode(BMessage *node);
 
@@ -57,7 +57,7 @@ protected:
 
 			
 			PDocument			*doc;
-			map<int32,BMessage*>	sorter;
+			map<void*,BMessage*>	sorter;
 			BList				*included;
 
 			PluginManager		*pluginManager;

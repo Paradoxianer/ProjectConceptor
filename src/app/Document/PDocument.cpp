@@ -502,7 +502,7 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 				entry.GetRef(entryRef);
 			}
 			else
-				entryRef == NULL;
+				entryRef = NULL;
 		}
 		Unlock();
 	}

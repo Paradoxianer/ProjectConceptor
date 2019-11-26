@@ -80,7 +80,6 @@ BArchivable *PEditorManager::Instantiate(BMessage *archive)
 void PEditorManager::BroadCast(BMessage *message)
 {
 	TRACE();
-//	editors->DoForEach(SendMessage,message);
 	editorMessenger->DoForEach(SendMessage,message);
 }
 void PEditorManager::UnregisterPEditor(PEditor *editor)
@@ -89,7 +88,6 @@ void PEditorManager::UnregisterPEditor(PEditor *editor)
 	int32 index=editors->IndexOf(editor);
 	if (editors->RemoveItem(index))
 	{
-
 		editorMessenger->RemoveItem(index);
 		editor->SetManager(NULL);
 	}
@@ -117,7 +115,7 @@ status_t PEditorManager::RegisterPEditor(PEditor *editor)
 				}
 				BMessenger *messenger =			new BMessenger(editor->GetHandler(),NULL,&err);
 				if (err!=B_OK)
-				PRINT(("ERROR\t new BMessenger %s\n",strerror(err)));
+					PRINT(("ERROR\t new BMessenger %s\n",strerror(err)));
 				editorMessenger->AddItem(messenger);
 				editor->SetManager(this);
 				BMessage	*configMessage		= editor->GetConfiguration();
@@ -148,19 +146,19 @@ status_t PEditorManager::RegisterPEditor(PEditor *editor)
 PEditor* PEditorManager::GetActivPEditor(void)
 {
 	TRACE();
-	return (PEditor *)editors->ItemAt((int32)activeEditor->LastItem());
+	return (PEditor *)(activeEditor->LastItem());
 }
+
 void PEditorManager::SetActivePEditor(int32 index)
 {
 	TRACE();
-	void *	value	= (void *)index;
-	activeEditor->AddItem(value);
+	activeEditor->AddItem(editors->ItemAt(index));
 }
 
 void PEditorManager::SetInactivePEditor(int32 index)
 {
 	TRACE();
-	activeEditor->RemoveItem((void *)index);
+	activeEditor->RemoveItem(editors->ItemAt(index));
 }
 
 PEditor* PEditorManager::InstantiatePEditor(BMessage *archive)

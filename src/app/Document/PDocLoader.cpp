@@ -96,7 +96,7 @@ BList* PDocLoader::ReIndexSelected(BMessage *selectionMessage)
 
 	while (selectionMessage->FindPointer("node",i,&selectPointer) == B_OK)
 	{
-		newSelection->AddItem(indexer->PointerForIndex((int32)selectPointer));
+		newSelection->AddItem(indexer->PointerForIndex(selectPointer));
 		i++;
 	}
 	return newSelection;
