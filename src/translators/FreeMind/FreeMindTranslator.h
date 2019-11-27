@@ -62,14 +62,14 @@ protected:
 	//used to convert FreeMind 2 PDoc
 	status_t		CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElement *parent, int32 level, int32 line);
 	status_t		CreateConnection(BMessage *connectionS,TiXmlElement *start,TiXmlElement *end);
-	int32			GetID(const char *idString);
+	void*			GetID(const char *idString);
 	int32			GetRGB(const char *rgbString);
 	BPositionIO 	*in;
 	BMessage		*config;
 	BPositionIO		*out;
-	set<int32>		processedIDs;
-	map<int32,BMessage*>	nodes;
-	map<int32,BMessage*>	connections;
+	set<void*>		processedIDs;
+	map<void*,BMessage*>	nodes;
+	map<void*,BMessage*>	connections;
 
 	BMessage		*allConnections;
 	BMessage		*allNodes;
