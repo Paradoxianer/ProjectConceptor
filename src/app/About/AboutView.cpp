@@ -12,6 +12,10 @@
 #include <Rect.h>
 #include <StringView.h>
 #include <Alert.h>
+#include <storage/AppFileInfo.h>
+#include <Application.h>
+#include <Roster.h>
+
 
 #include "AboutView.h"
 #include "AboutGitInfo.h"
@@ -41,14 +45,25 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	fTitleView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	AddChild(fTitleView);
 
-	//CeckString
-	fRevNumb.SetTo(GIT_REV_STR);
+	//Get the App Version String
+	app_info		appInfo;
+	version_info	info;
+	memset(&info, 0, sizeof(version_info));
 
-	if(fRevNumb.Length() == 0)
-	{
-		fRevNumb.SetTo("---");
+	BAppFileInfo appFileInfo;
+	if (be_app->GetAppInfo(&appInfo) == B_OK){
+		BFile file(&appInfo.ref, B_READ_ONLY);
+		if (file.InitCheck() == B_OK) {
+			BAppFileInfo appFileInfo(&file);
+			if (appFileInfo.InitCheck() == B_OK)
+				appFileInfo.GetVersionInfo(&info, B_APP_VERSION_KIND);
+		}
 	}
-
+	char versionString[255];
+	sprintf(versionString,
+		"%" B_PRIu32 ".%" B_PRIu32 ".%" B_PRIu32 "-%" B_PRIu32,
+				info.major, info.middle, info.minor, info.internal);
+	fRevNumb.SetTo(versionString);
 	//String Insert Titel and __DATE__
 	fRevNumb.Insert("revision: ",0);
 	fRevNumb.Insert("    ",fRevNumb.Length());

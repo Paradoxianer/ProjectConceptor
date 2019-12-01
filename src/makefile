@@ -2,26 +2,6 @@ first: default
 
 PLNAME = $(shell uname)
 
-GIT_REV=$(shell git rev-list HEAD --count)
-
-COMMAND = "\#define GIT_REV_STR \"$(GIT_REV)\""
-
-gitupdate:
-	@echo "---------GIT INFO GEN-----------"
-	touch app/About/AboutGitInfo.h
-	rm app/About/AboutGitInfo.h
-	@echo "" >> app/About/AboutGitInfo.h 
-	@echo "#ifndef GIT_INFO_H" >> app/About/AboutGitInfo.h 
-	@echo "#define GIT_INFO_H" >> app/About/AboutGitInfo.h 
-	@echo "" >> app/About/AboutGitInfo.h  
-	@echo "//do not edit this" >> app/About/AboutGitInfo.h
-	@echo $(COMMAND) >> app/About/AboutGitInfo.h
-	@echo "" >> app/About/AboutGitInfo.h 
-	@echo "#endif" >> app/About/AboutGitInfo.h 
-	@echo "UPDATED"
-	@echo "--------------------------------"
-
-
 pkgupdate:
 	@echo "---------PKG INFO GEN-----------"
 	touch .PackageInfo
@@ -93,7 +73,7 @@ export DEBUGGER = TRUE
 # 	placed in the "locales" subdirectory.
 export LOCALES = en es de
 
-app: gitupdate pkgupdate app/makefile FORCE
+app: pkgupdate app/makefile FORCE
 	cd app && make
 
 app_clean:
