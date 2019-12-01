@@ -1,5 +1,23 @@
+resource app_flags B_MULTIPLE_LAUNCH;
 
-resource(1, "New Application Flags") #'APPF' $"00000000";
+resource app_version {
+	major  = 0,
+	middle = 1,
+	minor  = 1,
+
+	variety = B_APPV_ALPHA,
+	internal = 0,
+
+	short_info = "A graph editor",
+	long_info = "App to view, edit and process information which can be represented by a graph structure."
+};
+
+resource app_signature "application/x-vnd.ProjectConceptor";
+
+resource file_types message {
+	"types" = "application/x-vnd.projectconceptor-document",
+	"types" = "application/x-freemind"
+};
 
 resource(1, "document") #'HVIF' array {
 	$"6E636966090401920501020106023E3E0A0000000000003C9DAE494BB249A67D"
@@ -120,8 +138,6 @@ resource mini_icon array {
 	$"9E9E9E9E9E9EFFFFFFDDDDDDDDDDDDFF"
 	$"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 };
-
-resource app_signature "application/x-vnd.ProjectConceptor";
 
 resource(1, "new") #'PNG ' array {
 	$"89504E470D0A1A0A0000000D494844520000001200000012080600000056CE8E"
