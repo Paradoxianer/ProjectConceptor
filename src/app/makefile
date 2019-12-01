@@ -67,12 +67,13 @@ SRCS= 	About/AboutWindow.cpp \
 		Tools/MessageXmlWriter.cpp \
 		Tools/ShortCutFilter.cpp \
 		Tools/TextViewCompleter.cpp \
-		Tools/FontPanel/FontListView.cpp \
-		Tools/FontPanel/FontPanel.cpp \
-		Tools/FontPanel/FontPreview.cpp \
-		Tools/FontPanel/FontView.cpp \
 		Tools/plugins/BasePlugin.cpp \
 		Tools/plugins/PluginManager.cpp
+#		Tools/FontPanel/FontListView.cpp \
+#		Tools/FontPanel/FontPanel.cpp \
+#		Tools/FontPanel/FontPreview.cpp \
+#		Tools/FontPanel/FontView.cpp \
+
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.

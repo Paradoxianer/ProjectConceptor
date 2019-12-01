@@ -16,6 +16,7 @@
 #include "ToolItem.h"
 #include "ToolMenu.h"
 #include "MainView.h"
+//#include "FontPanel.h"
 
 
 
@@ -357,7 +358,7 @@ void PWindow::MakeToolbars()
 
 	tmpBar->AddItem(toolItem);
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"trash");
-	toolItem = new ToolItem("find",tmpBitmap,NULL);
+	toolItem = new ToolItem("trash",tmpBitmap,new BMessage('del'));
 	tmpBar->AddItem(toolItem);
 	tmpBar->AddSeperator();
 	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"font");
@@ -437,6 +438,14 @@ void PWindow::MessageReceived(BMessage *message)
 		case P_C_REMOVE_EDITOR:
 		{
 			RemoveEditor();
+		}
+		break;
+		case 'font':
+		{
+	/*		 FontPanel *fPanel = new FontPanel(FONT_PANEL,be_plain_font, new BString("Timon"),NULL,NULL, false, true, true);
+			 fPanel->SetHideWhenDone(false);
+//			 fPanel->setTarget(doc);
+			 fPanel->Show();*/
 		}
 		default:
 			BWindow::MessageReceived(message);
