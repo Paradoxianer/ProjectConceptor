@@ -35,8 +35,8 @@ SRCS = 	AFont.cpp \
 		TextViewCompleter.cpp  \
 		FontPanel/FontListView.cpp \
 		FontPanel/FontPanel.cpp \
-		FontPanel/FontView.cpp  
-
+		FontPanel/FontView.cpp  \
+		plugins/BasePlugin.cpp
 
 # ToolBar/BaseItem.cpp \
 #		ToolBar/Mover.cpp \
@@ -89,7 +89,6 @@ SYSTEM_INCLUDE_PATHS = /boot/system/develop/headers/private/support/ /boot/syste
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS =	. \
 					../../include \
-#					../../include/tinyxml \
 					../../include/plugins 
 
 #	specify the level of optimization that you desire

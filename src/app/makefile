@@ -67,6 +67,10 @@ SRCS= 	About/AboutWindow.cpp \
 		Tools/MessageXmlWriter.cpp \
 		Tools/ShortCutFilter.cpp \
 		Tools/TextViewCompleter.cpp \
+		Tools/FontPanel/FontListView.cpp \
+		Tools/FontPanel/FontPanel.cpp \
+		Tools/FontPanel/FontPreview.cpp \
+		Tools/FontPanel/FontView.cpp \
 		Tools/plugins/BasePlugin.cpp \
 		Tools/plugins/PluginManager.cpp
 
@@ -110,7 +114,6 @@ SYSTEM_INCLUDE_PATHS =	/boot/system/develop/headers/private/support \
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS =	. \
 					../include \
-					../include/tinyxml \
 					../include/plugins \
 					Commands \
 					Config \
@@ -118,7 +121,8 @@ LOCAL_INCLUDE_PATHS =	. \
 					Document \
 					ToolBar \
 					About \
-					Tools
+					Tools \
+					Tools/FontPanel
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
