@@ -18,7 +18,6 @@
 
 
 #include "AboutView.h"
-#include "AboutGitInfo.h"
 
 AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 {
