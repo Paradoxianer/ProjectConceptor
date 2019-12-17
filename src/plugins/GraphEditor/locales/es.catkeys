@@ -1,12 +1,49 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	1941601976
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	1588829839
+New Tab	ProjectConceptor		Nueva pestaña
+Settings	ProjectConceptor		Configuración
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Cortar
+Save Macro	ProjectConceptor		Guardar Macro
+Replace all	ProjectConceptor		Reemplazar todo
+Paste	ProjectConceptor		Pegar
+Help	ProjectConceptor		Ayuda
+Save as	ProjectConceptor		Guardar como
+Play	ProjectConceptor		Reproducir
+Find & Replace	ProjectConceptor		Buscar & Reemplazar
+New	ProjectConceptor		Nuevo
+Tile Vertical	ProjectConceptor		Mosaico Vertical
+Copy	ProjectConceptor		Copiar
+About	ProjectConceptor		Acerca de
+Find	ProjectConceptor		Buscar
+Stop recording	ProjectConceptor		Detener grabación
+Export	ProjectConceptor		Exportar
+Save	ProjectConceptor		Guardar
+Find next	ProjectConceptor		Buscar siguiente
+Undo	ProjectConceptor		Deshacer
+File	ProjectConceptor		Archivo
+Print	ProjectConceptor		Imprimir
+Open	ProjectConceptor		Abrir
+Window	ProjectConceptor		Ventana
+Replace	ProjectConceptor		Reemplazar
+Edit	ProjectConceptor		Editar
+Tile	ProjectConceptor		Mosaico
+Close	ProjectConceptor		Cerrar
+Redo	ProjectConceptor		Rehacer
+Quit	ProjectConceptor		Salir
+Page setup	ProjectConceptor		Configurar página
+Search	ProjectConceptor		Buscar
+Start recording	ProjectConceptor		Iniciar grabación
+Cascade	ProjectConceptor		Cascada
+Clear	ProjectConceptor		Limpiar
+Select all	ProjectConceptor		Seleccionar todo
 Cancel	GraphEditor		Cancelar
 Scale	GraphEditor		Escala
 Fill	GraphEditor		Rellenar
 Name	GraphEditor		Nombre
-Input attributname	GraphEditor		Ingresar nombre atributo
-OK	GraphEditor		OK
-Pen size	GraphEditor		Tamaño del lapiz
-Node::Pattern	GraphEditor		Node::Pattern
+Input attributname	GraphEditor		Ingrese nombre de atributo
+OK	GraphEditor		Aceptar
+Pen size	GraphEditor		Tamaño de lápiz
+Node::Pattern	GraphEditor		Nodo::Patrón
 Attribut	GraphEditor		Atributo
-Delete	AttributeRenderer		Borrar
 Grid	GraphEditor		Grilla
+Delete	AttributeRenderer		Borrar

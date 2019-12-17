@@ -1,0 +1,108 @@
+1	French	application/x-vnd.ProjectConceptor	2706318720
+New Tab	ProjectConceptor		Nouvel onglet
+Settings	ProjectConceptor		Réglages
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Couper
+Save Macro	ProjectConceptor		Enregistrer la macro
+Replace all	ProjectConceptor		Remplacer tout
+Paste	ProjectConceptor		Coller
+Help	ProjectConceptor		Aide
+Save as	ProjectConceptor		Enregistrer sous
+Play	ProjectConceptor		Lire
+Find & Replace	ProjectConceptor		Chercher & Remplacer
+New	ProjectConceptor		Nouveau ..
+Tile Vertical	ProjectConceptor		Tuile verticale
+Copy	ProjectConceptor		Copier
+About	ProjectConceptor		À propos de
+Find	ProjectConceptor		Chercher
+Stop recording	ProjectConceptor		Stopper l'enregistrement
+Export	ProjectConceptor		Exporter
+Save	ProjectConceptor		Sauvegarder
+Find next	ProjectConceptor		Chercher l'occurence suivante ..
+Undo	ProjectConceptor		Défaire
+File	ProjectConceptor		Fichier
+Print	ProjectConceptor		Imprimer
+Open	ProjectConceptor		Ouvrir
+Window	ProjectConceptor		Fenêtre
+Replace	ProjectConceptor		Remplacer
+Edit	ProjectConceptor		Éditer
+Tile	ProjectConceptor		Tuile
+Close	ProjectConceptor		Fermer
+Redo	ProjectConceptor		Refaire
+Quit	ProjectConceptor		Quitter
+Page setup	ProjectConceptor		Mise en page
+Search	ProjectConceptor		Rechercher
+Start recording	ProjectConceptor		Démarrer l'enregistrement
+Cascade	ProjectConceptor		Cascade
+Clear	ProjectConceptor		Nettoyer
+Select all	ProjectConceptor		Sélectionner tout
+Select all	MainWindow		Sélectionner tout
+Macro	MainWindow		Macro
+Title	MainWindow		Titre
+New	MainWindow		Nouveau .
+Save	MainWindow		Sauvegarder
+Open	MainWindow		Ouvrir
+Stop recording	MainWindow		Stopper l'enregistrement
+Page setup	MainWindow		Mise en page
+Search	MainWindow		Rechercher
+Project settings	MainWindow		Paramètres du projet
+Print	MainWindow		Imprimer
+Window	MainWindow		Fenêtre
+Find next	MainWindow		Chercher l'occurence suivante .
+File	MainWindow		Fichier
+Play	MainWindow		Lire
+Quit	MainWindow		Quitter
+Redo	MainWindow		Refaire
+Paste	MainWindow		Coller
+Edit	MainWindow		Éditer
+Replace	MainWindow		Remplacer
+Title vertical	MainWindow		Titre vertical
+Cascade	MainWindow		Cascade
+Replace & Find	MainWindow		Chercher et Remplacer
+Undo	MainWindow		Défaire
+Find	MainWindow		Chercher
+Copy	MainWindow		Copier
+Close	MainWindow		Fermer
+Help	MainWindow		Aide
+Clear	MainWindow		Nettoyer
+Cut	MainWindow		Couper
+Start recording	MainWindow		Démarrer l'enregistrement
+About	MainWindow		À propos de
+Replace all	MainWindow		Remplacer tout
+Save as	MainWindow		Enregistrer sous
+Settings	SavePanel		Réglages
+Fileformat	SavePanel		Format de fichier
+Save as	SavePanel		Enregistrer sous
+Could not find plugins	SavePanel		Impossible de trouver des greffons
+Error on execution of Command.	CommandManager		Erreur à l'exécution de la commande.
+Coud not find command	CommandManager		Impossible de trouver la commande
+Input macroname	CommandManager		Entrer nom_de_macro
+OK	CommandManager		OK
+Macro recording already started!	CommandManager		Enregistrement de la macro déjà démarré !
+Cancel	CommandManager		Abandon
+Macro	CommandManager		Macro
+Contiune recording	CommandManager		Continuer l'enregistrement
+Restart recording	CommandManager		Redémarrer l'enregistrement
+Name	CommandManager		Nom
+Error!	CommandManager		Erreur !
+Settings	ConfigWindow		Réglages
+FTP Warning	AboutURLView		Alerte par FTP
+Web Browser Warning	AboutURLView		Alerte par navigateur
+Ok	AboutURLView		Ok
+E-mail Warning	AboutURLView		Alerte par courriel
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Il n'y a pas, sur votre machine,  de navigateur qui soit configuré comme le programme par défaut pour visualiser des pages web.
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Il n'y a pas, sur votre machine,  de client FTP qui soit configuré comme le programme par défaut pour se connecter à un serveur FTP.
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Il n'y a pas, sur votre machine,  de programme de courriel qui soit configuré comme le programme par défaut pour envoyer des courriels.
+Problems while trying to save the file	Document		Problèmes en essayant de sauvegarder le fichier
+Save	Document		Sauvegarder
+Save changes to  	Document		Enregistrer les changements vers
+Save before close	Document		Sauvegarder avant de fermer
+Error	Document		Erreur
+I had problems while setting up the Printer!	Document		J'ai eu des problèmes durant le paramétrage de l'imprimante !
+Cancel	Document		Abandon
+No active Editor Pleas install a Editor Plugin.	Document		Pas d'éditeur actif, veuillez installer un greffon d'édition.
+Don't save	Document		Ne pas sauvegarder
+Cant find plugins	PluginManager		Impossible de trouver des greffons
+ProjectConceptor	PluginManager		ProjectConceptor
+OK	PluginManager		OK
+Help	HelpWindow		Aide

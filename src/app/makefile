@@ -125,6 +125,8 @@ LOCAL_INCLUDE_PATHS =	. \
 					Tools \
 					Tools/FontPanel
 
+LOCALES = de en es fr fur hr ro sv
+
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
 # OPTIMIZE= FULL

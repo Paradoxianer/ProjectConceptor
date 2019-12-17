@@ -1,0 +1,44 @@
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	2371896127
+New Tab	ProjectConceptor		Nova kartica
+Settings	ProjectConceptor		Postavke
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Izreži
+Save Macro	ProjectConceptor		Save Macro
+Replace all	ProjectConceptor		Zamijeni sve
+Paste	ProjectConceptor		Zalijepi
+Help	ProjectConceptor		Pomoć
+Save as	ProjectConceptor		Spremi kao
+Play	ProjectConceptor		Play
+Find & Replace	ProjectConceptor		Nađi i zamijeni
+New	ProjectConceptor		Novo
+Tile Vertical	ProjectConceptor		Tile Vertical
+Copy	ProjectConceptor		Kopiraj
+About	ProjectConceptor		O programu
+Find	ProjectConceptor		Nađi
+Stop recording	ProjectConceptor		Prekini snimanje
+Export	ProjectConceptor		Izvezi
+Save	ProjectConceptor		Spremi
+Find next	ProjectConceptor		Nađi slijedeće
+Undo	ProjectConceptor		Undo
+File	ProjectConceptor		Datoteka
+Print	ProjectConceptor		Ispis
+Open	ProjectConceptor		Otvori
+Window	ProjectConceptor		Prozor
+Replace	ProjectConceptor		Zamijeni
+Edit	ProjectConceptor		Uredi
+Tile	ProjectConceptor		Tile
+Close	ProjectConceptor		Zatvori
+Redo	ProjectConceptor		Redo
+Quit	ProjectConceptor		Quit
+Page setup	ProjectConceptor		Page setup
+Search	ProjectConceptor		Traži
+Start recording	ProjectConceptor		Započni snimanje
+Cascade	ProjectConceptor		Cascade
+Clear	ProjectConceptor		Očisti
+Select all	ProjectConceptor		Odaberi sve
+true	BoolItem		true
+false	BoolItem		false
+bottom	RectItem		dno
+left	RectItem		lijevo
+right	RectItem		desno
+top	RectItem		gore

@@ -1,61 +1,108 @@
-1	English	application/x-vnd.ProjectConceptor	530206262
+1	Spanish	application/x-vnd.ProjectConceptor	2706318720
+New Tab	ProjectConceptor		Nueva pestaña
+Settings	ProjectConceptor		Configuración
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Cortar
+Save Macro	ProjectConceptor		Guardar Macro
+Replace all	ProjectConceptor		Reemplazar todo
+Paste	ProjectConceptor		Pegar
+Help	ProjectConceptor		Ayuda
+Save as	ProjectConceptor		Guardar como
+Play	ProjectConceptor		Reproducir
+Find & Replace	ProjectConceptor		Buscar & Reemplazar
+New	ProjectConceptor		Nuevo
+Tile Vertical	ProjectConceptor		Mosaico Vertical
+Copy	ProjectConceptor		Copiar
+About	ProjectConceptor		Acerca de
+Find	ProjectConceptor		Buscar
+Stop recording	ProjectConceptor		Detener grabación
+Export	ProjectConceptor		Exportar
+Save	ProjectConceptor		Guardar
+Find next	ProjectConceptor		Buscar siguiente
+Undo	ProjectConceptor		Deshacer
+File	ProjectConceptor		Archivo
+Print	ProjectConceptor		Imprimir
+Open	ProjectConceptor		Abrir
+Window	ProjectConceptor		Ventana
+Replace	ProjectConceptor		Reemplazar
+Edit	ProjectConceptor		Editar
+Tile	ProjectConceptor		Mosaico
+Close	ProjectConceptor		Cerrar
+Redo	ProjectConceptor		Rehacer
+Quit	ProjectConceptor		Salir
+Page setup	ProjectConceptor		Configurar página
+Search	ProjectConceptor		Buscar
+Start recording	ProjectConceptor		Iniciar grabación
+Cascade	ProjectConceptor		Cascada
+Clear	ProjectConceptor		Limpiar
+Select all	ProjectConceptor		Seleccionar todo
 Select all	MainWindow		Seleccionar todo
 Macro	MainWindow		Macro
 Title	MainWindow		Título
 New	MainWindow		Nuevo
 Save	MainWindow		Guardar
 Open	MainWindow		Abrir
-Settings	SavePanel		Configuración
 Stop recording	MainWindow		Detener grabación
-Page setup	MainWindow		Configuración de página
-Settings	ConfigWindow		Configuración
-Coud not find command	CommandManager		No se pudo encontrar el comando
+Page setup	MainWindow		Configurar página
 Search	MainWindow		Buscar
 Project settings	MainWindow		Configuración del proyecto
-Problems while trying to save the file	Document		Hubo un problema al intentar guardar el archivo
 Print	MainWindow		Imprimir
 Window	MainWindow		Ventana
 Find next	MainWindow		Buscar siguiente
 File	MainWindow		Archivo
-Save	Document		Guardar
-Fileformat	SavePanel		Formato de archivo
-Cant find plugins	PluginManager		Plugins no encontrados
-Play	MainWindow		Ejecutar
+Play	MainWindow		Reproducir
 Quit	MainWindow		Salir
 Redo	MainWindow		Rehacer
-Input macroname	CommandManager		Ingresar nombre de macro
-ProjectConceptor	PluginManager		ProjectConceptor
 Paste	MainWindow		Pegar
-OK	CommandManager		OK
 Edit	MainWindow		Editar
-Macro recording already started!	CommandManager		Grabador de macro ya ha sido iniciado!
 Replace	MainWindow		Reemplazar
 Title vertical	MainWindow		Título vertical
 Cascade	MainWindow		Cascada
-Replace & Find	MainWindow		Buscar y reemplazar
+Replace & Find	MainWindow		Buscar & Reemplazar
 Undo	MainWindow		Deshacer
 Find	MainWindow		Buscar
-Save before close	Document		Guardar antes de cerrar
-Save as	SavePanel		Guardar como
-Cancel	CommandManager		Cancelar
-Error	Document		Error
-Macro	CommandManager		Macro
 Copy	MainWindow		Copiar
-Help	HelpWindow		Ayuda
 Close	MainWindow		Cerrar
 Help	MainWindow		Ayuda
-Contiune recording	CommandManager		Continuar grabación
-OK	PluginManager		OK
-Save changes to ...	Document		Guardar cambios a ...
 Clear	MainWindow		Limpiar
 Cut	MainWindow		Cortar
-Cancel	Document		Cancelar
-Restart recording	CommandManager		Reiniciar grabación
-Name	CommandManager		Nombre
 Start recording	MainWindow		Iniciar grabación
-Error!	CommandManager		Error!
 About	MainWindow		Acerca de
 Replace all	MainWindow		Reemplazar todo
-Could not find plugins	SavePanel		Plugins no encontrados
-Don't save	Document		No guardar
 Save as	MainWindow		Guardar como
+Settings	SavePanel		Configuración
+Fileformat	SavePanel		Formato de archivo
+Save as	SavePanel		Guardar como
+Could not find plugins	SavePanel		No se encontraron plugins
+Error on execution of Command.	CommandManager		Error de ejecución del comando.
+Coud not find command	CommandManager		No se encontró el comando
+Input macroname	CommandManager		Ingresar nombre de macro
+OK	CommandManager		Aceptar
+Macro recording already started!	CommandManager		Grabación de macro iniciada!
+Cancel	CommandManager		Cancelar
+Macro	CommandManager		Macro
+Contiune recording	CommandManager		Continuar grabando
+Restart recording	CommandManager		Reiniciar grabado
+Name	CommandManager		Nombre
+Error!	CommandManager		Error!
+Settings	ConfigWindow		Opciones
+FTP Warning	AboutURLView		FTP - Advertencia
+Web Browser Warning	AboutURLView		Navegador Web - Advertencia
+Ok	AboutURLView		Aceptar
+E-mail Warning	AboutURLView		Correo electrónico - Advertencia
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		No hay un navegador web configurado por defecto para visualizar páginas web.
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		No hay un cliente de FTP configurado por defecto para conectarse a un servidor de FTP.
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		No hay un programa de correo electrónico que esté configurado por defecto para enviar mensajes.
+Problems while trying to save the file	Document		Hubo un problema al intentar grabar el archivo
+Save	Document		Guardar
+Save changes to  	Document		Guardar cambios a
+Save before close	Document		Guardar antes de cerrar
+Error	Document		Error
+I had problems while setting up the Printer!	Document		Hubo un problema al configurar la impresora!
+Cancel	Document		Cancelar
+No active Editor Pleas install a Editor Plugin.	Document		No hay Editor activo. Por favor, instale un Editor Plugin.
+Don't save	Document		No guardar
+Cant find plugins	PluginManager		No se encontraron plugins.
+ProjectConceptor	PluginManager		ProjectConceptor
+OK	PluginManager		Aceptar
+Help	HelpWindow		Ayuda

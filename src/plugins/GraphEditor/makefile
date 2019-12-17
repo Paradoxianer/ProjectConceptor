@@ -83,6 +83,8 @@ LOCAL_INCLUDE_PATHS = \
 		../../app/ToolBar \
 		../../app/Tools
 
+LOCALES = de en es fr fur hr ro sv
+
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
 #OPTIMIZE= FULL

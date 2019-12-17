@@ -1,0 +1,44 @@
+1	French	application/x-vnd.ProjectConceptor-plugin	2371896127
+New Tab	ProjectConceptor		Nouvel onglet
+Settings	ProjectConceptor		Réglages
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Couper
+Save Macro	ProjectConceptor		Enregistrer la macro
+Replace all	ProjectConceptor		Remplacer tout
+Paste	ProjectConceptor		Coller
+Help	ProjectConceptor		Aide
+Save as	ProjectConceptor		Enregistrer sous
+Play	ProjectConceptor		Lire
+Find & Replace	ProjectConceptor		Chercher & Remplacer
+New	ProjectConceptor		Nouveau ....
+Tile Vertical	ProjectConceptor		Tuile verticale
+Copy	ProjectConceptor		Copier
+About	ProjectConceptor		À propos de
+Find	ProjectConceptor		Chercher
+Stop recording	ProjectConceptor		Stopper l'enregistrement
+Export	ProjectConceptor		Exporter
+Save	ProjectConceptor		Sauvegarder
+Find next	ProjectConceptor		Chercher l'occurence suivante ....
+Undo	ProjectConceptor		Défaire
+File	ProjectConceptor		Fichier
+Print	ProjectConceptor		Imprimer
+Open	ProjectConceptor		Ouvrir
+Window	ProjectConceptor		Fenêtre
+Replace	ProjectConceptor		Remplacer
+Edit	ProjectConceptor		Éditer
+Tile	ProjectConceptor		Tuile
+Close	ProjectConceptor		Fermer
+Redo	ProjectConceptor		Refaire
+Quit	ProjectConceptor		Quitter
+Page setup	ProjectConceptor		Mise en page
+Search	ProjectConceptor		Rechercher
+Start recording	ProjectConceptor		Démarrer l'enregistrement
+Cascade	ProjectConceptor		Cascade
+Clear	ProjectConceptor		Nettoyer
+Select all	ProjectConceptor		Sélectionner tout
+true	BoolItem		vrai
+false	BoolItem		faux
+bottom	RectItem		bas
+left	RectItem		gauche
+right	RectItem		droite
+top	RectItem		haut

@@ -1,0 +1,108 @@
+1	Swedish	application/x-vnd.ProjectConceptor	2706318720
+New Tab	ProjectConceptor		Ny Tab
+Settings	ProjectConceptor		Inställningar
+Macro	ProjectConceptor		Makro
+Cut	ProjectConceptor		Klipp ut
+Save Macro	ProjectConceptor		Spara Makro
+Replace all	ProjectConceptor		Ersätt alla
+Paste	ProjectConceptor		Klistra in
+Help	ProjectConceptor		Hjälp
+Save as	ProjectConceptor		Spara som
+Play	ProjectConceptor		Spela upp
+Find & Replace	ProjectConceptor		Sök & Ersätt
+New	ProjectConceptor		Ny
+Tile Vertical	ProjectConceptor		Vertikal titel
+Copy	ProjectConceptor		Kopiera
+About	ProjectConceptor		Om
+Find	ProjectConceptor		Hitta
+Stop recording	ProjectConceptor		Stoppa inspelning
+Export	ProjectConceptor		Exportera
+Save	ProjectConceptor		Spara
+Find next	ProjectConceptor		Hitta nästa
+Undo	ProjectConceptor		Ångra
+File	ProjectConceptor		Arkiv
+Print	ProjectConceptor		Skriv ut
+Open	ProjectConceptor		Öppna
+Window	ProjectConceptor		Fönster
+Replace	ProjectConceptor		Ersätt
+Edit	ProjectConceptor		Ändra
+Tile	ProjectConceptor		Upprepa
+Close	ProjectConceptor		Stäng
+Redo	ProjectConceptor		Gör om
+Quit	ProjectConceptor		Avsluta
+Page setup	ProjectConceptor		Utskriftsformat
+Search	ProjectConceptor		Sök
+Start recording	ProjectConceptor		Starta inspelning
+Cascade	ProjectConceptor		Kaskad
+Clear	ProjectConceptor		Rensa
+Select all	ProjectConceptor		Markera alla
+Select all	MainWindow		Välj alla
+Macro	MainWindow		Makro
+Title	MainWindow		Titel
+New	MainWindow		Ny
+Save	MainWindow		Spara
+Open	MainWindow		Öppna
+Stop recording	MainWindow		Stoppa inspelning
+Page setup	MainWindow		Utskriftsformat
+Search	MainWindow		Sök
+Project settings	MainWindow		Projektinställningar
+Print	MainWindow		Skriv ut
+Window	MainWindow		Fönster
+Find next	MainWindow		Hitta nästa
+File	MainWindow		Arkiv
+Play	MainWindow		Spela upp
+Quit	MainWindow		Avsluta
+Redo	MainWindow		Gör om
+Paste	MainWindow		Klistra in
+Edit	MainWindow		Ändra
+Replace	MainWindow		Ersätt
+Title vertical	MainWindow		Vertikal titel
+Cascade	MainWindow		Kaskad
+Replace & Find	MainWindow		Sök & Ersätt
+Undo	MainWindow		Ångra
+Find	MainWindow		Hitta
+Copy	MainWindow		Kopiera
+Close	MainWindow		Stäng
+Help	MainWindow		Hjälp
+Clear	MainWindow		Rensa
+Cut	MainWindow		Klipp ut
+Start recording	MainWindow		Starta inspelning
+About	MainWindow		Om
+Replace all	MainWindow		Ersätt alla
+Save as	MainWindow		Spara som
+Settings	SavePanel		Inställningar
+Fileformat	SavePanel		Filformat
+Save as	SavePanel		Spara som
+Could not find plugins	SavePanel		Kunde inte hitta plugins
+Error on execution of Command.	CommandManager		Fel vid exekvering av kommando.
+Coud not find command	CommandManager		Kunde inte hitta kommandot
+Input macroname	CommandManager		Infoga makronamn
+OK	CommandManager		OK
+Macro recording already started!	CommandManager		Inspelning av makro har redan startat!
+Cancel	CommandManager		Avbryt
+Macro	CommandManager		Makro
+Contiune recording	CommandManager		Fortsätt inspelning
+Restart recording	CommandManager		Börja om inspelning
+Name	CommandManager		Namn
+Error!	CommandManager		Fel!
+Settings	ConfigWindow		Inställningar
+FTP Warning	AboutURLView		FTP-varning
+Web Browser Warning	AboutURLView		Webläsarvarning
+Ok	AboutURLView		OK
+E-mail Warning	AboutURLView		E-mailvarning
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Det finns ingen webläsare som är konfigurerad som standardvisare av websidor på ditt system.
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Det finns ingen FTP-klient konfigurerad som standardprogram för FTP-anslutningar.
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Det finns ingen e-postklient konfigurerad som standardprogram för att skicka och ta emot e-post.
+Problems while trying to save the file	Document		Ett fel inträffade när filen skulle sparas
+Save	Document		Spara
+Save changes to  	Document		Spara ändringar till
+Save before close	Document		Spara före stängning
+Error	Document		Fel
+I had problems while setting up the Printer!	Document		Ett fel inträffade när skrivaren ställdes in!
+Cancel	Document		Avbryt
+No active Editor Pleas install a Editor Plugin.	Document		Det finns ingen aktiv editor. Var god installera en editeringsplugin.
+Don't save	Document		Spara inte
+Cant find plugins	PluginManager		Kan inte hitta plugins
+ProjectConceptor	PluginManager		ProjektConceptor
+OK	PluginManager		OK
+Help	HelpWindow		Hjälp

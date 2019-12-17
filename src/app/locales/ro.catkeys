@@ -1,0 +1,108 @@
+1	Romanian	application/x-vnd.ProjectConceptor	2706318720
+New Tab	ProjectConceptor		Tab nou
+Settings	ProjectConceptor		Configurări
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Tăiere
+Save Macro	ProjectConceptor		Salvare macro
+Replace all	ProjectConceptor		Înlocuiește tot
+Paste	ProjectConceptor		Lipire
+Help	ProjectConceptor		Ajutor
+Save as	ProjectConceptor		Salvare ca
+Play	ProjectConceptor		Redare
+Find & Replace	ProjectConceptor		Căutare & Înlocuire
+New	ProjectConceptor		Nou
+Tile Vertical	ProjectConceptor		Juxtapune vertical
+Copy	ProjectConceptor		Copiere
+About	ProjectConceptor		Despre
+Find	ProjectConceptor		Căutare
+Stop recording	ProjectConceptor		Oprește înregistrarea
+Export	ProjectConceptor		Exportă
+Save	ProjectConceptor		Salvare
+Find next	ProjectConceptor		Caută înainte
+Undo	ProjectConceptor		Reface
+File	ProjectConceptor		Fișier
+Print	ProjectConceptor		Tipărire
+Open	ProjectConceptor		Deschide
+Window	ProjectConceptor		Fereastră
+Replace	ProjectConceptor		Înlocuire
+Edit	ProjectConceptor		Editare
+Tile	ProjectConceptor		Juxtapune
+Close	ProjectConceptor		Închide
+Redo	ProjectConceptor		Repetă
+Quit	ProjectConceptor		Ieșire
+Page setup	ProjectConceptor		Configurare pagină
+Search	ProjectConceptor		Căutare
+Start recording	ProjectConceptor		Începe înregistrarea
+Cascade	ProjectConceptor		Cascadă
+Clear	ProjectConceptor		Eliberare
+Select all	ProjectConceptor		Selectează tot
+Select all	MainWindow		Selectează tot
+Macro	MainWindow		Macro
+Title	MainWindow		Titlu
+New	MainWindow		Nou
+Save	MainWindow		Salvare
+Open	MainWindow		Deschide
+Stop recording	MainWindow		Oprește înregistrarea
+Page setup	MainWindow		Configurare pagină
+Search	MainWindow		Căutare
+Project settings	MainWindow		Configurări proiect
+Print	MainWindow		Tipărire
+Window	MainWindow		Fereastră
+Find next	MainWindow		Caută înainte
+File	MainWindow		Fișier
+Play	MainWindow		Redare
+Quit	MainWindow		Ieșire
+Redo	MainWindow		Repetă
+Paste	MainWindow		Lipire
+Edit	MainWindow		Editare
+Replace	MainWindow		Înlocuire
+Title vertical	MainWindow		Juxtapune vertical
+Cascade	MainWindow		Cascadă
+Replace & Find	MainWindow		Înlocuire & Căutare
+Undo	MainWindow		Reface
+Find	MainWindow		Căutare
+Copy	MainWindow		Copiere
+Close	MainWindow		Închide
+Help	MainWindow		Ajutor
+Clear	MainWindow		Eliberează
+Cut	MainWindow		Tăiere
+Start recording	MainWindow		Începe înregistrarea
+About	MainWindow		Despre
+Replace all	MainWindow		Înlocuiește tot
+Save as	MainWindow		Salvare ca
+Settings	SavePanel		Configurări
+Fileformat	SavePanel		Format fișier
+Save as	SavePanel		Salvare ca
+Could not find plugins	SavePanel		Nu s-au putut găsi modulele
+Error on execution of Command.	CommandManager		Eroare la execuția Comenzii.
+Coud not find command	CommandManager		Nu s-a putut găsi comanda
+Input macroname	CommandManager		Introduce nume macro
+OK	CommandManager		OK
+Macro recording already started!	CommandManager		Înregistrarea macroului a început deja!
+Cancel	CommandManager		Anulează
+Macro	CommandManager		Macro
+Contiune recording	CommandManager		Continuă înregistrarea
+Restart recording	CommandManager		Reîncepe înregistrarea
+Name	CommandManager		Nume
+Error!	CommandManager		Eroare!
+Settings	ConfigWindow		Configurări
+FTP Warning	AboutURLView		Avertisment FTP
+Web Browser Warning	AboutURLView		Avertisment browser web
+Ok	AboutURLView		Ok
+E-mail Warning	AboutURLView		Avertisment email
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Nu există niciun browser web pe mașină care este configurat ca programul implicit pentru vizualizarea paginilor web.
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Nu există niciun client FTP pe mașină care este configurat ca programul implicit pentru conectarea la un server FTP.
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nu există niciun program de email pe mașină care este configurat ca programul implicit pentru trimiterea de email.
+Problems while trying to save the file	Document		Probleme în timpul încercării de a salva fișierul
+Save	Document		Salvează
+Save changes to  	Document		Salvează modificări la
+Save before close	Document		Salvează înainte de închidere
+Error	Document		Eroare
+I had problems while setting up the Printer!	Document		Au fost probleme la configurarea imprimantei!
+Cancel	Document		Anulează
+No active Editor Pleas install a Editor Plugin.	Document		Niciun editor activ. Instalați un modul de editor.
+Don't save	Document		Nu salva
+Cant find plugins	PluginManager		Nu se pot găsi modulele
+ProjectConceptor	PluginManager		ProjectConceptor
+OK	PluginManager		OK
+Help	HelpWindow		Ajutor

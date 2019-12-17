@@ -1,0 +1,108 @@
+1	Croatian	application/x-vnd.ProjectConceptor	2706318720
+New Tab	ProjectConceptor		Nova kartica
+Settings	ProjectConceptor		Postavke
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Izreži
+Save Macro	ProjectConceptor		Save Macro
+Replace all	ProjectConceptor		Zamijeni sve
+Paste	ProjectConceptor		Zalijepi
+Help	ProjectConceptor		Pomoć
+Save as	ProjectConceptor		Spremi kao
+Play	ProjectConceptor		Play
+Find & Replace	ProjectConceptor		Nađi i zamjeni
+New	ProjectConceptor		Novi
+Tile Vertical	ProjectConceptor		Tile Vertical
+Copy	ProjectConceptor		Kopiraj
+About	ProjectConceptor		O programu
+Find	ProjectConceptor		Nađi
+Stop recording	ProjectConceptor		Prestani snimati
+Export	ProjectConceptor		izvezi
+Save	ProjectConceptor		Spremi
+Find next	ProjectConceptor		Nađi tekst
+Undo	ProjectConceptor		Undo
+File	ProjectConceptor		Datoteka
+Print	ProjectConceptor		Ispis
+Open	ProjectConceptor		Otvori
+Window	ProjectConceptor		Prozor
+Replace	ProjectConceptor		Zamijeni
+Edit	ProjectConceptor		Uredi
+Tile	ProjectConceptor		Tile
+Close	ProjectConceptor		Zatvori
+Redo	ProjectConceptor		Redo
+Quit	ProjectConceptor		Završi
+Page setup	ProjectConceptor		Page setup
+Search	ProjectConceptor		Traži
+Start recording	ProjectConceptor		Započni snimati
+Cascade	ProjectConceptor		Cascade
+Clear	ProjectConceptor		Očisti
+Select all	ProjectConceptor		Odaberi sve
+Select all	MainWindow		Odaberi sve
+Macro	MainWindow		Macro
+Title	MainWindow		Naslov
+New	MainWindow		Novo
+Save	MainWindow		Spremi
+Open	MainWindow		Otvori
+Stop recording	MainWindow		Prestani snimati
+Page setup	MainWindow		Page setup
+Search	MainWindow		Traži
+Project settings	MainWindow		Postavke projekta
+Print	MainWindow		Ispis
+Window	MainWindow		Prozor
+Find next	MainWindow		Nađi tekst
+File	MainWindow		Datoteka
+Play	MainWindow		Play
+Quit	MainWindow		Završi
+Redo	MainWindow		Redo
+Paste	MainWindow		Zalijepi
+Edit	MainWindow		Uredi
+Replace	MainWindow		Zamijeni
+Title vertical	MainWindow		Title vertical
+Cascade	MainWindow		Cascade
+Replace & Find	MainWindow		Zamijeni i nađi
+Undo	MainWindow		Undo
+Find	MainWindow		Nađi
+Copy	MainWindow		Kopiraj
+Close	MainWindow		Zatvori
+Help	MainWindow		Pomoć
+Clear	MainWindow		Očisti
+Cut	MainWindow		Izreži
+Start recording	MainWindow		Započni snimati
+About	MainWindow		O programu
+Replace all	MainWindow		Zamijeni sve
+Save as	MainWindow		Spremi kao
+Settings	SavePanel		Postavke
+Fileformat	SavePanel		Fileformat
+Save as	SavePanel		Spremi kao
+Could not find plugins	SavePanel		Ne mogu naći priključke
+Error on execution of Command.	CommandManager		Greška pri izvršavanju naredbe
+Coud not find command	CommandManager		Ne mogu naći naredbu
+Input macroname	CommandManager		Input macroname
+OK	CommandManager		U redu
+Macro recording already started!	CommandManager		Macro recording already started!
+Cancel	CommandManager		Otkaži
+Macro	CommandManager		Macro
+Contiune recording	CommandManager		Nastavi snimati
+Restart recording	CommandManager		Ponovno pokreni snimanje
+Name	CommandManager		Ime
+Error!	CommandManager		Greška!
+Settings	ConfigWindow		Postavke
+FTP Warning	AboutURLView		FTP upozorenje
+Web Browser Warning	AboutURLView		Upozorenje preglednika
+Ok	AboutURLView		U redu
+E-mail Warning	AboutURLView		E-mail upozorenje
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Nema nijednog preglednika na vašem stroju koji je konfiguriran kao zadani program za gledanje web stranica.
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Nema nijednog FTP klijenta na vašem stroju koji je konfiguriran kao zadani program za spajanje na FTP poslužitelj.
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nema nijednog e-mail programa na vašem stroju koji je konfiguriran kao zadani program za slanje e-maila.
+Problems while trying to save the file	Document		Problemi pri pokušaju spremanja datoteke
+Save	Document		Spremi
+Save changes to  	Document		Spremi promjene kao
+Save before close	Document		Spremi prije zatvaranja
+Error	Document		Greška
+I had problems while setting up the Printer!	Document		I had problems while setting up the Printer!
+Cancel	Document		Otkaži
+No active Editor Pleas install a Editor Plugin.	Document		No active Editor Pleas install a Editor Plugin.
+Don't save	Document		Nemoj spremiti
+Cant find plugins	PluginManager		Ne mogu naći priključke
+ProjectConceptor	PluginManager		ProjectConceptor
+OK	PluginManager		U redu
+Help	HelpWindow		Pomoć

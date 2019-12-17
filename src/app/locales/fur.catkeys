@@ -1,0 +1,108 @@
+1	Friulian	application/x-vnd.ProjectConceptor	2706318720
+New Tab	ProjectConceptor		Gnove schede
+Settings	ProjectConceptor		Impostazions
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Taie
+Save Macro	ProjectConceptor		Salve Macro
+Replace all	ProjectConceptor		Sostituìs dut
+Paste	ProjectConceptor		Tache
+Help	ProjectConceptor		Jutori
+Save as	ProjectConceptor		Salve come
+Play	ProjectConceptor		Riprodûs
+Find & Replace	ProjectConceptor		Cjate e sostituìs
+New	ProjectConceptor		Gnûf
+Tile Vertical	ProjectConceptor		Piastrele verticâl
+Copy	ProjectConceptor		Copie
+About	ProjectConceptor		Informazions
+Find	ProjectConceptor		Cjate
+Stop recording	ProjectConceptor		Ferme la regjistrazion
+Export	ProjectConceptor		Espuarte
+Save	ProjectConceptor		Salve
+Find next	ProjectConceptor		Cjate prossim
+Undo	ProjectConceptor		Disfe
+File	ProjectConceptor		File
+Print	ProjectConceptor		Stampe
+Open	ProjectConceptor		Vierç
+Window	ProjectConceptor		Barcon
+Replace	ProjectConceptor		Sostituìs
+Edit	ProjectConceptor		Modifiche
+Tile	ProjectConceptor		Piastrele
+Close	ProjectConceptor		Siere
+Redo	ProjectConceptor		Torne fâs
+Quit	ProjectConceptor		Jes
+Page setup	ProjectConceptor		Impostazions pagjine
+Search	ProjectConceptor		Cîr
+Start recording	ProjectConceptor		Tache la regjistrazion
+Cascade	ProjectConceptor		Pissande
+Clear	ProjectConceptor		Nete
+Select all	ProjectConceptor		Selezione dut
+Select all	MainWindow		Selezione dut
+Macro	MainWindow		Macro
+Title	MainWindow		Titul
+New	MainWindow		Gnûf
+Save	MainWindow		Salve
+Open	MainWindow		Vierç
+Stop recording	MainWindow		Ferme la regjistrazion
+Page setup	MainWindow		Impostazion pagjine
+Search	MainWindow		Cîr
+Project settings	MainWindow		Impostazions progjet
+Print	MainWindow		Stampe
+Window	MainWindow		Barcon
+Find next	MainWindow		Cjate prossim
+File	MainWindow		File
+Play	MainWindow		Riprodûs
+Quit	MainWindow		Jes
+Redo	MainWindow		Torne fâs
+Paste	MainWindow		Tache
+Edit	MainWindow		Modifiche
+Replace	MainWindow		Sostituìs
+Title vertical	MainWindow		Titul verticâl
+Cascade	MainWindow		Pissande
+Replace & Find	MainWindow		Sostituìs e cjate
+Undo	MainWindow		Disfe
+Find	MainWindow		Cjate
+Copy	MainWindow		Copie
+Close	MainWindow		Siere
+Help	MainWindow		Jutori
+Clear	MainWindow		Nete
+Cut	MainWindow		Taie
+Start recording	MainWindow		Tache la regjistrazion
+About	MainWindow		Informazions
+Replace all	MainWindow		Sostituìs dut
+Save as	MainWindow		Salve come
+Settings	SavePanel		Impostazions
+Fileformat	SavePanel		Formât di file
+Save as	SavePanel		Salve come
+Could not find plugins	SavePanel		Impussibil cjatâ plugin
+Error on execution of Command.	CommandManager		Erôr te esecuzion dal comant.
+Coud not find command	CommandManager		Impussibil cjatâ il comant
+Input macroname	CommandManager		Inserìs non di macro
+OK	CommandManager		Va ben
+Macro recording already started!	CommandManager		Regjistrazion de macro za tacade!
+Cancel	CommandManager		Anule
+Macro	CommandManager		Macro
+Contiune recording	CommandManager		Continue regjistrazion
+Restart recording	CommandManager		Torne tache la regjistrazion
+Name	CommandManager		Non
+Error!	CommandManager		Erôr!
+Settings	ConfigWindow		Impostazions
+FTP Warning	AboutURLView		Avertiment FTP
+Web Browser Warning	AboutURLView		Avertiment navigadôr web
+Ok	AboutURLView		Va ben
+E-mail Warning	AboutURLView		Avertiment e-mail
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Nol è presint nissun navigadôr web te machine che al sedi configurât come program predefinît par viodi pagjinis web.
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Nol è presint nissun client FTP te machine che al sedi configurât come program predefinît par conetisi a un servidôr FTP.
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nol è presint nissun program pes e-mail te machine che al sedi configurât come program predefinît par inviâ e-mail.
+Problems while trying to save the file	Document		Problemis intal cirî di salvâ il file
+Save	Document		Salve
+Save changes to  	Document		Salve modifichis a
+Save before close	Document		Salve prime di sierâ
+Error	Document		Erôr
+I had problems while setting up the Printer!	Document		I ai vût problemis intal configurâ la Stampadore!
+Cancel	Document		Anule
+No active Editor Pleas install a Editor Plugin.	Document		Nissun editôr atîf, par plasê instale un Editôr Plugin.
+Don't save	Document		No sta salvâ
+Cant find plugins	PluginManager		Impussibil cjatâ plugin
+ProjectConceptor	PluginManager		ProjectConceptor
+OK	PluginManager		Va ben
+Help	HelpWindow		Jutori

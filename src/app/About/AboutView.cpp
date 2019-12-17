@@ -151,7 +151,7 @@ AboutView::AboutView(BRect frame):BView(frame, "", B_FOLLOW_ALL, B_WILL_DRAW)
 	AddChild(fTranslatorTitleView);
 
 	//TranslatorNameView
-	fTranslatorNameString.SetTo("- thaflo\n- Dario\n- Briseur\n- emrysn\n");
+	fTranslatorNameString.SetTo("- thaflo\n- Dario\n- Briseur\n- emrysn\n Briseur (fr)\n- FabianReidinger (de)\n- Florentina (ro)\n- KapiX (pl)\n- Knezzen (sv)\n- tmtfx (fur)\n- unspacyar (es)\n- zvacet (hr)");
 	fTranslatorNameView = new BTextView(BRect(20+30+(kDL*(12/1.5)+kCL*(12/1.5)),120,kTL*(12/1.5)+(kDL*(12/1.5)+kCL*(12/1.5)-9+40),frameHeight-70), "translatornameview",
 	BRect(0,0,frameWidth-15,15), B_FOLLOW_ALL_SIDES, B_WILL_DRAW | B_FULL_UPDATE_ON_RESIZE);
 	fTranslatorNameView->MakeSelectable(false);

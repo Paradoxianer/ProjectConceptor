@@ -1,0 +1,44 @@
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	2371896127
+New Tab	ProjectConceptor		New Tab
+Settings	ProjectConceptor		Settings
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Cut
+Save Macro	ProjectConceptor		Save Macro
+Replace all	ProjectConceptor		Replace all
+Paste	ProjectConceptor		Paste
+Help	ProjectConceptor		Help
+Save as	ProjectConceptor		Save as
+Play	ProjectConceptor		Play
+Find & Replace	ProjectConceptor		Find & Replace
+New	ProjectConceptor		New
+Tile Vertical	ProjectConceptor		Tile Vertical
+Copy	ProjectConceptor		Copy
+About	ProjectConceptor		About
+Find	ProjectConceptor		Find
+Stop recording	ProjectConceptor		Stop recording
+Export	ProjectConceptor		Export
+Save	ProjectConceptor		Save
+Find next	ProjectConceptor		Find next
+Undo	ProjectConceptor		Undo
+File	ProjectConceptor		File
+Print	ProjectConceptor		Print
+Open	ProjectConceptor		Open
+Window	ProjectConceptor		Window
+Replace	ProjectConceptor		Replace
+Edit	ProjectConceptor		Edit
+Tile	ProjectConceptor		Tile
+Close	ProjectConceptor		Close
+Redo	ProjectConceptor		Redo
+Quit	ProjectConceptor		Quit
+Page setup	ProjectConceptor		Page setup
+Search	ProjectConceptor		Search
+Start recording	ProjectConceptor		Start recording
+Cascade	ProjectConceptor		Cascade
+Clear	ProjectConceptor		Clear
+Select all	ProjectConceptor		Select all
+true	BoolItem		true
+false	BoolItem		false
+bottom	RectItem		bottom
+left	RectItem		left
+right	RectItem		right
+top	RectItem		top

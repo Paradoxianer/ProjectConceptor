@@ -1,7 +1,44 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	2724668264
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	2371896127
+New Tab	ProjectConceptor		Nueva pestaña
+Settings	ProjectConceptor		Configuración
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Cortar
+Save Macro	ProjectConceptor		Guardar Macro
+Replace all	ProjectConceptor		Reemplazar todo
+Paste	ProjectConceptor		Pegar
+Help	ProjectConceptor		Ayuda
+Save as	ProjectConceptor		Guardar como
+Play	ProjectConceptor		Reproducir
+Find & Replace	ProjectConceptor		Buscar & Reemplazar
+New	ProjectConceptor		Nuevo
+Tile Vertical	ProjectConceptor		Mosaico Vertical
+Copy	ProjectConceptor		Copiar
+About	ProjectConceptor		Acerca de
+Find	ProjectConceptor		Buscar
+Stop recording	ProjectConceptor		Detener grabación
+Export	ProjectConceptor		Exportar
+Save	ProjectConceptor		Guardar
+Find next	ProjectConceptor		Buscar siguiente
+Undo	ProjectConceptor		Deshacer
+File	ProjectConceptor		Archivo
+Print	ProjectConceptor		Imprimir
+Open	ProjectConceptor		Abrir
+Window	ProjectConceptor		Ventana
+Replace	ProjectConceptor		Reemplazar
+Edit	ProjectConceptor		Editar
+Tile	ProjectConceptor		Mosaico
+Close	ProjectConceptor		Cerrar
+Redo	ProjectConceptor		Rehacer
+Quit	ProjectConceptor		Salir
+Page setup	ProjectConceptor		Configurar página
+Search	ProjectConceptor		Buscar
+Start recording	ProjectConceptor		Iniciar grabación
+Cascade	ProjectConceptor		Cascada
+Clear	ProjectConceptor		Limpiar
+Select all	ProjectConceptor		Seleccionar todo
 true	BoolItem		verdadero
-bottom	RectItem		abajo
-left	RectItem		izquierda
 false	BoolItem		falso
+bottom	RectItem		fondo
+left	RectItem		izquierda
 right	RectItem		derecha
 top	RectItem		arriba

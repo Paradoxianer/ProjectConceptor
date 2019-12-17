@@ -1,0 +1,44 @@
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	2371896127
+New Tab	ProjectConceptor		Tab nou
+Settings	ProjectConceptor		Configurări
+Macro	ProjectConceptor		Macro
+Cut	ProjectConceptor		Tăiere
+Save Macro	ProjectConceptor		Salvare macro
+Replace all	ProjectConceptor		Înlocuiește tot
+Paste	ProjectConceptor		Lipire
+Help	ProjectConceptor		Ajutor
+Save as	ProjectConceptor		Salvare ca
+Play	ProjectConceptor		Redare
+Find & Replace	ProjectConceptor		Căutare & Înlocuire
+New	ProjectConceptor		Nou
+Tile Vertical	ProjectConceptor		Juxtapune vertical
+Copy	ProjectConceptor		Copiere
+About	ProjectConceptor		Despre
+Find	ProjectConceptor		Căutare
+Stop recording	ProjectConceptor		Oprește înregistrarea
+Export	ProjectConceptor		Exportă
+Save	ProjectConceptor		Salvare
+Find next	ProjectConceptor		Caută înainte
+Undo	ProjectConceptor		Reface
+File	ProjectConceptor		Fișier
+Print	ProjectConceptor		Tipărire
+Open	ProjectConceptor		Deschide
+Window	ProjectConceptor		Fereastră
+Replace	ProjectConceptor		Înlocuire
+Edit	ProjectConceptor		Editare
+Tile	ProjectConceptor		Juxtapune
+Close	ProjectConceptor		Închide
+Redo	ProjectConceptor		Repetă
+Quit	ProjectConceptor		Ieșire
+Page setup	ProjectConceptor		Configurare pagină
+Search	ProjectConceptor		Căutare
+Start recording	ProjectConceptor		Începe înregistrarea
+Cascade	ProjectConceptor		Cascadă
+Clear	ProjectConceptor		Eliberare
+Select all	ProjectConceptor		Selectează tot
+true	BoolItem		adevărat
+false	BoolItem		fals
+bottom	RectItem		bază
+left	RectItem		stânga
+right	RectItem		dreapta
+top	RectItem		top
