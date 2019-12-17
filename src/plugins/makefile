@@ -37,9 +37,8 @@ catkeys:
 	done
 
 bindcatalogs:
-	for dir in $(plugins); do \
-		$(MAKE) -C $$dir bindcatalogs; \
-	done
+	$(MAKE) -C GraphEditor bindcatalogs; \
+	$(MAKE) -C NavigatorEditor bindcatalogs; \
 
     
  

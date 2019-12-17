@@ -22,6 +22,7 @@
 #include "ToolBar.h"
 #include "ToolItem.h"
 #include "InputRequest.h"
+//just for the B_FONT_TYPE Definiton
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "GraphEditor"
@@ -68,7 +69,8 @@ void GraphEditor::Init(void) {
 	nodeMessage	= new BMessage(P_C_CLASS_TYPE);
 	nodeMessage->AddMessage(P_C_NODE_DATA,dataMessage);
 	//Preparing the standart FontMessage
-	fontMessage		= new BMessage(B_FONT_TYPE);
+	//fontMessage		= new BMessage(B_FONT_TYPE);
+	fontMessage		= new BMessage('fOTy');
 	fontMessage->AddInt8("Font::Encoding",be_plain_font->Encoding());
 	fontMessage->AddInt16("Font::Face",be_plain_font->Face());
 	be_plain_font->GetFamilyAndStyle(&family,&style);
