@@ -114,7 +114,7 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	if (!saveMacro)
 		commandStuff->RemoveName("makro");
 	outMessage->AddMessage("PDocument::commandManager",commandStuff);
-	outMessage->PrintToStream();
+	DEBUG_ONLY(outMessage->PrintToStream(););
 	err = outMessage->Flatten(outDestination);
 	//necessary to avoid problems
 	inSource->Seek(0, SEEK_SET);
@@ -194,7 +194,7 @@ status_t ConvertPDoc2ASCII(BPositionIO * inSource, BMessage * ioExtension,	BPosi
 	if (!saveMacro)
 		commandStuff->RemoveName("makro");
 	outMessage->AddMessage("PDocument::commandManager",commandStuff);
-	outMessage->PrintToStream();
+	DEBUG_ONLY(	outMessage->PrintToStream(););
 	err = outMessage->Flatten(outDestination);
 	//necessary to avoid problems
 	inSource->Seek(0, SEEK_SET);

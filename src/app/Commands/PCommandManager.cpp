@@ -194,6 +194,7 @@ void PCommandManager::PlayMacro(BMessage *makro) {
 
 status_t PCommandManager::Execute(BMessage *settings) {
 	TRACE();
+	DEBUG_ONLY(settings->PrintToStream());
 	status_t	err	= doc->LockWithTimeout(TIMEOUT_LOCK);
 	if (err == B_OK) {
 		//(doc->GetChangedNodes())->MakeEmpty();

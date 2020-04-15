@@ -146,9 +146,9 @@ void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage
 
 void RemoveAttribute::AddAttribute(PDocument *doc, BMessage *node, BMessage *valueContainer,BMessage *undoMessage)
 {
-	node->PrintToStream();
+	DEBUG_ONLY(node->PrintToStream();
 	valueContainer->PrintToStream();
-	undoMessage->PrintToStream();
+	undoMessage->PrintToStream(););
 	int32 		i				= 0;
 	status_t	err				= B_OK;
 	BList		*subGroupList	= new BList();

@@ -67,12 +67,12 @@ void  ConfigManager::LoadConfig(void){
 	messageXml.SetTo(*path);
 	if (messageXml.InitCheck())
         config=messageXml.Read();
-    config->PrintToStream();
+	DEBUG_ONLY(config->PrintToStream());
 }
 
 void ConfigManager::SaveConfig(){
 	TRACE();
-	config->PrintToStream();
+	DEBUG_ONLY(config->PrintToStream());
 	MessageXmlWriter messageXml = MessageXmlWriter();
 	messageXml.SetTo(*path);
 	if (messageXml.InitCheck())

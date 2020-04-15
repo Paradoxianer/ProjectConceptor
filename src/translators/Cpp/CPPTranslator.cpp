@@ -173,7 +173,7 @@ status_t Converter::ConvertPDoc2FreeMind()
 	if (!saveMacro)
 		commandStuff->RemoveName("makro");
 	outMessage->AddMessage("PDocument::commandManager",commandStuff);
-	outMessage->PrintToStream();
+	DEBUG_ONLY(	outMessage->PrintToStream(););
 	err = outMessage->Flatten(outDestination);
 	//necessary to avoid problems
 	inSource->Seek(0, SEEK_SET);
