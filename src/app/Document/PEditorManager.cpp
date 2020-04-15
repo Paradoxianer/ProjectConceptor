@@ -189,8 +189,7 @@ bool PEditorManager::SendMessage(void *arg,void *msg)
 	status_t	err	= B_OK;
 	BMessenger* theMessenger=(BMessenger*)arg;
 	err=theMessenger->SendMessage((BMessage*)msg);
-/*	BHandler	*theHandler	= ((PEditor *)arg)->GetHandler();
-	theHandler->MessageReceived((BMessage *)msg);*/
+
 	return false;
 }
 

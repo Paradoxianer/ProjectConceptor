@@ -119,7 +119,7 @@ void GraphEditor::Init(void) {
 	newScale->AddFloat("scale",1.00);
 	scaleMenu->AddItem(new BMenuItem("100 %",newScale,0,0));
 	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",1.5);
+ 	newScale->AddFloat("scale",1.5);
 	scaleMenu->AddItem(new BMenuItem("150 %",newScale,0,0));
 	newScale	= new BMessage(G_E_NEW_SCALE);
 	newScale->AddFloat("scale",2);
@@ -315,12 +315,12 @@ void GraphEditor::ValueChanged() {
 	void		*pointer		= NULL;
 	BRect		frame;
 	BRect		invalid;
-	int i=0;
-	for ( it=changedNodes->begin();it!=changedNodes->end();it++) {
+	for ( it=changedNodes->begin();it!=changedNodes->end();++it) {
 		node = *it;
-		node->PrintToStream();
+		PRINT(("Changed node\n"););
+		DEBUG_ONLY(node->PrintToStream());
 		if (node->FindPointer(renderString,(void **)&painter) == B_OK) {
-			if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
+			if (((allConnections->HasItem(node))||(allNodes->HasItem(node))) && painter != NULL)
 				painter->ValueChanged();
 			else
 				RemoveRenderer(FindRenderer(node));
@@ -667,6 +667,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			break;
 		}
 		case G_E_COLOR_CHANGED: {
+			printf("G_E_COLOR_CHANGED");
 			rgb_color	tmpNewColor =	colorItem->GetColor();;
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changeColorMessage->AddString("Command::Name","ChangeValue");
@@ -791,11 +792,20 @@ void GraphEditor::InsertObject(BPoint where,bool deselect) {
 
 void GraphEditor::InsertRenderObject(BMessage *node) {
 	TRACE();
-	AddRenderer(CreateRendererFor(node));
+	if ((node->what == P_C_CONNECTION_TYPE) || (node->what == P_C_CLASS_TYPE)) {
+	    Renderer *render = CreateRendererFor(node);
+		if (render != NULL)
+			AddRenderer(render);
+		else 
+			fprintf(stderr, "GraphEditor: Couldnt create render for given node\n");
+	} else
+		fprintf(stderr,"GraphEditor: Error trying to insert a object which isnt actually a node oder connection \n" );
 }
 
 Renderer* GraphEditor::CreateRendererFor(BMessage *node)
 {
+	PRINT(("GraphEditor::CreateRendererFor()\n"));
+	DEBUG_ONLY(node->PrintToStream(););
 	void	*tmpDoc	= NULL;
 	Renderer *newRenderer = NULL;
 	if (node->FindPointer("ProjectConceptor::doc",&tmpDoc)==B_OK)
@@ -819,12 +829,9 @@ Renderer* GraphEditor::CreateRendererFor(BMessage *node)
 
 void GraphEditor::AddRenderer(Renderer* newRenderer) {
 	TRACE();
-	//if (BView::LockLooper()==B_OK){
-	    renderer->AddItem(newRenderer);
-	    BringToFront(newRenderer);
-	    activRenderer = newRenderer;
-	  //  BView::UnlockLooper();
-	//}
+	renderer->AddItem(newRenderer);
+	BringToFront(newRenderer);
+	activRenderer = newRenderer;
 }
 
 void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
@@ -957,6 +964,7 @@ void GraphEditor::SendToBack(Renderer *wichRenderer) {
 
 BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 {
+	TRACE();
 	BList		*selected			= doc->GetSelected();
 	BMessage	*newNode	    	= new BMessage(*nodeMessage);
 	BMessage	*newFont	    	= new BMessage(*fontMessage);
@@ -1046,8 +1054,10 @@ bool GraphEditor::DrawRenderer(void *arg,void *editor)
 	Renderer	*painter	=(Renderer *)arg;
 	GraphEditor	*gEditor	= (GraphEditor*)editor;
 	BRegion		region;
-	gEditor->GetClippingRegion(&region);
-	painter->Draw(gEditor,region.Frame());
+	if (gEditor != NULL)
+		gEditor->GetClippingRegion(&region);
+	if (painter != NULL)
+		painter->Draw(gEditor,region.Frame());
 	return false;
 }
 
