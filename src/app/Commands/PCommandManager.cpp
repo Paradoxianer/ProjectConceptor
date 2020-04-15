@@ -228,9 +228,9 @@ status_t PCommandManager::Execute(BMessage *settings) {
 					err=B_OK;
 				}
 				doc->SetModified();
+				doc->Unlock();
 				(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 			}
-			doc->Unlock();
 		}
 		else
 		{
