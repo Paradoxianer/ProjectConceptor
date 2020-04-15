@@ -20,6 +20,7 @@ public:
 	virtual	void			DetachedFromManager(void);
 
 protected:
+			void			UndoChangeValue(BMessage *node, BMessage *valueContainer, type_code type,void *oldValue, ssize_t oldSize);
 			void			DoChangeValue(BMessage *node, BMessage *valueContainer, BMessage *undo);
 	//----------------PCommand
 };
