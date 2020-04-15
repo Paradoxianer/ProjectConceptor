@@ -20,7 +20,7 @@ public:
 	virtual	void			DetachedFromManager(void);
 
 protected:
-			void			DoChangeValue(PDocument *doc,BRect *rect,BMessage *settings);
+			void			DoChangeValue(BMessage *node, BMessage *valueContainer, BMessage *undo);
 	//----------------PCommand
 };
 #endif

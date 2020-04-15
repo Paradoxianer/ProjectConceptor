@@ -28,163 +28,21 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 	ssize_t		oldSize			= 0;
 	PCommand::Undo(doc,undoMessage);
 	undo->FindMessage("ChangeValue::Undo" ,undoMessage);
-	while (undo->FindPointer("node",i,(void **)&node) == B_OK)
-	{
+	while (undo->FindPointer("node",i,(void **)&node) == B_OK){
 		err = B_OK;
-		if (undo->FindMessage("valueContainer",i,valueContainer) == B_OK)
-		{
+		if (err = undo->FindMessage("valueContainer",i,valueContainer) != B_OK) {
+			err = undo->FindMessage("valueContainer",0,valueContainer);
+		}
+		if (err == B_OK) {
 			err = valueContainer->FindString("name",i,(const char**)&name);
 			err = err | valueContainer->FindInt32("type",i,(int32 *)&type);
 			err = err | valueContainer->FindInt32("index",i,&index);
-			undoMessage->FindData("oldValue",type,(const void **)&oldValue,&oldSize);
-			subGroupList->MakeEmpty();
-			j	= 0;		
-			subGroup = node;
-			subGroupList->AddItem(subGroup);
-			while (valueContainer->FindString("subgroup",j,(const char**)&subGroupName) == B_OK)
-			{	
-				subGroup->FindMessage(subGroupName,tmpSubGroup);
-				subGroupList->AddItem(tmpSubGroup);
-				subGroup	= tmpSubGroup;
-				tmpSubGroup	= new BMessage();
-				j++;
-			}
-			delete tmpSubGroup;
-			subGroup->ReplaceData(name,type,index,oldValue,oldSize);
-			for (j=subGroupList->CountItems()-1;j>0;j--)
-			{
-				tmpSubGroup = (BMessage *)subGroupList->ItemAt(j-1);
-					valueContainer->FindString("subgroup",j-1,(const char**)&subGroupName);
-				if (tmpSubGroup)
-					tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(j));
-				delete subGroupList->RemoveItem(j);
-			}
-			changed->insert(node);
-		}
-		i++;
-	}
-	i = 0;
-	if ( (undo->FindBool(P_C_NODE_SELECTED,&selected) == B_OK) && (selected==true) )
-	{
-		undoMessage->FindMessage("selectedNodes",selectNodes);
-		if (undo->FindMessage("valueContainer",i,valueContainer) == B_OK)
-		{
-			err = valueContainer->FindString("name",i,(const char**)&name);
-			err = err | valueContainer->FindInt32("type",i,(int32 *)&type);
-			err = err | valueContainer->FindInt32("index",i,(int32 *)&index);
-			err 		= B_OK;
-			int32 	i	= 0;
-			while (selectNodes->FindPointer("node",i,(void **)&node) == B_OK)
-			{
-				j	= 0;
-				subGroupList->MakeEmpty();
-				subGroup = node;
-				subGroupList->AddItem(subGroup);
-				while (valueContainer->FindString("subgroup",j,(const char**)&subGroupName) == B_OK)
-				{	
-					subGroup->FindMessage(subGroupName,tmpSubGroup);
-					subGroupList->AddItem(tmpSubGroup);
-					subGroup	= tmpSubGroup;
-					tmpSubGroup	= new BMessage();
-					j++;
-				}
-				delete tmpSubGroup;
-				selectNodes->FindData("oldValue",type,i,(const void **)&oldValue,&oldSize);
-				err = subGroup->ReplaceData(name,type,index,oldValue,oldSize);
-				for (j=subGroupList->CountItems()-1;j>0;j--)
-				{
-					tmpSubGroup = (BMessage *)subGroupList->ItemAt(j-1);
-					valueContainer->FindString("subgroup",j-1,(const char**)&subGroupName);
-					if (tmpSubGroup)
-						tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(j));
-					delete subGroupList->RemoveItem(j);
-				}
-				changed->insert(node);
-				i++;
-			}
-		}
-	}
-	doc->SetModified();
-}
-
-BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
-{
-	set<BMessage*>	*changed		= doc->GetChangedNodes();
-	BList		*selection		= doc->GetSelected();
-	BList		*subGroupList	= new BList();
-	BMessage	*node			= NULL;
-	BMessage	*undoMessage	= new BMessage();
-	BMessage	*subGroup		= NULL;
-	BMessage	*tmpSubGroup	= new BMessage();
-	BMessage	*selectedNodes	= new BMessage();
-	BMessage	*valueContainer	= new BMessage();
-	int32		i				= 0;
-	int32		j				= 0;
-	bool		selected		= false;
-	char		*name			= NULL;
-	char		*subGroupName	= NULL;
-	int32		index			= 0;
-	type_code	type			= B_ANY_TYPE;
-	void*		newValue		= NULL;
-	void*		oldValue		= NULL;
-	ssize_t		size			= 0;
-	ssize_t		oldSize			= 0;
-	status_t	err				= B_OK;
-	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
-	{
-		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK)
-		{
-			err = valueContainer->FindString("name",(const char**)&name);
-			err = err | valueContainer->FindInt32("type",(int32 *)&type);
-			err = err | valueContainer->FindInt32("index",(int32 *)&index);
-			err = valueContainer->FindData("newValue", type,(const void **)&newValue, &size);
-			subGroupList->MakeEmpty();
-			j	= 0;		
-			subGroup = node;
-			subGroupList->AddItem(subGroup);
-			while (valueContainer->FindString("subgroup",j,(const char**)&subGroupName) == B_OK)
-			{	
-				subGroup->FindMessage(subGroupName,tmpSubGroup);
-				subGroupList->AddItem(tmpSubGroup);
-				subGroup	= tmpSubGroup;
-				tmpSubGroup	= new BMessage();
-				j++;
-			}
-			delete tmpSubGroup;
-			subGroup->FindData(name,type,index,(const void **)&oldValue,&oldSize);
-			undoMessage->AddData("oldValue",type,oldValue,oldSize,false);
-			err = subGroup->ReplaceData(name,type,index,newValue,size);
-			for (j=subGroupList->CountItems()-1;j>0;j--)
-			{
-				tmpSubGroup = (BMessage *)subGroupList->ItemAt(j-1);
-				valueContainer->FindString("subgroup",j-1,(const char**)&subGroupName);
-				if (tmpSubGroup)
-					err=tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(j));
-				delete subGroupList->RemoveItem(j);
-			}
-			changed->insert(node);
-		}
-		i++;
-	}
-	if ( (settings->FindBool(P_C_NODE_SELECTED,&selected) == B_OK) && (selected==true) )
-	{
-		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK)
-		{
-			err = valueContainer->FindString("name",i,(const char**)&name);
-			err = err | valueContainer->FindInt32("type",i,(int32 *)&type);
-			err = err | valueContainer->FindInt32("index",i,(int32 *)&index);
-			err = err | valueContainer->FindData("newValue",type,i,(const void **)&newValue,&size);
-//			if ( (settings->FindString("subgroup",i,(const char**)&subGroupName) != B_OK))
-//			subGroupName=NULL;
-			for (int32 i=0;i<selection->CountItems();i++)
-			{
-				node =(BMessage *) selection->ItemAt(i);
-				selectedNodes->AddPointer("node",node);
+			if (undoMessage->FindData("oldValue",type,i,(const void **)&oldValue,&oldSize) == B_OK) {
 				subGroupList->MakeEmpty();
 				j	= 0;		
 				subGroup = node;
 				subGroupList->AddItem(subGroup);
-				while (valueContainer->FindString("subgroup",j,(const char**)&subGroupName) == B_OK) {
+				while (valueContainer->FindString("subgroup",j,(const char**)&subGroupName) == B_OK) {	
 					subGroup->FindMessage(subGroupName,tmpSubGroup);
 					subGroupList->AddItem(tmpSubGroup);
 					subGroup	= tmpSubGroup;
@@ -192,9 +50,7 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 					j++;
 				}
 				delete tmpSubGroup;
-				subGroup->FindData(name,type,index,(const void **)&oldValue,&oldSize);
-				err = selectedNodes->AddData("oldValue",type,oldValue,oldSize,false);
-				err = subGroup->ReplaceData(name,type,index,newValue,size);
+				subGroup->ReplaceData(name,type,index,oldValue,oldSize);
 				for (j=subGroupList->CountItems()-1;j>0;j--) {
 					tmpSubGroup = (BMessage *)subGroupList->ItemAt(j-1);
 					valueContainer->FindString("subgroup",j-1,(const char**)&subGroupName);
@@ -203,26 +59,110 @@ BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
 					delete subGroupList->RemoveItem(j);
 				}
 				changed->insert(node);
-			}	
+			}
+		}
+		else {
+			fprintf(stderr, "ChangeValue::Undo couldnt find the valueContainer\n");
+		}
+		i++;
+	}
+	doc->SetModified();
+}
+
+BMessage* ChangeValue::Do(PDocument *doc, BMessage *settings)
+{
+	set<BMessage*>	*changed		= doc->GetChangedNodes();	
+	BList		*selection		= doc->GetSelected();
+	BMessage	*node			= NULL;
+	BMessage	*undoMessage	= new BMessage();
+	BMessage	*selectedNodes	= new BMessage();
+	BMessage	*valueContainer	= new BMessage();
+	int32		i				= 0;
+	bool		selected		= false;
+	
+
+	status_t	err				= B_OK;
+	while (settings->FindPointer("node",i,(void **)&node) == B_OK)
+	{
+		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK) {
+			DoChangeValue(node,valueContainer,undoMessage);
+			changed->insert(node);
+
+		}
+		i++;
+	}
+	if ( (settings->FindBool(P_C_NODE_SELECTED,&selected) == B_OK) && (selected==true) ) {
+		if (settings->FindMessage("valueContainer",i,valueContainer) == B_OK) {
+			for (i=0;i<selection->CountItems();i++) {
+				node =(BMessage *) selection->ItemAt(i);
+				DoChangeValue(node,valueContainer, undoMessage);
+				changed->insert(node);
+			}
 		}
 	}
-	undoMessage->AddMessage("selectedNodes",selectedNodes);
 	doc->SetModified();
 	settings->RemoveName("ChangeValue::Undo");
 	settings->AddMessage("ChangeValue::Undo",undoMessage);
-	settings =PCommand::Do(doc,settings);
+	settings = PCommand::Do(doc,settings);
 	return settings;
 }
 
-
-
-void ChangeValue::AttachedToManager(void) {
+void ChangeValue::AttachedToManager(void)
+{
 }
 
-void ChangeValue::DetachedFromManager(void) {
+
+void ChangeValue::DetachedFromManager(void)
+{
 }
 
-void ChangeValue::DoChangeValue(PDocument *doc,BRect *rect,BMessage *settings) {
-	type_code		type;
-	settings->FindInt32("type",(int32 *)&type);
+
+void ChangeValue::DoChangeValue(BMessage *node,BMessage *valueContainer, BMessage *undo)
+{
+	BList			*pathList		= new BList();
+	BMessage		*subGroup		= NULL;
+	BMessage		*tmpSubGroup	= new BMessage();
+	status_t		err				= B_OK;
+	char			*name			= NULL;
+	char			*subGroupName	= NULL;
+	int32			index			= 0;
+	int32			j				= 0;
+
+	type_code		type			= B_ANY_TYPE;
+	void*			newValue		= NULL;
+	void*			oldValue		= NULL;
+	ssize_t			size			= 0;
+	ssize_t			oldSize			= 0;
+	
+	err = valueContainer->FindString("name",(const char**)&name);
+	err = err | valueContainer->FindInt32("type",(int32 *)&type);
+	err = err | valueContainer->FindInt32("index",(int32 *)&index);
+	err = valueContainer->FindData("newValue", type,(const void **)&newValue, &size);
+	
+	//store the pointer of the changed node
+	undo->AddPointer("node",node);
+
+
+	pathList->MakeEmpty();
+	j	= 0;
+	subGroup = node;
+	pathList->AddItem(subGroup);
+	while (valueContainer->FindString("subgroup",j,(const char**)&subGroupName) == B_OK){	
+		subGroup->FindMessage(subGroupName,tmpSubGroup);
+		pathList->AddItem(tmpSubGroup);
+		subGroup	= tmpSubGroup;
+		tmpSubGroup	= new BMessage();
+		j++;
+	}
+	delete tmpSubGroup;
+	subGroup->FindData(name,type,index,(const void **)&oldValue,&oldSize);
+	undo->AddData("oldValue",type,oldValue,oldSize,false);
+	err = subGroup->ReplaceData(name,type,index,newValue,size);
+	for (j=pathList->CountItems()-1;j>0;j--) {
+		tmpSubGroup = (BMessage *)pathList->ItemAt(j-1);
+		valueContainer->FindString("subgroup",j-1,(const char**)&subGroupName);
+		if (tmpSubGroup)
+			err=tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)pathList->ItemAt(j));
+		delete pathList->RemoveItem(j);
+	}
 }
