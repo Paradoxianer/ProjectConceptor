@@ -194,7 +194,7 @@ void ColorToolItem::MouseUp(BPoint point)
 		//SetEventMask(oldEventMask);
 		SetEventMask(oldEventMask);
 		colorWindow->Hide();
-		Invoke();
+		//Invoke();
 
 	}
 	else
