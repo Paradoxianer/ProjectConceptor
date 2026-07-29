@@ -83,6 +83,6 @@ status_t TextEditorControl::Invoke(BMessage *message) {
 		Parent()->RemoveChild(this);
 	}
 	if ((changed) && (commit))
-		BInvoker::Invoke(&copy);
-
+		return BInvoker::Invoke(&copy);
+	return B_OK;
 }
