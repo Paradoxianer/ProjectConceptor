@@ -1,5 +1,5 @@
 #include "MessageXmlReader.h"
-#include "tinyxml/tinyxml.h"
+#include "tinyxml.h"
 #include <storage/File.h>
 #include <support/Debug.h>
 #include <mail/mail_encoding.h>

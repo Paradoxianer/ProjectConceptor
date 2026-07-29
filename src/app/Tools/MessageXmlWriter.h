@@ -4,7 +4,7 @@
 #include <String.h>
 #include <Message.h>
 
-#include "tinyxml/tinyxml.h"
+#include "tinyxml.h"
 
 
 class MessageXmlWriter

@@ -7,7 +7,7 @@
 #include <map>
 using namespace std;
 
-#include "tinyxml/tinyxml.h"
+#include "tinyxml.h"
 
 
 class MessageXmlReader
