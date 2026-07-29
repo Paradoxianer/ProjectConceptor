@@ -608,23 +608,31 @@ void PDocument::Load(void)
 	;
 	//docloader handles the Format and Stuff also the input translation
 	PDocLoader	*docLoader	= new PDocLoader(this,loaded);
-	delete allNodes;
-	delete allConnections;
 	delete printerSetting;
 	delete selected;
 
-	allNodes 		= docLoader->GetAllNodes();
-	for (i = 0; i<allNodes->CountItems(); i++) {
-		node=((BMessage*)allNodes->ItemAt(i));
+	// allNodes/allConnections are kept as the same BList instances (cleared
+	// and refilled) instead of being replaced - editors like NavigatorEditor
+	// cache the BList pointer for their lifetime, and a delete+reassign here
+	// left them pointing at freed memory on the next reload.
+	BList		*loadedNodes		= docLoader->GetAllNodes();
+	allNodes->MakeEmpty();
+	for (i = 0; i<loadedNodes->CountItems(); i++) {
+		node=((BMessage*)loadedNodes->ItemAt(i));
 		node->AddPointer("ProjectConceptor::doc",this);
 		valueChanged->insert(node);
+		allNodes->AddItem(node);
 	}
-	allConnections	= docLoader->GetAllConnections();
-	for (i = 0; i<allConnections->CountItems(); i++) {
-		node= (BMessage *)allConnections->ItemAt(i);
+	delete loadedNodes;
+	BList		*loadedConnections	= docLoader->GetAllConnections();
+	allConnections->MakeEmpty();
+	for (i = 0; i<loadedConnections->CountItems(); i++) {
+		node= (BMessage *)loadedConnections->ItemAt(i);
 		node->AddPointer("ProjectConceptor::doc",this);
 		valueChanged->insert(node);
+		allConnections->AddItem(node);
 	}
+	delete loadedConnections;
 	selected = docLoader->GetSelectedNodes();
 	delete commandManager;
 	commandManager= new PCommandManager(this);
