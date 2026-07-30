@@ -44,17 +44,22 @@ void PDocumentManager::Init(BMessage *archive) {
 }
 
 PDocumentManager::~PDocumentManager(void) {
+	// BLooper::Quit() deletes the looper itself once unlocked - an explicit
+	// delete afterward is a double free. Also iterate index 0 instead of an
+	// incrementing index: PDocument's destructor calls RemoveDocument(),
+	// which shrinks documentList while we're going through it.
 	PDocument	*currentDocument	= NULL;
 	status_t	err					= B_OK;
-	for (int32 i=0; i<documentList->CountItems();i++) {
-		currentDocument		= (PDocument *)documentList->ItemAt(i);
+	while (documentList->CountItems() > 0) {
+		currentDocument		= (PDocument *)documentList->ItemAt(0);
 		err = currentDocument->LockWithTimeout(TIMEOUT_LOCK);
 		if (err == B_OK) {
 			currentDocument->Quit();
-			delete currentDocument;
 		}
-		else
+		else {
 			printf("Error Locking PDocument - %s",strerror(err));
+			documentList->RemoveItem(currentDocument);
+		}
 	}
 	delete pluginManager;
 }
