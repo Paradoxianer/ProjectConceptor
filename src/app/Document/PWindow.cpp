@@ -36,6 +36,7 @@ PWindow::PWindow(BRect rect,PDocument *document):BWindow(rect,"ProjectConceptor"
 PWindow::PWindow(BMessage *archive):BWindow(archive)
 {
 	TRACE();
+	closing	= false;
 }
 
 
@@ -50,6 +51,7 @@ PWindow::~PWindow(void)
 void PWindow::Init(void)
 {
 	TRACE();
+	closing					= false;
 	oldShortcutMessage		= new BMessage();;
 	mainView				= NULL;
 	P_M_MAIN_VIEW_LEFT		= 0.0;

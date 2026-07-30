@@ -559,28 +559,31 @@ void GraphEditor::DetachedFromWindow(void) {
 	TRACE();
 	if (Window()) {
 		PWindow 	*pWindow		= (PWindow *)Window();
-		BMenuBar	*menuBar		= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
-		if (menuBar)
-			menuBar->RemoveItem(scaleMenu);
-//		pWindow->AddToolBar(toolBar);
-		pWindow->RemoveToolBar(G_E_TOOL_BAR	);
-		ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
-		if (configBar) {
-			configBar->RemoveItem(penSize);
-			configBar->RemoveItem(colorItem);
-			configBar->RemoveItem(patternItem);
-			configBar->RemoveSeperator();
-			configBar->RemoveItem(grid);
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
-			configBar->RemoveSeperator();
+		// While the whole window is closing, its menu bar/toolbars are being
+		// torn down as part of the same cascade - FindView() here can return
+		// a pointer to an already-destroyed sibling view. Only reachable in
+		// that case are those views, so skip it; RemoveRenderer() below only
+		// touches this editor's own state and stays safe either way.
+		if (!pWindow->IsClosing()) {
+			BMenuBar	*menuBar		= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
+			if (menuBar)
+				menuBar->RemoveItem(scaleMenu);
+			pWindow->RemoveToolBar(G_E_TOOL_BAR	);
+			ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
+			if (configBar) {
+				configBar->RemoveItem(penSize);
+				configBar->RemoveItem(colorItem);
+				configBar->RemoveItem(patternItem);
+				configBar->RemoveSeperator();
+				configBar->RemoveItem(grid);
+				configBar->RemoveSeperator();
+				configBar->RemoveSeperator();
+				configBar->RemoveSeperator();
+				configBar->RemoveSeperator();
+				configBar->RemoveSeperator();
+			}
 		}
 		Renderer	*nodeRenderer	= NULL;
-		for (int32 i=0;i<renderer->CountItems();i++) {
-			nodeRenderer = (Renderer *)renderer->ItemAt(i);
-		}
 		while(renderer->CountItems()>0) {
 			nodeRenderer = (Renderer *)renderer->ItemAt(0);
 			RemoveRenderer(nodeRenderer);

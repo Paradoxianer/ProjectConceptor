@@ -86,6 +86,13 @@ public:
 
 	virtual	bool			QuitRequested();
 
+	/**True from the point PDocument::QuitRequested() decides to actually
+	 * close this window. Editors get DetachedFromWindow() as part of that
+	 * same teardown and must not reach back into sibling views (menu bar,
+	 * toolbars) at that point - they may already be destroyed.
+	 */
+			bool			IsClosing(void){return closing;};
+			void			SetClosing(bool value){closing = value;};
 
 	virtual void			FrameResized(float width, float height);
 	virtual void			Show(void);
@@ -129,6 +136,7 @@ protected:
 
 			MainView		*mainView;
 			PDocument		*doc;
+			bool			closing;
 private:
 	#ifdef B_ZETA_VERSION_1_0_0
     	    BLanguageNotifier languageChanger;
