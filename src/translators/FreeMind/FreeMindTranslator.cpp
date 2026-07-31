@@ -129,7 +129,7 @@ status_t Converter::ConvertPDoc2FreeMind()
 	status_t		err					= B_OK;
 	BMessage		*inMessage			= new BMessage();
 	BMessage		*tmpMessage			= new BMessage();
-	void			*id					= NULL;
+	int32			id					= 0;
 
  	allConnections	= new BMessage();
 	selected		= new BMessage();
@@ -145,15 +145,15 @@ status_t Converter::ConvertPDoc2FreeMind()
 		int32 i = 0;
 		while(allNodes->FindMessage("node",i,tmpMessage)==B_OK)
 		{
-			tmpMessage->FindPointer("this",&id);
+			tmpMessage->FindInt32("this",&id);
 			nodes[id]=tmpMessage;
 			tmpMessage = new BMessage();
--			i++;
+			i++;
 		}
 		i = 0;
 		while(allConnections->FindMessage("node",i,tmpMessage)==B_OK)
 		{
-			tmpMessage->FindPointer("this",&id);
+			tmpMessage->FindInt32("this",&id);
 			connections[id]=tmpMessage;
 			tmpMessage = new BMessage();
 			i++;
@@ -222,9 +222,9 @@ status_t Converter::ConvertFreeMind2PDoc()
 TiXmlElement Converter::ProcessNode(BMessage *node)
 {
 	int32			i = 0;
-	void			*tmpNode		= NULL;
-	void			*fromNode		= NULL;
-	void			*toNode			= NULL;
+	int32			tmpNode			= 0;
+	int32			fromNode		= 0;
+	int32			toNode			= 0;
 	BMessage		*connection		= NULL;
 	BMessage		*data			= new BMessage();
 	BMessage		*attrib			= new BMessage();
@@ -233,14 +233,14 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 	char			*name			= NULL;
 
 	TiXmlElement	xmlNode("node");
-	node->FindPointer("this", &tmpNode);
+	node->FindInt32("this", &tmpNode);
 	//add this node to the processed List
 	processedIDs.insert(tmpNode);
 	//find the data field where name and attributes are stored
 	node->FindMessage(P_C_NODE_DATA,data);
 	data->FindString(P_C_NODE_NAME,(const char **)&name);
 	char *str = new char[64];
-	sprintf(str, "%p", *(void**)tmpNode);
+	sprintf(str, "%ld", (long)tmpNode);
 	xmlNode.SetAttribute("ID",str);
 	xmlNode.SetAttribute("TEXT",(const char *)name);
 	//add all Attributes
@@ -268,13 +268,13 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 		i++;
 	}
 	//find all outgoing connections
-	map<void*,BMessage*>::iterator iter;
+	map<int32,BMessage*>::iterator iter;
 	iter = connections.begin();
 	while (iter!=connections.end())
 	{
 		connection=(*iter).second;
-		connection->FindPointer(P_C_NODE_CONNECTION_FROM,&fromNode);
-		connection->FindPointer(P_C_NODE_CONNECTION_TO, &toNode);
+		connection->FindInt32(P_C_NODE_CONNECTION_FROM,&fromNode);
+		connection->FindInt32(P_C_NODE_CONNECTION_TO, &toNode);
 		if ((fromNode == tmpNode) && (processedIDs.find((*iter).first) == processedIDs.end()))
 		{
 			//check if the node was already insert if so we "connect via a arrowlink
@@ -282,17 +282,17 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 			{
 				TiXmlElement	xmlLink("arrowlink");
 				char *str = new char[64];
-				sprintf(str, "%p", *(void**)(*iter).first);
+				sprintf(str, "%ld", (long)(*iter).first);
 				xmlLink.SetAttribute("ID",str);
 				str = new char[64];
-				sprintf(str, "%p", *(void**)toNode);
+				sprintf(str, "%ld", (long)toNode);
 				xmlLink.SetAttribute("DESTINATION",str);
 				xmlNode.InsertEndChild(xmlLink);
 				processedIDs.insert((*iter).first);
 			}
 			else
 			{
-				map<void*,BMessage*>::iterator	found;
+				map<int32,BMessage*>::iterator	found;
 				found = nodes.find(toNode);
 				if (found!=nodes.end())
 				{
@@ -308,10 +308,10 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 			{
 				TiXmlElement	xmlLink("arrowlink");
 				char *str = new char[64];
-				sprintf(str, "%p", *(void**)(*iter).first);
+				sprintf(str, "%ld", (long)(*iter).first);
 				xmlLink.SetAttribute("ID",str);
 				str = new char[64];
-				sprintf(str, "%p", *(void**)fromNode);
+				sprintf(str, "%ld", (long)fromNode);
 				xmlLink.SetAttribute("DESTINATION",str);
 				xmlNode.InsertEndChild(xmlLink);
 			}
@@ -324,16 +324,18 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 BMessage* Converter::GuessStartNode(void)
 {
 	BMessage	*connection	= NULL;
-	void		*fromNode	= NULL;
-	void		*toNode		= NULL;
-	void		*nodeID		= NULL;
-	bool		found;
-	set<void*>	visited;
-	map<void*,BMessage*>::iterator iter;
+	int32		fromNode	= 0;
+	int32		toNode		= 0;
+	int32		nodeID		= 0;
+	bool		found		= false;
+	set<int32>	visited;
+	map<int32,BMessage*>::iterator iter;
+	if (connections.empty() || nodes.empty())
+		return nodes.empty() ? NULL : nodes.begin()->second;
 	iter = connections.begin();
 	//if there is a node given... we search for a Connection wich points to this node
 	connection = (*iter).second;
-	if (connection->FindPointer(P_C_NODE_CONNECTION_FROM, &fromNode) == B_OK)
+	if (connection->FindInt32(P_C_NODE_CONNECTION_FROM, &fromNode) == B_OK)
 	{
 		nodeID = fromNode;
 		visited.insert(fromNode);
@@ -346,7 +348,7 @@ BMessage* Converter::GuessStartNode(void)
 		while ((iter!=connections.end()) && (!found))
 		{
 			connection=(*iter).second;
-			connection->FindPointer(P_C_NODE_CONNECTION_TO,&toNode);
+			connection->FindInt32(P_C_NODE_CONNECTION_TO,&toNode);
 			if (toNode == fromNode)
 			{
 				visited.insert(fromNode);
@@ -359,7 +361,7 @@ BMessage* Converter::GuessStartNode(void)
 	}
 	iter = nodes.find(nodeID);
 	//we didnt find a node while searching through the connections...
-	if ((*iter).second == NULL){
+	if (iter == nodes.end()){
 		iter=nodes.begin();
 	}
 	return (*iter).second;
@@ -386,8 +388,8 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 	if (parent->Attribute("ID"))
 	{
 		const char	*idString = parent->Attribute("ID");
-		void*	id	= GetID(idString);
-		pDocNode->AddPointer("this",id);
+		int32	id	= GetID(idString);
+		pDocNode->AddInt32("this",id);
 	}
 	if (parent->Attribute("CREATED"))
 		pDocNode->AddInt32(P_C_NODE_CREATED,atoi(parent->Attribute("CREATED")));
@@ -438,7 +440,7 @@ status_t Converter::CreateConnection(BMessage *container,TiXmlElement *start,TiX
 	BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
 	BMessage	*data	= new BMessage();
 	char	*idFrom = (char*)start->Attribute("ID");
-	connection->AddPointer(P_C_NODE_CONNECTION_FROM,(void *)GetID(idFrom));
+	connection->AddInt32(P_C_NODE_CONNECTION_FROM,GetID(idFrom));
 	char	*idTo;
 	const char	*value= end->Value();
 	int32	found	= strcmp(end->Value(),"node");
@@ -455,14 +457,17 @@ status_t Converter::CreateConnection(BMessage *container,TiXmlElement *start,TiX
 		else
 			data->AddString(P_C_NODE_NAME,"Unnamed");
 	}
-	connection->AddPointer(P_C_NODE_CONNECTION_TO,GetID(idTo));
+	connection->AddInt32(P_C_NODE_CONNECTION_TO,GetID(idTo));
 	connection->AddMessage(P_C_NODE_DATA,data);
-	container->AddMessage("nodes", connection);
+	// PDocLoader::ReIndexConnections looks for the field "node" (singular) -
+	// this was "nodes", so every connection imported from a FreeMind file
+	// was silently invisible to the loader.
+	container->AddMessage("node", connection);
 }
 
-void* Converter::GetID(const char *idString)
+int32 Converter::GetID(const char *idString)
 {
-	void*	id;
+	int32	id	= 0;
 	if (strstr(idString,"Freemind")!=NULL)
 		sscanf(idString,"Freemind_Link_%d", &id);
 	else
