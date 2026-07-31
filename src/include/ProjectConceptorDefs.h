@@ -290,6 +290,14 @@ extern const char*		P_C_NODE_OUTGOING;			//		= "Node::outgoing"
 
 extern const int32		P_C_VERSION;//						= "0.01a Revision 132";
 
+/**Field name for the document format version written by PDocument::Archive()
+ * and checked by PDocument::Load(). Bumped whenever the on-disk shape of a
+ * document changes in a way older builds can't read (e.g. the move from
+ * pointer-identity to int32 ids in the Indexer).
+ */
+extern const char*		P_C_DOC_FORMAT_VERSION_FIELD;//	= "pc:format_version"
+extern const int32		P_C_DOC_FORMAT_VERSION;//			= 2
+
 
 #endif
 

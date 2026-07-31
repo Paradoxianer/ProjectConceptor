@@ -36,23 +36,31 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 		if (!included->HasItem(node))
 			included->AddItem(node);
 		returnNode = new BMessage(*node);
-		returnNode->AddPointer("this",node);
+		returnNode->AddInt32("this",IdFor(node));
 			// we need to check for the allNodes List
 		if ((returnNode->FindPointer(P_C_NODE_ALLNODES,(void **)&allNodeList) == B_OK) && (allNodeList != NULL) )
 		{
+			returnNode->RemoveName(P_C_NODE_ALLNODES);
 			for (i=0; i<allNodeList->CountItems();i++)
 			{
 				subNode =(BMessage *) allNodeList->ItemAt(i);
-				returnNode->AddPointer("allNodesList",subNode);
+				returnNode->AddInt32("allNodesList",IdFor(subNode));
 			}
 		}
 		if ((returnNode->FindPointer(P_C_NODE_ALLCONNECTIONS,(void **)&allConnectionList) == B_OK) && (allConnectionList != NULL) )
 		{
+			returnNode->RemoveName(P_C_NODE_ALLCONNECTIONS);
 			for (i=0; i<allConnectionList->CountItems();i++)
 			{
 				subNode =(BMessage *) allConnectionList->ItemAt(i);
-				returnNode->AddPointer("allConnectionsList",IndexConnection(subNode));
+				returnNode->AddInt32("allConnectionsList",IdFor(subNode));
 			}
+		}
+		void	*parent	= NULL;
+		if (returnNode->FindPointer(P_C_NODE_PARENT,&parent) == B_OK)
+		{
+			returnNode->RemoveName(P_C_NODE_PARENT);
+			returnNode->AddInt32(P_C_NODE_PARENT,IdFor((BMessage*)parent));
 		}
 
 		//here we also run the node through the available Editors so that they can save all they need :-)
@@ -80,7 +88,7 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes)
 {
 	TRACE();
 	BMessage *returnNode	= new BMessage(*connection);
-	returnNode->AddPointer("this",connection);
+	returnNode->AddInt32("this",IdFor(connection));
 	BMessage *from			= NULL;
 	BMessage *to			= NULL;
 	if (includeNodes)
@@ -102,7 +110,18 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes)
 	}
 	else
 	{
-		//**do we need a check if this node wich we are linking to is indexed??
+		void	*fromPointer	= NULL;
+		void	*toPointer		= NULL;
+		if (returnNode->FindPointer(P_C_NODE_CONNECTION_FROM,&fromPointer) == B_OK)
+		{
+			returnNode->RemoveName(P_C_NODE_CONNECTION_FROM);
+			returnNode->AddInt32(P_C_NODE_CONNECTION_FROM,IdFor((BMessage*)fromPointer));
+		}
+		if (returnNode->FindPointer(P_C_NODE_CONNECTION_TO,&toPointer) == B_OK)
+		{
+			returnNode->RemoveName(P_C_NODE_CONNECTION_TO);
+			returnNode->AddInt32(P_C_NODE_CONNECTION_TO,IdFor((BMessage*)toPointer));
+		}
 	}
 	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 	BasePlugin	*plugin		= NULL;
@@ -157,6 +176,7 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes)
 	int32		j				= 0;
 	if (includeNodes)
 	{
+		BList	nodePointers;
 		while (returnCommand->FindPointer("node",j,(void **)&node) == B_OK)
 		{
 			if (!included->HasItem(node))
@@ -164,16 +184,24 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes)
 				included->AddItem(node);
 				returnCommand->AddMessage("included_node",IndexNode(node));
 			}
+			nodePointers.AddItem(node);
 			j++;
+		}
+		if (nodePointers.CountItems() > 0)
+		{
+			returnCommand->RemoveName("node");
+			for (j=0; j<nodePointers.CountItems(); j++)
+				returnCommand->AddInt32("node",IdFor((BMessage*)nodePointers.ItemAt(j)));
 		}
 		char		*name	= NULL;
 		type_code	type	= 0;
 		int32		count	= 0;
 		while (returnCommand->GetInfo(B_MESSAGE_TYPE,i ,(char **)&name, &type, &count) == B_OK) {
-			if ( (returnCommand->FindMessage(name,count,&subCommand) == B_OK))
+			if ( (returnCommand->FindMessage(name,count-1,&subCommand) == B_OK))
 			{
-				IndexCommand(&subCommand);
-				returnCommand->ReplaceMessage(name,count,&subCommand);
+				BMessage	*indexedSub	= IndexCommand(&subCommand,true);
+				returnCommand->ReplaceMessage(name,count-1,indexedSub);
+				delete indexedSub;
 			}
 			i++;
 		}
@@ -184,41 +212,43 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes)
 
 BMessage* Indexer::RegisterDeIndexNode(BMessage *node)
 {
-	void		*tmpPointer			= NULL;
-	node->FindPointer("this",(void **)&tmpPointer);
+	int32		id				= 0;
+	node->FindInt32("this",&id);
 	node->RemoveName("this");
-	sorter[tmpPointer] = node;
+	sorter[id] = node;
 	return node;
 }
 
 BMessage* Indexer::DeIndexNode(BMessage *node)
 {
 	TRACE();
-	void		*subContainerEntry	= NULL;
+	int32		subId				= 0;
+	int32		parentId			= 0;
 	BList		*allNodesList		= new BList();
-	BList		*allConnectionsList	= new BList();
-	void		*tmpPointer			= NULL;
 	int32		i					= 0;
-	map<void*,BMessage*>::iterator	nodeIndex;
-	if (node->FindPointer(P_C_NODE_ALLNODES,&tmpPointer) == B_OK)
-			node->RemoveName(P_C_NODE_ALLNODES);
-	
-	while (node->FindPointer("allNodesList",i,&subContainerEntry) == B_OK) {
-		nodeIndex = sorter.find(subContainerEntry);
+	std::map<int32,BMessage*>::iterator	nodeIndex;
+
+	while (node->FindInt32("allNodesList",i,&subId) == B_OK) {
+		nodeIndex = sorter.find(subId);
 		if (nodeIndex != sorter.end()){
 			allNodesList->AddItem(nodeIndex->second);
 			//delete just this entry from the Message
 			node->RemoveData("allNodesList",i);
+		} else {
+			PRINT(("ERROR:\tDeIndexNode - unresolved allNodesList id %ld\n",(long)subId));
+			i++;
 		}
 	}
 	if (allNodesList->CountItems()>0){
 			node->AddPointer(P_C_NODE_ALLNODES,allNodesList);
 	}
-	if (node->FindPointer(P_C_NODE_PARENT,(void **)&tmpPointer) == B_OK) {
-		nodeIndex = sorter.find(tmpPointer);
+	if (node->FindInt32(P_C_NODE_PARENT,&parentId) == B_OK) {
+		node->RemoveName(P_C_NODE_PARENT);
+		nodeIndex = sorter.find(parentId);
 		if (nodeIndex != sorter.end()) {
-			node->RemoveName(P_C_NODE_PARENT);
 			node->AddPointer(P_C_NODE_PARENT,nodeIndex->second);
+		} else {
+			PRINT(("ERROR:\tDeIndexNode - unresolved parent id %ld\n",(long)parentId));
 		}
 	}
 	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
@@ -239,24 +269,24 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 BMessage* Indexer::DeIndexConnection(BMessage *connection)
 {
 	TRACE();
-	void		*tmpPointer			= NULL;
+	int32		id				= 0;
 	if (connection)
 	{
-		void		*fromPointer		= NULL;
-		void		*toPointer			= NULL;
-		BMessage	*fromMessage		= new BMessage();
-		BMessage	*toMessage			= new BMessage();
-		// need to check this for every Pointer individual
-		if (connection->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&fromPointer) != B_OK)
-		{
-			connection->FindMessage(P_C_NODE_CONNECTION_FROM,fromMessage);
-			fromPointer = DeIndexNode(fromMessage);
-		}
-		if (connection->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&toPointer) != B_OK)
-		{
-			connection->FindMessage(P_C_NODE_CONNECTION_TO,toMessage);
-			toPointer	= DeIndexNode(toMessage);
-		}
+		int32		fromId			= 0;
+		int32		toId			= 0;
+		BMessage	*fromMessage	= new BMessage();
+		BMessage	*toMessage		= new BMessage();
+		BMessage	*resolvedFrom	= NULL;
+		BMessage	*resolvedTo		= NULL;
+		// two distinct cases: an embedded, already-indexed node (includeNodes
+		// path, e.g. clipboard copy) or a plain id reference into "sorter"
+		// (the normal save-to-file path) - never both for the same field.
+		bool		haveFromId		= (connection->FindInt32(P_C_NODE_CONNECTION_FROM,&fromId) == B_OK);
+		bool		haveToId		= (connection->FindInt32(P_C_NODE_CONNECTION_TO,&toId) == B_OK);
+		if (!haveFromId && connection->FindMessage(P_C_NODE_CONNECTION_FROM,fromMessage) == B_OK)
+			resolvedFrom = DeIndexNode(fromMessage);
+		if (!haveToId && connection->FindMessage(P_C_NODE_CONNECTION_TO,toMessage) == B_OK)
+			resolvedTo = DeIndexNode(toMessage);
 		connection->RemoveName(P_C_NODE_CONNECTION_FROM);
 		connection->RemoveName(P_C_NODE_CONNECTION_TO);
 		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
@@ -275,24 +305,29 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 			}
 		}
 
-//		if we cant find the right Pointer then add the old one
-		map<void*,BMessage*>::iterator indexFrom;
-		indexFrom=sorter.find(fromPointer);
-		if (indexFrom != sorter.end())
-			connection->AddPointer(P_C_NODE_CONNECTION_FROM,indexFrom->second);
-		else
-			connection->AddPointer(P_C_NODE_CONNECTION_FROM,fromPointer);
-//		if we cant find the right Pointer then add the old one
-		map<void*,BMessage*>::iterator indexTo;
-		indexTo=sorter.find(toPointer);
-		if (indexTo != sorter.end())
-			connection->AddPointer(P_C_NODE_CONNECTION_TO,indexTo->second);
-		else
-			connection->AddPointer(P_C_NODE_CONNECTION_TO,toPointer);
+		if (haveFromId) {
+			std::map<int32,BMessage*>::iterator indexFrom = sorter.find(fromId);
+			if (indexFrom != sorter.end())
+				resolvedFrom = indexFrom->second;
+			else
+				PRINT(("ERROR:\tDeIndexConnection - unresolved from id %ld\n",(long)fromId));
+		}
+		if (resolvedFrom)
+			connection->AddPointer(P_C_NODE_CONNECTION_FROM,resolvedFrom);
+
+		if (haveToId) {
+			std::map<int32,BMessage*>::iterator indexTo = sorter.find(toId);
+			if (indexTo != sorter.end())
+				resolvedTo = indexTo->second;
+			else
+				PRINT(("ERROR:\tDeIndexConnection - unresolved to id %ld\n",(long)toId));
+		}
+		if (resolvedTo)
+			connection->AddPointer(P_C_NODE_CONNECTION_TO,resolvedTo);
 	}
-	connection->FindPointer("this",(void **)&tmpPointer);
+	connection->FindInt32("this",&id);
 	connection->RemoveName("this");
-	sorter[tmpPointer]=connection;
+	sorter[id]=connection;
 	return connection;
 }
 
@@ -333,11 +368,26 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 		i++;
 	}
 	i = 0;
-	//replace the old Pointer with the new ones
-	while (command->FindPointer("node",i,(void **)&node) == B_OK)
+	// "node" is stored as int32 ids on disk (AddInt32 in IndexCommand) but
+	// consumers like PCommand::Undo() expect live BMessage* pointers -
+	// ReplacePointer() would fail with B_BAD_TYPE against an int32 field, so
+	// the field is rebuilt from scratch rather than replaced in place.
+	int32			nodeId	= 0;
+	BList			resolvedNodes;
+	while (command->FindInt32("node",i,&nodeId) == B_OK)
 	{
-		command->ReplacePointer("node",i,sorter[node]);
+		std::map<int32,BMessage*>::iterator	nodeIndex	= sorter.find(nodeId);
+		if (nodeIndex != sorter.end())
+			resolvedNodes.AddItem(nodeIndex->second);
+		else
+			PRINT(("ERROR:\tDeIndexCommand - unresolved node id %ld\n",(long)nodeId));
 		i++;
+	}
+	if (i > 0)
+	{
+		command->RemoveName("node");
+		for (int32 k=0; k<resolvedNodes.CountItems(); k++)
+			command->AddPointer("node",resolvedNodes.ItemAt(k));
 	}
 	return command;
 }
@@ -353,7 +403,30 @@ BMessage* Indexer::DeIndexUndo(BMessage *undo)
 void Indexer::Init(void)
 {
 	TRACE();
-	sorter				= map<void* ,BMessage*>();
+	sorter				= std::map<int32,BMessage*>();
+	ids					= std::map<BMessage*,int32>();
+	nextId				= 1;
 	included			= new BList();
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
+}
+
+int32 Indexer::IdFor(BMessage *node)
+{
+	if (node == NULL)
+		return 0;
+	std::map<BMessage*,int32>::iterator it = ids.find(node);
+	if (it != ids.end())
+		return it->second;
+	int32	id	= nextId++;
+	ids[node]	= id;
+	return id;
+}
+
+bool Indexer::ResolveId(int32 id,BMessage **node)
+{
+	std::map<int32,BMessage*>::iterator it = sorter.find(id);
+	if (it == sorter.end())
+		return false;
+	*node = it->second;
+	return true;
 }

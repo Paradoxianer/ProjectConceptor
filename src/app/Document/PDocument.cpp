@@ -1,6 +1,7 @@
 #include <interface/Alert.h>
 #include <interface/PrintJob.h>
 #include <interface/Screen.h>
+#include <support/Autolock.h>
 #include <support/Debug.h>
 #include <support/String.h>
 #include <storage/NodeInfo.h>
@@ -72,6 +73,7 @@ status_t PDocument::Archive(BMessage* archive, bool deep) const
 	BMessage	*allConnectionsMessage	= new BMessage();
 	BMessage	*selectedMessage		= new BMessage();
 
+	archive->AddInt32(P_C_DOC_FORMAT_VERSION_FIELD,P_C_DOC_FORMAT_VERSION);
 	archive->AddMessage("PDocument::documentSetting",documentSetting);
 	//save all Nodes
 	for (i=0; i<allNodes->CountItems();i++) {
@@ -87,7 +89,7 @@ status_t PDocument::Archive(BMessage* archive, bool deep) const
 	archive->AddMessage("PDocument::allConnections",allConnectionsMessage);
 	//save the selected List
 	for (i=0; i<selected->CountItems();i++) {
-		selectedMessage->AddPointer("node",selected->ItemAt(i));
+		selectedMessage->AddInt32("node",indexer->IdFor((BMessage *)selected->ItemAt(i)));
 	}
 	archive->AddMessage("PDocument::selected",selectedMessage);
 	//save all Command related Stuff like Undo/Makor
@@ -589,7 +591,7 @@ void PDocument::Load(void)
 	BMessage			*loaded			= new BMessage();
 	int32				i				= 0;
 	translator_info		*indentifed		= new translator_info;
-	bool locked = Lock();
+	BAutolock			autolock(this);
 
 	if (file->InitCheck() == B_OK) {
 		roster	= BTranslatorRoster::Default();
@@ -606,6 +608,16 @@ void PDocument::Load(void)
 	else
 	 //**error handling
 	;
+
+	int32	fileVersion	= 0;
+	if ((loaded->FindInt32(P_C_DOC_FORMAT_VERSION_FIELD,&fileVersion) != B_OK)
+		|| (fileVersion != P_C_DOC_FORMAT_VERSION)) {
+		(new BAlert(B_TRANSLATE("Error"),
+			B_TRANSLATE("This file was saved by an incompatible version of ProjectConceptor and cannot be opened."),
+			"Ohh"))->Go();
+		return;
+	}
+
 	//docloader handles the Format and Stuff also the input translation
 	PDocLoader	*docLoader	= new PDocLoader(this,loaded);
 	delete printerSetting;
@@ -643,8 +655,6 @@ void PDocument::Load(void)
 //	commandManager->LoadUndo(docLoader->GetCommandManagerMessage());
 	SetPrintSettings( docLoader->GetPrinterSetting());
 	editorManager->BroadCast(new BMessage(P_C_VALUE_CHANGED));
-	if (locked)
-		Unlock();
 }
 
 void PDocument::SavePanel()

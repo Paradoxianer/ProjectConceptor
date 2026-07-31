@@ -85,7 +85,13 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	outDestination->Seek(0, SEEK_SET);
 	inSource->Seek(0, SEEK_SET);
 	inMessage->Unflatten(inSource);
-	//translations Process 
+	//translations Process
+	int32	formatVersion	= 0;
+	if (inMessage->FindInt32(P_C_DOC_FORMAT_VERSION_FIELD,&formatVersion) == B_OK)
+		outMessage->AddInt32(P_C_DOC_FORMAT_VERSION_FIELD,formatVersion);
+	BMessage	*documentSetting	= new BMessage();
+	inMessage->FindMessage("PDocument::documentSetting",documentSetting);
+	outMessage->AddMessage("PDocument::documentSetting",documentSetting);
 	inMessage->FindMessage("PDocument::allNodes",allNodes);
 	outMessage->AddMessage("PDocument::allNodes",allNodes);
 	inMessage->FindMessage("PDocument::allConnections",allConnections);

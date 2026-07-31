@@ -6,11 +6,9 @@
 #include <storage/File.h>
 #include <support/List.h>
 #include <map>
-using namespace std;
 
 class PDocument;
 class PluginManager;
-typedef multimap<int32, BMessage*>::iterator iter;
 /**
  * @class Indexer
  *
@@ -24,7 +22,11 @@ typedef multimap<int32, BMessage*>::iterator iter;
  * @date 2006/05/01
  * @Contact: mail@projectconceptor.de
  *
- *
+ * Identity on disk is a stable int32 id, assigned per Indexer instance (i.e.
+ * per save) via IdFor() - not a persistent property of the live node/
+ * connection BMessage. On load, RegisterDeIndexNode()/DeIndexConnection()
+ * populate "sorter" (id -> freshly allocated BMessage*) so later references
+ * to the same id resolve to the same new object.
  */
 
 class Indexer
@@ -34,34 +36,45 @@ public:
 								Indexer(PDocument *documnent);
 								~Indexer(void);
 
-			BMessage*			IndexNode(BMessage *node);	
-			BMessage*			IndexConnection(BMessage *connection,bool includeNodes=false);	
-			BMessage*			IndexUndo(BMessage *undo,bool includeNodes=false);	
+			BMessage*			IndexNode(BMessage *node);
+			BMessage*			IndexConnection(BMessage *connection,bool includeNodes=false);
+			BMessage*			IndexUndo(BMessage *undo,bool includeNodes=false);
 //			BMessage*			IndexMacro(BMessage *macro,bool includeNodes=false);
 			BMessage*			IndexMacroCommand(BMessage *macro);
-			BMessage*			IndexCommand(BMessage *command,bool includeNodes=false);	
-			BMessage*			PointerForIndex(void* index){return sorter[index];};
-			
+			BMessage*			IndexCommand(BMessage *command,bool includeNodes=false);
+			/**find-or-assign the stable id for a live node/connection BMessage
+			 * for the duration of this Indexer instance (one save operation)
+			 */
+			int32				IdFor(BMessage *node);
+
 			BMessage*			RegisterDeIndexNode(BMessage *node);
 
 			BMessage*			DeIndexNode(BMessage *node);
-			BMessage*			DeIndexConnection(BMessage *connection);	
-			BMessage*			DeIndexUndo(BMessage *undo);	
+			BMessage*			DeIndexConnection(BMessage *connection);
+			BMessage*			DeIndexUndo(BMessage *undo);
 //			BMessage*			DeIndexMacro(BMessage *macro);
 			BMessage*			DeIndexMacroCommand(BMessage *macro){return DeIndexCommand(macro);};
 
-			BMessage*			DeIndexCommand(BMessage *command);	
+			BMessage*			DeIndexCommand(BMessage *command);
+			/**resolve a previously registered id to the BMessage it belongs to
+			 * in this load. Returns false (and leaves *node untouched) if the
+			 * id is unknown - callers must not treat that as "no reference",
+			 * only as "could not resolve", and should log it.
+			 */
+			bool				ResolveId(int32 id,BMessage **node);
 
 protected:
 			void				Init(void);
 
-			
+
 			PDocument			*doc;
-			map<void*,BMessage*>	sorter;
+			std::map<int32,BMessage*>	sorter;
+			std::map<BMessage*,int32>	ids;
+			int32				nextId;
 			BList				*included;
 
 			PluginManager		*pluginManager;
-		
+
 
 private:
 

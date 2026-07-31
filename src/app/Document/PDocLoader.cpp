@@ -2,6 +2,7 @@
 #include "PDocument.h"
 
 #include <support/Archivable.h>
+#include <support/Debug.h>
 
 PDocLoader::PDocLoader(PDocument *doc,BMessage *loadableMessage)
 {
@@ -92,11 +93,15 @@ BList* PDocLoader::ReIndexSelected(BMessage *selectionMessage)
 {
 	BList		*newSelection		= new BList();
 	int32		i					= 0;
-	void		*selectPointer		= NULL;
+	int32		selectId			= 0;
+	BMessage	*resolved			= NULL;
 
-	while (selectionMessage->FindPointer("node",i,&selectPointer) == B_OK)
+	while (selectionMessage->FindInt32("node",i,&selectId) == B_OK)
 	{
-		newSelection->AddItem(indexer->PointerForIndex(selectPointer));
+		if (indexer->ResolveId(selectId,&resolved))
+			newSelection->AddItem(resolved);
+		else
+			PRINT(("ERROR:\tReIndexSelected - unresolved id %ld\n",(long)selectId));
 		i++;
 	}
 	return newSelection;
