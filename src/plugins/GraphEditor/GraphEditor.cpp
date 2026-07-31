@@ -795,7 +795,7 @@ void GraphEditor::InsertObject(BPoint where,bool deselect) {
 
 void GraphEditor::InsertRenderObject(BMessage *node) {
 	TRACE();
-	if ((node->what == P_C_CONNECTION_TYPE) || (node->what == P_C_CLASS_TYPE)) {
+	if ((node->what == P_C_CONNECTION_TYPE) || (node->what == P_C_CLASS_TYPE) || (node->what == P_C_GROUP_TYPE)) {
 	    Renderer *render = CreateRendererFor(node);
 		if (render != NULL)
 			AddRenderer(render);
