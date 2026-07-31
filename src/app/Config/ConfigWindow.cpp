@@ -21,10 +21,10 @@ void ConfigWindow::ChangeLanguage(){
 
 }
 
-void ConfigWindow::SetConfigMessage(BMessage *_configMessage){
+void ConfigWindow::SetConfigMessage(BMessage *_configMessage, BMessenger docTarget){
 TRACE();
 	configMessage=_configMessage;
-        mainConfigView->SetConfigMessage(configMessage);
+        mainConfigView->SetConfigMessage(configMessage, docTarget);
 }
 
 void ConfigWindow::Quit(){

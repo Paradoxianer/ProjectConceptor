@@ -182,6 +182,10 @@ protected:
 			/**save the file temporary for restoring
 			 */
 	 		void				AutoSave(void);
+			/**(re)creates or stops the autoSaver BMessageRunner from the
+			 * current AutoSave settings in documentSetting
+			 */
+			void				ApplyAutoSaveSettings(void);
 			/* puts all PDocument data to the given Stream;
 			 */
 			void				PushToStream(BPositionIO *pushTo);

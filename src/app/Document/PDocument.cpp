@@ -203,6 +203,10 @@ void PDocument::MessageReceived(BMessage* message) {
 			AutoSave();
 			break;
 		}
+		case P_C_DOC_SETTINGS_CHANGED: {
+			ApplyAutoSaveSettings();
+			break;
+		}
 		case P_C_RESTORE_SAVE: {
 			//for the Moment we use autosave ;-)
 			AutoSave();
@@ -247,8 +251,13 @@ void PDocument::Init(){
 	entryRef		= NULL;
 	autoSaveRef		= NULL;
 	modified		= false;
-	//set autosave to 5 minutes for the beginning 5 * 60 = 300 *1000 (miliisek) *1000 =
-	autoSaveIntervall	= 300000000;
+	autoSaver		= NULL;
+	bool	autoSaveEnabled		= true;
+	if (documentSetting->FindBool(P_C_DOC_AUTOSAVE_ENABLED,&autoSaveEnabled) != B_OK)
+		documentSetting->AddBool(P_C_DOC_AUTOSAVE_ENABLED,autoSaveEnabled);
+	int32	autoSaveSeconds		= 300;
+	if (documentSetting->FindInt32(P_C_DOC_AUTOSAVE_INTERVAL,&autoSaveSeconds) != B_OK)
+		documentSetting->AddInt32(P_C_DOC_AUTOSAVE_INTERVAL,autoSaveSeconds);
 	editorManager	= new PEditorManager(this);
 	commandManager	= new PCommandManager(this);
 	//** to do.. helpManager		= new HelpManager();
@@ -256,9 +265,7 @@ void PDocument::Init(){
 	BRect	windowRect	= tmpScreen->Frame();
 	windowRect.InsetBy(50,50);
 	window			= new PWindow(windowRect,this);
-	autoSaver		= new BMessageRunner(BMessenger(this),
-										 new BMessage(P_C_AUTO_SAVE),
-										 autoSaveIntervall);
+	ApplyAutoSaveSettings();
 	if (locked)
 		UnlockLooper();
 }
@@ -345,7 +352,7 @@ void PDocument::ShowSettings(void)
 {
 	bool locked = Lock();
 	ConfigWindow *configWin = documentManager->GetConfigWindow();
-	configWin->SetConfigMessage(documentSetting);
+	configWin->SetConfigMessage(documentSetting,BMessenger(this));
 	configWin->Show();
 	if (locked)
 		Unlock();
@@ -859,6 +866,26 @@ void PDocument::AutoSave(void)
 	BFile	*autoSave	= new BFile((const BEntry *)autoSaveRef,B_READ_WRITE | B_ERASE_FILE | B_CREATE_FILE);
 	PushToStream(autoSave);
 	delete autoSave;
+}
+
+void PDocument::ApplyAutoSaveSettings(void)
+{
+	TRACE();
+	bool	enabled		= true;
+	int32	seconds		= 300;
+	documentSetting->FindBool(P_C_DOC_AUTOSAVE_ENABLED,&enabled);
+	documentSetting->FindInt32(P_C_DOC_AUTOSAVE_INTERVAL,&seconds);
+	if (seconds <= 0)
+		seconds = 300;
+	autoSaveIntervall	= (bigtime_t)seconds * 1000000;
+
+	delete autoSaver;
+	autoSaver = NULL;
+	if (enabled) {
+		autoSaver = new BMessageRunner(BMessenger(this),
+										new BMessage(P_C_AUTO_SAVE),
+										autoSaveIntervall);
+	}
 }
 
 void PDocument::PushToStream(BPositionIO *pushTo) {

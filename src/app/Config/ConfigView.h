@@ -2,13 +2,15 @@
 #define CONFIG_VIEW_H
 
 #include <app/Message.h>
+#include <app/Messenger.h>
 #include <interface/Box.h>
 #include <interface/OutlineListView.h>
 #include <interface/Rect.h>
 #include <GridView.h>
 #include <Box.h>
 
-
+class BCheckBox;
+class BTextControl;
 
 /**
  * @class ConfigView
@@ -32,10 +34,11 @@ public:
 //					~ConfigView();
 
 	virtual	void			ChangeLanguage(void);
-	virtual	void			SetConfigMessage(BMessage *configureMessage);
+	virtual	void			SetConfigMessage(BMessage *configureMessage, BMessenger docTarget);
 	virtual	BMessage*		GetConfigMessage(void){return configMessage;};
 	virtual void 			ValueChanged(void);
 	virtual void			MessageReceived(BMessage *msg);
+	virtual void			AttachedToWindow(void);
 
 protected:
 	virtual	void			BuildConfigList(BMessage *confMessage, BListItem *parent);
@@ -43,5 +46,8 @@ protected:
 private:
             void			Init();
         BMessage			*configMessage;
+        BMessenger			documentTarget;
+        BCheckBox			*autoSaveCheckBox;
+        BTextControl		*autoSaveIntervalControl;
 };
 #endif

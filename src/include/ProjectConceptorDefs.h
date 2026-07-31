@@ -43,6 +43,9 @@ const uint32	P_C_REMOVE_EDITOR				= 'pcRE';
 
 const uint32	P_C_AUTO_SAVE					= 'pcAS';
 const uint32	P_C_RESTORE_SAVE				= 'pcRS';
+/** sent to a PDocument's BMessenger when its autosave settings were
+ *  changed in the settings UI, so the document can re-apply them live */
+const uint32	P_C_DOC_SETTINGS_CHANGED		= 'pcSC';
 
 /*const uint32	P_C_GROUP_TYPE					= 'pcGr';
 const uint32	P_C_NODE_TYPE					= 'pcNd';
@@ -297,6 +300,12 @@ extern const int32		P_C_VERSION;//						= "0.01a Revision 132";
  */
 extern const char*		P_C_DOC_FORMAT_VERSION_FIELD;//	= "pc:format_version"
 extern const int32		P_C_DOC_FORMAT_VERSION;//			= 2
+
+/** Field names for the per-document autosave settings, stored in
+ * PDocument::documentSetting (bool / int32 seconds).
+ */
+extern const char*		P_C_DOC_AUTOSAVE_ENABLED;//		= "AutoSave::enabled"
+extern const char*		P_C_DOC_AUTOSAVE_INTERVAL;//		= "AutoSave::interval"
 
 
 #endif

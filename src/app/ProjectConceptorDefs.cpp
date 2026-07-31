@@ -12,6 +12,9 @@ const int32		P_C_VERSION			= 12;
 const char*		P_C_DOC_FORMAT_VERSION_FIELD	= "pc:format_version";
 const int32		P_C_DOC_FORMAT_VERSION			= 2;
 
+const char*		P_C_DOC_AUTOSAVE_ENABLED		= "AutoSave::enabled";
+const char*		P_C_DOC_AUTOSAVE_INTERVAL		= "AutoSave::interval";
+
 
 
 const char*		P_MENU_APP_HELP					= B_TRANSLATE("Help");

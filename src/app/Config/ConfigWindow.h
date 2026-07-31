@@ -8,6 +8,7 @@
 
 
 #include <app/Message.h>
+#include <app/Messenger.h>
 #include <interface/Window.h>
 #include <interface/TabView.h>
 
@@ -28,7 +29,7 @@ class ConfigWindow : public BWindow
 
 public:
                                         ConfigWindow(BMessage *forMessage);
-		void			SetConfigMessage(BMessage *_configMessage);
+		void			SetConfigMessage(BMessage *_configMessage, BMessenger docTarget);
 virtual	void                            Quit(void);
 protected:
 		void			ChangeLanguage(void);

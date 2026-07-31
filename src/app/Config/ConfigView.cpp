@@ -8,6 +8,8 @@
 #include <ScrollView.h>
 #include <Slider.h>
 #include <StringView.h>
+#include <String.h>
+#include <stdlib.h>
 
 
 #include "ConfigView.h"
@@ -23,32 +25,51 @@ ConfigView::ConfigView(BMessage *_configMessage):BGridView(10,10){
 
 void ConfigView::Init(){
     BGridLayout     *gridLayout = GridLayout();
-    BCheckBox       *checkBox   = new BCheckBox(NULL,new BMessage(AUTOSAVE_TOGGLED));
-    BTextControl    *textControl = new BTextControl("AutoSave","Autosaveintervall", "5", new BMessage(AUTOSAVE_CHANGED));
- //   AddChild(textControl);
+    autoSaveCheckBox        = new BCheckBox(NULL,new BMessage(AUTOSAVE_TOGGLED));
+    autoSaveIntervalControl = new BTextControl("AutoSave","Autosaveintervall", "5", new BMessage(AUTOSAVE_CHANGED));
 
     // row 1
    gridLayout->AddView(new BStringView("CheckBoxLabel","Autosave enabled"), 0, 0);
-   gridLayout->AddView(checkBox, 1, 0);
+   gridLayout->AddView(autoSaveCheckBox, 1, 0);
 
    //row 2
-   gridLayout->AddItem(textControl->CreateLabelLayoutItem(), 0, 1);
-   gridLayout->AddItem(textControl->CreateTextViewLayoutItem(), 1, 1);
+   gridLayout->AddItem(autoSaveIntervalControl->CreateLabelLayoutItem(), 0, 1);
+   gridLayout->AddItem(autoSaveIntervalControl->CreateTextViewLayoutItem(), 1, 1);
    gridLayout->AddItem(BSpaceLayoutItem::CreateGlue(),0,2);
+}
+
+void ConfigView::AttachedToWindow(void){
+	BGridView::AttachedToWindow();
+	// controls default their invocation target to the window; route them
+	// to this view instead so MessageReceived() below actually sees them
+	autoSaveCheckBox->SetTarget(this);
+	autoSaveIntervalControl->SetTarget(this);
 }
 
 void ConfigView::ChangeLanguage(){
 	TRACE();
 }
 
-void ConfigView::SetConfigMessage(BMessage *configureMessage){
+void ConfigView::SetConfigMessage(BMessage *configureMessage, BMessenger docTarget){
 	TRACE();
-	configMessage=configureMessage;
+	configMessage	= configureMessage;
+	documentTarget	= docTarget;
 	ValueChanged();
 }
 
 void ConfigView::ValueChanged(void){
 	TRACE();
+	if (configMessage == NULL)
+		return;
+	bool	enabled		= true;
+	int32	interval	= 300;
+	configMessage->FindBool(P_C_DOC_AUTOSAVE_ENABLED,&enabled);
+	configMessage->FindInt32(P_C_DOC_AUTOSAVE_INTERVAL,&interval);
+	autoSaveCheckBox->SetValue(enabled ? B_CONTROL_ON : B_CONTROL_OFF);
+	autoSaveIntervalControl->SetEnabled(enabled);
+	BString intervalText;
+	intervalText << interval;
+	autoSaveIntervalControl->SetText(intervalText.String());
 }
 
 
@@ -57,9 +78,32 @@ void ConfigView::BuildConfigList(BMessage *confMessage, BListItem *parentItem){
 }
 
 void ConfigView::MessageReceived(BMessage *msg){
-	if (msg->what == MESSAGE_SELECTED){
-/*		MessageItem	*selectedItem= dynamic_cast<MessageItem*> (configList->ItemAt(configList->CurrentSelection()));
-		if (selectedItem != NULL)
-			showMessage->SetConfigMessage(selectedItem->Message());*/
+	switch (msg->what) {
+		case AUTOSAVE_TOGGLED: {
+			bool enabled = (autoSaveCheckBox->Value() == B_CONTROL_ON);
+			if (configMessage->ReplaceBool(P_C_DOC_AUTOSAVE_ENABLED,enabled) != B_OK)
+				configMessage->AddBool(P_C_DOC_AUTOSAVE_ENABLED,enabled);
+			autoSaveIntervalControl->SetEnabled(enabled);
+			documentTarget.SendMessage(P_C_DOC_SETTINGS_CHANGED);
+			break;
+		}
+		case AUTOSAVE_CHANGED: {
+			int32 interval = atoi(autoSaveIntervalControl->Text());
+			if (interval <= 0)
+				interval = 300;
+			if (configMessage->ReplaceInt32(P_C_DOC_AUTOSAVE_INTERVAL,interval) != B_OK)
+				configMessage->AddInt32(P_C_DOC_AUTOSAVE_INTERVAL,interval);
+			documentTarget.SendMessage(P_C_DOC_SETTINGS_CHANGED);
+			break;
+		}
+		case MESSAGE_SELECTED: {
+/*			MessageItem	*selectedItem= dynamic_cast<MessageItem*> (configList->ItemAt(configList->CurrentSelection()));
+			if (selectedItem != NULL)
+				showMessage->SetConfigMessage(selectedItem->Message());*/
+			break;
+		}
+		default:
+			BGridView::MessageReceived(msg);
+			break;
 	}
 }
