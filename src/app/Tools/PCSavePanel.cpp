@@ -1,5 +1,6 @@
 #include <interface/Window.h>
 #include <Catalog.h>
+#include <string.h>
 
 #include "PCSavePanel.h"
 #include "ProjectConceptorDefs.h"
@@ -22,7 +23,25 @@ PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target): BFilePanel(B_SAVE_
 	BRect limit 				= background->Bounds();
 	limit.bottom				= height;
 	BMenu		*format_menu	= BuildFormatsMenu();
-	format_menu->ItemAt(0)->SetMarked(true);
+	// Default to the native ProjectConceptor format, not whatever translator
+	// GetAllTranslators() happens to enumerate first (e.g. FreeMind) - saving
+	// without touching the format menu should never silently export into an
+	// unrelated format.
+	BMenuItem	*defaultItem	= NULL;
+	for (int32 i=0; i<format_menu->CountItems(); i++) {
+		BMenuItem	*item	= format_menu->ItemAt(i);
+		const char	*name	= NULL;
+		if ( (item->Message() != NULL)
+			&& (item->Message()->FindString("format::name",&name) == B_OK)
+			&& (strcmp(name,"ProjectConceptor Document") == 0) ) {
+			defaultItem = item;
+			break;
+		}
+	}
+	if (defaultItem == NULL)
+		defaultItem = format_menu->ItemAt(0);
+	if (defaultItem != NULL)
+		defaultItem->SetMarked(true);
 	format_menu->SetLabelFromMarked(true);
 	BRect rect;
 	textView=Window()->FindView("text view");
