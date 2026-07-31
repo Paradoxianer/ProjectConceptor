@@ -849,12 +849,15 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
 			(wichRenderer->GetMessage())->RemoveName(renderString);
 		//check if this rendere belongs to the grapheditor or if not it belongs to a group so the group will take care to remove the renderer from its renderlist
 		ClassRenderer* cRenderer = dynamic_cast <ClassRenderer*>(wichRenderer);
-		if (cRenderer != NULL) {
-			GroupRenderer* gRenderer = (GroupRenderer*)FindRenderer(cRenderer->Parent()) ;
-			if (gRenderer != NULL)
-				gRenderer->RemoveRenderer(wichRenderer);
-		}
-		if (renderer->HasItem(wichRenderer)){	
+		GroupRenderer* gRenderer = NULL;
+		if ((cRenderer != NULL) && (cRenderer->Parent() != NULL))
+			gRenderer = (GroupRenderer*)FindRenderer(cRenderer->Parent());
+		if (gRenderer != NULL) {
+			// the group owns this renderer's lifetime and already deletes it -
+			// falling through to the renderer->RemoveItem/delete below too was
+			// a double free.
+			gRenderer->RemoveRenderer(wichRenderer);
+		} else if (renderer->HasItem(wichRenderer)){
 			renderer->RemoveItem(wichRenderer);
 			delete wichRenderer;
 			wichRenderer=NULL;
