@@ -425,6 +425,9 @@ void PWindow::MessageReceived(BMessage *message)
 			break;
 		case MENU_FILE_SAVEAS:
 			break;
+		case MENU_APP_SETTINGS:
+			doc->ShowSettings();
+			break;
 		case MENU_FILE_SAVE:
 			break;
 		case B_SAVE_REQUESTED:
