@@ -847,20 +847,24 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
 			mouseReciver = NULL;
 		if (wichRenderer->GetMessage())
 			(wichRenderer->GetMessage())->RemoveName(renderString);
+		// A grouped renderer is registered both here (added once when its
+		// node was first created) and in its GroupRenderer's own list
+		// (GroupRenderer::InsertRenderObject). It has to come out of this
+		// list unconditionally, whichever owner ends up deleting it -
+		// otherwise DetachedFromWindow()'s drain loop keeps re-reading the
+		// same (already freed) pointer and either double-frees or spins
+		// forever.
+		renderer->RemoveItem(wichRenderer);
 		//check if this rendere belongs to the grapheditor or if not it belongs to a group so the group will take care to remove the renderer from its renderlist
 		ClassRenderer* cRenderer = dynamic_cast <ClassRenderer*>(wichRenderer);
 		GroupRenderer* gRenderer = NULL;
 		if ((cRenderer != NULL) && (cRenderer->Parent() != NULL))
 			gRenderer = (GroupRenderer*)FindRenderer(cRenderer->Parent());
 		if (gRenderer != NULL) {
-			// the group owns this renderer's lifetime and already deletes it -
-			// falling through to the renderer->RemoveItem/delete below too was
-			// a double free.
+			// the group owns this renderer's lifetime and deletes it
 			gRenderer->RemoveRenderer(wichRenderer);
-		} else if (renderer->HasItem(wichRenderer)){
-			renderer->RemoveItem(wichRenderer);
+		} else {
 			delete wichRenderer;
-			wichRenderer=NULL;
 		}
 	}
 /*	delete rendersensitv;
