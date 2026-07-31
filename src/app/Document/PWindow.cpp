@@ -464,7 +464,12 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	rect.bottom -= mainView->TabHeight();
 	mainView->AddTab(editor->GetView(), tab);
 	tab->SetLabel(name);
-	mainView->Select(tab);
+	// Only select the tab we just added if it's the first one - otherwise
+	// whichever editor plugin happens to be discovered/loaded last always
+	// wins the initial focus (alphabetically NavigatorEditor after
+	// GraphEditor), regardless of which is actually the primary editor.
+	if (mainView->CountTabs() == 1)
+		mainView->Select(tab);
 	BMessage *configMessage	= editor->GetConfiguration();
 	if (configMessage)
 	{
