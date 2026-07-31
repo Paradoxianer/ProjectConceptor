@@ -27,6 +27,7 @@ ProjektConceptor::~ProjektConceptor() {
 	TRACE();
 	delete documentManager;
 	delete openPanel;
+	delete configManager;
 }
 
 void ProjektConceptor::ReadyToRun() {
@@ -41,8 +42,7 @@ void ProjektConceptor::ReadyToRun() {
 	err = settingsDir->CreateDirectory("ProjectConceptor", NULL);
 	err = settingsDir->SetTo(settingsDir, "ProjectConceptor");
 	settings.SetTo(settingsDir, "GeneralSettings");
-	ConfigManager		*configManager = new ConfigManager((char *)settings.Path());
-	configManager->LoadConfig();
+	configManager = new ConfigManager((char *)settings.Path());
 	err = settingsDir->CreateDirectory("AutoSave", NULL);
 }
 

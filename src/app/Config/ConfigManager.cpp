@@ -16,15 +16,18 @@
 
 
 ConfigManager::ConfigManager(char *_path, BMessage *newConfig){
-// if no Message was passed we just create a Message :)
-    if (newConfig == NULL) {
-        config = new BMessage();
-        TestInit();
-    }
-    else
-        config = newConfig;
-    path = new BString(_path);
-    SaveConfig();
+	path = new BString(_path);
+	if (newConfig != NULL) {
+		config = newConfig;
+		return;
+	}
+	// if no Message was passed we start from defaults, then try to load
+	// the persisted config over them; only if no config file exists yet
+	// do we persist the defaults.
+	config = new BMessage();
+	_SetDefaults();
+	if (!LoadConfig())
+		SaveConfig();
 }
 
 BMessage* ConfigManager::GetConfigMessage(const char *name){
@@ -61,13 +64,19 @@ status_t ConfigManager::SetConfigMessage(const char *name,BMessage *newConfig){
 	return err;
 }
 
-void  ConfigManager::LoadConfig(void){
+bool ConfigManager::LoadConfig(void){
 	TRACE();
 	MessageXmlReader messageXml = MessageXmlReader();
 	messageXml.SetTo(*path);
-	if (messageXml.InitCheck())
-        config=messageXml.Read();
+	if (messageXml.InitCheck() != B_OK)
+		return false;
+	BMessage *loaded = messageXml.Read();
+	if (loaded == NULL)
+		return false;
+	delete config;
+	config = loaded;
 	DEBUG_ONLY(config->PrintToStream());
+	return true;
 }
 
 void ConfigManager::SaveConfig(){
@@ -79,13 +88,8 @@ void ConfigManager::SaveConfig(){
         messageXml.Write(*config);
 }
 
-void ConfigManager::TestInit(){
-	BMessage	* subMessage = new BMessage();
-	subMessage->AddBool("TestBool",false);
-	subMessage->AddString("TestString","This is a TestString");
-	subMessage->AddInt32("TestInt32",42);
-	config->AddBool("AutoSave",true);
-    config->AddString("Test","TestString");
-    config->AddPoint("My nice Point", BPoint(55,77));
-    config->AddMessage("SubConfig",subMessage);
+void ConfigManager::_SetDefaults(){
+	// populated by callers that need app-wide defaults (shortcuts,
+	// window geometry, recent files, ...); empty config is a valid
+	// starting point on first run.
 }

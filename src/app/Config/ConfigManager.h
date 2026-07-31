@@ -36,11 +36,11 @@ public:
 	 *  if you pass a NULL for the char it replaces the whole config Message
 	 */
 	status_t			SetConfigMessage(const char *name,BMessage *newConfig);
-	void				LoadConfig(void);
+	bool				LoadConfig(void);
 	void				SaveConfig();
 
 private:
-	void				TestInit(void);
+	void				_SetDefaults(void);
 	BMessage			*config;
 	BString				*path;
    // ConfigWindow		*configWindow;
