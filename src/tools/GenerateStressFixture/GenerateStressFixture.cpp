@@ -83,7 +83,7 @@ int main(int argc, char **argv)
 		fprintf(stderr,"usage: %s <output.pcd> [nodeCount]\n",argv[0]);
 		return 1;
 	}
-	int32	nodeCount	= (argc > 2) ? atoi(argv[2]) : 300;
+	int32	nodeCount	= (argc > 2) ? atoi(argv[2]) : 2200;
 	const int32	columns	= 20;
 
 	BApplication		app(GEN_APP_SIGNATURE);
