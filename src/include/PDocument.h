@@ -51,6 +51,11 @@ public:
 
 								PDocument(PDocumentManager *initManager);
 								PDocument(PDocumentManager *initManager,entry_ref *openEntry);
+	/** headless is only there to distinguish this overload - builds a
+	 * PDocument with no window/editorManager, for unit tests exercising
+	 * Indexer/PCommand without an app_server. See docs/notes.md.
+	 */
+								PDocument(PDocumentManager *initManager,bool headless);
 
 								PDocument(BMessage *archive);
 
@@ -177,6 +182,10 @@ public:
 			BMessage*			FindObject(BPoint *where);
 
 protected:
+			/** BLists, documentSetting, autosave settings - everything
+			 * shared by every Init() path, no window/editorManager
+			 */
+			void				_InitData(void);
 			void				Init(void);
 			void				Init(BMessage *archive);
 			/**save the file temporary for restoring

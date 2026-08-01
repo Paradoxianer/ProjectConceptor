@@ -39,6 +39,18 @@ PDocument::PDocument(PDocumentManager *initManager):BLooper()
 	Run();
 }
 
+// headless is only there to distinguish this overload - no window, no
+// editorManager, just enough state (allNodes/allConnections/commandManager)
+// for Indexer/PCommand tests to run without an app_server. See docs/notes.md.
+PDocument::PDocument(PDocumentManager *initManager,bool headless):BLooper()
+{
+	TRACE();
+	documentManager=initManager;
+	_InitData();
+	commandManager	= new PCommandManager(this);
+	Run();
+}
+
 PDocument::PDocument(PDocumentManager *initManager,entry_ref *openEntry):BLooper()
 {
 	TRACE();
@@ -237,9 +249,8 @@ void PDocument::MessageReceived(BMessage* message) {
 
 }
 
-void PDocument::Init(){
+void PDocument::_InitData(void){
 	TRACE();
-	bool locked = Lock();
 	allNodes		= new BList();
 	allConnections	= new BList();
 	selected		= new BList();
@@ -258,12 +269,21 @@ void PDocument::Init(){
 	autoSaveRef		= NULL;
 	modified		= false;
 	autoSaver		= NULL;
+	editorManager	= NULL;
+	commandManager	= NULL;
+	window			= NULL;
 	bool	autoSaveEnabled		= true;
 	if (documentSetting->FindBool(P_C_DOC_AUTOSAVE_ENABLED,&autoSaveEnabled) != B_OK)
 		documentSetting->AddBool(P_C_DOC_AUTOSAVE_ENABLED,autoSaveEnabled);
 	int32	autoSaveSeconds		= 300;
 	if (documentSetting->FindInt32(P_C_DOC_AUTOSAVE_INTERVAL,&autoSaveSeconds) != B_OK)
 		documentSetting->AddInt32(P_C_DOC_AUTOSAVE_INTERVAL,autoSaveSeconds);
+}
+
+void PDocument::Init(){
+	TRACE();
+	bool locked = Lock();
+	_InitData();
 	editorManager	= new PEditorManager(this);
 	commandManager	= new PCommandManager(this);
 	//** to do.. helpManager		= new HelpManager();
