@@ -12,6 +12,7 @@
 
 #include "MessageXmlReader.h"
 #include "MessageXmlWriter.h"
+#include "ProjectConceptorDefs.h"
 
 
 
@@ -31,21 +32,16 @@ ConfigManager::ConfigManager(char *_path, BMessage *newConfig){
 }
 
 BMessage* ConfigManager::GetConfigMessage(const char *name){
-	BMessage	*tmpMessage = NULL;
-	status_t	err			= B_OK;
-	ssize_t		size;
-	
 	if (name == NULL)
 		return config;
-	else {
-		err = config->FindData(name, B_MESSAGE_TYPE,(const void **)&tmpMessage,&size);
-		if (size<=0)
-		err = B_ERROR;
-	}
-	if (err != B_OK)
-		return NULL;
-	else
-		return tmpMessage;
+	// nested BMessages are stored flattened, not as live pointers, so this
+	// always has to hand back a copy - modify it and pass it to
+	// SetConfigMessage() to persist changes.
+	BMessage	*subMessage	= new BMessage();
+	if (config->FindMessage(name,subMessage) == B_OK)
+		return subMessage;
+	delete subMessage;
+	return NULL;
 }
 
 

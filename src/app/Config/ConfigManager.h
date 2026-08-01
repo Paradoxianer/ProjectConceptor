@@ -28,8 +28,11 @@ class ConfigManager
 {
 public:
 						ConfigManager( char *path,BMessage* newConfig=NULL);
-	/** returns a Pointer to the BMessage holding the Configuration for the given name
-	 *  if the name is NULL all goes to the main settings)
+	/** returns the Configuration for the given name, or the whole config if
+	 *  NULL. Passing a name returns a copy owned by the caller (delete it
+	 *  when done, and pass an edited copy to SetConfigMessage() to persist
+	 *  changes); passing NULL returns the live config object - do not
+	 *  delete it.
 	 */
 	BMessage*           GetConfigMessage(const char *name=NULL);
 	/** pass a komplete new Configration to the Manager causes it to rewrite the Config file and recreate a Config GUI
