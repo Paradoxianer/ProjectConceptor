@@ -1,9 +1,11 @@
 #include <GroupLayout.h>
 #include <Button.h>
+#include <Messenger.h>
 #include <SpaceLayoutItem.h>
 #include <Catalog.h>
 
 #include "ConfigWindow.h"
+#include "PDocument.h"
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "ConfigWindow"
@@ -21,10 +23,11 @@ void ConfigWindow::ChangeLanguage(){
 
 }
 
-void ConfigWindow::SetConfigMessage(BMessage *_configMessage, BMessenger docTarget){
+void ConfigWindow::SetConfigMessage(BMessage *_configMessage, PDocument *forDoc){
 TRACE();
 	configMessage=_configMessage;
-        mainConfigView->SetConfigMessage(configMessage, docTarget);
+        mainConfigView->SetConfigMessage(configMessage, BMessenger(forDoc));
+        shortCutView->SetActiveDocument(forDoc);
 }
 
 void ConfigWindow::Quit(){
@@ -49,6 +52,12 @@ TRACE();
     pluginConfigView    = new PluginView();
     containerView->AddTab(pluginConfigView,pluginSettingsTab );
     pluginSettingsTab->SetLabel("Plugin Settings");
+
+    //Build ShortCutView
+    BTab    *shortcutsTab=new BTab();
+    shortCutView        = new ShortCutView();
+    containerView->AddTab(shortCutView,shortcutsTab);
+    shortcutsTab->SetLabel("Shortcuts");
 
     groupLayout->AddView(containerView);
 }

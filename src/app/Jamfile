@@ -66,6 +66,8 @@ PROJECT_CONCEPTOR_SOURCES =
 	ConfigManager.cpp
 	ConfigWindow.cpp
 	ConfigView.cpp
+	ShortCutView.cpp
+	KeyCaptureWindow.cpp
 	MessageXmlReader.cpp
 	MessageXmlWriter.cpp
 	PluginView.cpp

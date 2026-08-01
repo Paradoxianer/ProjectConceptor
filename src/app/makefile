@@ -36,6 +36,8 @@ SRCS= 	About/AboutWindow.cpp \
 		Config/ConfigManager.cpp \
 		Config/ConfigWindow.cpp \
 		Config/ConfigView.cpp \
+		Config/ShortCutView.cpp \
+		Config/KeyCaptureWindow.cpp \
 		Config/PluginView.cpp \
 		Config/PluginItem.cpp \
 		Config/PluginInfoView.cpp \
