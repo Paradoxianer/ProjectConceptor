@@ -19,6 +19,22 @@
 ProjektConceptor::ProjektConceptor():BApplication(APP_SIGNATURE) {
 	TRACE();
 	RegisterMime();
+	// configManager has to exist before the first document/editor does -
+	// GraphEditor reads shortcut bindings from it while attaching, and the
+	// very first document is created below, directly in this constructor,
+	// long before ReadyToRun() would otherwise run.
+	BPath		settings;
+	status_t	err				= B_OK;
+	BDirectory	*settingsDir	= NULL;
+
+	find_directory(B_USER_SETTINGS_DIRECTORY, &settings, true);
+	settingsDir = new BDirectory(settings.Path());
+	err = settingsDir->CreateDirectory("ProjectConceptor", NULL);
+	err = settingsDir->SetTo(settingsDir, "ProjectConceptor");
+	settings.SetTo(settingsDir, "GeneralSettings");
+	configManager = new ConfigManager((char *)settings.Path());
+	err = settingsDir->CreateDirectory("AutoSave", NULL);
+
 	documentManager = new PDocumentManager();
 	openPanel		= new BFilePanel();
 }
@@ -28,22 +44,6 @@ ProjektConceptor::~ProjektConceptor() {
 	delete documentManager;
 	delete openPanel;
 	delete configManager;
-}
-
-void ProjektConceptor::ReadyToRun() {
-	TRACE();
-	//creat settingsfolder
-	BPath		settings;
-	status_t	err				= B_OK;
-	BDirectory	*settingsDir	= NULL;
-	
-	find_directory(B_USER_SETTINGS_DIRECTORY, &settings, true);
-	settingsDir = new BDirectory(settings.Path());
-	err = settingsDir->CreateDirectory("ProjectConceptor", NULL);
-	err = settingsDir->SetTo(settingsDir, "ProjectConceptor");
-	settings.SetTo(settingsDir, "GeneralSettings");
-	configManager = new ConfigManager((char *)settings.Path());
-	err = settingsDir->CreateDirectory("AutoSave", NULL);
 }
 
 /**

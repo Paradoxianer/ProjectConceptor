@@ -26,7 +26,6 @@ class ProjektConceptor : public BApplication {
 									ProjektConceptor();
 									~ProjektConceptor();
 
-	virtual	void					ReadyToRun(void);
 	virtual	bool					QuitRequested(void);
 	virtual	void					MessageReceived(BMessage *message);
 	virtual	void					RefsReceived(BMessage *message);
