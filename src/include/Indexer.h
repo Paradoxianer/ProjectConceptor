@@ -65,6 +65,15 @@ public:
 
 protected:
 			void				Init(void);
+			/** one PEditor instance per editor plugin, built on first use
+			 * and reused for the rest of this Indexer's lifetime instead
+			 * of constructing (and leaking - see issue #71) a fresh one on
+			 * every single IndexNode/DeIndexNode/IndexConnection/
+			 * DeIndexConnection call. Safe because PreprocessBeforSave()/
+			 * PreprocessAfterLoad() only touch the BMessage passed to them,
+			 * never the editor's own instance state.
+			 */
+			BList*				GetCachedEditors(void);
 
 
 			PDocument			*doc;
@@ -74,6 +83,7 @@ protected:
 			BList				*included;
 
 			PluginManager		*pluginManager;
+			BList				*cachedEditors;
 
 
 private:

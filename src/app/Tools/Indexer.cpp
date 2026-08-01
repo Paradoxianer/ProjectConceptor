@@ -18,7 +18,32 @@ Indexer::~Indexer(void)
 {
 	TRACE();
 	delete included;
+	if (cachedEditors != NULL) {
+		for (int32 i = 0; i < cachedEditors->CountItems(); i++)
+			delete (PEditor*)cachedEditors->ItemAt(i);
+		delete cachedEditors;
+	}
+}
 
+BList* Indexer::GetCachedEditors(void)
+{
+	if (cachedEditors != NULL)
+		return cachedEditors;
+	cachedEditors = new BList();
+	BList		*editorPlugins	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
+	BasePlugin	*plugin			= NULL;
+	PEditor		*editor			= NULL;
+	if (editorPlugins) {
+		for (int32 i = 0; i < editorPlugins->CountItems(); i++) {
+			plugin = (BasePlugin *) editorPlugins->ItemAt(i);
+			if (plugin) {
+				editor = (PEditor *)plugin->GetNewObject(NULL);
+				if (editor)
+					cachedEditors->AddItem(editor);
+			}
+		}
+	}
+	return cachedEditors;
 }
 
 BMessage*	Indexer::IndexNode(BMessage *node)
@@ -64,22 +89,9 @@ BMessage*	Indexer::IndexNode(BMessage *node)
 		}
 
 		//here we also run the node through the available Editors so that they can save all they need :-)
-		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
-		BasePlugin	*plugin		= NULL;
-		PEditor		*editor		= NULL;
-		if (editorList)
-		{
-			for (i=0;i<editorList->CountItems();i++)
-			{
-				plugin = (BasePlugin *) editorList->ItemAt(i);
-				if (plugin)
-				{
-					editor=(PEditor *)plugin->GetNewObject(NULL);
-					editor->PreprocessBeforSave(returnNode);
-				}
-
-			}
-		}
+		BList	*editors	= GetCachedEditors();
+		for (i=0;i<editors->CountItems();i++)
+			((PEditor *)editors->ItemAt(i))->PreprocessBeforSave(returnNode);
 	}
 	return returnNode;
 }
@@ -123,22 +135,9 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes)
 			returnNode->AddInt32(P_C_NODE_CONNECTION_TO,IdFor((BMessage*)toPointer));
 		}
 	}
-	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
-	BasePlugin	*plugin		= NULL;
-	PEditor		*editor		= NULL;
-	if (editorList)
-	{
-		for (int32 i=0;i<editorList->CountItems();i++)
-		{
-			plugin = (BasePlugin *) editorList->ItemAt(i);
-			if (plugin)
-			{
-				editor=(PEditor *)plugin->GetNewObject(NULL);
-				editor->PreprocessBeforSave(returnNode);
-			}
-
-		}
-	}
+	BList	*editors	= GetCachedEditors();
+	for (int32 i=0;i<editors->CountItems();i++)
+		((PEditor *)editors->ItemAt(i))->PreprocessBeforSave(returnNode);
 	return returnNode;
 }
 
@@ -251,18 +250,9 @@ BMessage* Indexer::DeIndexNode(BMessage *node)
 			PRINT(("ERROR:\tDeIndexNode - unresolved parent id %ld\n",(long)parentId));
 		}
 	}
-	BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
-	BasePlugin	*plugin		= NULL;
-	PEditor		*editor		= NULL;
-	if (editorList) {
-		for (i=0;i<editorList->CountItems();i++) {
-			plugin = (BasePlugin *) editorList->ItemAt(i);
-			if (plugin){
-				editor=(PEditor *)plugin->GetNewObject(NULL);
-				editor->PreprocessAfterLoad(node);
-			}
-		}
-	}
+	BList	*editors	= GetCachedEditors();
+	for (i=0;i<editors->CountItems();i++)
+		((PEditor *)editors->ItemAt(i))->PreprocessAfterLoad(node);
 	return node;
 }
 
@@ -289,21 +279,9 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 			resolvedTo = DeIndexNode(toMessage);
 		connection->RemoveName(P_C_NODE_CONNECTION_FROM);
 		connection->RemoveName(P_C_NODE_CONNECTION_TO);
-		BList		*editorList	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
-		BasePlugin	*plugin		= NULL;
-		PEditor		*editor		= NULL;
-		if (editorList!=NULL)
-		{
-			for (int32 i=0;i<editorList->CountItems();i++)
-			{
-				plugin = (BasePlugin *) editorList->ItemAt(i);
-				if (plugin)
-				{
-					editor=(PEditor *)plugin->GetNewObject(NULL);
-					editor->PreprocessAfterLoad(connection);
-				}
-			}
-		}
+		BList	*editors	= GetCachedEditors();
+		for (int32 i=0;i<editors->CountItems();i++)
+			((PEditor *)editors->ItemAt(i))->PreprocessAfterLoad(connection);
 
 		if (haveFromId) {
 			std::map<int32,BMessage*>::iterator indexFrom = sorter.find(fromId);
@@ -408,6 +386,7 @@ void Indexer::Init(void)
 	nextId				= 1;
 	included			= new BList();
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
+	cachedEditors		= NULL;
 }
 
 int32 Indexer::IdFor(BMessage *node)

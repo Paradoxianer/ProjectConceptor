@@ -109,3 +109,34 @@ void IndexerTest::ConnectionRoundtrip(void)
 	CPPUNIT_ASSERT_EQUAL((void*)indexedFrom,resolvedFrom);
 	CPPUNIT_ASSERT_EQUAL((void*)indexedTo,resolvedTo);
 }
+
+void IndexerTest::ManyNodesDoNotLeakEditorInstances(void)
+{
+	// regression test for issue #71: IndexNode()/IndexConnection() used to
+	// construct a fresh, never-released PEditor per editor plugin on every
+	// single call. With real editor plugins loaded (this test binary's
+	// Plugins/ symlinks to the actual built plugins, see docs/notes.md)
+	// that exhausted the process's file descriptors around ~250 nodes -
+	// this document is well past that. Indexer::GetCachedEditors() now
+	// builds each editor once per Indexer instance and reuses it; if that
+	// regresses, this test either fails outright or the process crashes/
+	// hangs building the 250th-ish editor instance, same as the original
+	// bug did for the stress-fixture generator.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	Indexer		indexer(doc);
+
+	const int32	count	= 300;
+	BMessage	*previous	= NULL;
+	for (int32 i = 0; i < count; i++) {
+		BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+		BMessage	*indexed	= indexer.IndexNode(node);
+		CPPUNIT_ASSERT(indexed != NULL);
+		if (previous != NULL) {
+			BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
+			connection->AddPointer(P_C_NODE_CONNECTION_FROM,previous);
+			connection->AddPointer(P_C_NODE_CONNECTION_TO,node);
+			CPPUNIT_ASSERT(indexer.IndexConnection(connection,false) != NULL);
+		}
+		previous = node;
+	}
+}
