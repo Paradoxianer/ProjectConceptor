@@ -10,7 +10,9 @@
 #include <Catalog.h>
 
 #include "GraphEditor.h"
+#include "ConfigManager.h"
 #include "PCommandManager.h"
+#include "ProjectConceptor.h"
 #include "Renderer.h"
 #include "ClassRenderer.h"
 #include "ConnectionRenderer.h"
@@ -194,24 +196,34 @@ void GraphEditor::AttachedToManager(void) {
 	BMessage	*shortcuts	= new BMessage();
 	BMessage	*tmpMessage	= new BMessage();
 	BMessage	*sendMessage;
-	shortcuts->AddInt32("key",B_DELETE);
+
+	int32	deleteKey		= B_DELETE;
+	int32	deleteModifiers	= 0;
+	ReadShortcutBinding(P_C_SHORTCUT_ACTION_DELETE,&deleteKey,&deleteModifiers);
+	shortcuts->AddInt32("key",deleteKey);
 	sendMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 	sendMessage->AddString("Command::Name","Delete");
-	shortcuts->AddInt32("modifiers",0);
+	shortcuts->AddInt32("modifiers",deleteModifiers);
 	shortcuts->AddMessage("message",sendMessage);
 	shortcuts->AddPointer("handler",new BMessenger(doc,NULL,&err));
 
 
+	int32	addBoolKey			= 'b';
+	int32	addBoolModifiers	= B_COMMAND_KEY;
+	ReadShortcutBinding(P_C_SHORTCUT_ACTION_ADD_BOOL,&addBoolKey,&addBoolModifiers);
 	BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
 	addBoolMessage->AddInt32("type",B_BOOL_TYPE);
-	shortcuts->AddInt32("key",'b');
-	shortcuts->AddInt32("modifiers",B_COMMAND_KEY);
+	shortcuts->AddInt32("key",addBoolKey);
+	shortcuts->AddInt32("modifiers",addBoolModifiers);
 	shortcuts->AddMessage("message",addBoolMessage);
 	shortcuts->AddPointer("handler",new BMessenger(this,NULL,&err));
 
+	int32	insertKey		= B_INSERT;
+	int32	insertModifiers	= 0;
+	ReadShortcutBinding(P_C_SHORTCUT_ACTION_INSERT_NODE,&insertKey,&insertModifiers);
 	BMessage	*insertNode = new BMessage(G_E_INSERT_NODE);
-	shortcuts->AddInt32("key",B_INSERT);
-	shortcuts->AddInt32("modifiers",0);
+	shortcuts->AddInt32("key",insertKey);
+	shortcuts->AddInt32("modifiers",insertModifiers);
 	shortcuts->AddMessage("message",insertNode);
 	shortcuts->AddPointer("handler",new BMessenger(this,NULL,&err));
 
@@ -223,6 +235,20 @@ void GraphEditor::AttachedToManager(void) {
 /*	if (doc!=NULL)
 		this->ResizeTo(doc->Bounds().Width(),doc->Bounds().Height());*/
 	UpdateScrollBars();
+}
+
+void GraphEditor::ReadShortcutBinding(const char *action,int32 *key,int32 *modifiers)
+{
+	ConfigManager	*configManager	= ((ProjektConceptor*)be_app)->GetConfigManager();
+	BMessage		*shortcutsConfig	= configManager->GetConfigMessage(P_C_CONFIG_SHORTCUTS_FIELD);
+	if (shortcutsConfig == NULL)
+		return;
+	BMessage	binding;
+	if (shortcutsConfig->FindMessage(action,&binding) == B_OK) {
+		binding.FindInt32(P_C_SHORTCUT_KEY_FIELD,key);
+		binding.FindInt32(P_C_SHORTCUT_MODIFIERS_FIELD,modifiers);
+	}
+	delete shortcutsConfig;
 }
 
 void GraphEditor::DetachedFromManager(void) {

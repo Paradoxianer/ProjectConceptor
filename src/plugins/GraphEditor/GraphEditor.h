@@ -119,10 +119,15 @@ protected:
 			void			Init(void);
 			void			InsertObject(BPoint where,bool deselect);
 			void			InsertRenderObject(BMessage *node);
-			
+
 			void			DeleteFromList(Renderer *wichRenderer);
 			void			AddToList(Renderer *wichRenderer, int32 pos);
 			void			UpdateScrollBars(void);
+			/** overlays the app-wide binding for the given action name
+			 * (ConfigManager's Shortcuts config) onto *key/*modifiers,
+			 * leaving them at their passed-in defaults if none is set
+			 */
+			void			ReadShortcutBinding(const char *action,int32 *key,int32 *modifiers);
 
 
 

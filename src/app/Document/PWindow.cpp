@@ -54,6 +54,7 @@ void PWindow::Init(void)
 	closing					= false;
 	oldShortcutMessage		= new BMessage();;
 	mainView				= NULL;
+	shortcutFilter			= NULL;
 	P_M_MAIN_VIEW_LEFT		= 0.0;
 	P_M_MAIN_VIEW_TOP		= 0.0;
 	P_M_MAIN_VIEW_BOTTOM	= Bounds().Height();
@@ -69,6 +70,43 @@ void PWindow::Init(void)
 	BRect containerRect		= BRect(P_M_MAIN_VIEW_LEFT+1,P_M_MAIN_VIEW_TOP+2,P_M_MAIN_VIEW_RIGHT-1,P_M_MAIN_VIEW_BOTTOM-1);
 	mainView				= new MainView(doc,containerRect, "tabContainer");
 	AddChild(mainView);
+	ReloadMacroShortcuts();
+}
+
+void PWindow::ReloadMacroShortcuts(void)
+{
+	TRACE();
+	if (shortcutFilter != NULL) {
+		RemoveCommonFilter(shortcutFilter);
+		delete shortcutFilter;
+		shortcutFilter = NULL;
+	}
+
+	ConfigManager	*configManager		= ((ProjektConceptor*)be_app)->GetConfigManager();
+	BMessage		*macroShortcuts		= configManager->GetConfigMessage(P_C_CONFIG_MACRO_SHORTCUTS_FIELD);
+	if (macroShortcuts == NULL)
+		return;
+
+	BMessage	flatList;
+	int32		key			= 0;
+	int32		modifiers	= 0;
+	const char	*macroName	= NULL;
+	int32		i			= 0;
+	while (macroShortcuts->FindInt32(P_C_SHORTCUT_KEY_FIELD,i,&key) == B_OK) {
+		macroShortcuts->FindInt32(P_C_SHORTCUT_MODIFIERS_FIELD,i,&modifiers);
+		macroShortcuts->FindString(P_C_MACRO_SHORTCUT_NAME_FIELD,i,&macroName);
+		BMessage	*sendMessage	= new BMessage(P_C_PLAY_MACRO_BY_NAME);
+		sendMessage->AddString(P_C_MACRO_SHORTCUT_NAME_FIELD,macroName);
+		flatList.AddInt32("key",key);
+		flatList.AddInt32("modifiers",modifiers);
+		flatList.AddMessage("message",sendMessage);
+		flatList.AddPointer("handler",new BMessenger(doc));
+		i++;
+	}
+	delete macroShortcuts;
+
+	shortcutFilter = new ShortCutFilter(&flatList);
+	AddCommonFilter(shortcutFilter);
 }
 
 void PWindow::CreatEditorList(void)
@@ -85,6 +123,15 @@ void PWindow::CreatEditorList(void)
 //			subMenu->AddItem(new BMenuItem(B_TRANSLATE(editorPlg->GetName()),editorAdd));
 		}
 	}
+	// AddEditor() above selects each tab as it's added, purely to attach
+	// its view safely - the last one added (alphabetically NavigatorEditor,
+	// after GraphEditor) ends up selected as a side effect. Show the first
+	// one (GraphEditor) instead, now that every tab's view is attached.
+	bool locked = LockLooper();
+	if (mainView->CountTabs() > 0)
+		mainView->Select((int32)0);
+	if (locked)
+		UnlockLooper();
 }
 
 BMenuBar *PWindow::MakeMenu(void)
@@ -467,18 +514,15 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 	rect.bottom -= mainView->TabHeight();
 	mainView->AddTab(editor->GetView(), tab);
 	tab->SetLabel(name);
-	// Only select the tab we just added if it's the first one - otherwise
-	// whichever editor plugin happens to be discovered/loaded last always
-	// wins the initial focus (alphabetically NavigatorEditor after
-	// GraphEditor), regardless of which is actually the primary editor.
-	if (mainView->CountTabs() == 1)
-		mainView->Select(tab);
-	BMessage *configMessage	= editor->GetConfiguration();
-	if (configMessage)
-	{
-		BMessage *docSettings	= doc->DocumentSettings();
-		docSettings->AddMessage(name,configMessage);
-	}
+	// MainView doesn't use BLayout, so BTab::Select() is what actually
+	// AddChild()s a tab's view the first time - it never happens from
+	// AddTab() alone. Selecting every tab here keeps that first attach
+	// inside this LockLooper()'d call instead of deferring it to whatever
+	// context the tab happens to get clicked in for the first time later
+	// (a live mouse click wasn't a safe enough context - see issue #70).
+	// CreatEditorList() restores GraphEditor as the visible tab once every
+	// editor plugin has been added and attached this way.
+	mainView->Select(tab);
 	editor->GetView()->MakeFocus(true);
 	(editor->GetView())->ResizeTo(rect.Width()-B_V_SCROLL_BAR_WIDTH -2,rect.Height()-B_H_SCROLL_BAR_HEIGHT-2);
 	(editor->GetView())->MoveTo(2,2);

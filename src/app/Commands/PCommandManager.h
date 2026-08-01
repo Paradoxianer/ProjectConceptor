@@ -40,6 +40,12 @@ public:
 			void		StartMacro(void);
 			void		StopMacro(void);
 			void		PlayMacro(BMessage *makro);
+			/** looks up a macro by its "Name" field in macroList and plays
+			 * it if found; logs and does nothing otherwise - a document not
+			 * having a macro under an app-wide shortcut's name is a normal
+			 * case, not an error
+			 */
+			void		PlayMacroByName(const char *name);
 	virtual	status_t	RegisterPCommand(BasePlugin *commandPlugin);
 	virtual	void		UnregisterPCommand(char *name);
 

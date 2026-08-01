@@ -46,6 +46,11 @@ const uint32	P_C_RESTORE_SAVE				= 'pcRS';
 /** sent to a PDocument's BMessenger when its autosave settings were
  *  changed in the settings UI, so the document can re-apply them live */
 const uint32	P_C_DOC_SETTINGS_CHANGED		= 'pcSC';
+/** sent to a PDocument's BMessenger by an app-wide macro shortcut. Carries
+ *  the macro name (P_C_MACRO_SHORTCUT_NAME_FIELD) to look up in that
+ *  document's own macro list; if it has none by that name this is a no-op,
+ *  not an error - the same binding is meant to apply across documents. */
+const uint32	P_C_PLAY_MACRO_BY_NAME			= 'pcPN';
 
 /*const uint32	P_C_GROUP_TYPE					= 'pcGr';
 const uint32	P_C_NODE_TYPE					= 'pcNd';
@@ -306,6 +311,26 @@ extern const int32		P_C_DOC_FORMAT_VERSION;//			= 2
  */
 extern const char*		P_C_DOC_AUTOSAVE_ENABLED;//		= "AutoSave::enabled"
 extern const char*		P_C_DOC_AUTOSAVE_INTERVAL;//		= "AutoSave::interval"
+
+/** Field name for the app-wide editor action shortcuts in ConfigManager
+ * (a BMessage keyed by action name, each entry a BMessage with
+ * P_C_SHORTCUT_KEY_FIELD/P_C_SHORTCUT_MODIFIERS_FIELD int32 fields), and
+ * the action names GraphEditor currently binds.
+ */
+extern const char*		P_C_CONFIG_SHORTCUTS_FIELD;//		= "Shortcuts"
+extern const char*		P_C_SHORTCUT_ACTION_DELETE;//		= "Delete"
+extern const char*		P_C_SHORTCUT_ACTION_ADD_BOOL;//	= "AddBool"
+extern const char*		P_C_SHORTCUT_ACTION_INSERT_NODE;//	= "InsertNode"
+extern const char*		P_C_SHORTCUT_KEY_FIELD;//			= "key"
+extern const char*		P_C_SHORTCUT_MODIFIERS_FIELD;//	= "modifiers"
+
+/** Field names for the app-wide MacroShortcuts list in ConfigManager (a
+ * flat repeating list like ShortCutFilter's own AddShortCutList() format:
+ * P_C_SHORTCUT_KEY_FIELD/P_C_SHORTCUT_MODIFIERS_FIELD/
+ * P_C_MACRO_SHORTCUT_NAME_FIELD per entry, matched by index).
+ */
+extern const char*		P_C_CONFIG_MACRO_SHORTCUTS_FIELD;//	= "MacroShortcuts"
+extern const char*		P_C_MACRO_SHORTCUT_NAME_FIELD;//		= "macroName"
 
 
 #endif

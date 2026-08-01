@@ -207,6 +207,12 @@ void PDocument::MessageReceived(BMessage* message) {
 			ApplyAutoSaveSettings();
 			break;
 		}
+		case P_C_PLAY_MACRO_BY_NAME: {
+			const char	*macroName	= NULL;
+			if (message->FindString(P_C_MACRO_SHORTCUT_NAME_FIELD,&macroName) == B_OK)
+				commandManager->PlayMacroByName(macroName);
+			break;
+		}
 		case P_C_RESTORE_SAVE: {
 			//for the Moment we use autosave ;-)
 			AutoSave();
@@ -352,7 +358,7 @@ void PDocument::ShowSettings(void)
 {
 	bool locked = Lock();
 	ConfigWindow *configWin = documentManager->GetConfigWindow();
-	configWin->SetConfigMessage(documentSetting,BMessenger(this));
+	configWin->SetConfigMessage(documentSetting,this);
 	configWin->Show();
 	if (locked)
 		Unlock();

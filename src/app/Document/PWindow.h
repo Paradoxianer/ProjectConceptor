@@ -97,6 +97,13 @@ public:
 	virtual void			FrameResized(float width, float height);
 	virtual void			Show(void);
 			void			Init(void);
+	/**(Re)builds shortcutFilter from ConfigManager's app-wide
+	 * MacroShortcuts list and attaches it window-wide via
+	 * AddCommonFilter() - unlike editor action shortcuts, macro shortcuts
+	 * aren't tied to one editor tab. Call again after the list changes in
+	 * the Settings UI.
+	 */
+			void			ReloadMacroShortcuts(void);
 			float			P_M_MAIN_VIEW_LEFT;
 			float			P_M_MAIN_VIEW_TOP;
 			float			P_M_MAIN_VIEW_BOTTOM;

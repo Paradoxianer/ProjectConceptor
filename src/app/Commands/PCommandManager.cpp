@@ -192,6 +192,21 @@ void PCommandManager::PlayMacro(BMessage *makro) {
 
 }
 
+void PCommandManager::PlayMacroByName(const char *name) {
+	BMessage	*macro	= NULL;
+	bool		found	= false;
+	for (int32 i = 0; (!found) && (i < macroList->CountItems()); i++) {
+		macro = (BMessage *)macroList->ItemAt(i);
+		const char	*macroName	= NULL;
+		if ((macro->FindString("Name",&macroName) == B_OK) && (strcmp(macroName,name) == 0))
+			found = true;
+	}
+	if (found)
+		PlayMacro(macro);
+	else
+		PRINT(("PCommandManager::PlayMacroByName - no macro named \"%s\" in this document\n",name));
+}
+
 status_t PCommandManager::Execute(BMessage *settings) {
 	TRACE();
 	DEBUG_ONLY(settings->PrintToStream());

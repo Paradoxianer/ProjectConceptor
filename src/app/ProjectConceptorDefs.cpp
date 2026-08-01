@@ -15,6 +15,16 @@ const int32		P_C_DOC_FORMAT_VERSION			= 2;
 const char*		P_C_DOC_AUTOSAVE_ENABLED		= "AutoSave::enabled";
 const char*		P_C_DOC_AUTOSAVE_INTERVAL		= "AutoSave::interval";
 
+const char*		P_C_CONFIG_SHORTCUTS_FIELD		= "Shortcuts";
+const char*		P_C_SHORTCUT_ACTION_DELETE		= "Delete";
+const char*		P_C_SHORTCUT_ACTION_ADD_BOOL	= "AddBool";
+const char*		P_C_SHORTCUT_ACTION_INSERT_NODE	= "InsertNode";
+const char*		P_C_SHORTCUT_KEY_FIELD			= "key";
+const char*		P_C_SHORTCUT_MODIFIERS_FIELD	= "modifiers";
+
+const char*		P_C_CONFIG_MACRO_SHORTCUTS_FIELD	= "MacroShortcuts";
+const char*		P_C_MACRO_SHORTCUT_NAME_FIELD		= "macroName";
+
 
 
 const char*		P_MENU_APP_HELP					= B_TRANSLATE("Help");

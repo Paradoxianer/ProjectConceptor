@@ -85,7 +85,26 @@ void ConfigManager::SaveConfig(){
 }
 
 void ConfigManager::_SetDefaults(){
-	// populated by callers that need app-wide defaults (shortcuts,
-	// window geometry, recent files, ...); empty config is a valid
-	// starting point on first run.
+	BMessage	shortcuts;
+	BMessage	deleteBinding;
+	deleteBinding.AddInt32(P_C_SHORTCUT_KEY_FIELD,B_DELETE);
+	deleteBinding.AddInt32(P_C_SHORTCUT_MODIFIERS_FIELD,0);
+	shortcuts.AddMessage(P_C_SHORTCUT_ACTION_DELETE,&deleteBinding);
+
+	BMessage	addBoolBinding;
+	addBoolBinding.AddInt32(P_C_SHORTCUT_KEY_FIELD,'b');
+	addBoolBinding.AddInt32(P_C_SHORTCUT_MODIFIERS_FIELD,B_COMMAND_KEY);
+	shortcuts.AddMessage(P_C_SHORTCUT_ACTION_ADD_BOOL,&addBoolBinding);
+
+	BMessage	insertNodeBinding;
+	insertNodeBinding.AddInt32(P_C_SHORTCUT_KEY_FIELD,B_INSERT);
+	insertNodeBinding.AddInt32(P_C_SHORTCUT_MODIFIERS_FIELD,0);
+	shortcuts.AddMessage(P_C_SHORTCUT_ACTION_INSERT_NODE,&insertNodeBinding);
+
+	config->AddMessage(P_C_CONFIG_SHORTCUTS_FIELD,&shortcuts);
+
+	// empty on first run - populated by the user via the Shortcuts settings
+	// tab, entries are {key, modifiers, macroName} matched by index like
+	// ShortCutFilter::AddShortCutList() expects.
+	config->AddMessage(P_C_CONFIG_MACRO_SHORTCUTS_FIELD,new BMessage());
 }
