@@ -902,7 +902,14 @@ Renderer* GraphEditor::CreateRendererFor(BMessage *node)
 
 void GraphEditor::AddRenderer(Renderer* newRenderer) {
 	TRACE();
-	renderer->AddItem(newRenderer);
+	// RemoveRenderer() only removes the first matching entry from this list
+	// (BList::RemoveItem() - verified against Haiku's own List.cpp, it does
+	// an IndexOf() + single removal). A duplicate entry here would survive
+	// that removal as a dangling pointer once the object is deleted, and
+	// the next Draw() pass would read freed memory through it - guard
+	// against ever creating that duplicate in the first place.
+	if (!renderer->HasItem(newRenderer))
+		renderer->AddItem(newRenderer);
 	BringToFront(newRenderer);
 	activRenderer = newRenderer;
 }

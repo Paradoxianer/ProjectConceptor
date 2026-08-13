@@ -112,7 +112,11 @@ void GroupRenderer::InsertRenderObject(BMessage *node) {
 
 void GroupRenderer::AddRenderer(Renderer* newRenderer) {
 	TRACE();
-	renderer->AddItem(newRenderer);
+	// see the same guard in GraphEditor::AddRenderer() - RemoveRenderer()
+	// only drops the first matching entry, so a duplicate here would leave
+	// a second, stale reference in this group's own bookkeeping list
+	if (!renderer->HasItem(newRenderer))
+		renderer->AddItem(newRenderer);
 }
 
 void GroupRenderer::RemoveRenderer(Renderer *wichRenderer) {
