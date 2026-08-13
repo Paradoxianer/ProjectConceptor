@@ -917,25 +917,25 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
 			mouseReciver = NULL;
 		if (wichRenderer->GetMessage())
 			(wichRenderer->GetMessage())->RemoveName(renderString);
-		// A grouped renderer is registered both here (added once when its
-		// node was first created) and in its GroupRenderer's own list
-		// (GroupRenderer::InsertRenderObject). It has to come out of this
-		// list unconditionally, whichever owner ends up deleting it -
-		// otherwise DetachedFromWindow()'s drain loop keeps re-reading the
-		// same (already freed) pointer and either double-frees or spins
-		// forever.
 		renderer->RemoveItem(wichRenderer);
-		//check if this rendere belongs to the grapheditor or if not it belongs to a group so the group will take care to remove the renderer from its renderlist
+		// A grouped renderer is also tracked in its GroupRenderer's own
+		// `renderer` list (bookkeeping for cascading MoveBy/ResizeBy to
+		// children, see CreateRendererFor()) - drop it from there too, but
+		// GraphEditor is the only place that ever deletes a renderer.
+		// Letting the group also delete it (the previous design) meant two
+		// independent code paths could each decide they own the same
+		// object's lifetime - GroupRenderer::ValueChanged()'s own scan over
+		// changedNodes calls RemoveRenderer() on a child that's fallen out
+		// of the group *without* going through here at all, so whichever of
+		// the two ran first left the other holding a dangling pointer it
+		// would eventually double-free.
 		ClassRenderer* cRenderer = dynamic_cast <ClassRenderer*>(wichRenderer);
 		GroupRenderer* gRenderer = NULL;
 		if ((cRenderer != NULL) && (cRenderer->Parent() != NULL))
 			gRenderer = (GroupRenderer*)FindRenderer(cRenderer->Parent());
-		if (gRenderer != NULL) {
-			// the group owns this renderer's lifetime and deletes it
+		if (gRenderer != NULL)
 			gRenderer->RemoveRenderer(wichRenderer);
-		} else {
-			delete wichRenderer;
-		}
+		delete wichRenderer;
 	}
 /*	delete rendersensitv;
 	rendersensitv = new BRegion();

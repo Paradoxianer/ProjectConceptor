@@ -117,9 +117,13 @@ void GroupRenderer::AddRenderer(Renderer* newRenderer) {
 
 void GroupRenderer::RemoveRenderer(Renderer *wichRenderer) {
 	TRACE();
+	// bookkeeping only - GraphEditor::RemoveRenderer() is the single place
+	// that ever deletes a renderer (see the comment there). This just drops
+	// it from this group's own child list, e.g. because it fell out of the
+	// group's P_C_NODE_ALLNODES (GroupRenderer::ValueChanged()) or is being
+	// removed via GraphEditor::RemoveRenderer()'s delegation - either way
+	// the object may still be alive and owned elsewhere.
 	renderer->RemoveItem(wichRenderer);
-	delete wichRenderer;
-	wichRenderer=NULL;
 }
 
 
