@@ -73,6 +73,13 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings) {
 		if (node->what == P_C_GROUP_TYPE) {
 			if (!allNodes->HasItem(node))
 				allNodes->AddItem(node);
+			// the group node itself has to go through the P_C_VALUE_CHANGED
+			// path too, not just its children - otherwise nothing ever
+			// creates a GroupRenderer for it (GraphEditor::ValueChanged()
+			// only builds renderers for nodes it's told changed), so a
+			// freshly grouped set of nodes stays invisible: no box, and
+			// nothing there to receive a later double-click either
+			changed->insert(node);
 			//try to find the Lists for the Nodes where the grouped Node should go in
 			if (node->FindPointer(P_C_NODE_ALLNODES,(void **)&gAllNodes) != B_OK){
 				gAllNodes = new BList();

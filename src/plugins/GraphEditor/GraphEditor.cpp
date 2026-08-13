@@ -333,7 +333,6 @@ void GraphEditor::ProcessChangedNode(BMessage *node,BList *allNodes,BList *allCo
 	PRINT(("Changed node\n"););
 	DEBUG_ONLY(node->PrintToStream());
 	Renderer	*painter		= NULL;
-	void		*pointer		= NULL;
 	if (node->FindPointer(renderString,(void **)&painter) == B_OK) {
 		if (((allConnections->HasItem(node))||(allNodes->HasItem(node))) && painter != NULL)
 			painter->ValueChanged();
@@ -341,10 +340,12 @@ void GraphEditor::ProcessChangedNode(BMessage *node,BList *allNodes,BList *allCo
 			RemoveRenderer(FindRenderer(node));
 	}
 	else {
-		//**check if this node is in the node or connection list because if it is not it´s a node frome a subgroup or it was deleted
-		if (((allConnections->HasItem(node))||
-		     (allNodes->HasItem(node))) &&
-		    (node->FindPointer(P_C_NODE_PARENT,&pointer) !=B_OK))
+		// every node/connection still in the document gets a top-level
+		// renderer here, grouped or not - see the comment on
+		// CreateRendererFor() for why grouped ones aren't special-cased out
+		// anymore. If it's not in either list it was deleted (or never
+		// finished being created), nothing to do.
+		if ((allConnections->HasItem(node))||(allNodes->HasItem(node)))
 			InsertRenderObject(node);
 		else
 			RemoveRenderer(FindRenderer(node));
@@ -847,9 +848,7 @@ void GraphEditor::InsertRenderObject(BMessage *node) {
 	TRACE();
 	if ((node->what == P_C_CONNECTION_TYPE) || (node->what == P_C_CLASS_TYPE) || (node->what == P_C_GROUP_TYPE)) {
 	    Renderer *render = CreateRendererFor(node);
-		if (render != NULL)
-			AddRenderer(render);
-		else 
+		if (render == NULL)
 			fprintf(stderr, "GraphEditor: Couldnt create render for given node\n");
 	} else
 		fprintf(stderr,"GraphEditor: Error trying to insert a object which isnt actually a node oder connection \n" );
@@ -877,6 +876,18 @@ Renderer* GraphEditor::CreateRendererFor(BMessage *node)
 		break;
 	}
 	node->AddPointer(renderString,newRenderer);
+	// every renderer this factory hands out is always drawn via the normal
+	// top-level cycle (GraphEditor::Draw() -> renderer->DoForEach()), even
+	// one built by a GroupRenderer for a newly grouped child - a group's own
+	// `renderer` list (InsertRenderObject/AddRenderer in GroupRenderer.cpp)
+	// is bookkeeping for cascading MoveBy/ResizeBy to its children, not a
+	// second, parallel place things get painted. Without this, whichever of
+	// "the group" or "its new child" happened to be reached first in
+	// GraphEditor::ValueChanged()'s std::set iteration decided whether the
+	// child ended up registered here at all - non-deterministic and, in
+	// practice, usually wrong (issue #36 follow-up).
+	if (newRenderer != NULL)
+		AddRenderer(newRenderer);
 	return newRenderer;
 }
 
