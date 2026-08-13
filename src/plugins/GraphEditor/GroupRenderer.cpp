@@ -103,6 +103,10 @@ void GroupRenderer::InsertRenderObject(BMessage *node) {
 		AddRenderer(newRenderer);
 	else
 		AddRenderer(editor->CreateRendererFor(node));
+	// a child just joined this group for the first time (new insert, or an
+	// existing node grouped in) - grow the box to include it now instead of
+	// leaving it to whatever happens to touch this group's frame next
+	RecalcFrame(true);
 }
 
 
@@ -146,6 +150,12 @@ void GroupRenderer::RecalcFrame(bool toFit) {
 	groupFrame.top = groupFrame.top-15;
 	if (groupFrame != frame) {
 		frame =  frame | groupFrame;
+		// without this, the next ValueChanged() on this renderer (any later
+		// change anywhere - changedNodes never clears - will trigger one)
+		// re-reads P_C_NODE_FRAME from container via ClassRenderer's own
+		// ValueChanged() and overwrites this recalculation right back to
+		// its old, too-small value
+		container->ReplaceRect(P_C_NODE_FRAME,frame);
 		//** need to move the Attribs and the Name...
 		if (parentNode) {
 			GroupRenderer	*parent	= NULL;
