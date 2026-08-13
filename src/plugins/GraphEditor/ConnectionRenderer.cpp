@@ -289,15 +289,7 @@ void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
 }
 
 bool ConnectionRenderer::CaughtStraigt(BPoint where){
-	/*float newy	= (double)where.x*ax+mx;
-	float newx	= (double)where.y*ay+my;
-	float dx	= (newx-where.x);
-	float dy	= (newy-where.y);
-	float dist	= sqrt(dx*dx+dy*dy);
-	if (dist<max_entfernung)
-		return true;
-	else*/
-		return false;
+	return DistanceToSegment(where,fromPoint,toPoint) < max_entfernung;
 }
 
 bool ConnectionRenderer::CaughtBended(BPoint where){
@@ -324,12 +316,24 @@ float ConnectionRenderer::Distance(BPoint one, BPoint two)
 	return sqrt(dx*dx+dy*dy);
 }
 
+float ConnectionRenderer::DistanceToSegment(BPoint p, BPoint segStart, BPoint segEnd)
+{
+	float dx		= segEnd.x-segStart.x;
+	float dy		= segEnd.y-segStart.y;
+	float lengthSq	= dx*dx+dy*dy;
+	if (lengthSq == 0)
+		return Distance(p,segStart);
+	float t	= ((p.x-segStart.x)*dx+(p.y-segStart.y)*dy)/lengthSq;
+	t		= fmax(0.0f,fmin(1.0f,t));
+	return Distance(p,BPoint(segStart.x+t*dx,segStart.y+t*dy));
+}
+
 BPoint ConnectionRenderer::PointOnBezier(float t)
 {
 	double x1=fromPoint.x, y1=fromPoint.y;
 	double cx1=firstBend.x, cy1=firstBend.y;
 	double cx2=secondBend.x, cy2=secondBend.y;
-	double x2=toPoint.x, y2=toPoint.x;
+	double x2=toPoint.x, y2=toPoint.y;
 	double ax=cx1-x1, ay=cy1-y1;
 	double bx=cx2-cx1-ax, by=cy2-cy1-ay;
 	double cx=x2-cx2-ax-bx-bx; // instead of ...-ax-2*bx. Does it worth?
@@ -341,5 +345,9 @@ BPoint ConnectionRenderer::PointOnBezier(float t)
 }
 
 bool ConnectionRenderer::CaughtAngled(BPoint where){
-	return false;
+	if (DistanceToSegment(where,fromPoint,firstBend) < max_entfernung)
+		return true;
+	if (DistanceToSegment(where,firstBend,secondBend) < max_entfernung)
+		return true;
+	return DistanceToSegment(where,secondBend,toPoint) < max_entfernung;
 }

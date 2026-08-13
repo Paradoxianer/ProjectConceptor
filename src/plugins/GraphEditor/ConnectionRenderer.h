@@ -62,6 +62,7 @@ protected:
 			
 			BPoint		PointOnBezier(float t);
 			float		Distance(BPoint one, BPoint two);
+			float		DistanceToSegment(BPoint p, BPoint segStart, BPoint segEnd);
 
 	bool				selected;
 	BPoint				first,second,third;
