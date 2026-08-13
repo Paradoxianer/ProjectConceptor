@@ -276,7 +276,7 @@ BMenuBar *PWindow::MakeMenu(void)
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_WINDOW_TITLE);
-	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Title vertical"),new BMessage(MENU_WINDOW_TITLE_VERTICAL)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Title Vertical"),new BMessage(MENU_WINDOW_TITLE_VERTICAL)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_WINDOW_TITLE_VERTICAL);

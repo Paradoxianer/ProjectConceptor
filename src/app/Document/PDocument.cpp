@@ -510,7 +510,7 @@ void PDocument::Print(void)
 				}
 			}
 			else{
-				(new BAlert(B_TRANSLATE("Error"),B_TRANSLATE("No active Editor please install a Editor plugin."),"Ohh"))->Go();
+				(new BAlert(B_TRANSLATE("Error"),B_TRANSLATE("No active editor - please install an editor plugin."),"Ohh"))->Go();
 			}
 		}
 		Unlock();

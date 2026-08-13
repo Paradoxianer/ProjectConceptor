@@ -1061,7 +1061,7 @@ void URLView::LaunchURL() {
 		if( result != B_NO_ERROR  &&  result != B_ALREADY_RUNNING ) {
 			BAlert *alert = new BAlert( B_TRANSLATE("E-mail Warning"),
 										B_TRANSLATE("There is no e-mail program on your machine that is configured as the default program to send e-mail."),
-										"Ok", NULL, NULL, B_WIDTH_AS_USUAL,
+										B_TRANSLATE("OK"), NULL, NULL, B_WIDTH_AS_USUAL,
 										B_WARNING_ALERT );
 			alert->Go();
 		}
@@ -1076,7 +1076,7 @@ void URLView::LaunchURL() {
 		if( result != B_NO_ERROR  &&  result != B_ALREADY_RUNNING ) {
 			BAlert *alert = new BAlert(B_TRANSLATE("Web Browser Warning"),
 										B_TRANSLATE("There is no web browser on your machine that is configured as the default program to view web pages."),
-										B_TRANSLATE("Ok"), NULL, NULL, B_WIDTH_AS_USUAL,
+										B_TRANSLATE("OK"), NULL, NULL, B_WIDTH_AS_USUAL,
 										B_WARNING_ALERT );
 			alert->Go();
 		}
@@ -1092,7 +1092,7 @@ void URLView::LaunchURL() {
 		if( result != B_NO_ERROR  &&  result != B_ALREADY_RUNNING ) {
 			BAlert *alert = new BAlert( B_TRANSLATE("FTP Warning"),
 										B_TRANSLATE("There is no FTP client on your machine that is configured as the default program to connect to an FTP server."),
-										B_TRANSLATE("Ok"), NULL, NULL, B_WIDTH_AS_USUAL,
+										B_TRANSLATE("OK"), NULL, NULL, B_WIDTH_AS_USUAL,
 										B_WARNING_ALERT );
 			alert->Go();
 		}

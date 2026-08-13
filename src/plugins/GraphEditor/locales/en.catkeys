@@ -1,12 +1,19 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	3476289904
-Cancel	GraphEditor		Cancel
-Scale	GraphEditor		Scale
-Fill	GraphEditor		Fill
-Name	GraphEditor		Name
-Attribute	GraphEditor		Attribute
-OK	GraphEditor		OK
-Pen size	GraphEditor		Pen size
-Input attribute name	GraphEditor		Input attribute name
+1	English	application/x-vnd.ProjectConceptor-plugin	3243326216
 Delete	AttributeRenderer		Delete
+Fill color for selected nodes	GraphEditor		Fill color for selected nodes
+Group selected nodes	GraphEditor		Group selected nodes
+Add text attribute	GraphEditor		Add text attribute
 Grid	GraphEditor		Grid
+Fill	GraphEditor		Fill
 Pattern	GraphEditor		Pattern
+Fill pattern for selected nodes	GraphEditor		Fill pattern for selected nodes
+Toggle grid	GraphEditor		Toggle grid
+Scale	GraphEditor		Scale
+Input attribute name	GraphEditor		Input attribute name
+Attribute	GraphEditor		Attribute
+Name	GraphEditor		Name
+Border pen size for selected nodes	GraphEditor		Border pen size for selected nodes
+Pen size	GraphEditor		Pen size
+Add boolean attribute	GraphEditor		Add boolean attribute
+Cancel	GraphEditor		Cancel
+OK	GraphEditor		OK

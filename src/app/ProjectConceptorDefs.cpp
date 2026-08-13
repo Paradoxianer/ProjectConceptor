@@ -123,8 +123,8 @@ const char*		P_MENU_SEARCH_REPLACE_ALL		= B_TRANSLATE("Replace all");
  */
 
 const char*		P_MENU_WINDOW					= B_TRANSLATE("Window");
-const char*		P_MENU_WINDOW_TITLE				= B_TRANSLATE("Tile");
-const char*		P_MENU_WINDOW_TITLE_VERTICAL	= B_TRANSLATE("Tile Vertical");
+const char*		P_MENU_WINDOW_TITLE				= B_TRANSLATE("Title");
+const char*		P_MENU_WINDOW_TITLE_VERTICAL	= B_TRANSLATE("Title Vertical");
 const char*		P_MENU_WINDOW_CASCADE			= B_TRANSLATE("Cascade");
 
 

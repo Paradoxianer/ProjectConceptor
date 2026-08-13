@@ -250,7 +250,7 @@ status_t PCommandManager::Execute(BMessage *settings) {
 		else
 		{
 			char	*error	= new char[255];
-			sprintf(error,"%s: %s",B_TRANSLATE("Coud not find command"),commandName);
+			sprintf(error,"%s: %s",B_TRANSLATE("Could not find command"),commandName);
 			(new BAlert(B_TRANSLATE("Error!"),error, B_TRANSLATE("OK"),NULL,NULL, B_WIDTH_AS_USUAL, B_OFFSET_SPACING, B_STOP_ALERT))->Go();
 			delete error;
 			err = B_ERROR;

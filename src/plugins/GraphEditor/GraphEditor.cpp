@@ -134,9 +134,13 @@ void GraphEditor::Init(void) {
 	scaleMenu->AddItem(new BMenuItem("1000 %",newScale,0,0));
 
 	grid		= new ToolItem(B_TRANSLATE("Grid"),BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
+	grid->BButton::SetToolTip(B_TRANSLATE("Toggle grid"));
 	penSize		= new FloatToolItem(B_TRANSLATE("Pen size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
+	penSize->BButton::SetToolTip(B_TRANSLATE("Border pen size for selected nodes"));
 	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
+	colorItem->BButton::SetToolTip(B_TRANSLATE("Fill color for selected nodes"));
 	patternItem	= new PatternToolItem(B_TRANSLATE("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
+	patternItem->BButton::SetToolTip(B_TRANSLATE("Fill pattern for selected nodes"));
 
 	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);
 	//loading ressource_images from the PluginRessource
@@ -155,6 +159,7 @@ void GraphEditor::Init(void) {
 		if (bmp) {
 			BMessage	*groupMessage = new BMessage(G_E_GROUP);
 			addGroup	= new ToolItem("addGroup",bmp,groupMessage);
+			addGroup->BButton::SetToolTip(B_TRANSLATE("Group selected nodes"));
 			toolBar->AddItem(addGroup);
 		}
 	}
@@ -167,6 +172,7 @@ void GraphEditor::Init(void) {
 			BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
 			addBoolMessage->AddInt32("type",B_BOOL_TYPE);
 			addBool		= new ToolItem("addBool",bmp,addBoolMessage);
+			addBool->BButton::SetToolTip(B_TRANSLATE("Add boolean attribute"));
 			toolBar->AddItem(addBool);
 		}
 	}
@@ -178,6 +184,7 @@ void GraphEditor::Init(void) {
 			BMessage	*addTextMessage = new BMessage(G_E_ADD_ATTRIBUTE);
 			addTextMessage->AddInt32("type",B_STRING_TYPE);
 			addText		= new ToolItem("addText",bmp,addTextMessage);
+			addText->BButton::SetToolTip(B_TRANSLATE("Add text attribute"));
 			toolBar->AddItem(addText);
 		}
 	}
