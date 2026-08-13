@@ -1062,29 +1062,34 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 	commandMessage->AddPointer("node",newNode);
     subCommandMessage->AddPointer("node",newNode);
 
-	//if (connected == true){
     	while (i<selected->CountItems())
 		{
 			from	= (BMessage *)selected->ItemAt(i);
        		if (to != NULL && from!=NULL)
        	 	{
-				connection		    = new BMessage(P_C_CONNECTION_TYPE);
             	err = from->FindRect(P_C_NODE_FRAME,fromRect);
             	if (!selectRect)
                 	selectRect = new BRect(*fromRect);
             	else
                 	*selectRect = *selectRect | *fromRect;
             	err = B_OK;
-            	connection->AddPointer(P_C_NODE_CONNECTION_FROM,from);
-            	connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
-            	uint	cType	= 1;
-            	connection->AddInt8(P_C_NODE_CONNECTION_TYPE, cType);
-
-            	connection->AddMessage(P_C_NODE_DATA,data);
-            
-            	connection->AddPointer("ProjectConceptor::doc",doc);
-            	//** add the connections to the Nodes :-)
-            	commandMessage->AddPointer("node",connection);
+				// only wire the new node up to the selection when the caller
+				// actually asked for that (e.g. "insert connected sibling") -
+				// this used to run unconditionally regardless of `connected`,
+				// so any insert with a stale selection (e.g. double-clicking
+				// a group to add a plain child, right after the group itself
+				// was left selected) silently grew an unwanted connection
+				if (connected == true) {
+					connection		    = new BMessage(P_C_CONNECTION_TYPE);
+					connection->AddPointer(P_C_NODE_CONNECTION_FROM,from);
+					connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
+					uint	cType	= 1;
+					connection->AddInt8(P_C_NODE_CONNECTION_TYPE, cType);
+					connection->AddMessage(P_C_NODE_DATA,data);
+					connection->AddPointer("ProjectConceptor::doc",doc);
+					//** add the connections to the Nodes :-)
+					commandMessage->AddPointer("node",connection);
+				}
         	}
 			i++;
 		}
