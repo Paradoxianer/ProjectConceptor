@@ -19,7 +19,6 @@ ClassRenderer::ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer):
 	TRACE();
 	Init();
 	ValueChanged();
-	name->MouseDown(BPoint(0,0));
 }
 void ClassRenderer::Init()
 {
