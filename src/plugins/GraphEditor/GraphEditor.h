@@ -119,6 +119,11 @@ protected:
 			void			Init(void);
 			void			InsertObject(BPoint where,bool deselect);
 			void			InsertRenderObject(BMessage *node);
+			/** ValueChanged()'s per-node update/insert/remove logic, split out
+			 * so it can run over allNodes/allConnections in two passes - see
+			 * ValueChanged() for why the order matters.
+			 */
+			void			ProcessChangedNode(BMessage *node,BList *allNodes,BList *allConnections);
 
 			void			DeleteFromList(Renderer *wichRenderer);
 			void			AddToList(Renderer *wichRenderer, int32 pos);

@@ -322,6 +322,28 @@ void GraphEditor::PreprocessAfterLoad(BMessage *container) {
 	container=container;
 }
 
+void GraphEditor::ProcessChangedNode(BMessage *node,BList *allNodes,BList *allConnections) {
+	PRINT(("Changed node\n"););
+	DEBUG_ONLY(node->PrintToStream());
+	Renderer	*painter		= NULL;
+	void		*pointer		= NULL;
+	if (node->FindPointer(renderString,(void **)&painter) == B_OK) {
+		if (((allConnections->HasItem(node))||(allNodes->HasItem(node))) && painter != NULL)
+			painter->ValueChanged();
+		else
+			RemoveRenderer(FindRenderer(node));
+	}
+	else {
+		//**check if this node is in the node or connection list because if it is not it´s a node frome a subgroup or it was deleted
+		if (((allConnections->HasItem(node))||
+		     (allNodes->HasItem(node))) &&
+		    (node->FindPointer(P_C_NODE_PARENT,&pointer) !=B_OK))
+			InsertRenderObject(node);
+		else
+			RemoveRenderer(FindRenderer(node));
+	}
+}
+
 void GraphEditor::ValueChanged() {
 	TRACE();
 	//try to lock the document during we are painting
@@ -329,7 +351,7 @@ void GraphEditor::ValueChanged() {
 
 	status_t err = doc->LockWithTimeout(TIMEOUT_LOCK);
 	printf("DocLocError - %s\n",strerror(err));
-	
+
 	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
 	set<BMessage*>::iterator it;
 
@@ -337,29 +359,24 @@ void GraphEditor::ValueChanged() {
 	BList		*allConnections	= doc->GetAllConnections();
 
 	BMessage	*node			= NULL;
-	Renderer	*painter		= NULL;
-	void		*pointer		= NULL;
-	BRect		frame;
-	BRect		invalid;
+	// ConnectionRenderer resolves its endpoints' renderer pointers once, at
+	// construction (see ConnectionRenderer::ValueChanged()) - if a connection
+	// gets its own renderer built before its endpoint nodes have theirs, it
+	// is left with from/to == NULL and silently never draws (CalcLine() just
+	// skips it) until some later, unrelated P_C_VALUE_CHANGED happens to
+	// refresh it. changedNodes is a std::set<BMessage*>, so a single pass
+	// over it processes nodes and connections in pointer-address order, not
+	// dependency order - two passes here guarantees every node/group already
+	// has a renderer before any connection referencing it is built.
 	for ( it=changedNodes->begin();it!=changedNodes->end();++it) {
 		node = *it;
-		PRINT(("Changed node\n"););
-		DEBUG_ONLY(node->PrintToStream());
-		if (node->FindPointer(renderString,(void **)&painter) == B_OK) {
-			if (((allConnections->HasItem(node))||(allNodes->HasItem(node))) && painter != NULL)
-				painter->ValueChanged();
-			else
-				RemoveRenderer(FindRenderer(node));
-		}
-		else {
-			//**check if this node is in the node or connection list because if it is not it´s a node frome a subgroup or it was deleted
-			if (((allConnections->HasItem(node))||
-			     (allNodes->HasItem(node))) &&
-			    (node->FindPointer(P_C_NODE_PARENT,&pointer) !=B_OK))
-				InsertRenderObject(node);
-			else
-				RemoveRenderer(FindRenderer(node));
-		}
+		if (node->what != P_C_CONNECTION_TYPE)
+			ProcessChangedNode(node,allNodes,allConnections);
+	}
+	for ( it=changedNodes->begin();it!=changedNodes->end();++it) {
+		node = *it;
+		if (node->what == P_C_CONNECTION_TYPE)
+			ProcessChangedNode(node,allNodes,allConnections);
 	}
 	if (err == B_OK)
 	    doc->Unlock();
