@@ -57,7 +57,9 @@ SRCS= 	TestMain.cpp \
 		../app/Tools/TextViewCompleter.cpp \
 		../app/Tools/plugins/BasePlugin.cpp \
 		../app/Tools/plugins/PluginManager.cpp \
-		../plugins/ChangeValueCommand/ChangeValue.cpp
+		../plugins/ChangeValueCommand/ChangeValue.cpp \
+		../plugins/InsertCommand/Insert.cpp \
+		../plugins/GroupCommand/Group.cpp
 
 RDEFS=
 
@@ -81,7 +83,9 @@ LOCAL_INCLUDE_PATHS =	. \
 						../app/ToolBar \
 						../app/About \
 						../app/Tools \
-						../plugins/ChangeValueCommand
+						../plugins/ChangeValueCommand \
+						../plugins/InsertCommand \
+						../plugins/GroupCommand
 
 COMPILER_FLAGS =
 

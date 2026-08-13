@@ -12,9 +12,11 @@ class PCommandTest : public CppUnit::TestFixture
 {
 public:
 	void ChangeValueDoUndo(void);
+	void GroupThenInsertChildRegistersInParentList(void);
 
 	CPPUNIT_TEST_SUITE(PCommandTest);
 	CPPUNIT_TEST(ChangeValueDoUndo);
+	CPPUNIT_TEST(GroupThenInsertChildRegistersInParentList);
 	CPPUNIT_TEST_SUITE_END();
 };
 
