@@ -46,6 +46,70 @@ void PCommandTest::ChangeValueDoUndo(void)
 	CPPUNIT_ASSERT_EQUAL((int32)1,restored);
 }
 
+void PCommandTest::ChangeValueOnSelectionDoUndo(void)
+{
+	// regression check for issue #61: ChangeValue applied to "all selected
+	// nodes" (P_C_NODE_SELECTED - used by e.g. the Pen size control), which
+	// the report claims gets called twice with the second Undo ending up
+	// with the wrong node. Exercises Do()+Undo() across two selected nodes
+	// at once through the real ChangeValue class and checks that each
+	// node's own value is independently changed and restored.
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	pattern1;
+	pattern1.AddFloat("PenSize",1.0f);
+	BMessage	node1(P_C_CLASS_TYPE);
+	node1.AddMessage(P_C_NODE_PATTERN,&pattern1);
+
+	BMessage	pattern2;
+	pattern2.AddFloat("PenSize",2.0f);
+	BMessage	node2(P_C_CLASS_TYPE);
+	node2.AddMessage(P_C_NODE_PATTERN,&pattern2);
+
+	doc->GetSelected()->AddItem(&node1);
+	doc->GetSelected()->AddItem(&node2);
+
+	BMessage	valueContainer;
+	valueContainer.AddString("name","PenSize");
+	valueContainer.AddString("subgroup",P_C_NODE_PATTERN);
+	valueContainer.AddInt32("type",(int32)B_FLOAT_TYPE);
+	valueContainer.AddFloat("newValue",5.0f);
+
+	BMessage	settings;
+	settings.AddBool(P_C_NODE_SELECTED,true);
+	settings.AddMessage("valueContainer",&valueContainer);
+
+	ChangeValue	command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	BMessage	changedPattern1;
+	CPPUNIT_ASSERT(node1.FindMessage(P_C_NODE_PATTERN,&changedPattern1) == B_OK);
+	float	penSize1	= 0;
+	CPPUNIT_ASSERT(changedPattern1.FindFloat("PenSize",&penSize1) == B_OK);
+	CPPUNIT_ASSERT_EQUAL(5.0f,penSize1);
+
+	BMessage	changedPattern2;
+	CPPUNIT_ASSERT(node2.FindMessage(P_C_NODE_PATTERN,&changedPattern2) == B_OK);
+	float	penSize2	= 0;
+	CPPUNIT_ASSERT(changedPattern2.FindFloat("PenSize",&penSize2) == B_OK);
+	CPPUNIT_ASSERT_EQUAL(5.0f,penSize2);
+
+	command.Undo(doc,result);
+
+	BMessage	restoredPattern1;
+	CPPUNIT_ASSERT(node1.FindMessage(P_C_NODE_PATTERN,&restoredPattern1) == B_OK);
+	float	restored1	= 0;
+	CPPUNIT_ASSERT(restoredPattern1.FindFloat("PenSize",&restored1) == B_OK);
+	CPPUNIT_ASSERT_EQUAL(1.0f,restored1);
+
+	BMessage	restoredPattern2;
+	CPPUNIT_ASSERT(node2.FindMessage(P_C_NODE_PATTERN,&restoredPattern2) == B_OK);
+	float	restored2	= 0;
+	CPPUNIT_ASSERT(restoredPattern2.FindFloat("PenSize",&restored2) == B_OK);
+	CPPUNIT_ASSERT_EQUAL(2.0f,restored2);
+}
+
 void PCommandTest::GroupThenInsertChildRegistersInParentList(void)
 {
 	// regression test for issue #36: double-clicking a group node inserts a
