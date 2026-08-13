@@ -20,6 +20,12 @@ void Group::Undo(PDocument *doc,BMessage *undo) {
 		if ( (node->FindPointer(P_C_NODE_ALLNODES,(void **)&subList) == B_OK) && (subList) ) {
 			while (subList->CountItems()>0) {
 				subNode	= (BMessage *)subList->RemoveItem((int32)0);
+				// Do() only re-groups a node whose P_C_NODE_PARENT isn't
+				// already set (see Group::Do()'s guard) - leaving it here
+				// after ungrouping made every child look "already grouped"
+				// to a later redo, which then silently skipped re-adding
+				// them to the group's own list at all
+				subNode->RemoveName(P_C_NODE_PARENT);
 				allNodes->AddItem(subNode);
 				changed->insert(subNode);
 			}

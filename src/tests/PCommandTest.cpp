@@ -153,3 +153,47 @@ void PCommandTest::GroupThenInsertChildRegistersInParentList(void)
 	CPPUNIT_ASSERT(doc->GetAllNodes()->HasItem(&newChild));
 	CPPUNIT_ASSERT(groupAllNodes->HasItem(&newChild));
 }
+
+void PCommandTest::GroupUndoThenRedoKeepsChildren(void)
+{
+	// regression test for a bug found while live-testing #38's fixes:
+	// Group::Undo() removed a child from the group's own P_C_NODE_ALLNODES
+	// list but never cleared P_C_NODE_PARENT on the child itself. Redo runs
+	// Group::Do() again on the same two nodes - which only (re-)groups a
+	// node whose P_C_NODE_PARENT isn't already set (see its guard) - so the
+	// stale leftover parent pointer made every child look "already grouped"
+	// and Do() silently skipped re-adding any of them.
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	child1(P_C_CLASS_TYPE);
+	child1.AddRect(P_C_NODE_FRAME,BRect(0,0,50,50));
+	BMessage	child2(P_C_CLASS_TYPE);
+	child2.AddRect(P_C_NODE_FRAME,BRect(100,0,150,50));
+	doc->GetAllNodes()->AddItem(&child1);
+	doc->GetAllNodes()->AddItem(&child2);
+	doc->GetSelected()->AddItem(&child1);
+	doc->GetSelected()->AddItem(&child2);
+
+	BMessage	groupNode(P_C_GROUP_TYPE);
+	BMessage	groupSettings;
+	groupSettings.AddPointer("node",&groupNode);
+
+	Group		groupCommand;
+	BMessage	*result	= groupCommand.Do(doc,&groupSettings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	groupCommand.Undo(doc,result);
+
+	void	*parent	= NULL;
+	CPPUNIT_ASSERT(child1.FindPointer(P_C_NODE_PARENT,&parent) != B_OK);
+	CPPUNIT_ASSERT(child2.FindPointer(P_C_NODE_PARENT,&parent) != B_OK);
+
+	// redo: same settings message, same current selection - matches what
+	// PCommandManager::Redo() actually replays
+	groupCommand.Do(doc,&groupSettings);
+
+	BList	*groupAllNodes	= NULL;
+	CPPUNIT_ASSERT(groupNode.FindPointer(P_C_NODE_ALLNODES,(void **)&groupAllNodes) == B_OK);
+	CPPUNIT_ASSERT(groupAllNodes->HasItem(&child1));
+	CPPUNIT_ASSERT(groupAllNodes->HasItem(&child2));
+}
