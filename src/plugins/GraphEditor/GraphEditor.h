@@ -42,6 +42,10 @@ const uint32			G_E_INSERT_NODE 		= 'geIN';
 const uint32            G_E_INSERT_SIBLING      = 'geIS';
 
 extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
+// transient field on a freshly inserted node's own BMessage, checked once by
+// CreateRendererFor() and removed right after - not part of the saved
+// document format
+extern const char		*G_E_START_EDITING_NAME;	//	= "GraphEditor::StartEditingName";
 
 const float		triangleHeight	= 7;
 const float		gridWidth		= 50;

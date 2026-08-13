@@ -53,6 +53,12 @@ public:
 				void		ResizeBy(float dx,float dy);
 				bool		Selected(void){return selected;};
 				BMessage*	Parent(void){return parentNode;};
+				/** puts the name label straight into edit mode - used right
+				 * after a fresh insert so the user can type a name
+				 * immediately, without simulating it on every construction
+				 * (that used to also fire on a plain document load, see #69)
+				 */
+				void		StartEditingName(void){name->MouseDown(BPoint(0,0));};
 
 
 protected:
