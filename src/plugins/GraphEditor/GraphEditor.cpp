@@ -1026,21 +1026,43 @@ Renderer* GraphEditor::FindRenderer(BMessage *container) {
 
 void GraphEditor::BringToFront(Renderer *wichRenderer) {
 	TRACE();
-	BMessage	*parentNode		= NULL;
-	BMessage	*tmpMessage		= NULL;
-	BList		*groupAllNodeList	= new BList();
-	Renderer	*tmpRenderer		= NULL;
-	if (wichRenderer!=NULL)
-		if ((tmpMessage = wichRenderer->GetMessage()) != NULL) {
-	    /*if ((tmpMessage->FindPointer(P_C_NODE_PARENT, (void **)&parentNode) == B_OK) && (parentNode != NULL) ) {
-			parentNode->FindPointer(renderString,(void **)&tmpRenderer);
-			if (tmpRenderer)
-				((GroupRenderer *)tmpRenderer)->BringToFront(wichRenderer);
-	    }*/
-		DeleteFromList(wichRenderer);
-		AddToList(wichRenderer,renderer->CountItems()+1);
-		Invalidate();
+	// used to go through DeleteFromList()/AddToList(), which for a group
+	// recursively drops and re-inserts every child and their connections -
+	// the re-insert passed the same stale `pos` to every sibling instead of
+	// tracking a running position, so connections shared between siblings
+	// (e.g. a child's incoming matching another child's outgoing) could be
+	// silently dropped or duplicated.
+	if (wichRenderer != NULL) {
+		renderer->RemoveItem(wichRenderer);
+		renderer->AddItem(wichRenderer);
+		// a group's own Draw() paints an opaque background - anything that
+		// has to remain visible on top of it (its children, and any
+		// connection touching one of those children, since part of that
+		// line runs through the group's own rect) has to stay ordered
+		// after it. GroupRenderer::RenderList() is bookkeeping only (see
+		// CreateRendererFor()), not itself drawn, so this only ever moves
+		// existing renderer positions, never deletes/recreates anything -
+		// and BringToFront() on something already at the front is a
+		// harmless no-op, so revisiting a connection shared between two
+		// children here is safe.
+		GroupRenderer	*groupRenderer	= dynamic_cast<GroupRenderer*>(wichRenderer);
+		if (groupRenderer != NULL) {
+			BList	*children	= groupRenderer->RenderList();
+			for (int32 i = 0; i < children->CountItems(); i++) {
+				Renderer	*child		= (Renderer *)children->ItemAt(i);
+				BringToFront(child);
+				BMessage	*childNode	= child->GetMessage();
+				BList		*connections	= NULL;
+				if ((childNode != NULL) && (childNode->FindPointer(P_C_NODE_INCOMING,(void **)&connections) == B_OK))
+					for (int32 c = 0; c < connections->CountItems(); c++)
+						BringToFront(FindRenderer((BMessage *)connections->ItemAt(c)));
+				if ((childNode != NULL) && (childNode->FindPointer(P_C_NODE_OUTGOING,(void **)&connections) == B_OK))
+					for (int32 c = 0; c < connections->CountItems(); c++)
+						BringToFront(FindRenderer((BMessage *)connections->ItemAt(c)));
+			}
 		}
+		Invalidate();
+	}
    }
 
 
