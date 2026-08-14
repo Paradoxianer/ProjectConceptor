@@ -1,6 +1,8 @@
+#include <app/Roster.h>
 #include <interface/MenuItem.h>
 #include <interface/ScrollBar.h>
 #include <interface/ScrollView.h>
+#include <storage/Entry.h>
 #include <stdio.h>
 #include <translation/TranslationUtils.h>
 #include <translation/TranslatorFormats.h>
@@ -164,6 +166,33 @@ BMenuBar *PWindow::MakeMenu(void)
 	item->SetTarget(be_app);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_OPEN);
+
+	// "Open Recent" - populated from Haiku's own system-wide recent-documents
+	// list (BRoster::AddToRecentDocuments() is called on every open/save, see
+	// PDocument::Save()/ProjektConceptor::RefsReceived()), not a separate
+	// list of our own. Each entry posts the exact message shape Tracker
+	// itself sends (B_REFS_RECEIVED with a "refs" entry_ref), so it runs
+	// through the real ProjektConceptor::RefsReceived() with no extra
+	// dispatch code needed here.
+	BMenu		*recentMenu	= new BMenu(B_TRANSLATE("Open Recent"));
+	BMessage	recentRefs;
+	be_roster->GetRecentDocuments(&recentRefs,10,NULL,0,APP_SIGNATURE);
+	entry_ref	recentRef;
+	int32		recentIndex	= 0;
+	while (recentRefs.FindRef("refs",recentIndex,&recentRef) == B_OK) {
+		BMessage	*openMessage	= new BMessage(B_REFS_RECEIVED);
+		openMessage->AddRef("refs",&recentRef);
+		BMenuItem	*recentItem	= new BMenuItem(recentRef.name,openMessage);
+		recentItem->SetTarget(be_app);
+		recentMenu->AddItem(recentItem);
+		recentIndex++;
+	}
+	if (recentIndex == 0)
+		recentMenu->SetEnabled(false);
+	menu->AddItem(recentMenu);
+	localizeMenuItems->AddPointer("item",(void *) recentMenu->Superitem());
+	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_OPEN_RECENT);
+
 	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Close"),new BMessage(MENU_FILE_CLOSE),'W'));
 	menu->AddSeparatorItem();
 	localizeMenuItems->AddPointer("item",(void *) item);
