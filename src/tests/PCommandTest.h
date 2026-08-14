@@ -13,12 +13,14 @@ class PCommandTest : public CppUnit::TestFixture
 public:
 	void ChangeValueDoUndo(void);
 	void ChangeValueOnSelectionDoUndo(void);
+	void ChangeValueOnConnectionPattern(void);
 	void GroupThenInsertChildRegistersInParentList(void);
 	void GroupUndoThenRedoKeepsChildren(void);
 
 	CPPUNIT_TEST_SUITE(PCommandTest);
 	CPPUNIT_TEST(ChangeValueDoUndo);
 	CPPUNIT_TEST(ChangeValueOnSelectionDoUndo);
+	CPPUNIT_TEST(ChangeValueOnConnectionPattern);
 	CPPUNIT_TEST(GroupThenInsertChildRegistersInParentList);
 	CPPUNIT_TEST(GroupUndoThenRedoKeepsChildren);
 	CPPUNIT_TEST_SUITE_END();

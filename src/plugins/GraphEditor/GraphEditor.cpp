@@ -692,7 +692,18 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
 				connection->AddMessage(P_C_NODE_DATA,data);
 				connection->AddInt8(P_C_NODE_CONNECTION_TYPE,1);
-				
+				// deliberately NOT the toolbar's current color/pen size -
+				// those default to values tuned for node fills, easy to end
+				// up pale/thin enough that a brand-new connection is barely
+				// visible. Matches ConnectionRenderer's own old hardcoded
+				// Init() default. Still fully changeable afterwards via the
+				// same Pen size/Fill color controls once selected - this is
+				// only the starting point.
+				BMessage	*connectionPattern	= new BMessage();
+				rgb_color	defaultConnectionColor	= make_color(187,67,47,255);
+				connectionPattern->AddInt32("FillColor",*(int32 *)&defaultConnectionColor);
+				connectionPattern->AddFloat("PenSize",2.0f);
+				connection->AddMessage(P_C_NODE_PATTERN,connectionPattern);
 				connection->AddPointer("ProjectConceptor::doc",doc);
 				//** add the connections to the Nodes :-)
 				commandMessage->AddPointer("node",connection);
@@ -1115,6 +1126,13 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 					uint	cType	= 1;
 					connection->AddInt8(P_C_NODE_CONNECTION_TYPE, cType);
 					connection->AddMessage(P_C_NODE_DATA,data);
+					// see the G_E_CONNECTED handler above for why this isn't
+					// the toolbar's current color/pen size
+					BMessage	*connectionPattern	= new BMessage();
+					rgb_color	defaultConnectionColor	= make_color(187,67,47,255);
+					connectionPattern->AddInt32("FillColor",*(int32 *)&defaultConnectionColor);
+					connectionPattern->AddFloat("PenSize",2.0f);
+					connection->AddMessage(P_C_NODE_PATTERN,connectionPattern);
 					connection->AddPointer("ProjectConceptor::doc",doc);
 					//** add the connections to the Nodes :-)
 					commandMessage->AddPointer("node",connection);

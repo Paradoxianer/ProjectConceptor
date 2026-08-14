@@ -110,6 +110,45 @@ void PCommandTest::ChangeValueOnSelectionDoUndo(void)
 	CPPUNIT_ASSERT_EQUAL(2.0f,restored2);
 }
 
+void PCommandTest::ChangeValueOnConnectionPattern(void)
+{
+	// regression test: connections used to never get a P_C_NODE_PATTERN
+	// sub-message at all, so the Pen size/Fill color toolbar controls
+	// (which go through ChangeValue targeting "PenSize"/"FillColor" inside
+	// that sub-message, same as for a class node) silently did nothing for
+	// a selected connection - DoChangeValue()'s FindData/ReplaceData both
+	// failed quietly against a message that was never there.
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	pattern;
+	pattern.AddFloat("PenSize",2.0f);
+	pattern.AddInt32("FillColor",0xff43439a);
+	BMessage	connection(P_C_CONNECTION_TYPE);
+	connection.AddMessage(P_C_NODE_PATTERN,&pattern);
+
+	doc->GetSelected()->AddItem(&connection);
+
+	BMessage	valueContainer;
+	valueContainer.AddString("name","PenSize");
+	valueContainer.AddString("subgroup",P_C_NODE_PATTERN);
+	valueContainer.AddInt32("type",(int32)B_FLOAT_TYPE);
+	valueContainer.AddFloat("newValue",5.0f);
+
+	BMessage	settings;
+	settings.AddBool(P_C_NODE_SELECTED,true);
+	settings.AddMessage("valueContainer",&valueContainer);
+
+	ChangeValue	command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	BMessage	changedPattern;
+	CPPUNIT_ASSERT(connection.FindMessage(P_C_NODE_PATTERN,&changedPattern) == B_OK);
+	float	changedPenSize	= 0;
+	CPPUNIT_ASSERT(changedPattern.FindFloat("PenSize",&changedPenSize) == B_OK);
+	CPPUNIT_ASSERT_EQUAL(5.0f,changedPenSize);
+}
+
 void PCommandTest::GroupThenInsertChildRegistersInParentList(void)
 {
 	// regression test for issue #36: double-clicking a group node inserts a

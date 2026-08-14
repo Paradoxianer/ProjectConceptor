@@ -67,6 +67,7 @@ protected:
 	bool				selected;
 	BPoint				first,second,third;
 	rgb_color			fillColor;
+	float				penSize;
 	ClassRenderer		*from;
 	ClassRenderer		*to;
 	BPoint				fromPoint;

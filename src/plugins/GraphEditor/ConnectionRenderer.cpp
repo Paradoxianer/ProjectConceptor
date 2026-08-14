@@ -20,6 +20,7 @@ void ConnectionRenderer::Init() {
 	toPoint			= BPoint(0,0);
 	selected		= false;
 	fillColor		= make_color(187,67,47,255);
+	penSize			= 2.0;
 	connectionType	= 2;
 	bezier			= BShape();
 
@@ -122,6 +123,15 @@ void ConnectionRenderer::ValueChanged() {
 	tmpNode->FindPointer(editor->RenderString(),(void **)&to);
 	container->FindBool(P_C_NODE_SELECTED,&selected);
 	container->FindInt8(P_C_NODE_CONNECTION_TYPE, (int8 *)&connectionType);
+	// same P_C_NODE_PATTERN sub-message a class node has - the Pen size/Fill
+	// color toolbar controls (GraphEditor.cpp's G_E_PEN_SIZE_CHANGED/
+	// G_E_COLOR_CHANGED) go through ChangeValue targeting exactly these two
+	// fields there, regardless of node type
+	BMessage	pattern;
+	if (container->FindMessage(P_C_NODE_PATTERN,&pattern) == B_OK) {
+		pattern.FindFloat("PenSize",&penSize);
+		pattern.FindInt32("FillColor",(int32 *)&fillColor);
+	}
 }
 
 void ConnectionRenderer::CalcLine() {
@@ -215,7 +225,7 @@ bool ConnectionRenderer::Caught(BPoint where){
 }
 
 void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
-		drawOn->SetPenSize(2.0);
+		drawOn->SetPenSize(penSize);
 		BPoint	shadowFrom		= fromPoint;
 		BPoint	shadowTo		= toPoint;
 		BPoint	shadowfirst		= first;
@@ -239,7 +249,7 @@ void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
 }
 
 void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
-	drawOn->SetPenSize(2.0);
+	drawOn->SetPenSize(penSize);
 	if (!selected)
 		drawOn->SetHighColor(fillColor);
 	else
@@ -256,7 +266,7 @@ void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
 }
 
 void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
-	drawOn->SetPenSize(2.0);
+	drawOn->SetPenSize(penSize);
 	BPoint	shadowFrom		= fromPoint;
 	BPoint	shadowTo		= toPoint;
 	BPoint	shadowfirst		= first;
