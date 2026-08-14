@@ -80,7 +80,7 @@ void ConfigManager::SaveConfig(){
 	DEBUG_ONLY(config->PrintToStream());
 	MessageXmlWriter messageXml = MessageXmlWriter();
 	messageXml.SetTo(*path);
-	if (messageXml.InitCheck())
+	if (messageXml.InitCheck() == B_OK)
         messageXml.Write(*config);
 }
 
