@@ -14,6 +14,7 @@
 #include <translation/TranslationUtils.h>
 
 #include <string.h>
+#include <stdio.h>
 
 
 ProjektConceptor::ProjektConceptor():BApplication(APP_SIGNATURE) {
@@ -167,6 +168,12 @@ void ProjektConceptor::RegisterMime(void) {
 
 int main()
 {
+	// stdout/stderr default to fully-buffered when redirected to a file (not
+	// a TTY) - debug.log then only gets what's been flushed, which for a
+	// still-running, non-crashed process can lag far behind what's actually
+	// happened. Line-buffered keeps it current for live debugging.
+	setvbuf(stdout, NULL, _IOLBF, 0);
+	setvbuf(stderr, NULL, _IOLBF, 0);
 
 	new ProjektConceptor();
 	/*	freopen ("/boot/var/log/ProjectConceptor.log","w",stdout);
