@@ -20,6 +20,7 @@
 #include "PDocLoader.h"
 #include "PDocumentManager.h"
 #include "PluginManager.h"
+#include "ProjectConceptor.h"
 
 
 #undef B_TRANSLATION_CONTEXT
@@ -290,6 +291,19 @@ void PDocument::Init(){
 	BScreen *tmpScreen	= new BScreen();
 	BRect	windowRect	= tmpScreen->Frame();
 	windowRect.InsetBy(50,50);
+	// restore the window frame remembered from the last time a window was
+	// closed, if it still falls within the current screen (a stored frame
+	// from a since-disconnected second monitor would otherwise open the
+	// window off-screen)
+	ConfigManager	*configManager	= ((ProjektConceptor*)be_app)->GetConfigManager();
+	BMessage		*frameConfig	= configManager->GetConfigMessage(P_C_CONFIG_WINDOW_FRAME_FIELD);
+	if (frameConfig != NULL) {
+		BRect	rememberedFrame;
+		if ( (frameConfig->FindRect("frame",&rememberedFrame) == B_OK)
+			&& (tmpScreen->Frame().Contains(rememberedFrame.LeftTop())) )
+			windowRect	= rememberedFrame;
+		delete frameConfig;
+	}
 	window			= new PWindow(windowRect,this);
 	ApplyAutoSaveSettings();
 	if (locked)
@@ -730,6 +744,11 @@ bool PDocument::QuitRequested(void)
 			Unlock();
 	}
 	if (returnValue == true) {
+		BMessage		frameConfig;
+		frameConfig.AddRect("frame",window->Frame());
+		ConfigManager	*configManager	= ((ProjektConceptor*)be_app)->GetConfigManager();
+		configManager->SetConfigMessage(P_C_CONFIG_WINDOW_FRAME_FIELD,&frameConfig);
+		configManager->SaveConfig();
 		window->SetClosing(true);
 		window->Lock();
 		window->Quit();

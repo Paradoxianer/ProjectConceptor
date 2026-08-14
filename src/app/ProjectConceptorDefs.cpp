@@ -25,6 +25,8 @@ const char*		P_C_SHORTCUT_MODIFIERS_FIELD	= "modifiers";
 const char*		P_C_CONFIG_MACRO_SHORTCUTS_FIELD	= "MacroShortcuts";
 const char*		P_C_MACRO_SHORTCUT_NAME_FIELD		= "macroName";
 
+const char*		P_C_CONFIG_WINDOW_FRAME_FIELD		= "WindowFrame";
+
 
 
 const char*		P_MENU_APP_HELP					= B_TRANSLATE("Help");
