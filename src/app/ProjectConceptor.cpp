@@ -11,7 +11,7 @@
 #include <storage/Entry.h>
 #include <storage/FindDirectory.h>
 #include <storage/Path.h>
-#include <translation/TranslationUtils.h>
+#include <storage/Resources.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -138,27 +138,29 @@ void ProjektConceptor::RegisterMime(void) {
 	BMimeType		mime;
 	BMessage		info;
 	mime.SetType(P_C_DOCUMENT_MIMETYPE);
-	if (!mime.IsInstalled()) {
-		if (mime.GetAttrInfo(&info) == B_NO_ERROR)  {
-			int32	mimeVersion;
-			info.FindInt32("version",&mimeVersion);
-			if (mimeVersion<P_C_VERSION);
-				valid = false;
-		}
+	if (mime.IsInstalled()) {
+		int32	mimeVersion	= 0;
+		if ( (mime.GetAttrInfo(&info) == B_OK)
+			&& (info.FindInt32("version",&mimeVersion) == B_OK)
+			&& (mimeVersion >= P_C_VERSION) )
+			valid = true;
 		if (!valid)
 			mime.Delete();
 	}
 	if (!valid) {
-		BBitmap *kLargeIcon= BTranslationUtils::GetBitmap(B_LARGE_ICON,"BEOS:L:STD_ICON");
-		BBitmap *kSmallIcon= BTranslationUtils::GetBitmap(B_MINI_ICON,"BEOS:M:STD_ICON");
-
 		mime.Install();
 		mime.SetShortDescription("ProjectConceptor Document");
 		mime.SetLongDescription("Documentfile for the ProjectConceptor");
-		if (kLargeIcon)
-			mime.SetIcon(kLargeIcon, B_LARGE_ICON);
-		if (kLargeIcon)
-			mime.SetIcon(kSmallIcon, B_MINI_ICON);
+		// the app's own icon resources are the unnamed built-in large_icon/
+		// mini_icon types (used for the app itself, not this document type) -
+		// the document's own icon lives in the .rdef as a separate vector
+		// resource, #'HVIF' id 1, "document" - load that instead of looking
+		// up a "BEOS:L:STD_ICON"/"BEOS:M:STD_ICON" named resource that was
+		// never actually declared anywhere, which silently failed before.
+		size_t		iconSize	= 0;
+		const void	*iconData	= BApplication::AppResources()->LoadResource('HVIF',1,&iconSize);
+		if (iconData != NULL)
+			mime.SetIcon((const uint8 *)iconData,iconSize);
 		mime.SetPreferredApp(APP_SIGNATURE);
 		BMessage msg;
 		msg.AddInt32("version",P_C_VERSION);
