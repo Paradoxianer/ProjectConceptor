@@ -292,14 +292,16 @@ void PDocument::Init(){
 	BRect	windowRect	= tmpScreen->Frame();
 	windowRect.InsetBy(50,50);
 	// restore the window frame remembered from the last time a window was
-	// closed, if it still falls within the current screen (a stored frame
-	// from a since-disconnected second monitor would otherwise open the
-	// window off-screen)
+	// closed, if the user hasn't turned that off and it still falls within
+	// the current screen (a stored frame from a since-disconnected second
+	// monitor would otherwise open the window off-screen)
 	ConfigManager	*configManager	= ((ProjektConceptor*)be_app)->GetConfigManager();
 	BMessage		*frameConfig	= configManager->GetConfigMessage(P_C_CONFIG_WINDOW_FRAME_FIELD);
 	if (frameConfig != NULL) {
+		bool	rememberEnabled	= true;
 		BRect	rememberedFrame;
-		if ( (frameConfig->FindRect("frame",&rememberedFrame) == B_OK)
+		if ( (frameConfig->FindBool(P_C_WINDOW_FRAME_REMEMBER_FIELD,&rememberEnabled) != B_OK || rememberEnabled)
+			&& (frameConfig->FindRect(P_C_WINDOW_FRAME_RECT_FIELD,&rememberedFrame) == B_OK)
 			&& (tmpScreen->Frame().Contains(rememberedFrame.LeftTop())) )
 			windowRect	= rememberedFrame;
 		delete frameConfig;
@@ -744,11 +746,22 @@ bool PDocument::QuitRequested(void)
 			Unlock();
 	}
 	if (returnValue == true) {
-		BMessage		frameConfig;
-		frameConfig.AddRect("frame",window->Frame());
-		ConfigManager	*configManager	= ((ProjektConceptor*)be_app)->GetConfigManager();
-		configManager->SetConfigMessage(P_C_CONFIG_WINDOW_FRAME_FIELD,&frameConfig);
-		configManager->SaveConfig();
+		ConfigManager	*configManager		= ((ProjektConceptor*)be_app)->GetConfigManager();
+		BMessage		*existingConfig		= configManager->GetConfigMessage(P_C_CONFIG_WINDOW_FRAME_FIELD);
+		bool			rememberEnabled		= true;
+		if (existingConfig != NULL) {
+			existingConfig->FindBool(P_C_WINDOW_FRAME_REMEMBER_FIELD,&rememberEnabled);
+			delete existingConfig;
+		}
+		// a disabled toggle just stops updating the remembered frame - it
+		// doesn't erase whatever was last stored, so turning it back on
+		// later resumes from that position rather than losing it
+		if (rememberEnabled) {
+			BMessage	frameConfig;
+			frameConfig.AddRect(P_C_WINDOW_FRAME_RECT_FIELD,window->Frame());
+			configManager->SetConfigMessage(P_C_CONFIG_WINDOW_FRAME_FIELD,&frameConfig);
+			configManager->SaveConfig();
+		}
 		window->SetClosing(true);
 		window->Lock();
 		window->Quit();
