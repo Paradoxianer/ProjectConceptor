@@ -1,3 +1,4 @@
+#include <app/Roster.h>
 #include <interface/Alert.h>
 #include <interface/PrintJob.h>
 #include <interface/Screen.h>
@@ -620,6 +621,7 @@ void PDocument::Save(void)
 	if (err==B_OK) {
 			ResetModified();
 			window->SetTitle(Title());
+			be_roster->AddToRecentDocuments(entryRef,APP_SIGNATURE);
 	}
 	else
 		PRINT(("ERROR:\tPDocument -Save error %s\n",strerror(err)));

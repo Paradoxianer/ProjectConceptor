@@ -102,6 +102,7 @@ void ProjektConceptor::RefsReceived(BMessage *msg) {
 			PDocument *doc=documentManager->PDocumentAt(0);
 			doc->SetEntry(&ref);
 			doc->Load();
+			be_roster->AddToRecentDocuments(&ref,APP_SIGNATURE);
 		}
 	delete entry;
 }
