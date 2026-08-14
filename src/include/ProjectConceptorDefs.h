@@ -190,9 +190,13 @@ extern const char*		P_MENU_FILE_NEW_TAB;//				= "New Tab";
  *@see PMenuAcces
  */	
 extern const char*		P_MENU_FILE_OPEN;//					= "Open";
+/**value to find the BMenu Item "File->Open Recent" over the PMenuAcces Interface
+ *@see PMenuAcces
+ */
+extern const char*		P_MENU_FILE_OPEN_RECENT;//			= "Open Recent";
 /**value to find the BMenu Item "File->Close" over the PMenuAcces Interface
  *@see PMenuAcces
- */	
+ */
 extern const char*		P_MENU_FILE_CLOSE;//				= "Close";
 /**value to find the BMenu Item "File->Save" over the PMenuAcces Interface
  *@see PMenuAcces

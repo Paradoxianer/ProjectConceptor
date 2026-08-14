@@ -69,6 +69,10 @@ const char*		P_MENU_FILE_NEW_TAB				= B_TRANSLATE("New Tab");
  *@see PMenuAcces
  */
 const char*		P_MENU_FILE_OPEN				= B_TRANSLATE("Open");
+/**value to find the BMenu Item "File->Open Recent" over the PMenuAcces Interface
+ *@see PMenuAcces
+ */
+const char*		P_MENU_FILE_OPEN_RECENT			= B_TRANSLATE("Open Recent");
 /**value to find the BMenu Item "File->Close" over the PMenuAcces Interface
  *@see PMenuAcces
  */
