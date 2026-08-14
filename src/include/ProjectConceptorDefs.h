@@ -336,11 +336,14 @@ extern const char*		P_C_SHORTCUT_MODIFIERS_FIELD;//	= "modifiers"
 extern const char*		P_C_CONFIG_MACRO_SHORTCUTS_FIELD;//	= "MacroShortcuts"
 extern const char*		P_C_MACRO_SHORTCUT_NAME_FIELD;//		= "macroName"
 
-/** Field name for the app-wide remembered window frame in ConfigManager
- * (a BMessage holding a single BRect "frame" field) - restored for new
- * document windows, updated when a window closes.
+/** Field names inside the app-wide remembered-window-frame ConfigManager
+ * entry: "frame" (BRect) is restored for new document windows and
+ * updated when a window closes; "remember" (bool, defaults to true -
+ * today's always-on behavior - when absent) gates both directions.
  */
 extern const char*		P_C_CONFIG_WINDOW_FRAME_FIELD;//		= "WindowFrame"
+extern const char*		P_C_WINDOW_FRAME_RECT_FIELD;//			= "frame"
+extern const char*		P_C_WINDOW_FRAME_REMEMBER_FIELD;//		= "remember"
 
 
 #endif

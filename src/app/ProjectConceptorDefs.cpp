@@ -26,6 +26,8 @@ const char*		P_C_CONFIG_MACRO_SHORTCUTS_FIELD	= "MacroShortcuts";
 const char*		P_C_MACRO_SHORTCUT_NAME_FIELD		= "macroName";
 
 const char*		P_C_CONFIG_WINDOW_FRAME_FIELD		= "WindowFrame";
+const char*		P_C_WINDOW_FRAME_RECT_FIELD		= "frame";
+const char*		P_C_WINDOW_FRAME_REMEMBER_FIELD	= "remember";
 
 
 

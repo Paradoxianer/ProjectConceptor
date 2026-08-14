@@ -21,9 +21,10 @@ class BTextControl;
  * @bug dont work :-)
  */
 
-const uint32 MESSAGE_SELECTED	= 'MEsl';
-const uint32 AUTOSAVE_CHANGED	= 'AScg';
-const uint32 AUTOSAVE_TOGGLED	= 'AStg';
+const uint32 MESSAGE_SELECTED				= 'MEsl';
+const uint32 AUTOSAVE_CHANGED				= 'AScg';
+const uint32 AUTOSAVE_TOGGLED				= 'AStg';
+const uint32 REMEMBER_WINDOW_FRAME_TOGGLED	= 'RWft';
 
 
 class ConfigView : public BGridView
@@ -49,5 +50,8 @@ private:
         BMessenger			documentTarget;
         BCheckBox			*autoSaveCheckBox;
         BTextControl		*autoSaveIntervalControl;
+        // app-wide, unlike the two above - reads/writes ConfigManager
+        // directly rather than the per-document configMessage
+        BCheckBox			*rememberWindowFrameCheckBox;
 };
 #endif
