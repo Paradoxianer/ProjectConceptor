@@ -212,8 +212,7 @@ status_t PCommandManager::Execute(BMessage *settings) {
 	DEBUG_ONLY(settings->PrintToStream());
 	status_t	err	= doc->LockWithTimeout(TIMEOUT_LOCK);
 	if (err == B_OK) {
-		//(doc->GetChangedNodes())->MakeEmpty();
-		(doc->GetChangedNodes())->empty();
+		(doc->GetChangedNodes())->clear();
 		bool		shadow				= false;
 		char		*commandName		= NULL;
 		PCommand	*command			= NULL;
@@ -279,7 +278,7 @@ void PCommandManager::Undo(BMessage *undo) {
 	BMessage		*msg				= NULL;
 	status_t		err					= doc->LockWithTimeout(TIMEOUT_LOCK);
 	if (err == B_OK) {
-		(doc->GetChangedNodes())->empty();
+		(doc->GetChangedNodes())->clear();
 		if (index<0)
 			index=undoStatus;
 		while (i>=index) {
@@ -313,7 +312,7 @@ void PCommandManager::Redo(BMessage *redo) {
 	BMessage		*msg			= NULL;
 	status_t		err				= doc->LockWithTimeout(TIMEOUT_LOCK);
 	if (err == B_OK) {
-		(doc->GetChangedNodes())->empty();
+		(doc->GetChangedNodes())->clear();
 		if (index<0)
 			index=undoStatus+1;
 		while (i<=index) {
