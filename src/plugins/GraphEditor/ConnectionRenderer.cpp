@@ -293,7 +293,15 @@ bool ConnectionRenderer::CaughtStraigt(BPoint where){
 }
 
 bool ConnectionRenderer::CaughtBended(BPoint where){
-	if (bezier.Bounds().Contains(where) == true )
+	// bezier's own points are relative to fromPoint (built via MoveTo(0,0) +
+	// offset control points in DrawBended()) - only StrokeShape()'s implicit
+	// MovePenTo(fromPoint) translates that to screen/document space at draw
+	// time, so Bounds() alone is in the wrong coordinate space entirely and
+	// essentially never contains `where` (an absolute click point) unless
+	// fromPoint happens to sit near the origin. PointOnBezier() below
+	// already works in absolute coordinates, so only this bounding check
+	// needed the offset.
+	if (bezier.Bounds().OffsetByCopy(fromPoint).Contains(where) == true )
 	{
 		float t = 0;
 		float minDist=999999;
