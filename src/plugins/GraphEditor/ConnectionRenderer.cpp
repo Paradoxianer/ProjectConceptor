@@ -134,6 +134,13 @@ void ConnectionRenderer::ValueChanged() {
 	}
 }
 
+void ConnectionRenderer::InvalidateEndpoint(Renderer *removed) {
+	if ((Renderer *)from == removed)
+		from = NULL;
+	if ((Renderer *)to == removed)
+		to = NULL;
+}
+
 void ConnectionRenderer::CalcLine() {
 	if (from != NULL &&  to != NULL)
 	{
