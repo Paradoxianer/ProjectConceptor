@@ -287,11 +287,23 @@ void GraphEditor::InitAll() {
 
 	BMessage	*node			= NULL;
 	void		*renderer		= NULL;
+	// Groups need their renderer created - and thus appended to the
+	// top-level draw list - before their children, or the group's opaque
+	// background paints over them on the next redraw (the list draws in
+	// insertion order, see GraphEditor::Draw()/AddRenderer()). allNodes
+	// carries no such guarantee - it reflects the document's node storage,
+	// not creation or nesting order - so this needs an explicit group-first
+	// pass rather than trusting a single pass over allNodes to land groups
+	// before their children.
 	for (int32 i=0;i<allNodes->CountItems();i++) {
 		node = (BMessage *)allNodes->ItemAt(i);
-		if (node->FindPointer(renderString,&renderer) != B_OK) {
+		if ((node->what == P_C_GROUP_TYPE) && (node->FindPointer(renderString,&renderer) != B_OK))
 			InsertRenderObject(node);
-		}
+	}
+	for (int32 i=0;i<allNodes->CountItems();i++) {
+		node = (BMessage *)allNodes->ItemAt(i);
+		if ((node->what != P_C_GROUP_TYPE) && (node->FindPointer(renderString,&renderer) != B_OK))
+			InsertRenderObject(node);
 	}
 	for (int32 i=0;i<allConnections->CountItems();i++) {
 		node = (BMessage *)allConnections->ItemAt(i);
