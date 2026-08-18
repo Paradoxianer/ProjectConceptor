@@ -30,7 +30,8 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-Translator
 SRCS= 	StandardTranslator.cpp \
 		TranslatorMain.cpp \
 		SettingsManager.cpp \
-		ConfigView.cpp
+		ConfigView.cpp \
+		ProjectConceptorDefs.cpp
 
 		
 #	specify the resource files to use
