@@ -791,13 +791,21 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			break;
 		}
 		case G_E_INSERT_NODE: {
-			BMessage *generatedInsertCommand = GenerateInsertCommand(P_C_CLASS_TYPE);
+			// connected=true: both this and G_E_INSERT_SIBLING are meant to
+			// insert a node connected to the current selection - they never
+			// passed that explicitly, which the missing "if (connected)"
+			// gate (restored earlier - see that fix's notes) happened to
+			// paper over by connecting unconditionally regardless of this
+			// flag's value. Restoring the gate correctly enforced the flag,
+			// which then exposed that these two call sites never actually
+			// set it.
+			BMessage *generatedInsertCommand = GenerateInsertCommand(P_C_CLASS_TYPE,true);
 			if (generatedInsertCommand)
 	            sentTo->SendMessage(generatedInsertCommand);
 			break;
 		}
 		case G_E_INSERT_SIBLING: {
-			BMessage *generatedInsertCommand = GenerateInsertCommand(P_C_CLASS_TYPE);
+			BMessage *generatedInsertCommand = GenerateInsertCommand(P_C_CLASS_TYPE,true);
 			if (generatedInsertCommand)
 				sentTo->SendMessage(generatedInsertCommand);
 			break;
