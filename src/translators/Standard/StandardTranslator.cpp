@@ -29,7 +29,20 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 		err = B_BAD_VALUE;
 	else
 	{
-		/*if (outType == 0) 
+		// Identify() runs against every file any app on the system scans via
+		// BTranslatorRoster, not just ProjectConceptor documents - a full
+		// Unflatten() of the whole stream before any cheap check meant every
+		// unrelated file got fully parsed as a BMessage just to be rejected.
+		// .pcd files are BMessage::Flatten()'s own on-disk format, which
+		// always starts with this 4-byte magic - reject anything else here,
+		// before touching the rest of the stream at all.
+		char	magic[4];
+		off_t	savedPos	= inSource->Position();
+		ssize_t	bytesRead	= inSource->Read(magic, sizeof(magic));
+		inSource->Seek(savedPos, SEEK_SET);
+		if ((bytesRead != (ssize_t)sizeof(magic)) || (memcmp(magic, "HMF1", sizeof(magic)) != 0))
+			err = B_NO_TRANSLATOR;
+		/*if (outType == 0)
 			outType = B_TRANSLATOR_NONE;
 		if (outType != B_TRANSLATOR_NONE && outType != P_C_DOCUMENT_TYPE)
 			err	= B_NO_TRANSLATOR;*/
