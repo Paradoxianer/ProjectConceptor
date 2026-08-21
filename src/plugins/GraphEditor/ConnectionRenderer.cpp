@@ -262,14 +262,27 @@ void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
 	else
 		drawOn->SetHighColor(tint_color(fillColor,1.5));
 	bezier=BShape();
-	bezier.MoveTo(BPoint(0,0));
+	bezier.MoveTo(fromPoint);
 	BPoint	controlPoints[3];
-	controlPoints[0]=firstBend-fromPoint;
-	controlPoints[1]=secondBend-fromPoint;
-	controlPoints[2]=toPoint-fromPoint;
+	controlPoints[0]=firstBend;
+	controlPoints[1]=secondBend;
+	controlPoints[2]=toPoint;
 	bezier.BezierTo(controlPoints);
-	drawOn->MovePenTo(fromPoint);
-	drawOn->StrokeShape(&bezier);
+	// `bezier` above is kept only so CaughtBended()'s Bounds() pre-check has
+	// something to work with - it's not used for drawing. StrokeShape()
+	// verified live to ignore BView::SetScale() entirely in this Haiku
+	// build: at any zoom other than 100% the curve painted at its native,
+	// unscaled size/position while every other primitive here (StrokeLine,
+	// FillRoundRect, ...) scaled correctly. Approximating the curve as short
+	// StrokeLine() segments via PointOnBezier() (same source CaughtBended()
+	// already uses for hit-testing) sidesteps StrokeShape() entirely and
+	// scales like everything else.
+	BPoint	previous = fromPoint;
+	for (float t = 0.02; t <= 1.0; t += 0.02) {
+		BPoint	current = PointOnBezier(t);
+		drawOn->StrokeLine(previous,current);
+		previous = current;
+	}
 }
 
 void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
@@ -310,15 +323,9 @@ bool ConnectionRenderer::CaughtStraigt(BPoint where){
 }
 
 bool ConnectionRenderer::CaughtBended(BPoint where){
-	// bezier's own points are relative to fromPoint (built via MoveTo(0,0) +
-	// offset control points in DrawBended()) - only StrokeShape()'s implicit
-	// MovePenTo(fromPoint) translates that to screen/document space at draw
-	// time, so Bounds() alone is in the wrong coordinate space entirely and
-	// essentially never contains `where` (an absolute click point) unless
-	// fromPoint happens to sit near the origin. PointOnBezier() below
-	// already works in absolute coordinates, so only this bounding check
-	// needed the offset.
-	if (bezier.Bounds().OffsetByCopy(fromPoint).Contains(where) == true )
+	// bezier's points are absolute (document-space), same as
+	// PointOnBezier() below, so Bounds() needs no offset here.
+	if (bezier.Bounds().Contains(where) == true )
 	{
 		float t = 0;
 		float minDist=999999;
