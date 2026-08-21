@@ -48,14 +48,22 @@ void GroupRenderer::SendToBack(Renderer *wichRenderer)
 void GroupRenderer::ValueChanged()
 {
 	TRACE();
+	// Used to walk the *entire* session-wide changedNodes set on every call
+	// (issue #87) - for a batch covering the whole document (e.g. right
+	// after load, or at construction: the constructor calls ValueChanged()
+	// immediately) every group re-scanned every other group's children too,
+	// O(group count x total changed nodes). allNodes/renderer here are this
+	// group's own child list/renderer bookkeeping - both bounded by this
+	// group's own size, never by document size - so walk those instead and
+	// use changedNodes only for the O(log n) membership check a std::set
+	// gives for free.
 	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
 	BList			*allDocNodes	= doc->GetAllNodes();
-
-	set<BMessage*>::iterator it;
-	BMessage	*node			= NULL;
-	Renderer	*painter		= NULL;
+	BMessage		*node			= NULL;
+	Renderer		*painter		= NULL;
 
 	ClassRenderer::ValueChanged();
+
 	// ClassRenderer::ValueChanged() just read P_C_NODE_FRAME as-is - if this
 	// broadcast came from the generic Resize command (dragging the group's
 	// own resize handle), that command has no idea this node is a group and
@@ -67,24 +75,33 @@ void GroupRenderer::ValueChanged()
 	// live during an in-progress drag via ResizeBy(), just also covering
 	// the final committed value).
 	RecalcFrame(true);
-	for ( it=changedNodes->begin();it!=changedNodes->end();it++) {
-		node	= *it;
-		painter	= FindRenderer(node);
-		if (painter != NULL) {
-			if (allNodes->HasItem(node))
-				painter->ValueChanged();
-			else
-				RemoveRenderer(painter);
-		}
-		else {
-			if (allNodes->HasItem(node) == true)
-				if (allDocNodes->HasItem(node) == true )
-					InsertRenderObject(node);
-				else
-					allNodes->RemoveItem(node);
-			else
-				RemoveRenderer(painter);
-		}
+
+	// Pass 1: renderers this group already built. One whose underlying node
+	// no longer appears in our own allNodes has left the group (ungrouped,
+	// moved elsewhere, ...) and its renderer needs to go. Iterated
+	// backwards since RemoveRenderer() shrinks this same list.
+	for (int32 i = renderer->CountItems()-1; i >= 0; i--) {
+		painter	= (Renderer *)renderer->ItemAt(i);
+		node	= painter->GetMessage();
+		if (!allNodes->HasItem(node))
+			RemoveRenderer(painter);
+	}
+
+	// Pass 2: our current children. Only ones this broadcast actually
+	// touched need anything - refresh an existing renderer, build a
+	// missing one, or drop a child that's been deleted from the document
+	// entirely (allNodes hasn't caught up to that yet).
+	for (int32 i = allNodes->CountItems()-1; i >= 0; i--) {
+		node = (BMessage *)allNodes->ItemAt(i);
+		if (changedNodes->find(node) == changedNodes->end())
+			continue;
+		painter = FindRenderer(node);
+		if (painter != NULL)
+			painter->ValueChanged();
+		else if (allDocNodes->HasItem(node))
+			InsertRenderObject(node);
+		else
+			allNodes->RemoveItem(node);
 	}
 }
 
