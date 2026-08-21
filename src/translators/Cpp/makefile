@@ -99,11 +99,11 @@ COMPILER_FLAGS =
 LINKER_FLAGS =
 INSTALL_DIR    = /boot/home/config/add-ons/Translators
 
-install:: $(NAME)
+install:: default
 	@echo "Copying locale files"
 	@echo $(INSTALL_DIR)
 	@mkdir -p $(INSTALL_DIR)
-	@cp -rf ./$(NAME) $(INSTALL_DIR)
+	@cp -rf $(TARGET) $(INSTALL_DIR)
 	@echo "Done copying."
 
 ## include the makefile-engine

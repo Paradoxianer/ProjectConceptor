@@ -105,11 +105,11 @@ DEVEL_DIRECTORY := \
 	$(shell findpaths -r "makefile_engine" B_FIND_PATH_DEVELOP_DIRECTORY)
 include $(DEVEL_DIRECTORY)/etc/makefile-engine
 
-install:: $(NAME)
+install:: default
 	@echo "Copying locale files"
 	@echo $(INSTALL_DIR)
 	@mkdir -p $(INSTALL_DIR)
-	@cp -rf ./$(NAME) $(INSTALL_DIR)
+	@cp -rf $(TARGET) $(INSTALL_DIR)
 	@echo "Done copying."
 
 default .DEFAULT:

@@ -79,7 +79,7 @@ app: pkgupdate app/makefile FORCE
 app_clean:
 	cd app && make clean
 
-app_install: app/makefile FORCE
+app_install: pkgupdate app/makefile FORCE
 	cd app && make install
 
 app_catkeys: app/makefile FORCE
