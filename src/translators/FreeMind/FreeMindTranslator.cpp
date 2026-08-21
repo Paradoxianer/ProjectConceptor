@@ -31,32 +31,20 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 	if (outType != P_C_FREEMIND_TYPE && outType != P_C_DOCUMENT_RAW_TYPE) {
 		return B_NO_TRANSLATOR;
 	}
-	//read the first 10 chars check if it starts with <map then we suggest it is a freemind file
-	if (inSource->Read(xmlString, 10)==10)
-	{
-		if (strstr(xmlString,"<map")!=NULL)
-			outType = P_C_DOCUMENT_RAW_TYPE;
-		else
-			return B_NO_TRANSLATOR;
-	}
-	//need to rework this... unflattens the whole Datastream to check if PDocument::allNodes are in here
+	// Identify() runs against every file any app on the system scans via
+	// BTranslatorRoster, not just ProjectConceptor/FreeMind documents - a
+	// cheap, bounded read is all format detection should ever cost here.
+	// This used to fall back to a full Unflatten() of the whole stream
+	// (checking for a "PDocument::allNodes" field) whenever the 10-byte
+	// read didn't come back with exactly 10 bytes - i.e. for any file
+	// smaller than 10 bytes, which is a narrow case but still exactly the
+	// kind of unbounded full-stream parse the fix for #73 removes from
+	// StandardTranslator's Identify() too. A file that's too short to
+	// contain "<map" isn't a FreeMind document either way.
+	if ((inSource->Read(xmlString, 10)==10) && (strstr(xmlString,"<map")!=NULL))
+		outType = P_C_DOCUMENT_RAW_TYPE;
 	else
-	{
-		BMessage	*testMessage	= new BMessage();
-		BMessage	*tmpMessage		= new BMessage();
-		err = testMessage->Unflatten(inSource);
-		if (err == B_OK)
-		{
-			if (err == B_OK)
-			{
-				err = testMessage->FindMessage("PDocument::allNodes",tmpMessage);
-				if (err==B_OK)
-					outType = P_C_FREEMIND_TYPE;
-			}
-			if (err != B_OK)
-				return B_NO_TRANSLATOR;
-		}
-	}
+		return B_NO_TRANSLATOR;
 
 
 	if (outType == P_C_FREEMIND_TYPE) {
