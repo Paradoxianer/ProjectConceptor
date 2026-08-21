@@ -45,9 +45,20 @@ void TextEditorControl::MouseDown(BPoint point) {
 void TextEditorControl::MouseUp(BPoint point) {
 	TRACE();
 	BTextView::MouseUp(point);
-	if (!Bounds().Contains(point)) {
-		Invoke();
-	}
+	// No "outside bounds -> dismiss" check here (unlike MouseDown() above) -
+	// a deliberate "click elsewhere to finish editing" gesture always starts
+	// with a MouseDown, which already dismisses via the check above before
+	// any MouseUp for it would even reach this control. The only way this
+	// method sees a point outside Bounds() is a MouseUp with no matching
+	// MouseDown ever delivered here - e.g. the trailing mouse-up of the very
+	// gesture that just created this control (SetEventMask(B_POINTER_EVENTS,
+	// B_LOCK_WINDOW_FOCUS, ...) in AttachedToWindow() makes this control
+	// receive every subsequent pointer event regardless of screen position,
+	// including one still in flight from before it existed) - dismissing on
+	// that closed the box instantly after every group-double-click insert,
+	// since the new child renders nowhere near the original click (issue
+	// #108). Same reasoning covers a normal text-selection drag that starts
+	// inside and releases just outside - shouldn't dismiss either.
 }
 
 void TextEditorControl::KeyDown(const char *bytes, int32 numBytes)
