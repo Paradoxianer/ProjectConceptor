@@ -56,6 +56,17 @@ void GroupRenderer::ValueChanged()
 	Renderer	*painter		= NULL;
 
 	ClassRenderer::ValueChanged();
+	// ClassRenderer::ValueChanged() just read P_C_NODE_FRAME as-is - if this
+	// broadcast came from the generic Resize command (dragging the group's
+	// own resize handle), that command has no idea this node is a group and
+	// commits whatever the user dragged to, with only a bare minimum-size
+	// check, no children-bounds check at all. RecalcFrame() unions that
+	// against the children's actual bounds, so a manual shrink below what
+	// the children need immediately snaps back to fit instead of leaving
+	// them stranded outside a too-small box (matches what already happens
+	// live during an in-progress drag via ResizeBy(), just also covering
+	// the final committed value).
+	RecalcFrame(true);
 	for ( it=changedNodes->begin();it!=changedNodes->end();it++) {
 		node	= *it;
 		painter	= FindRenderer(node);
@@ -154,6 +165,14 @@ void GroupRenderer::RecalcFrame(bool toFit) {
 				groupFrame = groupFrame | tmpRenderer->Frame();
 		}
 	}
+	// no children registered in this group's own bookkeeping list yet (e.g.
+	// called from ValueChanged() before any child has been processed, or
+	// right at construction) - groupFrame is still the invalid (0,0)-(-1,-1)
+	// default here, and unioning that into `frame` below would corrupt it
+	// into a huge, (0,0)-anchored rect that paints over the rest of the
+	// canvas. Nothing to fit yet, so leave the existing frame alone.
+	if (!groupFrame.IsValid())
+		return;
 	groupFrame.InsetBy(-5,-5);
 	groupFrame.top = groupFrame.top-15;
 	if (groupFrame != frame) {
