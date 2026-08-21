@@ -49,6 +49,16 @@ public:
 
 	virtual bool		Selected(void){return selected;};
 	virtual bool		Caught(BPoint where);
+	// from/to are resolved once in ValueChanged() and cached until the next
+	// broadcast that touches this specific connection - if an endpoint's
+	// renderer is deleted in between (its node removed from the document,
+	// e.g. via Undo/Delete) without this connection itself being marked
+	// changed, the cached pointer goes dangling. GraphEditor::RemoveRenderer()
+	// is the single place a renderer ever gets deleted, so it calls this on
+	// every connection to null out any reference to what it's about to
+	// delete, rather than leaving CalcLine()/Draw() to dereference freed
+	// memory on the next redraw.
+	virtual	void		InvalidateEndpoint(Renderer *removed);
 
 protected:
 			void		Init();

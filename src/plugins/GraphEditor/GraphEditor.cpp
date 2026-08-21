@@ -965,6 +965,19 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
 			gRenderer = (GroupRenderer*)FindRenderer(cRenderer->Parent());
 		if (gRenderer != NULL)
 			gRenderer->RemoveRenderer(wichRenderer);
+		// a connection resolves and caches its endpoints' renderer pointers
+		// in ValueChanged() and doesn't revisit them until the next
+		// broadcast that touches that specific connection - if a node gets
+		// removed (Undo of its Insert, Delete, ...) without whatever
+		// command did that also marking every connection attached to it as
+		// changed, a connection can be left caching a pointer to exactly
+		// the renderer being deleted here. Null those out now rather than
+		// let CalcLine()/Draw() dereference freed memory on the next redraw.
+		for (int32 i = 0; i < renderer->CountItems(); i++) {
+			ConnectionRenderer	*cnRenderer	= dynamic_cast<ConnectionRenderer*>((Renderer*)renderer->ItemAt(i));
+			if (cnRenderer != NULL)
+				cnRenderer->InvalidateEndpoint(wichRenderer);
+		}
 		delete wichRenderer;
 	}
 /*	delete rendersensitv;

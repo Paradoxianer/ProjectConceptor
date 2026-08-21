@@ -67,7 +67,18 @@ void StringRenderer::MouseDown(BPoint where,int32 buttons, int32 clicks,int32 mo
 	textRect.bottom=textRect.bottom*editor->Scale();
 	textRect.InsetBy((2*editor->Scale()),0);
 	textRect.OffsetBy((-2*editor->Scale()),editor->Scale());
-	TextEditorControl	*editer	= new TextEditorControl(textRect,"StringEditor",changeMessage,B_FOLLOW_LEFT|B_FOLLOW_TOP);
+	// TextEditorControl is a BInvoker, which takes ownership of the message
+	// it's given and deletes it in its own destructor - changeMessage is
+	// this renderer's one persistent template (built once in
+	// ClassRenderer::Init()), reused for every edit session, so each
+	// TextEditorControl needs its own independent copy rather than the
+	// shared pointer itself. Passing changeMessage directly meant the
+	// *second* rename of the same node reused an already-freed message
+	// (and the control that freed it a second time double-freed it) -
+	// undetected until the freed block got reused for something else
+	// entirely (e.g. a connection's BMessage), which then crashed on a
+	// completely unrelated redraw with no obvious link back to renaming.
+	TextEditorControl	*editer	= new TextEditorControl(textRect,"StringEditor",new BMessage(*changeMessage),B_FOLLOW_LEFT|B_FOLLOW_TOP);
 	editer->SetTarget(editor->BelongTo());
 	editer->SetScale(editor->Scale());
 	editor->AddChild(editer);
