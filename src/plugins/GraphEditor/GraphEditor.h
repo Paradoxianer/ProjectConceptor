@@ -42,10 +42,6 @@ const uint32			G_E_INSERT_NODE 		= 'geIN';
 const uint32            G_E_INSERT_SIBLING      = 'geIS';
 
 extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
-// transient field on a freshly inserted node's own BMessage, checked once by
-// CreateRendererFor() and removed right after - not part of the saved
-// document format
-extern const char		*G_E_START_EDITING_NAME;	//	= "GraphEditor::StartEditingName";
 
 const float		triangleHeight	= 7;
 const float		gridWidth		= 50;
@@ -180,6 +176,21 @@ protected:
 			BRegion			*rendersensitv;
 			Renderer		*activRenderer;
 			Renderer		*mouseReciver;
+			// "start editing this node's name once its renderer exists" is
+			// pure GUI intent for the next InsertRenderObject() to act on -
+			// keeping it as a GraphEditor-local pointer instead of a bool
+			// flag on the node's own BMessage (the previous design) means it
+			// can never leak into a saved file, no matter what order saves
+			// and inserts happen to race in. See issue #75. Compared by
+			// identity in CreateRendererFor(), so if the insert that set
+			// this never results in a renderer (a failed/undone command,
+			// say), the pointer goes stale until overwritten by the next
+			// insert - accepted as a narrow, cosmetic risk (an unrelated
+			// future node could in theory get an unwanted edit-focus if a
+			// new BMessage happens to reuse that exact freed address) rather
+			// than adding more state to close off what a real bool flag on
+			// the node never risked in the first place, just differently.
+			BMessage		*pendingStartEditNode;
 			BList			*renderer;
 			float			scale;
 

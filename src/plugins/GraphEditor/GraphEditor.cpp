@@ -31,7 +31,6 @@
 
 
 const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
-const char		*G_E_START_EDITING_NAME	= "GraphEditor::StartEditingName";
 
 GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW | B_NAVIGABLE) {
 	TRACE();
@@ -50,6 +49,7 @@ void GraphEditor::Init(void) {
 	startMouseDown	= NULL;
 	activRenderer	= NULL;
 	mouseReciver	= NULL;
+	pendingStartEditNode	= NULL;
 	rendersensitv	= new BRegion();
 	renderString	= new char[30];
 	key_hold		= false;
@@ -847,7 +847,7 @@ void GraphEditor::InsertObject(BPoint where,bool deselect) {
 	newObject->AddMessage(P_C_NODE_FONT,newFont);
 	newObject->AddMessage(P_C_NODE_PATTERN,newPattern);
 	if (newObject->what == P_C_CLASS_TYPE)
-		newObject->AddBool(G_E_START_EDITING_NAME,true);
+		pendingStartEditNode = newObject;
 	//preparing CommandMessage
 	commandMessage->AddPointer("node",(void *)newObject);
 	commandMessage->AddString("Command::Name","Insert");
@@ -902,10 +902,8 @@ Renderer* GraphEditor::CreateRendererFor(BMessage *node)
 	// practice, usually wrong (issue #36 follow-up).
 	if (newRenderer != NULL)
 		AddRenderer(newRenderer);
-	bool	startEditing	= false;
-	if ((node->what == P_C_CLASS_TYPE) &&
-	    (node->FindBool(G_E_START_EDITING_NAME,&startEditing) == B_OK) && startEditing) {
-		node->RemoveName(G_E_START_EDITING_NAME);
+	if ((node->what == P_C_CLASS_TYPE) && (node == pendingStartEditNode)) {
+		pendingStartEditNode = NULL;
 		((ClassRenderer*)newRenderer)->StartEditingName();
 	}
 	return newRenderer;
@@ -1094,7 +1092,7 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 	}
 	newNode->what = newWhat;
 	if (newWhat == P_C_CLASS_TYPE)
-		newNode->AddBool(G_E_START_EDITING_NAME,true);
+		pendingStartEditNode = newNode;
 	newNode->AddMessage(P_C_NODE_FONT,newFont);
 	newNode->AddMessage(P_C_NODE_PATTERN,newPattern);
 	commandMessage->AddString("Command::Name","Insert");
