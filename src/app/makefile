@@ -183,6 +183,7 @@ include $(DEVEL_DIRECTORY)/etc/makefile-engine
 default .DEFAULT:
 	mkdir -p ../../$(APP_DIR)
 	cp -rf $(NAME) ../../$(APP_DIR)
+	ln -sf $(NAME) ../../$(APP_DIR)/ProjectConceptor.a
 	cp -rf ../.PackageInfo ../../bin
 	mkdir -p ../../bin/data/deskbar/menu/Applications
 	ln -sf ../../../../apps/ProjectConceptor/$(NAME) ../../bin/data/deskbar/menu/Applications

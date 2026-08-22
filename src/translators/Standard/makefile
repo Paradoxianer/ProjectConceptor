@@ -30,8 +30,7 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-Translator
 SRCS= 	StandardTranslator.cpp \
 		TranslatorMain.cpp \
 		SettingsManager.cpp \
-		ConfigView.cpp \
-		ProjectConceptorDefs.cpp
+		ConfigView.cpp
 
 		
 #	specify the resource files to use
@@ -48,7 +47,7 @@ RSRCS=
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be  translation
+LIBS= be  translation ../../../$(APP_DIR)/ProjectConceptor.a
 		
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
