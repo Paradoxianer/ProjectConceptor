@@ -77,6 +77,28 @@ BMessage* MessageXmlReader::ReadFile(const BString &fileName) {
 	return NULL;
 }
 
+BMessage* MessageXmlReader::ReadFrom(BPositionIO *source){
+	off_t	size	= source->Seek(0, SEEK_END);
+	source->Seek(0, SEEK_SET);
+	if (size <= 0)
+		return NULL;
+	char	*buffer	= new char[size+1];
+	ssize_t	bytesRead	= source->Read(buffer,size);
+	if (bytesRead < 0)
+		bytesRead = 0;
+	buffer[bytesRead]	= '\0';
+
+	TiXmlDocument	xmlDoc;
+	xmlDoc.Parse(buffer);
+	delete[] buffer;
+	if (xmlDoc.Error())
+		return NULL;
+	TiXmlElement *element = xmlDoc.FirstChildElement("BMessage");
+	if (element == NULL)
+		return NULL;
+	return ProcessXML(element);
+}
+
 BMessage* MessageXmlReader::ProcessXML(TiXmlElement *element, BMessage *nodeMessage){
 	BMessage *bMessage	= new BMessage;
 	const char *what=element->Attribute("what");
@@ -151,7 +173,14 @@ BMessage* MessageXmlReader::ProcessXML(TiXmlElement *element, BMessage *nodeMess
 				break;
  			}
 			case 13:{
-				bMessage->AddPointer(child->Attribute("name"),(const void*)atoi(child->Attribute("value")));
+				// written as "%p" (hex, e.g. "0x7fc8...") by MessageXmlWriter -
+				// atoi() would silently parse that as 0 (stops at the 'x').
+				// The bit pattern itself is meaningless once reloaded in a
+				// different process anyway (same as the native flatten
+				// format - neither can restore a live pointer), but at
+				// least round-trips the same value instead of zeroing it.
+				bMessage->AddPointer(child->Attribute("name"),
+					(const void*)strtoul(child->Attribute("value"),NULL,16));
 				break;
 			}
 			case 14:{

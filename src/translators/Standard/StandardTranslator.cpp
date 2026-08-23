@@ -19,57 +19,65 @@
 #include "StandardTranslator.h"
 #include "SettingsManager.h"
 #include "ConfigView.h"
+#include "MessageXmlReader.h"
+#include "MessageXmlWriter.h"
 
 status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	BMessage * ioExtension,	translator_info * outInfo, uint32 outType)
 {
-	status_t err	= B_OK;
-	BMessage		*testMessage	= new BMessage();
-	BMessage		*tmpMessage		= new BMessage();
 	if ((!inSource) || (!outInfo))
-		err = B_BAD_VALUE;
-	else
-	{
-		// Identify() runs against every file any app on the system scans via
-		// BTranslatorRoster, not just ProjectConceptor documents - a full
-		// Unflatten() of the whole stream before any cheap check meant every
-		// unrelated file got fully parsed as a BMessage just to be rejected.
-		// .pcd files are BMessage::Flatten()'s own on-disk format, which
-		// always starts with this 4-byte magic - reject anything else here,
-		// before touching the rest of the stream at all.
-		char	magic[4];
-		off_t	savedPos	= inSource->Position();
-		ssize_t	bytesRead	= inSource->Read(magic, sizeof(magic));
-		inSource->Seek(savedPos, SEEK_SET);
-		if ((bytesRead != (ssize_t)sizeof(magic)) || (memcmp(magic, "HMF1", sizeof(magic)) != 0))
-			err = B_NO_TRANSLATOR;
-		/*if (outType == 0)
-			outType = B_TRANSLATOR_NONE;
-		if (outType != B_TRANSLATOR_NONE && outType != P_C_DOCUMENT_TYPE)
-			err	= B_NO_TRANSLATOR;*/
-		if (err == B_OK)
-		{
-			err = testMessage->Unflatten(inSource);
-			if (err == B_OK)
-			{
-				if (err == B_OK)
-					err = testMessage->FindMessage("PDocument::allNodes",tmpMessage);
-				if (err != B_OK)
-				{
-					err = B_NO_TRANSLATOR;
-				}
-				else
-				{
-					outInfo->group = B_TRANSLATOR_NONE;
-					outInfo->type = P_C_DOCUMENT_RAW_TYPE;
-					outInfo->quality = 0.3;		
-					outInfo->capability = 1.0;	
-					strcpy(outInfo->name, "ProjectConceptor nativ format");
-					strcpy(outInfo->MIME, P_C_DOCUMENT_MIMETYPE);
-				}
-			}
-		}
+		return B_BAD_VALUE;
+
+	// Identify() runs against every file any app on the system scans via
+	// BTranslatorRoster, not just ProjectConceptor documents - fully parsing
+	// the whole stream before any cheap check meant every unrelated file got
+	// fully parsed just to be rejected. Of the two formats we produce,
+	// BMessage::Flatten()'s own binary format always starts with this 4-byte
+	// magic, and the XML export always starts with an XML declaration -
+	// reject anything matching neither before touching the rest of the
+	// stream at all.
+	char	prefix[16];
+	off_t	savedPos	= inSource->Position();
+	ssize_t	bytesRead	= inSource->Read(prefix, sizeof(prefix));
+	inSource->Seek(savedPos, SEEK_SET);
+
+	bool	looksNative	= (bytesRead >= 4) && (memcmp(prefix, "HMF1", 4) == 0);
+	bool	looksXml	= (bytesRead >= 5) && (memcmp(prefix, "<?xml", 5) == 0);
+
+	if (looksNative) {
+		BMessage	testMessage;
+		BMessage	tmpMessage;
+		if ((testMessage.Unflatten(inSource) != B_OK)
+			|| (testMessage.FindMessage("PDocument::allNodes",&tmpMessage) != B_OK))
+			return B_NO_TRANSLATOR;
+		outInfo->group = B_TRANSLATOR_NONE;
+		outInfo->type = P_C_DOCUMENT_RAW_TYPE;
+		outInfo->quality = 0.3;
+		outInfo->capability = 1.0;
+		strcpy(outInfo->name, "ProjectConceptor nativ format");
+		strcpy(outInfo->MIME, P_C_DOCUMENT_MIMETYPE);
+		return B_OK;
 	}
-	return err;
+
+	if (looksXml) {
+		MessageXmlReader	xmlReader;
+		BMessage			*parsed	= xmlReader.ReadFrom(inSource);
+		inSource->Seek(savedPos, SEEK_SET);
+		BMessage			tmpMessage;
+		if ((parsed == NULL) || (parsed->FindMessage("PDocument::allNodes",&tmpMessage) != B_OK)) {
+			delete parsed;
+			return B_NO_TRANSLATOR;
+		}
+		delete parsed;
+		outInfo->group = B_TRANSLATOR_TEXT;
+		outInfo->type = P_C_DOCUMENT_TEXT_TYPE;
+		outInfo->quality = 0.3;
+		outInfo->capability = 1.0;
+		strcpy(outInfo->name, "ProjectConceptor Text");
+		strcpy(outInfo->MIME, "text/plain");
+		return B_OK;
+	}
+
+	return B_NO_TRANSLATOR;
 }
 
 status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage * ioExtension,	uint32 outType,	BPositionIO * outDestination)
@@ -80,12 +88,11 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	BMessage		*selected			= new BMessage();
 	BMessage		*commandStuff		= new BMessage();
 	BMessage		*outCommand			= new BMessage();
-	BMessage		*inMessage			= new BMessage();
+	BMessage		*inMessage			= NULL;
 	BMessage		*outMessage			= new BMessage();
 	BMessage		*tmpMessage			= new BMessage();
 	bool			saveUndo			= true;
 	bool			saveMacro			= true;
-	bool			restoreWindowPos	= true;
 	int32			undoLevel			= -1;
 	printf("StandartTranslator::Translate\n");
 	if (ioExtension != NULL)
@@ -97,7 +104,21 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	//necessary to avoid problems
 	outDestination->Seek(0, SEEK_SET);
 	inSource->Seek(0, SEEK_SET);
-	inMessage->Unflatten(inSource);
+
+	// tInfo->type reflects whatever Identify() determined the *input*
+	// stream actually is (native binary vs XML export) - read accordingly,
+	// regardless of what output format was requested.
+	if ((tInfo != NULL) && (tInfo->type == P_C_DOCUMENT_TEXT_TYPE)) {
+		MessageXmlReader	xmlReader;
+		inMessage = xmlReader.ReadFrom(inSource);
+		if (inMessage == NULL)
+			return B_NO_TRANSLATOR;
+	} else {
+		inMessage = new BMessage();
+		err = inMessage->Unflatten(inSource);
+		if (err != B_OK)
+			return err;
+	}
 	//translations Process
 	int32	formatVersion	= 0;
 	if (inMessage->FindInt32(P_C_DOC_FORMAT_VERSION_FIELD,&formatVersion) == B_OK)
@@ -134,12 +155,18 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 		commandStuff->RemoveName("makro");
 	outMessage->AddMessage("PDocument::commandManager",commandStuff);
 	DEBUG_ONLY(outMessage->PrintToStream(););
-	err = outMessage->Flatten(outDestination);
+
+	if (outType == P_C_DOCUMENT_TEXT_TYPE) {
+		MessageXmlWriter	xmlWriter;
+		err = xmlWriter.WriteTo(*outMessage,outDestination);
+	} else {
+		err = outMessage->Flatten(outDestination);
+	}
 	//necessary to avoid problems
 	inSource->Seek(0, SEEK_SET);
 	outDestination->Seek(0, SEEK_SET);	/* paranoia */
-	
-	printf("StandartTranslator - Flatten outMessage - %s\n", strerror(err));
+
+	printf("StandartTranslator - Translate outMessage - %s\n", strerror(err));
 	return err;
 }
 
@@ -155,78 +182,4 @@ status_t GetConfigMessage(BMessage * ioExtension)
 	status_t err = B_OK;
 
 	return err;
-}
-
-status_t ConvertPDoc2ASCII(BPositionIO * inSource, BMessage * ioExtension,	BPositionIO * outDestination)
-{
-	status_t		err					= B_OK;
-	BMessage		*inMessage			= new BMessage();
-	BMessage		*outMessage			= new BMessage();
-	BMessage		*outCommand			= new BMessage();
-
-	BMessage		*tmpMessage			= new BMessage();
-	BMessage		*allConnections		= new BMessage();
-	BMessage		*selected			= new BMessage();
-	BMessage		*commandStuff		= new BMessage();
-
-	int32			i					= 0;
-	bool			saveUndo			= true;
-	bool			saveMacro			= true;
-	int32			undoLevel			= -1;
-	printf("StandartTranslator::Translate\n");
-	if (ioExtension != NULL)
-	{
-		ioExtension->FindBool("SaveUndo",&saveUndo);
-		ioExtension->FindBool("SaveMacro",&saveUndo);
-		ioExtension->FindInt32("UndoLevel",&undoLevel);
-	}
-	//necessary to avoid problems
-	outDestination->Seek(0, SEEK_SET);
-	inSource->Seek(0, SEEK_SET);
-	inMessage->Unflatten(inSource);
-	//translations Process 
-	inMessage->FindMessage("PDocument::allNodes",tmpMessage);
-//	while (tmpMessage->FindMessage("node",))
-	inMessage->FindMessage("PDocument::allConnections",allConnections);
-	outMessage->AddMessage("PDocument::allConnections",allConnections);
-	inMessage->FindMessage("PDocument::selected",selected);
-	outMessage->AddMessage("PDocument::selected",selected);
-
-	inMessage->FindMessage("PDocument::commandManager",commandStuff);
-	if (saveUndo)
-	{
-		if (undoLevel>0)
-		{
-			type_code	typeFound;
-			int32		countFound;
-			int32		i			= 0;
-			commandStuff->GetInfo("undo",&typeFound,&countFound);
-			for (i =undoLevel;i< countFound;i++)
-			{
-				commandStuff->FindMessage("und",i,tmpMessage);
-				outCommand->AddMessage("undo",tmpMessage);
-			}
-		}
-	}
-	else
-		commandStuff->RemoveName("undo");
-	if (!saveMacro)
-		commandStuff->RemoveName("makro");
-	outMessage->AddMessage("PDocument::commandManager",commandStuff);
-	DEBUG_ONLY(	outMessage->PrintToStream(););
-	err = outMessage->Flatten(outDestination);
-	//necessary to avoid problems
-	inSource->Seek(0, SEEK_SET);
-	outDestination->Seek(0, SEEK_SET);	/* paranoia */
-	
-	printf("StandartTranslator - Flatten outMessage - %s\n", strerror(err));
-	return err;
-}
-
-status_t ConvertASCII2PDoc(BPositionIO * inSource, BMessage * ioExtension,	BPositionIO * outDestination)
-{
-}
-
-status_t ConvertPDoc2PDoc(BPositionIO * inSource, BMessage * ioExtension,	BPositionIO * outDestination)
-{
 }

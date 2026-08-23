@@ -18,6 +18,12 @@
 
 #define P_C_DOCUMENT_TYPE 'pcDT'
 #define P_C_DOCUMENT_RAW_TYPE 'pcRT'
+// distinct from P_C_DOCUMENT_TYPE so Translate()'s outType can actually tell
+// "native ProjectConceptor Document" and "ProjectConceptor Text" apart -
+// both used to share P_C_DOCUMENT_TYPE, only differing by translation_format
+// group (B_TRANSLATOR_NONE vs B_TRANSLATOR_TEXT), which never reaches
+// Translate() at all (see PDocument::Save(), PCSavePanel::BuildFormatsMenu())
+#define P_C_DOCUMENT_TEXT_TYPE 'pcXT'
 
 
 const uint32	P_C_PLUGIN_MESSAGE				= 'pcPM';

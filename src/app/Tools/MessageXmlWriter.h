@@ -3,6 +3,7 @@
 
 #include <String.h>
 #include <Message.h>
+#include <DataIO.h>
 
 #include "tinyxml.h"
 
@@ -22,6 +23,11 @@ public:
 	// Vielleicht zur convenience
 	// tut im endeffekt nur obiges
 	status_t WriteFile(const BString &fileName, const BMessage &message);
+
+	// Same output as Write(), but to an arbitrary stream instead of the
+	// file at filePath - for callers (translators) that only ever get a
+	// BPositionIO, not necessarily one backed by a real on-disk path.
+	status_t WriteTo(BMessage &message, BPositionIO *destination);
 
 private:
     TiXmlElement	ProcessMessage(const char *name,BMessage *node);
