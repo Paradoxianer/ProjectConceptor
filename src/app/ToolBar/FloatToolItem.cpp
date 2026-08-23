@@ -6,6 +6,29 @@
 #include "FloatToolItem.h"
 #include "ToolBar.h"
 
+// textValue covers almost all of FloatToolItem's own BButton bounds (see
+// the constructor below), including the area where it draws its own label
+// text - a click there used to be silently swallowed by BTextControl's
+// default MouseDown() (which only knows how to position a cursor/select
+// text), leaving only the thin uncovered BButton border actually clickable.
+// Divider() is the x-offset where the label ends and the editable box
+// begins; clicking left of it now commits the current value exactly like
+// pressing Enter already does (BTextControl::Invoke() sends the same
+// message to the same target), instead of doing nothing.
+class LabelClickTextControl : public BTextControl {
+public:
+	LabelClickTextControl(BRect frame, const char *name, const char *label,
+			const char *text, BMessage *message)
+		: BTextControl(frame, name, label, text, message) {}
+
+	virtual void MouseDown(BPoint where) {
+		if (where.x < Divider())
+			Invoke();
+		else
+			BTextControl::MouseDown(where);
+	}
+};
+
 FloatToolItem::FloatToolItem(const char *name, float newValue,BMessage *msg)
 			  :BButton(BRect(0,0,ITEM_WIDTH*4,ITEM_HEIGHT),name,"",msg), BaseItem(name) {
 	Init();
@@ -15,7 +38,7 @@ FloatToolItem::FloatToolItem(const char *name, float newValue,BMessage *msg)
 			textControlRect.InsetBy(5,2);
 	char*	floatToText	= new char[24];
 	sprintf(floatToText,"%.2f",newValue);
-	textValue		= new BTextControl(textControlRect,name,name,"",new BMessage(*msg));
+	textValue		= new LabelClickTextControl(textControlRect,name,name,"",new BMessage(*msg));
 	float moveToY=(Bounds().Height()-textValue->Bounds().Height())/2;
 	textValue->MoveTo(textValue->Frame().left,moveToY);
 	for (uint32 i = 0; i < 256; ++i)
