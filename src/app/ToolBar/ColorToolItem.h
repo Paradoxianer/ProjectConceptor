@@ -7,29 +7,43 @@
 #include <app/Message.h>
 #include <interface/Bitmap.h>
 #include <interface/Button.h>
-#include <interface/ColorControl.h>
 #include <interface/Window.h>
 
 #include <support/Archivable.h>
 #include <support/String.h>
 
-const uint32 COLOR_CHANGED	='ctCC';
-
 class ToolBar;
+class ColorSwatchView;
+class ColorPickerWindow;
+
+// Number of algorithmically-generated palette swatches shown next to the
+// current-color swatch - a hue sweep, not a hand-curated list, so this
+// widget doesn't need per-project color curation to be reusable.
+const int32 CTI_PALETTE_SIZE = 8;
 
 /**
  * @class ColorToolItem
  *
- * @brief  ColorToolItem add a BButton with a visualisation of a pattern to a ToolBar 
+ * @brief A row of quick-pick palette swatches plus a current-color swatch
+ * that opens a full BColorControl+alpha picker on click - adds this to a
+ * ToolBar.
  *
- * @author Paradoxon powered by Jesus Christ
- * @version 0.01
- * @date 2005/10/04
+ * Replaces the previous single-swatch-button-with-popup design, whose
+ * popup closed again on the same click that was supposed to open it
+ * (MouseUp hid it whenever the release point was still over the button -
+ * i.e. any ordinary click). Picking a palette swatch applies that color
+ * immediately; picking one from the full picker does the same. Either
+ * way, the exact same external contract this item always had is
+ * preserved: GetColor() returns the current value, and picking a color
+ * explicitly invokes this item's own message/target (see
+ * GraphEditor::MessageReceived's G_E_COLOR_CHANGED case, which just
+ * polls GetColor() on receiving it - unchanged by this redesign).
  *
  * @see ToolBar
- * @see ToolMenu
+ * @see ColorSwatchView
+ * @see ColorPickerWindow
  */
-class ColorToolItem: public	BaseItem, 
+class ColorToolItem: public	BaseItem,
 				public	BButton
 {
 
@@ -58,22 +72,25 @@ virtual		void			MouseDown(BPoint point);
 virtual		void			MouseUp(BPoint point);
 virtual		void			Draw(BRect updateRect);
 
-//virtual 	status_t		Invoke(BMessage *message = NULL);
 virtual		BRect			Frame(void) {return BButton::Frame();};
 virtual		void			MoveTo(float x,float y){BButton::MoveTo(x,y);};
-virtual		void			ResizeTo(float width,float height){ResizeTo(width,height);};
+virtual		void			ResizeTo(float width,float height){BButton::ResizeTo(width,height);};
 virtual 	void			MessageReceived(BMessage *message);
 
 protected:
 			void			Init();
+			void			BuildChildren(rgb_color initialColor);
+			void			SetColor(rgb_color newColor);
+
 	const	char			*tName;
 			rgb_color		value;
 			BString			*description;
 			BString			*toolTip;
 			uint32			behavior;
 			uint32			state;
-			BWindow			*colorWindow;
-			BColorControl	*colorPicker;
-			uint32			oldEventMask;
+
+			ColorSwatchView	*currentColorSwatch;
+			ColorSwatchView	*paletteSwatch[CTI_PALETTE_SIZE];
+			ColorPickerWindow	*pickerWindow;
 };
 #endif
