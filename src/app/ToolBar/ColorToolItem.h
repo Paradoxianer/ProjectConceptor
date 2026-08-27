@@ -13,34 +13,31 @@
 #include <support/String.h>
 
 class ToolBar;
-class ColorSwatchView;
 class ColorPickerWindow;
-
-// Number of algorithmically-generated palette swatches shown next to the
-// current-color swatch - a hue sweep, not a hand-curated list, so this
-// widget doesn't need per-project color curation to be reusable.
-const int32 CTI_PALETTE_SIZE = 8;
 
 /**
  * @class ColorToolItem
  *
- * @brief A row of quick-pick palette swatches plus a current-color swatch
- * that opens a full BColorControl+alpha picker on click - adds this to a
- * ToolBar.
+ * @brief A compact split button: the main area shows/reapplies the
+ * current fill color, a narrow arrow strip on the right opens a full
+ * picker (palette + BColorControl + alpha) for anything else.
  *
- * Replaces the previous single-swatch-button-with-popup design, whose
- * popup closed again on the same click that was supposed to open it
- * (MouseUp hid it whenever the release point was still over the button -
- * i.e. any ordinary click). Picking a palette swatch applies that color
- * immediately; picking one from the full picker does the same. Either
- * way, the exact same external contract this item always had is
- * preserved: GetColor() returns the current value, and picking a color
- * explicitly invokes this item's own message/target (see
- * GraphEditor::MessageReceived's G_E_COLOR_CHANGED case, which just
- * polls GetColor() on receiving it - unchanged by this redesign).
+ * Replaces a previous, wider design (an always-visible row of palette
+ * swatches next to a current-color swatch) that turned out too wide and
+ * visually busy for a horizontal toolbar row - that layout works for
+ * Icon-O-Matic's own SwatchGroup because it lives in a roomy sidebar,
+ * not a toolbar. The palette now lives inside ColorPickerWindow instead,
+ * only visible while actually picking a color.
+ *
+ * Clicking the main area needs no custom handling at all - it's a plain
+ * BButton, and its native click-Invoke() already sends this item's own
+ * message (e.g. G_E_COLOR_CHANGED) to its target, exactly what
+ * GraphEditor::MessageReceived already expects (it just polls
+ * GetColor() fresh on receiving it - unaffected by this redesign).
+ * Clicking the arrow opens ColorPickerWindow; picking a color there also
+ * invokes the same message.
  *
  * @see ToolBar
- * @see ColorSwatchView
  * @see ColorPickerWindow
  */
 class ColorToolItem: public	BaseItem,
@@ -68,8 +65,6 @@ virtual		void			SetState(uint32 newState){state=newState;};
 virtual		uint32			GetState(void){return state;};
 virtual		void			SetBehavior(uint32 newBehavior){behavior=newBehavior;};
 virtual		uint32			GetBehavior(void){return behavior;};
-virtual		void			MouseDown(BPoint point);
-virtual		void			MouseUp(BPoint point);
 virtual		void			Draw(BRect updateRect);
 
 virtual		BRect			Frame(void) {return BButton::Frame();};
@@ -89,8 +84,6 @@ protected:
 			uint32			behavior;
 			uint32			state;
 
-			ColorSwatchView	*currentColorSwatch;
-			ColorSwatchView	*paletteSwatch[CTI_PALETTE_SIZE];
 			ColorPickerWindow	*pickerWindow;
 };
 #endif

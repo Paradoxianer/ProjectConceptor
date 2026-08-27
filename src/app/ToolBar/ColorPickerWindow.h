@@ -7,6 +7,7 @@
 
 class BColorControl;
 class AlphaSlider;
+class ColorSwatchView;
 
 // Sent to the window's target right before it quits (dismissed by
 // clicking outside, Escape, or being closed some other way), so the
@@ -14,21 +15,28 @@ class AlphaSlider;
 // instead of needing to poll IsHidden()/Lock() to find out.
 const uint32 PW_CLOSED = 'pwCL';
 
+// Number of algorithmically-generated palette swatches shown above the
+// custom color control - a hue sweep, not a hand-curated list, so this
+// widget doesn't need per-project color curation to be reusable.
+const int32 PW_PALETTE_SIZE = 8;
+
 /**
  * @class ColorPickerWindow
  *
- * Small popup window pairing a stock BColorControl with an AlphaSlider.
- * Replaces ColorToolItem's old ad hoc colorWindow / custom MouseDown-
- * MouseUp popup-hide logic, which closed the popup on a normal click
- * before a color could even be picked. This window opens on a normal
- * click and stays open until explicitly dismissed - clicking outside it
- * (detected via WindowActivated()) or pressing Escape - instead of being
- * tied to the mouse button being held down.
+ * Popup window offering a row of quick-pick palette swatches plus a
+ * stock BColorControl and an AlphaSlider for anything not in the
+ * palette. Replaces ColorToolItem's old ad hoc colorWindow / custom
+ * MouseDown-MouseUp popup-hide logic, which closed the popup on a normal
+ * click before a color could even be picked. This window opens on a
+ * normal click and stays open until explicitly dismissed - clicking
+ * outside it (detected via WindowActivated()) or pressing Escape -
+ * instead of being tied to the mouse button being held down.
  *
  * Reports the picked rgb_color (RGB from the color control, alpha from
  * the slider) live: an explicit message is sent to the target each time
- * either control changes, rather than relying on a separate OK/commit
- * step or on BButton's native click-Invoke() semantics.
+ * a palette swatch is clicked or either control changes, rather than
+ * relying on a separate OK/commit step or on BButton's native
+ * click-Invoke() semantics.
  */
 class ColorPickerWindow : public BWindow {
 public:
@@ -45,9 +53,11 @@ public:
 
 private:
 			void			_ReportColor();
+			void			_ApplyColor(rgb_color color);
 
 			BColorControl	*fColorControl;
 			AlphaSlider		*fAlphaSlider;
+			ColorSwatchView	*fPaletteSwatch[PW_PALETTE_SIZE];
 			BMessage		*fMessage;
 			BHandler		*fTarget;
 };

@@ -1,7 +1,6 @@
-#include <math.h>
-
 #include <interface/Point.h>
 #include <interface/Screen.h>
+#include <interface/View.h>
 #include "ColorToolItem.h"
 
 #include "ColorSwatchView.h"
@@ -9,48 +8,67 @@
 #include "ToolBar.h"
 
 enum {
-	// from a palette swatch or the picker window - apply this color
+	// from the picker window - apply this color
 	CTI_SWATCH_CLICKED	= 'ctSC',
-	// from the current-color swatch - open the full picker
+	// from the arrow strip - open the full picker
 	CTI_OPEN_PICKER		= 'ctOP',
 };
 
-static const float kCurrentSwatchSize	= 24.0;
-static const float kPaletteSwatchWidth	= 14.0;
-static const float kMargin				= 2.0;
-static const float kGap				= 4.0;
+static const float kArrowWidth	= 10.0;
 
 
-// Standard HSV->RGB conversion (hueDegrees in [0,360), saturation/value in
-// [0,1]) - written fresh rather than reusing any third-party
-// implementation, since this is what generates the algorithmic palette
-// (see class comment in the header for why that matters).
-static rgb_color
-HueToColor(float hueDegrees, float saturation, float value)
-{
-	float	c			= value * saturation;
-	float	hPrime		= hueDegrees / 60.0;
-	float	x			= c * (1.0 - fabs(fmod(hPrime, 2.0) - 1.0));
-	float	r1 = 0, g1 = 0, b1 = 0;
+// Narrow strip on the right edge of ColorToolItem that opens the full
+// picker - the "arrow" half of the split button. A separate small child
+// view rather than hit-testing inside ColorToolItem::MouseDown() itself,
+// same idiom FloatToolItem already uses for its embedded text control:
+// Haiku's normal view-hierarchy dispatch routes a click landing on this
+// child straight to it, leaving the rest of the button's own bounds
+// (and its native BButton click-Invoke() behavior) untouched.
+class ColorPickerArrowView : public BView {
+public:
+	ColorPickerArrowView(BRect frame, BMessage *message, BHandler *target)
+		: BView(frame, "ColorToolItem::arrow", B_FOLLOW_NONE, B_WILL_DRAW),
+		fMessage(message), fTarget(target), fTrackingStart(-1.0, -1.0)
+	{
+		SetViewColor(B_TRANSPARENT_32_BIT);
+	}
 
-	if (hPrime < 1)			{ r1 = c; g1 = x; b1 = 0; }
-	else if (hPrime < 2)	{ r1 = x; g1 = c; b1 = 0; }
-	else if (hPrime < 3)	{ r1 = 0; g1 = c; b1 = x; }
-	else if (hPrime < 4)	{ r1 = 0; g1 = x; b1 = c; }
-	else if (hPrime < 5)	{ r1 = x; g1 = 0; b1 = c; }
-	else					{ r1 = c; g1 = 0; b1 = x; }
+	virtual ~ColorPickerArrowView() { delete fMessage; }
 
-	float	m = value - c;
-	rgb_color	color;
-	color.red	= (uint8)((r1 + m) * 255.0 + 0.5);
-	color.green	= (uint8)((g1 + m) * 255.0 + 0.5);
-	color.blue	= (uint8)((b1 + m) * 255.0 + 0.5);
-	color.alpha	= 255;
-	return color;
-}
+	virtual void Draw(BRect updateRect) {
+		BRect	b		= Bounds();
+		BPoint	center(b.left + b.Width()/2, b.top + b.Height()/2);
+		SetHighColor(0,0,0,255);
+		FillTriangle(
+			BPoint(center.x - 3, center.y - 2),
+			BPoint(center.x + 3, center.y - 2),
+			BPoint(center.x, center.y + 3));
+	}
+
+	virtual void MouseDown(BPoint where) {
+		if (Bounds().Contains(where))
+			fTrackingStart = where;
+	}
+
+	virtual void MouseUp(BPoint where) {
+		if (Bounds().Contains(where) && Bounds().Contains(fTrackingStart)
+			&& (fMessage != NULL) && (fTarget != NULL)) {
+			BLooper *looper = fTarget->Looper();
+			if (looper != NULL)
+				looper->PostMessage(fMessage, fTarget);
+		}
+		fTrackingStart.x = -1.0;
+		fTrackingStart.y = -1.0;
+	}
+
+private:
+	BMessage	*fMessage;
+	BHandler	*fTarget;
+	BPoint		fTrackingStart;
+};
 
 
-ColorToolItem::ColorToolItem(const char *name, rgb_color newValue,BMessage *msg):BaseItem(name),BButton(BRect(0,0,ITEM_WIDTH,ITEM_HEIGHT),name,"",msg)
+ColorToolItem::ColorToolItem(const char *name, rgb_color newValue,BMessage *msg):BaseItem(name),BButton(BRect(0,0,ITEM_WIDTH+kArrowWidth,ITEM_HEIGHT),name,"",msg)
 {
 	Init();
 	value	= newValue;
@@ -89,27 +107,8 @@ void ColorToolItem::Init(void)
 
 void ColorToolItem::BuildChildren(rgb_color initialColor)
 {
-	float	x	= kMargin;
-
-	currentColorSwatch = new ColorSwatchView("ColorToolItem::currentColor",
-		new BMessage(CTI_OPEN_PICKER), this, initialColor,
-		kCurrentSwatchSize, kCurrentSwatchSize);
-	currentColorSwatch->MoveTo(x, (ITEM_HEIGHT - kCurrentSwatchSize) / 2);
-	AddChild(currentColorSwatch);
-	x += kCurrentSwatchSize + kGap;
-
-	for (int32 i = 0; i < CTI_PALETTE_SIZE; i++) {
-		rgb_color	swatchColor	= HueToColor(
-			i * (360.0 / CTI_PALETTE_SIZE), 0.85, 0.95);
-		paletteSwatch[i] = new ColorSwatchView("ColorToolItem::palette",
-			new BMessage(CTI_SWATCH_CLICKED), this, swatchColor,
-			kPaletteSwatchWidth, ITEM_HEIGHT - 4);
-		paletteSwatch[i]->MoveTo(x, 2);
-		AddChild(paletteSwatch[i]);
-		x += kPaletteSwatchWidth;
-	}
-
-	ResizeTo(x + kMargin, ITEM_HEIGHT);
+	BRect	arrowFrame(ITEM_WIDTH, 0, ITEM_WIDTH+kArrowWidth, ITEM_HEIGHT);
+	AddChild(new ColorPickerArrowView(arrowFrame, new BMessage(CTI_OPEN_PICKER), this));
 }
 
 ColorToolItem::~ColorToolItem(void)
@@ -162,24 +161,47 @@ BArchivable* ColorToolItem::Instantiate(BMessage *archive)
 void ColorToolItem::Draw(BRect updateRect)
 {
 	BButton::Draw(updateRect);
-}
+	SetDrawingMode(B_OP_OVER);
+	BRect	swatchFrame=BRect(0,0,17,17);
+	if (Value() != B_CONTROL_ON)
+	{
+		swatchFrame.OffsetTo(4,4);
+	}
+	else
+	{
+		swatchFrame.OffsetTo(5,5);
+		swatchFrame.bottom -=2;
+		swatchFrame.right -=2;
+	}
+	SetHighColor(value);
+	FillRoundRect(swatchFrame,4,4);
+	SetHighColor(tint_color(value,0));
+	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+1),BPoint(swatchFrame.right,swatchFrame.top+1));
+	SetHighColor(tint_color(value,0.2));
+	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+2),BPoint(swatchFrame.right,swatchFrame.top+2));
+	SetHighColor(tint_color(value,0.4));
+	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+3),BPoint(swatchFrame.right,swatchFrame.top+3));
+	SetHighColor(tint_color(value,0.6));
+	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+4),BPoint(swatchFrame.right,swatchFrame.top+4));
+	SetHighColor(tint_color(value,0.8));
+	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+5),BPoint(swatchFrame.right,swatchFrame.top+5));
 
-void ColorToolItem::MouseDown(BPoint point)
-{
-	BButton::MouseDown(point);
-}
-
-void ColorToolItem::MouseUp(BPoint point)
-{
-	BButton::MouseUp(point);
+	SetHighColor(ui_color(B_KEYBOARD_NAVIGATION_COLOR));
+	StrokeRoundRect(swatchFrame,4,4);
 }
 
 void ColorToolItem::SetColor(rgb_color newColor)
 {
+	// pickerWindow is never pushed this value back - it's always the
+	// *source* of a color change (palette swatch or the color/alpha
+	// controls inside it), never the target of one, so there's nothing
+	// to sync into it here. (An earlier version of this class did call
+	// pickerWindow->SetColor() from here, across threads without
+	// locking pickerWindow first - a confirmed "Looper must be locked"
+	// crash inside BColorControl::SetValue(). Removing the call outright
+	// turned out to be the right fix, not adding the missing Lock().)
 	value = newColor;
-	currentColorSwatch->SetColor(value);
-	if (pickerWindow != NULL)
-		pickerWindow->SetColor(value);
+	Invalidate();
 	Invoke();
 }
 
