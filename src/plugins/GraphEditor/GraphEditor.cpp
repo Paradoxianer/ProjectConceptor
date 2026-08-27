@@ -372,6 +372,22 @@ void GraphEditor::ValueChanged() {
 
 	status_t err = doc->LockWithTimeout(TIMEOUT_LOCK);
 	printf("DocLocError - %s\n",strerror(err));
+	if (err != B_OK) {
+		// PCommandManager::Execute() holds this same document lock while it
+		// clears and then repopulates GetChangedNodes() (PCommandManager.cpp,
+		// around the clear() at the top and the command's own Do() call) -
+		// proceeding to iterate that set below without actually holding the
+		// lock here can race against that clear()/insert() on a different
+		// thread and corrupt the set mid-iteration. Confirmed via a live
+		// crash report: _Rb_tree_increment on an invalidated iterator. This
+		// used to happen unconditionally - err was checked only to decide
+		// whether to call Unlock(), never to gate the loop itself.
+		// Skipping this cycle avoids the crash; a node whose only change
+		// lands in a skipped cycle can go stale until something else
+		// touches it, which is the pre-existing trade-off of TIMEOUT_LOCK
+		// being a timeout at all - better than corrupting the set.
+		return;
+	}
 
 	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
 	set<BMessage*>::iterator it;
