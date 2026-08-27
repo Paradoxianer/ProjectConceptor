@@ -1,6 +1,7 @@
 #include <interface/Point.h>
 #include <interface/Screen.h>
 #include <interface/View.h>
+#include <interface/ControlLook.h>
 #include "ColorToolItem.h"
 
 #include "ColorSwatchView.h"
@@ -18,32 +19,71 @@ static const float kArrowWidth	= 10.0;
 
 
 // Narrow strip on the right edge of ColorToolItem that opens the full
-// picker - the "arrow" half of the split button. A real BButton (not
-// just a plain BView with a triangle drawn on it) so it actually looks
-// and behaves like a toolbar button - raised bevel, pressed-state
-// feedback - all for free from BButton::Draw(), just with a small
-// triangle layered on top instead of a text label. A separate child
-// view rather than hit-testing inside ColorToolItem::MouseDown() itself,
-// same idiom FloatToolItem already uses for its embedded text control:
-// Haiku's normal view-hierarchy dispatch routes a click landing on this
-// child straight to it, leaving the rest of the outer button's own
-// bounds (and its native BButton click-Invoke() behavior) untouched.
-class ColorPickerArrowButton : public BButton {
+// picker - the "arrow" half of the split button. A plain BView, not a
+// BButton: making it a real BButton looked right but broke clicking
+// entirely, because ColorToolItem itself is *also* a BButton, and
+// ToolBar's own MouseDown/MouseUp dispatch calls straight into the
+// outer BButton directly (see ToolBar.cpp) regardless of where exactly
+// in its Frame() the click landed - that outer BButton's own native
+// mouse-capture then wins the tracking over the inner BButton's, so the
+// inner one's Invoke() never fires. A plain BView with its own small
+// MouseDown/MouseUp (no BControl-style capture) sidesteps that
+// entirely, and drawing it via BControlLook still gets a proper native
+// button bevel/pressed-state look - just without being a real BControl.
+class ColorPickerArrowView : public BView {
 public:
-	ColorPickerArrowButton(BRect frame, BMessage *message)
-		: BButton(frame, "ColorToolItem::arrow", "", message) {}
+	ColorPickerArrowView(BRect frame, BMessage *message, BHandler *target)
+		: BView(frame, "ColorToolItem::arrow", B_FOLLOW_NONE, B_WILL_DRAW),
+		fMessage(message), fTarget(target), fTrackingStart(-1.0, -1.0),
+		fPressed(false)
+	{
+		SetViewColor(B_TRANSPARENT_32_BIT);
+	}
+
+	virtual ~ColorPickerArrowView() { delete fMessage; }
 
 	virtual void Draw(BRect updateRect) {
-		BButton::Draw(updateRect);
-		BRect	b		= Bounds();
-		BPoint	center(b.left + b.Width()/2, b.top + b.Height()/2);
-		SetDrawingMode(B_OP_OVER);
+		BRect	frame	= Bounds();
+		rgb_color	base	= ui_color(B_PANEL_BACKGROUND_COLOR);
+		uint32	flags	= fPressed ? BControlLook::B_ACTIVATED : 0;
+		be_control_look->DrawButtonFrame(this, frame, updateRect, base, base, flags);
+		be_control_look->DrawButtonBackground(this, frame, updateRect, base, flags);
+
+		BPoint	center(Bounds().left + Bounds().Width()/2,
+			Bounds().top + Bounds().Height()/2);
 		SetHighColor(0,0,0,255);
 		FillTriangle(
 			BPoint(center.x - 3, center.y - 2),
 			BPoint(center.x + 3, center.y - 2),
 			BPoint(center.x, center.y + 3));
 	}
+
+	virtual void MouseDown(BPoint where) {
+		if (Bounds().Contains(where)) {
+			fTrackingStart	= where;
+			fPressed		= true;
+			Invalidate();
+		}
+	}
+
+	virtual void MouseUp(BPoint where) {
+		bool	invoke	= Bounds().Contains(where) && Bounds().Contains(fTrackingStart);
+		fPressed = false;
+		Invalidate();
+		if (invoke && (fMessage != NULL) && (fTarget != NULL)) {
+			BLooper *looper = fTarget->Looper();
+			if (looper != NULL)
+				looper->PostMessage(fMessage, fTarget);
+		}
+		fTrackingStart.x = -1.0;
+		fTrackingStart.y = -1.0;
+	}
+
+private:
+	BMessage	*fMessage;
+	BHandler	*fTarget;
+	BPoint		fTrackingStart;
+	bool		fPressed;
 };
 
 
@@ -87,10 +127,7 @@ void ColorToolItem::Init(void)
 void ColorToolItem::BuildChildren(rgb_color initialColor)
 {
 	BRect	arrowFrame(ITEM_WIDTH, 0, ITEM_WIDTH+kArrowWidth, ITEM_HEIGHT);
-	ColorPickerArrowButton	*arrowButton	=
-		new ColorPickerArrowButton(arrowFrame, new BMessage(CTI_OPEN_PICKER));
-	arrowButton->SetTarget(this);
-	AddChild(arrowButton);
+	AddChild(new ColorPickerArrowView(arrowFrame, new BMessage(CTI_OPEN_PICKER), this));
 }
 
 ColorToolItem::~ColorToolItem(void)
