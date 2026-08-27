@@ -60,6 +60,9 @@ public:
 				 */
 				void		StartEditingName(void){name->MouseDown(BPoint(0,0));};
 
+				void		SetPreviewFillColor(rgb_color color);
+				void		ClearPreviewFillColor(void);
+
 
 protected:
 				void		Init();
@@ -72,6 +75,8 @@ protected:
 	//++++++++++ClassSettings++++++++++
 		float				xRadius,yRadius;
 		rgb_color			fillColor,borderColor;
+		bool				hasPreviewFillColor;
+		rgb_color			previewFillColor;
 		BRect				frame;
 		bool				selected;
 		AFont				*font;

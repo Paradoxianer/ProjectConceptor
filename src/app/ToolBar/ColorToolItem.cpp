@@ -87,11 +87,12 @@ private:
 };
 
 
-ColorToolItem::ColorToolItem(const char *name, rgb_color newValue,BMessage *msg):BaseItem(name),BButton(BRect(0,0,ITEM_WIDTH+kArrowWidth,ITEM_HEIGHT),name,"",msg)
+ColorToolItem::ColorToolItem(const char *name, rgb_color newValue,BMessage *msg,BMessage *previewMsg):BaseItem(name),BButton(BRect(0,0,ITEM_WIDTH+kArrowWidth,ITEM_HEIGHT),name,"",msg)
 {
 	Init();
-	value	= newValue;
-	tName	= name;
+	value			= newValue;
+	tName			= name;
+	previewMessage	= previewMsg;
 	BuildChildren(newValue);
 }
 
@@ -122,6 +123,8 @@ void ColorToolItem::Init(void)
 	toolTip				= NULL;
 	state				= P_M_ITEM_UP;
 	pickerWindow		= NULL;
+	previewMessage		= NULL;
+	hasPreview			= false;
 }
 
 void ColorToolItem::BuildChildren(rgb_color initialColor)
@@ -134,6 +137,7 @@ ColorToolItem::~ColorToolItem(void)
 {
 	if (description!=NULL) delete description;
 	if (toolTip!=NULL) delete toolTip;
+	if (previewMessage!=NULL) delete previewMessage;
 }
 
 void ColorToolItem::AttachedToToolBar(ToolBar *tb)
@@ -181,6 +185,7 @@ void ColorToolItem::Draw(BRect updateRect)
 {
 	BButton::Draw(updateRect);
 	SetDrawingMode(B_OP_OVER);
+	rgb_color	drawColor	= hasPreview ? previewValue : value;
 	BRect	swatchFrame=BRect(0,0,17,17);
 	if (Value() != B_CONTROL_ON)
 	{
@@ -192,17 +197,17 @@ void ColorToolItem::Draw(BRect updateRect)
 		swatchFrame.bottom -=2;
 		swatchFrame.right -=2;
 	}
-	SetHighColor(value);
+	SetHighColor(drawColor);
 	FillRoundRect(swatchFrame,4,4);
-	SetHighColor(tint_color(value,0));
+	SetHighColor(tint_color(drawColor,0));
 	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+1),BPoint(swatchFrame.right,swatchFrame.top+1));
-	SetHighColor(tint_color(value,0.2));
+	SetHighColor(tint_color(drawColor,0.2));
 	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+2),BPoint(swatchFrame.right,swatchFrame.top+2));
-	SetHighColor(tint_color(value,0.4));
+	SetHighColor(tint_color(drawColor,0.4));
 	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+3),BPoint(swatchFrame.right,swatchFrame.top+3));
-	SetHighColor(tint_color(value,0.6));
+	SetHighColor(tint_color(drawColor,0.6));
 	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+4),BPoint(swatchFrame.right,swatchFrame.top+4));
-	SetHighColor(tint_color(value,0.8));
+	SetHighColor(tint_color(drawColor,0.8));
 	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+5),BPoint(swatchFrame.right,swatchFrame.top+5));
 
 	SetHighColor(ui_color(B_KEYBOARD_NAVIGATION_COLOR));
@@ -219,18 +224,39 @@ void ColorToolItem::SetColor(rgb_color newColor)
 	// locking pickerWindow first - a confirmed "Looper must be locked"
 	// crash inside BColorControl::SetValue(). Removing the call outright
 	// turned out to be the right fix, not adding the missing Lock().)
-	value = newColor;
+	value		= newColor;
+	hasPreview	= false;
 	Invalidate();
 	Invoke();
+}
+
+void ColorToolItem::PreviewColor(rgb_color newColor)
+{
+	// Live preview only - value/GetColor() (the committed color
+	// GraphEditor's G_E_COLOR_CHANGED handler reads) is untouched here.
+	// Mirrors ClassRenderer::MouseMoved() previewing a drag purely at
+	// the renderer level - see docs/notes.md.
+	hasPreview		= true;
+	previewValue	= newColor;
+	Invalidate();
+	if (previewMessage != NULL) {
+		BMessage	preview(*previewMessage);
+		AddColorToMessage(&preview,newColor);
+		Invoke(&preview);
+	}
 }
 
 void ColorToolItem::MessageReceived(BMessage *message)
 {
 	switch (message->what) {
 		case CTI_SWATCH_CLICKED: {
+			// despite the name (kept from before the redesign), this is
+			// now only ever a live-preview report from inside the open
+			// picker (palette swatch, BColorControl, AlphaSlider) - the
+			// real commit happens once, in PW_CLOSED below
 			rgb_color	newColor;
 			if (ColorFromMessage(message,newColor))
-				SetColor(newColor);
+				PreviewColor(newColor);
 			break;
 		}
 		case CTI_OPEN_PICKER: {
@@ -269,6 +295,12 @@ void ColorToolItem::MessageReceived(BMessage *message)
 		}
 		case PW_CLOSED: {
 			pickerWindow = NULL;
+			// the one real, undo-worthy commit - whatever was last
+			// previewed while the picker was open. If nothing was ever
+			// previewed (opened and closed without touching anything),
+			// hasPreview is still false and this is correctly a no-op.
+			if (hasPreview)
+				SetColor(previewValue);
 			break;
 		}
 		default:

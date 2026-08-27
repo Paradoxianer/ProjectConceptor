@@ -34,8 +34,17 @@ class ColorPickerWindow;
  * message (e.g. G_E_COLOR_CHANGED) to its target, exactly what
  * GraphEditor::MessageReceived already expects (it just polls
  * GetColor() fresh on receiving it - unaffected by this redesign).
- * Clicking the arrow opens ColorPickerWindow; picking a color there also
- * invokes the same message.
+ *
+ * Clicking the arrow opens ColorPickerWindow. Everything picked *inside*
+ * the picker (dragging BColorControl/AlphaSlider, clicking a palette
+ * swatch) is a live preview only - forwarded via the optional
+ * previewMsg, which the target (GraphEditor) uses to update just the
+ * selected renderers' drawn color, without touching document data or
+ * undo history. Mirrors how Move/Resize preview a drag purely at the
+ * renderer level and only send one real, undo-worthy command at the
+ * end (see docs/notes.md) - here "the end" is the picker closing
+ * (ColorPickerWindow's PW_CLOSED), which is when the one real commit
+ * (msg) actually gets sent, carrying whatever was last previewed.
  *
  * @see ToolBar
  * @see ColorPickerWindow
@@ -45,7 +54,8 @@ class ColorToolItem: public	BaseItem,
 {
 
 public:
-							ColorToolItem(const char *name, rgb_color newValue, BMessage *msg);
+							ColorToolItem(const char *name, rgb_color newValue,
+								BMessage *msg, BMessage *previewMsg = NULL);
 							ColorToolItem(BMessage *msg);
 							~ColorToolItem(void);
 	virtual	void			AttachedToToolBar(ToolBar *tb);
@@ -76,6 +86,7 @@ protected:
 			void			Init();
 			void			BuildChildren(rgb_color initialColor);
 			void			SetColor(rgb_color newColor);
+			void			PreviewColor(rgb_color newColor);
 
 	const	char			*tName;
 			rgb_color		value;
@@ -85,5 +96,8 @@ protected:
 			uint32			state;
 
 			ColorPickerWindow	*pickerWindow;
+			BMessage			*previewMessage;
+			rgb_color			previewValue;
+			bool				hasPreview;
 };
 #endif

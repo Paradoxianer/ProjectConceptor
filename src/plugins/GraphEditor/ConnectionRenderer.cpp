@@ -20,6 +20,7 @@ void ConnectionRenderer::Init() {
 	toPoint			= BPoint(0,0);
 	selected		= false;
 	fillColor		= make_color(187,67,47,255);
+	hasPreviewFillColor	= false;
 	penSize			= 2.0;
 	connectionType	= 2;
 	bezier			= BShape();
@@ -132,6 +133,18 @@ void ConnectionRenderer::ValueChanged() {
 		pattern.FindFloat("PenSize",&penSize);
 		pattern.FindInt32("FillColor",(int32 *)&fillColor);
 	}
+	// a real committed value just arrived - drop any leftover preview
+	// from a picker session, same reasoning as ClassRenderer::ValueChanged()
+	hasPreviewFillColor	= false;
+}
+
+void ConnectionRenderer::SetPreviewFillColor(rgb_color color) {
+	hasPreviewFillColor	= true;
+	previewFillColor	= color;
+}
+
+void ConnectionRenderer::ClearPreviewFillColor(void) {
+	hasPreviewFillColor	= false;
 }
 
 void ConnectionRenderer::InvalidateEndpoint(Renderer *removed) {
@@ -248,9 +261,9 @@ void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
 		drawOn->StrokeLine(	shadowFrom,shadowTo);
 		drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
 		if (!selected)
-			drawOn->SetHighColor(fillColor);
+			drawOn->SetHighColor(EffectiveFillColor());
 		else
-			drawOn->SetHighColor(tint_color(fillColor,1.5));
+			drawOn->SetHighColor(tint_color(EffectiveFillColor(),1.5));
 		drawOn->StrokeLine(	fromPoint,toPoint);
 		drawOn->FillTriangle(first,second,third);
 }
@@ -258,9 +271,9 @@ void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
 void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
 	drawOn->SetPenSize(penSize);
 	if (!selected)
-		drawOn->SetHighColor(fillColor);
+		drawOn->SetHighColor(EffectiveFillColor());
 	else
-		drawOn->SetHighColor(tint_color(fillColor,1.5));
+		drawOn->SetHighColor(tint_color(EffectiveFillColor(),1.5));
 	bezier=BShape();
 	bezier.MoveTo(fromPoint);
 	BPoint	controlPoints[3];
@@ -309,9 +322,9 @@ void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
 	drawOn->StrokeLine(	sSecondBend,shadowTo);
 	drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
 	if (!selected)
-		drawOn->SetHighColor(fillColor);
+		drawOn->SetHighColor(EffectiveFillColor());
 	else
-		drawOn->SetHighColor(tint_color(fillColor,1.5));
+		drawOn->SetHighColor(tint_color(EffectiveFillColor(),1.5));
 	drawOn->StrokeLine(	fromPoint,firstBend);
 	drawOn->StrokeLine(	firstBend,secondBend);
 	drawOn->StrokeLine(	secondBend,toPoint);

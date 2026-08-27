@@ -10,6 +10,7 @@
 #include <Catalog.h>
 
 #include "GraphEditor.h"
+#include "ColorSwatchView.h"
 #include "ConfigManager.h"
 #include "PCommandManager.h"
 #include "ProjectConceptor.h"
@@ -138,7 +139,7 @@ void GraphEditor::Init(void) {
 	grid->BButton::SetToolTip(B_TRANSLATE("Toggle grid"));
 	penSize		= new FloatToolItem(B_TRANSLATE("Pen size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
 	penSize->BButton::SetToolTip(B_TRANSLATE("Border pen size for selected nodes"));
-	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
+	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED),new BMessage(G_E_COLOR_PREVIEW));
 	colorItem->BButton::SetToolTip(B_TRANSLATE("Fill color for selected nodes"));
 	patternItem	= new PatternToolItem(B_TRANSLATE("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 	patternItem->BButton::SetToolTip(B_TRANSLATE("Fill pattern for selected nodes"));
@@ -773,6 +774,24 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			valueContainer->AddInt32("newValue",*(int32 *)&tmpNewColor);
 			changeColorMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changeColorMessage);
+			break;
+		}
+		case G_E_COLOR_PREVIEW: {
+			// live preview while the picker is still open - update the
+			// renderers of whatever's currently selected directly, no
+			// document mutation, no undo entry (see docs/notes.md and
+			// the comment on G_E_COLOR_PREVIEW's declaration).
+			rgb_color	previewColor;
+			if (ColorFromMessage(message,previewColor)) {
+				BList	*selection	= doc->GetSelected();
+				for (int32 i=0; i<selection->CountItems(); i++) {
+					BMessage	*node		= (BMessage *)selection->ItemAt(i);
+					Renderer	*painter	= FindRenderer(node);
+					if (painter != NULL)
+						painter->SetPreviewFillColor(previewColor);
+				}
+				Invalidate();
+			}
 			break;
 		}
 		case G_E_PEN_SIZE_CHANGED: {
