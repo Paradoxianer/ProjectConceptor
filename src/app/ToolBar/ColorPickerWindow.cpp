@@ -52,15 +52,18 @@ HueToColor(float hueDegrees, float saturation, float value)
 
 
 // Closes the window on Escape - installed as a common filter so it sees
-// the key before any child control's own KeyDown handling.
+// the key before any child control's own KeyDown handling. Marks the
+// close as cancelled first, so QuitRequested() tells the target to
+// discard whatever was last previewed instead of committing it.
 class ColorPickerEscapeFilter : public BMessageFilter {
 public:
-	ColorPickerEscapeFilter(BWindow *window)
+	ColorPickerEscapeFilter(ColorPickerWindow *window)
 		: BMessageFilter(B_KEY_DOWN), fWindow(window) {}
 
 	virtual filter_result Filter(BMessage *message, BHandler **target) {
 		int8	byte	= 0;
 		if ((message->FindInt8("byte",&byte) == B_OK) && (byte == B_ESCAPE)) {
+			fWindow->Cancel();
 			fWindow->PostMessage(B_QUIT_REQUESTED);
 			return B_SKIP_MESSAGE;
 		}
@@ -68,17 +71,19 @@ public:
 	}
 
 private:
-	BWindow	*fWindow;
+	ColorPickerWindow	*fWindow;
 };
 
 
 ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
-		BMessage *message, BHandler *target)
+		BMessage *message, BHandler *target,
+		const rgb_color *history, int32 historyCount)
 	: BWindow(frame, "Color", B_BORDERED_WINDOW_LOOK,
 		B_FLOATING_APP_WINDOW_FEEL,
 		B_NOT_ZOOMABLE | B_NOT_RESIZABLE | B_ASYNCHRONOUS_CONTROLS),
 	fMessage(message),
-	fTarget(target)
+	fTarget(target),
+	fCancelled(false)
 {
 	fColorControl = new BColorControl(BPoint(1,1), B_CELLS_32x8, 1.0,
 		"ColorPickerWindow::colorControl", new BMessage(PW_COLOR_CONTROL_CHANGED));
@@ -101,7 +106,25 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 		AddChild(fPaletteSwatch[i]);
 	}
 
-	float	colorControlTop	= kMargin + kPaletteSwatchHeight + kMargin;
+	// history row below the palette - recently used custom colors
+	// (ColorToolItem::RecordColorInHistory()), most-recent first. Reuses
+	// the palette row's own PW_PALETTE_CLICKED click contract, so a
+	// history swatch behaves exactly like a palette swatch once clicked.
+	// The row's full height is always reserved, even before any history
+	// exists, so the window doesn't resize/jump around as it fills up.
+	float	historyTop	= kMargin + kPaletteSwatchHeight + kMargin;
+	int32	shown		= (historyCount < PW_HISTORY_SIZE) ? historyCount : PW_HISTORY_SIZE;
+	for (int32 i = 0; i < PW_HISTORY_SIZE; i++)
+		fHistorySwatch[i] = NULL;
+	for (int32 i = 0; i < shown; i++) {
+		fHistorySwatch[i] = new ColorSwatchView("ColorPickerWindow::history",
+			new BMessage(PW_PALETTE_CLICKED), this, history[i],
+			swatchWidth, kPaletteSwatchHeight);
+		fHistorySwatch[i]->MoveTo(kMargin + i*swatchWidth, historyTop);
+		AddChild(fHistorySwatch[i]);
+	}
+
+	float	colorControlTop	= historyTop + kPaletteSwatchHeight + kMargin;
 	fColorControl->MoveTo(1, colorControlTop);
 	fColorControl->SetTarget(this);
 	AddChild(fColorControl);
@@ -169,6 +192,7 @@ ColorPickerWindow::QuitRequested(void)
 		BLooper *looper = fTarget->Looper();
 		if (looper != NULL) {
 			BMessage	closed(PW_CLOSED);
+			closed.AddBool("cancel", fCancelled);
 			looper->PostMessage(&closed, fTarget);
 		}
 	}

@@ -125,6 +125,7 @@ void ColorToolItem::Init(void)
 	pickerWindow		= NULL;
 	previewMessage		= NULL;
 	hasPreview			= false;
+	colorHistoryCount	= 0;
 }
 
 void ColorToolItem::BuildChildren(rgb_color initialColor)
@@ -226,6 +227,7 @@ void ColorToolItem::SetColor(rgb_color newColor)
 	// turned out to be the right fix, not adding the missing Lock().)
 	value		= newColor;
 	hasPreview	= false;
+	RecordColorInHistory(newColor);
 	Invalidate();
 	Invoke();
 }
@@ -244,6 +246,45 @@ void ColorToolItem::PreviewColor(rgb_color newColor)
 		AddColorToMessage(&preview,newColor);
 		Invoke(&preview);
 	}
+}
+
+void ColorToolItem::CancelPreview(void)
+{
+	// Escape discards whatever was being previewed - no commit. The
+	// renderers GraphEditor updated directly while previewing (see
+	// PreviewColor() above) have no other way to learn this session
+	// ended without a real commit, so they're told explicitly to fall
+	// back to their real color again.
+	hasPreview	= false;
+	Invalidate();
+	if (previewMessage != NULL) {
+		BMessage	cancel(*previewMessage);
+		cancel.AddBool("cancel",true);
+		Invoke(&cancel);
+	}
+}
+
+void ColorToolItem::RecordColorInHistory(rgb_color color)
+{
+	// MRU: drop any existing occurrence of this exact color first, then
+	// prepend it - re-using a color bumps it to the front instead of
+	// piling up duplicate entries.
+	int32	existing	= -1;
+	for (int32 i = 0; i < colorHistoryCount; i++) {
+		if ((colorHistory[i].red == color.red)
+			&& (colorHistory[i].green == color.green)
+			&& (colorHistory[i].blue == color.blue)
+			&& (colorHistory[i].alpha == color.alpha)) {
+			existing = i;
+			break;
+		}
+	}
+	int32	last	= (existing >= 0) ? existing : (CTI_COLOR_HISTORY_SIZE - 1);
+	for (int32 i = last; i > 0; i--)
+		colorHistory[i] = colorHistory[i-1];
+	colorHistory[0]	= color;
+	if (colorHistoryCount < CTI_COLOR_HISTORY_SIZE)
+		colorHistoryCount++;
 }
 
 void ColorToolItem::MessageReceived(BMessage *message)
@@ -267,7 +308,8 @@ void ColorToolItem::MessageReceived(BMessage *message)
 
 				BRect	frame(startPoint.x,startPoint.y,startPoint.x+1,startPoint.y+1);
 				pickerWindow = new ColorPickerWindow(frame,value,
-					new BMessage(CTI_SWATCH_CLICKED),this);
+					new BMessage(CTI_SWATCH_CLICKED),this,
+					colorHistory,colorHistoryCount);
 
 				// keep the popup on-screen near the swatch that opened it,
 				// same edge-avoidance idea the old inline popup used -
@@ -299,8 +341,14 @@ void ColorToolItem::MessageReceived(BMessage *message)
 			// previewed while the picker was open. If nothing was ever
 			// previewed (opened and closed without touching anything),
 			// hasPreview is still false and this is correctly a no-op.
-			if (hasPreview)
-				SetColor(previewValue);
+			bool	cancel	= false;
+			message->FindBool("cancel",&cancel);
+			if (hasPreview) {
+				if (cancel)
+					CancelPreview();
+				else
+					SetColor(previewValue);
+			}
 			break;
 		}
 		default:

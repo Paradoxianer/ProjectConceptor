@@ -781,17 +781,21 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			// renderers of whatever's currently selected directly, no
 			// document mutation, no undo entry (see docs/notes.md and
 			// the comment on G_E_COLOR_PREVIEW's declaration).
+			bool		cancel	= false;
+			message->FindBool("cancel",&cancel);
 			rgb_color	previewColor;
-			if (ColorFromMessage(message,previewColor)) {
-				BList	*selection	= doc->GetSelected();
-				for (int32 i=0; i<selection->CountItems(); i++) {
-					BMessage	*node		= (BMessage *)selection->ItemAt(i);
-					Renderer	*painter	= FindRenderer(node);
-					if (painter != NULL)
-						painter->SetPreviewFillColor(previewColor);
-				}
-				Invalidate();
+			BList		*selection	= doc->GetSelected();
+			for (int32 i=0; i<selection->CountItems(); i++) {
+				BMessage	*node		= (BMessage *)selection->ItemAt(i);
+				Renderer	*painter	= FindRenderer(node);
+				if (painter == NULL)
+					continue;
+				if (cancel)
+					painter->ClearPreviewFillColor();
+				else if (ColorFromMessage(message,previewColor))
+					painter->SetPreviewFillColor(previewColor);
 			}
+			Invalidate();
 			break;
 		}
 		case G_E_PEN_SIZE_CHANGED: {

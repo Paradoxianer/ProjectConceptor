@@ -15,6 +15,12 @@
 class ToolBar;
 class ColorPickerWindow;
 
+// Number of "recently used" custom colors this item remembers,
+// most-recently-used first - shown as a second row in ColorPickerWindow
+// (see PW_HISTORY_SIZE there; kept equal so the whole history is always
+// visible at once).
+const int32 CTI_COLOR_HISTORY_SIZE = 8;
+
 /**
  * @class ColorToolItem
  *
@@ -44,7 +50,17 @@ class ColorPickerWindow;
  * renderer level and only send one real, undo-worthy command at the
  * end (see docs/notes.md) - here "the end" is the picker closing
  * (ColorPickerWindow's PW_CLOSED), which is when the one real commit
- * (msg) actually gets sent, carrying whatever was last previewed.
+ * (msg) actually gets sent, carrying whatever was last previewed. If the
+ * picker was dismissed via Escape rather than a normal close, PW_CLOSED
+ * carries a "cancel" flag instead - CancelPreview() discards the preview
+ * without committing, and tells the target to revert its renderers back
+ * to their real color too (see the comment on Renderer::
+ * ClearPreviewFillColor()), since they were never told about the commit
+ * that isn't happening.
+ *
+ * Every real commit (SetColor()) is also recorded into a small
+ * most-recently-used color history, shown as a second swatch row in
+ * ColorPickerWindow alongside the fixed algorithmic palette.
  *
  * @see ToolBar
  * @see ColorPickerWindow
@@ -87,6 +103,8 @@ protected:
 			void			BuildChildren(rgb_color initialColor);
 			void			SetColor(rgb_color newColor);
 			void			PreviewColor(rgb_color newColor);
+			void			CancelPreview(void);
+			void			RecordColorInHistory(rgb_color color);
 
 	const	char			*tName;
 			rgb_color		value;
@@ -99,5 +117,8 @@ protected:
 			BMessage			*previewMessage;
 			rgb_color			previewValue;
 			bool				hasPreview;
+
+			rgb_color			colorHistory[CTI_COLOR_HISTORY_SIZE];
+			int32				colorHistoryCount;
 };
 #endif

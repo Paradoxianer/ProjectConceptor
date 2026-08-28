@@ -20,6 +20,13 @@ const uint32 PW_CLOSED = 'pwCL';
 // widget doesn't need per-project color curation to be reusable.
 const int32 PW_PALETTE_SIZE = 8;
 
+// Number of "recently used" custom-color swatches shown in a second row
+// below the palette, most-recently-used first. The caller (ColorToolItem)
+// owns the actual history; this window only displays up to this many of
+// what it's given - kept equal to PW_PALETTE_SIZE just so both rows are
+// the same width, not because the two need to match.
+const int32 PW_HISTORY_SIZE = 8;
+
 /**
  * @class ColorPickerWindow
  *
@@ -41,7 +48,9 @@ const int32 PW_PALETTE_SIZE = 8;
 class ColorPickerWindow : public BWindow {
 public:
 							ColorPickerWindow(BRect frame, rgb_color color,
-								BMessage *message, BHandler *target);
+								BMessage *message, BHandler *target,
+								const rgb_color *history = NULL,
+								int32 historyCount = 0);
 	virtual					~ColorPickerWindow();
 
 	virtual	void			MessageReceived(BMessage *message);
@@ -51,6 +60,11 @@ public:
 			void			SetColor(rgb_color color);
 			rgb_color		Color(void) const;
 
+	// Marks this close as a cancel rather than a commit - called by the
+	// Escape key filter before requesting the quit, so QuitRequested()
+	// can tell the target not to apply whatever was last previewed.
+			void			Cancel(void) { fCancelled = true; }
+
 private:
 			void			_ReportColor();
 			void			_ApplyColor(rgb_color color);
@@ -58,8 +72,10 @@ private:
 			BColorControl	*fColorControl;
 			AlphaSlider		*fAlphaSlider;
 			ColorSwatchView	*fPaletteSwatch[PW_PALETTE_SIZE];
+			ColorSwatchView	*fHistorySwatch[PW_HISTORY_SIZE];
 			BMessage		*fMessage;
 			BHandler		*fTarget;
+			bool			fCancelled;
 };
 
 #endif // COLOR_PICKER_WINDOW_H
