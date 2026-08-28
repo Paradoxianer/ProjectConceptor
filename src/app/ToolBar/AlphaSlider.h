@@ -5,6 +5,14 @@
  *
  * Copyright 2006-2012 Stephan Assmus <superstippi@gmx.de>
  * Distributed under the terms of the MIT License.
+ *
+ * ProjectConceptor addition: a small checkerboard-aware swatch "end cap"
+ * at the end of the gradient bar (see _EndCapRect()/_DrawEndCap() in the
+ * .cpp), showing the resulting color at the current alpha value instead
+ * of just a position marker - drawn with the same checkerboard style
+ * ColorSwatchView uses for the palette/history rows elsewhere in
+ * ColorPickerWindow, so this reads as the same "color swatch" visual
+ * language rather than a foreign widget bolted on next to it.
  */
 
 #ifndef ALPHA_SLIDER_H
@@ -51,6 +59,8 @@ private:
 			void				_UpdateColors();
 			void				_AllocBitmap(int32 width, int32 height);
 			BRect				_BitmapRect() const;
+			BRect				_EndCapRect() const;
+			void				_DrawEndCap();
 			int32				_ValueFor(BPoint where) const;
 
 private:

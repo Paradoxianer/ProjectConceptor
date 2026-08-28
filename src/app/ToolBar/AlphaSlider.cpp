@@ -26,6 +26,13 @@ static const rgb_color kWhite		= { 255, 255, 255, 255 };
 static const rgb_color kAlphaLow	= { 0xbb, 0xbb, 0xbb, 0xff };
 static const rgb_color kAlphaHigh	= { 0xe0, 0xe0, 0xe0, 0xff };
 
+// End-cap swatch (ProjectConceptor addition, see the class comment in the
+// header) - same checkerboard pattern and colors ColorSwatchView uses, so
+// the two read as one visual language.
+static const pattern	kDottedBig	= { { 0x0f, 0x0f, 0x0f, 0x0f, 0xf0, 0xf0, 0xf0, 0xf0 } };
+static const float		kEndCapSize	= 24.0;
+static const float		kEndCapGap	= 3.0;
+
 
 AlphaSlider::AlphaSlider(orientation dir, BMessage *message,
 		border_style border)
@@ -74,10 +81,13 @@ BSize
 AlphaSlider::MinSize()
 {
 	BSize	minSize;
+	// +kEndCapSize+kEndCapGap so the gradient itself still gets the full
+	// 255 pixels of 1:1 resolution the original design assumed, with the
+	// end cap occupying genuinely extra space rather than eating into it
 	if (fOrientation == B_HORIZONTAL)
-		minSize = BSize(255 + 4, 7 + 4);
+		minSize = BSize(255 + 4 + kEndCapSize + kEndCapGap, 7 + 4);
 	else
-		minSize = BSize(7 + 4, 255 + 4);
+		minSize = BSize(7 + 4, 255 + 4 + kEndCapSize + kEndCapGap);
 	return BLayoutUtils::ComposeSize(ExplicitMinSize(), minSize);
 }
 
@@ -182,48 +192,51 @@ AlphaSlider::Draw(BRect updateRect)
 		be_control_look->DrawTextControlBorder(this, b, updateRect, bg, flags);
 	}
 
-	DrawBitmap(fBitmap, b.LeftTop());
+	BRect	barRect = _BitmapRect();
+	DrawBitmap(fBitmap, barRect.LeftTop());
 
 	// value marker
 	if (fOrientation == B_HORIZONTAL) {
-		float	pos = floorf(b.left + Value() * b.Width() / 255.0 + 0.5);
+		float	pos = floorf(barRect.left + Value() * barRect.Width() / 255.0 + 0.5);
 
-		if (pos - 2 >= b.left) {
+		if (pos - 2 >= barRect.left) {
 			SetHighColor(kWhite);
-			StrokeLine(BPoint(pos - 2, b.top), BPoint(pos - 2, b.bottom));
+			StrokeLine(BPoint(pos - 2, barRect.top), BPoint(pos - 2, barRect.bottom));
 		}
-		if (pos - 1 >= b.left) {
+		if (pos - 1 >= barRect.left) {
 			SetHighColor(kBlack);
-			StrokeLine(BPoint(pos - 1, b.top), BPoint(pos - 1, b.bottom));
+			StrokeLine(BPoint(pos - 1, barRect.top), BPoint(pos - 1, barRect.bottom));
 		}
-		if (pos + 1 <= b.right) {
+		if (pos + 1 <= barRect.right) {
 			SetHighColor(kBlack);
-			StrokeLine(BPoint(pos + 1, b.top), BPoint(pos + 1, b.bottom));
+			StrokeLine(BPoint(pos + 1, barRect.top), BPoint(pos + 1, barRect.bottom));
 		}
-		if (pos + 2 <= b.right) {
+		if (pos + 2 <= barRect.right) {
 			SetHighColor(kWhite);
-			StrokeLine(BPoint(pos + 2, b.top), BPoint(pos + 2, b.bottom));
+			StrokeLine(BPoint(pos + 2, barRect.top), BPoint(pos + 2, barRect.bottom));
 		}
 	} else {
-		float	pos = floorf(b.top + Value() * b.Height() / 255.0 + 0.5);
+		float	pos = floorf(barRect.top + Value() * barRect.Height() / 255.0 + 0.5);
 
-		if (pos - 2 >= b.top) {
+		if (pos - 2 >= barRect.top) {
 			SetHighColor(kWhite);
-			StrokeLine(BPoint(b.left, pos - 2), BPoint(b.right, pos - 2));
+			StrokeLine(BPoint(barRect.left, pos - 2), BPoint(barRect.right, pos - 2));
 		}
-		if (pos - 1 >= b.top) {
+		if (pos - 1 >= barRect.top) {
 			SetHighColor(kBlack);
-			StrokeLine(BPoint(b.left, pos - 1), BPoint(b.right, pos - 1));
+			StrokeLine(BPoint(barRect.left, pos - 1), BPoint(barRect.right, pos - 1));
 		}
-		if (pos + 1 <= b.bottom) {
+		if (pos + 1 <= barRect.bottom) {
 			SetHighColor(kBlack);
-			StrokeLine(BPoint(b.left, pos + 1), BPoint(b.right, pos + 1));
+			StrokeLine(BPoint(barRect.left, pos + 1), BPoint(barRect.right, pos + 1));
 		}
-		if (pos + 2 <= b.bottom) {
+		if (pos + 2 <= barRect.bottom) {
 			SetHighColor(kWhite);
-			StrokeLine(BPoint(b.left, pos + 2), BPoint(b.right, pos + 2));
+			StrokeLine(BPoint(barRect.left, pos + 2), BPoint(barRect.right, pos + 2));
 		}
 	}
+
+	_DrawEndCap();
 }
 
 
@@ -384,7 +397,63 @@ AlphaSlider::_BitmapRect() const
 	BRect	r = Bounds();
 	if (fBorderStyle == B_FANCY_BORDER)
 		r.InsetBy(2, 2);
+	// leave room for the end cap (_EndCapRect() below) at the far end,
+	// so the gradient bar doesn't draw underneath it
+	if (fOrientation == B_HORIZONTAL)
+		r.right		-= (kEndCapSize + kEndCapGap);
+	else
+		r.bottom	-= (kEndCapSize + kEndCapGap);
 	return r;
+}
+
+
+BRect
+AlphaSlider::_EndCapRect() const
+{
+	BRect	r = Bounds();
+	if (fBorderStyle == B_FANCY_BORDER)
+		r.InsetBy(2, 2);
+	if (fOrientation == B_HORIZONTAL)
+		r.left	= r.right - kEndCapSize + 1;
+	else
+		r.top	= r.bottom - kEndCapSize + 1;
+	return r;
+}
+
+
+static inline void
+blend_end_cap_color(rgb_color &a, const rgb_color &b, float alpha)
+{
+	// mirrors ColorSwatchView::blend_color() exactly - see the class
+	// comment in AlphaSlider.h for why
+	float alphaInv = 1.0 - alpha;
+	a.red	= (uint8)(b.red * alphaInv + a.red * alpha);
+	a.green	= (uint8)(b.green * alphaInv + a.green * alpha);
+	a.blue	= (uint8)(b.blue * alphaInv + a.blue * alpha);
+}
+
+
+void
+AlphaSlider::_DrawEndCap()
+{
+	rgb_color	color	= fColor;
+	color.alpha			= (uint8)Value();
+
+	BRect	r = _EndCapRect();
+	if (color.alpha < 255) {
+		float		alpha	= color.alpha / 255.0;
+		rgb_color	h		= color;
+		blend_end_cap_color(h, kAlphaHigh, alpha);
+		rgb_color	l		= color;
+		blend_end_cap_color(l, kAlphaLow, alpha);
+
+		SetHighColor(h);
+		SetLowColor(l);
+		FillRect(r, kDottedBig);
+	} else {
+		SetHighColor(color);
+		FillRect(r);
+	}
 }
 
 
