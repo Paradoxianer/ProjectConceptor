@@ -6,13 +6,18 @@
  * Copyright 2006-2012 Stephan Assmus <superstippi@gmx.de>
  * Distributed under the terms of the MIT License.
  *
- * ProjectConceptor addition: a small checkerboard-aware swatch "end cap"
- * at the end of the gradient bar (see _EndCapRect()/_DrawEndCap() in the
- * .cpp), showing the resulting color at the current alpha value instead
- * of just a position marker - drawn with the same checkerboard style
- * ColorSwatchView uses for the palette/history rows elsewhere in
- * ColorPickerWindow, so this reads as the same "color swatch" visual
- * language rather than a foreign widget bolted on next to it.
+ * ProjectConceptor additions:
+ * - the drag position is drawn via be_control_look->DrawSliderThumb() -
+ *   the exact same native "block thumb" BSlider itself draws (see
+ *   _DrawThumb() in the .cpp) - instead of the original ported code's
+ *   plain white/black marker lines, so this reads as Haiku's real slider
+ *   design rather than a hand-rolled one.
+ * - a small checkerboard-aware swatch "end cap" at the end of the
+ *   gradient bar (see _EndCapRect()/_DrawEndCap() in the .cpp), showing
+ *   the resulting color at the current alpha value - drawn with the same
+ *   checkerboard style ColorSwatchView uses for the palette/history rows
+ *   elsewhere in ColorPickerWindow, so this reads as the same "color
+ *   swatch" visual language too.
  */
 
 #ifndef ALPHA_SLIDER_H
@@ -59,6 +64,7 @@ private:
 			void				_UpdateColors();
 			void				_AllocBitmap(int32 width, int32 height);
 			BRect				_BitmapRect() const;
+			void				_DrawThumb(BRect barRect, bool isFocus);
 			BRect				_EndCapRect() const;
 			void				_DrawEndCap();
 			int32				_ValueFor(BPoint where) const;

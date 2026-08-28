@@ -19,10 +19,9 @@
 #include <app/Message.h>
 #include <interface/Window.h>
 
-// Just the two constants this file needs from Icon-O-Matic's own
-// (Icon-O-Matic specific) ui_defines.h, plus stock kBlack/kWhite.
+// Just the constants this file needs from Icon-O-Matic's own
+// (Icon-O-Matic specific) ui_defines.h, plus stock kBlack.
 static const rgb_color kBlack		= {   0,   0,   0, 255 };
-static const rgb_color kWhite		= { 255, 255, 255, 255 };
 static const rgb_color kAlphaLow	= { 0xbb, 0xbb, 0xbb, 0xff };
 static const rgb_color kAlphaHigh	= { 0xe0, 0xe0, 0xe0, 0xff };
 
@@ -32,6 +31,15 @@ static const rgb_color kAlphaHigh	= { 0xe0, 0xe0, 0xe0, 0xff };
 static const pattern	kDottedBig	= { { 0x0f, 0x0f, 0x0f, 0x0f, 0xf0, 0xf0, 0xf0, 0xf0 } };
 static const float		kEndCapSize	= 24.0;
 static const float		kEndCapGap	= 3.0;
+
+// Thumb (ProjectConceptor addition, replacing the original ported code's
+// plain white/black marker lines) - be_control_look->DrawSliderThumb() is
+// the exact same call BSlider itself makes for its native "block thumb"
+// (see ~/repos/haiku/src/kits/interface/Slider.cpp, _DrawBlockThumb()),
+// so this adopts Haiku's real slider design instead of a hand-rolled
+// marker, just sized to fit this control's much thinner bar than a
+// full-size BSlider's.
+static const float		kThumbWidth	= 11.0;
 
 
 AlphaSlider::AlphaSlider(orientation dir, BMessage *message,
@@ -195,47 +203,7 @@ AlphaSlider::Draw(BRect updateRect)
 	BRect	barRect = _BitmapRect();
 	DrawBitmap(fBitmap, barRect.LeftTop());
 
-	// value marker
-	if (fOrientation == B_HORIZONTAL) {
-		float	pos = floorf(barRect.left + Value() * barRect.Width() / 255.0 + 0.5);
-
-		if (pos - 2 >= barRect.left) {
-			SetHighColor(kWhite);
-			StrokeLine(BPoint(pos - 2, barRect.top), BPoint(pos - 2, barRect.bottom));
-		}
-		if (pos - 1 >= barRect.left) {
-			SetHighColor(kBlack);
-			StrokeLine(BPoint(pos - 1, barRect.top), BPoint(pos - 1, barRect.bottom));
-		}
-		if (pos + 1 <= barRect.right) {
-			SetHighColor(kBlack);
-			StrokeLine(BPoint(pos + 1, barRect.top), BPoint(pos + 1, barRect.bottom));
-		}
-		if (pos + 2 <= barRect.right) {
-			SetHighColor(kWhite);
-			StrokeLine(BPoint(pos + 2, barRect.top), BPoint(pos + 2, barRect.bottom));
-		}
-	} else {
-		float	pos = floorf(barRect.top + Value() * barRect.Height() / 255.0 + 0.5);
-
-		if (pos - 2 >= barRect.top) {
-			SetHighColor(kWhite);
-			StrokeLine(BPoint(barRect.left, pos - 2), BPoint(barRect.right, pos - 2));
-		}
-		if (pos - 1 >= barRect.top) {
-			SetHighColor(kBlack);
-			StrokeLine(BPoint(barRect.left, pos - 1), BPoint(barRect.right, pos - 1));
-		}
-		if (pos + 1 <= barRect.bottom) {
-			SetHighColor(kBlack);
-			StrokeLine(BPoint(barRect.left, pos + 1), BPoint(barRect.right, pos + 1));
-		}
-		if (pos + 2 <= barRect.bottom) {
-			SetHighColor(kWhite);
-			StrokeLine(BPoint(barRect.left, pos + 2), BPoint(barRect.right, pos + 2));
-		}
-	}
-
+	_DrawThumb(barRect, isFocus);
 	_DrawEndCap();
 }
 
@@ -404,6 +372,40 @@ AlphaSlider::_BitmapRect() const
 	else
 		r.bottom	-= (kEndCapSize + kEndCapGap);
 	return r;
+}
+
+
+void
+AlphaSlider::_DrawThumb(BRect barRect, bool isFocus)
+{
+	BRect	thumb;
+	if (fOrientation == B_HORIZONTAL) {
+		float	pos	= floorf(barRect.left + Value() * barRect.Width() / 255.0 + 0.5);
+		thumb.left		= pos - kThumbWidth / 2;
+		thumb.right		= thumb.left + kThumbWidth;
+		thumb.top		= barRect.top;
+		thumb.bottom	= barRect.bottom;
+	} else {
+		float	pos	= floorf(barRect.top + Value() * barRect.Height() / 255.0 + 0.5);
+		thumb.top		= pos - kThumbWidth / 2;
+		thumb.bottom	= thumb.top + kThumbWidth;
+		thumb.left		= barRect.left;
+		thumb.right		= barRect.right;
+	}
+
+	rgb_color	base	= ui_color(B_CONTROL_BACKGROUND_COLOR);
+	// built manually rather than via be_control_look->Flags(this) -
+	// that helper also folds Value() into B_ACTIVATED/B_PARTIALLY_ACTIVATED
+	// for a plain BControl, which for AlphaSlider is the 0-255 alpha
+	// value, not an on/off state - alpha values 1 and 2 would wrongly
+	// flag the thumb as "activated" otherwise
+	uint32	flags	= 0;
+	if (!IsEnabled())
+		flags |= BControlLook::B_DISABLED;
+	if (isFocus)
+		flags |= BControlLook::B_FOCUSED;
+
+	be_control_look->DrawSliderThumb(this, thumb, thumb, base, flags, fOrientation);
 }
 
 
