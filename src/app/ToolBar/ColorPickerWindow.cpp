@@ -1,4 +1,6 @@
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "ColorPickerWindow.h"
 #include "AlphaSlider.h"
@@ -7,7 +9,13 @@
 #include <app/Looper.h>
 #include <app/MessageFilter.h>
 #include <interface/ColorControl.h>
+#include <interface/TextControl.h>
 #include <interface/View.h>
+
+#include <Catalog.h>
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "ColorPickerWindow"
 
 // Local to this file only - ColorToolItem.h happens to declare its own
 // (unrelated) COLOR_CHANGED constant, so these stay unexported to avoid
@@ -15,11 +23,16 @@
 enum {
 	PW_COLOR_CONTROL_CHANGED	= 'pwCC',
 	PW_ALPHA_CHANGED			= 'pwAC',
+	PW_ALPHA_TEXT_ENTERED		= 'pwAT',
 	PW_PALETTE_CLICKED			= 'pwPC',
 };
 
 static const float kPaletteSwatchHeight	= 22.0;
 static const float kMargin					= 1.0;
+// matches BColorControl's own (private) kTextFieldsHSpacing exactly -
+// see ~/repos/haiku/src/kits/interface/ColorControl.cpp - so the gap
+// between the alpha bar and its text field matches the R/G/B rows above.
+static const float kTextFieldsHSpacing		= 6.0;
 
 
 // Standard HSV->RGB conversion (hueDegrees in [0,360), saturation/value in
@@ -93,12 +106,26 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 	float	width, height;
 	fColorControl->GetPreferredSize(&width,&height);
 
+	// BColorControl names its own R/G/B fields "_red"/"_green"/"_blue"
+	// and adds them as real children in its own constructor - public
+	// API (BView::FindView()), no private access needed. Used below to
+	// line the alpha row's label/field up with these exactly, instead of
+	// recomputing the same font-metric math ourselves and risking a
+	// slightly-off alignment.
+	BTextControl	*redText		= dynamic_cast<BTextControl *>(
+		fColorControl->FindView("_red"));
+	float			textFieldLeft	= 1 + redText->Frame().left;
+	float			textFieldWidth	= redText->Frame().Width();
+	float			textFieldHeight	= redText->Frame().Height();
+
 	// A BWindow has no background of its own - without this, any area
 	// not actually covered by a child view (e.g. the history row before
 	// anything has been recorded into it yet) shows through as plain
 	// white instead of matching the panel-gray everything else uses.
-	// Added first/before the real content so later children (drawn in
-	// add-order) paint over it rather than being hidden behind it.
+	// Everything below is added as a child of this view, not directly
+	// to the window - see the class comment for why (overlapping
+	// *sibling* views added straight to a BWindow don't reliably route
+	// mouse events to the right one; real parent/child nesting does).
 	float	historyTop		= kMargin + kPaletteSwatchHeight + kMargin;
 	float	colorControlTop	= historyTop + kPaletteSwatchHeight + kMargin;
 	float	totalHeight		= colorControlTop + height + 4 + 20 + 4;
@@ -118,7 +145,7 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 			new BMessage(PW_PALETTE_CLICKED), this, swatchColor,
 			swatchWidth, kPaletteSwatchHeight);
 		fPaletteSwatch[i]->MoveTo(kMargin + i*swatchWidth, kMargin);
-		AddChild(fPaletteSwatch[i]);
+		background->AddChild(fPaletteSwatch[i]);
 	}
 
 	// history row below the palette - recently used custom colors
@@ -135,20 +162,46 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 			new BMessage(PW_PALETTE_CLICKED), this, history[i],
 			swatchWidth, kPaletteSwatchHeight);
 		fHistorySwatch[i]->MoveTo(kMargin + i*swatchWidth, historyTop);
-		AddChild(fHistorySwatch[i]);
+		background->AddChild(fHistorySwatch[i]);
 	}
 
 	fColorControl->MoveTo(1, colorControlTop);
 	fColorControl->SetTarget(this);
-	AddChild(fColorControl);
+	background->AddChild(fColorControl);
+
+	// alpha row - same shape as the R/G/B rows above: a ramp/bar on the
+	// left, "Alpha:" label + numeric field on the right, using the exact
+	// frame/divider redText already has above rather than an
+	// independently computed one, so it lines up even if "Alpha:"
+	// (translated) isn't the same width as "Red:"/"Green:"/"Blue:" -
+	// BColorControl itself does the same thing, sharing one labelWidth
+	// across all three of its own fields.
+	float	alphaTop		= colorControlTop + height + 4;
+	float	alphaBarRight	= textFieldLeft - kTextFieldsHSpacing;
 
 	fAlphaSlider = new AlphaSlider(B_HORIZONTAL, new BMessage(PW_ALPHA_CHANGED));
-	fAlphaSlider->MoveTo(1, colorControlTop + height + 4);
-	fAlphaSlider->ResizeTo(width - 2, 20);
+	fAlphaSlider->MoveTo(1, alphaTop);
+	fAlphaSlider->ResizeTo(alphaBarRight - 1, 20);
 	fAlphaSlider->SetTarget(this);
 	fAlphaSlider->SetColor(color);
 	fAlphaSlider->SetValue(color.alpha);
-	AddChild(fAlphaSlider);
+	background->AddChild(fAlphaSlider);
+
+	BRect	alphaTextFrame(textFieldLeft, alphaTop + (20 - textFieldHeight) / 2,
+		textFieldLeft + textFieldWidth,
+		alphaTop + (20 - textFieldHeight) / 2 + textFieldHeight);
+	fAlphaText = new BTextControl(alphaTextFrame, "_alpha",
+		B_TRANSLATE("Alpha:"), "255", new BMessage(PW_ALPHA_TEXT_ENTERED),
+		B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE);
+	fAlphaText->SetDivider(redText->Divider());
+	for (int32 i = 0; i < 256; i++)
+		fAlphaText->TextView()->DisallowChar(i);
+	for (int32 i = '0'; i <= '9'; i++)
+		fAlphaText->TextView()->AllowChar(i);
+	fAlphaText->TextView()->SetMaxBytes(3);
+	fAlphaText->SetAlignment(B_ALIGN_LEFT, B_ALIGN_RIGHT);
+	fAlphaText->SetTarget(this);
+	background->AddChild(fAlphaText);
 
 	ResizeTo(width, totalHeight);
 
@@ -173,6 +226,26 @@ ColorPickerWindow::MessageReceived(BMessage *message)
 			break;
 		}
 		case PW_ALPHA_CHANGED: {
+			// dragging the slider also updates its own text field, same
+			// as BColorControl::SetValue() always syncing "_red" etc.
+			// regardless of whether the ramp or the field itself changed
+			char	string[4];
+			sprintf(string, "%d", fAlphaSlider->Value());
+			fAlphaText->SetText(string);
+			_ReportColor();
+			break;
+		}
+		case PW_ALPHA_TEXT_ENTERED: {
+			int32	value	= strtol(fAlphaText->Text(), NULL, 10);
+			value			= max_c(0, min_c(255, value));
+			fAlphaSlider->SetValue(value);
+			// SetValue() above already re-syncs fAlphaText via a queued
+			// PW_ALPHA_CHANGED - except when value == the slider's
+			// current value already, where it's a no-op and nothing
+			// would otherwise clamp/normalize what was actually typed
+			char	string[4];
+			sprintf(string, "%d", value);
+			fAlphaText->SetText(string);
 			_ReportColor();
 			break;
 		}
@@ -237,6 +310,9 @@ ColorPickerWindow::_ApplyColor(rgb_color color)
 	fColorControl->SetValue(color);
 	fAlphaSlider->SetColor(color);
 	fAlphaSlider->SetValue(color.alpha);
+	char	string[4];
+	sprintf(string, "%d", color.alpha);
+	fAlphaText->SetText(string);
 	_ReportColor();
 }
 

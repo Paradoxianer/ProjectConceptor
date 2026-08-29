@@ -6,6 +6,7 @@
 #include <app/Message.h>
 
 class BColorControl;
+class BTextControl;
 class AlphaSlider;
 class ColorSwatchView;
 
@@ -44,6 +45,21 @@ const int32 PW_HISTORY_SIZE = 8;
  * a palette swatch is clicked or either control changes, rather than
  * relying on a separate OK/commit step or on BButton's native
  * click-Invoke() semantics.
+ *
+ * The alpha row (AlphaSlider + fAlphaText) is laid out to match
+ * BColorControl's own R/G/B rows exactly - fAlphaText's frame/divider are
+ * copied from BColorControl's own "_red" BTextControl (found via the
+ * public BView::FindView(), not private API) rather than recomputing the
+ * label/field geometry independently, so the two can't drift apart.
+ *
+ * All real content lives inside a single full-window background BView
+ * (added first, in the constructor) rather than as direct siblings of
+ * this BWindow - nested parent/child views reliably route mouse events
+ * to whichever child is actually under the pointer; a set of overlapping
+ * *sibling* views added directly to a BWindow do not (the first-added
+ * one - originally an earlier, sibling-based version of this background
+ * fix - swallowed every click in the window, an actual regression fixed
+ * before it shipped).
  */
 class ColorPickerWindow : public BWindow {
 public:
@@ -71,6 +87,7 @@ private:
 
 			BColorControl	*fColorControl;
 			AlphaSlider		*fAlphaSlider;
+			BTextControl	*fAlphaText;
 			ColorSwatchView	*fPaletteSwatch[PW_PALETTE_SIZE];
 			ColorSwatchView	*fHistorySwatch[PW_HISTORY_SIZE];
 			BMessage		*fMessage;
