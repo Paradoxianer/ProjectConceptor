@@ -114,9 +114,25 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 	// slightly-off alignment.
 	BTextControl	*redText		= dynamic_cast<BTextControl *>(
 		fColorControl->FindView("_red"));
+	BTextControl	*greenText		= dynamic_cast<BTextControl *>(
+		fColorControl->FindView("_green"));
+	BTextControl	*blueText		= dynamic_cast<BTextControl *>(
+		fColorControl->FindView("_blue"));
 	float			textFieldLeft	= 1 + redText->Frame().left;
 	float			textFieldWidth	= redText->Frame().Width();
 	float			textFieldHeight	= redText->Frame().Height();
+	// the exact per-row height/spacing BColorControl uses between its
+	// own Red/Green/Blue rows (its _LayoutView() spaces all three by
+	// this same "offset") - the alpha row below reuses it verbatim
+	// instead of an independently chosen height, which is what "look
+	// 1:1 like Red/Green/Blue" actually means for a fourth row.
+	float			rowHeight		= greenText->Frame().top - redText->Frame().top;
+
+	float	historyTop		= kMargin + kPaletteSwatchHeight + kMargin;
+	float	colorControlTop	= historyTop + kPaletteSwatchHeight + kMargin;
+	// one more row, continuing the exact same rhythm as Red/Green/Blue
+	// (see rowHeight above) rather than an independently chosen gap
+	float	alphaTop		= colorControlTop + blueText->Frame().top + rowHeight;
 
 	// A BWindow has no background of its own - without this, any area
 	// not actually covered by a child view (e.g. the history row before
@@ -126,9 +142,7 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 	// to the window - see the class comment for why (overlapping
 	// *sibling* views added straight to a BWindow don't reliably route
 	// mouse events to the right one; real parent/child nesting does).
-	float	historyTop		= kMargin + kPaletteSwatchHeight + kMargin;
-	float	colorControlTop	= historyTop + kPaletteSwatchHeight + kMargin;
-	float	totalHeight		= colorControlTop + height + 4 + 20 + 4;
+	float	totalHeight		= alphaTop + rowHeight + 4;
 	BView	*background = new BView(BRect(0, 0, width, totalHeight),
 		"ColorPickerWindow::background", B_FOLLOW_NONE, 0);
 	background->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
@@ -175,21 +189,21 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 	// independently computed one, so it lines up even if "Alpha:"
 	// (translated) isn't the same width as "Red:"/"Green:"/"Blue:" -
 	// BColorControl itself does the same thing, sharing one labelWidth
-	// across all three of its own fields.
-	float	alphaTop		= colorControlTop + height + 4;
+	// across all three of its own fields. rowHeight/alphaTop already
+	// computed above (needed earlier, for totalHeight).
 	float	alphaBarRight	= textFieldLeft - kTextFieldsHSpacing;
 
 	fAlphaSlider = new AlphaSlider(B_HORIZONTAL, new BMessage(PW_ALPHA_CHANGED));
 	fAlphaSlider->MoveTo(1, alphaTop);
-	fAlphaSlider->ResizeTo(alphaBarRight - 1, 20);
+	fAlphaSlider->ResizeTo(alphaBarRight - 1, rowHeight);
 	fAlphaSlider->SetTarget(this);
 	fAlphaSlider->SetColor(color);
 	fAlphaSlider->SetValue(color.alpha);
 	background->AddChild(fAlphaSlider);
 
-	BRect	alphaTextFrame(textFieldLeft, alphaTop + (20 - textFieldHeight) / 2,
+	BRect	alphaTextFrame(textFieldLeft, alphaTop + (rowHeight - textFieldHeight) / 2,
 		textFieldLeft + textFieldWidth,
-		alphaTop + (20 - textFieldHeight) / 2 + textFieldHeight);
+		alphaTop + (rowHeight - textFieldHeight) / 2 + textFieldHeight);
 	fAlphaText = new BTextControl(alphaTextFrame, "_alpha",
 		B_TRANSLATE("Alpha:"), "255", new BMessage(PW_ALPHA_TEXT_ENTERED),
 		B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE);
