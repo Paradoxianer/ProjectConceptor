@@ -7,6 +7,7 @@
 #include <app/Looper.h>
 #include <app/MessageFilter.h>
 #include <interface/ColorControl.h>
+#include <interface/View.h>
 
 // Local to this file only - ColorToolItem.h happens to declare its own
 // (unrelated) COLOR_CHANGED constant, so these stay unexported to avoid
@@ -92,6 +93,20 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 	float	width, height;
 	fColorControl->GetPreferredSize(&width,&height);
 
+	// A BWindow has no background of its own - without this, any area
+	// not actually covered by a child view (e.g. the history row before
+	// anything has been recorded into it yet) shows through as plain
+	// white instead of matching the panel-gray everything else uses.
+	// Added first/before the real content so later children (drawn in
+	// add-order) paint over it rather than being hidden behind it.
+	float	historyTop		= kMargin + kPaletteSwatchHeight + kMargin;
+	float	colorControlTop	= historyTop + kPaletteSwatchHeight + kMargin;
+	float	totalHeight		= colorControlTop + height + 4 + 20 + 4;
+	BView	*background = new BView(BRect(0, 0, width, totalHeight),
+		"ColorPickerWindow::background", B_FOLLOW_NONE, 0);
+	background->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(background);
+
 	// palette row above the color control - algorithmically generated
 	// (hue sweep), not hand-curated, so this widget doesn't need
 	// per-project color curation to be reusable
@@ -112,7 +127,6 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 	// history swatch behaves exactly like a palette swatch once clicked.
 	// The row's full height is always reserved, even before any history
 	// exists, so the window doesn't resize/jump around as it fills up.
-	float	historyTop	= kMargin + kPaletteSwatchHeight + kMargin;
 	int32	shown		= (historyCount < PW_HISTORY_SIZE) ? historyCount : PW_HISTORY_SIZE;
 	for (int32 i = 0; i < PW_HISTORY_SIZE; i++)
 		fHistorySwatch[i] = NULL;
@@ -124,7 +138,6 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 		AddChild(fHistorySwatch[i]);
 	}
 
-	float	colorControlTop	= historyTop + kPaletteSwatchHeight + kMargin;
 	fColorControl->MoveTo(1, colorControlTop);
 	fColorControl->SetTarget(this);
 	AddChild(fColorControl);
@@ -137,7 +150,7 @@ ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
 	fAlphaSlider->SetValue(color.alpha);
 	AddChild(fAlphaSlider);
 
-	ResizeTo(width, colorControlTop + height + 4 + 20 + 4);
+	ResizeTo(width, totalHeight);
 
 	AddCommonFilter(new ColorPickerEscapeFilter(this));
 }

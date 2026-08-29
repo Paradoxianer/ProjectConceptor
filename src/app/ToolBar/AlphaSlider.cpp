@@ -33,13 +33,15 @@ static const float		kEndCapSize	= 24.0;
 static const float		kEndCapGap	= 3.0;
 
 // Thumb (ProjectConceptor addition, replacing the original ported code's
-// plain white/black marker lines) - be_control_look->DrawSliderThumb() is
-// the exact same call BSlider itself makes for its native "block thumb"
-// (see ~/repos/haiku/src/kits/interface/Slider.cpp, _DrawBlockThumb()),
-// so this adopts Haiku's real slider design instead of a hand-rolled
-// marker, just sized to fit this control's much thinner bar than a
-// full-size BSlider's.
-static const float		kThumbWidth	= 11.0;
+// plain white/black marker lines) - mirrors BColorControl's own round
+// selector knob exactly, same constants and the same two-stroke technique
+// (a thick white circle, then a thinner black ring on top - see
+// BColorControl::_DrawSelectors() in
+// ~/repos/haiku/src/kits/interface/ColorControl.cpp), so the alpha
+// control's handle matches the R/G/B ramps right above it in
+// ColorPickerWindow instead of looking like a different kind of control.
+static const float		kSelectorSize		= 4.0;
+static const float		kSelectorPenSize	= 2.0;
 
 
 AlphaSlider::AlphaSlider(orientation dir, BMessage *message,
@@ -54,7 +56,15 @@ AlphaSlider::AlphaSlider(orientation dir, BMessage *message,
 {
 	FrameResized(Bounds().Width(), Bounds().Height());
 
-	SetViewColor(B_TRANSPARENT_COLOR);
+	// was B_TRANSPARENT_COLOR in the original ported code, which disables
+	// Haiku's automatic erase-to-view-color before each Draw() call - the
+	// end cap/thumb additions left a real, uncovered gap between the
+	// gradient bar and the end cap that never got painted by anything,
+	// and any stale pixels from a previous frame had no guarantee of
+	// being cleared either. A real background color lets Haiku erase the
+	// whole view correctly before every redraw, matching the panel-gray
+	// ColorPickerWindow's own background now explicitly uses too.
+	SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	SetLowColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 
 	SetValue(255);
@@ -378,34 +388,29 @@ AlphaSlider::_BitmapRect() const
 void
 AlphaSlider::_DrawThumb(BRect barRect, bool isFocus)
 {
-	BRect	thumb;
+	BPoint	center;
 	if (fOrientation == B_HORIZONTAL) {
-		float	pos	= floorf(barRect.left + Value() * barRect.Width() / 255.0 + 0.5);
-		thumb.left		= pos - kThumbWidth / 2;
-		thumb.right		= thumb.left + kThumbWidth;
-		thumb.top		= barRect.top;
-		thumb.bottom	= barRect.bottom;
+		center.x	= floorf(barRect.left + Value() * barRect.Width() / 255.0 + 0.5);
+		center.y	= (barRect.top + barRect.bottom) / 2;
 	} else {
-		float	pos	= floorf(barRect.top + Value() * barRect.Height() / 255.0 + 0.5);
-		thumb.top		= pos - kThumbWidth / 2;
-		thumb.bottom	= thumb.top + kThumbWidth;
-		thumb.left		= barRect.left;
-		thumb.right		= barRect.right;
+		center.x	= (barRect.left + barRect.right) / 2;
+		center.y	= floorf(barRect.top + Value() * barRect.Height() / 255.0 + 0.5);
 	}
 
-	rgb_color	base	= ui_color(B_CONTROL_BACKGROUND_COLOR);
-	// built manually rather than via be_control_look->Flags(this) -
-	// that helper also folds Value() into B_ACTIVATED/B_PARTIALLY_ACTIVATED
-	// for a plain BControl, which for AlphaSlider is the 0-255 alpha
-	// value, not an on/off state - alpha values 1 and 2 would wrongly
-	// flag the thumb as "activated" otherwise
-	uint32	flags	= 0;
-	if (!IsEnabled())
-		flags |= BControlLook::B_DISABLED;
+	// exact technique/constants BColorControl::_DrawSelectors() uses -
+	// SetLowColor(black) locally for the B_SOLID_LOW ring stroke, then
+	// restored, since the view's real LowColor (panel background) is
+	// relied on elsewhere (e.g. the border in Draw())
+	SetHighColor(255, 255, 255);
+	SetLowColor(0, 0, 0);
+	SetPenSize(kSelectorPenSize);
+	StrokeEllipse(center, kSelectorSize / 2, kSelectorSize / 2);
+	SetPenSize(kSelectorPenSize / 2);
+	StrokeEllipse(center, kSelectorSize, kSelectorSize, B_SOLID_LOW);
 	if (isFocus)
-		flags |= BControlLook::B_FOCUSED;
-
-	be_control_look->DrawSliderThumb(this, thumb, thumb, base, flags, fOrientation);
+		StrokeEllipse(center, kSelectorSize / 2, kSelectorSize / 2, B_SOLID_LOW);
+	SetPenSize(1.0);
+	SetLowColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 }
 
 

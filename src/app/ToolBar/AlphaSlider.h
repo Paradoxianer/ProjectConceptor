@@ -7,11 +7,17 @@
  * Distributed under the terms of the MIT License.
  *
  * ProjectConceptor additions:
- * - the drag position is drawn via be_control_look->DrawSliderThumb() -
- *   the exact same native "block thumb" BSlider itself draws (see
- *   _DrawThumb() in the .cpp) - instead of the original ported code's
- *   plain white/black marker lines, so this reads as Haiku's real slider
- *   design rather than a hand-rolled one.
+ * - the drag position is drawn as the same round selector knob
+ *   BColorControl's own R/G/B ramps use - same constants, same two-
+ *   stroke technique (see _DrawThumb() in the .cpp and
+ *   BColorControl::_DrawSelectors() in
+ *   ~/repos/haiku/src/kits/interface/ColorControl.cpp) - instead of the
+ *   original ported code's plain white/black marker lines, so the alpha
+ *   control's handle matches the ramps right above it in
+ *   ColorPickerWindow rather than looking like a different control.
+ *   (An earlier version of this tried BSlider's rectangular "block
+ *   thumb" via be_control_look->DrawSliderThumb() instead - visually the
+ *   wrong shape for this context, replaced.)
  * - a small checkerboard-aware swatch "end cap" at the end of the
  *   gradient bar (see _EndCapRect()/_DrawEndCap() in the .cpp), showing
  *   the resulting color at the current alpha value - drawn with the same
