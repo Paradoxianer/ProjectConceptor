@@ -34,6 +34,12 @@ const uint32			G_E_GRID_CHANGED		= 'geGC';
 
 const uint32			G_E_PATTERN_CHANGED		= 'gePC';
 const uint32			G_E_COLOR_CHANGED		= 'geCC';
+// live preview only, while a color picker is still open - updates the
+// selected nodes'/connections' renderers directly (see Renderer::
+// SetPreviewFillColor()), never touches document data or undo history.
+// G_E_COLOR_CHANGED above is still the one real, undo-worthy commit,
+// sent once when the picker closes - see docs/notes.md.
+const uint32			G_E_COLOR_PREVIEW		= 'geCP';
 const uint32			G_E_PEN_SIZE_CHANGED	= 'gePS';
 const uint32			G_E_ADD_ATTRIBUTE		= 'geAA';
 //*order to Insert and new a Node and to connect it to all current selected Nodes*/

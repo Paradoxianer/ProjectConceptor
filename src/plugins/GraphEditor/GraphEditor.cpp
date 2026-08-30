@@ -10,6 +10,7 @@
 #include <Catalog.h>
 
 #include "GraphEditor.h"
+#include "ColorSwatchView.h"
 #include "ConfigManager.h"
 #include "PCommandManager.h"
 #include "ProjectConceptor.h"
@@ -138,7 +139,7 @@ void GraphEditor::Init(void) {
 	grid->BButton::SetToolTip(B_TRANSLATE("Toggle grid"));
 	penSize		= new FloatToolItem(B_TRANSLATE("Pen size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
 	penSize->BButton::SetToolTip(B_TRANSLATE("Border pen size for selected nodes"));
-	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED));
+	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED),new BMessage(G_E_COLOR_PREVIEW));
 	colorItem->BButton::SetToolTip(B_TRANSLATE("Fill color for selected nodes"));
 	patternItem	= new PatternToolItem(B_TRANSLATE("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 	patternItem->BButton::SetToolTip(B_TRANSLATE("Fill pattern for selected nodes"));
@@ -372,6 +373,22 @@ void GraphEditor::ValueChanged() {
 
 	status_t err = doc->LockWithTimeout(TIMEOUT_LOCK);
 	printf("DocLocError - %s\n",strerror(err));
+	if (err != B_OK) {
+		// PCommandManager::Execute() holds this same document lock while it
+		// clears and then repopulates GetChangedNodes() (PCommandManager.cpp,
+		// around the clear() at the top and the command's own Do() call) -
+		// proceeding to iterate that set below without actually holding the
+		// lock here can race against that clear()/insert() on a different
+		// thread and corrupt the set mid-iteration. Confirmed via a live
+		// crash report: _Rb_tree_increment on an invalidated iterator. This
+		// used to happen unconditionally - err was checked only to decide
+		// whether to call Unlock(), never to gate the loop itself.
+		// Skipping this cycle avoids the crash; a node whose only change
+		// lands in a skipped cycle can go stale until something else
+		// touches it, which is the pre-existing trade-off of TIMEOUT_LOCK
+		// being a timeout at all - better than corrupting the set.
+		return;
+	}
 
 	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
 	set<BMessage*>::iterator it;
@@ -757,6 +774,28 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			valueContainer->AddInt32("newValue",*(int32 *)&tmpNewColor);
 			changeColorMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changeColorMessage);
+			break;
+		}
+		case G_E_COLOR_PREVIEW: {
+			// live preview while the picker is still open - update the
+			// renderers of whatever's currently selected directly, no
+			// document mutation, no undo entry (see docs/notes.md and
+			// the comment on G_E_COLOR_PREVIEW's declaration).
+			bool		cancel	= false;
+			message->FindBool("cancel",&cancel);
+			rgb_color	previewColor;
+			BList		*selection	= doc->GetSelected();
+			for (int32 i=0; i<selection->CountItems(); i++) {
+				BMessage	*node		= (BMessage *)selection->ItemAt(i);
+				Renderer	*painter	= FindRenderer(node);
+				if (painter == NULL)
+					continue;
+				if (cancel)
+					painter->ClearPreviewFillColor();
+				else if (ColorFromMessage(message,previewColor))
+					painter->SetPreviewFillColor(previewColor);
+			}
+			Invalidate();
 			break;
 		}
 		case G_E_PEN_SIZE_CHANGED: {

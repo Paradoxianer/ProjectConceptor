@@ -60,7 +60,18 @@ public:
 	// memory on the next redraw.
 	virtual	void		InvalidateEndpoint(Renderer *removed);
 
+	virtual	void		SetPreviewFillColor(rgb_color color);
+	virtual	void		ClearPreviewFillColor(void);
+
 protected:
+	/** fillColor, or the live preview color while a picker is open and
+	 * hasn't committed yet - see the class comment on Renderer's own
+	 * SetPreviewFillColor() for why this exists. Draw*() below always
+	 * goes through this instead of reading fillColor directly.
+	 */
+	rgb_color			EffectiveFillColor(void) {
+		return hasPreviewFillColor ? previewFillColor : fillColor;
+	}
 			void		Init();
 			void		CalcLine();
 			void		DrawStraight(BView *drawOn, BRect updateRect);
@@ -77,6 +88,8 @@ protected:
 	bool				selected;
 	BPoint				first,second,third;
 	rgb_color			fillColor;
+	bool				hasPreviewFillColor;
+	rgb_color			previewFillColor;
 	float				penSize;
 	ClassRenderer		*from;
 	ClassRenderer		*to;

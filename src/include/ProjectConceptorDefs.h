@@ -148,7 +148,18 @@ const uint32	MENU_MACRO_SAVE					= 'MMsv';
 
 const uint32	MENU_HELP_ABOUT					= 'MHab';
 
-const bigtime_t	TIMEOUT_LOCK					= 10;
+// bigtime_t is microseconds - this was 10 (i.e. 0.01ms), which meant
+// LockWithTimeout() calls sharing this constant (PCommandManager::Execute(),
+// GraphEditor::ValueChanged(), PDocumentManager) failed under almost any
+// real lock contention rather than the rare/exceptional case a timeout is
+// meant to guard against. Confirmed as the direct cause of a live crash:
+// GraphEditor::ValueChanged() proceeded to iterate PDocument's changedNodes
+// set without actually holding the lock whenever this timeout fired,
+// racing against PCommandManager::Execute() clearing/repopulating that
+// same set on another thread (see the fix at GraphEditor.cpp's
+// ValueChanged()). 50ms comfortably covers normal command execution time
+// without making a genuinely stuck lock hang the UI for long.
+const bigtime_t	TIMEOUT_LOCK					= 50000;
 
 
 //extern const char		*APP_SIGNATURE;//					= "application/ProjektConceptor";;

@@ -39,6 +39,7 @@ void ClassRenderer::Init()
 	font						= new AFont();
 	penSize						= 1.0;
 	connecting					= 0;
+	hasPreviewFillColor			= false;
 
 	BMessage	*editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 	editMessage->AddPointer("node",container);
@@ -249,7 +250,7 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	drawOn->SetPenSize(penSize);
 	drawOn->SetHighColor(0,0,0,77);
 	drawOn->FillRoundRect(shadowFrame, xRadius, yRadius);
-	drawColor=fillColor;
+	drawColor=hasPreviewFillColor ? previewFillColor : fillColor;
 	if (selected) {
 		drawOn->SetPenSize(5.0);
 		drawOn->SetHighColor(200,0,0,150);
@@ -336,6 +337,11 @@ void ClassRenderer::ValueChanged() {
 	pattern->FindInt32("FillColor",(int32 *)&fillColor);
 	pattern->FindInt32("BorderColor",(int32 *)&borderColor);
 	pattern->FindFloat("PenSize",&penSize);
+	// a real committed value just arrived (this is only ever called from
+	// a genuine P_C_VALUE_CHANGED, never from the preview path below) -
+	// any leftover preview from a picker session is now stale, drop it
+	// so Draw() goes back to the real fillColor just read above
+	hasPreviewFillColor			= false;
 	data->FindString(P_C_NODE_NAME,(const char **)&newName);
 	name->SetString(newName);
 	name->SetFrame(BRect(frame.left+(xRadius/3),frame.top+(yRadius/3),frame.right-(xRadius/3),frame.top+12));
@@ -425,6 +431,15 @@ void ClassRenderer::ResizeBy(float dx,float dy) {
 	topConnection.Set(xMiddle-circleSize,frame.top-circleSize,xMiddle+circleSize,frame.top+circleSize);
 	rightConnection.Set(frame.right-circleSize,yMiddle-circleSize,frame.right+circleSize,yMiddle+circleSize);
 	bottomConnection.Set(xMiddle-circleSize,frame.bottom-circleSize,xMiddle+circleSize,frame.bottom+circleSize);
+}
+
+void ClassRenderer::SetPreviewFillColor(rgb_color color) {
+	hasPreviewFillColor	= true;
+	previewFillColor	= color;
+}
+
+void ClassRenderer::ClearPreviewFillColor(void) {
+	hasPreviewFillColor	= false;
 }
 
 void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 count)

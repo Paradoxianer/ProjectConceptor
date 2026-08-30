@@ -58,6 +58,9 @@ SRCS= 	About/AboutWindow.cpp \
 		ToolBar/ToolItem.cpp \
 		ToolBar/ToolMenu.cpp\
 		ToolBar/ColorToolItem.cpp \
+		ToolBar/ColorSwatchView.cpp \
+		ToolBar/AlphaSlider.cpp \
+		ToolBar/ColorPickerWindow.cpp \
 		ToolBar/FloatToolItem.cpp \
 		ToolBar/PatternToolItem.cpp \
 		Tools/AFont.cpp \

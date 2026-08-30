@@ -29,6 +29,20 @@ public:
 
 	virtual	BMessage*	GetMessage(void){return container;};
 
+	/** Live-preview color while a picker is open, without touching the
+	 * underlying node data - mirrors how Move/Resize preview a drag by
+	 * only updating renderer geometry, committing a single real command
+	 * at the end (see docs/notes.md). Non-pure with an empty default so
+	 * only renderers that actually draw a fill color (ClassRenderer/
+	 * ConnectionRenderer) need to override it - everything else (labels,
+	 * attribute rows, ...) is unaffected. ClearPreviewFillColor() is
+	 * called automatically from within each overriding renderer's own
+	 * ValueChanged() once a real committed value arrives, so callers
+	 * never need to explicitly clear it themselves.
+	 */
+	virtual	void		SetPreviewFillColor(rgb_color color) {};
+	virtual	void		ClearPreviewFillColor(void) {};
+
 protected:
 			BMessage	*container;
 			GraphEditor	*editor;

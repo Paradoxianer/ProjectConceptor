@@ -1,0 +1,347 @@
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "ColorPickerWindow.h"
+#include "AlphaSlider.h"
+#include "ColorSwatchView.h"
+
+#include <app/Looper.h>
+#include <app/MessageFilter.h>
+#include <interface/ColorControl.h>
+#include <interface/TextControl.h>
+#include <interface/View.h>
+
+#include <Catalog.h>
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "ColorPickerWindow"
+
+// Local to this file only - ColorToolItem.h happens to declare its own
+// (unrelated) COLOR_CHANGED constant, so these stay unexported to avoid
+// any confusion between the two.
+enum {
+	PW_COLOR_CONTROL_CHANGED	= 'pwCC',
+	PW_ALPHA_CHANGED			= 'pwAC',
+	PW_ALPHA_TEXT_ENTERED		= 'pwAT',
+	PW_PALETTE_CLICKED			= 'pwPC',
+};
+
+static const float kPaletteSwatchHeight	= 22.0;
+static const float kMargin					= 1.0;
+// matches BColorControl's own (private) kTextFieldsHSpacing exactly -
+// see ~/repos/haiku/src/kits/interface/ColorControl.cpp - so the gap
+// between the alpha bar and its text field matches the R/G/B rows above.
+static const float kTextFieldsHSpacing		= 6.0;
+
+
+// Standard HSV->RGB conversion (hueDegrees in [0,360), saturation/value in
+// [0,1]) - written fresh rather than reusing any third-party
+// implementation (this codebase deliberately avoids the non-standard-
+// licensed rgb_hsv.h that ships alongside Icon-O-Matic's gradient
+// picker), since this is what generates the algorithmic palette.
+static rgb_color
+HueToColor(float hueDegrees, float saturation, float value)
+{
+	float	c			= value * saturation;
+	float	hPrime		= hueDegrees / 60.0;
+	float	x			= c * (1.0 - fabs(fmod(hPrime, 2.0) - 1.0));
+	float	r1 = 0, g1 = 0, b1 = 0;
+
+	if (hPrime < 1)			{ r1 = c; g1 = x; b1 = 0; }
+	else if (hPrime < 2)	{ r1 = x; g1 = c; b1 = 0; }
+	else if (hPrime < 3)	{ r1 = 0; g1 = c; b1 = x; }
+	else if (hPrime < 4)	{ r1 = 0; g1 = x; b1 = c; }
+	else if (hPrime < 5)	{ r1 = x; g1 = 0; b1 = c; }
+	else					{ r1 = c; g1 = 0; b1 = x; }
+
+	float	m = value - c;
+	rgb_color	color;
+	color.red	= (uint8)((r1 + m) * 255.0 + 0.5);
+	color.green	= (uint8)((g1 + m) * 255.0 + 0.5);
+	color.blue	= (uint8)((b1 + m) * 255.0 + 0.5);
+	color.alpha	= 255;
+	return color;
+}
+
+
+// Closes the window on Escape - installed as a common filter so it sees
+// the key before any child control's own KeyDown handling. Marks the
+// close as cancelled first, so QuitRequested() tells the target to
+// discard whatever was last previewed instead of committing it.
+class ColorPickerEscapeFilter : public BMessageFilter {
+public:
+	ColorPickerEscapeFilter(ColorPickerWindow *window)
+		: BMessageFilter(B_KEY_DOWN), fWindow(window) {}
+
+	virtual filter_result Filter(BMessage *message, BHandler **target) {
+		int8	byte	= 0;
+		if ((message->FindInt8("byte",&byte) == B_OK) && (byte == B_ESCAPE)) {
+			fWindow->Cancel();
+			fWindow->PostMessage(B_QUIT_REQUESTED);
+			return B_SKIP_MESSAGE;
+		}
+		return B_DISPATCH_MESSAGE;
+	}
+
+private:
+	ColorPickerWindow	*fWindow;
+};
+
+
+ColorPickerWindow::ColorPickerWindow(BRect frame, rgb_color color,
+		BMessage *message, BHandler *target,
+		const rgb_color *history, int32 historyCount)
+	: BWindow(frame, "Color", B_BORDERED_WINDOW_LOOK,
+		B_FLOATING_APP_WINDOW_FEEL,
+		B_NOT_ZOOMABLE | B_NOT_RESIZABLE | B_ASYNCHRONOUS_CONTROLS),
+	fMessage(message),
+	fTarget(target),
+	fCancelled(false)
+{
+	fColorControl = new BColorControl(BPoint(1,1), B_CELLS_32x8, 1.0,
+		"ColorPickerWindow::colorControl", new BMessage(PW_COLOR_CONTROL_CHANGED));
+	fColorControl->SetValue(color);
+
+	float	width, height;
+	fColorControl->GetPreferredSize(&width,&height);
+
+	// BColorControl names its own R/G/B fields "_red"/"_green"/"_blue"
+	// and adds them as real children in its own constructor - public
+	// API (BView::FindView()), no private access needed. Used below to
+	// line the alpha row's label/field up with these exactly, instead of
+	// recomputing the same font-metric math ourselves and risking a
+	// slightly-off alignment.
+	BTextControl	*redText		= dynamic_cast<BTextControl *>(
+		fColorControl->FindView("_red"));
+	BTextControl	*greenText		= dynamic_cast<BTextControl *>(
+		fColorControl->FindView("_green"));
+	BTextControl	*blueText		= dynamic_cast<BTextControl *>(
+		fColorControl->FindView("_blue"));
+	float			textFieldLeft	= 1 + redText->Frame().left;
+	float			textFieldWidth	= redText->Frame().Width();
+	float			textFieldHeight	= redText->Frame().Height();
+	// the exact per-row height/spacing BColorControl uses between its
+	// own Red/Green/Blue rows (its _LayoutView() spaces all three by
+	// this same "offset") - the alpha row below reuses it verbatim
+	// instead of an independently chosen height, which is what "look
+	// 1:1 like Red/Green/Blue" actually means for a fourth row.
+	float			rowHeight		= greenText->Frame().top - redText->Frame().top;
+
+	float	historyTop		= kMargin + kPaletteSwatchHeight + kMargin;
+	float	colorControlTop	= historyTop + kPaletteSwatchHeight + kMargin;
+	// one more row, continuing the exact same rhythm as Red/Green/Blue
+	// (see rowHeight above) rather than an independently chosen gap
+	float	alphaTop		= colorControlTop + blueText->Frame().top + rowHeight;
+
+	// A BWindow has no background of its own - without this, any area
+	// not actually covered by a child view (e.g. the history row before
+	// anything has been recorded into it yet) shows through as plain
+	// white instead of matching the panel-gray everything else uses.
+	// Everything below is added as a child of this view, not directly
+	// to the window - see the class comment for why (overlapping
+	// *sibling* views added straight to a BWindow don't reliably route
+	// mouse events to the right one; real parent/child nesting does).
+	float	totalHeight		= alphaTop + rowHeight + 4;
+	BView	*background = new BView(BRect(0, 0, width, totalHeight),
+		"ColorPickerWindow::background", B_FOLLOW_NONE, 0);
+	background->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	AddChild(background);
+
+	// palette row above the color control - algorithmically generated
+	// (hue sweep), not hand-curated, so this widget doesn't need
+	// per-project color curation to be reusable
+	float	swatchWidth	= (width - 2*kMargin) / PW_PALETTE_SIZE;
+	for (int32 i = 0; i < PW_PALETTE_SIZE; i++) {
+		rgb_color	swatchColor	= HueToColor(
+			i * (360.0 / PW_PALETTE_SIZE), 0.85, 0.95);
+		fPaletteSwatch[i] = new ColorSwatchView("ColorPickerWindow::palette",
+			new BMessage(PW_PALETTE_CLICKED), this, swatchColor,
+			swatchWidth, kPaletteSwatchHeight);
+		fPaletteSwatch[i]->MoveTo(kMargin + i*swatchWidth, kMargin);
+		background->AddChild(fPaletteSwatch[i]);
+	}
+
+	// history row below the palette - recently used custom colors
+	// (ColorToolItem::RecordColorInHistory()), most-recent first. Reuses
+	// the palette row's own PW_PALETTE_CLICKED click contract, so a
+	// history swatch behaves exactly like a palette swatch once clicked.
+	// The row's full height is always reserved, even before any history
+	// exists, so the window doesn't resize/jump around as it fills up.
+	int32	shown		= (historyCount < PW_HISTORY_SIZE) ? historyCount : PW_HISTORY_SIZE;
+	for (int32 i = 0; i < PW_HISTORY_SIZE; i++)
+		fHistorySwatch[i] = NULL;
+	for (int32 i = 0; i < shown; i++) {
+		fHistorySwatch[i] = new ColorSwatchView("ColorPickerWindow::history",
+			new BMessage(PW_PALETTE_CLICKED), this, history[i],
+			swatchWidth, kPaletteSwatchHeight);
+		fHistorySwatch[i]->MoveTo(kMargin + i*swatchWidth, historyTop);
+		background->AddChild(fHistorySwatch[i]);
+	}
+
+	fColorControl->MoveTo(1, colorControlTop);
+	fColorControl->SetTarget(this);
+	background->AddChild(fColorControl);
+
+	// alpha row - same shape as the R/G/B rows above: a ramp/bar on the
+	// left, "Alpha:" label + numeric field on the right, using the exact
+	// frame/divider redText already has above rather than an
+	// independently computed one, so it lines up even if "Alpha:"
+	// (translated) isn't the same width as "Red:"/"Green:"/"Blue:" -
+	// BColorControl itself does the same thing, sharing one labelWidth
+	// across all three of its own fields. rowHeight/alphaTop already
+	// computed above (needed earlier, for totalHeight).
+	float	alphaBarRight	= textFieldLeft - kTextFieldsHSpacing;
+
+	fAlphaSlider = new AlphaSlider(B_HORIZONTAL, new BMessage(PW_ALPHA_CHANGED));
+	fAlphaSlider->MoveTo(1, alphaTop);
+	fAlphaSlider->ResizeTo(alphaBarRight - 1, rowHeight);
+	fAlphaSlider->SetTarget(this);
+	fAlphaSlider->SetColor(color);
+	fAlphaSlider->SetValue(color.alpha);
+	background->AddChild(fAlphaSlider);
+
+	BRect	alphaTextFrame(textFieldLeft, alphaTop + (rowHeight - textFieldHeight) / 2,
+		textFieldLeft + textFieldWidth,
+		alphaTop + (rowHeight - textFieldHeight) / 2 + textFieldHeight);
+	fAlphaText = new BTextControl(alphaTextFrame, "_alpha",
+		B_TRANSLATE("Alpha:"), "255", new BMessage(PW_ALPHA_TEXT_ENTERED),
+		B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE);
+	fAlphaText->SetDivider(redText->Divider());
+	for (int32 i = 0; i < 256; i++)
+		fAlphaText->TextView()->DisallowChar(i);
+	for (int32 i = '0'; i <= '9'; i++)
+		fAlphaText->TextView()->AllowChar(i);
+	fAlphaText->TextView()->SetMaxBytes(3);
+	fAlphaText->SetAlignment(B_ALIGN_LEFT, B_ALIGN_RIGHT);
+	fAlphaText->SetTarget(this);
+	background->AddChild(fAlphaText);
+
+	ResizeTo(width, totalHeight);
+
+	AddCommonFilter(new ColorPickerEscapeFilter(this));
+}
+
+
+ColorPickerWindow::~ColorPickerWindow()
+{
+}
+
+
+void
+ColorPickerWindow::MessageReceived(BMessage *message)
+{
+	switch (message->what) {
+		case PW_COLOR_CONTROL_CHANGED: {
+			rgb_color	newColor	= fColorControl->ValueAsColor();
+			newColor.alpha			= fAlphaSlider->Value();
+			fAlphaSlider->SetColor(newColor);
+			_ReportColor();
+			break;
+		}
+		case PW_ALPHA_CHANGED: {
+			// dragging the slider also updates its own text field, same
+			// as BColorControl::SetValue() always syncing "_red" etc.
+			// regardless of whether the ramp or the field itself changed
+			char	string[4];
+			sprintf(string, "%d", fAlphaSlider->Value());
+			fAlphaText->SetText(string);
+			_ReportColor();
+			break;
+		}
+		case PW_ALPHA_TEXT_ENTERED: {
+			int32	value	= strtol(fAlphaText->Text(), NULL, 10);
+			value			= max_c(0, min_c(255, value));
+			fAlphaSlider->SetValue(value);
+			// SetValue() above already re-syncs fAlphaText via a queued
+			// PW_ALPHA_CHANGED - except when value == the slider's
+			// current value already, where it's a no-op and nothing
+			// would otherwise clamp/normalize what was actually typed
+			char	string[4];
+			sprintf(string, "%d", value);
+			fAlphaText->SetText(string);
+			_ReportColor();
+			break;
+		}
+		case PW_PALETTE_CLICKED: {
+			rgb_color	newColor;
+			if (ColorFromMessage(message,newColor))
+				_ApplyColor(newColor);
+			break;
+		}
+		default:
+			BWindow::MessageReceived(message);
+			break;
+	}
+}
+
+
+void
+ColorPickerWindow::WindowActivated(bool active)
+{
+	BWindow::WindowActivated(active);
+	if (!active)
+		PostMessage(B_QUIT_REQUESTED);
+}
+
+
+bool
+ColorPickerWindow::QuitRequested(void)
+{
+	if ((fMessage != NULL) && (fTarget != NULL)) {
+		BLooper *looper = fTarget->Looper();
+		if (looper != NULL) {
+			BMessage	closed(PW_CLOSED);
+			closed.AddBool("cancel", fCancelled);
+			looper->PostMessage(&closed, fTarget);
+		}
+	}
+	return BWindow::QuitRequested();
+}
+
+
+void
+ColorPickerWindow::SetColor(rgb_color color)
+{
+	fColorControl->SetValue(color);
+	fAlphaSlider->SetColor(color);
+	fAlphaSlider->SetValue(color.alpha);
+}
+
+
+rgb_color
+ColorPickerWindow::Color(void) const
+{
+	rgb_color	color	= fColorControl->ValueAsColor();
+	color.alpha			= fAlphaSlider->Value();
+	return color;
+}
+
+
+void
+ColorPickerWindow::_ApplyColor(rgb_color color)
+{
+	fColorControl->SetValue(color);
+	fAlphaSlider->SetColor(color);
+	fAlphaSlider->SetValue(color.alpha);
+	char	string[4];
+	sprintf(string, "%d", color.alpha);
+	fAlphaText->SetText(string);
+	_ReportColor();
+}
+
+
+void
+ColorPickerWindow::_ReportColor()
+{
+	if ((fMessage == NULL) || (fTarget == NULL))
+		return;
+
+	BLooper *looper = fTarget->Looper();
+	if (looper == NULL)
+		return;
+
+	BMessage	report(*fMessage);
+	AddColorToMessage(&report, Color());
+	looper->PostMessage(&report, fTarget);
+}
