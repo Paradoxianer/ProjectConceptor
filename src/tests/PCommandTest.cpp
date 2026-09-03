@@ -4,14 +4,45 @@
 #include <interface/Rect.h>
 #include <support/List.h>
 
+#include "BasePlugin.h"
 #include "ChangeValue.h"
 #include "Group.h"
 #include "Insert.h"
+#include "PCommandManager.h"
 #include "PDocument.h"
 #include "ProjectConceptorDefs.h"
 #include "TestDocument.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(PCommandTest);
+
+namespace {
+
+// Minimal BasePlugin so a real ChangeValue instance can be registered
+// with a PCommandManager under a chosen name, without pulling in the
+// dynamic-loading machinery real plugin .so's use - GetNewObject() is
+// the only part PCommandManager::RegisterPCommand() actually calls.
+class TestChangeValuePlugin : public BasePlugin {
+public:
+	TestChangeValuePlugin(void) : BasePlugin(0) {}
+	virtual char*	GetName(void) { return (char *)"ChangeValue"; }
+	virtual char*	GetAutor(void) { return (char *)"test"; }
+	virtual char*	GetVersionsString(void) { return (char *)"0"; }
+	virtual char*	GetDescription(void) { return (char *)"test"; }
+	virtual uint32	GetType(void) { return P_C_COMMANDO_PLUGIN_TYPE; }
+	virtual void*	GetNewObject(void *value) { return new ChangeValue(); }
+};
+
+// A bare wrapper command - Do()/Undo() are inherited straight from
+// PCommand, unoverridden, so calling them here exercises exactly the
+// PCommand::subPCommand loop being tested and nothing else.
+class TestWrapperCommand : public PCommand {
+public:
+	virtual void	AttachedToManager(void) {}
+	virtual void	DetachedFromManager(void) {}
+	virtual char*	Name(void) { return (char *)"TestWrapper"; }
+};
+
+}
 
 void PCommandTest::ChangeValueDoUndo(void)
 {
@@ -235,4 +266,73 @@ void PCommandTest::GroupUndoThenRedoKeepsChildren(void)
 	CPPUNIT_ASSERT(groupNode.FindPointer(P_C_NODE_ALLNODES,(void **)&groupAllNodes) == B_OK);
 	CPPUNIT_ASSERT(groupAllNodes->HasItem(&child1));
 	CPPUNIT_ASSERT(groupAllNodes->HasItem(&child2));
+}
+
+void PCommandTest::WrapperUndoRestoresAllSubcommands(void)
+{
+	// regression test for issue #116: PCommand::Do()'s subPCommand
+	// write-back used ReplaceMessage()'s unindexed 2-arg overload, which
+	// always targets slot 0 regardless of loop index - so a wrapper
+	// carrying more than one PCommand::subPCommand only ever got undo
+	// info written into the LAST slot. Undo() then silently restored
+	// only that last subcommand and left every earlier one applied.
+	// Two ChangeValue subcommands here, each targeting a different node -
+	// without the fix, node1 (processed first, slot 0) never gets its
+	// undo info and Undo() is a no-op for it.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
+
+	BMessage	node1(P_C_CLASS_TYPE);
+	node1.AddInt32("TestValue",1);
+	BMessage	node2(P_C_CLASS_TYPE);
+	node2.AddInt32("TestValue",2);
+
+	BMessage	valueContainer1;
+	valueContainer1.AddString("name","TestValue");
+	valueContainer1.AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer1.AddInt32("index",0);
+	int32	newValue1	= 100;
+	valueContainer1.AddData("newValue",B_INT32_TYPE,&newValue1,sizeof(int32));
+
+	BMessage	sub1;
+	sub1.AddString("Command::Name","ChangeValue");
+	sub1.AddPointer("node",&node1);
+	sub1.AddMessage("valueContainer",&valueContainer1);
+
+	BMessage	valueContainer2;
+	valueContainer2.AddString("name","TestValue");
+	valueContainer2.AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer2.AddInt32("index",0);
+	int32	newValue2	= 200;
+	valueContainer2.AddData("newValue",B_INT32_TYPE,&newValue2,sizeof(int32));
+
+	BMessage	sub2;
+	sub2.AddString("Command::Name","ChangeValue");
+	sub2.AddPointer("node",&node2);
+	sub2.AddMessage("valueContainer",&valueContainer2);
+
+	BMessage	settings;
+	settings.AddMessage("PCommand::subPCommand",&sub1);
+	settings.AddMessage("PCommand::subPCommand",&sub2);
+
+	TestWrapperCommand	wrapper;
+	wrapper.SetManager(doc->GetCommandManager());
+	BMessage	*result	= wrapper.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	int32	changed1	= 0;
+	CPPUNIT_ASSERT(node1.FindInt32("TestValue",&changed1) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)100,changed1);
+	int32	changed2	= 0;
+	CPPUNIT_ASSERT(node2.FindInt32("TestValue",&changed2) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)200,changed2);
+
+	wrapper.Undo(doc,result);
+
+	int32	restored1	= 0;
+	CPPUNIT_ASSERT(node1.FindInt32("TestValue",&restored1) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)1,restored1);
+	int32	restored2	= 0;
+	CPPUNIT_ASSERT(node2.FindInt32("TestValue",&restored2) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)2,restored2);
 }

@@ -38,7 +38,10 @@ BMessage* PCommand::Do(PDocument *doc,BMessage *settings)
 		if (subPCommand)
 		{
 			subPCommandMessage = subPCommand->Do(doc,subPCommandMessage);
-			settings->ReplaceMessage("PCommand::subPCommand",subPCommandMessage);
+			// indexed - the 2-arg overload always targets slot 0, silently
+			// dropping every subcommand's undo info but the last one's
+			// whenever a wrapper carries more than one (see issue #116)
+			settings->ReplaceMessage("PCommand::subPCommand",i,subPCommandMessage);
 		}
 		i++;
 	}
