@@ -147,6 +147,9 @@ public:
 			bool				QuitRequested(void);
 
 			PWindow*			GetWindow(void){return window;};
+			/** Called by PWindow's own ctor before Show(), so
+			 * GetWindow() is already valid during AttachedToManager(). */
+			void				SetWindow(PWindow *newWindow){window=newWindow;};
 			PCommandManager*	GetCommandManager(void){return commandManager;};
 			PEditorManager*		GetEditorManager(void){return editorManager;};
 

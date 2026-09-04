@@ -31,6 +31,9 @@ PWindow::PWindow(BRect rect,PDocument *document):BWindow(rect,"ProjectConceptor"
 {
 	TRACE();
 	doc	= document;
+	// set before Init()/Show(), so doc->GetWindow() is already valid
+	// once AttachedToManager() etc. run (see PDocument::SetWindow()).
+	doc->SetWindow(this);
 	Init();
 	Show();
 }
@@ -537,12 +540,8 @@ void PWindow::MessageReceived(BMessage *message)
 void PWindow::AddEditor(const char *name,PEditor *editor)
 {
 	bool locked = LockLooper();
-	// A PEditor is not required to have a view. A view-less editor (the
-	// auto-layout editor, #54/#105) returns NULL here: it wants to be
-	// registered with the manager - so it gets fed nodes/connections and can
-	// contribute a toolbar and shortcuts - but it has nothing to put in a
-	// tab. Everything in this block is tab/view setup and would dereference
-	// that NULL (see issue #102).
+	// GetView() may be NULL for a view-less editor (#102) - it still
+	// wants RegisterPEditor() below, just no tab.
 	BView	*editorView = editor->GetView();
 	if (editorView != NULL) {
 		BTab	*tab = new BTab();
