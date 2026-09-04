@@ -20,7 +20,6 @@ SRCS= 	TestMain.cpp \
 		LayoutEditorTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
 		../plugins/LayoutEditor/DotLayouter.cpp \
-		../plugins/LayoutEditor/ChoiceToolItem.cpp \
 		../plugins/BatchCommand/Batch.cpp \
 		../app/ProjectConceptorDefs.cpp \
 		../app/Config/ConfigManager.cpp \
@@ -53,6 +52,8 @@ SRCS= 	TestMain.cpp \
 		../app/ToolBar/AlphaSlider.cpp \
 		../app/ToolBar/ColorPickerWindow.cpp \
 		../app/ToolBar/FloatToolItem.cpp \
+		../app/ToolBar/ChoiceToolItem.cpp \
+		../app/ToolBar/IconMenuItem.cpp \
 		../app/ToolBar/PatternToolItem.cpp \
 		../app/Tools/AFont.cpp \
 		../app/Tools/PCSavePanel.cpp \
