@@ -44,6 +44,16 @@ GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"Gra
 	SetDrawingMode(B_OP_ALPHA);
 }
 
+GraphEditor::~GraphEditor(void) {
+	TRACE();
+	// stop the shared animation ticker before this view goes away - it
+	// keeps sending G_E_ANIMATION_TICK to BMessenger(this) via a raw
+	// BMessageRunner* otherwise, which outlives us if an animation is
+	// still in flight (e.g. right after Auto-Layout) when the window
+	// closes, and dispatches to freed memory next tick.
+	delete animationRunner;
+}
+
 void GraphEditor::Init(void) {
 	TRACE();
 	printRect		= NULL;

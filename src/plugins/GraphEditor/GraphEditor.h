@@ -63,6 +63,7 @@ class GraphEditor : public PEditor, public BView {
 
 public:
 							GraphEditor(image_id newId);
+	virtual					~GraphEditor(void);
 
 	//++++++++++++++++PEditor
 	virtual	void			AttachedToManager(void);
