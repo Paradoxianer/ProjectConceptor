@@ -678,6 +678,21 @@ void PDocument::Load(void)
 	// and refilled) instead of being replaced - editors like NavigatorEditor
 	// cache the BList pointer for their lifetime, and a delete+reassign here
 	// left them pointing at freed memory on the next reload.
+	//
+	// Any nodes/connections already in these lists (e.g. from editing
+	// before this Load(), reusing the same window) have to be marked
+	// changed *before* MakeEmpty() drops them - otherwise GraphEditor's
+	// diffing (ProcessChangedNode(), driven off valueChanged) never learns
+	// they're gone and keeps their now-stale renderers around: still
+	// drawn, but no longer selectable/editable since they're not in
+	// allNodes anymore. Same changed->insert() pattern Delete::Do() uses,
+	// and same as there, never actually deleted - node lifetime here
+	// relies on process teardown, not on Load() freeing anything.
+	for (i = 0; i<allNodes->CountItems(); i++)
+		valueChanged->insert((BMessage*)allNodes->ItemAt(i));
+	for (i = 0; i<allConnections->CountItems(); i++)
+		valueChanged->insert((BMessage*)allConnections->ItemAt(i));
+
 	BList		*loadedNodes		= docLoader->GetAllNodes();
 	allNodes->MakeEmpty();
 	for (i = 0; i<loadedNodes->CountItems(); i++) {
