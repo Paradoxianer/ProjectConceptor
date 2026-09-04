@@ -59,31 +59,55 @@ DotLayouter::Layout(const BList *nodes, const BList *connections, BMessage *posi
 	if (err != B_OK)
 		return err;
 
-	BString	command("dot -Tplain \"");
-	command << dotPath << "\" 2>&1";
-	FILE	*pipe	= popen(command.String(),"r");
-	if (pipe == NULL) {
+	// -Tplain has leaf node positions but no cluster geometry; -Tdot has
+	// each cluster's own `bb=` but requires knowing our own subgraph
+	// naming to find it (see ParseClusterBounds()) - two passes over the
+	// same graph rather than one shared, more complex parser.
+	BString	plainOutput;
+	err	= RunDot(dotPath,"-Tplain",&plainOutput);
+	if (err != B_OK) {
 		remove(dotPath.String());
-		return B_ERROR;
+		return err;
 	}
 
-	BString	output;
+	BString	dotOutput;
+	err	= RunDot(dotPath,"-Tdot",&dotOutput);
+	remove(dotPath.String());
+	if (err != B_OK)
+		return err;
+
+	float	graphHeightPoints	= 0;
+	err	= ParsePlainOutput(plainOutput,nodes,positions,&graphHeightPoints);
+	if (err != B_OK)
+		return err;
+
+	return ParseClusterBounds(dotOutput,nodes,graphHeightPoints,positions);
+}
+
+
+status_t
+DotLayouter::RunDot(const BString &dotPath, const char *format, BString *output)
+{
+	BString	command("dot ");
+	command << format << " \"" << dotPath << "\" 2>&1";
+	FILE	*pipe	= popen(command.String(),"r");
+	if (pipe == NULL)
+		return B_ERROR;
+
 	char	buffer[1024];
 	size_t	bytesRead;
 	while ((bytesRead = fread(buffer,1,sizeof(buffer)-1,pipe)) > 0) {
 		buffer[bytesRead]	= '\0';
-		output << buffer;
+		(*output) << buffer;
 	}
 	int	exitStatus	= pclose(pipe);
-	remove(dotPath.String());
 
 	if (exitStatus != 0) {
-		fprintf(stderr,"DotLayouter: `dot` exited with status %d:\n%s\n",
-			exitStatus,output.String());
+		fprintf(stderr,"DotLayouter: `dot %s` exited with status %d:\n%s\n",
+			format,exitStatus,output->String());
 		return B_ERROR;
 	}
-
-	return ParsePlainOutput(output,nodes,positions);
+	return B_OK;
 }
 
 
@@ -96,13 +120,14 @@ DotLayouter::WriteDotFile(const BString &path, const BList *nodes, const BList *
 		return err;
 
 	BString	source("digraph G {\n");
+	// only top-level nodes here (no P_C_NODE_PARENT) - a grouped node is
+	// written recursively from inside its own group's WriteDotNode() call
+	// instead, nested in that group's subgraph cluster block.
 	for (int32 i=0; i<nodes->CountItems(); i++) {
 		BMessage	*node	= (BMessage *)nodes->ItemAt(i);
-		BRect		frame(0,0,100,80);
-		node->FindRect(P_C_NODE_FRAME,&frame);
-		source << "  n" << i << " [width=" << (frame.Width()/kPointsPerInch)
-			<< ", height=" << (frame.Height()/kPointsPerInch)
-			<< ", fixedsize=true, shape=box, label=\"\"];\n";
+		BMessage	*parent	= NULL;
+		if (node->FindPointer(P_C_NODE_PARENT,(void **)&parent) != B_OK)
+			WriteDotNode(source,node,nodes);
 	}
 	if (connections != NULL) {
 		for (int32 i=0; i<connections->CountItems(); i++) {
@@ -129,8 +154,44 @@ DotLayouter::WriteDotFile(const BString &path, const BList *nodes, const BList *
 }
 
 
+void
+DotLayouter::WriteDotNode(BString &source, BMessage *node, const BList *nodes)
+{
+	int32	index	= nodes->IndexOf(node);
+	if (index < 0)
+		return;
+
+	if (node->what == P_C_GROUP_TYPE) {
+		source << "  subgraph cluster_" << index << " {\n";
+		source << "    label=\"\";\n";
+		// invisible anchor node - lets a connection directly to/from the
+		// group itself (not one of its children) still have a real dot
+		// node id to route through. The group's actual frame comes from
+		// this cluster's own bb= afterward (ParseClusterBounds()), never
+		// from this anchor's own position.
+		source << "    n" << index << " [shape=point, style=invis, "
+			"width=0.01, height=0.01];\n";
+		BList	*children	= NULL;
+		if ((node->FindPointer(P_C_NODE_ALLNODES,(void **)&children) == B_OK)
+				&& (children != NULL)) {
+			for (int32 i=0; i<children->CountItems(); i++)
+				WriteDotNode(source,(BMessage *)children->ItemAt(i),nodes);
+		}
+		source << "  }\n";
+	}
+	else {
+		BRect	frame(0,0,100,80);
+		node->FindRect(P_C_NODE_FRAME,&frame);
+		source << "  n" << index << " [width=" << (frame.Width()/kPointsPerInch)
+			<< ", height=" << (frame.Height()/kPointsPerInch)
+			<< ", fixedsize=true, shape=box, label=\"\"];\n";
+	}
+}
+
+
 status_t
-DotLayouter::ParsePlainOutput(const BString &output, const BList *nodes, BMessage *positions)
+DotLayouter::ParsePlainOutput(const BString &output, const BList *nodes, BMessage *positions,
+	float *graphHeightPoints)
 {
 	// "graph <scale> <width> <height>" - height needed to flip dot's
 	// bottom-up coords into Haiku's top-down ones below.
@@ -149,7 +210,13 @@ DotLayouter::ParsePlainOutput(const BString &output, const BList *nodes, BMessag
 			return B_ERROR;
 		}
 	}
-	float	graphHeightPoints	= graphHeight * kPointsPerInch;
+	*graphHeightPoints	= graphHeight * kPointsPerInch;
+
+	int32	expectedLeaves	= 0;
+	for (int32 i=0; i<nodes->CountItems(); i++) {
+		if (((BMessage *)nodes->ItemAt(i))->what == P_C_CLASS_TYPE)
+			expectedLeaves++;
+	}
 
 	int32	lineStart	= 0;
 	int32	found		= 0;
@@ -178,7 +245,13 @@ DotLayouter::ParsePlainOutput(const BString &output, const BList *nodes, BMessag
 		if ((sscanf(name,"n%d",&parsedIndex) != 1)
 			|| (parsedIndex < 0) || (parsedIndex >= nodes->CountItems()))
 			continue;
-		int32	index	= (int32)parsedIndex;
+		int32		index	= (int32)parsedIndex;
+		BMessage	*node	= (BMessage *)nodes->ItemAt(index);
+		// a group's own anchor node also shows up here (it's a real,
+		// if invisible, dot node) - its frame comes from the cluster's
+		// own bb= instead, see ParseClusterBounds()
+		if (node->what != P_C_CLASS_TYPE)
+			continue;
 
 		float	centerX	= x * kPointsPerInch;
 		float	centerY	= y * kPointsPerInch;
@@ -187,18 +260,70 @@ DotLayouter::ParsePlainOutput(const BString &output, const BList *nodes, BMessag
 		// flip dot's bottom-up y against total height for Haiku's top-down y
 		BRect	frame(
 			centerX - halfW,
-			graphHeightPoints - (centerY + halfH),
+			*graphHeightPoints - (centerY + halfH),
 			centerX + halfW,
-			graphHeightPoints - (centerY - halfH));
+			*graphHeightPoints - (centerY - halfH));
 
-		positions->AddPointer("node",nodes->ItemAt(index));
+		positions->AddPointer("node",node);
 		positions->AddRect("frame",frame);
 		found++;
 	}
 
-	if (found != nodes->CountItems()) {
-		fprintf(stderr,"DotLayouter: expected %d node(s) back from `dot`, got %d\n",
-			(int)nodes->CountItems(),(int)found);
+	if (found != expectedLeaves) {
+		fprintf(stderr,"DotLayouter: expected %d leaf node(s) back from `dot`, got %d\n",
+			(int)expectedLeaves,(int)found);
+		return B_ERROR;
+	}
+	return B_OK;
+}
+
+
+status_t
+DotLayouter::ParseClusterBounds(const BString &dotOutput, const BList *nodes,
+	float graphHeightPoints, BMessage *positions)
+{
+	int32	found		= 0;
+	int32	expected	= 0;
+	for (int32 i=0; i<nodes->CountItems(); i++) {
+		BMessage	*node	= (BMessage *)nodes->ItemAt(i);
+		if (node->what != P_C_GROUP_TYPE)
+			continue;
+		expected++;
+
+		// `-Tdot` writes a cluster's own "graph [bb=\"...\", ...]" line as
+		// the first thing inside its block, before any nested content
+		// (including a nested group's own subgraph/bb) - searching for the
+		// first bb= after our marker always finds the right one.
+		BString	marker;
+		marker << "subgraph cluster_" << i << " ";
+		int32	clusterPos	= dotOutput.FindFirst(marker.String());
+		if (clusterPos < 0)
+			continue;
+		int32	bbPos	= dotOutput.FindFirst("bb=\"",clusterPos);
+		if (bbPos < 0)
+			continue;
+		int32	valueStart	= bbPos+4;
+		int32	quoteEnd	= dotOutput.FindFirst('"',valueStart);
+		if (quoteEnd < 0)
+			continue;
+		BString	bbValue;
+		dotOutput.CopyInto(bbValue,valueStart,quoteEnd-valueStart);
+
+		float	llx,lly,urx,ury;
+		if (sscanf(bbValue.String(),"%f,%f,%f,%f",&llx,&lly,&urx,&ury) != 4)
+			continue;
+
+		// bb is already in points (unlike -Tplain's inch-based fields) -
+		// same bottom-up-to-top-down flip as ParsePlainOutput()'s leaves.
+		BRect	frame(llx,graphHeightPoints-ury,urx,graphHeightPoints-lly);
+		positions->AddPointer("node",node);
+		positions->AddRect("frame",frame);
+		found++;
+	}
+
+	if (found != expected) {
+		fprintf(stderr,"DotLayouter: expected %d group bounding box(es) from `dot`, got %d\n",
+			(int)expected,(int)found);
 		return B_ERROR;
 	}
 	return B_OK;
