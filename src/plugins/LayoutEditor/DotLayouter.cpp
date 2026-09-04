@@ -113,9 +113,7 @@ DotLayouter::WriteDotFile(const BString &path, const BList *nodes, const BList *
 			connection->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&to);
 			int32	fromIndex	= nodes->IndexOf(from);
 			int32	toIndex		= nodes->IndexOf(to);
-			// skip connections whose endpoint isn't in this layout run
-			// (e.g. layouting a selection rather than the whole graph)
-			// rather than emitting an edge to an undeclared DOT node
+			// skip edges to a node not in this layout run
 			if ((fromIndex >= 0) && (toIndex >= 0))
 				source << "  n" << fromIndex << " -> n" << toIndex << ";\n";
 		}
@@ -134,9 +132,8 @@ DotLayouter::WriteDotFile(const BString &path, const BList *nodes, const BList *
 status_t
 DotLayouter::ParsePlainOutput(const BString &output, const BList *nodes, BMessage *positions)
 {
-	// "graph <scale> <width> <height>" - need the overall height to flip
-	// dot's bottom-up/center-origin coordinates into Haiku's top-down,
-	// top-left-origin ones (see the class comment / issue #104).
+	// "graph <scale> <width> <height>" - height needed to flip dot's
+	// bottom-up coords into Haiku's top-down ones below.
 	float	graphHeight	= 0;
 	{
 		BString	line	= output;
@@ -171,10 +168,8 @@ DotLayouter::ParsePlainOutput(const BString &output, const BList *nodes, BMessag
 		char	name[32]		= {0};
 		float	x,y,width,height;
 		char	label[8]		= {0};
-		// only the fields this needs (name/x/y/width/height) - style,
-		// shape, color and fillcolor are always the fixed values this
-		// class itself writes into the DOT source, so parsing them back
-		// isn't needed to place the node
+		// style/shape/color/fillcolor are fixed values we wrote - not
+		// parsed back
 		if (sscanf(line.String(),"%15s %31s %f %f %f %f %7s",
 				tag,name,&x,&y,&width,&height,label) != 7)
 			continue;
@@ -189,10 +184,7 @@ DotLayouter::ParsePlainOutput(const BString &output, const BList *nodes, BMessag
 		float	centerY	= y * kPointsPerInch;
 		float	halfW	= (width * kPointsPerInch) / 2.0;
 		float	halfH	= (height * kPointsPerInch) / 2.0;
-		// dot's y grows upward from the bottom of the drawing - flip
-		// against the drawing's own total height to get Haiku's
-		// top-down y, keeping this node's own height so top/bottom
-		// don't come out swapped
+		// flip dot's bottom-up y against total height for Haiku's top-down y
 		BRect	frame(
 			centerX - halfW,
 			graphHeightPoints - (centerY + halfH),

@@ -1,0 +1,173 @@
+#include "LayoutEditor.h"
+
+#include <stdio.h>
+
+#include <Catalog.h>
+
+#include "BaseItem.h"
+#include "DotLayouter.h"
+#include "PCommandManager.h"
+#include "PWindow.h"
+#include "ProjectConceptorDefs.h"
+#include "ToolBar.h"
+#include "ToolItem.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "LayoutEditor"
+
+static const char	*L_E_TOOL_BAR	= "L_E_TOOL_BAR";
+
+
+LayoutEditor::LayoutEditor(void):PEditor(),BHandler("LayoutEditor")
+{
+	configMessage		= new BMessage();
+	layouter			= NULL;
+	toolBar				= NULL;
+	applyingLayout		= false;
+}
+
+
+LayoutEditor::~LayoutEditor(void)
+{
+	delete layouter;
+}
+
+
+void LayoutEditor::SetLayouter(PLayouter *newLayouter)
+{
+	delete layouter;
+	layouter	= newLayouter;
+}
+
+
+void LayoutEditor::AttachedToManager(void)
+{
+	if (layouter == NULL)
+		SetLayouter(new DotLayouter());
+
+	// no view -> reach PWindow via doc, not Window(). Valid this early
+	// because PWindow's own ctor sets it via SetWindow() before Show().
+	PWindow	*pWindow	= doc->GetWindow();
+	if (pWindow == NULL)
+		return;
+
+	toolBar	= new ToolBar(BRect(0,0,50,ITEM_HEIGHT+4),L_E_TOOL_BAR,B_ITEMS_IN_ROW);
+	// no icon yet - ToolItem draws a plain bordered button when bitmap
+	// is NULL (see ToolItem::Draw()), not a functional blocker.
+	ToolItem	*applyItem	= new ToolItem(B_TRANSLATE("Auto-Layout"),
+		NULL,new BMessage(L_E_APPLY_LAYOUT));
+	applyItem->BButton::SetToolTip(B_TRANSLATE("Automatically arrange the graph"));
+	toolBar->AddItem(applyItem);
+	// BMessenger(this) resolves via GetHandler()'s own Looper() (doc's,
+	// already set by RegisterPEditor()) - plain SetTarget(this) would
+	// default to the button's own looper (pWindow) instead.
+	applyItem->SetTarget(BMessenger(this));
+
+	pWindow->AddToolBar(toolBar);
+}
+
+
+void LayoutEditor::DetachedFromManager(void)
+{
+	if (toolBar != NULL) {
+		PWindow	*pWindow	= (doc != NULL) ? doc->GetWindow() : NULL;
+		if (pWindow != NULL)
+			pWindow->RemoveToolBar(L_E_TOOL_BAR);
+		toolBar	= NULL;
+	}
+}
+
+
+void LayoutEditor::ValueChanged(void)
+{
+	// no-op by design - only reacts to explicit ApplyLayout() triggers.
+	if (applyingLayout)
+		return;
+}
+
+
+void LayoutEditor::SetShortCutFilter(ShortCutFilter *_shortCutFilter)
+{
+	AddFilter(_shortCutFilter);
+}
+
+
+void LayoutEditor::MessageReceived(BMessage *message)
+{
+	switch (message->what) {
+		case L_E_APPLY_LAYOUT: {
+			ApplyLayout();
+			break;
+		}
+		default:
+			BHandler::MessageReceived(message);
+			break;
+	}
+}
+
+
+BMessage* LayoutEditor::BuildLayoutCommand(BMessage *positions)
+{
+	// One "Batch" wrapper, one ChangeValue subPCommand per node - single
+	// undo step (see #116). ChangeValue not Move: Move applies one dx/dy
+	// to doc->GetSelected() as a whole, no way to target one node's
+	// absolute position; ChangeValue takes an explicit per-node value
+	// directly (same technique ClassRenderer.cpp already uses).
+	BMessage	*wrapper		= new BMessage(P_C_EXECUTE_COMMAND);
+	wrapper->AddString("Command::Name","Batch");
+
+	int32		i				= 0;
+	void		*nodePtr		= NULL;
+	BRect		newFrame;
+	int32		subCommandCount	= 0;
+	while (positions->FindPointer("node",i,&nodePtr) == B_OK) {
+		if (positions->FindRect("frame",i,&newFrame) == B_OK) {
+			BMessage	*subCommand		= new BMessage(P_C_EXECUTE_COMMAND);
+			BMessage	*valueContainer	= new BMessage();
+			subCommand->AddString("Command::Name","ChangeValue");
+			subCommand->AddPointer("node",nodePtr);
+			valueContainer->AddString("name",P_C_NODE_FRAME);
+			valueContainer->AddInt32("type",(int32)B_RECT_TYPE);
+			valueContainer->AddRect("newValue",newFrame);
+			subCommand->AddMessage("valueContainer",valueContainer);
+			wrapper->AddMessage("PCommand::subPCommand",subCommand);
+			subCommandCount++;
+		}
+		i++;
+	}
+
+	if (subCommandCount == 0) {
+		delete wrapper;
+		return NULL;
+	}
+	return wrapper;
+}
+
+
+void LayoutEditor::ApplyLayout(void)
+{
+	if ((applyingLayout) || (layouter == NULL) || (doc == NULL))
+		return;
+
+	BList	*nodes			= doc->GetAllNodes();
+	BList	*connections	= doc->GetAllConnections();
+	if ((nodes == NULL) || (nodes->CountItems() == 0))
+		return;
+
+	applyingLayout	= true;
+
+	BMessage	positions;
+	status_t	err	= layouter->Layout(nodes,connections,&positions);
+	if (err != B_OK) {
+		fprintf(stderr,"LayoutEditor::ApplyLayout() - %s failed: %s\n",
+			layouter->Name(),strerror(err));
+		applyingLayout	= false;
+		return;
+	}
+
+	BMessage	*wrapper	= BuildLayoutCommand(&positions);
+	if (wrapper != NULL)
+		(new BMessenger(doc))->SendMessage(wrapper);
+
+	applyingLayout	= false;
+}

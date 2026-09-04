@@ -17,10 +17,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(PCommandTest);
 
 namespace {
 
-// Minimal BasePlugin so a real ChangeValue instance can be registered
-// with a PCommandManager under a chosen name, without pulling in the
-// dynamic-loading machinery real plugin .so's use - GetNewObject() is
-// the only part PCommandManager::RegisterPCommand() actually calls.
+// Minimal BasePlugin to register ChangeValue without a real plugin .so.
 class TestChangeValuePlugin : public BasePlugin {
 public:
 	TestChangeValuePlugin(void) : BasePlugin(0) {}
@@ -32,9 +29,7 @@ public:
 	virtual void*	GetNewObject(void *value) { return new ChangeValue(); }
 };
 
-// A bare wrapper command - Do()/Undo() are inherited straight from
-// PCommand, unoverridden, so calling them here exercises exactly the
-// PCommand::subPCommand loop being tested and nothing else.
+// Do()/Undo() unoverridden - exercises only the subPCommand loop.
 class TestWrapperCommand : public PCommand {
 public:
 	virtual void	AttachedToManager(void) {}
@@ -270,15 +265,9 @@ void PCommandTest::GroupUndoThenRedoKeepsChildren(void)
 
 void PCommandTest::WrapperUndoRestoresAllSubcommands(void)
 {
-	// regression test for issue #116: PCommand::Do()'s subPCommand
-	// write-back used ReplaceMessage()'s unindexed 2-arg overload, which
-	// always targets slot 0 regardless of loop index - so a wrapper
-	// carrying more than one PCommand::subPCommand only ever got undo
-	// info written into the LAST slot. Undo() then silently restored
-	// only that last subcommand and left every earlier one applied.
-	// Two ChangeValue subcommands here, each targeting a different node -
-	// without the fix, node1 (processed first, slot 0) never gets its
-	// undo info and Undo() is a no-op for it.
+	// #116: subPCommand write-back used to always hit slot 0, so only
+	// the last of several subcommands got undo info. Two ChangeValues
+	// here - without the fix, node1 (slot 0) never undoes.
 	PDocument	*doc	= NewHeadlessTestDocument();
 	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
 

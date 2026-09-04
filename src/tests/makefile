@@ -17,6 +17,10 @@ SRCS= 	TestMain.cpp \
 		TestDocument.cpp \
 		IndexerTest.cpp \
 		PCommandTest.cpp \
+		LayoutEditorTest.cpp \
+		../plugins/LayoutEditor/LayoutEditor.cpp \
+		../plugins/LayoutEditor/DotLayouter.cpp \
+		../plugins/BatchCommand/Batch.cpp \
 		../app/ProjectConceptorDefs.cpp \
 		../app/Config/ConfigManager.cpp \
 		../app/Config/ConfigWindow.cpp \
@@ -88,7 +92,9 @@ LOCAL_INCLUDE_PATHS =	. \
 						../app/Tools \
 						../plugins/ChangeValueCommand \
 						../plugins/InsertCommand \
-						../plugins/GroupCommand
+						../plugins/GroupCommand \
+						../plugins/LayoutEditor \
+						../plugins/BatchCommand
 
 COMPILER_FLAGS =
 

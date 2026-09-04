@@ -3,6 +3,7 @@
 #include <cppunit/ui/text/TestRunner.h>
 
 #include "IndexerTest.h"
+#include "LayoutEditorTest.h"
 #include "PCommandTest.h"
 
 const char *TEST_APP_SIGNATURE = "application/x-vnd.ProjectConceptorTests";
@@ -17,6 +18,7 @@ int main(int argc, char **argv)
 	CppUnit::TextUi::TestRunner runner;
 	runner.addTest(IndexerTest::suite());
 	runner.addTest(PCommandTest::suite());
+	runner.addTest(LayoutEditorTest::suite());
 	bool success = runner.run("", false);
 	return success ? 0 : 1;
 }
