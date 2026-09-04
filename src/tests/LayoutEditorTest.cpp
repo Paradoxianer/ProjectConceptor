@@ -85,6 +85,42 @@ void LayoutEditorTest::BuildLayoutCommandShapesOneUndoableBatch(void)
 }
 
 
+void LayoutEditorTest::CenterOnOldBoundsShiftsToMatchOldCenter(void)
+{
+	// old graph's bounding box is centered on (150,50); a fresh dot layout
+	// starts near its own origin - CenterOnOldBounds() must shift every
+	// "frame" entry so the NEW bounding box is re-centered on (150,50) too.
+	BMessage	node1(P_C_CLASS_TYPE);
+	node1.AddRect(P_C_NODE_FRAME,BRect(0,0,100,40));
+	BMessage	node2(P_C_CLASS_TYPE);
+	node2.AddRect(P_C_NODE_FRAME,BRect(200,60,300,100));
+
+	BList	nodes;
+	nodes.AddItem(&node1);
+	nodes.AddItem(&node2);
+
+	// new layout's own bounding box is centered on (55,15), nowhere near
+	// the old (150,50) - e.g. dot's own coordinate space near its origin.
+	BMessage	positions;
+	positions.AddPointer("node",&node1);
+	positions.AddRect("frame",BRect(0,0,10,10));
+	positions.AddPointer("node",&node2);
+	positions.AddRect("frame",BRect(100,20,110,30));
+
+	LayoutEditor	editor;
+	editor.CenterOnOldBounds(&nodes,&positions);
+
+	BRect	frame1;
+	CPPUNIT_ASSERT(positions.FindRect("frame",0,&frame1) == B_OK);
+	BRect	frame2;
+	CPPUNIT_ASSERT(positions.FindRect("frame",1,&frame2) == B_OK);
+
+	// shift was (150,50)-(55,15) = (95,35); sizes stay untouched
+	CPPUNIT_ASSERT(frame1 == BRect(95,35,105,45));
+	CPPUNIT_ASSERT(frame2 == BRect(195,55,205,65));
+}
+
+
 void LayoutEditorTest::BatchAppliesAndUndoesAllSubcommands(void)
 {
 	// #116 regression (undo must restore every subcommand, not just the

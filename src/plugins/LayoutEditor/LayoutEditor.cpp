@@ -161,6 +161,47 @@ BMessage* LayoutEditor::BuildLayoutCommand(BMessage *positions)
 }
 
 
+void LayoutEditor::CenterOnOldBounds(const BList *nodes, BMessage *positions)
+{
+	BRect	oldBounds;
+	bool	haveOld		= false;
+	for (int32 i = 0; i < nodes->CountItems(); i++) {
+		BMessage	*node	= (BMessage*)nodes->ItemAt(i);
+		BRect		nodeFrame;
+		if ((node != NULL) && (node->FindRect(P_C_NODE_FRAME,&nodeFrame) == B_OK)) {
+			oldBounds	= haveOld ? (oldBounds | nodeFrame) : nodeFrame;
+			haveOld		= true;
+		}
+	}
+
+	BRect	newBounds;
+	bool	haveNew		= false;
+	int32	i			= 0;
+	BRect	positionFrame;
+	while (positions->FindRect("frame",i,&positionFrame) == B_OK) {
+		newBounds	= haveNew ? (newBounds | positionFrame) : positionFrame;
+		haveNew		= true;
+		i++;
+	}
+
+	if ((!haveOld) || (!haveNew))
+		return;
+
+	BPoint	oldCenter((oldBounds.left+oldBounds.right)/2,(oldBounds.top+oldBounds.bottom)/2);
+	BPoint	newCenter((newBounds.left+newBounds.right)/2,(newBounds.top+newBounds.bottom)/2);
+	BPoint	delta	= oldCenter-newCenter;
+	if (delta == BPoint(0,0))
+		return;
+
+	i	= 0;
+	while (positions->FindRect("frame",i,&positionFrame) == B_OK) {
+		positionFrame.OffsetBy(delta);
+		positions->ReplaceRect("frame",i,positionFrame);
+		i++;
+	}
+}
+
+
 void LayoutEditor::ApplyLayout(void)
 {
 	if ((applyingLayout) || (layouter == NULL) || (doc == NULL))
@@ -193,6 +234,8 @@ void LayoutEditor::ApplyLayout(void)
 		applyingLayout	= false;
 		return;
 	}
+
+	CenterOnOldBounds(nodes,&positions);
 
 	BMessage	*wrapper	= BuildLayoutCommand(&positions);
 	if (wrapper != NULL)

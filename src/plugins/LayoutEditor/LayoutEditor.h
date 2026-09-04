@@ -73,6 +73,15 @@ public:
 	 */
 			BMessage*		BuildLayoutCommand(BMessage *positions);
 
+	/** Shifts every "frame" entry in `positions` so the new layout's
+	 * bounding-box center lands on the old bounding-box center (from
+	 * `nodes`' current P_C_NODE_FRAME) instead of wherever the layouter's
+	 * own coordinate space happens to put it - a fresh dot layout starts
+	 * near its own origin, which reads as "graph jammed into a corner"
+	 * once applied. No-op if either bounding box is empty.
+	 */
+			void			CenterOnOldBounds(const BList *nodes, BMessage *positions);
+
 protected:
 			void			ApplyLayout(void);
 
