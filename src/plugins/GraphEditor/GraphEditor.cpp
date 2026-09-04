@@ -8,6 +8,7 @@
 #include <support/DataIO.h>
 #include <string.h>
 #include <Catalog.h>
+#include <MessageRunner.h>
 
 #include "GraphEditor.h"
 #include "ColorSwatchView.h"
@@ -60,6 +61,9 @@ void GraphEditor::Init(void) {
 	toPoint			= new BPoint(0,0);
 	renderer		= new BList();
 	scale			= 1.0;
+	animatingRenderers	= new BList();
+	animationRunner		= NULL;
+	animationLastTick	= 0;
 	configMessage	= new BMessage();
 	myScrollParent	= NULL;
 
@@ -682,6 +686,22 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			UpdateScrollBars();
 			break;
 		}
+		case G_E_ANIMATION_TICK: {
+			bigtime_t	now	= system_time();
+			float		dt	= (now-animationLastTick)/1000000.0f;
+			animationLastTick	= now;
+			for (int32 i = animatingRenderers->CountItems()-1; i >= 0; i--) {
+				Renderer	*r	= (Renderer*)animatingRenderers->ItemAt(i);
+				if (!r->AnimationStep(dt))
+					animatingRenderers->RemoveItem(i);
+			}
+			if (animatingRenderers->CountItems() == 0) {
+				delete animationRunner;
+				animationRunner	= NULL;
+			}
+			Invalidate();
+			break;
+		}
 		case G_E_CONNECTING: {
 				connecting = true;
 				message->FindPoint(P_C_NODE_CONNECTION_TO,toPoint);
@@ -1023,12 +1043,26 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
 			if (cnRenderer != NULL)
 				cnRenderer->InvalidateEndpoint(wichRenderer);
 		}
+		// avoid a dangling pointer in animatingRenderers if this renderer
+		// gets deleted mid-animation (e.g. Undo right after Auto-Layout)
+		animatingRenderers->RemoveItem(wichRenderer);
 		delete wichRenderer;
 	}
 /*	delete rendersensitv;
 	rendersensitv = new BRegion();
 	renderer->DoForEach(ProceedRegion,rendersensitv);*/
 	//**recalc Region
+}
+
+void GraphEditor::StartAnimating(Renderer *wichRenderer) {
+	TRACE();
+	if (!animatingRenderers->HasItem(wichRenderer))
+		animatingRenderers->AddItem(wichRenderer);
+	if (animationRunner == NULL) {
+		animationLastTick	= system_time();
+		BMessage	*tick	= new BMessage(G_E_ANIMATION_TICK);
+		animationRunner		= new BMessageRunner(BMessenger(this),tick,20000,-1);
+	}
 }
 
 Renderer* GraphEditor::FindRenderer(BPoint where) {

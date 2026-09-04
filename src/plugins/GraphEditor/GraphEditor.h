@@ -46,6 +46,9 @@ const uint32			G_E_ADD_ATTRIBUTE		= 'geAA';
 const uint32			G_E_INSERT_NODE 		= 'geIN';
 //*order to Insert and new a Node directly as a sibling to the last selected Node*/
 const uint32            G_E_INSERT_SIBLING      = 'geIS';
+// drives Renderer::AnimationStep() for every renderer in animatingRenderers,
+// see StartAnimating(); not sent by anything outside GraphEditor itself.
+const uint32			G_E_ANIMATION_TICK		= 'geAT';
 
 extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
 
@@ -54,6 +57,7 @@ const float		gridWidth		= 50;
 const float		circleSize		= 3.0;
 
 class Renderer;
+class BMessageRunner;
 
 class GraphEditor : public PEditor, public BView {
 
@@ -119,6 +123,11 @@ public:
 			void			SendMessageToDoc(BMessage* msg){sentTo->SendMessage(msg);};
 			BMessage		*GetStandartPattern(void){return patternMessage;};
 			BMessage        *GenerateInsertCommand(uint32 newWhat, bool connected = false);
+
+			/** Registers wichRenderer for per-frame AnimationStep() calls
+			 * (lazily starts the shared tick runner); the renderer removes
+			 * itself once AnimationStep() reports it has settled. */
+			void			StartAnimating(Renderer *wichRenderer);
 
 
 protected:
@@ -199,6 +208,12 @@ protected:
 			BMessage		*pendingStartEditNode;
 			BList			*renderer;
 			float			scale;
+
+			/** renderers currently mid-AnimationStep(); drives the shared
+			 * G_E_ANIMATION_TICK runner, see StartAnimating(). */
+			BList			*animatingRenderers;
+			BMessageRunner	*animationRunner;
+			bigtime_t		animationLastTick;
 
 			bool			gridEnabled;
 			image_id 		pluginID;

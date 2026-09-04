@@ -19,6 +19,7 @@ ClassRenderer::ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer):
 	TRACE();
 	Init();
 	ValueChanged();
+	initialized	= true;
 }
 void ClassRenderer::Init()
 {
@@ -40,6 +41,10 @@ void ClassRenderer::Init()
 	penSize						= 1.0;
 	connecting					= 0;
 	hasPreviewFillColor			= false;
+	animating					= false;
+	animPosX = animPosY		= 0;
+	animVelX = animVelY		= 0;
+	initialized					= false;
 
 	BMessage	*editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 	editMessage->AddPointer("node",container);
@@ -242,6 +247,19 @@ void ClassRenderer::MouseUp(BPoint where) {
 
 
 void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
+	// mid-slide: shift this node's whole draw (shape+name+attributes+
+	// connectors, all already positioned at the real/final frame) so it
+	// paints at the current animated position instead - frame itself and
+	// every child stay at their real, final values throughout (see
+	// AnimationStep()/ValueChanged()).
+	bool	offsetForAnim	= animating;
+	BPoint	priorOrigin		= drawOn->Origin();
+	if (offsetForAnim) {
+		BPoint	delta(animPosX-frame.left,animPosY-frame.top);
+		drawOn->PushState();
+		drawOn->SetOrigin(priorOrigin+delta);
+	}
+
 	BRect		shadowFrame = frame;
 	bool		fitIn		= true;
 	drawOn->SetFont(font);
@@ -298,6 +316,9 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	}
 	if (!fitIn)
 		drawOn->DrawString("...",BPoint(frame.left+circleSize+2,frame.bottom-(yRadius/3)));
+
+	if (offsetForAnim)
+		drawOn->PopState();
 }
 
 void ClassRenderer::MessageReceived(BMessage *message) {
@@ -321,7 +342,21 @@ void ClassRenderer::ValueChanged() {
 	uint32		type			= B_ANY_TYPE;
 	int32		count			= 0;
 
+	BRect	oldFrame	= frame;
 	container->FindRect(P_C_NODE_FRAME,&frame);
+	if ((initialized) && (oldFrame.LeftTop() != frame.LeftTop())) {
+		if (!animating) {
+			animPosX	= oldFrame.left;
+			animPosY	= oldFrame.top;
+			animVelX	= 0;
+			animVelY	= 0;
+		}
+		// else: already mid-animation (e.g. Auto-Layout run again before the
+		// last one settled) - keep the current animated position/velocity as
+		// the start of the new leg instead of snapping back to oldFrame.
+		animating	= true;
+		editor->StartAnimating(this);
+	}
 	container->FindBool(P_C_NODE_SELECTED,&selected);
 	container->FindFloat(P_C_NODE_X_RADIUS,&xRadius);
 	container->FindFloat(P_C_NODE_Y_RADIUS,&yRadius);
@@ -440,6 +475,32 @@ void ClassRenderer::SetPreviewFillColor(rgb_color color) {
 
 void ClassRenderer::ClearPreviewFillColor(void) {
 	hasPreviewFillColor	= false;
+}
+
+bool ClassRenderer::AnimationStep(float dt) {
+	if (!animating)
+		return false;
+	// critically-damped-ish spring toward frame.LeftTop() (the already-
+	// committed target) - k=stiffness, c=damping, mass=1.
+	const float	k		= 180.0f;
+	const float	c		= 24.0f;
+	float		targetX	= frame.left;
+	float		targetY	= frame.top;
+	float		accelX	= k*(targetX-animPosX) - c*animVelX;
+	float		accelY	= k*(targetY-animPosY) - c*animVelY;
+	animVelX	+= accelX*dt;
+	animVelY	+= accelY*dt;
+	animPosX	+= animVelX*dt;
+	animPosY	+= animVelY*dt;
+
+	const float	epsilonPos	= 0.5f;
+	const float	epsilonVel	= 2.0f;
+	if ((fabs(targetX-animPosX) < epsilonPos) && (fabs(targetY-animPosY) < epsilonPos)
+			&& (fabs(animVelX) < epsilonVel) && (fabs(animVelY) < epsilonVel)) {
+		animating	= false;
+		return false;
+	}
+	return true;
 }
 
 void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 count)
