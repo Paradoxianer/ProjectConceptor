@@ -1,8 +1,14 @@
 #include "LayoutEditor.h"
 
-#include <stdio.h>
+#include <string.h>
 
+#include <Alert.h>
+#include <Bitmap.h>
 #include <Catalog.h>
+#include <DataIO.h>
+#include <Resources.h>
+#include <String.h>
+#include <TranslationUtils.h>
 
 #include "BaseItem.h"
 #include "DotLayouter.h"
@@ -18,12 +24,13 @@
 static const char	*L_E_TOOL_BAR	= "L_E_TOOL_BAR";
 
 
-LayoutEditor::LayoutEditor(void):PEditor(),BHandler("LayoutEditor")
+LayoutEditor::LayoutEditor(image_id newId):PEditor(),BHandler("LayoutEditor")
 {
 	configMessage		= new BMessage();
 	layouter			= NULL;
 	toolBar				= NULL;
 	applyingLayout		= false;
+	pluginID			= newId;
 }
 
 
@@ -52,10 +59,20 @@ void LayoutEditor::AttachedToManager(void)
 		return;
 
 	toolBar	= new ToolBar(BRect(0,0,50,ITEM_HEIGHT+4),L_E_TOOL_BAR,B_ITEMS_IN_ROW);
-	// no icon yet - ToolItem draws a plain bordered button when bitmap
-	// is NULL (see ToolItem::Draw()), not a functional blocker.
+
+	// icon from this plugin's own resources ("layout", see LayoutEditor.rdef);
+	// ToolItem falls back to a plain bordered button if bmp stays NULL.
+	BBitmap		*bmp	= NULL;
+	BResources	res;
+	if ((pluginID >= 0) && (res.SetToImage(pluginID) == B_OK)) {
+		size_t		size;
+		const void	*data	= res.LoadResource((type_code)'PNG ',"layout",&size);
+		if (data != NULL)
+			bmp	= BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
+	}
+
 	ToolItem	*applyItem	= new ToolItem(B_TRANSLATE("Auto-Layout"),
-		NULL,new BMessage(L_E_APPLY_LAYOUT));
+		bmp,new BMessage(L_E_APPLY_LAYOUT));
 	applyItem->BButton::SetToolTip(B_TRANSLATE("Automatically arrange the graph"));
 	toolBar->AddItem(applyItem);
 	// BMessenger(this) resolves via GetHandler()'s own Looper() (doc's,
@@ -156,11 +173,23 @@ void LayoutEditor::ApplyLayout(void)
 
 	applyingLayout	= true;
 
+	if (!layouter->IsAvailable()) {
+		BString	text;
+		text.SetToFormat(B_TRANSLATE("%s is not available - is it installed and on PATH?"),
+			layouter->Name());
+		(new BAlert(B_TRANSLATE("Auto-Layout"),text.String(),B_TRANSLATE("OK"),
+			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go();
+		applyingLayout	= false;
+		return;
+	}
+
 	BMessage	positions;
 	status_t	err	= layouter->Layout(nodes,connections,&positions);
 	if (err != B_OK) {
-		fprintf(stderr,"LayoutEditor::ApplyLayout() - %s failed: %s\n",
-			layouter->Name(),strerror(err));
+		BString	text;
+		text.SetToFormat(B_TRANSLATE("%s failed: %s"),layouter->Name(),strerror(err));
+		(new BAlert(B_TRANSLATE("Auto-Layout"),text.String(),B_TRANSLATE("OK"),
+			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go();
 		applyingLayout	= false;
 		return;
 	}

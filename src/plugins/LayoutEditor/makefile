@@ -33,7 +33,7 @@ SRCS= 	DotLayouter.cpp \
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
-RDEFS=
+RDEFS= LayoutEditor.rdef
 
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.

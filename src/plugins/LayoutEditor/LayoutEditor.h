@@ -34,7 +34,9 @@ class LayoutEditor : public PEditor, public BHandler
 {
 
 public:
-							LayoutEditor(void);
+	/** newId is the plugin's own image_id, needed to load its icon
+	 * resource in AttachedToManager(); -1 (default) skips icon loading. */
+							LayoutEditor(image_id newId = -1);
 	virtual					~LayoutEditor(void);
 
 	//++++++++++++++++PEditor
@@ -80,5 +82,6 @@ protected:
 			/** guards against reacting to change notifications caused by
 			 * this editor's own command; not a concurrency lock. */
 			bool			applyingLayout;
+			image_id		pluginID;
 };
 #endif

@@ -61,6 +61,12 @@ public:
 	 */
 	virtual	status_t		Layout(const BList *nodes, const BList *connections,
 								BMessage *positions) = 0;
+
+	/** true if this layouter's backend is actually usable right now
+	 * (e.g. an external tool is on PATH). Callers should check this
+	 * before Layout() to give a specific error instead of a generic one.
+	 */
+	virtual	bool			IsAvailable(void) = 0;
 };
 
 #endif

@@ -19,7 +19,7 @@ public:
 	virtual char*			GetAutor(void){return "Paradoxon";};
 	virtual char*			GetName(void){return "LayoutEditor";};
 	virtual char*			GetDescription(void){return "Automatic graph layout (issue #54)";};
-	virtual void*			GetNewObject(void *value){return new LayoutEditor();};
+	virtual void*			GetNewObject(void *value){return new LayoutEditor(GetPluginID());};
 	//----------------BasePlugin
 };
 #endif

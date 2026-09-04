@@ -29,7 +29,7 @@ public:
 								BMessage *positions);
 
 	/** true if `dot` could actually be run. */
-			bool			IsAvailable(void);
+	virtual	bool			IsAvailable(void);
 
 protected:
 			status_t		WriteDotFile(const BString &path, const BList *nodes,
