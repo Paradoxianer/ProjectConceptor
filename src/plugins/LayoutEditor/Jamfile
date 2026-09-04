@@ -11,6 +11,7 @@ SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Tools
 AddResources pc_layout_editor : LayoutEditor.rdef ;
 
 Addon pc_layout_editor :
+	ChoiceToolItem.cpp
 	DotLayouter.cpp
 	LayoutEditor.cpp
 	LayoutEditorPlugin.cpp

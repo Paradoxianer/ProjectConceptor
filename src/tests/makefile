@@ -20,6 +20,7 @@ SRCS= 	TestMain.cpp \
 		LayoutEditorTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
 		../plugins/LayoutEditor/DotLayouter.cpp \
+		../plugins/LayoutEditor/ChoiceToolItem.cpp \
 		../plugins/BatchCommand/Batch.cpp \
 		../app/ProjectConceptorDefs.cpp \
 		../app/Config/ConfigManager.cpp \

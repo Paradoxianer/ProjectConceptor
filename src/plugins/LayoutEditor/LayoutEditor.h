@@ -15,6 +15,8 @@
 class ToolBar;
 
 const uint32	L_E_APPLY_LAYOUT	= 'lEAL';
+const uint32	L_E_SET_DIRECTION	= 'lESD';
+const uint32	L_E_SET_ENGINE		= 'lESE';
 
 /**
  * @class LayoutEditor
@@ -84,6 +86,13 @@ public:
 
 protected:
 			void			ApplyLayout(void);
+			/** Forward to the current layouter's own Graphviz-specific
+			 * settings, if it is a DotLayouter (dynamic_cast) - a no-op
+			 * for any other PLayouter, since rankdir/engine aren't part
+			 * of the generic PLayouter interface.
+			 */
+			void			SetRankDir(const char *rankdir);
+			void			SetEngine(const char *engine);
 
 			BMessage		*configMessage;
 			PLayouter		*layouter;

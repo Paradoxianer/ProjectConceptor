@@ -38,6 +38,21 @@ public:
 	/** true if `dot` could actually be run. */
 	virtual	bool			IsAvailable(void);
 
+	/** Graphviz rank direction for the `dot` engine - "TB" (default),
+	 * "LR", "RL" or "BT". Passed through as -Grankdir=<value>; other
+	 * engines below silently ignore it (not applicable to them, not a
+	 * ProjectConceptor fallback).
+	 */
+			void			SetRankDir(const char *rankdir){this->rankdir=rankdir;};
+			const char*		RankDir(void){return rankdir.String();};
+
+	/** Which Graphviz layout engine to run, via -K<engine>: "dot"
+	 * (default, hierarchical/rankdir-aware), "neato"/"fdp"/"sfdp"
+	 * (force-directed), "circo" (circular), "twopi" (radial).
+	 */
+			void			SetEngine(const char *engine){this->engine=engine;};
+			const char*		Engine(void){return engine.String();};
+
 protected:
 			status_t		WriteDotFile(const BString &path, const BList *nodes,
 								const BList *connections);
@@ -59,5 +74,8 @@ protected:
 			 */
 			status_t		ParseClusterBounds(const BString &dotOutput, const BList *nodes,
 								float graphHeightPoints, BMessage *positions);
+
+			BString			rankdir;
+			BString			engine;
 };
 #endif

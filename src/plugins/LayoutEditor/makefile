@@ -27,7 +27,8 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
 #	if two source files with the same name (source.c or source.cpp)
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
-SRCS= 	DotLayouter.cpp \
+SRCS= 	ChoiceToolItem.cpp \
+		DotLayouter.cpp \
 		LayoutEditor.cpp \
 		LayoutEditorPlugin.cpp
 

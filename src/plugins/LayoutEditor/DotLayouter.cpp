@@ -18,7 +18,7 @@
 static const float kPointsPerInch	= 72.0;
 
 
-DotLayouter::DotLayouter(void)
+DotLayouter::DotLayouter(void):rankdir("TB"),engine("dot")
 {
 }
 
@@ -88,8 +88,9 @@ DotLayouter::Layout(const BList *nodes, const BList *connections, BMessage *posi
 status_t
 DotLayouter::RunDot(const BString &dotPath, const char *format, BString *output)
 {
-	BString	command("dot ");
-	command << format << " \"" << dotPath << "\" 2>&1";
+	BString	command("dot -K");
+	command << engine << " -Grankdir=" << rankdir << " " << format
+		<< " \"" << dotPath << "\" 2>&1";
 	FILE	*pipe	= popen(command.String(),"r");
 	if (pipe == NULL)
 		return B_ERROR;

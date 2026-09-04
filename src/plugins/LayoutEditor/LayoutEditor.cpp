@@ -11,6 +11,7 @@
 #include <TranslationUtils.h>
 
 #include "BaseItem.h"
+#include "ChoiceToolItem.h"
 #include "DotLayouter.h"
 #include "PCommandManager.h"
 #include "PWindow.h"
@@ -80,6 +81,28 @@ void LayoutEditor::AttachedToManager(void)
 	// default to the button's own looper (pWindow) instead.
 	applyItem->SetTarget(BMessenger(this));
 
+	ChoiceToolItem	*directionItem	= new ChoiceToolItem(B_TRANSLATE("Direction"),
+		NULL,new BMessage(L_E_SET_DIRECTION));
+	directionItem->AddChoice(B_TRANSLATE("Top to bottom"),"TB");
+	directionItem->AddChoice(B_TRANSLATE("Left to right"),"LR");
+	directionItem->AddChoice(B_TRANSLATE("Right to left"),"RL");
+	directionItem->AddChoice(B_TRANSLATE("Bottom to top"),"BT");
+	directionItem->BButton::SetToolTip(B_TRANSLATE("Layout direction (top to bottom)"));
+	toolBar->AddItem(directionItem);
+	directionItem->SetTarget(BMessenger(this));
+
+	ChoiceToolItem	*topologyItem	= new ChoiceToolItem(B_TRANSLATE("Topology"),
+		NULL,new BMessage(L_E_SET_ENGINE));
+	topologyItem->AddChoice(B_TRANSLATE("Hierarchical"),"dot");
+	topologyItem->AddChoice(B_TRANSLATE("Spring model"),"neato");
+	topologyItem->AddChoice(B_TRANSLATE("Force-directed"),"fdp");
+	topologyItem->AddChoice(B_TRANSLATE("Force-directed (large graphs)"),"sfdp");
+	topologyItem->AddChoice(B_TRANSLATE("Circular"),"circo");
+	topologyItem->AddChoice(B_TRANSLATE("Radial"),"twopi");
+	topologyItem->BButton::SetToolTip(B_TRANSLATE("Layout topology (hierarchical)"));
+	toolBar->AddItem(topologyItem);
+	topologyItem->SetTarget(BMessenger(this));
+
 	pWindow->AddToolBar(toolBar);
 }
 
@@ -114,6 +137,18 @@ void LayoutEditor::MessageReceived(BMessage *message)
 	switch (message->what) {
 		case L_E_APPLY_LAYOUT: {
 			ApplyLayout();
+			break;
+		}
+		case L_E_SET_DIRECTION: {
+			const char	*value	= NULL;
+			if (message->FindString("value",&value) == B_OK)
+				SetRankDir(value);
+			break;
+		}
+		case L_E_SET_ENGINE: {
+			const char	*value	= NULL;
+			if (message->FindString("value",&value) == B_OK)
+				SetEngine(value);
 			break;
 		}
 		default:
@@ -199,6 +234,22 @@ void LayoutEditor::CenterOnOldBounds(const BList *nodes, BMessage *positions)
 		positions->ReplaceRect("frame",i,positionFrame);
 		i++;
 	}
+}
+
+
+void LayoutEditor::SetRankDir(const char *rankdir)
+{
+	DotLayouter	*dotLayouter	= dynamic_cast<DotLayouter *>(layouter);
+	if (dotLayouter != NULL)
+		dotLayouter->SetRankDir(rankdir);
+}
+
+
+void LayoutEditor::SetEngine(const char *engine)
+{
+	DotLayouter	*dotLayouter	= dynamic_cast<DotLayouter *>(layouter);
+	if (dotLayouter != NULL)
+		dotLayouter->SetEngine(engine);
 }
 
 
