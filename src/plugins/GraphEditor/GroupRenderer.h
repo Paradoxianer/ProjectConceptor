@@ -35,6 +35,15 @@ public:
 	                              int32 clicks =0,int32 modifiers =0);
 /*			void			MouseUp(BPoint where);
 			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg);*/
+			/** Renders as the union of its children's own rects (plus
+			 * margin), not one bounding-box rect - the shape hugs whatever
+			 * region its children actually occupy, with empty space
+			 * between spread-out children left uncovered (issue #38).
+			 * frame/P_C_NODE_FRAME (RecalcFrame()) stay a plain bounding
+			 * rect regardless - only Draw()'s own shape changes, hit-
+			 * testing/serialization are unaffected.
+			 */
+			void			Draw(BView *drawOn, BRect updateRect);
 			void			LanguageChanged();
 //			void			MessageReceived(BMessage *message);
 

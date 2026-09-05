@@ -2,10 +2,12 @@
 #include "ProjectConceptorDefs.h"
 
 #include <math.h>
+#include <set>
 
 #include <interface/Font.h>
 #include <interface/View.h>
 #include <interface/GraphicsDefs.h>
+#include <interface/Region.h>
 
 #include <interface/Window.h>
 
@@ -14,6 +16,81 @@
 #include "PDocument.h"
 
 
+// Haiku has no "stroke a BRegion's outline" primitive (only FillRegion()),
+// so tracing the boundary of a union of rects is done by hand: coordinate-
+// compress every rect's edges into a grid, mark which cells are covered,
+// then any covered cell's edge that borders an uncovered (or out-of-grid)
+// neighbor is part of the outer boundary. Segments only, not a connected
+// polygon path - fine for BeginLineArray(), which doesn't need one.
+static void DrawRegionOutline(BView *drawOn, BRegion &region, rgb_color color)
+{
+	int32	rectCount	= region.CountRects();
+	if (rectCount == 0)
+		return;
+
+	std::set<float>	xset,yset;
+	for (int32 i=0; i<rectCount; i++) {
+		BRect	r	= region.RectAt(i);
+		xset.insert(r.left);
+		xset.insert(r.right);
+		yset.insert(r.top);
+		yset.insert(r.bottom);
+	}
+	vector<float>	xs(xset.begin(),xset.end());
+	vector<float>	ys(yset.begin(),yset.end());
+	int32	nx	= xs.size()-1;
+	int32	ny	= ys.size()-1;
+	if ((nx <= 0) || (ny <= 0))
+		return;
+
+	vector<vector<bool> >	covered(nx,vector<bool>(ny,false));
+	for (int32 r=0; r<rectCount; r++) {
+		BRect	rect	= region.RectAt(r);
+		for (int32 i=0; i<nx; i++) {
+			if ((xs[i] < rect.left) || (xs[i] >= rect.right))
+				continue;
+			for (int32 j=0; j<ny; j++) {
+				if ((ys[j] >= rect.top) && (ys[j] < rect.bottom))
+					covered[i][j]	= true;
+			}
+		}
+	}
+
+	int32	segmentCount	= 0;
+	for (int32 i=0; i<nx; i++) {
+		for (int32 j=0; j<ny; j++) {
+			if (!covered[i][j])
+				continue;
+			if ((i == 0) || !covered[i-1][j])
+				segmentCount++;
+			if ((i == nx-1) || !covered[i+1][j])
+				segmentCount++;
+			if ((j == 0) || !covered[i][j-1])
+				segmentCount++;
+			if ((j == ny-1) || !covered[i][j+1])
+				segmentCount++;
+		}
+	}
+	if (segmentCount == 0)
+		return;
+
+	drawOn->BeginLineArray(segmentCount);
+	for (int32 i=0; i<nx; i++) {
+		for (int32 j=0; j<ny; j++) {
+			if (!covered[i][j])
+				continue;
+			if ((i == 0) || !covered[i-1][j])
+				drawOn->AddLine(BPoint(xs[i],ys[j]),BPoint(xs[i],ys[j+1]),color);
+			if ((i == nx-1) || !covered[i+1][j])
+				drawOn->AddLine(BPoint(xs[i+1],ys[j]),BPoint(xs[i+1],ys[j+1]),color);
+			if ((j == 0) || !covered[i][j-1])
+				drawOn->AddLine(BPoint(xs[i],ys[j]),BPoint(xs[i+1],ys[j]),color);
+			if ((j == ny-1) || !covered[i][j+1])
+				drawOn->AddLine(BPoint(xs[i],ys[j+1]),BPoint(xs[i+1],ys[j+1]),color);
+		}
+	}
+	drawOn->EndLineArray();
+}
 
 
 GroupRenderer::GroupRenderer(GraphEditor *parentEditor, BMessage *forContainer):ClassRenderer(parentEditor, forContainer)
@@ -230,4 +307,71 @@ void GroupRenderer::MouseDown(BPoint where, int32 buttons,
 		editor->SendMessageToDoc(newNodeCommand);
 	}
 	ClassRenderer::MouseDown(where,buttons,clicks,modifiers);
+}
+
+
+void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
+{
+	bool	offsetForAnim	= animating;
+	BPoint	priorOrigin		= drawOn->Origin();
+	if (offsetForAnim) {
+		BPoint	delta(animPosX-frame.left,animPosY-frame.top);
+		drawOn->PushState();
+		drawOn->SetOrigin(priorOrigin+delta);
+	}
+
+	drawOn->SetFont(font);
+	drawOn->SetPenSize(penSize);
+
+	// same -5/-5 margin RecalcFrame() already uses for the (still plain
+	// rect) frame/P_C_NODE_FRAME - just applied per child instead of once
+	// around the whole bounding box, so the shape actually hugs each
+	// child instead of covering the space between them too.
+	BRegion	region;
+	for (int32 i=0; i<renderer->CountItems(); i++) {
+		Renderer	*child	= (Renderer *)renderer->ItemAt(i);
+		if ((child->GetMessage()->what == P_C_CLASS_TYPE)
+				|| (child->GetMessage()->what == P_C_GROUP_TYPE)) {
+			BRect	r	= child->Frame();
+			r.InsetBy(-5,-5);
+			region.Include(r);
+		}
+	}
+	if (region.CountRects() == 0) {
+		if (offsetForAnim)
+			drawOn->PopState();
+		return;
+	}
+	// label strip along the top of the union's own horizontal extent -
+	// same purpose as RecalcFrame()'s "-15 on top", just following the
+	// shape's actual width there instead of the full old bounding box.
+	BRect	unionBounds	= region.Frame();
+	region.Include(BRect(unionBounds.left,unionBounds.top-15,unionBounds.right,unionBounds.top));
+
+	rgb_color	drawColor	= hasPreviewFillColor ? previewFillColor : fillColor;
+
+	BRegion	shadowRegion(region);
+	shadowRegion.OffsetBy(3,3);
+	drawOn->SetHighColor(0,0,0,77);
+	drawOn->FillRegion(&shadowRegion);
+
+	if (selected) {
+		rgb_color	selectColor	= {200,0,0,150};
+		DrawRegionOutline(drawOn,region,selectColor);
+	}
+
+	drawOn->SetHighColor(drawColor);
+	drawOn->FillRegion(&region);
+
+	DrawRegionOutline(drawOn,region,borderColor);
+
+	name->Draw(drawOn,updateRect);
+	vector<Renderer *>::iterator	allAttributes	= attributes->begin();
+	while (allAttributes != attributes->end()) {
+		(*allAttributes)->Draw(drawOn,updateRect);
+		allAttributes++;
+	}
+
+	if (offsetForAnim)
+		drawOn->PopState();
 }
