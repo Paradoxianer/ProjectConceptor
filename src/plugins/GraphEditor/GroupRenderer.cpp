@@ -346,17 +346,26 @@ void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
 			drawOn->PopState();
 		return;
 	}
-	// label space along the top - same purpose as RecalcFrame()'s "-15 on
-	// top", added as two extra hull candidates rather than a separate
-	// strip so the whole shape stays one convex polygon.
+	// label space along the top - the name (and, if present, this
+	// group's own attribute rows) always sit in the top-left corner, so
+	// the space reserved above the topmost child has to actually fit
+	// them, not a guessed constant. Added as two extra hull candidates
+	// rather than a separate strip so the whole shape stays one convex
+	// polygon.
 	float	minX	= points[0].x, maxX = points[0].x, minY = points[0].y;
 	for (uint32 i=1; i<points.size(); i++) {
 		if (points[i].x < minX) minX = points[i].x;
 		if (points[i].x > maxX) maxX = points[i].x;
 		if (points[i].y < minY) minY = points[i].y;
 	}
-	points.push_back(BPoint(minX,minY-15));
-	points.push_back(BPoint(maxX,minY-15));
+	float	labelSpace	= name->Frame().Height()+4;
+	vector<Renderer *>::iterator	attrHeight	= attributes->begin();
+	while (attrHeight != attributes->end()) {
+		labelSpace	+= (*attrHeight)->Frame().Height();
+		attrHeight++;
+	}
+	points.push_back(BPoint(minX,minY-labelSpace));
+	points.push_back(BPoint(maxX,minY-labelSpace));
 
 	vector<BPoint>	hull	= OrthogonalizeHull(ConvexHull(points));
 	if (hull.size() < 3) {
