@@ -357,6 +357,19 @@ void GraphEditor::PreprocessAfterLoad(BMessage *container) {
 	container=container;
 }
 
+Renderer* GraphEditor::DrillIntoGroup(Renderer *hit, BPoint where) {
+	GroupRenderer	*group	= dynamic_cast<GroupRenderer*>(hit);
+	if (group == NULL)
+		return hit;
+	BList	*children	= group->RenderList();
+	for (int32 i = children->CountItems()-1; i >= 0; i--) {
+		Renderer	*child	= (Renderer*)children->ItemAt(i);
+		if (child->Caught(where))
+			return DrillIntoGroup(child,where);
+	}
+	return hit;
+}
+
 void GraphEditor::ProcessChangedNode(BMessage *node,BList *allNodes,BList *allConnections) {
 	PRINT(("Changed node\n"););
 	DEBUG_ONLY(node->PrintToStream());
@@ -498,7 +511,12 @@ void GraphEditor::MouseDown(BPoint where) {
 	bool found	=	false;
 	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0) );i--) {
 		if (((Renderer*)renderer->ItemAt(i))->Caught(scaledWhere)) {
-			mouseReciver = (Renderer*)renderer->ItemAt(i);
+			// a group's own Frame() always contains its children's, so a
+			// click anywhere in the box would otherwise always resolve to
+			// the group itself - drill down to whichever child (or
+			// nested-group descendant) is actually under the cursor
+			// (issue #38)
+			mouseReciver = DrillIntoGroup((Renderer*)renderer->ItemAt(i),scaledWhere);
 			mouseReciver->MouseDown(scaledWhere,buttons, clicks, modifiers);
 			found			= true;
 		}

@@ -140,6 +140,15 @@ protected:
 			 * ValueChanged() for why the order matters.
 			 */
 			void			ProcessChangedNode(BMessage *node,BList *allNodes,BList *allConnections);
+			/** hit's own Frame() always contains a group's children, so
+			 * MouseDown()'s top-level hit test alone can never resolve a
+			 * click to the specific child under the cursor - only ever to
+			 * the group (issue #38). Recurses for nested groups; returns
+			 * hit itself unchanged for anything that isn't a GroupRenderer,
+			 * or if the click landed inside the group's box but not on any
+			 * of its children.
+			 */
+			Renderer*		DrillIntoGroup(Renderer *hit, BPoint where);
 
 			void			DeleteFromList(Renderer *wichRenderer);
 			void			AddToList(Renderer *wichRenderer, int32 pos);
