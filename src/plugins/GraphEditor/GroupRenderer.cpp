@@ -2,12 +2,11 @@
 #include "ProjectConceptorDefs.h"
 
 #include <math.h>
-#include <set>
+#include <algorithm>
 
 #include <interface/Font.h>
 #include <interface/View.h>
 #include <interface/GraphicsDefs.h>
-#include <interface/Region.h>
 
 #include <interface/Window.h>
 
@@ -16,80 +15,80 @@
 #include "PDocument.h"
 
 
-// Haiku has no "stroke a BRegion's outline" primitive (only FillRegion()),
-// so tracing the boundary of a union of rects is done by hand: coordinate-
-// compress every rect's edges into a grid, mark which cells are covered,
-// then any covered cell's edge that borders an uncovered (or out-of-grid)
-// neighbor is part of the outer boundary. Segments only, not a connected
-// polygon path - fine for BeginLineArray(), which doesn't need one.
-static void DrawRegionOutline(BView *drawOn, BRegion &region, rgb_color color)
+static bool PointLess(const BPoint &a, const BPoint &b)
 {
-	int32	rectCount	= region.CountRects();
-	if (rectCount == 0)
-		return;
+	return (a.x < b.x) || ((a.x == b.x) && (a.y < b.y));
+}
 
-	std::set<float>	xset,yset;
-	for (int32 i=0; i<rectCount; i++) {
-		BRect	r	= region.RectAt(i);
-		xset.insert(r.left);
-		xset.insert(r.right);
-		yset.insert(r.top);
-		yset.insert(r.bottom);
+static float Cross(const BPoint &o, const BPoint &a, const BPoint &b)
+{
+	return (a.x-o.x)*(b.y-o.y) - (a.y-o.y)*(b.x-o.x);
+}
+
+// Andrew's monotone chain - the group is meant to look like a string pulled
+// taut around all its children (issue #38), not a union of separate boxes
+// with gaps where children happen to be far apart. Standard O(n log n)
+// convex hull: sort by (x,y), then build the lower and upper chains,
+// popping the last point whenever the last three make a non-left turn.
+static vector<BPoint> ConvexHull(vector<BPoint> points)
+{
+	int32	n	= points.size();
+	if (n < 3)
+		return points;
+	sort(points.begin(),points.end(),PointLess);
+
+	vector<BPoint>	hull(2*n);
+	int32	k	= 0;
+	for (int32 i=0; i<n; i++) {
+		while ((k >= 2) && (Cross(hull[k-2],hull[k-1],points[i]) <= 0))
+			k--;
+		hull[k++]	= points[i];
 	}
-	vector<float>	xs(xset.begin(),xset.end());
-	vector<float>	ys(yset.begin(),yset.end());
-	int32	nx	= xs.size()-1;
-	int32	ny	= ys.size()-1;
-	if ((nx <= 0) || (ny <= 0))
-		return;
+	for (int32 i=n-2, lower=k+1; i>=0; i--) {
+		while ((k >= lower) && (Cross(hull[k-2],hull[k-1],points[i]) <= 0))
+			k--;
+		hull[k++]	= points[i];
+	}
+	hull.resize(k-1);
+	return hull;
+}
 
-	vector<vector<bool> >	covered(nx,vector<bool>(ny,false));
-	for (int32 r=0; r<rectCount; r++) {
-		BRect	rect	= region.RectAt(r);
-		for (int32 i=0; i<nx; i++) {
-			if ((xs[i] < rect.left) || (xs[i] >= rect.right))
-				continue;
-			for (int32 j=0; j<ny; j++) {
-				if ((ys[j] >= rect.top) && (ys[j] < rect.bottom))
-					covered[i][j]	= true;
-			}
+
+// A convex hull's own edges are generally diagonal wherever the point set's
+// boundary isn't already axis-aligned - "a string pulled taut" but with only
+// right-angle turns (issue #38) means each diagonal edge (a,b) needs an
+// axis-aligned dogleg corner inserted. Both candidate corners - (a.x,b.y)
+// and (b.x,a.y) - complete the same right triangle with the diagonal; the
+// one farther from the hull's own centroid is the one that stays outside
+// the hull (bulges further out) rather than cutting into it.
+static vector<BPoint> OrthogonalizeHull(const vector<BPoint> &hull)
+{
+	if (hull.size() < 3)
+		return hull;
+
+	float	cx	= 0, cy	= 0;
+	for (uint32 i=0; i<hull.size(); i++) {
+		cx	+= hull[i].x;
+		cy	+= hull[i].y;
+	}
+	cx	/= hull.size();
+	cy	/= hull.size();
+
+	vector<BPoint>	result;
+	uint32	n	= hull.size();
+	for (uint32 i=0; i<n; i++) {
+		BPoint	a	= hull[i];
+		BPoint	b	= hull[(i+1)%n];
+		result.push_back(a);
+		if ((a.x != b.x) && (a.y != b.y)) {
+			BPoint	corner1(a.x,b.y);
+			BPoint	corner2(b.x,a.y);
+			float	d1	= (corner1.x-cx)*(corner1.x-cx)+(corner1.y-cy)*(corner1.y-cy);
+			float	d2	= (corner2.x-cx)*(corner2.x-cx)+(corner2.y-cy)*(corner2.y-cy);
+			result.push_back((d1 > d2) ? corner1 : corner2);
 		}
 	}
-
-	int32	segmentCount	= 0;
-	for (int32 i=0; i<nx; i++) {
-		for (int32 j=0; j<ny; j++) {
-			if (!covered[i][j])
-				continue;
-			if ((i == 0) || !covered[i-1][j])
-				segmentCount++;
-			if ((i == nx-1) || !covered[i+1][j])
-				segmentCount++;
-			if ((j == 0) || !covered[i][j-1])
-				segmentCount++;
-			if ((j == ny-1) || !covered[i][j+1])
-				segmentCount++;
-		}
-	}
-	if (segmentCount == 0)
-		return;
-
-	drawOn->BeginLineArray(segmentCount);
-	for (int32 i=0; i<nx; i++) {
-		for (int32 j=0; j<ny; j++) {
-			if (!covered[i][j])
-				continue;
-			if ((i == 0) || !covered[i-1][j])
-				drawOn->AddLine(BPoint(xs[i],ys[j]),BPoint(xs[i],ys[j+1]),color);
-			if ((i == nx-1) || !covered[i+1][j])
-				drawOn->AddLine(BPoint(xs[i+1],ys[j]),BPoint(xs[i+1],ys[j+1]),color);
-			if ((j == 0) || !covered[i][j-1])
-				drawOn->AddLine(BPoint(xs[i],ys[j]),BPoint(xs[i+1],ys[j]),color);
-			if ((j == ny-1) || !covered[i][j+1])
-				drawOn->AddLine(BPoint(xs[i],ys[j+1]),BPoint(xs[i+1],ys[j+1]),color);
-		}
-	}
-	drawOn->EndLineArray();
+	return result;
 }
 
 
@@ -323,47 +322,69 @@ void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->SetFont(font);
 	drawOn->SetPenSize(penSize);
 
-	// same -5/-5 margin RecalcFrame() already uses for the (still plain
-	// rect) frame/P_C_NODE_FRAME - just applied per child instead of once
-	// around the whole bounding box, so the shape actually hugs each
-	// child instead of covering the space between them too.
-	BRegion	region;
+	// one connected shape wrapped tightly around every child (like a
+	// string pulled taut around them - issue #38), not separate boxes
+	// with gaps where children happen to be spread far apart - so this
+	// collects every child's own 4 corners (+5px margin, same as
+	// RecalcFrame()'s inset) as hull candidate points rather than
+	// unioning rects.
+	vector<BPoint>	points;
 	for (int32 i=0; i<renderer->CountItems(); i++) {
 		Renderer	*child	= (Renderer *)renderer->ItemAt(i);
 		if ((child->GetMessage()->what == P_C_CLASS_TYPE)
 				|| (child->GetMessage()->what == P_C_GROUP_TYPE)) {
 			BRect	r	= child->Frame();
 			r.InsetBy(-5,-5);
-			region.Include(r);
+			points.push_back(r.LeftTop());
+			points.push_back(r.RightTop());
+			points.push_back(r.LeftBottom());
+			points.push_back(r.RightBottom());
 		}
 	}
-	if (region.CountRects() == 0) {
+	if (points.empty()) {
 		if (offsetForAnim)
 			drawOn->PopState();
 		return;
 	}
-	// label strip along the top of the union's own horizontal extent -
-	// same purpose as RecalcFrame()'s "-15 on top", just following the
-	// shape's actual width there instead of the full old bounding box.
-	BRect	unionBounds	= region.Frame();
-	region.Include(BRect(unionBounds.left,unionBounds.top-15,unionBounds.right,unionBounds.top));
+	// label space along the top - same purpose as RecalcFrame()'s "-15 on
+	// top", added as two extra hull candidates rather than a separate
+	// strip so the whole shape stays one convex polygon.
+	float	minX	= points[0].x, maxX = points[0].x, minY = points[0].y;
+	for (uint32 i=1; i<points.size(); i++) {
+		if (points[i].x < minX) minX = points[i].x;
+		if (points[i].x > maxX) maxX = points[i].x;
+		if (points[i].y < minY) minY = points[i].y;
+	}
+	points.push_back(BPoint(minX,minY-15));
+	points.push_back(BPoint(maxX,minY-15));
+
+	vector<BPoint>	hull	= OrthogonalizeHull(ConvexHull(points));
+	if (hull.size() < 3) {
+		if (offsetForAnim)
+			drawOn->PopState();
+		return;
+	}
 
 	rgb_color	drawColor	= hasPreviewFillColor ? previewFillColor : fillColor;
 
-	BRegion	shadowRegion(region);
-	shadowRegion.OffsetBy(3,3);
+	vector<BPoint>	shadowHull(hull);
+	for (uint32 i=0; i<shadowHull.size(); i++)
+		shadowHull[i]	+= BPoint(3,3);
 	drawOn->SetHighColor(0,0,0,77);
-	drawOn->FillRegion(&shadowRegion);
+	drawOn->FillPolygon(&shadowHull[0],shadowHull.size());
 
 	if (selected) {
-		rgb_color	selectColor	= {200,0,0,150};
-		DrawRegionOutline(drawOn,region,selectColor);
+		drawOn->SetPenSize(5.0);
+		drawOn->SetHighColor(200,0,0,150);
+		drawOn->StrokePolygon(&hull[0],hull.size());
+		drawOn->SetPenSize(penSize);
 	}
 
 	drawOn->SetHighColor(drawColor);
-	drawOn->FillRegion(&region);
+	drawOn->FillPolygon(&hull[0],hull.size());
 
-	DrawRegionOutline(drawOn,region,borderColor);
+	drawOn->SetHighColor(borderColor);
+	drawOn->StrokePolygon(&hull[0],hull.size());
 
 	name->Draw(drawOn,updateRect);
 	vector<Renderer *>::iterator	allAttributes	= attributes->begin();
