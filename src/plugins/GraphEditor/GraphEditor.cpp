@@ -1435,32 +1435,41 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos) {
 
 void GraphEditor::UpdateScrollBars()
 {
-	if (doc != NULL)
-	{
-		BRect		docRect		= doc->Bounds();
-		BRect		scrollRect	= myScrollParent->Bounds();
-		if ((myScrollParent) && (doc))
-		{
-			float heightDiff	= docRect.Height()-scrollRect.Height();
-			float widthDiff		= docRect.Width()-scrollRect.Width();
-			float docWidth		= docRect.Width()*scale;
-			float docHeight		= docRect.Height()*scale;
-			if (widthDiff<0)
-				widthDiff = 0;
-			if (heightDiff<0)
-					heightDiff = 0;					
-			BScrollBar	*sb	= myScrollParent->ScrollBar(B_HORIZONTAL);
-			sb->SetRange(docRect.left,widthDiff*scale);
-			sb->SetProportion(scrollRect.Width()/docWidth);
-			// Steps are 1/8 visible window for small steps
-			//   and 1/2 visible window for large steps
-			sb->SetSteps(docWidth / 8.0, docWidth / 2.0);
-	
-			sb	= myScrollParent->ScrollBar(B_VERTICAL);
-			sb->SetRange(docRect.top,heightDiff*scale);
-			sb->SetProportion(scrollRect.Height()/docHeight);
-			sb->SetSteps(docHeight / 8.0, docHeight / 2.0);
-		}
+	// myScrollParent (and its own child scrollbars) can already be torn
+	// down by the time this runs during window close - RemoveRenderer()'s
+	// own cascade (see DetachedFromWindow()) can still trigger a bounds-
+	// changed style update after that point. myScrollParent->Bounds() used
+	// to run unconditionally before this same NULL-check even existed,
+	// crashing on close; each retrieved BScrollBar needs its own guard
+	// too since ScrollBar() can return NULL independently of
+	// myScrollParent itself still being valid.
+	if ((doc == NULL) || (myScrollParent == NULL))
+		return;
+
+	BRect		docRect		= doc->Bounds();
+	BRect		scrollRect	= myScrollParent->Bounds();
+	float heightDiff	= docRect.Height()-scrollRect.Height();
+	float widthDiff		= docRect.Width()-scrollRect.Width();
+	float docWidth		= docRect.Width()*scale;
+	float docHeight		= docRect.Height()*scale;
+	if (widthDiff<0)
+		widthDiff = 0;
+	if (heightDiff<0)
+			heightDiff = 0;
+	BScrollBar	*sb	= myScrollParent->ScrollBar(B_HORIZONTAL);
+	if (sb != NULL) {
+		sb->SetRange(docRect.left,widthDiff*scale);
+		sb->SetProportion(scrollRect.Width()/docWidth);
+		// Steps are 1/8 visible window for small steps
+		//   and 1/2 visible window for large steps
+		sb->SetSteps(docWidth / 8.0, docWidth / 2.0);
+	}
+
+	sb	= myScrollParent->ScrollBar(B_VERTICAL);
+	if (sb != NULL) {
+		sb->SetRange(docRect.top,heightDiff*scale);
+		sb->SetProportion(scrollRect.Height()/docHeight);
+		sb->SetSteps(docHeight / 8.0, docHeight / 2.0);
 	}
 
 }
