@@ -201,6 +201,18 @@ void PDocument::MessageReceived(BMessage* message) {
 			break;
 		}
 
+		// the Edit menu item has always sent this straight here, but nothing
+		// ever handled it - Select all silently did nothing. The Select
+		// command's own selectAll path is what does the work; no "deselect"
+		// field is added on purpose, so the command clears the old selection
+		// first (its default when the field is absent).
+		case B_SELECT_ALL: {
+			BMessage	*selectAllMessage	= new BMessage(P_C_EXECUTE_COMMAND);
+			selectAllMessage->AddString("Command::Name","Select");
+			selectAllMessage->AddBool("selectAll",true);
+			commandManager->Execute(selectAllMessage);
+			break;
+		}
 		case B_UNDO: {
 			commandManager->Undo(NULL);
 			break;

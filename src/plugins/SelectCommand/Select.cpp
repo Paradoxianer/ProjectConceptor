@@ -112,16 +112,34 @@ void Select::DoSelect(PDocument *doc,BMessage *container) {
 }
 
 void Select::DoSelectAll(PDocument *doc) {
+	// connections are kept in their own list and are selectable in their
+	// own right (the connection style/arrow toolbar controls act on the
+	// selection), so Select all has to cover both lists, not just nodes
+	SelectList(doc,doc->GetAllNodes());
+	SelectList(doc,doc->GetAllConnections());
+}
+
+void Select::SelectList(PDocument *doc,BList *all) {
 	BList			*selected			= doc->GetSelected();
-	BList			*all				= doc->GetAllNodes();
-	set<BMessage*>		*changed			= doc->GetChangedNodes();
+	set<BMessage*>	*changed			= doc->GetChangedNodes();
 
 	BMessage		*currentContainer	= NULL;
 	int32 			i					= 0;
+	if (all == NULL)
+		return;
 	for (i=0;i<all->CountItems();i++) {
 		currentContainer =(BMessage *) all->ItemAt(i);
-		currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,false);
-		selected->AddItem(currentContainer);
+		if (currentContainer == NULL)
+			continue;
+		// used to write `false` here while adding the node to the
+		// selection list - so everything landed in `selected` but every
+		// renderer still drew, and every command still tested, as
+		// unselected. DoSelect() has always written true for the single
+		// node case; this is the same thing for all of them.
+		if (currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,true) != B_OK)
+			currentContainer->AddBool(P_C_NODE_SELECTED,true);
+		if (!selected->HasItem(currentContainer))
+			selected->AddItem(currentContainer);
 		changed->insert(currentContainer);
 	}
 }

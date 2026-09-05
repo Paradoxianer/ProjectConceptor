@@ -20,6 +20,11 @@ BMessage* ShortCutFilter::GetShortcutList(void)
 	for (iter =shortcutMap.begin();iter != shortcutMap.end();iter++)
 	{
 		theShortcut = iter->second;
+		// Filter() used to insert NULL entries for unhandled keys (see
+		// there) - skip rather than dereference, so an old map that still
+		// has some can still be read out
+		if (theShortcut == NULL)
+			continue;
 		returnMessage->AddInt32("key",theShortcut->key);
 		returnMessage->AddInt32("modifiers",theShortcut->modifiers);
 		returnMessage->AddMessage("message",theShortcut->sendMessage);
@@ -39,8 +44,14 @@ filter_result ShortCutFilter::Filter(BMessage *message, BHandler **target)
 		{
 			message->FindInt32("modifiers",(int32 *)&modifiers);
 			BMessage	*sendMessage	= NULL;
-			theShortcut	= shortcutMap[key];
-			if (theShortcut != NULL)
+			// find(), not operator[] - reading through operator[] inserts a
+			// default (NULL) entry for every key that isn't a shortcut, so
+			// the map grew with every ordinary keystroke and anything later
+			// walking it (GetShortcutList()) hit those NULLs.
+			map<uint32, shortcut*>::iterator	found	= shortcutMap.find(key);
+			if (found != shortcutMap.end())
+				theShortcut	= found->second;
+			if ((theShortcut != NULL) && (theShortcut->sentTo != NULL))
 			{
 				if ( (theShortcut->modifiers == 0) || ((theShortcut->modifiers & modifiers) != 0 ) )
 				{
@@ -74,6 +85,10 @@ void ShortCutFilter::AddShortCutList(BMessage *shortcutList)
 		theShortcut->key=key;
 		shortcutList->FindInt32("modifiers",i,(int32 *)&modifiers);
 		shortcutList->FindMessage("message",i,(theShortcut->sendMessage));
+		// reset per entry: on a miss FindPointer leaves this untouched, so
+		// it used to keep the previous entry's messenger - or, on the very
+		// first one, whatever was on the stack
+		messenger	= NULL;
 		shortcutList->FindPointer("handler",i,(void **)&messenger);
 		theShortcut->sentTo		= messenger;
 		theShortcut->modifiers	= modifiers;
