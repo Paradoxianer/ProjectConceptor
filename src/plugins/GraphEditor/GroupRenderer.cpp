@@ -16,6 +16,13 @@
 #include "PDocument.h"
 
 
+static void PushIfNew(vector<BPoint> &points, BPoint p)
+{
+	if (points.empty() || (points.back() != p))
+		points.push_back(p);
+}
+
+
 // A convex (or orthogonalized-convex) hull only ever bulges outward, so a
 // short child sitting beside a tall one gets swallowed by whatever the
 // tallest/widest neighbour dictates - it can never carve out the empty
@@ -86,31 +93,35 @@ static vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float lab
 
 	// top boundary, left to right - the label notch is reserved above the
 	// leftmost child's own column only (that's where the name always
-	// sits), not the full width
+	// sits), not the full width. The leftmost child's own real top never
+	// needs its own vertex here: the notch is by construction always
+	// *more* restrictive (labelSpace above it), so for that entire
+	// column's width the boundary already clears it - visiting it
+	// separately would mean dropping down to it and immediately back up
+	// past where it started, a spurious spike rather than a real corner.
 	polygon.push_back(BPoint(xs[0],topY[0]-labelSpace));
 	polygon.push_back(BPoint(xs[1],topY[0]-labelSpace));
-	polygon.push_back(BPoint(xs[1],topY[0]));
-	float	prevTop	= topY[0];
+	float	prevTop	= topY[0]-labelSpace;
 	for (int32 i=1; i<n; i++) {
 		if (topY[i] != prevTop) {
-			polygon.push_back(BPoint(xs[i],prevTop));
+			PushIfNew(polygon,BPoint(xs[i],prevTop));
 			polygon.push_back(BPoint(xs[i],topY[i]));
 			prevTop	= topY[i];
 		}
 	}
-	polygon.push_back(BPoint(xs[n],prevTop));
+	PushIfNew(polygon,BPoint(xs[n],prevTop));
 
 	// right edge, then bottom boundary, right to left
 	float	prevBottom	= bottomY[n-1];
-	polygon.push_back(BPoint(xs[n],prevBottom));
+	PushIfNew(polygon,BPoint(xs[n],prevBottom));
 	for (int32 i=n-2; i>=0; i--) {
 		if (bottomY[i] != prevBottom) {
-			polygon.push_back(BPoint(xs[i+1],prevBottom));
+			PushIfNew(polygon,BPoint(xs[i+1],prevBottom));
 			polygon.push_back(BPoint(xs[i+1],bottomY[i]));
 			prevBottom	= bottomY[i];
 		}
 	}
-	polygon.push_back(BPoint(xs[0],prevBottom));
+	PushIfNew(polygon,BPoint(xs[0],prevBottom));
 	// left edge back up to the label notch is implicit - StrokePolygon/
 	// FillPolygon close the polygon back to its first point on their own
 
