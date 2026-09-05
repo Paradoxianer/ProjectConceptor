@@ -65,12 +65,20 @@ static vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float lab
 		}
 	}
 	// bridge gaps (no child at all in that column) by holding the boundary
-	// at its last height, so the shape stays one connected piece
+	// at its last height, so the shape stays one connected piece - each
+	// boundary is bridged in its own walking direction (top: left to
+	// right, bottom: right to left, matching how each is traced below),
+	// not a single shared direction: a gap between a tall column and a
+	// short one has to keep the *tall* column's reach for as long as
+	// possible along whichever boundary is walking away from it, not
+	// snap to the short column's height as soon as the gap starts.
 	for (int32 i=1; i<n; i++) {
-		if (!active[i]) {
-			topY[i]		= topY[i-1];
-			bottomY[i]	= bottomY[i-1];
-		}
+		if (!active[i])
+			topY[i]	= topY[i-1];
+	}
+	for (int32 i=n-2; i>=0; i--) {
+		if (!active[i])
+			bottomY[i]	= bottomY[i+1];
 	}
 
 	// top boundary, left to right - the label notch is reserved above the
@@ -104,6 +112,65 @@ static vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float lab
 	// FillPolygon close the polygon back to its first point on their own
 
 	return polygon;
+}
+
+
+// Every corner in ComputeGroupBoundary()'s result is a right angle, either
+// convex (like a node's own corner) or concave (a notch cut into the shape
+// where a shorter child leaves empty space next to a taller one) - the
+// nodes themselves use rounded corners, so this shape should too, notches
+// included (issue #38). Rather than pull in BShape's SVG-style ArcTo (whose
+// sweep-direction flags aren't obvious to get right for a mix of convex and
+// concave turns), each vertex is replaced by a handful of points along the
+// actual tangent circle: trim `radius` back along both edges meeting at the
+// corner to get the arc's endpoints, its center is where those two trimmed
+// edges' perpendiculars meet (same construction for either turn direction -
+// only the resulting curve's concavity differs), then step along the
+// circle between the two endpoints.
+static vector<BPoint> RoundCorners(const vector<BPoint> &points, float radius)
+{
+	vector<BPoint>	result;
+	uint32	n	= points.size();
+	if ((n < 3) || (radius <= 0))
+		return points;
+
+	for (uint32 i=0; i<n; i++) {
+		BPoint	prev	= points[(i+n-1)%n];
+		BPoint	corner	= points[i];
+		BPoint	next	= points[(i+1)%n];
+		BPoint	dirIn(corner.x-prev.x,corner.y-prev.y);
+		BPoint	dirOut(next.x-corner.x,next.y-corner.y);
+		float	lenIn	= sqrt(dirIn.x*dirIn.x+dirIn.y*dirIn.y);
+		float	lenOut	= sqrt(dirOut.x*dirOut.x+dirOut.y*dirOut.y);
+		float	r		= radius;
+		if (lenIn > 0)  r = min(r,lenIn/2);
+		if (lenOut > 0) r = min(r,lenOut/2);
+		if ((lenIn < 0.01) || (lenOut < 0.01) || (r < 0.5)) {
+			result.push_back(corner);
+			continue;
+		}
+		BPoint	unitIn(dirIn.x/lenIn,dirIn.y/lenIn);
+		BPoint	unitOut(dirOut.x/lenOut,dirOut.y/lenOut);
+		BPoint	entry(corner.x-unitIn.x*r,corner.y-unitIn.y*r);
+		BPoint	exit(corner.x+unitOut.x*r,corner.y+unitOut.y*r);
+		// dirIn/dirOut are axis-aligned and perpendicular - the arc's
+		// center takes its x from whichever of entry/exit sits on the
+		// vertical edge, and its y from whichever sits on the horizontal
+		// one (the corner of the two edges' own R-offset parallels).
+		BPoint	center	= (fabs(unitIn.x) > 0.5)
+			? BPoint(entry.x,exit.y) : BPoint(exit.x,entry.y);
+		float	startAngle	= atan2(entry.y-center.y,entry.x-center.x);
+		float	endAngle	= atan2(exit.y-center.y,exit.x-center.x);
+		float	delta		= endAngle-startAngle;
+		while (delta > M_PI)  delta -= 2*M_PI;
+		while (delta < -M_PI) delta += 2*M_PI;
+		const int32	steps	= 6;
+		for (int32 s=0; s<=steps; s++) {
+			float	a	= startAngle+delta*s/steps;
+			result.push_back(BPoint(center.x+r*cos(a),center.y+r*sin(a)));
+		}
+	}
+	return result;
 }
 
 
@@ -338,18 +405,22 @@ void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->SetPenSize(penSize);
 
 	// one connected shape wrapped tightly around every child (issue #38) -
-	// each child's own padded rect (+5px margin, same as RecalcFrame()'s
-	// inset) feeds the skyline boundary walk below, rather than only its
-	// corners (a hull can't tell a short child from a tall one two
-	// columns over; the actual rect per column is what makes the
-	// boundary hug each child's own height).
+	// each child's own padded rect feeds the skyline boundary walk below,
+	// rather than only its corners (a hull can't tell a short child from
+	// a tall one two columns over; the actual rect per column is what
+	// makes the boundary hug each child's own height). More margin at the
+	// bottom/right than top/left: that's where the drop shadow (below)
+	// also lands, so it needs the extra room to not crowd the child.
 	vector<BRect>	rects;
 	for (int32 i=0; i<renderer->CountItems(); i++) {
 		Renderer	*child	= (Renderer *)renderer->ItemAt(i);
 		if ((child->GetMessage()->what == P_C_CLASS_TYPE)
 				|| (child->GetMessage()->what == P_C_GROUP_TYPE)) {
 			BRect	r	= child->Frame();
-			r.InsetBy(-5,-5);
+			r.top		-= 5;
+			r.left		-= 5;
+			r.bottom	+= 8;
+			r.right		+= 8;
 			rects.push_back(r);
 		}
 	}
@@ -375,6 +446,7 @@ void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
 			drawOn->PopState();
 		return;
 	}
+	hull	= RoundCorners(hull,xRadius);
 
 	rgb_color	drawColor	= hasPreviewFillColor ? previewFillColor : fillColor;
 
