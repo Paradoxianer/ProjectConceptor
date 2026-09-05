@@ -65,20 +65,23 @@ static vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float lab
 		}
 	}
 	// bridge gaps (no child at all in that column) by holding the boundary
-	// at its last height, so the shape stays one connected piece - each
-	// boundary is bridged in its own walking direction (top: left to
-	// right, bottom: right to left, matching how each is traced below),
-	// not a single shared direction: a gap between a tall column and a
-	// short one has to keep the *tall* column's reach for as long as
-	// possible along whichever boundary is walking away from it, not
-	// snap to the short column's height as soon as the gap starts.
-	for (int32 i=1; i<n; i++) {
-		if (!active[i])
-			topY[i]	= topY[i-1];
-	}
+	// at its last height, so the shape stays one connected piece. The two
+	// boundaries are logically traced in opposite directions around the
+	// group - bottom left to right, top right to left, meeting at the
+	// left/right ends - so each one's gaps have to carry forward in that
+	// same direction: the bottom boundary keeps a column's own bottom
+	// extended rightward until it actually reaches the next child, only
+	// then dropping/rising to that child's own bottom; the top boundary
+	// does the same extended leftward. Using the same direction for both
+	// (an earlier version of this) cuts the boundary in *before* it
+	// reaches the next real child instead of hugging up against it.
 	for (int32 i=n-2; i>=0; i--) {
 		if (!active[i])
-			bottomY[i]	= bottomY[i+1];
+			topY[i]	= topY[i+1];
+	}
+	for (int32 i=1; i<n; i++) {
+		if (!active[i])
+			bottomY[i]	= bottomY[i-1];
 	}
 
 	// top boundary, left to right - the label notch is reserved above the
