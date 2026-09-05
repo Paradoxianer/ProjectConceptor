@@ -23,19 +23,22 @@ static void PushIfNew(vector<BPoint> &points, BPoint p)
 }
 
 
-// A convex (or orthogonalized-convex) hull only ever bulges outward, so a
-// short child sitting beside a tall one gets swallowed by whatever the
-// tallest/widest neighbour dictates - it can never carve out the empty
-// space next to a shorter child (issue #38). What's actually wanted is a
-// "skyline": sweep left to right and let the top/bottom boundary hug
-// whichever child is actually present at each x, stepping to a new height
-// exactly where children start/end - the classic skyline-silhouette
-// problem, computed independently for the top edge (minimum y per column)
-// and the bottom edge (maximum y per column). A gap with no child at all
-// simply keeps the boundary coasting at its last height until the next
-// child is reached, instead of leaving a disconnected hole - that's what
-// keeps the whole thing one connected shape without ever drawing a
-// diagonal or cutting into a child's own rect.
+// The tightest *orthogonally convex* outline around the children (issue
+// #38) - a string pulled taut around them, but bending only at right
+// angles. A plain convex hull is wrong twice over: it draws diagonals, and
+// it bulges out to the tallest/widest neighbour, swallowing a short child
+// two columns over. A per-column silhouette ("skyline") fixes the
+// swallowing but goes too far the other way - it happily carves a bay, an
+// empty pocket walled in on three sides, wherever a shallow child sits
+// between two deeper ones, and a taut string would never dip into one.
+//
+// Orthogonal convexity is exactly the property that rules bays out: every
+// horizontal and vertical line must meet the shape in one run. Per column
+// the shape is one run by construction, so what remains is that the top
+// edge be valley-shaped (falling, then rising) and the bottom edge
+// mountain-shaped. The tightest such pair is a prefix/suffix scan - see
+// ComputeGroupBoundary() - and it needs no special case for a column no
+// child covers, since the scans bridge those on their own.
 static vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float labelSpace)
 {
 	vector<BPoint>	polygon;
@@ -53,45 +56,42 @@ static vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float lab
 		return polygon;
 
 	// per column (interval between two consecutive critical x values): the
-	// tightest top/bottom among whichever rects actually cover it
-	vector<float>	topY(n), bottomY(n);
-	vector<bool>	active(n,false);
+	// tightest top/bottom among whichever rects actually cover it. A
+	// column no child covers keeps the outward sentinel, i.e. contributes
+	// no constraint of its own - the envelope scans below bridge it.
+	const float		kFar	= 1e30;
+	vector<float>	topY(n,kFar), bottomY(n,-kFar);
 	for (int32 i=0; i<n; i++) {
 		float	midX	= (xs[i]+xs[i+1])/2;
 		for (uint32 r=0; r<rects.size(); r++) {
 			if ((rects[r].left <= midX) && (midX < rects[r].right)) {
-				if (!active[i]) {
-					topY[i]		= rects[r].top;
-					bottomY[i]	= rects[r].bottom;
-					active[i]	= true;
-				} else {
-					if (rects[r].top < topY[i]) topY[i] = rects[r].top;
-					if (rects[r].bottom > bottomY[i]) bottomY[i] = rects[r].bottom;
-				}
+				if (rects[r].top < topY[i]) topY[i] = rects[r].top;
+				if (rects[r].bottom > bottomY[i]) bottomY[i] = rects[r].bottom;
 			}
 		}
 	}
 	// The name (and this group's own attribute rows) sit above the
-	// leftmost child, so that column's real top edge is its child's top
-	// raised by labelSpace. Fold that in here, before bridging - not
-	// later while emitting points: the raised level is what a following
-	// gap has to carry. Applying it afterwards let the boundary dip down
-	// to the child's own top and come straight back up at the next child,
-	// a notch enclosing nothing.
+	// leftmost child, so that column's top edge is its child's top raised
+	// by labelSpace. Fold it in before the scans so the raised level is
+	// what they carry, not the child's bare top.
 	topY[0]	-= labelSpace;
-	// bridge gaps (no child at all in that column) by holding the
-	// boundary at its last height, so the shape stays one connected
-	// piece. Both edges carry from the left: a gap keeps the level of the
-	// child that just ended and holds it until the *next* child's own
-	// near edge, where it steps to that child's level. Carrying either
-	// edge from the right instead makes it step early - at the previous
-	// child's far edge rather than at the next child's near one - which
-	// leaves an empty tongue sticking out over the gap.
-	for (int32 i=1; i<n; i++) {
-		if (!active[i]) {
-			topY[i]		= topY[i-1];
-			bottomY[i]	= bottomY[i-1];
-		}
+
+	// Tightest valley-shaped top / mountain-shaped bottom (see the note
+	// above the function). Largest valley below a set of constraints is
+	// the pointwise max of the running minima taken from each end, and
+	// the mirror image gives the smallest mountain above them.
+	vector<float>	topPre(n), topSuf(n), botPre(n), botSuf(n);
+	float	run	= kFar;
+	for (int32 i=0; i<n; i++)		{ run = min(run,topY[i]);    topPre[i] = run; }
+	run	= kFar;
+	for (int32 i=n-1; i>=0; i--)	{ run = min(run,topY[i]);    topSuf[i] = run; }
+	run	= -kFar;
+	for (int32 i=0; i<n; i++)		{ run = max(run,bottomY[i]); botPre[i] = run; }
+	run	= -kFar;
+	for (int32 i=n-1; i>=0; i--)	{ run = max(run,bottomY[i]); botSuf[i] = run; }
+	for (int32 i=0; i<n; i++) {
+		topY[i]		= max(topPre[i],topSuf[i]);
+		bottomY[i]	= min(botPre[i],botSuf[i]);
 	}
 
 	// top boundary, left to right
