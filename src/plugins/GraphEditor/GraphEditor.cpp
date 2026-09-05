@@ -670,6 +670,17 @@ void GraphEditor::AttachedToWindow(void) {
 
 void GraphEditor::DetachedFromWindow(void) {
 	TRACE();
+	// stop this as early as possible in teardown, not just in the
+	// destructor: a BMessageRunner tick already sitting in this looper's
+	// message port when the window starts closing can still be dispatched
+	// after the destructor deletes the runner (deleting it doesn't recall
+	// an already-sent message) - only actually safe once nothing can
+	// reach this object as "this" anymore, i.e. before GraphEditor itself
+	// is destructed, which DetachedFromWindow() reliably runs ahead of.
+	if (animationRunner != NULL) {
+		delete animationRunner;
+		animationRunner	= NULL;
+	}
 	if (Window()) {
 		PWindow 	*pWindow		= (PWindow *)Window();
 		// While the whole window is closing, its menu bar/toolbars are being
