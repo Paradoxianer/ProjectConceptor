@@ -27,6 +27,10 @@ public:
 	virtual	void			Highlight(bool isHighlighted);
 	virtual	void			GetContentSize(float *width, float *height);
 
+			/** not owned - see the class note. Used by ChoiceToolItem to
+			 * repeat the marked choice's icon in the field itself. */
+			BBitmap*		Icon(void) {return icon;};
+
 protected:
 			void			DrawIcon(void);
 

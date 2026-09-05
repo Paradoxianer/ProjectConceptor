@@ -48,6 +48,15 @@ public:
 	 */
 			void			SetValue(const char *value);
 
+	/** Shows the marked choice as its icon instead of its label, turning
+	 * the field into an icon field - the popup keeps icon *and* label, so
+	 * the text is still there while choosing. Only worth setting when
+	 * every choice actually carries an icon; one without still falls back
+	 * to drawing its label. Set it before adding choices and give the
+	 * item an icon-sized width.
+	 */
+			void			SetIconOnly(bool iconOnly);
+
 	virtual	void			AttachedToToolBar(ToolBar *tb);
 	virtual	void			DetachedFromToolBar(ToolBar *tb);
 
@@ -55,7 +64,8 @@ public:
 	static	BArchivable*	Instantiate(BMessage *archive);
 
 	virtual	BRect			Frame(void) {return BMenuField::Frame();};
-	virtual	void			Draw(BRect updateRect) {BMenuField::Draw(updateRect);};
+	virtual	void			Draw(BRect updateRect);
+	virtual	void			DrawAfterChildren(BRect updateRect);
 	virtual	void			MoveTo(float x,float y) {BMenuField::MoveTo(x,y);};
 	virtual	void			ResizeTo(float width,float height)
 								{BMenuField::ResizeTo(width,height);};
@@ -68,5 +78,6 @@ public:
 protected:
 			BPopUpMenu		*menu;
 			BMessage		*baseMessage;
+			bool			iconOnly;
 };
 #endif

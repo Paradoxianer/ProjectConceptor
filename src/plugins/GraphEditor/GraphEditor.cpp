@@ -19,6 +19,20 @@
 #include "ClassRenderer.h"
 #include "ConnectionRenderer.h"
 #include "GroupRenderer.h"
+
+
+// same shape as LayoutEditor's own loader - the plugin's icons live as PNG
+// resources in its add-on image, and every caller wants a BBitmap
+static BBitmap*
+LoadPluginIcon(BResources *res, const char *name)
+{
+	size_t		size;
+	const void	*data	= (res != NULL)
+		? res->LoadResource((type_code)'PNG ',name,&size) : NULL;
+	if (data == NULL)
+		return NULL;
+	return BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
+}
 #include "PWindow.h"
 #include "PEditorManager.h"
 
@@ -155,23 +169,6 @@ void GraphEditor::Init(void) {
 	penSize->BButton::SetToolTip(B_TRANSLATE("Border pen size for selected nodes"));
 	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED),new BMessage(G_E_COLOR_PREVIEW));
 	colorItem->BButton::SetToolTip(B_TRANSLATE("Fill color for selected nodes"));
-	connectionStyle		= new ChoiceToolItem(B_TRANSLATE("Connection"),
-		new BMessage(G_E_CONNECTION_STYLE),ITEM_WIDTH*5);
-	connectionStyle->AddChoice(B_TRANSLATE("Straight"),"0");
-	connectionStyle->AddChoice(B_TRANSLATE("Rounded"),"1");
-	connectionStyle->AddChoice(B_TRANSLATE("Angular"),"2");
-	connectionStyle->SetValue("2");
-	connectionStyle->SetToolTip(B_TRANSLATE("Shape of the selected connections"));
-
-	connectionArrows	= new ChoiceToolItem(B_TRANSLATE("Arrows"),
-		new BMessage(G_E_CONNECTION_ARROWS),ITEM_WIDTH*5);
-	connectionArrows->AddChoice(B_TRANSLATE("At target"),"1");
-	connectionArrows->AddChoice(B_TRANSLATE("At source"),"2");
-	connectionArrows->AddChoice(B_TRANSLATE("Both ends"),"3");
-	connectionArrows->AddChoice(B_TRANSLATE("None"),"0");
-	connectionArrows->SetValue("1");
-	connectionArrows->SetToolTip(B_TRANSLATE("Which ends of the selected connections carry an arrow"));
-
 	patternItem	= new PatternToolItem(B_TRANSLATE("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 	patternItem->BButton::SetToolTip(B_TRANSLATE("Fill pattern for selected nodes"));
 
@@ -209,6 +206,29 @@ void GraphEditor::Init(void) {
 			toolBar->AddItem(addBool);
 		}
 	}
+
+	// Icon fields rather than text ones: the toolbar row is short on
+	// width and the shape/arrow choices read faster as pictures. The
+	// popup still shows icon *and* label, so the wording stays available
+	// while choosing.
+	connectionStyle		= new ChoiceToolItem(B_TRANSLATE("Connection"),
+		new BMessage(G_E_CONNECTION_STYLE),ITEM_WIDTH*2);
+	connectionStyle->SetIconOnly(true);
+	connectionStyle->AddChoice(B_TRANSLATE("Straight"),"0",LoadPluginIcon(res,"linear"));
+	connectionStyle->AddChoice(B_TRANSLATE("Rounded"),"1",LoadPluginIcon(res,"bended"));
+	connectionStyle->AddChoice(B_TRANSLATE("Angular"),"2",LoadPluginIcon(res,"angeld"));
+	connectionStyle->SetValue("2");
+	connectionStyle->SetToolTip(B_TRANSLATE("Shape of the selected connections"));
+
+	connectionArrows	= new ChoiceToolItem(B_TRANSLATE("Arrows"),
+		new BMessage(G_E_CONNECTION_ARROWS),ITEM_WIDTH*2);
+	connectionArrows->SetIconOnly(true);
+	connectionArrows->AddChoice(B_TRANSLATE("At target"),"1",LoadPluginIcon(res,"arrow-target"));
+	connectionArrows->AddChoice(B_TRANSLATE("At source"),"2",LoadPluginIcon(res,"arrow-source"));
+	connectionArrows->AddChoice(B_TRANSLATE("Both ends"),"3",LoadPluginIcon(res,"arrow-both"));
+	connectionArrows->AddChoice(B_TRANSLATE("None"),"0",LoadPluginIcon(res,"arrow-none"));
+	connectionArrows->SetValue("1");
+	connectionArrows->SetToolTip(B_TRANSLATE("Which ends of the selected connections carry an arrow"));
 
 	data=res->LoadResource((type_code)'PNG ',"addText",&size);
 	if (data) {

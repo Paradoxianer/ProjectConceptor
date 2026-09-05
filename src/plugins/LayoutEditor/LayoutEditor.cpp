@@ -91,7 +91,8 @@ void LayoutEditor::AttachedToManager(void)
 	applyItem->SetTarget(BMessenger(this));
 
 	ChoiceToolItem	*directionItem	= new ChoiceToolItem(B_TRANSLATE("Direction"),
-		new BMessage(L_E_SET_DIRECTION),ITEM_WIDTH*6);
+		new BMessage(L_E_SET_DIRECTION),ITEM_WIDTH*2);
+	directionItem->SetIconOnly(true);
 	directionItem->AddChoice(B_TRANSLATE("Top " "\xE2\x86\x92" " Bottom"),"TB",
 		haveRes ? LoadIcon(res,"dir-tb") : NULL);
 	directionItem->AddChoice(B_TRANSLATE("Left " "\xE2\x86\x92" " Right"),"LR",
@@ -105,7 +106,8 @@ void LayoutEditor::AttachedToManager(void)
 	directionItem->SetTarget(BMessenger(this));
 
 	ChoiceToolItem	*topologyItem	= new ChoiceToolItem(B_TRANSLATE("Topology"),
-		new BMessage(L_E_SET_ENGINE),ITEM_WIDTH*6);
+		new BMessage(L_E_SET_ENGINE),ITEM_WIDTH*2);
+	topologyItem->SetIconOnly(true);
 	topologyItem->AddChoice(B_TRANSLATE("Hierarchical"),"dot",
 		haveRes ? LoadIcon(res,"topo-dot") : NULL);
 	topologyItem->AddChoice(B_TRANSLATE("Spring model"),"neato",
