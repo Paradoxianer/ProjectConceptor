@@ -71,37 +71,32 @@ static vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float lab
 			}
 		}
 	}
-	// bridge gaps (no child at all in that column) by holding the boundary
-	// at its last height, so the shape stays one connected piece. The two
-	// boundaries are logically traced in opposite directions around the
-	// group - bottom left to right, top right to left, meeting at the
-	// left/right ends - so each one's gaps have to carry forward in that
-	// same direction: the bottom boundary keeps a column's own bottom
-	// extended rightward until it actually reaches the next child, only
-	// then dropping/rising to that child's own bottom; the top boundary
-	// does the same extended leftward. Using the same direction for both
-	// (an earlier version of this) cuts the boundary in *before* it
-	// reaches the next real child instead of hugging up against it.
-	for (int32 i=n-2; i>=0; i--) {
-		if (!active[i])
-			topY[i]	= topY[i+1];
-	}
+	// The name (and this group's own attribute rows) sit above the
+	// leftmost child, so that column's real top edge is its child's top
+	// raised by labelSpace. Fold that in here, before bridging - not
+	// later while emitting points: the raised level is what a following
+	// gap has to carry. Applying it afterwards let the boundary dip down
+	// to the child's own top and come straight back up at the next child,
+	// a notch enclosing nothing.
+	topY[0]	-= labelSpace;
+	// bridge gaps (no child at all in that column) by holding the
+	// boundary at its last height, so the shape stays one connected
+	// piece. Both edges carry from the left: a gap keeps the level of the
+	// child that just ended and holds it until the *next* child's own
+	// near edge, where it steps to that child's level. Carrying either
+	// edge from the right instead makes it step early - at the previous
+	// child's far edge rather than at the next child's near one - which
+	// leaves an empty tongue sticking out over the gap.
 	for (int32 i=1; i<n; i++) {
-		if (!active[i])
+		if (!active[i]) {
+			topY[i]		= topY[i-1];
 			bottomY[i]	= bottomY[i-1];
+		}
 	}
 
-	// top boundary, left to right - the label notch is reserved above the
-	// leftmost child's own column only (that's where the name always
-	// sits), not the full width. The leftmost child's own real top never
-	// needs its own vertex here: the notch is by construction always
-	// *more* restrictive (labelSpace above it), so for that entire
-	// column's width the boundary already clears it - visiting it
-	// separately would mean dropping down to it and immediately back up
-	// past where it started, a spurious spike rather than a real corner.
-	polygon.push_back(BPoint(xs[0],topY[0]-labelSpace));
-	polygon.push_back(BPoint(xs[1],topY[0]-labelSpace));
-	float	prevTop	= topY[0]-labelSpace;
+	// top boundary, left to right
+	polygon.push_back(BPoint(xs[0],topY[0]));
+	float	prevTop	= topY[0];
 	for (int32 i=1; i<n; i++) {
 		if (topY[i] != prevTop) {
 			PushIfNew(polygon,BPoint(xs[i],prevTop));
