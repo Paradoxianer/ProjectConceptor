@@ -403,15 +403,14 @@ void ClassRenderer::ValueChanged() {
 	// this node's own frame just changed via a committed command (Move,
 	// ChangeValue/Auto-Layout, either one's Undo, ...) rather than an
 	// interactive drag - MouseMoved()'s own live-drag path already
-	// cascades to a parent group directly, but none of those commands
-	// mark the *parent* as changed (only this node), so without this the
-	// group's box never learns a lone child moved/resized outside of a
-	// drag (issue #38). RecalcFrame() is a no-op on anything but a
-	// GroupRenderer.
+	// cascades to a parent group directly (same pattern as here), but
+	// none of those commands mark the *parent* as changed (only this
+	// node), so without this the group's box never learns a lone child
+	// moved/resized outside of a drag (issue #38).
 	if ((oldFrame != frame) && (parentNode != NULL)) {
-		Renderer	*parentRenderer	= NULL;
-		if (parentNode->FindPointer(editor->RenderString(),(void **)&parentRenderer) == B_OK)
-			parentRenderer->RecalcFrame(true);
+		GroupRenderer	*parent	= NULL;
+		if (parentNode->FindPointer(editor->RenderString(),(void **)&parent) == B_OK)
+			parent->RecalcFrame();
 	}
 }
 
