@@ -82,6 +82,17 @@ public:
 protected:
 				void		Init();
 				void		InsertRenderObject(BMessage *node);
+				/** each child's own rect plus the margin the outline keeps
+				 * around it - shared by Draw() and PlaceLabel() so both
+				 * agree on where the shape actually sits. */
+				void		CollectChildRects(vector<BRect> &rects);
+				/** height kept clear above the leftmost child for this
+				 * group's name and attribute rows. */
+				float		LabelSpace(void);
+				/** moves the name/attributes into the outline's own label
+				 * notch - ClassRenderer places them against `frame`, which
+				 * for a group is the whole children's bounding box (#38). */
+				void		PlaceLabel(void);
 				
 /*				bool		MoveAll(void *arg,float dx, float dy);
 				bool		ResizeAll(void *arg,float dx, float dy);*/
@@ -93,6 +104,10 @@ protected:
 		BList				*renderer;
 		Renderer			*father;
 		float				scale;
+		/** true while this group still carries the editor's standard fill
+		 * colour, i.e. was never given one of its own - it then draws a
+		 * faint tint and no drop shadow (#38). */
+		bool				usesDefaultFill;
 		//-----Group Special Methods
 
 private:
