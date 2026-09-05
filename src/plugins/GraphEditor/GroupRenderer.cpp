@@ -193,7 +193,14 @@ void GroupRenderer::RecalcFrame(bool toFit) {
 	groupFrame.InsetBy(-5,-5);
 	groupFrame.top = groupFrame.top-15;
 	if (groupFrame != frame) {
-		frame =  frame | groupFrame;
+		// exact assignment, not a union with the old frame (issue #38) -
+		// a group is a strict auto-fit rectangle around its children, so
+		// it has to shrink back down just as readily as it grows. No
+		// manual resize handle exists anymore (SupportsResize() is false
+		// here) to fight this; a stray committed resize from some other
+		// path (an old macro replay, say) gets corrected back to fit the
+		// next time this runs, same as an oversized one would.
+		frame = groupFrame;
 		// without this, the next ValueChanged() on this renderer (any later
 		// change anywhere - changedNodes never clears - will trigger one)
 		// re-reads P_C_NODE_FRAME from container via ClassRenderer's own

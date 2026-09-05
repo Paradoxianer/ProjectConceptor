@@ -52,6 +52,15 @@ public:
 	 */
 	virtual	bool		AnimationStep(float dt) {return false;};
 
+	/** Recomputes this renderer's own fit-around-children frame (see
+	 * GroupRenderer::RecalcFrame() - issue #38). Non-pure/no-op default so
+	 * any renderer can be told "one of your descendants may have moved,
+	 * re-check your own bounds" without a dynamic_cast at every call site
+	 * (ClassRenderer::ValueChanged() cascades to a parent this way) -
+	 * only GroupRenderer does anything with it.
+	 */
+	virtual	void		RecalcFrame(bool toFit=true) {};
+
 protected:
 			BMessage	*container;
 			GraphEditor	*editor;

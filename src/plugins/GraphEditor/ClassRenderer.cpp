@@ -111,7 +111,8 @@ void ClassRenderer::MouseDown(BPoint where, int32 buttons,
 				connecting	= 3;
 			else if (bottomConnection.Contains(where))
 				connecting	= 4;
-			else if ( (where.y >= (frame.bottom-(2*circleSize))) && (where.x >= (frame.right-(2*circleSize))) ) {
+			else if (SupportsResize() && (where.y >= (frame.bottom-(2*circleSize)))
+					&& (where.x >= (frame.right-(2*circleSize)))) {
 				resizing = true;
 			}
 		}
@@ -282,8 +283,10 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	
 	
 
-	drawOn->SetHighColor(0,0,0,255);	
-	drawOn->FillTriangle(BPoint(frame.right-(3*circleSize),frame.bottom),BPoint(frame.right,frame.bottom-(3*circleSize)),BPoint(frame.right,frame.bottom));
+	if (SupportsResize()) {
+		drawOn->SetHighColor(0,0,0,255);
+		drawOn->FillTriangle(BPoint(frame.right-(3*circleSize),frame.bottom),BPoint(frame.right,frame.bottom-(3*circleSize)),BPoint(frame.right,frame.bottom));
+	}
 	
 
 	drawOn->SetHighColor(borderColor);
@@ -396,6 +399,20 @@ void ClassRenderer::ValueChanged() {
 	topConnection.Set(xMiddle-circleSize,frame.top-circleSize,xMiddle+circleSize,frame.top+circleSize);
 	rightConnection.Set(frame.right-circleSize,yMiddle-circleSize,frame.right+circleSize,yMiddle+circleSize);
 	bottomConnection.Set(xMiddle-circleSize,frame.bottom-circleSize,xMiddle+circleSize,frame.bottom+circleSize);
+
+	// this node's own frame just changed via a committed command (Move,
+	// ChangeValue/Auto-Layout, either one's Undo, ...) rather than an
+	// interactive drag - MouseMoved()'s own live-drag path already
+	// cascades to a parent group directly, but none of those commands
+	// mark the *parent* as changed (only this node), so without this the
+	// group's box never learns a lone child moved/resized outside of a
+	// drag (issue #38). RecalcFrame() is a no-op on anything but a
+	// GroupRenderer.
+	if ((oldFrame != frame) && (parentNode != NULL)) {
+		Renderer	*parentRenderer	= NULL;
+		if (parentNode->FindPointer(editor->RenderString(),(void **)&parentRenderer) == B_OK)
+			parentRenderer->RecalcFrame(true);
+	}
 }
 
 BRect ClassRenderer::Frame( void ) {

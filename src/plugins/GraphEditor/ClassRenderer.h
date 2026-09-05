@@ -65,6 +65,14 @@ public:
 
 				bool		AnimationStep(float dt);
 
+				/** false hides the resize handle/hit-test entirely (issue
+				 * #38 - a group's box is auto-fit around its children, a
+				 * manual resize handle would just get overridden by
+				 * RecalcFrame() the moment it commits anyway). True here,
+				 * overridden in GroupRenderer.
+				 */
+		virtual	bool		SupportsResize(void) {return true;};
+
 
 protected:
 				void		Init();

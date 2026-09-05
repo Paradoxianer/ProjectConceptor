@@ -57,11 +57,15 @@ public:
 			float			Scale(void){return scale;};
 			BList*			RenderList(void){return renderer;};
 	static	bool			DrawRenderer(void *arg,void *editor);
-			void			RecalcFrame(bool toFit=true);
+	virtual	void			RecalcFrame(bool toFit=true);
 
 			void			BringToFront(Renderer *wichRenderer);
 			void			SendToBack(Renderer *wichRenderer);
 				//------Group Special Methods
+
+			/** no manual resize handle - a group's box is always an
+			 * auto-fit rectangle around its children (issue #38). */
+	virtual	bool			SupportsResize(void) {return false;};
 
 
 protected:
