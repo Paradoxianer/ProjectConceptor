@@ -35,13 +35,15 @@ public:
 	                              int32 clicks =0,int32 modifiers =0);
 /*			void			MouseUp(BPoint where);
 			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg);*/
-			/** Renders as the union of its children's own rects (plus
-			 * margin), not one bounding-box rect - the shape hugs whatever
-			 * region its children actually occupy, with empty space
-			 * between spread-out children left uncovered (issue #38).
-			 * frame/P_C_NODE_FRAME (RecalcFrame()) stay a plain bounding
-			 * rect regardless - only Draw()'s own shape changes, hit-
-			 * testing/serialization are unaffected.
+			/** Renders as a skyline-style boundary that hugs each
+			 * child's own rect (plus margin) column by column, not one
+			 * bounding-box rect - a short child stays short even when a
+			 * taller one sits in a neighbouring column. Gaps with no
+			 * child at all just hold the last height, keeping the shape
+			 * one connected piece (issue #38). frame/P_C_NODE_FRAME
+			 * (RecalcFrame()) stay a plain bounding rect regardless -
+			 * only Draw()'s own shape changes, hit-testing/serialization
+			 * are unaffected.
 			 */
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			LanguageChanged();

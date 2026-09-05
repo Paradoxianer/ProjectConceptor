@@ -3,6 +3,7 @@
 
 #include <math.h>
 #include <algorithm>
+#include <set>
 
 #include <interface/Font.h>
 #include <interface/View.h>
@@ -15,80 +16,94 @@
 #include "PDocument.h"
 
 
-static bool PointLess(const BPoint &a, const BPoint &b)
+// A convex (or orthogonalized-convex) hull only ever bulges outward, so a
+// short child sitting beside a tall one gets swallowed by whatever the
+// tallest/widest neighbour dictates - it can never carve out the empty
+// space next to a shorter child (issue #38). What's actually wanted is a
+// "skyline": sweep left to right and let the top/bottom boundary hug
+// whichever child is actually present at each x, stepping to a new height
+// exactly where children start/end - the classic skyline-silhouette
+// problem, computed independently for the top edge (minimum y per column)
+// and the bottom edge (maximum y per column). A gap with no child at all
+// simply keeps the boundary coasting at its last height until the next
+// child is reached, instead of leaving a disconnected hole - that's what
+// keeps the whole thing one connected shape without ever drawing a
+// diagonal or cutting into a child's own rect.
+static vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float labelSpace)
 {
-	return (a.x < b.x) || ((a.x == b.x) && (a.y < b.y));
-}
+	vector<BPoint>	polygon;
+	if (rects.empty())
+		return polygon;
 
-static float Cross(const BPoint &o, const BPoint &a, const BPoint &b)
-{
-	return (a.x-o.x)*(b.y-o.y) - (a.y-o.y)*(b.x-o.x);
-}
+	set<float>	xset;
+	for (uint32 i=0; i<rects.size(); i++) {
+		xset.insert(rects[i].left);
+		xset.insert(rects[i].right);
+	}
+	vector<float>	xs(xset.begin(),xset.end());
+	int32	n	= xs.size()-1;
+	if (n <= 0)
+		return polygon;
 
-// Andrew's monotone chain - the group is meant to look like a string pulled
-// taut around all its children (issue #38), not a union of separate boxes
-// with gaps where children happen to be far apart. Standard O(n log n)
-// convex hull: sort by (x,y), then build the lower and upper chains,
-// popping the last point whenever the last three make a non-left turn.
-static vector<BPoint> ConvexHull(vector<BPoint> points)
-{
-	int32	n	= points.size();
-	if (n < 3)
-		return points;
-	sort(points.begin(),points.end(),PointLess);
-
-	vector<BPoint>	hull(2*n);
-	int32	k	= 0;
+	// per column (interval between two consecutive critical x values): the
+	// tightest top/bottom among whichever rects actually cover it
+	vector<float>	topY(n), bottomY(n);
+	vector<bool>	active(n,false);
 	for (int32 i=0; i<n; i++) {
-		while ((k >= 2) && (Cross(hull[k-2],hull[k-1],points[i]) <= 0))
-			k--;
-		hull[k++]	= points[i];
-	}
-	for (int32 i=n-2, lower=k+1; i>=0; i--) {
-		while ((k >= lower) && (Cross(hull[k-2],hull[k-1],points[i]) <= 0))
-			k--;
-		hull[k++]	= points[i];
-	}
-	hull.resize(k-1);
-	return hull;
-}
-
-
-// A convex hull's own edges are generally diagonal wherever the point set's
-// boundary isn't already axis-aligned - "a string pulled taut" but with only
-// right-angle turns (issue #38) means each diagonal edge (a,b) needs an
-// axis-aligned dogleg corner inserted. Both candidate corners - (a.x,b.y)
-// and (b.x,a.y) - complete the same right triangle with the diagonal; the
-// one farther from the hull's own centroid is the one that stays outside
-// the hull (bulges further out) rather than cutting into it.
-static vector<BPoint> OrthogonalizeHull(const vector<BPoint> &hull)
-{
-	if (hull.size() < 3)
-		return hull;
-
-	float	cx	= 0, cy	= 0;
-	for (uint32 i=0; i<hull.size(); i++) {
-		cx	+= hull[i].x;
-		cy	+= hull[i].y;
-	}
-	cx	/= hull.size();
-	cy	/= hull.size();
-
-	vector<BPoint>	result;
-	uint32	n	= hull.size();
-	for (uint32 i=0; i<n; i++) {
-		BPoint	a	= hull[i];
-		BPoint	b	= hull[(i+1)%n];
-		result.push_back(a);
-		if ((a.x != b.x) && (a.y != b.y)) {
-			BPoint	corner1(a.x,b.y);
-			BPoint	corner2(b.x,a.y);
-			float	d1	= (corner1.x-cx)*(corner1.x-cx)+(corner1.y-cy)*(corner1.y-cy);
-			float	d2	= (corner2.x-cx)*(corner2.x-cx)+(corner2.y-cy)*(corner2.y-cy);
-			result.push_back((d1 > d2) ? corner1 : corner2);
+		float	midX	= (xs[i]+xs[i+1])/2;
+		for (uint32 r=0; r<rects.size(); r++) {
+			if ((rects[r].left <= midX) && (midX < rects[r].right)) {
+				if (!active[i]) {
+					topY[i]		= rects[r].top;
+					bottomY[i]	= rects[r].bottom;
+					active[i]	= true;
+				} else {
+					if (rects[r].top < topY[i]) topY[i] = rects[r].top;
+					if (rects[r].bottom > bottomY[i]) bottomY[i] = rects[r].bottom;
+				}
+			}
 		}
 	}
-	return result;
+	// bridge gaps (no child at all in that column) by holding the boundary
+	// at its last height, so the shape stays one connected piece
+	for (int32 i=1; i<n; i++) {
+		if (!active[i]) {
+			topY[i]		= topY[i-1];
+			bottomY[i]	= bottomY[i-1];
+		}
+	}
+
+	// top boundary, left to right - the label notch is reserved above the
+	// leftmost child's own column only (that's where the name always
+	// sits), not the full width
+	polygon.push_back(BPoint(xs[0],topY[0]-labelSpace));
+	polygon.push_back(BPoint(xs[1],topY[0]-labelSpace));
+	polygon.push_back(BPoint(xs[1],topY[0]));
+	float	prevTop	= topY[0];
+	for (int32 i=1; i<n; i++) {
+		if (topY[i] != prevTop) {
+			polygon.push_back(BPoint(xs[i],prevTop));
+			polygon.push_back(BPoint(xs[i],topY[i]));
+			prevTop	= topY[i];
+		}
+	}
+	polygon.push_back(BPoint(xs[n],prevTop));
+
+	// right edge, then bottom boundary, right to left
+	float	prevBottom	= bottomY[n-1];
+	polygon.push_back(BPoint(xs[n],prevBottom));
+	for (int32 i=n-2; i>=0; i--) {
+		if (bottomY[i] != prevBottom) {
+			polygon.push_back(BPoint(xs[i+1],prevBottom));
+			polygon.push_back(BPoint(xs[i+1],bottomY[i]));
+			prevBottom	= bottomY[i];
+		}
+	}
+	polygon.push_back(BPoint(xs[0],prevBottom));
+	// left edge back up to the label notch is implicit - StrokePolygon/
+	// FillPolygon close the polygon back to its first point on their own
+
+	return polygon;
 }
 
 
@@ -322,52 +337,39 @@ void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
 	drawOn->SetFont(font);
 	drawOn->SetPenSize(penSize);
 
-	// one connected shape wrapped tightly around every child (like a
-	// string pulled taut around them - issue #38), not separate boxes
-	// with gaps where children happen to be spread far apart - so this
-	// collects every child's own 4 corners (+5px margin, same as
-	// RecalcFrame()'s inset) as hull candidate points rather than
-	// unioning rects.
-	vector<BPoint>	points;
+	// one connected shape wrapped tightly around every child (issue #38) -
+	// each child's own padded rect (+5px margin, same as RecalcFrame()'s
+	// inset) feeds the skyline boundary walk below, rather than only its
+	// corners (a hull can't tell a short child from a tall one two
+	// columns over; the actual rect per column is what makes the
+	// boundary hug each child's own height).
+	vector<BRect>	rects;
 	for (int32 i=0; i<renderer->CountItems(); i++) {
 		Renderer	*child	= (Renderer *)renderer->ItemAt(i);
 		if ((child->GetMessage()->what == P_C_CLASS_TYPE)
 				|| (child->GetMessage()->what == P_C_GROUP_TYPE)) {
 			BRect	r	= child->Frame();
 			r.InsetBy(-5,-5);
-			points.push_back(r.LeftTop());
-			points.push_back(r.RightTop());
-			points.push_back(r.LeftBottom());
-			points.push_back(r.RightBottom());
+			rects.push_back(r);
 		}
 	}
-	if (points.empty()) {
+	if (rects.empty()) {
 		if (offsetForAnim)
 			drawOn->PopState();
 		return;
 	}
 	// label space along the top - the name (and, if present, this
 	// group's own attribute rows) always sit in the top-left corner, so
-	// the space reserved above the topmost child has to actually fit
-	// them, not a guessed constant. Added as two extra hull candidates
-	// rather than a separate strip so the whole shape stays one convex
-	// polygon.
-	float	minX	= points[0].x, maxX = points[0].x, minY = points[0].y;
-	for (uint32 i=1; i<points.size(); i++) {
-		if (points[i].x < minX) minX = points[i].x;
-		if (points[i].x > maxX) maxX = points[i].x;
-		if (points[i].y < minY) minY = points[i].y;
-	}
+	// the space reserved above the leftmost child has to actually fit
+	// them, not a guessed constant.
 	float	labelSpace	= name->Frame().Height()+4;
 	vector<Renderer *>::iterator	attrHeight	= attributes->begin();
 	while (attrHeight != attributes->end()) {
 		labelSpace	+= (*attrHeight)->Frame().Height();
 		attrHeight++;
 	}
-	points.push_back(BPoint(minX,minY-labelSpace));
-	points.push_back(BPoint(maxX,minY-labelSpace));
 
-	vector<BPoint>	hull	= OrthogonalizeHull(ConvexHull(points));
+	vector<BPoint>	hull	= ComputeGroupBoundary(rects,labelSpace);
 	if (hull.size() < 3) {
 		if (offsetForAnim)
 			drawOn->PopState();
