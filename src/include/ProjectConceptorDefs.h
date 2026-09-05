@@ -311,6 +311,11 @@ extern const char*		P_C_NODE_ALLCONNECTIONS;	//		= "Node::allConnections"
 
 
 extern const char*		P_C_NODE_CONNECTION_TYPE;	//		= "Connection::type"
+/** int8 bitmask, which ends of a connection carry an arrow head:
+ * 1 = at the target, 2 = at the source, 3 = both, 0 = none. Missing on
+ * connections saved before this existed - ConnectionRenderer adds it with
+ * the target-only default, matching how they used to draw. */
+extern const char*		P_C_NODE_CONNECTION_ARROWS;	//		= "Connection::arrows"
 
 extern const char*		P_C_NODE_INCOMING;			//		= "Node::incoming"
 extern const char*		P_C_NODE_OUTGOING;			//		= "Node::outgoing"

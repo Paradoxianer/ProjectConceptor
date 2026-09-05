@@ -86,7 +86,12 @@ protected:
 			float		DistanceToSegment(BPoint p, BPoint segStart, BPoint segEnd);
 
 	bool				selected;
+	/** arrow head at the target end: first/second are its base corners,
+	 * third its tip on the target's own edge. */
 	BPoint				first,second,third;
+	/** same triangle mirrored onto the source end, drawn only when
+	 * P_C_NODE_CONNECTION_ARROWS asks for it. */
+	BPoint				fromFirst,fromSecond,fromThird;
 	rgb_color			fillColor;
 	bool				hasPreviewFillColor;
 	rgb_color			previewFillColor;
@@ -104,6 +109,8 @@ protected:
 	PDocument			*doc;
 	BMessenger			*sentTo;
 	uint				connectionType;
+	/** P_C_NODE_CONNECTION_ARROWS: bit 0 target, bit 1 source. */
+	int8				arrows;
 
 
 private:

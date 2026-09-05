@@ -155,6 +155,23 @@ void GraphEditor::Init(void) {
 	penSize->BButton::SetToolTip(B_TRANSLATE("Border pen size for selected nodes"));
 	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED),new BMessage(G_E_COLOR_PREVIEW));
 	colorItem->BButton::SetToolTip(B_TRANSLATE("Fill color for selected nodes"));
+	connectionStyle		= new ChoiceToolItem(B_TRANSLATE("Connection"),
+		new BMessage(G_E_CONNECTION_STYLE),ITEM_WIDTH*5);
+	connectionStyle->AddChoice(B_TRANSLATE("Straight"),"0");
+	connectionStyle->AddChoice(B_TRANSLATE("Rounded"),"1");
+	connectionStyle->AddChoice(B_TRANSLATE("Angular"),"2");
+	connectionStyle->SetValue("2");
+	connectionStyle->SetToolTip(B_TRANSLATE("Shape of the selected connections"));
+
+	connectionArrows	= new ChoiceToolItem(B_TRANSLATE("Arrows"),
+		new BMessage(G_E_CONNECTION_ARROWS),ITEM_WIDTH*5);
+	connectionArrows->AddChoice(B_TRANSLATE("At target"),"1");
+	connectionArrows->AddChoice(B_TRANSLATE("At source"),"2");
+	connectionArrows->AddChoice(B_TRANSLATE("Both ends"),"3");
+	connectionArrows->AddChoice(B_TRANSLATE("None"),"0");
+	connectionArrows->SetValue("1");
+	connectionArrows->SetToolTip(B_TRANSLATE("Which ends of the selected connections carry an arrow"));
+
 	patternItem	= new PatternToolItem(B_TRANSLATE("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 	patternItem->BButton::SetToolTip(B_TRANSLATE("Fill pattern for selected nodes"));
 
@@ -643,10 +660,15 @@ void GraphEditor::AttachedToWindow(void) {
 	configBar->AddSeperator();
 	configBar->AddItem(penSize);
 	configBar->AddItem(colorItem);
+	configBar->AddSeperator();
+	configBar->AddItem(connectionStyle);
+	configBar->AddItem(connectionArrows);
 
 	grid->SetTarget(this);
 	penSize->SetTarget(this);
 	colorItem->SetTarget(this);
+	connectionStyle->SetTarget(this);
+	connectionArrows->SetTarget(this);
 	sentToMe	= new BMessenger((BView *)this);
 	BView *parent = myScrollParent->Parent();
 	if (parent) {
@@ -697,6 +719,9 @@ void GraphEditor::DetachedFromWindow(void) {
 			if (configBar) {
 				configBar->RemoveItem(penSize);
 				configBar->RemoveItem(colorItem);
+				configBar->RemoveItem(connectionStyle);
+				configBar->RemoveItem(connectionArrows);
+				configBar->RemoveSeperator();
 				configBar->RemoveItem(patternItem);
 				configBar->RemoveSeperator();
 				configBar->RemoveItem(grid);
@@ -780,6 +805,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
 				connection->AddMessage(P_C_NODE_DATA,data);
 				connection->AddInt8(P_C_NODE_CONNECTION_TYPE,1);
+				connection->AddInt8(P_C_NODE_CONNECTION_ARROWS,1);
 				// deliberately NOT the toolbar's current color/pen size -
 				// those default to values tuned for node fills, easy to end
 				// up pale/thin enough that a brand-new connection is barely
@@ -868,6 +894,29 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			valueContainer->AddFloat("newValue",penSize->GetValue());
 			changePenSizeMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changePenSizeMessage);
+			break;
+		}
+		// Both of these live directly on the connection node rather than in
+		// its pattern sub-message, so the ChangeValue carries no "subgroup".
+		// ChangeValue replaces in place and needs the field to already
+		// exist - ConnectionRenderer::ValueChanged() guarantees that for
+		// the arrows field on connections predating it.
+		case G_E_CONNECTION_STYLE:
+		case G_E_CONNECTION_ARROWS: {
+			const char	*value	= NULL;
+			if (message->FindString("value",&value) != B_OK)
+				break;
+			bool		isStyle	= (message->what == G_E_CONNECTION_STYLE);
+			BMessage	*changeMessage	= new BMessage(P_C_EXECUTE_COMMAND);
+			changeMessage->AddString("Command::Name","ChangeValue");
+			changeMessage->AddBool(P_C_NODE_SELECTED,true);
+			BMessage	*valueContainer	= new BMessage();
+			valueContainer->AddString("name",
+				isStyle ? P_C_NODE_CONNECTION_TYPE : P_C_NODE_CONNECTION_ARROWS);
+			valueContainer->AddInt32("type",B_INT8_TYPE);
+			valueContainer->AddInt8("newValue",(int8)atoi(value));
+			changeMessage->AddMessage("valueContainer",valueContainer);
+			sentTo->SendMessage(changeMessage);
 			break;
 		}
 		case G_E_ADD_ATTRIBUTE: {
@@ -1290,6 +1339,7 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 					connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
 					uint	cType	= 1;
 					connection->AddInt8(P_C_NODE_CONNECTION_TYPE, cType);
+					connection->AddInt8(P_C_NODE_CONNECTION_ARROWS,1);
 					connection->AddMessage(P_C_NODE_DATA,data);
 					// see the G_E_CONNECTED handler above for why this isn't
 					// the toolbar's current color/pen size
