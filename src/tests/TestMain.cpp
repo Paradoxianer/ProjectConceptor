@@ -5,6 +5,7 @@
 #include "GroupBoundaryTest.h"
 #include "IndexerTest.h"
 #include "LayoutEditorTest.h"
+#include "MessageXmlWriterTest.h"
 #include "PCommandTest.h"
 #include "TestDocument.h"
 
@@ -22,6 +23,7 @@ int main(int argc, char **argv)
 	runner.addTest(PCommandTest::suite());
 	runner.addTest(LayoutEditorTest::suite());
 	runner.addTest(GroupBoundaryTest::suite());
+	runner.addTest(MessageXmlWriterTest::suite());
 	bool success = runner.run("", false);
 	// #117: every headless PDocument any test created is still running a
 	// real BLooper thread at this point - quit them before main() returns,

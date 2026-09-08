@@ -19,6 +19,7 @@ SRCS= 	TestMain.cpp \
 		PCommandTest.cpp \
 		LayoutEditorTest.cpp \
 		GroupBoundaryTest.cpp \
+		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
 		../plugins/LayoutEditor/DotLayouter.cpp \
 		../plugins/BatchCommand/Batch.cpp \

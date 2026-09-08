@@ -291,7 +291,7 @@ TiXmlElement  MessageXmlWriter::ProcessMessage(const char* bName, BMessage *msg)
 				break;
 			}
 			default:{
-				char 		*code	= new char[5];
+				char	code[5];
 				const void	*data;
 				ssize_t		size	= 0;
 				ssize_t		len		= 0;
@@ -303,13 +303,25 @@ TiXmlElement  MessageXmlWriter::ProcessMessage(const char* bName, BMessage *msg)
 					//for now we only support base64
 					xmlSubNode.SetAttribute("encode","base64");
 					if (msg->FindData(name, type,q, &data, &size) == B_OK){
-						//make shure the outputdata will fit
-						char *encoded = new char[(size*2)];
-						if (data != NULL)
-							len=encode_base64(encoded,(char *)data,size, false);
-							encoded[len] = '\0';
+						// +1 for the '\0' written below, on top of
+						// whatever headroom base64's own expansion needs -
+						// this used to be missing, a one-byte heap
+						// overflow that only got worse (writing to a
+						// zero-size allocation) when size==0. The braces
+						// around `if (data != NULL)` were also missing, so
+						// encoded[len]='\0' and the SetAttribute below ran
+						// unconditionally even when data was NULL, using
+						// whatever len happened to be left over from the
+						// previous iteration (or 0, uninitialized-
+						// equivalent, on the very first).
+						char	*encoded	= new char[(size*2)+1];
+						if (data != NULL) {
+							len	= encode_base64(encoded,(char *)data,size, false);
+							encoded[len]	= '\0';
 							if (len>0)
 								xmlSubNode.SetAttribute("value",encoded);
+						}
+						delete[] encoded;
 					}
 					xmlNode.InsertEndChild(xmlSubNode);
 				}
