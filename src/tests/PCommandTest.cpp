@@ -8,6 +8,8 @@
 #include "ChangeValue.h"
 #include "Group.h"
 #include "Insert.h"
+#include "Move.h"
+#include "Select.h"
 #include "PCommandManager.h"
 #include "PDocument.h"
 #include "ProjectConceptorDefs.h"
@@ -324,4 +326,61 @@ void PCommandTest::WrapperUndoRestoresAllSubcommands(void)
 	int32	restored2	= 0;
 	CPPUNIT_ASSERT(node2.FindInt32("TestValue",&restored2) == B_OK);
 	CPPUNIT_ASSERT_EQUAL((int32)2,restored2);
+}
+
+
+void PCommandTest::MoveGroupWithSelectedChildrenMovesOnce(void)
+{
+	// Move::MoveNode() carries a group's children along by recursing through
+	// P_C_NODE_ALLNODES. Select all puts the group *and* its children in the
+	// selection, so moving every selected node from the top offset each
+	// child twice - and the group's box, refitted to its children, ended up
+	// at twice the drag distance.
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	child1(P_C_CLASS_TYPE);
+	child1.AddRect(P_C_NODE_FRAME,BRect(0,0,50,50));
+	BMessage	child2(P_C_CLASS_TYPE);
+	child2.AddRect(P_C_NODE_FRAME,BRect(100,0,150,50));
+	doc->GetAllNodes()->AddItem(&child1);
+	doc->GetAllNodes()->AddItem(&child2);
+	doc->GetSelected()->AddItem(&child1);
+	doc->GetSelected()->AddItem(&child2);
+
+	BMessage	groupNode(P_C_GROUP_TYPE);
+	BMessage	groupSettings;
+	groupSettings.AddPointer("node",&groupNode);
+	Group	groupCommand;
+	groupCommand.Do(doc,&groupSettings);
+
+	// go through the real Select all, so this covers the selection state it
+	// actually produces rather than a hand-built approximation
+	doc->GetSelected()->MakeEmpty();
+	doc->GetAllNodes()->AddItem(&groupNode);
+
+	BMessage	selectSettings;
+	selectSettings.AddBool("selectAll",true);
+	Select	selectCommand;
+	selectCommand.Do(doc,&selectSettings);
+
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(&groupNode));
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(&child1));
+	bool	flag	= false;
+	CPPUNIT_ASSERT(child1.FindBool(P_C_NODE_SELECTED,&flag) == B_OK);
+	CPPUNIT_ASSERT(flag);
+
+	BMessage	moveSettings;
+	moveSettings.AddFloat("dx",10.0);
+	moveSettings.AddFloat("dy",5.0);
+
+	Move	moveCommand;
+	moveCommand.Do(doc,&moveSettings);
+
+	BRect	moved;
+	CPPUNIT_ASSERT(child1.FindRect(P_C_NODE_FRAME,&moved) == B_OK);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0,moved.left,0.001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0,moved.top,0.001);
+	CPPUNIT_ASSERT(child2.FindRect(P_C_NODE_FRAME,&moved) == B_OK);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(110.0,moved.left,0.001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0,moved.top,0.001);
 }

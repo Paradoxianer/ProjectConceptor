@@ -68,7 +68,9 @@ SRCS= 	TestMain.cpp \
 		../app/Tools/plugins/PluginManager.cpp \
 		../plugins/ChangeValueCommand/ChangeValue.cpp \
 		../plugins/InsertCommand/Insert.cpp \
-		../plugins/GroupCommand/Group.cpp
+		../plugins/GroupCommand/Group.cpp \
+		../plugins/MoveCommand/Move.cpp \
+		../plugins/SelectCommand/Select.cpp
 
 RDEFS=
 

@@ -5,6 +5,30 @@ Move::Move():PCommand()
 {
 }
 
+
+// MoveNode() already walks a group's P_C_NODE_ALLNODES, so a group carries
+// its children along on its own. When the children are *also* in the
+// selection - which Select all always produces - moving each selected node
+// from the top would offset them a second time, and the group's box, being
+// refitted to its children, then lands at twice the distance. Skip anything
+// an ancestor already moves. Mirrored in ClassRenderer::MoveAll() for the
+// live drag, which cascades the same way.
+static bool HasSelectedAncestor(BMessage *node)
+{
+	BMessage	*parent		= NULL;
+	bool		isSelected	= false;
+	while ((node != NULL)
+			&& (node->FindPointer(P_C_NODE_PARENT,(void **)&parent) == B_OK)
+			&& (parent != NULL)) {
+		isSelected	= false;
+		if ((parent->FindBool(P_C_NODE_SELECTED,&isSelected) == B_OK) && isSelected)
+			return true;
+		node	= parent;
+		parent	= NULL;
+	}
+	return false;
+}
+
 void Move::Undo(PDocument *doc,BMessage *undo) {
 	BMessage		*undoMessage		= new BMessage();
 	set<BMessage*>		*changed			= doc->GetChangedNodes();
@@ -36,6 +60,8 @@ BMessage* Move::Do(PDocument *doc, BMessage *settings) {
 	if ( (settings->FindFloat("dx",&dx)==B_OK) && (settings->FindFloat("dy",&dy)==B_OK) )	{
 		for (i=0;i<selected->CountItems();i++) {
 			node=(BMessage *)selected->ItemAt(i);
+			if (HasSelectedAncestor(node))
+				continue;
 			MoveNode(doc, changed,node, dx, dy, undoMessage);
 		}
 	}

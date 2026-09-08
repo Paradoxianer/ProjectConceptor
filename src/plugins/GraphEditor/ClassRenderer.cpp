@@ -437,9 +437,28 @@ bool  ClassRenderer::Caught(BPoint where) {
 void  ClassRenderer::SetFrame(BRect newFrame) {
 }
 
+// see the identical guard in the Move command (Move.cpp): a group's own
+// MoveBy() cascades into its children, so a child that is selected in its
+// own right must not be moved again from here
+static bool HasSelectedAncestor(BMessage *node)
+{
+	BMessage	*parent		= NULL;
+	bool		isSelected	= false;
+	while ((node != NULL)
+			&& (node->FindPointer(P_C_NODE_PARENT,(void **)&parent) == B_OK)
+			&& (parent != NULL)) {
+		isSelected	= false;
+		if ((parent->FindBool(P_C_NODE_SELECTED,&isSelected) == B_OK) && isSelected)
+			return true;
+		node	= parent;
+		parent	= NULL;
+	}
+	return false;
+}
+
 bool  ClassRenderer::MoveAll(void *arg,float dx, float dy) {
 	Renderer	*renderer	= (Renderer*)arg;
-	if (renderer->Selected())
+	if (renderer->Selected() && !HasSelectedAncestor(renderer->GetMessage()))
 		renderer->MoveBy(dx,dy);
 	return false;
 }
