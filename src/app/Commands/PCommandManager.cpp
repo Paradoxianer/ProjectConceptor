@@ -243,7 +243,14 @@ status_t PCommandManager::Execute(BMessage *settings) {
 				}
 				doc->SetModified();
 				doc->Unlock();
-				(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+				// a document with no attached UI (currently: any headless
+				// PDocument, e.g. NewHeadlessTestDocument() in the test
+				// suite) has no PEditorManager to notify - nothing to
+				// broadcast to, not an error (#117). Deterministic null
+				// dereference otherwise: reproduced by sending a real
+				// P_C_EXECUTE_COMMAND via BMessenger to a headless doc.
+				if (doc->GetEditorManager() != NULL)
+					doc->GetEditorManager()->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 			}
 		}
 		else
@@ -296,7 +303,9 @@ void PCommandManager::Undo(BMessage *undo) {
 			}
 			i--;
 		}
-		(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+		// see the same guard/comment in Execute() above
+		if (doc->GetEditorManager() != NULL)
+			doc->GetEditorManager()->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 		doc->Unlock();
 	}
 	else
@@ -330,7 +339,9 @@ void PCommandManager::Redo(BMessage *redo) {
 			if (undoStatus > (undoList->CountItems()-1))
 				undoStatus = undoList->CountItems()-1;
 		}
-		(doc->GetEditorManager())->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+		// see the same guard/comment in Execute() above
+		if (doc->GetEditorManager() != NULL)
+			doc->GetEditorManager()->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 		doc->Unlock();
 	}
 	else

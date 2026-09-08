@@ -6,6 +6,7 @@
 #include "IndexerTest.h"
 #include "LayoutEditorTest.h"
 #include "PCommandTest.h"
+#include "TestDocument.h"
 
 const char *TEST_APP_SIGNATURE = "application/x-vnd.ProjectConceptorTests";
 
@@ -22,5 +23,10 @@ int main(int argc, char **argv)
 	runner.addTest(LayoutEditorTest::suite());
 	runner.addTest(GroupBoundaryTest::suite());
 	bool success = runner.run("", false);
+	// #117: every headless PDocument any test created is still running a
+	// real BLooper thread at this point - quit them before main() returns,
+	// or one still mid-dispatch crashes into memory this process is
+	// already tearing down.
+	CleanupTestDocuments();
 	return success ? 0 : 1;
 }

@@ -1,8 +1,10 @@
 #include "PCommandTest.h"
 
 #include <app/Message.h>
+#include <app/Messenger.h>
 #include <interface/Rect.h>
 #include <support/List.h>
+#include <OS.h>
 
 #include "BasePlugin.h"
 #include "ChangeValue.h"
@@ -383,4 +385,52 @@ void PCommandTest::MoveGroupWithSelectedChildrenMovesOnce(void)
 	CPPUNIT_ASSERT(child2.FindRect(P_C_NODE_FRAME,&moved) == B_OK);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(110.0,moved.left,0.001);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0,moved.top,0.001);
+}
+
+void PCommandTest::ExecuteViaRealMessageDispatchSurvivesProcessExit(void)
+{
+	// #117: every other test in this suite calls a PCommand's Do()/Undo()
+	// directly - this is the one path that goes through a real BMessenger
+	// send to the document's own looper thread, same as every editor in
+	// the app does it (see e.g. GraphEditor's sentTo->SendMessage() calls).
+	// A headless PDocument (NewHeadlessTestDocument()) is "fine to just
+	// leak" per its own doc comment, but its BLooper::Run() thread is real
+	// and was never told to stop - if it is still mid-dispatch of a
+	// message queued here when the test process itself exits, it crashes
+	// into memory that is already being torn down. The crash used to show
+	// up as a *separate* debug_server report a few seconds after CppUnit
+	// had already printed "OK" and this process returned - snooze()ing
+	// here to let this specific send finish is not the fix (later tests'
+	// leaked documents, and this one after the snooze, are still running
+	// loopers when main() returns) - the actual fix is in TestMain.cpp.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
+
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	node->AddInt32("TestValue",1);
+	doc->GetAllNodes()->AddItem(node);
+
+	BMessage	*valueContainer	= new BMessage();
+	valueContainer->AddString("name","TestValue");
+	valueContainer->AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer->AddInt32("index",0);
+	int32	newValue	= 42;
+	valueContainer->AddData("newValue",B_INT32_TYPE,&newValue,sizeof(int32));
+
+	BMessage	settings(P_C_EXECUTE_COMMAND);
+	settings.AddString("Command::Name","ChangeValue");
+	settings.AddPointer("node",node);
+	settings.AddMessage("valueContainer",valueContainer);
+
+	BMessenger	target(doc);
+	CPPUNIT_ASSERT(target.IsValid());
+	CPPUNIT_ASSERT(target.SendMessage(&settings) == B_OK);
+
+	// give the looper thread a chance to actually dispatch it before this
+	// test method (and eventually the whole process) moves on
+	snooze(200000);
+
+	int32	changed	= 0;
+	CPPUNIT_ASSERT(node->FindInt32("TestValue",&changed) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)42,changed);
 }
