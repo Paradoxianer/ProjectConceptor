@@ -362,7 +362,11 @@ void PDocument::Resize(float toX,float toY)
 	bool locked = Lock();
 	bounds.right	= toX;
 	bounds.bottom	= toY;
-	editorManager->BroadCast(new BMessage(P_C_DOC_BOUNDS_CHANGED));
+	// a document with no attached UI (a headless PDocument, e.g.
+	// NewHeadlessTestDocument() in the test suite) has no editorManager -
+	// same null-deref pattern already fixed in PCommandManager (#117)
+	if (editorManager != NULL)
+		editorManager->BroadCast(new BMessage(P_C_DOC_BOUNDS_CHANGED));
 	if (locked)
 		Unlock();
 }
@@ -732,7 +736,12 @@ void PDocument::Load(void)
 //	commandManager->LoadMacros(docLoader->GetCommandManagerMessage());
 //	commandManager->LoadUndo(docLoader->GetCommandManagerMessage());
 	SetPrintSettings( docLoader->GetPrinterSetting());
-	editorManager->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+	// see the same guard/comment in Resize() above - this is the exact
+	// crash docs/notes.md already documented as blocking a headless
+	// Load() test; the fix is the same one #117 already applied to
+	// PCommandManager's three call sites
+	if (editorManager != NULL)
+		editorManager->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 }
 
 void PDocument::SavePanel()
