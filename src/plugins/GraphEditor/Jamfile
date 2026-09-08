@@ -20,6 +20,7 @@ Addon pc_graph_editor :
 	ConnectionRenderer.cpp
 	GraphEditor.cpp
 	GraphEditorPlugin.cpp
+	GroupBoundary.cpp
 	GroupRenderer.cpp
 	StringRenderer.cpp
 	TextEditorControl.cpp

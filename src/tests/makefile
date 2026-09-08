@@ -18,6 +18,7 @@ SRCS= 	TestMain.cpp \
 		IndexerTest.cpp \
 		PCommandTest.cpp \
 		LayoutEditorTest.cpp \
+		GroupBoundaryTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
 		../plugins/LayoutEditor/DotLayouter.cpp \
 		../plugins/BatchCommand/Batch.cpp \
@@ -70,7 +71,8 @@ SRCS= 	TestMain.cpp \
 		../plugins/InsertCommand/Insert.cpp \
 		../plugins/GroupCommand/Group.cpp \
 		../plugins/MoveCommand/Move.cpp \
-		../plugins/SelectCommand/Select.cpp
+		../plugins/SelectCommand/Select.cpp \
+		../plugins/GraphEditor/GroupBoundary.cpp
 
 RDEFS=
 
@@ -98,7 +100,8 @@ LOCAL_INCLUDE_PATHS =	. \
 						../plugins/InsertCommand \
 						../plugins/GroupCommand \
 						../plugins/LayoutEditor \
-						../plugins/BatchCommand
+						../plugins/BatchCommand \
+						../plugins/GraphEditor
 
 COMPILER_FLAGS =
 

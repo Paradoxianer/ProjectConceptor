@@ -1,4 +1,5 @@
 #include "GroupRenderer.h"
+#include "GroupBoundary.h"
 #include "ProjectConceptorDefs.h"
 
 #include <math.h>
@@ -16,112 +17,6 @@
 #include "PDocument.h"
 
 
-static void PushIfNew(vector<BPoint> &points, BPoint p)
-{
-	if (points.empty() || (points.back() != p))
-		points.push_back(p);
-}
-
-
-// The tightest *orthogonally convex* outline around the children (issue
-// #38) - a string pulled taut around them, but bending only at right
-// angles. A plain convex hull is wrong twice over: it draws diagonals, and
-// it bulges out to the tallest/widest neighbour, swallowing a short child
-// two columns over. A per-column silhouette ("skyline") fixes the
-// swallowing but goes too far the other way - it happily carves a bay, an
-// empty pocket walled in on three sides, wherever a shallow child sits
-// between two deeper ones, and a taut string would never dip into one.
-//
-// Orthogonal convexity is exactly the property that rules bays out: every
-// horizontal and vertical line must meet the shape in one run. Per column
-// the shape is one run by construction, so what remains is that the top
-// edge be valley-shaped (falling, then rising) and the bottom edge
-// mountain-shaped. The tightest such pair is a prefix/suffix scan - see
-// ComputeGroupBoundary() - and it needs no special case for a column no
-// child covers, since the scans bridge those on their own.
-static vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float labelSpace)
-{
-	vector<BPoint>	polygon;
-	if (rects.empty())
-		return polygon;
-
-	set<float>	xset;
-	for (uint32 i=0; i<rects.size(); i++) {
-		xset.insert(rects[i].left);
-		xset.insert(rects[i].right);
-	}
-	vector<float>	xs(xset.begin(),xset.end());
-	int32	n	= xs.size()-1;
-	if (n <= 0)
-		return polygon;
-
-	// per column (interval between two consecutive critical x values): the
-	// tightest top/bottom among whichever rects actually cover it. A
-	// column no child covers keeps the outward sentinel, i.e. contributes
-	// no constraint of its own - the envelope scans below bridge it.
-	const float		kFar	= 1e30;
-	vector<float>	topY(n,kFar), bottomY(n,-kFar);
-	for (int32 i=0; i<n; i++) {
-		float	midX	= (xs[i]+xs[i+1])/2;
-		for (uint32 r=0; r<rects.size(); r++) {
-			if ((rects[r].left <= midX) && (midX < rects[r].right)) {
-				if (rects[r].top < topY[i]) topY[i] = rects[r].top;
-				if (rects[r].bottom > bottomY[i]) bottomY[i] = rects[r].bottom;
-			}
-		}
-	}
-	// The name (and this group's own attribute rows) sit above the
-	// leftmost child, so that column's top edge is its child's top raised
-	// by labelSpace. Fold it in before the scans so the raised level is
-	// what they carry, not the child's bare top.
-	topY[0]	-= labelSpace;
-
-	// Tightest valley-shaped top / mountain-shaped bottom (see the note
-	// above the function). Largest valley below a set of constraints is
-	// the pointwise max of the running minima taken from each end, and
-	// the mirror image gives the smallest mountain above them.
-	vector<float>	topPre(n), topSuf(n), botPre(n), botSuf(n);
-	float	run	= kFar;
-	for (int32 i=0; i<n; i++)		{ run = min(run,topY[i]);    topPre[i] = run; }
-	run	= kFar;
-	for (int32 i=n-1; i>=0; i--)	{ run = min(run,topY[i]);    topSuf[i] = run; }
-	run	= -kFar;
-	for (int32 i=0; i<n; i++)		{ run = max(run,bottomY[i]); botPre[i] = run; }
-	run	= -kFar;
-	for (int32 i=n-1; i>=0; i--)	{ run = max(run,bottomY[i]); botSuf[i] = run; }
-	for (int32 i=0; i<n; i++) {
-		topY[i]		= max(topPre[i],topSuf[i]);
-		bottomY[i]	= min(botPre[i],botSuf[i]);
-	}
-
-	// top boundary, left to right
-	polygon.push_back(BPoint(xs[0],topY[0]));
-	float	prevTop	= topY[0];
-	for (int32 i=1; i<n; i++) {
-		if (topY[i] != prevTop) {
-			PushIfNew(polygon,BPoint(xs[i],prevTop));
-			polygon.push_back(BPoint(xs[i],topY[i]));
-			prevTop	= topY[i];
-		}
-	}
-	PushIfNew(polygon,BPoint(xs[n],prevTop));
-
-	// right edge, then bottom boundary, right to left
-	float	prevBottom	= bottomY[n-1];
-	PushIfNew(polygon,BPoint(xs[n],prevBottom));
-	for (int32 i=n-2; i>=0; i--) {
-		if (bottomY[i] != prevBottom) {
-			PushIfNew(polygon,BPoint(xs[i+1],prevBottom));
-			polygon.push_back(BPoint(xs[i+1],bottomY[i]));
-			prevBottom	= bottomY[i];
-		}
-	}
-	PushIfNew(polygon,BPoint(xs[0],prevBottom));
-	// left edge back up to the label notch is implicit - StrokePolygon/
-	// FillPolygon close the polygon back to its first point on their own
-
-	return polygon;
-}
 
 
 // Every corner in ComputeGroupBoundary()'s result is a right angle, either

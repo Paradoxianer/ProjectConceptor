@@ -2,6 +2,7 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
+#include "GroupBoundaryTest.h"
 #include "IndexerTest.h"
 #include "LayoutEditorTest.h"
 #include "PCommandTest.h"
@@ -19,6 +20,7 @@ int main(int argc, char **argv)
 	runner.addTest(IndexerTest::suite());
 	runner.addTest(PCommandTest::suite());
 	runner.addTest(LayoutEditorTest::suite());
+	runner.addTest(GroupBoundaryTest::suite());
 	bool success = runner.run("", false);
 	return success ? 0 : 1;
 }
