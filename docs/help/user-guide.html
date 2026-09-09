@@ -74,6 +74,7 @@ instance.</p>
 		<li><a href="#toolbar">The toolbar</a></li>
 		<li><a href="#creating-a-node">Creating a node</a></li>
 		<li><a href="#attributes">Attributes</a></li>
+		<li><a href="#search-and-bulk-edits">Search and bulk edits</a></li>
 		<li><a href="#connections">Connections</a></li>
 		<li><a href="#grouping">Grouping</a></li>
 		<li><a href="#automatic-layout">Automatic layout</a></li>
@@ -102,6 +103,11 @@ choice fields:</p>
 
 <p>Both show the currently picked shape as an icon; the pop-up menu also
 carries the name, in case the icon alone isn't clear enough.</p>
+
+<p>The <strong>grid toggle</strong> overlays an alignment grid and
+snaps node positions to it as you create or drag them &mdash; a quick
+way to line several nodes up into neat rows or columns without
+hand-nudging each one.</p>
 
 <p>Below that, a second toolbar row, visible while the GraphEditor tab is
 active:</p>
@@ -136,6 +142,19 @@ selected node via the two toolbar icons ("add boolean attribute" /
 
 <p>Each row has a checkmark icon (toggle the value) and a red cross
 (remove the row).</p>
+
+<h2 id="search-and-bulk-edits">Search and bulk edits</h2>
+
+<p><strong>Search &rarr; Find</strong> looks for a string across every
+node's name and attribute text and selects every node that matches
+(replacing whatever was selected before) &mdash; a quick way to gather
+up all the nodes that share something in common instead of clicking
+them one by one.</p>
+
+<p>That selection then doubles as a bulk edit: with several nodes
+selected, changing an attribute's value on one of them applies the
+same change to every other selected node too, not just the one you
+clicked on.</p>
 
 <h2 id="connections">Connections</h2>
 

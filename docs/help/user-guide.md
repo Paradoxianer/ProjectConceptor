@@ -23,6 +23,11 @@ icon choice fields:
 Both show the currently picked shape as an icon; the pop-up menu also
 carries the name, in case the icon alone isn't clear enough.
 
+The **grid toggle** overlays an alignment grid and snaps node
+positions to it as you create or drag them - a quick way to line
+several nodes up into neat rows or columns without hand-nudging each
+one.
+
 Below that, a second toolbar row, visible while the GraphEditor tab is
 active:
 
@@ -54,6 +59,18 @@ attribute"):
 
 Each row has a checkmark icon (toggle the value) and a red cross
 (remove the row).
+
+## Search and bulk edits
+
+**Search &rarr; Find** looks for a string across every node's name and
+attribute text and selects every node that matches (replacing whatever
+was selected before) - a quick way to gather up all the nodes that
+share something in common instead of clicking them one by one.
+
+That selection then doubles as a bulk edit: with several nodes
+selected, changing an attribute's value on one of them applies the
+same change to every other selected node too, not just the one you
+clicked on.
 
 ## Connections
 
