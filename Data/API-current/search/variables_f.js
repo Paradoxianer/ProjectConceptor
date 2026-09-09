@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['rankdir_0',['rankdir',['../classDotLayouter.html#a2329507b17642df496b6154b3d438e93',1,'DotLayouter']]],
+  ['recording_1',['recording',['../classPCommandManager.html#adc052c2c7876bb1346dc20a2ad4b55c1',1,'PCommandManager']]],
+  ['rect_2',['rect',['../classRectItem.html#a70580251f2b1a33b867bd9b09354773e',1,'RectItem']]],
+  ['red_3',['red',['../AboutURLView_8h.html#a74c880b0c5bf80194043b982b56bb101',1,'AboutURLView.h']]],
+  ['remember_5fwindow_5fframe_5ftoggled_4',['REMEMBER_WINDOW_FRAME_TOGGLED',['../app_2Config_2ConfigView_8h.html#ae7dba66be81fc3f4ff76c34afd6b87c7',1,'ConfigView.h']]],
+  ['rememberwindowframecheckbox_5',['rememberWindowFrameCheckBox',['../classConfigView.html#a97014a378fd8fa40fa4331827002173e',1,'ConfigView']]],
+  ['renderbitmap_6',['renderBitmap',['../classPagedView.html#adb129c0130094d16d3e2cc969c4db932',1,'PagedView']]],
+  ['renderer_7',['renderer',['../classGraphEditor.html#a6b6f2a584961efb345a9fc9435896649',1,'GraphEditor::renderer'],['../classGroupRenderer.html#a88a7fda00a2563a05f0ece714d6d0047',1,'GroupRenderer::renderer']]],
+  ['rendersensitv_8',['rendersensitv',['../classGraphEditor.html#ad42e61d7a72f7127bc23d858f8936ae2',1,'GraphEditor']]],
+  ['renderstring_9',['renderString',['../classGraphEditor.html#a5f750b6819fddd54edcb7316bee7dcbb',1,'GraphEditor::renderString'],['../classNavigatorEditor.html#a75d28784b4ac22311e94dbea4d682bf2',1,'NavigatorEditor::renderString']]],
+  ['resizing_10',['resizing',['../classClassRenderer.html#aef39e1e7de875f15be06b5a396b90541',1,'ClassRenderer']]],
+  ['restorewinstate_11',['restoreWinState',['../classSettingsManager.html#a7adc4ea45fc845d8af82255d68cc31b1',1,'SettingsManager']]],
+  ['right_12',['right',['../classRectItem.html#ab2f038a2ac5d4bd3a76e41e638028756',1,'RectItem']]],
+  ['right_5fmargin_13',['right_margin',['../classToolBar.html#a104530e82a1e331a9475228c39384be1',1,'ToolBar']]],
+  ['rightconnection_14',['rightConnection',['../classClassRenderer.html#acfff718269cdd1eca8363200b8c52500',1,'ClassRenderer']]],
+  ['righticonborder_15',['rightIconBorder',['../classToolBar.html#ac442785daeff55fcb9fa24aa31054b66',1,'ToolBar']]],
+  ['root_16',['root',['../classNavigatorEditor.html#aaa98242486c2393d5a24097c8f067372',1,'NavigatorEditor']]],
+  ['rows_17',['rows',['../classPagedView.html#a8f2b8994ab359272dbdf1e9b4260faa4',1,'PagedView']]]
+];

@@ -1,0 +1,24 @@
+var NAVTREEINDEX13 =
+{
+"pages.html":[],
+"structURLView_1_1kp.html":[3,0,128,0],
+"structURLView_1_1kp.html#a470e67beaf2d703de71c5111e16726ec":[3,0,128,0,0],
+"structURLView_1_1kp.html#a7ade5e983ceca668aed9288a97a14345":[3,0,128,0,1],
+"structshortcut.html":[3,0,117],
+"structshortcut.html#a4757d498b0166a958b33d2011bcf386f":[3,0,117,2],
+"structshortcut.html#a80fd2480eb51791568071b3966142aa3":[3,0,117,1],
+"structshortcut.html#a97bc632e12b1ea267387c2ebb24f1131":[3,0,117,3],
+"structshortcut.html#adf6b63e8873eb5c0fc1d10b15a1bbb0a":[3,0,117,0],
+"todo.html":[0],
+"translators_2Cpp_2ConfigView_8cpp.html":[4,0,0,5,0,0],
+"translators_2Cpp_2ConfigView_8h.html":[4,0,0,5,0,1],
+"translators_2Cpp_2ConfigView_8h_source.html":[4,0,0,5,0,1],
+"translators_2FreeMind_2ConfigView_8cpp.html":[4,0,0,5,1,0],
+"translators_2FreeMind_2ConfigView_8h.html":[4,0,0,5,1,1],
+"translators_2FreeMind_2ConfigView_8h_source.html":[4,0,0,5,1,1],
+"translators_2Standard_2ConfigView_8cpp.html":[4,0,0,5,2,0],
+"translators_2Standard_2ConfigView_8h.html":[4,0,0,5,2,1],
+"translators_2Standard_2ConfigView_8h_source.html":[4,0,0,5,2,1],
+"translators_2Standard_2MessageXmlReader_8cpp.html":[4,0,0,5,2,2],
+"translators_2Standard_2MessageXmlWriter_8cpp.html":[4,0,0,5,2,3]
+};
