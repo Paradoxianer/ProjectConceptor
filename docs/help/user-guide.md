@@ -10,10 +10,9 @@ through the main workflows using screenshots of a running instance.
 
 ![Toolbar](screenshots/03-toolbar.png)
 
-Left to right: file actions (New, Open, Save, Print), then edit/delete,
-then three node tools (add a group, add a boolean attribute, add a text
-attribute), grid toggle, pen size, fill color, and on the right two
-icon choice fields:
+Left to right: file actions (New, Open, Save, Save As, Print), then
+Search, Delete, and font settings, then grid toggle, pen size, fill
+color, and on the right two icon choice fields:
 
 - **Connection shape** - straight, rounded, or angular. Applies to
   whichever connections are currently selected.
@@ -49,11 +48,15 @@ immediately puts its name into edit mode:
 Type a name, done. Double-clicking *inside* an existing group instead
 adds the new node as a child of that group directly.
 
+The narrow toolbar down the left edge (visible in the screenshot
+above) carries the GraphEditor's own node tools: group the current
+selection, add a boolean attribute, and add a text attribute.
+
 ## Attributes
 
 Any node can carry its own attribute rows - added to the selected node
-via the two toolbar icons ("add boolean attribute" / "add text
-attribute"):
+via the "add boolean attribute" / "add text attribute" icons on that
+left-edge toolbar:
 
 ![Node with attributes](screenshots/04-node-with-attributes.png)
 
