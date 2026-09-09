@@ -4,6 +4,7 @@
 #include <interface/ScrollView.h>
 #include <storage/Entry.h>
 #include <stdio.h>
+#include <string.h>
 #include <translation/TranslationUtils.h>
 #include <translation/TranslatorFormats.h>
 #include <BeBuild.h>
@@ -129,11 +130,26 @@ void PWindow::CreatEditorList(void)
 		}
 	}
 	// AddEditor() above selects each tab as it's added, purely to attach
-	// its view safely - the last one added (alphabetically NavigatorEditor,
-	// after GraphEditor) ends up selected as a side effect. Show the first
-	// one (GraphEditor) instead, now that every tab's view is attached.
+	// its view safely - whichever one was added last ends up selected as
+	// a side effect. Show GraphEditor instead, now that every tab's view
+	// is attached. GetPluginsByType() hands plugins back in directory
+	// listing order, not alphabetically - it happened to put GraphEditor
+	// first on a BFS dev build, which is what "just select tab 0" here
+	// used to rely on, but packagefs (an installed .hpkg) lists the same
+	// directory in a different order, so tab 0 ended up being
+	// NavigatorEditor instead. Find the tab by its actual label.
 	bool locked = LockLooper();
-	if (mainView->CountTabs() > 0)
+	int32	graphEditorTab	= -1;
+	for (int32 i = 0; i < mainView->CountTabs(); i++) {
+		BTab	*tab	= mainView->TabAt(i);
+		if ((tab != NULL) && (tab->Label() != NULL) && (strcmp(tab->Label(),"GraphEditor") == 0)) {
+			graphEditorTab	= i;
+			break;
+		}
+	}
+	if (graphEditorTab >= 0)
+		mainView->Select(graphEditorTab);
+	else if (mainView->CountTabs() > 0)
 		mainView->Select((int32)0);
 	if (locked)
 		UnlockLooper();
