@@ -360,12 +360,14 @@ float GroupRenderer::LabelSpace(void)
 }
 
 
-// ClassRenderer places the name relative to `frame`, which for a group is
-// the bounding box of every child - so the label ended up at the top of
-// the *topmost* child, while the outline reserves its notch above the
-// *leftmost* one. Whenever those are different children the label floated
-// outside the shape entirely. Move it (and any attribute rows, keeping
-// their spacing) to where the notch actually is.
+// ClassRenderer places the name (and, since ClassRenderer::InsertAttribute()
+// is inherited unchanged, every attribute row) relative to `frame`, which
+// for a group is the bounding box of every child - so both the vertical
+// position and the *width* came out wrong: the label ended up at the top
+// of the *topmost* child instead of the notch above the *leftmost* one,
+// and every row stretched across the whole group instead of just that
+// notch. Move each row into the notch and resize it to the notch's own
+// width, keeping its height (a row's own text metrics, untouched here).
 void GroupRenderer::PlaceLabel(void)
 {
 	vector<BRect>	rects;
@@ -379,15 +381,17 @@ void GroupRenderer::PlaceLabel(void)
 			leftmost	= rects[i];
 	}
 
-	BRect	current	= name->Frame();
-	float	dx		= (leftmost.left+(xRadius/3)) - current.left;
-	float	dy		= (leftmost.top-LabelSpace()+(yRadius/3)) - current.top;
-	if ((dx == 0) && (dy == 0))
+	float	targetLeft	= leftmost.left+(xRadius/3);
+	float	targetRight	= leftmost.right-(xRadius/3);
+	BRect	current		= name->Frame();
+	float	dy			= (leftmost.top-LabelSpace()+(yRadius/3)) - current.top;
+	if ((current.left == targetLeft) && (current.right == targetRight) && (dy == 0))
 		return;
-	name->MoveBy(dx,dy);
+	name->SetFrame(BRect(targetLeft,current.top+dy,targetRight,current.bottom+dy));
 	vector<Renderer *>::iterator	attribute	= attributes->begin();
 	while (attribute != attributes->end()) {
-		(*attribute)->MoveBy(dx,dy);
+		BRect	row	= (*attribute)->Frame();
+		(*attribute)->SetFrame(BRect(targetLeft,row.top+dy,targetRight,row.bottom+dy));
 		attribute++;
 	}
 }
