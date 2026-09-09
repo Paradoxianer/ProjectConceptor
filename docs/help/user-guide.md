@@ -93,6 +93,22 @@ whole graph - useful after inserting many nodes by hand, which tend to
 overlap. Direction and topology can be set first via the two fields
 next to it.
 
+## Macros
+
+The **Macro** menu records a sequence of actions and replays it later -
+useful for a repetitive edit you'd otherwise do by hand every time.
+**Start recording** / **Stop recording** capture everything done in
+between as one named macro (you're asked for a name when you stop);
+**Play** lists the macros recorded so far, and **Open**/**Save** move a
+macro's recording to/from its own file. Macros are saved as part of the
+document.
+
+This is still rudimentary: a macro replays the exact same sequence of
+commands regardless of what's selected or how the graph has changed
+since - there's no parameterization, conditionals, or editing a
+macro's steps after recording. Fine for "redo this exact edit again,"
+not a general scripting facility.
+
 ## Save, load, undo
 
 - **File → Save / Save As** writes the document to a `.pcd` file.

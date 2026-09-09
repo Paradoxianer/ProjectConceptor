@@ -77,6 +77,7 @@ instance.</p>
 		<li><a href="#connections">Connections</a></li>
 		<li><a href="#grouping">Grouping</a></li>
 		<li><a href="#automatic-layout">Automatic layout</a></li>
+		<li><a href="#macros">Macros</a></li>
 		<li><a href="#save-load-undo">Save, load, undo</a></li>
 	</ul>
 </nav>
@@ -174,6 +175,23 @@ gap:</p>
 the whole graph &mdash; useful after inserting many nodes by hand,
 which tend to overlap. Direction and topology can be set first via the
 two fields next to it.</p>
+
+<h2 id="macros">Macros</h2>
+
+<p>The <strong>Macro</strong> menu records a sequence of actions and
+replays it later &mdash; useful for a repetitive edit you'd otherwise
+do by hand every time. <strong>Start recording</strong> /
+<strong>Stop recording</strong> capture everything done in between as
+one named macro (you're asked for a name when you stop);
+<strong>Play</strong> lists the macros recorded so far, and
+<strong>Open</strong>/<strong>Save</strong> move a macro's recording
+to/from its own file. Macros are saved as part of the document.</p>
+
+<p>This is still rudimentary: a macro replays the exact same sequence
+of commands regardless of what's selected or how the graph has changed
+since &mdash; there's no parameterization, conditionals, or editing a
+macro's steps after recording. Fine for &ldquo;redo this exact edit
+again,&rdquo; not a general scripting facility.</p>
 
 <h2 id="save-load-undo">Save, load, undo</h2>
 
