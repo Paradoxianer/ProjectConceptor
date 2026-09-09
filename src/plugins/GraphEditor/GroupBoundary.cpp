@@ -103,12 +103,58 @@ vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float labelSpace
 	// corner, so a corridor much narrower than twice the usual corner
 	// radius rounds almost its whole height away at both ends and reads
 	// as a thin line instead of a band.
-	const float	kCorridorHeight	= 32;
+	const float		kCorridorHeight	= 32;
+	vector<bool>	isCorridor(n,false);
 	for (int32 i=0; i<n; i++) {
 		if (topY[i] > bottomY[i]) {
+			isCorridor[i]	= true;
 			float	center	= (topY[i]+bottomY[i])/2;
 			topY[i]		= center-kCorridorHeight/2;
 			bottomY[i]	= center+kCorridorHeight/2;
+		}
+	}
+
+	// Where the corridor meets a real child, both topY and bottomY step at
+	// the very same x (the child's own edge) - the top edge's drop and the
+	// bottom edge's drop land on the exact same vertical line, which draws
+	// as one line, not as a corridor with any width of its own along that
+	// drop (this is what "just two lines lying on top of each other" -
+	// your description - actually is). The two steps don't overlap with
+	// either the child's own rect or the corridor's flat span, though (the
+	// coincident stretch is the empty run between them), so nudging them
+	// a few px apart - one edge steps a little early, the other a little
+	// late - costs nothing and gives that whole connecting run real,
+	// recognizable width instead of a single line. Ordinary transitions
+	// (not a corridor boundary) are untouched.
+	//
+	// Which edge goes early matters: stepping the wrong one re-creates
+	// the exact inversion this file exists to avoid, since for the x
+	// range between the two steps, one side already carries its new
+	// value while the other still carries its old one - that pairing
+	// must itself satisfy top<bottom, and only one of the two pairings
+	// (new top vs. old bottom, or old top vs. new bottom) does. Skip the
+	// padding on the rare transition where neither does (columns too
+	// narrow) - falling back to the coincident-but-valid single line
+	// beats stepping into a fresh bowtie.
+	const float		kCorridorSidePadding	= 8;
+	vector<float>	topStepX(n), bottomStepX(n);
+	for (int32 k=0; k<n; k++) {
+		topStepX[k]		= xs[k];
+		bottomStepX[k]	= xs[k];
+	}
+	for (int32 k=1; k<n; k++) {
+		if ((isCorridor[k] != isCorridor[k-1])
+				&& (topY[k] != topY[k-1]) && (bottomY[k] != bottomY[k-1])) {
+			float	leftRoom	= xs[k]-xs[k-1];
+			float	rightRoom	= xs[k+1]-xs[k];
+			float	pad			= std::min(kCorridorSidePadding,std::min(leftRoom,rightRoom)/2);
+			if (topY[k] < bottomY[k-1]) {
+				topStepX[k]		= xs[k]-pad;
+				bottomStepX[k]	= xs[k]+pad;
+			} else if (topY[k-1] < bottomY[k]) {
+				bottomStepX[k]	= xs[k]-pad;
+				topStepX[k]		= xs[k]+pad;
+			}
 		}
 	}
 
@@ -117,8 +163,8 @@ vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float labelSpace
 	float	prevTop	= topY[0];
 	for (int32 i=1; i<n; i++) {
 		if (topY[i] != prevTop) {
-			PushIfNew(polygon,BPoint(xs[i],prevTop));
-			polygon.push_back(BPoint(xs[i],topY[i]));
+			PushIfNew(polygon,BPoint(topStepX[i],prevTop));
+			polygon.push_back(BPoint(topStepX[i],topY[i]));
 			prevTop	= topY[i];
 		}
 	}
@@ -129,8 +175,8 @@ vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float labelSpace
 	PushIfNew(polygon,BPoint(xs[n],prevBottom));
 	for (int32 i=n-2; i>=0; i--) {
 		if (bottomY[i] != prevBottom) {
-			PushIfNew(polygon,BPoint(xs[i+1],prevBottom));
-			polygon.push_back(BPoint(xs[i+1],bottomY[i]));
+			PushIfNew(polygon,BPoint(bottomStepX[i+1],prevBottom));
+			polygon.push_back(BPoint(bottomStepX[i+1],bottomY[i]));
 			prevBottom	= bottomY[i];
 		}
 	}
