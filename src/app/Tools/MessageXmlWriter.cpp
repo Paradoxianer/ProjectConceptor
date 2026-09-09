@@ -5,6 +5,51 @@
 #include <support/Debug.h>
 #include <mail/mail_encoding.h>
 
+#include <setjmp.h>
+#include <signal.h>
+
+namespace {
+
+sigjmp_buf	sArithmeticFaultTarget;
+
+void HandleArithmeticFault(int)
+{
+	siglongjmp(sArithmeticFaultTarget, 1);
+}
+
+// encode_base64() (Mail Kit, opaque - no local source to read) is the
+// prime suspect for issue #114's SIGFPE: it's the only arithmetic-heavy
+// call in ProcessMessage()'s default: branch, and the crash's reported
+// offset matched that branch. The exact trigger was never confirmed
+// despite exhausting every input shape testable from the outside (raw
+// sizes 0-300, NaN/Infinity floats, every real field type/size a saved
+// node actually uses, B_PATTERN_TYPE specifically). Rather than leave a
+// crash whose precise cause is unconfirmed, trap the fault itself: a
+// process's own SIGFPE handler takes priority over the OS's default
+// "hand this to debug_server" action, so installing one here for the
+// duration of just this one call turns a fault inside encode_base64()
+// into a skipped field (and a leaked `encoded` buffer - accepted, since
+// the alternative is losing the whole write) instead of a crashed app.
+ssize_t EncodeBase64Guarded(char *out, const char *in, ssize_t length)
+{
+	struct sigaction	action, previous;
+	action.sa_handler	= HandleArithmeticFault;
+	sigemptyset(&action.sa_mask);
+	action.sa_flags		= 0;
+	sigaction(SIGFPE, &action, &previous);
+
+	ssize_t	result;
+	if (sigsetjmp(sArithmeticFaultTarget, 1) == 0)
+		result = encode_base64(out, in, length, false);
+	else
+		result = -1;
+
+	sigaction(SIGFPE, &previous, NULL);
+	return result;
+}
+
+}	// namespace
+
 
 MessageXmlWriter::MessageXmlWriter(){
     filePath=new BString("");
@@ -316,10 +361,12 @@ TiXmlElement  MessageXmlWriter::ProcessMessage(const char* bName, BMessage *msg)
 						// equivalent, on the very first).
 						char	*encoded	= new char[(size*2)+1];
 						if (data != NULL) {
-							len	= encode_base64(encoded,(char *)data,size, false);
-							encoded[len]	= '\0';
-							if (len>0)
-								xmlSubNode.SetAttribute("value",encoded);
+							len	= EncodeBase64Guarded(encoded,(char *)data,size);
+							if (len >= 0) {
+								encoded[len]	= '\0';
+								if (len>0)
+									xmlSubNode.SetAttribute("value",encoded);
+							}
 						}
 						delete[] encoded;
 					}
