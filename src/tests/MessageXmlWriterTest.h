@@ -20,6 +20,9 @@ public:
 	void OrdinaryMessageRoundtrips(void);
 	void RawFieldSizesZeroToThreeHundredDoNotCrash(void);
 	void RealisticNestedNodeMessageDoesNotCrash(void);
+	void PatternFieldDoesNotCrash(void);
+	void RgbColorFieldsDoNotCrash(void);
+	void FullRealisticNodeWithPatternFieldDoesNotCrash(void);
 
 	CPPUNIT_TEST_SUITE(MessageXmlWriterTest);
 	CPPUNIT_TEST(ZeroLengthRawFieldDoesNotCrash);
@@ -28,6 +31,9 @@ public:
 	CPPUNIT_TEST(OrdinaryMessageRoundtrips);
 	CPPUNIT_TEST(RawFieldSizesZeroToThreeHundredDoNotCrash);
 	CPPUNIT_TEST(RealisticNestedNodeMessageDoesNotCrash);
+	CPPUNIT_TEST(PatternFieldDoesNotCrash);
+	CPPUNIT_TEST(RgbColorFieldsDoNotCrash);
+	CPPUNIT_TEST(FullRealisticNodeWithPatternFieldDoesNotCrash);
 	CPPUNIT_TEST_SUITE_END();
 };
 

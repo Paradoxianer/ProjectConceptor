@@ -120,6 +120,93 @@ void MessageXmlWriterTest::RealisticNestedNodeMessageDoesNotCrash(void)
 	CPPUNIT_ASSERT(writer.WriteTo(node,&destination) == B_OK);
 }
 
+void MessageXmlWriterTest::PatternFieldDoesNotCrash(void)
+{
+	// B_PATTERN_TYPE isn't one of the explicit case labels in
+	// ProcessMessage(), so it falls into the default: branch under test -
+	// and unlike the earlier RealisticNestedNodeMessageDoesNotCrash test,
+	// this is the one field from GenerateStressFixture.cpp's NewNode() that
+	// was never actually included: every node's Pattern sub-message carries
+	// exactly this field (see GenerateStressFixture.cpp), so it's present
+	// in every real saved document. pattern is a fixed 8-byte struct
+	// (GraphicsDefs.h) - fixed size, not swept like the raw-size fuzz above.
+	BMessage	pattern;
+	pattern.AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH),false);
+
+	MessageXmlWriter	writer;
+	BMallocIO			destination;
+	CPPUNIT_ASSERT(writer.WriteTo(pattern,&destination) == B_OK);
+}
+
+void MessageXmlWriterTest::RgbColorFieldsDoNotCrash(void)
+{
+	// rgb_color fields are packed into int32 (B_INT32_TYPE, an explicitly
+	// handled case) everywhere they're used in a real node's Pattern
+	// sub-message - not a default: branch candidate at all, but cheap to
+	// rule out explicitly now that PatternFieldDoesNotCrash covers the one
+	// real default: field in that same sub-message.
+	BMessage	pattern;
+	rgb_color	fillColor	= {152,180,190,255};
+	pattern.AddInt32("FillColor",*(int32*)&fillColor);
+	rgb_color	borderColor	= {0,0,0,255};
+	pattern.AddInt32("BorderColor",*(int32*)&borderColor);
+	rgb_color	highColor	= {0,0,0,255};
+	pattern.AddInt32("HighColor",*(int32*)&highColor);
+	rgb_color	lowColor	= {128,128,128,255};
+	pattern.AddInt32("LowColor",*(int32*)&lowColor);
+
+	MessageXmlWriter	writer;
+	BMallocIO			destination;
+	CPPUNIT_ASSERT(writer.WriteTo(pattern,&destination) == B_OK);
+}
+
+void MessageXmlWriterTest::FullRealisticNodeWithPatternFieldDoesNotCrash(void)
+{
+	// The exact shape of GenerateStressFixture.cpp's NewNode(), field for
+	// field, including the B_PATTERN_TYPE "Pattern" field that
+	// RealisticNestedNodeMessageDoesNotCrash omitted - the most complete
+	// reproduction of a real saved node's XML export attempted so far.
+	BMessage	font('fOTy');
+	font.AddInt8("Font::Encoding",0);
+	font.AddInt16("Font::Face",0x40);
+	font.AddString("Font::Family","Noto Sans");
+	font.AddInt32("Font::Flags",0);
+	font.AddFloat("Font::Rotation",0.0);
+	font.AddFloat("Font::Shear",90.0);
+	font.AddFloat("Font::Size",12.0);
+	font.AddInt8("Font::Spacing",2);
+	font.AddString("Font::Style","Regular");
+	font.AddInt32("Font::Color",(int32)0xffb5976f);
+
+	BMessage	pattern;
+	rgb_color	fillColor	= {152,180,190,255};
+	pattern.AddInt32("FillColor",*(int32*)&fillColor);
+	rgb_color	borderColor	= {0,0,0,255};
+	pattern.AddInt32("BorderColor",*(int32*)&borderColor);
+	pattern.AddFloat("PenSize",1.0);
+	pattern.AddInt8("DrawingMode",B_OP_ALPHA);
+	rgb_color	highColor	= {0,0,0,255};
+	pattern.AddInt32("HighColor",*(int32*)&highColor);
+	rgb_color	lowColor	= {128,128,128,255};
+	pattern.AddInt32("LowColor",*(int32*)&lowColor);
+	pattern.AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH),false);
+
+	BMessage	data;
+	data.AddString("Node::name","Node 1");
+
+	BMessage	node(P_C_CLASS_TYPE);
+	node.AddMessage("Node::Data",&data);
+	node.AddRect("Node::Frame",BRect(0,0,100,40));
+	node.AddMessage("Node::Font",&font);
+	node.AddMessage("Node::Pattern",&pattern);
+	node.AddBool("Node::selected",false);
+	node.AddPointer("Node::parent",(void *)0x12345678);
+
+	MessageXmlWriter	writer;
+	BMallocIO			destination;
+	CPPUNIT_ASSERT(writer.WriteTo(node,&destination) == B_OK);
+}
+
 void MessageXmlWriterTest::OrdinaryMessageRoundtrips(void)
 {
 	// sanity check: the fields the app actually writes on every save/quit
