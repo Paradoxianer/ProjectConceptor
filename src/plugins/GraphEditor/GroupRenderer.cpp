@@ -356,6 +356,10 @@ float GroupRenderer::LabelSpace(void)
 		space	+= (*attribute)->Frame().Height();
 		attribute++;
 	}
+	// gap between the last row (name, or the last attribute if there is
+	// one) and the first child's own top edge - without this the last row
+	// sits flush against it, same margin as the rows' own left/right inset.
+	space	+= circleSize+2;
 	return space;
 }
 
@@ -381,8 +385,13 @@ void GroupRenderer::PlaceLabel(void)
 			leftmost	= rects[i];
 	}
 
-	float	targetLeft	= leftmost.left+(xRadius/3);
-	float	targetRight	= leftmost.right-(xRadius/3);
+	// same left/right inset ClassRenderer::InsertAttribute() gives a plain
+	// node's own attribute rows (frame.left+circleSize+2 .. frame.right-
+	// circleSize-2) - name and attributes share this same targetLeft/
+	// targetRight, so the label lines up with its own attribute rows too,
+	// not just with a normal node's.
+	float	targetLeft	= leftmost.left+circleSize+2;
+	float	targetRight	= leftmost.right-circleSize-2;
 	BRect	current		= name->Frame();
 	float	dy			= (leftmost.top-LabelSpace()+(yRadius/3)) - current.top;
 	if ((current.left == targetLeft) && (current.right == targetRight) && (dy == 0))
