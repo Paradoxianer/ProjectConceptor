@@ -1,0 +1,135 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<BMessage type="BMessage" what="0">
+  <Data name="pc:format_version" type="int32" value="2" />
+  <BMessage name="PDocument::documentSetting" type="BMessage" what="0" />
+  <BMessage name="PDocument::allNodes" type="BMessage" what="0">
+    <BMessage name="node" type="BMessage" what="1885556564">
+      <Data name="this" type="int32" value="1" />
+      <BMessage name="Node::Data" type="BMessage" what="0">
+        <Data name="Node::name" type="string" value="Testnode 1" />
+        <BMessage name="Attributetest_1" type="BMessage" what="1129534546">
+          <Data name="Name" type="string" value="Attributetest_1" />
+          <Data name="Value" type="string" value="Hello" />
+        </BMessage>
+      </BMessage>
+      <Data name="Node::Frame" type="BRect" left="40" top="40" right="140" bottom="80" />
+      <BMessage name="Node::Font" type="BMessage" what="1716475001">
+        <Data name="Font::Encoding" type="int8" value="0" />
+        <Data name="Font::Face" type="int16" value="0" />
+        <Data name="Font::Family" type="string" value="Swis721 BT" />
+        <Data name="Font::Flags" type="int32" value="0" />
+        <Data name="Font::Rotation" type="float" value="0" />
+        <Data name="Font::Shear" type="float" value="90" />
+        <Data name="Font::Size" type="float" value="12" />
+        <Data name="Font::Spacing" type="int8" value="0" />
+        <Data name="Font::Style" type="string" value="Roman" />
+        <Data name="Font::Color" type="int32" value="-4876433" />
+      </BMessage>
+      <BMessage name="Node::Pattern" type="BMessage" what="0">
+        <Data name="FillColor" type="int32" value="-4279144" />
+        <Data name="BorderColor" type="int32" value="-16777216" />
+        <Data name="PenSize" type="float" value="1.0" />
+        <Data name="DrawingMode" type="int8" value="0" />
+        <Data name="HighColor" type="int32" value="-16777216" />
+        <Data name="LowColor" type="int32" value="-8355712" />
+      </BMessage>
+      <Data name="Node::parent" type="int32" value="4" />
+    </BMessage>
+    <BMessage name="node" type="BMessage" what="1885556564">
+      <Data name="this" type="int32" value="2" />
+      <BMessage name="Node::Data" type="BMessage" what="0">
+        <Data name="Node::name" type="string" value="Testnode 2" />
+      </BMessage>
+      <Data name="Node::Frame" type="BRect" left="200" top="40" right="300" bottom="80" />
+      <BMessage name="Node::Font" type="BMessage" what="1716475001">
+        <Data name="Font::Encoding" type="int8" value="0" />
+        <Data name="Font::Face" type="int16" value="0" />
+        <Data name="Font::Family" type="string" value="Swis721 BT" />
+        <Data name="Font::Flags" type="int32" value="0" />
+        <Data name="Font::Rotation" type="float" value="0" />
+        <Data name="Font::Shear" type="float" value="90" />
+        <Data name="Font::Size" type="float" value="12" />
+        <Data name="Font::Spacing" type="int8" value="0" />
+        <Data name="Font::Style" type="string" value="Roman" />
+        <Data name="Font::Color" type="int32" value="-4876433" />
+      </BMessage>
+      <BMessage name="Node::Pattern" type="BMessage" what="0">
+        <Data name="FillColor" type="int32" value="-4279144" />
+        <Data name="BorderColor" type="int32" value="-16777216" />
+        <Data name="PenSize" type="float" value="1.0" />
+        <Data name="DrawingMode" type="int8" value="0" />
+        <Data name="HighColor" type="int32" value="-16777216" />
+        <Data name="LowColor" type="int32" value="-8355712" />
+      </BMessage>
+      <Data name="Node::parent" type="int32" value="4" />
+    </BMessage>
+    <BMessage name="node" type="BMessage" what="1885556564">
+      <Data name="this" type="int32" value="3" />
+      <BMessage name="Node::Data" type="BMessage" what="0">
+        <Data name="Node::name" type="string" value="Testnode 3" />
+      </BMessage>
+      <Data name="Node::Frame" type="BRect" left="200" top="200" right="300" bottom="240" />
+      <BMessage name="Node::Font" type="BMessage" what="1716475001">
+        <Data name="Font::Encoding" type="int8" value="0" />
+        <Data name="Font::Face" type="int16" value="0" />
+        <Data name="Font::Family" type="string" value="Swis721 BT" />
+        <Data name="Font::Flags" type="int32" value="0" />
+        <Data name="Font::Rotation" type="float" value="0" />
+        <Data name="Font::Shear" type="float" value="90" />
+        <Data name="Font::Size" type="float" value="12" />
+        <Data name="Font::Spacing" type="int8" value="0" />
+        <Data name="Font::Style" type="string" value="Roman" />
+        <Data name="Font::Color" type="int32" value="-4876433" />
+      </BMessage>
+      <BMessage name="Node::Pattern" type="BMessage" what="0">
+        <Data name="FillColor" type="int32" value="-4279144" />
+        <Data name="BorderColor" type="int32" value="-16777216" />
+        <Data name="PenSize" type="float" value="1.0" />
+        <Data name="DrawingMode" type="int8" value="0" />
+        <Data name="HighColor" type="int32" value="-16777216" />
+        <Data name="LowColor" type="int32" value="-8355712" />
+      </BMessage>
+    </BMessage>
+    <BMessage name="node" type="BMessage" what="1885554516">
+      <Data name="this" type="int32" value="4" />
+      <BMessage name="Node::Data" type="BMessage" what="0">
+        <Data name="Node::name" type="string" value="Combined" />
+      </BMessage>
+      <Data name="Node::Frame" type="BRect" left="20" top="10" right="320" bottom="100" />
+      <BMessage name="Node::Font" type="BMessage" what="1716475001">
+        <Data name="Font::Encoding" type="int8" value="0" />
+        <Data name="Font::Face" type="int16" value="0" />
+        <Data name="Font::Family" type="string" value="Swis721 BT" />
+        <Data name="Font::Flags" type="int32" value="0" />
+        <Data name="Font::Rotation" type="float" value="0" />
+        <Data name="Font::Shear" type="float" value="90" />
+        <Data name="Font::Size" type="float" value="12" />
+        <Data name="Font::Spacing" type="int8" value="0" />
+        <Data name="Font::Style" type="string" value="Roman" />
+        <Data name="Font::Color" type="int32" value="-4876433" />
+      </BMessage>
+      <BMessage name="Node::Pattern" type="BMessage" what="0">
+        <Data name="FillColor" type="int32" value="-4279144" />
+        <Data name="BorderColor" type="int32" value="-16777216" />
+        <Data name="PenSize" type="float" value="1.0" />
+        <Data name="DrawingMode" type="int8" value="0" />
+        <Data name="HighColor" type="int32" value="-16777216" />
+        <Data name="LowColor" type="int32" value="-8355712" />
+      </BMessage>
+      <Data name="allNodesList" type="int32" value="1" />
+      <Data name="allNodesList" type="int32" value="2" />
+    </BMessage>
+  </BMessage>
+  <BMessage name="PDocument::allConnections" type="BMessage" what="0">
+    <BMessage name="node" type="BMessage" what="1885553492">
+      <Data name="this" type="int32" value="5" />
+      <Data name="Connection::type" type="int8" value="1" />
+      <Data name="Node::from" type="int32" value="2" />
+      <Data name="Node::to" type="int32" value="3" />
+    </BMessage>
+  </BMessage>
+  <BMessage name="PDocument::selected" type="BMessage" what="0" />
+  <BMessage name="PDocument::commandManager" type="BMessage" what="0">
+    <Data name="undoStatus" type="int32" value="-1" />
+  </BMessage>
+</BMessage>
