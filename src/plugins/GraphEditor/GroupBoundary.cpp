@@ -98,7 +98,12 @@ vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float labelSpace
 	// recentering each column independently on the midpoint of its own
 	// (invalid) range reproduces one level band across the whole run with
 	// no separate run-boundary tracking needed.
-	const float	kCorridorHeight	= 16;
+	// Wider than it first looks it needs to be: RoundCorners() clamps its
+	// rounding radius to at most half of the shortest edge meeting at a
+	// corner, so a corridor much narrower than twice the usual corner
+	// radius rounds almost its whole height away at both ends and reads
+	// as a thin line instead of a band.
+	const float	kCorridorHeight	= 32;
 	for (int32 i=0; i<n; i++) {
 		if (topY[i] > bottomY[i]) {
 			float	center	= (topY[i]+bottomY[i])/2;
