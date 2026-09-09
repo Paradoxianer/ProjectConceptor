@@ -67,6 +67,7 @@ const float		arrowSize		= 7.0;
 
 class Renderer;
 class BMessageRunner;
+class TextEditorControl;
 
 class GraphEditor : public PEditor, public BView {
 
@@ -113,6 +114,16 @@ public:
 			Renderer*		CreateRendererFor(BMessage *node);
 			void			AddRenderer(Renderer* newRenderer);
 			void			RemoveRenderer(Renderer* wichRenderer);
+
+			/** StringRenderer::MouseDown() reports the inline rename box it
+			 * just opened here - at most one is ever open at a time. Lets
+			 * RemoveRenderer() close it out from under an Undo/Delete that
+			 * destroys the node being renamed mid-edit, instead of leaving
+			 * an orphaned text box with nothing behind it. */
+			void			SetActiveTextEditor(TextEditorControl *e){activeTextEditor=e;};
+			/** TextEditorControl calls this on itself once it's done (Enter
+			 * or click-away) so a stale pointer here never outlives it. */
+			void			ClearActiveTextEditor(TextEditorControl *e){if (activeTextEditor==e) activeTextEditor=NULL;};
 
 			bool			GridEnabled(void){return gridEnabled;};
 			float			GridWidth(void){return gridWidth;};
@@ -227,6 +238,7 @@ protected:
 			// than adding more state to close off what a real bool flag on
 			// the node never risked in the first place, just differently.
 			BMessage		*pendingStartEditNode;
+			TextEditorControl	*activeTextEditor;
 			BList			*renderer;
 			float			scale;
 

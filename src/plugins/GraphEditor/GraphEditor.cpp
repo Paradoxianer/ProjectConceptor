@@ -19,6 +19,7 @@
 #include "ClassRenderer.h"
 #include "ConnectionRenderer.h"
 #include "GroupRenderer.h"
+#include "TextEditorControl.h"
 
 
 // same shape as LayoutEditor's own loader - the plugin's icons live as PNG
@@ -76,6 +77,7 @@ void GraphEditor::Init(void) {
 	activRenderer	= NULL;
 	mouseReciver	= NULL;
 	pendingStartEditNode	= NULL;
+	activeTextEditor		= NULL;
 	rendersensitv	= new BRegion();
 	renderString	= new char[30];
 	key_hold		= false;
@@ -1114,6 +1116,21 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
 	TRACE();
 	//** Find the Node for the Renderer check if it has a parent... then remove the renderer also from the nodeList of the Groupparent
 	if (wichRenderer != NULL) {
+		// StringRenderer::MouseDown() (a double-click, or StartEditingName()
+		// right after an Insert) opens an inline rename box as a plain
+		// sibling BView, entirely outside this renderer's own object graph
+		// - nothing closes it if the node it belongs to gets torn down
+		// while it's still open (Undo right after Insert being the common
+		// case). Only one such box is ever open at a time, so it's safe to
+		// just close whichever one is open whenever any renderer goes away,
+		// without tracking which node it actually belongs to.
+		if (activeTextEditor != NULL) {
+			TextEditorControl	*editorControl	= activeTextEditor;
+			activeTextEditor	= NULL;
+			if (editorControl->Parent())
+				RemoveChild(editorControl);
+			delete editorControl;
+		}
 		if (activRenderer == wichRenderer)
 			activRenderer = NULL;
 		if (mouseReciver == wichRenderer)

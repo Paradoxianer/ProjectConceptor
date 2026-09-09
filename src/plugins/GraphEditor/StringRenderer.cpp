@@ -85,6 +85,7 @@ void StringRenderer::MouseDown(BPoint where,int32 buttons, int32 clicks,int32 mo
 	editer->SetText(*myString);
 	editer->MakeFocus(true);
 	editer->SelectAll();
+	editor->SetActiveTextEditor(editer);
 }
 
 void StringRenderer::Draw(BView *drawOn, BRect updateRect)

@@ -1,4 +1,5 @@
 #include "TextEditorControl.h"
+#include "GraphEditor.h"
 
 TextEditorControl::TextEditorControl(BRect rect
 		, const char *name
@@ -83,15 +84,22 @@ status_t TextEditorControl::Invoke(BMessage *message) {
 	//** maby we should turn this on
 	//SetEventMask(0);
 	BMessage copy(*Message());
-/*	copy.AddPointer("newValue", Text()); 
+/*	copy.AddPointer("newValue", Text());
 	copy.AddInt32("size",TextLength()+1);*/
 	BMessage *valueContainer	= new BMessage();
 	copy.FindMessage("valueContainer",valueContainer);
 	valueContainer->AddString("newValue",Text());
 	copy.ReplaceMessage("valueContainer",valueContainer);
-	if (Parent()) {
-		Parent()->MakeFocus(true);
-		Parent()->RemoveChild(this);
+	// GraphEditor::RemoveRenderer() tracks the one inline rename box that
+	// can be open at a time, to close it out if its node gets torn down
+	// (Undo, Delete, ...) while still open - clear that back-pointer here
+	// too so it's never left pointing at this control once editing has
+	// finished normally instead.
+	GraphEditor	*parent	= (GraphEditor *)Parent();
+	if (parent) {
+		parent->MakeFocus(true);
+		parent->RemoveChild(this);
+		parent->ClearActiveTextEditor(this);
 	}
 	if ((changed) && (commit))
 		return BInvoker::Invoke(&copy);
