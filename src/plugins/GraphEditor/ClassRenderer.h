@@ -63,6 +63,16 @@ public:
 				void		SetPreviewFillColor(rgb_color color);
 				void		ClearPreviewFillColor(void);
 
+				bool		AnimationStep(float dt);
+
+				/** false hides the resize handle/hit-test entirely (issue
+				 * #38 - a group's box is auto-fit around its children, a
+				 * manual resize handle would just get overridden by
+				 * RecalcFrame() the moment it commits anyway). True here,
+				 * overridden in GroupRenderer.
+				 */
+		virtual	bool		SupportsResize(void) {return true;};
+
 
 protected:
 				void		Init();
@@ -79,6 +89,21 @@ protected:
 		rgb_color			previewFillColor;
 		BRect				frame;
 		bool				selected;
+
+		/** spring-animates the drawn position toward frame.LeftTop() after
+		 * a non-interactive move (e.g. Auto-Layout) - see ValueChanged()/
+		 * AnimationStep(). Draw() offsets by (animPosX,animPosY)-frame.
+		 * LeftTop() via BView::SetOrigin(), frame/children stay at their
+		 * real, final position throughout - same "renderer draws something
+		 * other than the committed data, briefly" pattern as
+		 * SetPreviewFillColor() (see docs/notes.md).
+		 */
+		bool				animating;
+		float				animPosX,animPosY;
+		float				animVelX,animVelY;
+		/** false until the constructor's first ValueChanged() call has run -
+		 * skips animating a brand new node in from BRect(0,0,0,0). */
+		bool				initialized;
 		AFont				*font;
 		float				penSize;
 

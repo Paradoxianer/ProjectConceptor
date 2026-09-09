@@ -2,8 +2,12 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
 
+#include "GroupBoundaryTest.h"
 #include "IndexerTest.h"
+#include "LayoutEditorTest.h"
+#include "MessageXmlWriterTest.h"
 #include "PCommandTest.h"
+#include "TestDocument.h"
 
 const char *TEST_APP_SIGNATURE = "application/x-vnd.ProjectConceptorTests";
 
@@ -17,6 +21,14 @@ int main(int argc, char **argv)
 	CppUnit::TextUi::TestRunner runner;
 	runner.addTest(IndexerTest::suite());
 	runner.addTest(PCommandTest::suite());
+	runner.addTest(LayoutEditorTest::suite());
+	runner.addTest(GroupBoundaryTest::suite());
+	runner.addTest(MessageXmlWriterTest::suite());
 	bool success = runner.run("", false);
+	// #117: every headless PDocument any test created is still running a
+	// real BLooper thread at this point - quit them before main() returns,
+	// or one still mid-dispatch crashes into memory this process is
+	// already tearing down.
+	CleanupTestDocuments();
 	return success ? 0 : 1;
 }

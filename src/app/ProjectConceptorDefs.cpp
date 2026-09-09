@@ -171,6 +171,7 @@ const char*		P_C_NODE_ALLNODES				= "Node::allNodes";
 const char*		P_C_NODE_ALLCONNECTIONS			= "Node::allConnections";
 
 const char*		P_C_NODE_CONNECTION_TYPE		= "Connection::type";
+const char*		P_C_NODE_CONNECTION_ARROWS		= "Connection::arrows";
 
 const char*		P_C_NODE_INCOMING				= "Node::incoming";
 const char*		P_C_NODE_OUTGOING				= "Node::outgoing";

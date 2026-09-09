@@ -38,7 +38,8 @@ BMessage* PCommand::Do(PDocument *doc,BMessage *settings)
 		if (subPCommand)
 		{
 			subPCommandMessage = subPCommand->Do(doc,subPCommandMessage);
-			settings->ReplaceMessage("PCommand::subPCommand",subPCommandMessage);
+			// indexed - unindexed overload always hit slot 0 (#116)
+			settings->ReplaceMessage("PCommand::subPCommand",i,subPCommandMessage);
 		}
 		i++;
 	}

@@ -17,6 +17,12 @@ SRCS= 	TestMain.cpp \
 		TestDocument.cpp \
 		IndexerTest.cpp \
 		PCommandTest.cpp \
+		LayoutEditorTest.cpp \
+		GroupBoundaryTest.cpp \
+		MessageXmlWriterTest.cpp \
+		../plugins/LayoutEditor/LayoutEditor.cpp \
+		../plugins/LayoutEditor/DotLayouter.cpp \
+		../plugins/BatchCommand/Batch.cpp \
 		../app/ProjectConceptorDefs.cpp \
 		../app/Config/ConfigManager.cpp \
 		../app/Config/ConfigWindow.cpp \
@@ -48,6 +54,8 @@ SRCS= 	TestMain.cpp \
 		../app/ToolBar/AlphaSlider.cpp \
 		../app/ToolBar/ColorPickerWindow.cpp \
 		../app/ToolBar/FloatToolItem.cpp \
+		../app/ToolBar/ChoiceToolItem.cpp \
+		../app/ToolBar/IconMenuItem.cpp \
 		../app/ToolBar/PatternToolItem.cpp \
 		../app/Tools/AFont.cpp \
 		../app/Tools/PCSavePanel.cpp \
@@ -62,7 +70,10 @@ SRCS= 	TestMain.cpp \
 		../app/Tools/plugins/PluginManager.cpp \
 		../plugins/ChangeValueCommand/ChangeValue.cpp \
 		../plugins/InsertCommand/Insert.cpp \
-		../plugins/GroupCommand/Group.cpp
+		../plugins/GroupCommand/Group.cpp \
+		../plugins/MoveCommand/Move.cpp \
+		../plugins/SelectCommand/Select.cpp \
+		../plugins/GraphEditor/GroupBoundary.cpp
 
 RDEFS=
 
@@ -88,7 +99,10 @@ LOCAL_INCLUDE_PATHS =	. \
 						../app/Tools \
 						../plugins/ChangeValueCommand \
 						../plugins/InsertCommand \
-						../plugins/GroupCommand
+						../plugins/GroupCommand \
+						../plugins/LayoutEditor \
+						../plugins/BatchCommand \
+						../plugins/GraphEditor
 
 COMPILER_FLAGS =
 

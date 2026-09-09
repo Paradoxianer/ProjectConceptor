@@ -1,5 +1,6 @@
 plugins = \
 	AddAttributeCommand \
+	BatchCommand \
 	ChangeValueCommand \
 	CopyCommand \
 	DeleteCommand \
@@ -7,12 +8,13 @@ plugins = \
 	GraphEditor \
 	GroupCommand \
 	InsertCommand \
+	LayoutEditor \
 	MoveCommand \
 	NavigatorEditor \
 	PasteCommand \
 	RemoveAttributeCommand \
 	ResizeCommand \
-	SelectCommand 
+	SelectCommand
 
 
 default:

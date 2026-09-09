@@ -16,6 +16,9 @@ public:
 	void ChangeValueOnConnectionPattern(void);
 	void GroupThenInsertChildRegistersInParentList(void);
 	void GroupUndoThenRedoKeepsChildren(void);
+	void WrapperUndoRestoresAllSubcommands(void);
+	void MoveGroupWithSelectedChildrenMovesOnce(void);
+	void ExecuteViaRealMessageDispatchSurvivesProcessExit(void);
 
 	CPPUNIT_TEST_SUITE(PCommandTest);
 	CPPUNIT_TEST(ChangeValueDoUndo);
@@ -23,6 +26,9 @@ public:
 	CPPUNIT_TEST(ChangeValueOnConnectionPattern);
 	CPPUNIT_TEST(GroupThenInsertChildRegistersInParentList);
 	CPPUNIT_TEST(GroupUndoThenRedoKeepsChildren);
+	CPPUNIT_TEST(WrapperUndoRestoresAllSubcommands);
+	CPPUNIT_TEST(MoveGroupWithSelectedChildrenMovesOnce);
+	CPPUNIT_TEST(ExecuteViaRealMessageDispatchSurvivesProcessExit);
 	CPPUNIT_TEST_SUITE_END();
 };
 

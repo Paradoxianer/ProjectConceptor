@@ -43,6 +43,15 @@ public:
 	virtual	void		SetPreviewFillColor(rgb_color color) {};
 	virtual	void		ClearPreviewFillColor(void) {};
 
+	/** Advances a renderer's own in-flight position animation (e.g. after
+	 * Auto-Layout) by dt seconds. Returns true while still animating -
+	 * GraphEditor calls this every tick from its shared animation runner
+	 * (see GraphEditor::StartAnimating()) and drops the renderer once it
+	 * returns false. Non-pure/no-op default: only ClassRenderer overrides
+	 * it for now.
+	 */
+	virtual	bool		AnimationStep(float dt) {return false;};
+
 protected:
 			BMessage	*container;
 			GraphEditor	*editor;

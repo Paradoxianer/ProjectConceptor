@@ -21,6 +21,7 @@
 #include "PatternToolItem.h"
 #include "ColorToolItem.h"
 #include "FloatToolItem.h"
+#include "ChoiceToolItem.h"
 
 const float			 	max_entfernung			= 50.0;
 const uint32			G_E_RENDERER			= 'geRr';
@@ -41,24 +42,37 @@ const uint32			G_E_COLOR_CHANGED		= 'geCC';
 // sent once when the picker closes - see docs/notes.md.
 const uint32			G_E_COLOR_PREVIEW		= 'geCP';
 const uint32			G_E_PEN_SIZE_CHANGED	= 'gePS';
+// both carry a "value" string from their ChoiceToolItem and apply to the
+// current selection, same as the pen size/fill color controls
+const uint32			G_E_CONNECTION_STYLE	= 'geCS';
+const uint32			G_E_CONNECTION_ARROWS	= 'geCA';
 const uint32			G_E_ADD_ATTRIBUTE		= 'geAA';
 //*order to Insert and new a Node and to connect it to all current selected Nodes*/
 const uint32			G_E_INSERT_NODE 		= 'geIN';
 //*order to Insert and new a Node directly as a sibling to the last selected Node*/
 const uint32            G_E_INSERT_SIBLING      = 'geIS';
+// drives Renderer::AnimationStep() for every renderer in animatingRenderers,
+// see StartAnimating(); not sent by anything outside GraphEditor itself.
+const uint32			G_E_ANIMATION_TICK		= 'geAT';
 
 extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
 
 const float		triangleHeight	= 7;
 const float		gridWidth		= 50;
 const float		circleSize		= 3.0;
+// Arrow heads have to out-size the connection dots ClassRenderer draws at
+// exactly the same spots (same circleSize, same edge midpoints), or they
+// are covered by them and the arrow settings have no visible effect.
+const float		arrowSize		= 7.0;
 
 class Renderer;
+class BMessageRunner;
 
 class GraphEditor : public PEditor, public BView {
 
 public:
 							GraphEditor(image_id newId);
+	virtual					~GraphEditor(void);
 
 	//++++++++++++++++PEditor
 	virtual	void			AttachedToManager(void);
@@ -120,6 +134,11 @@ public:
 			BMessage		*GetStandartPattern(void){return patternMessage;};
 			BMessage        *GenerateInsertCommand(uint32 newWhat, bool connected = false);
 
+			/** Registers wichRenderer for per-frame AnimationStep() calls
+			 * (lazily starts the shared tick runner); the renderer removes
+			 * itself once AnimationStep() reports it has settled. */
+			void			StartAnimating(Renderer *wichRenderer);
+
 
 protected:
 			void			Init(void);
@@ -130,6 +149,15 @@ protected:
 			 * ValueChanged() for why the order matters.
 			 */
 			void			ProcessChangedNode(BMessage *node,BList *allNodes,BList *allConnections);
+			/** hit's own Frame() always contains a group's children, so
+			 * MouseDown()'s top-level hit test alone can never resolve a
+			 * click to the specific child under the cursor - only ever to
+			 * the group (issue #38). Recurses for nested groups; returns
+			 * hit itself unchanged for anything that isn't a GroupRenderer,
+			 * or if the click landed inside the group's box but not on any
+			 * of its children.
+			 */
+			Renderer*		DrillIntoGroup(Renderer *hit, BPoint where);
 
 			void			DeleteFromList(Renderer *wichRenderer);
 			void			AddToList(Renderer *wichRenderer, int32 pos);
@@ -158,6 +186,8 @@ protected:
 
 
 			FloatToolItem	*penSize;
+			ChoiceToolItem	*connectionStyle;
+			ChoiceToolItem	*connectionArrows;
 			ColorToolItem	*colorItem;
 			PatternToolItem	*patternItem;
 
@@ -199,6 +229,12 @@ protected:
 			BMessage		*pendingStartEditNode;
 			BList			*renderer;
 			float			scale;
+
+			/** renderers currently mid-AnimationStep(); drives the shared
+			 * G_E_ANIMATION_TICK runner, see StartAnimating(). */
+			BList			*animatingRenderers;
+			BMessageRunner	*animationRunner;
+			bigtime_t		animationLastTick;
 
 			bool			gridEnabled;
 			image_id 		pluginID;

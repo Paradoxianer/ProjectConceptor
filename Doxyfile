@@ -1,0 +1,34 @@
+# Doxygen config for ProjectConceptor's API reference. Deliberately minimal -
+# everything not listed here uses Doxygen's own current default (run
+# `doxygen -g -` to see them all) rather than freezing a decade-old default
+# snapshot into this file. Regenerate with: doxygen Doxyfile
+# (from the repo root; needs `pkgman install doxygen` on Haiku, or any
+# Doxygen 1.9+ elsewhere - only the HTML output is used).
+
+# Data/API/ itself is the old (2016, Doxygen 1.7.6.1) generated dump, kept
+# as-is rather than replaced - this generates into a clearly separate
+# sibling folder instead of overwriting or nesting inside it (Doxygen's own
+# default HTML_OUTPUT="html" would otherwise land at Data/API/html/, mixed
+# in among the old flat files).
+PROJECT_NAME           = "ProjectConceptor"
+PROJECT_BRIEF          = "Modular graph editor for Haiku and BeOS"
+OUTPUT_DIRECTORY       = Data
+HTML_OUTPUT            = API-current
+
+INPUT                  = src
+RECURSIVE              = YES
+FILE_PATTERNS          = *.h *.cpp
+
+# generated build output mixed into src/ by ./dev.sh build - never source
+EXCLUDE_PATTERNS       = */objects.*/* */bin/* *.o
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+GENERATE_LATEX         = NO
+GENERATE_HTML          = YES
+
+# the codebase spans BeOS-era (2005) through current C++ - keep parsing
+# lenient rather than tuned to one era's syntax
+BUILTIN_STL_SUPPORT    = YES

@@ -1,17 +1,47 @@
 #include "PCommandTest.h"
 
 #include <app/Message.h>
+#include <app/Messenger.h>
 #include <interface/Rect.h>
 #include <support/List.h>
+#include <OS.h>
 
+#include "BasePlugin.h"
 #include "ChangeValue.h"
 #include "Group.h"
 #include "Insert.h"
+#include "Move.h"
+#include "Select.h"
+#include "PCommandManager.h"
 #include "PDocument.h"
 #include "ProjectConceptorDefs.h"
 #include "TestDocument.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(PCommandTest);
+
+namespace {
+
+// Minimal BasePlugin to register ChangeValue without a real plugin .so.
+class TestChangeValuePlugin : public BasePlugin {
+public:
+	TestChangeValuePlugin(void) : BasePlugin(0) {}
+	virtual char*	GetName(void) { return (char *)"ChangeValue"; }
+	virtual char*	GetAutor(void) { return (char *)"test"; }
+	virtual char*	GetVersionsString(void) { return (char *)"0"; }
+	virtual char*	GetDescription(void) { return (char *)"test"; }
+	virtual uint32	GetType(void) { return P_C_COMMANDO_PLUGIN_TYPE; }
+	virtual void*	GetNewObject(void *value) { return new ChangeValue(); }
+};
+
+// Do()/Undo() unoverridden - exercises only the subPCommand loop.
+class TestWrapperCommand : public PCommand {
+public:
+	virtual void	AttachedToManager(void) {}
+	virtual void	DetachedFromManager(void) {}
+	virtual char*	Name(void) { return (char *)"TestWrapper"; }
+};
+
+}
 
 void PCommandTest::ChangeValueDoUndo(void)
 {
@@ -235,4 +265,172 @@ void PCommandTest::GroupUndoThenRedoKeepsChildren(void)
 	CPPUNIT_ASSERT(groupNode.FindPointer(P_C_NODE_ALLNODES,(void **)&groupAllNodes) == B_OK);
 	CPPUNIT_ASSERT(groupAllNodes->HasItem(&child1));
 	CPPUNIT_ASSERT(groupAllNodes->HasItem(&child2));
+}
+
+void PCommandTest::WrapperUndoRestoresAllSubcommands(void)
+{
+	// #116: subPCommand write-back used to always hit slot 0, so only
+	// the last of several subcommands got undo info. Two ChangeValues
+	// here - without the fix, node1 (slot 0) never undoes.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
+
+	BMessage	node1(P_C_CLASS_TYPE);
+	node1.AddInt32("TestValue",1);
+	BMessage	node2(P_C_CLASS_TYPE);
+	node2.AddInt32("TestValue",2);
+
+	BMessage	valueContainer1;
+	valueContainer1.AddString("name","TestValue");
+	valueContainer1.AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer1.AddInt32("index",0);
+	int32	newValue1	= 100;
+	valueContainer1.AddData("newValue",B_INT32_TYPE,&newValue1,sizeof(int32));
+
+	BMessage	sub1;
+	sub1.AddString("Command::Name","ChangeValue");
+	sub1.AddPointer("node",&node1);
+	sub1.AddMessage("valueContainer",&valueContainer1);
+
+	BMessage	valueContainer2;
+	valueContainer2.AddString("name","TestValue");
+	valueContainer2.AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer2.AddInt32("index",0);
+	int32	newValue2	= 200;
+	valueContainer2.AddData("newValue",B_INT32_TYPE,&newValue2,sizeof(int32));
+
+	BMessage	sub2;
+	sub2.AddString("Command::Name","ChangeValue");
+	sub2.AddPointer("node",&node2);
+	sub2.AddMessage("valueContainer",&valueContainer2);
+
+	BMessage	settings;
+	settings.AddMessage("PCommand::subPCommand",&sub1);
+	settings.AddMessage("PCommand::subPCommand",&sub2);
+
+	TestWrapperCommand	wrapper;
+	wrapper.SetManager(doc->GetCommandManager());
+	BMessage	*result	= wrapper.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	int32	changed1	= 0;
+	CPPUNIT_ASSERT(node1.FindInt32("TestValue",&changed1) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)100,changed1);
+	int32	changed2	= 0;
+	CPPUNIT_ASSERT(node2.FindInt32("TestValue",&changed2) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)200,changed2);
+
+	wrapper.Undo(doc,result);
+
+	int32	restored1	= 0;
+	CPPUNIT_ASSERT(node1.FindInt32("TestValue",&restored1) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)1,restored1);
+	int32	restored2	= 0;
+	CPPUNIT_ASSERT(node2.FindInt32("TestValue",&restored2) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)2,restored2);
+}
+
+
+void PCommandTest::MoveGroupWithSelectedChildrenMovesOnce(void)
+{
+	// Move::MoveNode() carries a group's children along by recursing through
+	// P_C_NODE_ALLNODES. Select all puts the group *and* its children in the
+	// selection, so moving every selected node from the top offset each
+	// child twice - and the group's box, refitted to its children, ended up
+	// at twice the drag distance.
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	child1(P_C_CLASS_TYPE);
+	child1.AddRect(P_C_NODE_FRAME,BRect(0,0,50,50));
+	BMessage	child2(P_C_CLASS_TYPE);
+	child2.AddRect(P_C_NODE_FRAME,BRect(100,0,150,50));
+	doc->GetAllNodes()->AddItem(&child1);
+	doc->GetAllNodes()->AddItem(&child2);
+	doc->GetSelected()->AddItem(&child1);
+	doc->GetSelected()->AddItem(&child2);
+
+	BMessage	groupNode(P_C_GROUP_TYPE);
+	BMessage	groupSettings;
+	groupSettings.AddPointer("node",&groupNode);
+	Group	groupCommand;
+	groupCommand.Do(doc,&groupSettings);
+
+	// go through the real Select all, so this covers the selection state it
+	// actually produces rather than a hand-built approximation
+	doc->GetSelected()->MakeEmpty();
+	doc->GetAllNodes()->AddItem(&groupNode);
+
+	BMessage	selectSettings;
+	selectSettings.AddBool("selectAll",true);
+	Select	selectCommand;
+	selectCommand.Do(doc,&selectSettings);
+
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(&groupNode));
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(&child1));
+	bool	flag	= false;
+	CPPUNIT_ASSERT(child1.FindBool(P_C_NODE_SELECTED,&flag) == B_OK);
+	CPPUNIT_ASSERT(flag);
+
+	BMessage	moveSettings;
+	moveSettings.AddFloat("dx",10.0);
+	moveSettings.AddFloat("dy",5.0);
+
+	Move	moveCommand;
+	moveCommand.Do(doc,&moveSettings);
+
+	BRect	moved;
+	CPPUNIT_ASSERT(child1.FindRect(P_C_NODE_FRAME,&moved) == B_OK);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0,moved.left,0.001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0,moved.top,0.001);
+	CPPUNIT_ASSERT(child2.FindRect(P_C_NODE_FRAME,&moved) == B_OK);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(110.0,moved.left,0.001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(5.0,moved.top,0.001);
+}
+
+void PCommandTest::ExecuteViaRealMessageDispatchSurvivesProcessExit(void)
+{
+	// #117: every other test in this suite calls a PCommand's Do()/Undo()
+	// directly - this is the one path that goes through a real BMessenger
+	// send to the document's own looper thread, same as every editor in
+	// the app does it (see e.g. GraphEditor's sentTo->SendMessage() calls).
+	// A headless PDocument (NewHeadlessTestDocument()) is "fine to just
+	// leak" per its own doc comment, but its BLooper::Run() thread is real
+	// and was never told to stop - if it is still mid-dispatch of a
+	// message queued here when the test process itself exits, it crashes
+	// into memory that is already being torn down. The crash used to show
+	// up as a *separate* debug_server report a few seconds after CppUnit
+	// had already printed "OK" and this process returned - snooze()ing
+	// here to let this specific send finish is not the fix (later tests'
+	// leaked documents, and this one after the snooze, are still running
+	// loopers when main() returns) - the actual fix is in TestMain.cpp.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
+
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	node->AddInt32("TestValue",1);
+	doc->GetAllNodes()->AddItem(node);
+
+	BMessage	*valueContainer	= new BMessage();
+	valueContainer->AddString("name","TestValue");
+	valueContainer->AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer->AddInt32("index",0);
+	int32	newValue	= 42;
+	valueContainer->AddData("newValue",B_INT32_TYPE,&newValue,sizeof(int32));
+
+	BMessage	settings(P_C_EXECUTE_COMMAND);
+	settings.AddString("Command::Name","ChangeValue");
+	settings.AddPointer("node",node);
+	settings.AddMessage("valueContainer",valueContainer);
+
+	BMessenger	target(doc);
+	CPPUNIT_ASSERT(target.IsValid());
+	CPPUNIT_ASSERT(target.SendMessage(&settings) == B_OK);
+
+	// give the looper thread a chance to actually dispatch it before this
+	// test method (and eventually the whole process) moves on
+	snooze(200000);
+
+	int32	changed	= 0;
+	CPPUNIT_ASSERT(node->FindInt32("TestValue",&changed) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)42,changed);
 }

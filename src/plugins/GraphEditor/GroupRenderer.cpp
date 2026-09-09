@@ -1,7 +1,10 @@
 #include "GroupRenderer.h"
+#include "GroupBoundary.h"
 #include "ProjectConceptorDefs.h"
 
 #include <math.h>
+#include <algorithm>
+#include <set>
 
 #include <interface/Font.h>
 #include <interface/View.h>
@@ -14,6 +17,65 @@
 #include "PDocument.h"
 
 
+
+
+// Every corner in ComputeGroupBoundary()'s result is a right angle, either
+// convex (like a node's own corner) or concave (a notch cut into the shape
+// where a shorter child leaves empty space next to a taller one) - the
+// nodes themselves use rounded corners, so this shape should too, notches
+// included (issue #38). Rather than pull in BShape's SVG-style ArcTo (whose
+// sweep-direction flags aren't obvious to get right for a mix of convex and
+// concave turns), each vertex is replaced by a handful of points along the
+// actual tangent circle: trim `radius` back along both edges meeting at the
+// corner to get the arc's endpoints, its center is where those two trimmed
+// edges' perpendiculars meet (same construction for either turn direction -
+// only the resulting curve's concavity differs), then step along the
+// circle between the two endpoints.
+static vector<BPoint> RoundCorners(const vector<BPoint> &points, float radius)
+{
+	vector<BPoint>	result;
+	uint32	n	= points.size();
+	if ((n < 3) || (radius <= 0))
+		return points;
+
+	for (uint32 i=0; i<n; i++) {
+		BPoint	prev	= points[(i+n-1)%n];
+		BPoint	corner	= points[i];
+		BPoint	next	= points[(i+1)%n];
+		BPoint	dirIn(corner.x-prev.x,corner.y-prev.y);
+		BPoint	dirOut(next.x-corner.x,next.y-corner.y);
+		float	lenIn	= sqrt(dirIn.x*dirIn.x+dirIn.y*dirIn.y);
+		float	lenOut	= sqrt(dirOut.x*dirOut.x+dirOut.y*dirOut.y);
+		float	r		= radius;
+		if (lenIn > 0)  r = min(r,lenIn/2);
+		if (lenOut > 0) r = min(r,lenOut/2);
+		if ((lenIn < 0.01) || (lenOut < 0.01) || (r < 0.5)) {
+			result.push_back(corner);
+			continue;
+		}
+		BPoint	unitIn(dirIn.x/lenIn,dirIn.y/lenIn);
+		BPoint	unitOut(dirOut.x/lenOut,dirOut.y/lenOut);
+		BPoint	entry(corner.x-unitIn.x*r,corner.y-unitIn.y*r);
+		BPoint	exit(corner.x+unitOut.x*r,corner.y+unitOut.y*r);
+		// dirIn/dirOut are axis-aligned and perpendicular - the arc's
+		// center takes its x from whichever of entry/exit sits on the
+		// vertical edge, and its y from whichever sits on the horizontal
+		// one (the corner of the two edges' own R-offset parallels).
+		BPoint	center	= (fabs(unitIn.x) > 0.5)
+			? BPoint(entry.x,exit.y) : BPoint(exit.x,entry.y);
+		float	startAngle	= atan2(entry.y-center.y,entry.x-center.x);
+		float	endAngle	= atan2(exit.y-center.y,exit.x-center.x);
+		float	delta		= endAngle-startAngle;
+		while (delta > M_PI)  delta -= 2*M_PI;
+		while (delta < -M_PI) delta += 2*M_PI;
+		const int32	steps	= 6;
+		for (int32 s=0; s<=steps; s++) {
+			float	a	= startAngle+delta*s/steps;
+			result.push_back(BPoint(center.x+r*cos(a),center.y+r*sin(a)));
+		}
+	}
+	return result;
+}
 
 
 GroupRenderer::GroupRenderer(GraphEditor *parentEditor, BMessage *forContainer):ClassRenderer(parentEditor, forContainer)
@@ -29,6 +91,7 @@ void GroupRenderer::Init()
 	scale							= 1.0;
 	renderer						= new BList();
 	father							= NULL;
+	usesDefaultFill					= false;
 	if (container->FindPointer(P_C_NODE_ALLNODES, (void **)&allNodes) !=B_OK)
 		container->AddPointer(P_C_NODE_ALLNODES,allNodes=new BList());
 }
@@ -63,6 +126,24 @@ void GroupRenderer::ValueChanged()
 	Renderer		*painter		= NULL;
 
 	ClassRenderer::ValueChanged();
+
+	// A group defaults to just a hint of fill (issue #38) - see the note
+	// in Draw(). ClassRenderer just read this group's fill from its
+	// pattern; one still carrying the editor's standard fill has never
+	// been given a colour of its own (every group ever saved carries that
+	// standard pattern, since ClassRenderer adds it on first use), so
+	// treat it as unset. A colour actually picked for this group differs
+	// and fills solidly.
+	rgb_color	standardFill;
+	usesDefaultFill	= false;
+	if (editor->GetStandartPattern()->FindInt32("FillColor",(int32 *)&standardFill) == B_OK) {
+		if ((fillColor.red == standardFill.red)
+				&& (fillColor.green == standardFill.green)
+				&& (fillColor.blue == standardFill.blue)) {
+			fillColor.alpha	= 55;
+			usesDefaultFill	= true;
+		}
+	}
 
 	// ClassRenderer::ValueChanged() just read P_C_NODE_FRAME as-is - if this
 	// broadcast came from the generic Resize command (dragging the group's
@@ -103,6 +184,9 @@ void GroupRenderer::ValueChanged()
 		else
 			allNodes->RemoveItem(node);
 	}
+	// after the children are up to date - the notch this sits in is
+	// derived from their rects
+	PlaceLabel();
 }
 
 void GroupRenderer::MoveBy(float dx,float dy) {
@@ -190,17 +274,32 @@ void GroupRenderer::RecalcFrame(bool toFit) {
 	// canvas. Nothing to fit yet, so leave the existing frame alone.
 	if (!groupFrame.IsValid())
 		return;
-	groupFrame.InsetBy(-5,-5);
-	groupFrame.top = groupFrame.top-15;
+	// same margins Draw()/CollectChildRects() use, so `frame` actually
+	// contains the drawn outline instead of clipping it - the top used to
+	// reserve a flat 15px for the label while Draw() reserves however much
+	// the name and attribute rows really need.
+	groupFrame.top		-= 5;
+	groupFrame.left		-= 5;
+	groupFrame.bottom	+= 8;
+	groupFrame.right	+= 8;
+	groupFrame.top		-= LabelSpace();
 	if (groupFrame != frame) {
-		frame =  frame | groupFrame;
+		// exact assignment, not a union with the old frame (issue #38) -
+		// a group is a strict auto-fit rectangle around its children, so
+		// it has to shrink back down just as readily as it grows. No
+		// manual resize handle exists anymore (SupportsResize() is false
+		// here) to fight this; a stray committed resize from some other
+		// path (an old macro replay, say) gets corrected back to fit the
+		// next time this runs, same as an oversized one would.
+		frame = groupFrame;
 		// without this, the next ValueChanged() on this renderer (any later
 		// change anywhere - changedNodes never clears - will trigger one)
 		// re-reads P_C_NODE_FRAME from container via ClassRenderer's own
 		// ValueChanged() and overwrites this recalculation right back to
 		// its old, too-small value
 		container->ReplaceRect(P_C_NODE_FRAME,frame);
-		//** need to move the Attribs and the Name...
+		// the notch the label sits in moved with the children
+		PlaceLabel();
 		if (parentNode) {
 			GroupRenderer	*parent	= NULL;
 			if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
@@ -223,4 +322,146 @@ void GroupRenderer::MouseDown(BPoint where, int32 buttons,
 		editor->SendMessageToDoc(newNodeCommand);
 	}
 	ClassRenderer::MouseDown(where,buttons,clicks,modifiers);
+}
+
+
+// Each child's own rect plus margin - the shape the boundary is built
+// around. More margin at the bottom/right than top/left: that is where a
+// child's own drop shadow lands, so it needs the extra room.
+void GroupRenderer::CollectChildRects(vector<BRect> &rects)
+{
+	for (int32 i=0; i<renderer->CountItems(); i++) {
+		Renderer	*child	= (Renderer *)renderer->ItemAt(i);
+		if ((child->GetMessage()->what == P_C_CLASS_TYPE)
+				|| (child->GetMessage()->what == P_C_GROUP_TYPE)) {
+			BRect	r	= child->Frame();
+			r.top		-= 5;
+			r.left		-= 5;
+			r.bottom	+= 8;
+			r.right		+= 8;
+			rects.push_back(r);
+		}
+	}
+}
+
+
+// Height the outline has to keep clear above the leftmost child for this
+// group's own name and attribute rows - measured off what they actually
+// occupy, not a guessed constant.
+float GroupRenderer::LabelSpace(void)
+{
+	float	space	= name->Frame().Height()+4;
+	vector<Renderer *>::iterator	attribute	= attributes->begin();
+	while (attribute != attributes->end()) {
+		space	+= (*attribute)->Frame().Height();
+		attribute++;
+	}
+	return space;
+}
+
+
+// ClassRenderer places the name relative to `frame`, which for a group is
+// the bounding box of every child - so the label ended up at the top of
+// the *topmost* child, while the outline reserves its notch above the
+// *leftmost* one. Whenever those are different children the label floated
+// outside the shape entirely. Move it (and any attribute rows, keeping
+// their spacing) to where the notch actually is.
+void GroupRenderer::PlaceLabel(void)
+{
+	vector<BRect>	rects;
+	CollectChildRects(rects);
+	if (rects.empty())
+		return;
+
+	BRect	leftmost	= rects[0];
+	for (uint32 i=1; i<rects.size(); i++) {
+		if (rects[i].left < leftmost.left)
+			leftmost	= rects[i];
+	}
+
+	BRect	current	= name->Frame();
+	float	dx		= (leftmost.left+(xRadius/3)) - current.left;
+	float	dy		= (leftmost.top-LabelSpace()+(yRadius/3)) - current.top;
+	if ((dx == 0) && (dy == 0))
+		return;
+	name->MoveBy(dx,dy);
+	vector<Renderer *>::iterator	attribute	= attributes->begin();
+	while (attribute != attributes->end()) {
+		(*attribute)->MoveBy(dx,dy);
+		attribute++;
+	}
+}
+
+
+void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
+{
+	bool	offsetForAnim	= animating;
+	BPoint	priorOrigin		= drawOn->Origin();
+	if (offsetForAnim) {
+		BPoint	delta(animPosX-frame.left,animPosY-frame.top);
+		drawOn->PushState();
+		drawOn->SetOrigin(priorOrigin+delta);
+	}
+
+	drawOn->SetFont(font);
+	drawOn->SetPenSize(penSize);
+
+	vector<BRect>	rects;
+	CollectChildRects(rects);
+	if (rects.empty()) {
+		if (offsetForAnim)
+			drawOn->PopState();
+		return;
+	}
+
+	vector<BPoint>	hull	= ComputeGroupBoundary(rects,LabelSpace());
+	if (hull.size() < 3) {
+		if (offsetForAnim)
+			drawOn->PopState();
+		return;
+	}
+	hull	= RoundCorners(hull,xRadius);
+
+	rgb_color	drawColor	= hasPreviewFillColor ? previewFillColor : fillColor;
+	// A group's fill lies behind every child across the whole enclosed
+	// area, so a solid one tints all of it and reads far heavier than the
+	// outline needs (issue #38) - by default it stays a faint tint. The
+	// drop shadow only makes sense under a fill solid enough to cast one;
+	// under the default tint it would be darker than the shape itself.
+	// Both go solid as soon as the group is given a real fill colour.
+	bool	filled	= (drawColor.alpha != 0);
+	bool	shadowed	= filled && (hasPreviewFillColor || !usesDefaultFill);
+
+	if (shadowed) {
+		vector<BPoint>	shadowHull(hull);
+		for (uint32 i=0; i<shadowHull.size(); i++)
+			shadowHull[i]	+= BPoint(3,3);
+		drawOn->SetHighColor(0,0,0,77);
+		drawOn->FillPolygon(&shadowHull[0],shadowHull.size());
+	}
+
+	if (selected) {
+		drawOn->SetPenSize(5.0);
+		drawOn->SetHighColor(200,0,0,150);
+		drawOn->StrokePolygon(&hull[0],hull.size());
+		drawOn->SetPenSize(penSize);
+	}
+
+	if (filled) {
+		drawOn->SetHighColor(drawColor);
+		drawOn->FillPolygon(&hull[0],hull.size());
+	}
+
+	drawOn->SetHighColor(borderColor);
+	drawOn->StrokePolygon(&hull[0],hull.size());
+
+	name->Draw(drawOn,updateRect);
+	vector<Renderer *>::iterator	allAttributes	= attributes->begin();
+	while (allAttributes != attributes->end()) {
+		(*allAttributes)->Draw(drawOn,updateRect);
+		allAttributes++;
+	}
+
+	if (offsetForAnim)
+		drawOn->PopState();
 }

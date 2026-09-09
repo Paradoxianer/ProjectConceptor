@@ -23,6 +23,10 @@ protected:
 	virtual	void			DoSelect(PDocument *doc ,BRect *rect);
 	virtual	void			DoSelect(PDocument *doc ,BMessage *container);
 	virtual void			DoSelectAll(PDocument *doc);
+			/** marks every entry of one of the document's node lists
+			 * selected - see DoSelectAll(), which covers both nodes and
+			 * connections. */
+			void			SelectList(PDocument *doc,BList *all);
 private:
 	//----------------PCommand
 };

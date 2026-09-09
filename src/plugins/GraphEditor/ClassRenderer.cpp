@@ -19,6 +19,7 @@ ClassRenderer::ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer):
 	TRACE();
 	Init();
 	ValueChanged();
+	initialized	= true;
 }
 void ClassRenderer::Init()
 {
@@ -40,6 +41,10 @@ void ClassRenderer::Init()
 	penSize						= 1.0;
 	connecting					= 0;
 	hasPreviewFillColor			= false;
+	animating					= false;
+	animPosX = animPosY		= 0;
+	animVelX = animVelY		= 0;
+	initialized					= false;
 
 	BMessage	*editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 	editMessage->AddPointer("node",container);
@@ -106,7 +111,8 @@ void ClassRenderer::MouseDown(BPoint where, int32 buttons,
 				connecting	= 3;
 			else if (bottomConnection.Contains(where))
 				connecting	= 4;
-			else if ( (where.y >= (frame.bottom-(2*circleSize))) && (where.x >= (frame.right-(2*circleSize))) ) {
+			else if (SupportsResize() && (where.y >= (frame.bottom-(2*circleSize)))
+					&& (where.x >= (frame.right-(2*circleSize)))) {
 				resizing = true;
 			}
 		}
@@ -242,6 +248,19 @@ void ClassRenderer::MouseUp(BPoint where) {
 
 
 void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
+	// mid-slide: shift this node's whole draw (shape+name+attributes+
+	// connectors, all already positioned at the real/final frame) so it
+	// paints at the current animated position instead - frame itself and
+	// every child stay at their real, final values throughout (see
+	// AnimationStep()/ValueChanged()).
+	bool	offsetForAnim	= animating;
+	BPoint	priorOrigin		= drawOn->Origin();
+	if (offsetForAnim) {
+		BPoint	delta(animPosX-frame.left,animPosY-frame.top);
+		drawOn->PushState();
+		drawOn->SetOrigin(priorOrigin+delta);
+	}
+
 	BRect		shadowFrame = frame;
 	bool		fitIn		= true;
 	drawOn->SetFont(font);
@@ -264,8 +283,10 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	
 	
 
-	drawOn->SetHighColor(0,0,0,255);	
-	drawOn->FillTriangle(BPoint(frame.right-(3*circleSize),frame.bottom),BPoint(frame.right,frame.bottom-(3*circleSize)),BPoint(frame.right,frame.bottom));
+	if (SupportsResize()) {
+		drawOn->SetHighColor(0,0,0,255);
+		drawOn->FillTriangle(BPoint(frame.right-(3*circleSize),frame.bottom),BPoint(frame.right,frame.bottom-(3*circleSize)),BPoint(frame.right,frame.bottom));
+	}
 	
 
 	drawOn->SetHighColor(borderColor);
@@ -298,6 +319,9 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	}
 	if (!fitIn)
 		drawOn->DrawString("...",BPoint(frame.left+circleSize+2,frame.bottom-(yRadius/3)));
+
+	if (offsetForAnim)
+		drawOn->PopState();
 }
 
 void ClassRenderer::MessageReceived(BMessage *message) {
@@ -321,7 +345,21 @@ void ClassRenderer::ValueChanged() {
 	uint32		type			= B_ANY_TYPE;
 	int32		count			= 0;
 
+	BRect	oldFrame	= frame;
 	container->FindRect(P_C_NODE_FRAME,&frame);
+	if ((initialized) && (oldFrame.LeftTop() != frame.LeftTop())) {
+		if (!animating) {
+			animPosX	= oldFrame.left;
+			animPosY	= oldFrame.top;
+			animVelX	= 0;
+			animVelY	= 0;
+		}
+		// else: already mid-animation (e.g. Auto-Layout run again before the
+		// last one settled) - keep the current animated position/velocity as
+		// the start of the new leg instead of snapping back to oldFrame.
+		animating	= true;
+		editor->StartAnimating(this);
+	}
 	container->FindBool(P_C_NODE_SELECTED,&selected);
 	container->FindFloat(P_C_NODE_X_RADIUS,&xRadius);
 	container->FindFloat(P_C_NODE_Y_RADIUS,&yRadius);
@@ -361,6 +399,19 @@ void ClassRenderer::ValueChanged() {
 	topConnection.Set(xMiddle-circleSize,frame.top-circleSize,xMiddle+circleSize,frame.top+circleSize);
 	rightConnection.Set(frame.right-circleSize,yMiddle-circleSize,frame.right+circleSize,yMiddle+circleSize);
 	bottomConnection.Set(xMiddle-circleSize,frame.bottom-circleSize,xMiddle+circleSize,frame.bottom+circleSize);
+
+	// this node's own frame just changed via a committed command (Move,
+	// ChangeValue/Auto-Layout, either one's Undo, ...) rather than an
+	// interactive drag - MouseMoved()'s own live-drag path already
+	// cascades to a parent group directly (same pattern as here), but
+	// none of those commands mark the *parent* as changed (only this
+	// node), so without this the group's box never learns a lone child
+	// moved/resized outside of a drag (issue #38).
+	if ((oldFrame != frame) && (parentNode != NULL)) {
+		GroupRenderer	*parent	= NULL;
+		if (parentNode->FindPointer(editor->RenderString(),(void **)&parent) == B_OK)
+			parent->RecalcFrame();
+	}
 }
 
 BRect ClassRenderer::Frame( void ) {
@@ -386,9 +437,28 @@ bool  ClassRenderer::Caught(BPoint where) {
 void  ClassRenderer::SetFrame(BRect newFrame) {
 }
 
+// see the identical guard in the Move command (Move.cpp): a group's own
+// MoveBy() cascades into its children, so a child that is selected in its
+// own right must not be moved again from here
+static bool HasSelectedAncestor(BMessage *node)
+{
+	BMessage	*parent		= NULL;
+	bool		isSelected	= false;
+	while ((node != NULL)
+			&& (node->FindPointer(P_C_NODE_PARENT,(void **)&parent) == B_OK)
+			&& (parent != NULL)) {
+		isSelected	= false;
+		if ((parent->FindBool(P_C_NODE_SELECTED,&isSelected) == B_OK) && isSelected)
+			return true;
+		node	= parent;
+		parent	= NULL;
+	}
+	return false;
+}
+
 bool  ClassRenderer::MoveAll(void *arg,float dx, float dy) {
 	Renderer	*renderer	= (Renderer*)arg;
-	if (renderer->Selected())
+	if (renderer->Selected() && !HasSelectedAncestor(renderer->GetMessage()))
 		renderer->MoveBy(dx,dy);
 	return false;
 }
@@ -440,6 +510,32 @@ void ClassRenderer::SetPreviewFillColor(rgb_color color) {
 
 void ClassRenderer::ClearPreviewFillColor(void) {
 	hasPreviewFillColor	= false;
+}
+
+bool ClassRenderer::AnimationStep(float dt) {
+	if (!animating)
+		return false;
+	// critically-damped-ish spring toward frame.LeftTop() (the already-
+	// committed target) - k=stiffness, c=damping, mass=1.
+	const float	k		= 180.0f;
+	const float	c		= 24.0f;
+	float		targetX	= frame.left;
+	float		targetY	= frame.top;
+	float		accelX	= k*(targetX-animPosX) - c*animVelX;
+	float		accelY	= k*(targetY-animPosY) - c*animVelY;
+	animVelX	+= accelX*dt;
+	animVelY	+= accelY*dt;
+	animPosX	+= animVelX*dt;
+	animPosY	+= animVelY*dt;
+
+	const float	epsilonPos	= 0.5f;
+	const float	epsilonVel	= 2.0f;
+	if ((fabs(targetX-animPosX) < epsilonPos) && (fabs(targetY-animPosY) < epsilonPos)
+			&& (fabs(animVelX) < epsilonVel) && (fabs(animVelY) < epsilonVel)) {
+		animating	= false;
+		return false;
+	}
+	return true;
 }
 
 void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 count)

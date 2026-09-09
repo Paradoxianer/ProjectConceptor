@@ -31,6 +31,9 @@ PWindow::PWindow(BRect rect,PDocument *document):BWindow(rect,"ProjectConceptor"
 {
 	TRACE();
 	doc	= document;
+	// set before Init()/Show(), so doc->GetWindow() is already valid
+	// once AttachedToManager() etc. run (see PDocument::SetWindow()).
+	doc->SetWindow(this);
 	Init();
 	Show();
 }
@@ -537,24 +540,29 @@ void PWindow::MessageReceived(BMessage *message)
 void PWindow::AddEditor(const char *name,PEditor *editor)
 {
 	bool locked = LockLooper();
-	BTab	*tab = new BTab();
-	BRect	rect = mainView->Bounds();
-	rect.InsetBy(5,5);
-	rect.bottom -= mainView->TabHeight();
-	mainView->AddTab(editor->GetView(), tab);
-	tab->SetLabel(name);
-	// MainView doesn't use BLayout, so BTab::Select() is what actually
-	// AddChild()s a tab's view the first time - it never happens from
-	// AddTab() alone. Selecting every tab here keeps that first attach
-	// inside this LockLooper()'d call instead of deferring it to whatever
-	// context the tab happens to get clicked in for the first time later
-	// (a live mouse click wasn't a safe enough context - see issue #70).
-	// CreatEditorList() restores GraphEditor as the visible tab once every
-	// editor plugin has been added and attached this way.
-	mainView->Select(tab);
-	editor->GetView()->MakeFocus(true);
-	(editor->GetView())->ResizeTo(rect.Width()-B_V_SCROLL_BAR_WIDTH -2,rect.Height()-B_H_SCROLL_BAR_HEIGHT-2);
-	(editor->GetView())->MoveTo(2,2);
+	// GetView() may be NULL for a view-less editor (#102) - it still
+	// wants RegisterPEditor() below, just no tab.
+	BView	*editorView = editor->GetView();
+	if (editorView != NULL) {
+		BTab	*tab = new BTab();
+		BRect	rect = mainView->Bounds();
+		rect.InsetBy(5,5);
+		rect.bottom -= mainView->TabHeight();
+		mainView->AddTab(editorView, tab);
+		tab->SetLabel(name);
+		// MainView doesn't use BLayout, so BTab::Select() is what actually
+		// AddChild()s a tab's view the first time - it never happens from
+		// AddTab() alone. Selecting every tab here keeps that first attach
+		// inside this LockLooper()'d call instead of deferring it to whatever
+		// context the tab happens to get clicked in for the first time later
+		// (a live mouse click wasn't a safe enough context - see issue #70).
+		// CreatEditorList() restores GraphEditor as the visible tab once every
+		// editor plugin has been added and attached this way.
+		mainView->Select(tab);
+		editorView->MakeFocus(true);
+		editorView->ResizeTo(rect.Width()-B_V_SCROLL_BAR_WIDTH -2,rect.Height()-B_H_SCROLL_BAR_HEIGHT-2);
+		editorView->MoveTo(2,2);
+	}
 	(doc->GetEditorManager())->RegisterPEditor(editor);
 	if (locked)
 		UnlockLooper();

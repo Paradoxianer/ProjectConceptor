@@ -201,6 +201,18 @@ void PDocument::MessageReceived(BMessage* message) {
 			break;
 		}
 
+		// the Edit menu item has always sent this straight here, but nothing
+		// ever handled it - Select all silently did nothing. The Select
+		// command's own selectAll path is what does the work; no "deselect"
+		// field is added on purpose, so the command clears the old selection
+		// first (its default when the field is absent).
+		case B_SELECT_ALL: {
+			BMessage	*selectAllMessage	= new BMessage(P_C_EXECUTE_COMMAND);
+			selectAllMessage->AddString("Command::Name","Select");
+			selectAllMessage->AddBool("selectAll",true);
+			commandManager->Execute(selectAllMessage);
+			break;
+		}
 		case B_UNDO: {
 			commandManager->Undo(NULL);
 			break;
@@ -350,7 +362,11 @@ void PDocument::Resize(float toX,float toY)
 	bool locked = Lock();
 	bounds.right	= toX;
 	bounds.bottom	= toY;
-	editorManager->BroadCast(new BMessage(P_C_DOC_BOUNDS_CHANGED));
+	// a document with no attached UI (a headless PDocument, e.g.
+	// NewHeadlessTestDocument() in the test suite) has no editorManager -
+	// same null-deref pattern already fixed in PCommandManager (#117)
+	if (editorManager != NULL)
+		editorManager->BroadCast(new BMessage(P_C_DOC_BOUNDS_CHANGED));
 	if (locked)
 		Unlock();
 }
@@ -678,6 +694,21 @@ void PDocument::Load(void)
 	// and refilled) instead of being replaced - editors like NavigatorEditor
 	// cache the BList pointer for their lifetime, and a delete+reassign here
 	// left them pointing at freed memory on the next reload.
+	//
+	// Any nodes/connections already in these lists (e.g. from editing
+	// before this Load(), reusing the same window) have to be marked
+	// changed *before* MakeEmpty() drops them - otherwise GraphEditor's
+	// diffing (ProcessChangedNode(), driven off valueChanged) never learns
+	// they're gone and keeps their now-stale renderers around: still
+	// drawn, but no longer selectable/editable since they're not in
+	// allNodes anymore. Same changed->insert() pattern Delete::Do() uses,
+	// and same as there, never actually deleted - node lifetime here
+	// relies on process teardown, not on Load() freeing anything.
+	for (i = 0; i<allNodes->CountItems(); i++)
+		valueChanged->insert((BMessage*)allNodes->ItemAt(i));
+	for (i = 0; i<allConnections->CountItems(); i++)
+		valueChanged->insert((BMessage*)allConnections->ItemAt(i));
+
 	BList		*loadedNodes		= docLoader->GetAllNodes();
 	allNodes->MakeEmpty();
 	for (i = 0; i<loadedNodes->CountItems(); i++) {
@@ -705,7 +736,12 @@ void PDocument::Load(void)
 //	commandManager->LoadMacros(docLoader->GetCommandManagerMessage());
 //	commandManager->LoadUndo(docLoader->GetCommandManagerMessage());
 	SetPrintSettings( docLoader->GetPrinterSetting());
-	editorManager->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+	// see the same guard/comment in Resize() above - this is the exact
+	// crash docs/notes.md already documented as blocking a headless
+	// Load() test; the fix is the same one #117 already applied to
+	// PCommandManager's three call sites
+	if (editorManager != NULL)
+		editorManager->BroadCast(new BMessage(P_C_VALUE_CHANGED));
 }
 
 void PDocument::SavePanel()

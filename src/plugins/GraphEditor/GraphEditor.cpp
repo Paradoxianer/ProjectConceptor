@@ -8,6 +8,7 @@
 #include <support/DataIO.h>
 #include <string.h>
 #include <Catalog.h>
+#include <MessageRunner.h>
 
 #include "GraphEditor.h"
 #include "ColorSwatchView.h"
@@ -18,6 +19,20 @@
 #include "ClassRenderer.h"
 #include "ConnectionRenderer.h"
 #include "GroupRenderer.h"
+
+
+// same shape as LayoutEditor's own loader - the plugin's icons live as PNG
+// resources in its add-on image, and every caller wants a BBitmap
+static BBitmap*
+LoadPluginIcon(BResources *res, const char *name)
+{
+	size_t		size;
+	const void	*data	= (res != NULL)
+		? res->LoadResource((type_code)'PNG ',name,&size) : NULL;
+	if (data == NULL)
+		return NULL;
+	return BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
+}
 #include "PWindow.h"
 #include "PEditorManager.h"
 
@@ -43,6 +58,16 @@ GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"Gra
 	SetDrawingMode(B_OP_ALPHA);
 }
 
+GraphEditor::~GraphEditor(void) {
+	TRACE();
+	// stop the shared animation ticker before this view goes away - it
+	// keeps sending G_E_ANIMATION_TICK to BMessenger(this) via a raw
+	// BMessageRunner* otherwise, which outlives us if an animation is
+	// still in flight (e.g. right after Auto-Layout) when the window
+	// closes, and dispatches to freed memory next tick.
+	delete animationRunner;
+}
+
 void GraphEditor::Init(void) {
 	TRACE();
 	printRect		= NULL;
@@ -60,6 +85,9 @@ void GraphEditor::Init(void) {
 	toPoint			= new BPoint(0,0);
 	renderer		= new BList();
 	scale			= 1.0;
+	animatingRenderers	= new BList();
+	animationRunner		= NULL;
+	animationLastTick	= 0;
 	configMessage	= new BMessage();
 	myScrollParent	= NULL;
 
@@ -178,6 +206,29 @@ void GraphEditor::Init(void) {
 			toolBar->AddItem(addBool);
 		}
 	}
+
+	// Icon fields rather than text ones: the toolbar row is short on
+	// width and the shape/arrow choices read faster as pictures. The
+	// popup still shows icon *and* label, so the wording stays available
+	// while choosing.
+	connectionStyle		= new ChoiceToolItem(B_TRANSLATE("Connection"),
+		new BMessage(G_E_CONNECTION_STYLE),ITEM_WIDTH*2);
+	connectionStyle->SetIconOnly(true);
+	connectionStyle->AddChoice(B_TRANSLATE("Straight"),"0",LoadPluginIcon(res,"linear"));
+	connectionStyle->AddChoice(B_TRANSLATE("Rounded"),"1",LoadPluginIcon(res,"bended"));
+	connectionStyle->AddChoice(B_TRANSLATE("Angular"),"2",LoadPluginIcon(res,"angeld"));
+	connectionStyle->SetValue("2");
+	connectionStyle->SetToolTip(B_TRANSLATE("Shape of the selected connections"));
+
+	connectionArrows	= new ChoiceToolItem(B_TRANSLATE("Arrows"),
+		new BMessage(G_E_CONNECTION_ARROWS),ITEM_WIDTH*2);
+	connectionArrows->SetIconOnly(true);
+	connectionArrows->AddChoice(B_TRANSLATE("At target"),"1",LoadPluginIcon(res,"arrow-target"));
+	connectionArrows->AddChoice(B_TRANSLATE("At source"),"2",LoadPluginIcon(res,"arrow-source"));
+	connectionArrows->AddChoice(B_TRANSLATE("Both ends"),"3",LoadPluginIcon(res,"arrow-both"));
+	connectionArrows->AddChoice(B_TRANSLATE("None"),"0",LoadPluginIcon(res,"arrow-none"));
+	connectionArrows->SetValue("1");
+	connectionArrows->SetToolTip(B_TRANSLATE("Which ends of the selected connections carry an arrow"));
 
 	data=res->LoadResource((type_code)'PNG ',"addText",&size);
 	if (data) {
@@ -343,6 +394,19 @@ void GraphEditor::PreprocessAfterLoad(BMessage *container) {
 	container=container;
 }
 
+Renderer* GraphEditor::DrillIntoGroup(Renderer *hit, BPoint where) {
+	GroupRenderer	*group	= dynamic_cast<GroupRenderer*>(hit);
+	if (group == NULL)
+		return hit;
+	BList	*children	= group->RenderList();
+	for (int32 i = children->CountItems()-1; i >= 0; i--) {
+		Renderer	*child	= (Renderer*)children->ItemAt(i);
+		if (child->Caught(where))
+			return DrillIntoGroup(child,where);
+	}
+	return hit;
+}
+
 void GraphEditor::ProcessChangedNode(BMessage *node,BList *allNodes,BList *allConnections) {
 	PRINT(("Changed node\n"););
 	DEBUG_ONLY(node->PrintToStream());
@@ -484,7 +548,12 @@ void GraphEditor::MouseDown(BPoint where) {
 	bool found	=	false;
 	for (int32 i=(renderer->CountItems()-1);((!found) && (i>=0) );i--) {
 		if (((Renderer*)renderer->ItemAt(i))->Caught(scaledWhere)) {
-			mouseReciver = (Renderer*)renderer->ItemAt(i);
+			// a group's own Frame() always contains its children's, so a
+			// click anywhere in the box would otherwise always resolve to
+			// the group itself - drill down to whichever child (or
+			// nested-group descendant) is actually under the cursor
+			// (issue #38)
+			mouseReciver = DrillIntoGroup((Renderer*)renderer->ItemAt(i),scaledWhere);
 			mouseReciver->MouseDown(scaledWhere,buttons, clicks, modifiers);
 			found			= true;
 		}
@@ -611,10 +680,15 @@ void GraphEditor::AttachedToWindow(void) {
 	configBar->AddSeperator();
 	configBar->AddItem(penSize);
 	configBar->AddItem(colorItem);
+	configBar->AddSeperator();
+	configBar->AddItem(connectionStyle);
+	configBar->AddItem(connectionArrows);
 
 	grid->SetTarget(this);
 	penSize->SetTarget(this);
 	colorItem->SetTarget(this);
+	connectionStyle->SetTarget(this);
+	connectionArrows->SetTarget(this);
 	sentToMe	= new BMessenger((BView *)this);
 	BView *parent = myScrollParent->Parent();
 	if (parent) {
@@ -638,6 +712,17 @@ void GraphEditor::AttachedToWindow(void) {
 
 void GraphEditor::DetachedFromWindow(void) {
 	TRACE();
+	// stop this as early as possible in teardown, not just in the
+	// destructor: a BMessageRunner tick already sitting in this looper's
+	// message port when the window starts closing can still be dispatched
+	// after the destructor deletes the runner (deleting it doesn't recall
+	// an already-sent message) - only actually safe once nothing can
+	// reach this object as "this" anymore, i.e. before GraphEditor itself
+	// is destructed, which DetachedFromWindow() reliably runs ahead of.
+	if (animationRunner != NULL) {
+		delete animationRunner;
+		animationRunner	= NULL;
+	}
 	if (Window()) {
 		PWindow 	*pWindow		= (PWindow *)Window();
 		// While the whole window is closing, its menu bar/toolbars are being
@@ -654,6 +739,9 @@ void GraphEditor::DetachedFromWindow(void) {
 			if (configBar) {
 				configBar->RemoveItem(penSize);
 				configBar->RemoveItem(colorItem);
+				configBar->RemoveItem(connectionStyle);
+				configBar->RemoveItem(connectionArrows);
+				configBar->RemoveSeperator();
 				configBar->RemoveItem(patternItem);
 				configBar->RemoveSeperator();
 				configBar->RemoveItem(grid);
@@ -680,6 +768,22 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		}
 		case P_C_DOC_BOUNDS_CHANGED: {
 			UpdateScrollBars();
+			break;
+		}
+		case G_E_ANIMATION_TICK: {
+			bigtime_t	now	= system_time();
+			float		dt	= (now-animationLastTick)/1000000.0f;
+			animationLastTick	= now;
+			for (int32 i = animatingRenderers->CountItems()-1; i >= 0; i--) {
+				Renderer	*r	= (Renderer*)animatingRenderers->ItemAt(i);
+				if (!r->AnimationStep(dt))
+					animatingRenderers->RemoveItem(i);
+			}
+			if (animatingRenderers->CountItems() == 0) {
+				delete animationRunner;
+				animationRunner	= NULL;
+			}
+			Invalidate();
 			break;
 		}
 		case G_E_CONNECTING: {
@@ -721,6 +825,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
 				connection->AddMessage(P_C_NODE_DATA,data);
 				connection->AddInt8(P_C_NODE_CONNECTION_TYPE,1);
+				connection->AddInt8(P_C_NODE_CONNECTION_ARROWS,1);
 				// deliberately NOT the toolbar's current color/pen size -
 				// those default to values tuned for node fills, easy to end
 				// up pale/thin enough that a brand-new connection is barely
@@ -809,6 +914,29 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			valueContainer->AddFloat("newValue",penSize->GetValue());
 			changePenSizeMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changePenSizeMessage);
+			break;
+		}
+		// Both of these live directly on the connection node rather than in
+		// its pattern sub-message, so the ChangeValue carries no "subgroup".
+		// ChangeValue replaces in place and needs the field to already
+		// exist - ConnectionRenderer::ValueChanged() guarantees that for
+		// the arrows field on connections predating it.
+		case G_E_CONNECTION_STYLE:
+		case G_E_CONNECTION_ARROWS: {
+			const char	*value	= NULL;
+			if (message->FindString("value",&value) != B_OK)
+				break;
+			bool		isStyle	= (message->what == G_E_CONNECTION_STYLE);
+			BMessage	*changeMessage	= new BMessage(P_C_EXECUTE_COMMAND);
+			changeMessage->AddString("Command::Name","ChangeValue");
+			changeMessage->AddBool(P_C_NODE_SELECTED,true);
+			BMessage	*valueContainer	= new BMessage();
+			valueContainer->AddString("name",
+				isStyle ? P_C_NODE_CONNECTION_TYPE : P_C_NODE_CONNECTION_ARROWS);
+			valueContainer->AddInt32("type",B_INT8_TYPE);
+			valueContainer->AddInt8("newValue",(int8)atoi(value));
+			changeMessage->AddMessage("valueContainer",valueContainer);
+			sentTo->SendMessage(changeMessage);
 			break;
 		}
 		case G_E_ADD_ATTRIBUTE: {
@@ -1023,12 +1151,26 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
 			if (cnRenderer != NULL)
 				cnRenderer->InvalidateEndpoint(wichRenderer);
 		}
+		// avoid a dangling pointer in animatingRenderers if this renderer
+		// gets deleted mid-animation (e.g. Undo right after Auto-Layout)
+		animatingRenderers->RemoveItem(wichRenderer);
 		delete wichRenderer;
 	}
 /*	delete rendersensitv;
 	rendersensitv = new BRegion();
 	renderer->DoForEach(ProceedRegion,rendersensitv);*/
 	//**recalc Region
+}
+
+void GraphEditor::StartAnimating(Renderer *wichRenderer) {
+	TRACE();
+	if (!animatingRenderers->HasItem(wichRenderer))
+		animatingRenderers->AddItem(wichRenderer);
+	if (animationRunner == NULL) {
+		animationLastTick	= system_time();
+		BMessage	*tick	= new BMessage(G_E_ANIMATION_TICK);
+		animationRunner		= new BMessageRunner(BMessenger(this),tick,20000,-1);
+	}
 }
 
 Renderer* GraphEditor::FindRenderer(BPoint where) {
@@ -1217,6 +1359,7 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 					connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
 					uint	cType	= 1;
 					connection->AddInt8(P_C_NODE_CONNECTION_TYPE, cType);
+					connection->AddInt8(P_C_NODE_CONNECTION_ARROWS,1);
 					connection->AddMessage(P_C_NODE_DATA,data);
 					// see the G_E_CONNECTED handler above for why this isn't
 					// the toolbar's current color/pen size
@@ -1362,32 +1505,41 @@ void GraphEditor::AddToList(Renderer *whichRenderer, int32 pos) {
 
 void GraphEditor::UpdateScrollBars()
 {
-	if (doc != NULL)
-	{
-		BRect		docRect		= doc->Bounds();
-		BRect		scrollRect	= myScrollParent->Bounds();
-		if ((myScrollParent) && (doc))
-		{
-			float heightDiff	= docRect.Height()-scrollRect.Height();
-			float widthDiff		= docRect.Width()-scrollRect.Width();
-			float docWidth		= docRect.Width()*scale;
-			float docHeight		= docRect.Height()*scale;
-			if (widthDiff<0)
-				widthDiff = 0;
-			if (heightDiff<0)
-					heightDiff = 0;					
-			BScrollBar	*sb	= myScrollParent->ScrollBar(B_HORIZONTAL);
-			sb->SetRange(docRect.left,widthDiff*scale);
-			sb->SetProportion(scrollRect.Width()/docWidth);
-			// Steps are 1/8 visible window for small steps
-			//   and 1/2 visible window for large steps
-			sb->SetSteps(docWidth / 8.0, docWidth / 2.0);
-	
-			sb	= myScrollParent->ScrollBar(B_VERTICAL);
-			sb->SetRange(docRect.top,heightDiff*scale);
-			sb->SetProportion(scrollRect.Height()/docHeight);
-			sb->SetSteps(docHeight / 8.0, docHeight / 2.0);
-		}
+	// myScrollParent (and its own child scrollbars) can already be torn
+	// down by the time this runs during window close - RemoveRenderer()'s
+	// own cascade (see DetachedFromWindow()) can still trigger a bounds-
+	// changed style update after that point. myScrollParent->Bounds() used
+	// to run unconditionally before this same NULL-check even existed,
+	// crashing on close; each retrieved BScrollBar needs its own guard
+	// too since ScrollBar() can return NULL independently of
+	// myScrollParent itself still being valid.
+	if ((doc == NULL) || (myScrollParent == NULL))
+		return;
+
+	BRect		docRect		= doc->Bounds();
+	BRect		scrollRect	= myScrollParent->Bounds();
+	float heightDiff	= docRect.Height()-scrollRect.Height();
+	float widthDiff		= docRect.Width()-scrollRect.Width();
+	float docWidth		= docRect.Width()*scale;
+	float docHeight		= docRect.Height()*scale;
+	if (widthDiff<0)
+		widthDiff = 0;
+	if (heightDiff<0)
+			heightDiff = 0;
+	BScrollBar	*sb	= myScrollParent->ScrollBar(B_HORIZONTAL);
+	if (sb != NULL) {
+		sb->SetRange(docRect.left,widthDiff*scale);
+		sb->SetProportion(scrollRect.Width()/docWidth);
+		// Steps are 1/8 visible window for small steps
+		//   and 1/2 visible window for large steps
+		sb->SetSteps(docWidth / 8.0, docWidth / 2.0);
+	}
+
+	sb	= myScrollParent->ScrollBar(B_VERTICAL);
+	if (sb != NULL) {
+		sb->SetRange(docRect.top,heightDiff*scale);
+		sb->SetProportion(scrollRect.Height()/docHeight);
+		sb->SetSteps(docHeight / 8.0, docHeight / 2.0);
 	}
 
 }

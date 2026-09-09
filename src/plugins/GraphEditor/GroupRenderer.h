@@ -35,6 +35,17 @@ public:
 	                              int32 clicks =0,int32 modifiers =0);
 /*			void			MouseUp(BPoint where);
 			void			MouseMoved(BPoint pt, uint32 code, const BMessage *msg);*/
+			/** Renders as a skyline-style boundary that hugs each
+			 * child's own rect (plus margin) column by column, not one
+			 * bounding-box rect - a short child stays short even when a
+			 * taller one sits in a neighbouring column. Gaps with no
+			 * child at all just hold the last height, keeping the shape
+			 * one connected piece (issue #38). frame/P_C_NODE_FRAME
+			 * (RecalcFrame()) stay a plain bounding rect regardless -
+			 * only Draw()'s own shape changes, hit-testing/serialization
+			 * are unaffected.
+			 */
+			void			Draw(BView *drawOn, BRect updateRect);
 			void			LanguageChanged();
 //			void			MessageReceived(BMessage *message);
 
@@ -63,10 +74,25 @@ public:
 			void			SendToBack(Renderer *wichRenderer);
 				//------Group Special Methods
 
+			/** no manual resize handle - a group's box is always an
+			 * auto-fit rectangle around its children (issue #38). */
+	virtual	bool			SupportsResize(void) {return false;};
+
 
 protected:
 				void		Init();
 				void		InsertRenderObject(BMessage *node);
+				/** each child's own rect plus the margin the outline keeps
+				 * around it - shared by Draw() and PlaceLabel() so both
+				 * agree on where the shape actually sits. */
+				void		CollectChildRects(vector<BRect> &rects);
+				/** height kept clear above the leftmost child for this
+				 * group's name and attribute rows. */
+				float		LabelSpace(void);
+				/** moves the name/attributes into the outline's own label
+				 * notch - ClassRenderer places them against `frame`, which
+				 * for a group is the whole children's bounding box (#38). */
+				void		PlaceLabel(void);
 				
 /*				bool		MoveAll(void *arg,float dx, float dy);
 				bool		ResizeAll(void *arg,float dx, float dy);*/
@@ -78,6 +104,10 @@ protected:
 		BList				*renderer;
 		Renderer			*father;
 		float				scale;
+		/** true while this group still carries the editor's standard fill
+		 * colour, i.e. was never given one of its own - it then draws a
+		 * faint tint and no drop shadow (#38). */
+		bool				usesDefaultFill;
 		//-----Group Special Methods
 
 private:

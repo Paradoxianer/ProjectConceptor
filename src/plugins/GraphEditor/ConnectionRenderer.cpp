@@ -23,6 +23,7 @@ void ConnectionRenderer::Init() {
 	hasPreviewFillColor	= false;
 	penSize			= 2.0;
 	connectionType	= 2;
+	arrows			= 1;
 	bezier			= BShape();
 
 //	connectionName	= new BTextControl(BRect(0,0,100,55),"Name",NULL,"Unbenannt",new BMessage(B_C_NAME_CHANGED));
@@ -124,6 +125,14 @@ void ConnectionRenderer::ValueChanged() {
 	tmpNode->FindPointer(editor->RenderString(),(void **)&to);
 	container->FindBool(P_C_NODE_SELECTED,&selected);
 	container->FindInt8(P_C_NODE_CONNECTION_TYPE, (int8 *)&connectionType);
+	// connections saved before arrow ends were selectable have no such
+	// field - give them the target-only default, which is exactly how they
+	// used to draw. Added rather than only defaulted locally so the
+	// toolbar's ChangeValue has an existing field to replace.
+	if (container->FindInt8(P_C_NODE_CONNECTION_ARROWS,&arrows) != B_OK) {
+		arrows	= 1;
+		container->AddInt8(P_C_NODE_CONNECTION_ARROWS,arrows);
+	}
 	// same P_C_NODE_PATTERN sub-message a class node has - the Pen size/Fill
 	// color toolbar controls (GraphEditor.cpp's G_E_PEN_SIZE_CHANGED/
 	// G_E_COLOR_CHANGED) go through ChangeValue targeting exactly these two
@@ -159,15 +168,17 @@ void ConnectionRenderer::CalcLine() {
 	{
 		BRect	*fromRect	= new BRect(from->Frame());
 		BRect	*toRect		= new BRect(to->Frame());
+		BPoint	fromOutward	= BPoint(0,0);
 		float	toMiddleX 	=	(toRect->right-toRect->left)/2;
 		float	toMiddleY	=	(toRect->bottom-toRect->top)/2;
 		alpha		= atan2((toRect->top-fromRect->top),(toRect->left-fromRect->left));
 		if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) ) {
-			first		= BPoint(toRect->right+circleSize,toRect->top+toMiddleY-circleSize);
-			second		= BPoint(first.x,toRect->top+toMiddleY+circleSize);
+			first		= BPoint(toRect->right+arrowSize,toRect->top+toMiddleY-arrowSize);
+			second		= BPoint(first.x,toRect->top+toMiddleY+arrowSize);
 			third		= BPoint(toRect->right,toRect->top+toMiddleY);
 			toPoint		= BPoint(first.x,third.y);
 			fromPoint	= BPoint(fromRect->left,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+			fromOutward	= BPoint(-1,0);
 			float	bendLength	= BEND_LENGTH* (fromPoint.x-toPoint.x);
 			firstBend.x		= fromPoint.x - bendLength;
 			firstBend.y		= fromPoint.y;
@@ -175,11 +186,12 @@ void ConnectionRenderer::CalcLine() {
 			secondBend.y	= toPoint.y;
 		}
 		else if (alpha < -M_PI_4) {
-			first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->bottom+circleSize);
-			second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->bottom+circleSize);
+			first		= BPoint(toRect->left+toMiddleX-arrowSize,toRect->bottom+arrowSize);
+			second		= BPoint(toRect->left+toMiddleX+arrowSize,toRect->bottom+arrowSize);
 			third		= BPoint(toRect->left+toMiddleX,toRect->bottom);
 			toPoint		= BPoint(third.x,first.y);
 			fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->top);
+			fromOutward	= BPoint(0,-1);
 			float	bendLength	= BEND_LENGTH* (fromPoint.y-toPoint.y);
 			firstBend.x		= fromPoint.x;
 			firstBend.y		= fromPoint.y - bendLength;
@@ -187,11 +199,12 @@ void ConnectionRenderer::CalcLine() {
 			secondBend.y	= toPoint.y + bendLength;
 		}
 		else if (alpha> M_PI_4) {
-			first		= BPoint(toRect->left+toMiddleX-circleSize,toRect->top-circleSize);
-			second		= BPoint(toRect->left+toMiddleX+circleSize,toRect->top-circleSize);
+			first		= BPoint(toRect->left+toMiddleX-arrowSize,toRect->top-arrowSize);
+			second		= BPoint(toRect->left+toMiddleX+arrowSize,toRect->top-arrowSize);
 			third		= BPoint(toRect->left+toMiddleX,toRect->top);
 			toPoint		= BPoint(third.x,first.y);
 			fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->bottom);
+			fromOutward	= BPoint(0,1);
 			float	bendLength	= BEND_LENGTH* (toPoint.y-fromPoint.y);
 			firstBend.x		= fromPoint.x;
 			firstBend.y		= fromPoint.y + bendLength;
@@ -200,17 +213,37 @@ void ConnectionRenderer::CalcLine() {
 
 		}
 		else {
-			first		= BPoint(toRect->left-circleSize,toRect->top+toMiddleY-circleSize);
-			second		= BPoint(toRect->left-circleSize,toRect->top+toMiddleY+circleSize);
+			first		= BPoint(toRect->left-arrowSize,toRect->top+toMiddleY-arrowSize);
+			second		= BPoint(toRect->left-arrowSize,toRect->top+toMiddleY+arrowSize);
 			third		= BPoint(toRect->left,toRect->top+toMiddleY);
 			toPoint		= BPoint(first.x,third.y);
 			fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+			fromOutward	= BPoint(1,0);
 			float	bendLength	= BEND_LENGTH* (toPoint.x-fromPoint.x);
 			firstBend.x		= fromPoint.x + bendLength;
 			firstBend.y		= fromPoint.y;
 			secondBend.x	= toPoint.x - bendLength;
 			secondBend.y	= toPoint.y;
 		}
+		// Source arrow head, mirroring the target one each branch above
+		// built by hand: tip on the source's own edge, base a arrowSize
+		// further out along the direction the line leaves in. The branches
+		// only have to say which way that is - the triangle itself is the
+		// same construction every time. Note the bend control points above
+		// keep using the unmoved fromPoint; the offset is a few pixels and
+		// shifting the curve's start by it is not worth recomputing them.
+		// BPoint has no scalar multiply, so the offsets are spelled out
+		float	outX	= fromOutward.x*arrowSize;
+		float	outY	= fromOutward.y*arrowSize;
+		float	sideX	= -fromOutward.y*arrowSize;
+		float	sideY	= fromOutward.x*arrowSize;
+		fromThird	= fromPoint;
+		fromFirst	= BPoint(fromPoint.x+outX+sideX,fromPoint.y+outY+sideY);
+		fromSecond	= BPoint(fromPoint.x+outX-sideX,fromPoint.y+outY-sideY);
+		if (arrows & 2)
+			fromPoint	= BPoint(fromPoint.x+outX,fromPoint.y+outY);
+		delete fromRect;
+		delete toRect;
 	}
 }
 
@@ -259,13 +292,20 @@ void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
 
 		drawOn->SetHighColor(0,0,0,77);
 		drawOn->StrokeLine(	shadowFrom,shadowTo);
-		drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
+		if (arrows & 1)
+			drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
+		if (arrows & 2)
+			drawOn->FillTriangle(BPoint(fromFirst.x,fromFirst.y+3),
+				BPoint(fromSecond.x,fromSecond.y+3),BPoint(fromThird.x,fromThird.y+3));
 		if (!selected)
 			drawOn->SetHighColor(EffectiveFillColor());
 		else
 			drawOn->SetHighColor(tint_color(EffectiveFillColor(),1.5));
 		drawOn->StrokeLine(	fromPoint,toPoint);
-		drawOn->FillTriangle(first,second,third);
+		if (arrows & 1)
+			drawOn->FillTriangle(first,second,third);
+		if (arrows & 2)
+			drawOn->FillTriangle(fromFirst,fromSecond,fromThird);
 }
 
 void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
@@ -296,6 +336,14 @@ void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
 		drawOn->StrokeLine(previous,current);
 		previous = current;
 	}
+	// This style used to draw no arrow head at all, unlike the straight and
+	// angled ones - so which ends carry an arrow had no effect on exactly
+	// the style new connections default to. Same triangles the others use;
+	// CalcLine() computes them regardless of style.
+	if (arrows & 1)
+		drawOn->FillTriangle(first,second,third);
+	if (arrows & 2)
+		drawOn->FillTriangle(fromFirst,fromSecond,fromThird);
 }
 
 void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
@@ -320,7 +368,11 @@ void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
 	drawOn->StrokeLine(	shadowFrom,sFirstBend);
 	drawOn->StrokeLine(	sFirstBend,sSecondBend);
 	drawOn->StrokeLine(	sSecondBend,shadowTo);
-	drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
+	if (arrows & 1)
+		drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
+	if (arrows & 2)
+		drawOn->FillTriangle(BPoint(fromFirst.x,fromFirst.y+3),
+			BPoint(fromSecond.x,fromSecond.y+3),BPoint(fromThird.x,fromThird.y+3));
 	if (!selected)
 		drawOn->SetHighColor(EffectiveFillColor());
 	else
@@ -328,7 +380,10 @@ void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
 	drawOn->StrokeLine(	fromPoint,firstBend);
 	drawOn->StrokeLine(	firstBend,secondBend);
 	drawOn->StrokeLine(	secondBend,toPoint);
-	drawOn->FillTriangle(first,second,third);
+	if (arrows & 1)
+		drawOn->FillTriangle(first,second,third);
+	if (arrows & 2)
+		drawOn->FillTriangle(fromFirst,fromSecond,fromThird);
 }
 
 bool ConnectionRenderer::CaughtStraigt(BPoint where){

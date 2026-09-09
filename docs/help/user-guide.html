@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ProjectConceptor - User Guide</title>
+<style>
+	body {
+		margin: 0 auto;
+		max-width: 860px;
+		padding: 24px 32px 64px;
+		font-family: "Noto Sans", "DejaVu Sans", sans-serif;
+		font-size: 14px;
+		line-height: 1.55;
+		color: #1a1a1a;
+		background: #fbfbfa;
+	}
+	h1 {
+		font-size: 24px;
+		border-bottom: 2px solid #2f6fa5;
+		padding-bottom: 8px;
+	}
+	h2 {
+		font-size: 18px;
+		margin-top: 2.2em;
+		color: #2f6fa5;
+		border-bottom: 1px solid #d8d8d4;
+		padding-bottom: 4px;
+	}
+	img {
+		display: block;
+		max-width: 100%;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		margin: 12px 0 18px;
+		box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+	}
+	code {
+		background: #eef0f2;
+		padding: 1px 5px;
+		border-radius: 3px;
+		font-family: "DejaVu Sans Mono", monospace;
+		font-size: 0.92em;
+	}
+	ul { padding-left: 1.4em; }
+	li { margin-bottom: 4px; }
+	.lead {
+		font-size: 15px;
+		color: #444;
+	}
+	nav.toc {
+		background: #f0f3f6;
+		border: 1px solid #d8dfe6;
+		border-radius: 6px;
+		padding: 12px 20px;
+		margin: 20px 0 32px;
+	}
+	nav.toc ul { margin: 6px 0; }
+	nav.toc a { color: #2f6fa5; text-decoration: none; }
+	nav.toc a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<h1>ProjectConceptor &mdash; User Guide</h1>
+
+<p class="lead">ProjectConceptor is a graph editor for Haiku: nodes,
+attributes and connections, groupable, with automatic layout. This
+guide walks through the main workflows using screenshots of a running
+instance.</p>
+
+<nav class="toc">
+	<strong>Contents</strong>
+	<ul>
+		<li><a href="#toolbar">The toolbar</a></li>
+		<li><a href="#creating-a-node">Creating a node</a></li>
+		<li><a href="#attributes">Attributes</a></li>
+		<li><a href="#connections">Connections</a></li>
+		<li><a href="#grouping">Grouping</a></li>
+		<li><a href="#automatic-layout">Automatic layout</a></li>
+		<li><a href="#save-load-undo">Save, load, undo</a></li>
+	</ul>
+</nav>
+
+<img src="screenshots/02-overview.png" alt="Overview of ProjectConceptor's GraphEditor">
+
+<h2 id="toolbar">The toolbar</h2>
+
+<img src="screenshots/03-toolbar.png" alt="Main toolbar">
+
+<p>Left to right: file actions (New, Open, Save, Print), then edit/delete,
+then three node tools (add a group, add a boolean attribute, add a text
+attribute), grid toggle, pen size, fill color, and on the right two icon
+choice fields:</p>
+
+<ul>
+	<li><strong>Connection shape</strong> &mdash; straight, rounded, or
+		angular. Applies to whichever connections are currently selected.</li>
+	<li><strong>Arrow ends</strong> &mdash; arrowhead at the target, at the
+		source, at both ends, or none.</li>
+</ul>
+
+<p>Both show the currently picked shape as an icon; the pop-up menu also
+carries the name, in case the icon alone isn't clear enough.</p>
+
+<p>Below that, a second toolbar row, visible while the GraphEditor tab is
+active:</p>
+
+<img src="screenshots/06-autolayout-toolbar.png" alt="Auto-Layout toolbar row">
+
+<ul>
+	<li><strong>Leftmost icon</strong> &mdash; applies the automatic layout.</li>
+	<li><strong>Direction</strong> &mdash; which way the graph grows
+		(top-to-bottom, left-to-right, etc.).</li>
+	<li><strong>Topology</strong> &mdash; the layout algorithm
+		(hierarchical, circular, force-directed, ...).</li>
+</ul>
+
+<h2 id="creating-a-node">Creating a node</h2>
+
+<p>Double-clicking an empty spot in the GraphEditor creates a new node
+and immediately puts its name into edit mode:</p>
+
+<img src="screenshots/01-insert-node.png" alt="A newly inserted node, name in edit mode">
+
+<p>Type a name, done. Double-clicking <em>inside</em> an existing group
+instead adds the new node as a child of that group directly.</p>
+
+<h2 id="attributes">Attributes</h2>
+
+<p>Any node can carry its own attribute rows &mdash; added to the
+selected node via the two toolbar icons ("add boolean attribute" /
+"add text attribute"):</p>
+
+<img src="screenshots/04-node-with-attributes.png" alt="A node with several attribute rows">
+
+<p>Each row has a checkmark icon (toggle the value) and a red cross
+(remove the row).</p>
+
+<h2 id="connections">Connections</h2>
+
+<p>Dragging from one of a node's four red connection points to another
+node creates a connection between them. Its shape and arrow ends can be
+changed afterward via the toolbar icons above, as long as the
+connection is selected (works on several at once).</p>
+
+<h2 id="grouping">Grouping</h2>
+
+<p>Select several nodes, then click the group icon in the toolbar. The
+group draws itself as one connected shape that hugs its children
+tightly &mdash; even when they're different sizes or don't line up at
+the same height:</p>
+
+<img src="screenshots/05-group.png" alt="A group tightly enclosing its children">
+
+<p>The shape grows automatically as a child moves or a new one is
+added, and shrinks back just as readily when a child is removed.
+Double-clicking the group's own area adds a new child node to it
+directly (see above).</p>
+
+<p>A freshly created group defaults to just a faint tint with no drop
+shadow &mdash; like any node, its fill color can be set to something
+solid via the toolbar's fill color control.</p>
+
+<p>If two children don't overlap vertically at all &mdash; one sitting
+entirely above the other &mdash; the group connects them with a short,
+fixed-width corridor instead of stretching a single shape across the
+gap:</p>
+
+<img src="screenshots/07-corridor-fix.png" alt="A group connecting two children that don't overlap vertically">
+
+<h2 id="automatic-layout">Automatic layout</h2>
+
+<p>The leftmost icon of the second toolbar row (see above) rearranges
+the whole graph &mdash; useful after inserting many nodes by hand,
+which tend to overlap. Direction and topology can be set first via the
+two fields next to it.</p>
+
+<h2 id="save-load-undo">Save, load, undo</h2>
+
+<ul>
+	<li><strong>File &rarr; Save / Save As</strong> writes the document to
+		a <code>.pcd</code> file.</li>
+	<li><strong>File &rarr; Open</strong> loads an existing document.</li>
+	<li><strong>Edit &rarr; Undo / Redo</strong> covers every change &mdash;
+		creating nodes, moving them, grouping, editing attributes, drawing
+		connections.</li>
+	<li><strong>Edit &rarr; Select all</strong> selects the entire graph at
+		once, e.g. to move all of it together.</li>
+</ul>
+
+</body>
+</html>

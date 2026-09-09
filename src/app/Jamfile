@@ -100,6 +100,8 @@ PROJECT_CONCEPTOR_SOURCES =
 	ColorToolItem.cpp
 	FloatToolItem.cpp
 	PatternToolItem.cpp
+	ChoiceToolItem.cpp
+	IconMenuItem.cpp
 
 	# Tools
 	AFont.cpp

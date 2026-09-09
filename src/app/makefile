@@ -63,6 +63,8 @@ SRCS= 	About/AboutWindow.cpp \
 		ToolBar/ColorPickerWindow.cpp \
 		ToolBar/FloatToolItem.cpp \
 		ToolBar/PatternToolItem.cpp \
+		ToolBar/ChoiceToolItem.cpp \
+		ToolBar/IconMenuItem.cpp \
 		Tools/AFont.cpp \
 		Tools/PCSavePanel.cpp \
 		Tools/Indexer.cpp \
