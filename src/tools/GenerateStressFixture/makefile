@@ -38,6 +38,11 @@ SRCS= 	GenerateStressFixture.cpp \
 		../../app/ToolBar/ToolItem.cpp \
 		../../app/ToolBar/ToolMenu.cpp \
 		../../app/ToolBar/ColorToolItem.cpp \
+		../../app/ToolBar/ColorSwatchView.cpp \
+		../../app/ToolBar/AlphaSlider.cpp \
+		../../app/ToolBar/ColorPickerWindow.cpp \
+		../../app/ToolBar/IconMenuItem.cpp \
+		../../app/ToolBar/ChoiceToolItem.cpp \
 		../../app/ToolBar/FloatToolItem.cpp \
 		../../app/ToolBar/PatternToolItem.cpp \
 		../../app/Tools/AFont.cpp \

@@ -80,6 +80,12 @@ A freshly created group defaults to just a faint tint with no drop
 shadow - like any node, its fill color can be set to something solid
 via the toolbar's fill color control.
 
+If two children don't overlap vertically at all - one sitting entirely
+above the other - the group connects them with a short, fixed-width
+corridor instead of stretching a single shape across the gap:
+
+![Group connecting two non-overlapping children](screenshots/07-corridor-fix.png)
+
 ## Automatic layout
 
 The leftmost icon of the second toolbar row (see above) rearranges the
