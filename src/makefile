@@ -73,13 +73,22 @@ export DEBUGGER = TRUE
 # 	placed in the "locales" subdirectory.
 export LOCALES = en es de
 
-app: pkgupdate app/makefile FORCE
+lib: app/lib/makefile FORCE
+	cd app/lib && make
+
+lib_clean:
+	cd app/lib && make clean
+
+lib_install: app/lib/makefile FORCE
+	cd app/lib && make install
+
+app: lib pkgupdate app/makefile FORCE
 	cd app && make
 
 app_clean:
 	cd app && make clean
 
-app_install: pkgupdate app/makefile FORCE
+app_install: lib_install pkgupdate app/makefile FORCE
 	cd app && make install
 
 app_catkeys: app/makefile FORCE
@@ -89,13 +98,13 @@ app_bindcat: app/makefile FORCE
 	cd app && make bindcatalogs
 
 
-plugins: plugins/makefile FORCE
+plugins: lib plugins/makefile FORCE
 	cd plugins && make
 
 plugins_clean:
 	cd plugins && make clean
 
-plugins_install: plugins/makefile FORCE
+plugins_install: lib_install plugins/makefile FORCE
 	cd plugins && make install
 
 plugins_catkeys: plugins/makefile FORCE
@@ -105,13 +114,13 @@ plugins_bindcat: plugins/makefile FORCE
 	cd plugins && make bindcatalogs
 
 
-translators: translators/makefile FORCE
+translators: lib translators/makefile FORCE
 	cd translators && make
 
 translators_clean:
 	cd translators && make clean
 
-translators_install: translators/makefile FORCE
+translators_install: lib_install translators/makefile FORCE
 	cd translators && make install
 
 translators_catkeys: translators/makefile FORCE
@@ -123,7 +132,7 @@ translators_bindcat: translators/makefile FORCE
 
 default: app plugins translators
 
-clean: app_clean plugins_clean translators_clean
+clean: lib_clean app_clean plugins_clean translators_clean
 
 catkeys: app_catkeys plugins_catkeys translators_clean
 

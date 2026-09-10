@@ -31,7 +31,6 @@ SRCS= 	About/AboutWindow.cpp \
 		About/AboutView.cpp \
 		About/AboutURLView.cpp \
 		MainView.cpp \
-		ProjectConceptorDefs.cpp \
 		ProjectConceptor.cpp \
 		Config/ConfigManager.cpp \
 		Config/ConfigWindow.cpp \
@@ -42,7 +41,6 @@ SRCS= 	About/AboutWindow.cpp \
 		Config/PluginItem.cpp \
 		Config/PluginInfoView.cpp \
 		Config/MessageView.cpp \
-		Commands/PCommand.cpp \
 		Commands/PCommandManager.cpp \
 		Document/PDocument.cpp \
 		Document/PDocumentManager.cpp \
@@ -100,7 +98,7 @@ RSRCS=
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be root translation tracker localestub $(STDCPPLIBS) tinyxml
+LIBS= be root translation tracker localestub $(STDCPPLIBS) tinyxml ../../$(APP_DIR)/libProjectConceptor.so
 
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
@@ -163,7 +161,12 @@ LOCALES = de en es fr fur hr ro sv
 COMPILER_FLAGS =
 
 #	specify additional linker flags
-LINKER_FLAGS =
+#	libProjectConceptor.so sits right next to this binary once installed -
+#	an $ORIGIN-relative rpath is needed for the runtime loader to find it
+#	there; a link-time relative path alone (in LIBS above) only resolves
+#	at link time, not at load time (confirmed live: without this, even the
+#	app itself fails with "Cannot open file libProjectConceptor.so").
+LINKER_FLAGS = -Xlinker -rpath=\$$ORIGIN
 
 SVG_ICON = ../../Data/Icons/Logogross.svg
 
@@ -188,7 +191,6 @@ include $(DEVEL_DIRECTORY)/etc/makefile-engine
 default .DEFAULT:
 	mkdir -p ../../$(APP_DIR)
 	cp -rf $(NAME) ../../$(APP_DIR)
-	ln -sf $(NAME) ../../$(APP_DIR)/ProjectConceptor.a
 	cp -rf ../.PackageInfo ../../bin
 	mkdir -p ../../bin/data/deskbar/menu/Applications
 	ln -sf ../../../../apps/ProjectConceptor/$(NAME) ../../bin/data/deskbar/menu/Applications
