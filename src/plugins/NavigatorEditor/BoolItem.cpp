@@ -122,7 +122,7 @@ status_t BoolItem::Invoke(BMessage *message)
 		valueContainer->AddString("name",label);
 		valueContainer->AddBool("newValue", GetValue());
 		sendMessage->ReplaceMessage("valueContainer",valueContainer);
-		BInvoker::Invoke(sendMessage);
+		return BInvoker::Invoke(sendMessage);
 	}
 	else
 		return B_ERROR;
