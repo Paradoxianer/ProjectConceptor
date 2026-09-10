@@ -161,13 +161,52 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 					else
 						AddItem(masterItem);
 					message->FindPointer(name,count-1,(void **)&list);
-					
+
 					for (int32 i=0;i<list->CountItems();i++)
-					{	
+					{
 						connection	= (BMessage*)list->ItemAt(i);
 						connection->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&toNode);
 						AddUnder(new NodeItem(toNode),masterItem);
 					}
+				}
+				// same shape as OUTGOING above, just following each
+				// connection back to where it came from instead of where
+				// it goes - was never added alongside it, so incoming
+				// connections never showed up here at all.
+				else if (strcmp(name,P_C_NODE_INCOMING) == B_OK)
+				{
+					BList		*list		= NULL;
+					BStringItem	*masterItem	= new BStringItem(name);
+					BMessage	*connection	= NULL;
+					BMessage	*fromNode	= NULL;
+					if (superItem)
+						AddUnder(masterItem,superItem);
+					else
+						AddItem(masterItem);
+					message->FindPointer(name,count-1,(void **)&list);
+
+					for (int32 i=0;i<list->CountItems();i++)
+					{
+						connection	= (BMessage*)list->ItemAt(i);
+						connection->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&fromNode);
+						AddUnder(new NodeItem(fromNode),masterItem);
+					}
+				}
+				// a group's children - unlike OUTGOING/INCOMING this list
+				// holds each child's own node BMessage directly, not a
+				// connection wrapper with a "to"/"from" field to follow.
+				else if (strcmp(name,P_C_NODE_ALLNODES) == B_OK)
+				{
+					BList		*list		= NULL;
+					BStringItem	*masterItem	= new BStringItem(name);
+					if (superItem)
+						AddUnder(masterItem,superItem);
+					else
+						AddItem(masterItem);
+					message->FindPointer(name,count-1,(void **)&list);
+
+					for (int32 i=0;i<list->CountItems();i++)
+						AddUnder(new NodeItem((BMessage*)list->ItemAt(i)),masterItem);
 				}
 
 /*				message->FindPointer(name,count,(void **)&pointer);
