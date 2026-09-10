@@ -17,6 +17,7 @@ Addon pc_navigator_editor :
 	BoolItem.cpp
 	FloatItem.cpp
 	MessageListView.cpp
+	NavigatorCommands.cpp
 	NavigatorEditor.cpp
 	NavigatorEditorPlugin.cpp
 	NodeItem.cpp

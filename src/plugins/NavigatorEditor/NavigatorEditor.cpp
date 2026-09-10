@@ -77,7 +77,7 @@ void NavigatorEditor::InitGraph()
 		BList		*allConnections	= doc->GetAllConnections();
 		BRect		rootrect		= Bounds();
 		rootrect.right				= 200;
-		root						= new NodeListView(rootrect,allNodes);
+		root						= new NodeListView(rootrect,allNodes,doc);
 		BMessage *selected 			= new BMessage(N_A_INVOKATION);
 		selected->AddPointer("ListView",root);
 		root->SetSelectionMessage(selected);

@@ -10,6 +10,10 @@
 #include "FloatItem.h"
 #include "BoolItem.h"
 #include "NodeItem.h"
+#include "NavigatorCommands.h"
+
+#include <interface/Window.h>
+#include <interface/StringItem.h>
 
 MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forContainer):BOutlineListView(rect,"MessageListView")
 {
@@ -26,6 +30,32 @@ MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forC
 void MessageListView::MouseDown(BPoint point)
 {
 	BOutlineListView::MouseDown(point);
+
+	BMessage	*current	= Window() ? Window()->CurrentMessage() : NULL;
+	int32		buttons		= 0;
+	if ((current == NULL) || (current->FindInt32("buttons",&buttons) != B_OK)
+			|| ((buttons & B_SECONDARY_MOUSE_BUTTON) == 0))
+		return;
+
+	int32	index	= IndexOf(point);
+	if (index < 0)
+		return;
+	NodeItem	*item	= dynamic_cast<NodeItem *>(ItemAt(index));
+	if (item == NULL)
+		return;
+
+	// this row's own node lives in a group's Node::allNodes list, not
+	// just referenced via an outgoing/incoming connection, iff its
+	// immediate superitem is the "Node::allNodes" label AddMessage()'s
+	// B_POINTER_TYPE case built for that field.
+	bool		isChildList	= false;
+	BListItem	*super		= Superitem(item);
+	BStringItem	*superLabel	= dynamic_cast<BStringItem *>(super);
+	if ((superLabel != NULL) && (strcmp(superLabel->Text(),P_C_NODE_ALLNODES) == 0))
+		isChildList	= true;
+
+	ConvertToScreen(&point);
+	NavShowNodeContextMenu(doc,item->GetNode(),isChildList,this,point);
 }
 
 void MessageListView::AttachedToWindow(void)

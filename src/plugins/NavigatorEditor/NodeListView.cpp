@@ -1,11 +1,37 @@
 #include "NodeListView.h"
 #include "NodeItem.h"
+#include "NavigatorCommands.h"
+
+#include <interface/Window.h>
 
 
-NodeListView::NodeListView(BRect rect, BList *forNodeList):BListView(rect,"NodeListView")
+NodeListView::NodeListView(BRect rect, BList *forNodeList, PDocument *document):BListView(rect,"NodeListView")
 {
 	nodes=forNodeList;
+	doc=document;
 	ValueChanged();
+}
+
+void NodeListView::MouseDown(BPoint point)
+{
+	BListView::MouseDown(point);
+
+	BMessage	*current	= Window() ? Window()->CurrentMessage() : NULL;
+	int32		buttons		= 0;
+	if ((doc == NULL) || (current == NULL) || (current->FindInt32("buttons",&buttons) != B_OK)
+			|| ((buttons & B_SECONDARY_MOUSE_BUTTON) == 0))
+		return;
+
+	int32	index	= IndexOf(point);
+	ConvertToScreen(&point);
+	if (index < 0) {
+		// empty space - every node here is top-level, so a new one is too
+		NavShowEmptyContextMenu(doc,NULL,this,point);
+		return;
+	}
+	NodeItem	*item	= dynamic_cast<NodeItem *>(ItemAt(index));
+	if (item != NULL)
+		NavShowNodeContextMenu(doc,item->GetNode(),false,this,point);
 }
 
 

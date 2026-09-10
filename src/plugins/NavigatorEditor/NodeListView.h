@@ -8,13 +8,17 @@
 #include <interface/Point.h>
 #include <interface/Rect.h>
 
+class PDocument;
+
 class NodeListView : public BListView
 {
 
 public:
-						NodeListView(BRect rect, BList *forNodeList);
+						NodeListView(BRect rect, BList *forNodeList, PDocument *document = NULL);
 	virtual	void		ValueChanged(void);
+	virtual	void		MouseDown(BPoint point);
 protected:
+			PDocument	*doc;
 
 	static	bool		AddNodes(void *node,void *list);
 			BList		*nodes;

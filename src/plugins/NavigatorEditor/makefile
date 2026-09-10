@@ -30,6 +30,7 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
 SRCS= 	BoolItem.cpp \
 		FloatItem.cpp \
 		MessageListView.cpp \
+		NavigatorCommands.cpp \
 		NavigatorEditor.cpp \
 		NavigatorEditorPlugin.cpp \
 		NodeItem.cpp \
