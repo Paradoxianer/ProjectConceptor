@@ -15,9 +15,10 @@
 #include <interface/Window.h>
 #include <interface/StringItem.h>
 
-MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forContainer):BOutlineListView(rect,"MessageListView")
+MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forContainer, NavigatorEditor *forEditor):BOutlineListView(rect,"MessageListView")
 {
 	doc				= document;
+	editor			= forEditor;
 	container		= forContainer;
 	baseEditMessage	=  new BMessage(P_C_EXECUTE_COMMAND);
 	baseEditMessage->AddPointer("node",container);
@@ -30,6 +31,9 @@ MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forC
 void MessageListView::MouseDown(BPoint point)
 {
 	BOutlineListView::MouseDown(point);
+
+	if (editor != NULL)
+		NavSetFocusedList(editor,this);
 
 	BMessage	*current	= Window() ? Window()->CurrentMessage() : NULL;
 	int32		buttons		= 0;

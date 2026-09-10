@@ -14,6 +14,8 @@
 #include "PDocument.h"
 #include "ProjectConceptorDefs.h"
 #include "InputRequest.h"
+#include "NavigatorEditor.h"
+#include "NodeItem.h"
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "NavigatorCommands"
@@ -220,4 +222,59 @@ void NavShowEmptyContextMenu(PDocument *doc, BMessage *parentNode,
 	BMenuItem	*chosen	= menu->Go(screenPoint,true,true);
 	if (chosen == addNode)
 		NavInsertNode(doc,parentNode);
+}
+
+void NavSetFocusedList(NavigatorEditor *editor, BListView *list)
+{
+	editor->SetFocusedList(list);
+}
+
+// The toolbar has no click position to work out its target from like the
+// context menu does - it always acts on whichever NodeItem is currently
+// selected in whichever list the user last clicked in (tracked via
+// NavSetFocusedList()).
+static BMessage* NavCurrentToolbarNode(BListView *focusedList)
+{
+	if (focusedList == NULL)
+		return NULL;
+	NodeItem	*item	= dynamic_cast<NodeItem *>(
+		focusedList->ItemAt(focusedList->CurrentSelection(0)));
+	return item ? item->GetNode() : NULL;
+}
+
+void NavToolbarAddNode(PDocument *doc, BListView *focusedList)
+{
+	BMessage	*selectedNode	= NavCurrentToolbarNode(focusedList);
+	if (selectedNode != NULL)
+		NavInsertNode(doc,selectedNode);
+	else if (focusedList != NULL && focusedList->CurrentSelection(0) < 0)
+		// nothing selected - top-level, same as the empty-space menu
+		NavInsertNode(doc,NULL);
+}
+
+void NavToolbarAddAttribute(PDocument *doc, BListView *focusedList,
+	BView *owner, BPoint screenPoint)
+{
+	BMessage	*node	= NavCurrentToolbarNode(focusedList);
+	if (node == NULL)
+		return;
+
+	BPopUpMenu	*menu		= new BPopUpMenu("toolbarAddAttribute",false,false);
+	BMenuItem	*addBool	= new BMenuItem(B_TRANSLATE("Add boolean attribute"),NULL);
+	BMenuItem	*addText	= new BMenuItem(B_TRANSLATE("Add text attribute"),NULL);
+	menu->AddItem(addBool);
+	menu->AddItem(addText);
+	menu->SetTargetForItems(owner);
+	BMenuItem	*chosen	= menu->Go(screenPoint,true,true);
+	if (chosen == addBool)
+		NavAddAttribute(doc,node,B_BOOL_TYPE);
+	else if (chosen == addText)
+		NavAddAttribute(doc,node,B_STRING_TYPE);
+}
+
+void NavToolbarDeleteNode(PDocument *doc, BListView *focusedList)
+{
+	BMessage	*node	= NavCurrentToolbarNode(focusedList);
+	if (node != NULL)
+		NavDeleteNode(doc,node);
 }

@@ -5,16 +5,20 @@
 #include <interface/Window.h>
 
 
-NodeListView::NodeListView(BRect rect, BList *forNodeList, PDocument *document):BListView(rect,"NodeListView")
+NodeListView::NodeListView(BRect rect, BList *forNodeList, PDocument *document, NavigatorEditor *forEditor):BListView(rect,"NodeListView")
 {
 	nodes=forNodeList;
 	doc=document;
+	editor=forEditor;
 	ValueChanged();
 }
 
 void NodeListView::MouseDown(BPoint point)
 {
 	BListView::MouseDown(point);
+
+	if (editor != NULL)
+		NavSetFocusedList(editor,this);
 
 	BMessage	*current	= Window() ? Window()->CurrentMessage() : NULL;
 	int32		buttons		= 0;

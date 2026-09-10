@@ -11,10 +11,12 @@
  */
 
 #include <app/Message.h>
+#include <interface/ListView.h>
 #include <interface/Point.h>
 #include <interface/View.h>
 
 class PDocument;
+class NavigatorEditor;
 
 /** Context menu for a node row: add attribute (bool/text), delete
  * attribute (submenu listing the node's current ones), delete node,
@@ -27,5 +29,20 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
  * parentNode is NULL, a child of parentNode otherwise. */
 void NavShowEmptyContextMenu(PDocument *doc, BMessage *parentNode,
 	BView *owner, BPoint screenPoint);
+
+/** Called from NodeListView/MessageListView::MouseDown so the toolbar
+ * (which has no click position of its own to work out its target from)
+ * knows which list the user last interacted with. */
+void NavSetFocusedList(NavigatorEditor *editor, BListView *list);
+
+/** Toolbar actions - same commands as the context menu, but the target
+ * node is whichever NodeItem is currently selected in focusedList
+ * (add-node/add-attribute act on it like "add child"/"add attribute" in
+ * the context menu; with nothing selected, add-node falls back to a
+ * top-level node, same as the empty-space context menu). */
+void NavToolbarAddNode(PDocument *doc, BListView *focusedList);
+void NavToolbarAddAttribute(PDocument *doc, BListView *focusedList,
+	BView *owner, BPoint screenPoint);
+void NavToolbarDeleteNode(PDocument *doc, BListView *focusedList);
 
 #endif

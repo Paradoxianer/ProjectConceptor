@@ -1,17 +1,55 @@
+#include "ToolBar.h"
 #include "ToolItem.h"
 #include "NavigatorEditor.h"
+#include "NavigatorCommands.h"
 #include "PCommandManager.h"
 #include "MessageListView.h"
 #include "NodeItem.h"
 #include "PEditorManager.h"
+#include "PWindow.h"
 
+#include <interface/Bitmap.h>
 #include <interface/Font.h>
 #include <interface/GraphicsDefs.h>
 #include <interface/ScrollView.h>
 #include <support/List.h>
 #include <translation/TranslationUtils.h>
 #include <translation/TranslatorFormats.h>
+#include <Catalog.h>
 #include <string.h>
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "NavigatorEditor"
+
+// Small glyph-on-a-tile icon, drawn once instead of shipped as a PNG
+// resource - the toolbar just needs three unambiguous, distinctly
+// labelled buttons, not hand-authored pixel art.
+static BBitmap* MakeGlyphIcon(const char *glyph, rgb_color tint)
+{
+	BRect	bounds(0,0,19,19);
+	BBitmap	*bmp	= new BBitmap(bounds,B_RGBA32,true);
+	BView	*view	= new BView(bounds,"glyph",B_FOLLOW_NONE,B_WILL_DRAW);
+	bmp->AddChild(view);
+	bmp->Lock();
+	view->SetHighColor(0,0,0,0);
+	view->FillRect(bounds,B_SOLID_HIGH);
+	view->SetHighColor(tint);
+	view->SetDrawingMode(B_OP_ALPHA);
+	view->SetPenSize(2);
+	view->StrokeRoundRect(bounds.InsetByCopy(1,1),4,4);
+	BFont	font(be_bold_font);
+	font.SetSize(11);
+	view->SetFont(&font);
+	float	width	= view->StringWidth(glyph);
+	font_height	fh;
+	font.GetHeight(&fh);
+	view->MovePenTo((bounds.Width()-width)/2,
+		(bounds.Height()+fh.ascent)/2-1);
+	view->DrawString(glyph);
+	view->Sync();
+	bmp->Unlock();
+	return bmp;
+}
 
 
 NavigatorEditor::NavigatorEditor():PEditor(),BView(BRect(0,0,200,200),"NavigatorEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW|B_NAVIGABLE|B_NAVIGABLE_JUMP)
@@ -77,7 +115,8 @@ void NavigatorEditor::InitGraph()
 		BList		*allConnections	= doc->GetAllConnections();
 		BRect		rootrect		= Bounds();
 		rootrect.right				= 200;
-		root						= new NodeListView(rootrect,allNodes,doc);
+		root						= new NodeListView(rootrect,allNodes,doc,this);
+		focusedList					= root;
 		BMessage *selected 			= new BMessage(N_A_INVOKATION);
 		selected->AddPointer("ListView",root);
 		root->SetSelectionMessage(selected);
@@ -85,6 +124,42 @@ void NavigatorEditor::InitGraph()
 		AddChild(new BScrollView("root",root,B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true));
 		SetViewColor(255,255,255,255);
 		Invalidate();
+}
+
+void NavigatorEditor::InitToolBar(void)
+{
+	PWindow	*pWindow	= (PWindow *)Window();
+
+	toolBar			= new ToolBar(BRect(1,1,30,2800),"N_A_TOOL_BAR",B_ITEMS_IN_COLUMN);
+
+	rgb_color	addNodeTint			= {40,150,40,255};
+	rgb_color	addAttributeTint	= {40,110,190,255};
+	rgb_color	deleteNodeTint		= {190,60,60,255};
+
+	addNode			= new ToolItem("addNode",
+		MakeGlyphIcon("+N",addNodeTint),new BMessage(N_A_ADD_NODE));
+	addNode->BButton::SetToolTip(B_TRANSLATE(
+		"Add a node (child of the selected node, or top-level)"));
+	toolBar->AddItem(addNode);
+
+	addAttribute	= new ToolItem("addAttribute",
+		MakeGlyphIcon("+A",addAttributeTint),new BMessage(N_A_ADD_ATTRIBUTE));
+	addAttribute->BButton::SetToolTip(B_TRANSLATE(
+		"Add an attribute to the selected node"));
+	toolBar->AddItem(addAttribute);
+
+	toolBar->AddSeperator();
+
+	deleteNode		= new ToolItem("deleteNode",
+		MakeGlyphIcon("-",deleteNodeTint),new BMessage(N_A_DELETE_NODE));
+	deleteNode->BButton::SetToolTip(B_TRANSLATE("Delete the selected node"));
+	toolBar->AddItem(deleteNode);
+
+	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
+	pWindow->AddToolBar(toolBar);
+	addNode->SetTarget(this);
+	addAttribute->SetTarget(this);
+	deleteNode->SetTarget(this);
 }
 
 void NavigatorEditor::AttachedToManager(void)
@@ -170,6 +245,7 @@ void NavigatorEditor::ValueChanged()
 void NavigatorEditor::AttachedToWindow(void)
 {
 	TRACE();
+	InitToolBar();
 	//put this in a seperate function??
 	if (doc)
 		InitGraph();
@@ -228,6 +304,24 @@ void NavigatorEditor::MessageReceived(BMessage *message)
 		case P_C_EDITOR_SWITCHED_ACTIV:
 		{
 			ValueChanged();
+			break;
+		}
+		case N_A_ADD_NODE:
+		{
+			NavToolbarAddNode(doc,focusedList);
+			break;
+		}
+		case N_A_ADD_ATTRIBUTE:
+		{
+			BPoint	point	= addAttribute->Frame().LeftBottom();
+			addAttribute->Parent()->ConvertToScreen(&point);
+			NavToolbarAddAttribute(doc,focusedList,this,point);
+			break;
+		}
+		case N_A_DELETE_NODE:
+		{
+			NavToolbarDeleteNode(doc,focusedList);
+			break;
 		}
 		default:
 			BView::MessageReceived(message);
@@ -260,7 +354,7 @@ void NavigatorEditor::InsertNewList(BListView *source)
 			{
 				ResizeTo(listrect.right+B_V_SCROLL_BAR_WIDTH+5,Bounds().bottom);
 			}
-			BListView	*list			= new MessageListView(doc,listrect,((NodeItem *)item)->GetNode());
+			BListView	*list			= new MessageListView(doc,listrect,((NodeItem *)item)->GetNode(),this);
 			BMessage *invoked 			= new BMessage(N_A_INVOKATION);
 			invoked->AddPointer("ListView",list);
 			list->SetInvocationMessage(invoked);

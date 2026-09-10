@@ -21,7 +21,12 @@ const uint32	N_A_RENDERER			= 'naRr';
 const uint32	N_A_SELECTION_CHANGED	= 'naSC';
 const uint32	N_A_INVOKATION			= 'naIK';
 const uint32	N_A_VALUE_CHANGED		= 'naVC';
+const uint32	N_A_ADD_NODE			= 'naAN';
+const uint32	N_A_ADD_ATTRIBUTE		= 'naAA';
+const uint32	N_A_DELETE_NODE			= 'naDN';
 
+class ToolBar;
+class ToolItem;
 
 class NavigatorEditor : public PEditor, public BView
 {
@@ -63,25 +68,36 @@ public:
 	virtual	void			KeyUp(const char *bytes, int32 numBytes);
 
 	virtual	void			MessageReceived(BMessage *msg);
-	
-	//----------------BView	
-	
-	
+
+	//----------------BView
+
+	/** Called by NodeListView/MessageListView on every click so the
+	 * toolbar knows which list to act on - it has no click position of
+	 * its own to work out a target from. */
+			void			SetFocusedList(BListView *list){focusedList=list;};
+
 protected:
 			void			Init(void);
 			void			InitGraph();
 			void			InsertNewList(BListView *source);
 //			void			InsertRenderObject(BMessage *node);
 			void			DeleteRenderObject(BMessage *node);
+			void			InitToolBar(void);
 
 			int32			id;
 			char*			renderString;
 
 			BMessage		*configMessage;
-			
+
 			BMessenger		*sentTo;
 
 			NodeListView	*root;
+			BListView		*focusedList;
+
+			ToolBar			*toolBar;
+			ToolItem		*addNode;
+			ToolItem		*addAttribute;
+			ToolItem		*deleteNode;
 
 			BList			*viewLine;
 private:

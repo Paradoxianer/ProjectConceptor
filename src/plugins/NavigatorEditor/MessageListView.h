@@ -9,13 +9,14 @@
 #include <interface/Rect.h>
 
 class PDocument;
+class NavigatorEditor;
 const uint32	M_L_VALUE_CHANGED		= 'mlVC';
 
 class MessageListView : public BOutlineListView
 {
 
 public:
-						MessageListView(PDocument *document,BRect rect, BMessage * forContainer);
+						MessageListView(PDocument *document,BRect rect, BMessage * forContainer, NavigatorEditor *forEditor = NULL);
 	virtual	void		MouseDown(BPoint point);
 	virtual void			AttachedToWindow(void);
 	virtual	BMessage*	GetContainer(void){return container;};
@@ -29,6 +30,7 @@ protected:
 	BMessage			*editMessage;
 	BMessage			*baseEditMessage;
 	PDocument			*doc;
+	NavigatorEditor		*editor;
 private:
 };
 #endif
