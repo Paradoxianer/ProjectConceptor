@@ -13,6 +13,12 @@ public:
 						BaseListItem(type_code supportetType, uint32 level = 0, bool expanded = true):BListItem(level,expanded){type=supportetType;};
 	virtual type_code	GetSupportedType(void){return type;};
 	virtual void		ValueChanged(void){};
+	// NULL for items with no field name of their own (NodeItem, the
+	// BStringItem group headers) - overridden by each value item
+	// (Bool/String/Float/Rect/Int32/Color) to return its own "label".
+	// Lets the toolbar's generic delete act on a plain field row without
+	// needing to know which concrete item type it is.
+	virtual const char	*GetLabel(void){return NULL;};
 
 protected:
 			type_code	type;

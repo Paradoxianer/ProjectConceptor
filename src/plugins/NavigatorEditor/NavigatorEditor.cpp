@@ -25,10 +25,10 @@
 // PNG resource. Deliberately just the bare symbol at near-maximum size -
 // an earlier version combined the symbol with a letter ("+N"/"+A") to
 // tell add-node/add-attribute apart, which nobody could actually read
-// at toolbar size. The two operations this toolbar exposes now (add,
-// delete) map onto the two symbols everyone already recognizes; which
-// *kind* of thing gets added is spelled out in the popup menu "+"
-// opens, in words, same as the right-click menu.
+// at toolbar size. Both buttons fire immediately (add a node / delete
+// the selection) rather than opening a menu - picking a field *type* is
+// still right-click only, since that inherently needs a choice a single
+// toolbar icon can't make for you.
 static BBitmap* MakeSymbolIcon(char symbol, rgb_color tint)
 {
 	BRect	bounds(0,0,19,19);
@@ -141,12 +141,13 @@ void NavigatorEditor::InitToolBar(void)
 	addItem			= new ToolItem("addItem",
 		MakeSymbolIcon('+',addTint),new BMessage(N_A_ADD));
 	addItem->BButton::SetToolTip(B_TRANSLATE(
-		"Add a node or field - same choices as the right-click menu"));
+		"Add a node (child of the selection, or top-level)"));
 	toolBar->AddItem(addItem);
 
 	deleteItem		= new ToolItem("deleteItem",
 		MakeSymbolIcon('-',deleteTint),new BMessage(N_A_DELETE_NODE));
-	deleteItem->BButton::SetToolTip(B_TRANSLATE("Delete the selected node"));
+	deleteItem->BButton::SetToolTip(B_TRANSLATE(
+		"Delete the selected node or field"));
 	toolBar->AddItem(deleteItem);
 
 	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
@@ -313,14 +314,12 @@ void NavigatorEditor::MessageReceived(BMessage *message)
 		}
 		case N_A_ADD:
 		{
-			BPoint	point	= addItem->Frame().LeftBottom();
-			addItem->Parent()->ConvertToScreen(&point);
-			NavToolbarShowAddMenu(doc,focusedList,this,point);
+			NavToolbarAddNode(doc,focusedList);
 			break;
 		}
 		case N_A_DELETE_NODE:
 		{
-			NavToolbarDeleteNode(doc,focusedList);
+			NavToolbarDelete(doc,focusedList);
 			break;
 		}
 		default:

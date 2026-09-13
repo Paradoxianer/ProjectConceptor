@@ -19,6 +19,7 @@ public:
 	virtual void	SetValue(bool newValue){value->SetValue(newValue);};
 	
 	virtual void	ValueChange(void);
+	virtual const char	*GetLabel(void){return label;};
 
 	virtual	void	Select(void);
 	virtual	void	Deselect(void);

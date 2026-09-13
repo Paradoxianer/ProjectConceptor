@@ -5,7 +5,6 @@
 #include <interface/MenuItem.h>
 #include <interface/OutlineListView.h>
 #include <interface/PopUpMenu.h>
-#include <interface/StringItem.h>
 #include <support/List.h>
 #include <support/TypeConstants.h>
 
@@ -18,6 +17,8 @@
 #include "InputRequest.h"
 #include "NavigatorEditor.h"
 #include "NodeItem.h"
+#include "BaseListItem.h"
+#include "MessageListView.h"
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "NavigatorCommands"
@@ -299,41 +300,76 @@ void NavSetFocusedList(NavigatorEditor *editor, BListView *list)
 	editor->SetFocusedList(list);
 }
 
-// Whether "item" (a NodeItem row) lives in a group's own Node::allNodes
-// list, i.e. is itself a child - same check MessageListView::MouseDown()
-// uses for the same reason (only such rows can sensibly get a child of
-// their own added to them through this menu).
-static bool NavIsChildListItem(BListView *list, BListItem *item)
-{
-	BOutlineListView	*outline	= dynamic_cast<BOutlineListView *>(list);
-	if (outline == NULL)
-		return false;
-	BStringItem	*superLabel	= dynamic_cast<BStringItem *>(outline->Superitem(item));
-	return (superLabel != NULL) && (strcmp(superLabel->Text(),P_C_NODE_ALLNODES) == 0);
-}
-
-void NavToolbarShowAddMenu(PDocument *doc, BListView *focusedList,
-	BView *owner, BPoint screenPoint)
+void NavToolbarAddNode(PDocument *doc, BListView *focusedList)
 {
 	if (focusedList == NULL)
 		return;
 	BListItem	*item	= focusedList->ItemAt(focusedList->CurrentSelection(0));
 	NodeItem	*node	= dynamic_cast<NodeItem *>(item);
 	if (node != NULL)
-		NavShowNodeContextMenu(doc,node->GetNode(),
-			NavIsChildListItem(focusedList,item),owner,screenPoint);
+		NavInsertNode(doc,node->GetNode());
 	else if (item == NULL)
-		// nothing selected - only the root list has a sensible top-level
-		// action here (a node column has no "add a field to nothing").
-		NavShowEmptyContextMenu(doc,NULL,owner,screenPoint);
+		// nothing selected - a top-level node, same as the empty-space
+		// right-click menu's default.
+		NavInsertNode(doc,NULL);
 }
 
-void NavToolbarDeleteNode(PDocument *doc, BListView *focusedList)
+// The index (position among possibly-several same-name/same-type
+// values - see AddAttribute::DoAddAttribute()'s own "lastIndex" scan)
+// of the *last* field on "container" matching name+type. Needed because
+// a plain field row (unlike the ones in the "Delete field" submenu,
+// which already knows its own index from when it was built) only knows
+// its own name and type, not its position.
+static bool NavFindFieldIndex(BMessage *container, const char *name,
+	type_code type, int32 *outIndex)
+{
+	char		*tmpName;
+	uint32		tmpType;
+	int32		count;
+	int32		i			= 0;
+	int32		lastIndex	= -1;
+	while (container->GetInfo(B_ANY_TYPE,i,(char **)&tmpName,&tmpType,&count) == B_OK) {
+		if ((strcmp(tmpName,name) == 0) && (tmpType == type))
+			lastIndex	= count-1;
+		i++;
+	}
+	if (lastIndex < 0)
+		return false;
+	*outIndex	= lastIndex;
+	return true;
+}
+
+void NavToolbarDelete(PDocument *doc, BListView *focusedList)
 {
 	if (focusedList == NULL)
 		return;
-	NodeItem	*item	= dynamic_cast<NodeItem *>(
-		focusedList->ItemAt(focusedList->CurrentSelection(0)));
-	if (item != NULL)
-		NavDeleteNode(doc,item->GetNode());
+	BListItem	*item	= focusedList->ItemAt(focusedList->CurrentSelection(0));
+	if (item == NULL)
+		return;
+
+	NodeItem	*nodeItem	= dynamic_cast<NodeItem *>(item);
+	if (nodeItem != NULL) {
+		NavDeleteNode(doc,nodeItem->GetNode());
+		return;
+	}
+
+	// A plain field row (Bool/String/Float/Rect/Int32/ColorItem) -
+	// only ones at the top level of their own column are handled
+	// directly here; a nested, GraphEditor-style wrapped attribute
+	// still goes through the right-click "Delete field" submenu, which
+	// already tracks its own subgroup/index from when it built that
+	// menu, rather than trying to reconstruct an arbitrary subgroup
+	// chain here from just the selected row.
+	BaseListItem		*base		= dynamic_cast<BaseListItem *>(item);
+	BOutlineListView	*outline	= dynamic_cast<BOutlineListView *>(focusedList);
+	MessageListView		*column		= dynamic_cast<MessageListView *>(focusedList);
+	if ((base == NULL) || (base->GetLabel() == NULL)
+			|| (outline == NULL) || (outline->Superitem(item) != NULL)
+			|| (column == NULL))
+		return;
+
+	int32	index;
+	if (NavFindFieldIndex(column->GetContainer(),base->GetLabel(),
+			base->GetSupportedType(),&index))
+		NavDeleteField(doc,column->GetContainer(),NULL,base->GetLabel(),index);
 }

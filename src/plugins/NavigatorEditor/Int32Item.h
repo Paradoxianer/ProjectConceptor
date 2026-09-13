@@ -21,6 +21,7 @@ public:
 	virtual	int32		GetInt32(void){return atol(value->Text());};
 
 	virtual void		ValueChange(void){value->SetText(svalue);};
+	virtual const char	*GetLabel(void){return label;};
 
 	virtual	void		Select(void);
 	virtual	void		Deselect(void);

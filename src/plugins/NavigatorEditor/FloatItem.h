@@ -22,6 +22,7 @@ public:
 	virtual	void		SetFloat(float *newFloat){sprintf(svalue,"%.2f",newFloat);};
 
 	virtual void		ValueChange(void){value->SetText(svalue);};
+	virtual const char	*GetLabel(void){return label;};
 
 	virtual	void		Select(void);
 	virtual	void		Deselect(void);

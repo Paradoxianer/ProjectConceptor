@@ -17,6 +17,7 @@ public:
 	virtual	const char*	GetString(void){return textControl->Text();};
 
 	virtual	void		Select(void);
+	virtual const char	*GetLabel(void){return label;};
 	virtual	void		Deselect(void);
 	virtual void		SetExpanded(bool expande);
 	virtual	void		Update(BView *owner, const BFont *font);

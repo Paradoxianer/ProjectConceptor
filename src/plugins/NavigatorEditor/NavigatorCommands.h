@@ -42,12 +42,14 @@ void NavShowEmptyContextMenu(PDocument *doc, BMessage *parentNode,
  * knows which list the user last interacted with. */
 void NavSetFocusedList(NavigatorEditor *editor, BListView *list);
 
-/** Toolbar actions - same menus/commands the context menu uses, just
- * reached a second way. The "+" button shows exactly the menu a
- * right-click on the currently selected NodeItem in focusedList would
- * (or the empty-space "Add node" menu if nothing valid is selected). */
-void NavToolbarShowAddMenu(PDocument *doc, BListView *focusedList,
-	BView *owner, BPoint screenPoint);
-void NavToolbarDeleteNode(PDocument *doc, BListView *focusedList);
+/** Toolbar actions - each one fires immediately, no submenu: a toolbar
+ * icon should do the thing, not open a chooser (that's what the
+ * right-click menu above is for). Picking a field *type* inherently
+ * needs a choice, so field creation stays right-click-only; the
+ * toolbar only covers the two operations that don't need one. Both act
+ * on whichever NodeItem (or, for delete, plain field row) is currently
+ * selected in focusedList. */
+void NavToolbarAddNode(PDocument *doc, BListView *focusedList);
+void NavToolbarDelete(PDocument *doc, BListView *focusedList);
 
 #endif
