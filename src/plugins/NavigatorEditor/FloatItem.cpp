@@ -103,7 +103,7 @@ status_t FloatItem::Invoke(BMessage *message)
 		valueContainer->AddString("name",label);
 		valueContainer->AddFloat("newValue", GetFloat());
 		sendMessage->ReplaceMessage("valueContainer",valueContainer);
-		BInvoker::Invoke(sendMessage);
+		return BInvoker::Invoke(sendMessage);
 	}
 	else
 		return B_ERROR;

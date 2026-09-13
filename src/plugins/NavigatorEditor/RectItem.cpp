@@ -177,7 +177,7 @@ status_t RectItem::Invoke(BMessage *message)
 		valueContainer->AddString("name",label);
 		valueContainer->AddRect("newValue", GetRect()); 
 		sendMessage->ReplaceMessage("valueContainer",valueContainer);
-		BInvoker::Invoke(sendMessage);
+		return BInvoker::Invoke(sendMessage);
 	}
 	else
 		return B_ERROR;

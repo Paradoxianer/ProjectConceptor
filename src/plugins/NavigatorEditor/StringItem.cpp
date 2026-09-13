@@ -103,10 +103,11 @@ status_t StringItem::Invoke(BMessage *message)
 		valueContainer->AddString("name",label);
 		valueContainer->AddString("newValue", textControl->Text()); 
 		sendMessage->ReplaceMessage("valueContainer",valueContainer);
-		BInvoker::Invoke(sendMessage);
+		status_t	result	= BInvoker::Invoke(sendMessage);
+		delete valueContainer;
+		return result;
 	}
 	else
 		return B_ERROR;
-	delete valueContainer;
 }
 
