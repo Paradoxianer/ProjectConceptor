@@ -9,12 +9,27 @@
 #include "RectItem.h"
 #include "FloatItem.h"
 #include "Int32Item.h"
+#include "ColorItem.h"
+#include "ColorPickerWindow.h"
 #include "BoolItem.h"
 #include "NodeItem.h"
 #include "NavigatorCommands.h"
 
 #include <interface/Window.h>
 #include <interface/StringItem.h>
+
+// Every packed-int32 color field in this app's node shape is named with
+// a "...Color" suffix (FillColor, BorderColor, HighColor, LowColor,
+// Font::Color - see NavBuildNewNode() in NavigatorCommands.cpp and
+// ClassRenderer::Draw()'s own FindInt32() reads) - there's no separate
+// BMessage type for these, so the field name is the only signal telling
+// a color apart from an arbitrary integer.
+static bool NavIsColorField(const char *name)
+{
+	size_t	len		= strlen(name);
+	size_t	suffixLen	= strlen("Color");
+	return (len >= suffixLen) && (strcmp(name+len-suffixLen,"Color") == 0);
+}
 
 MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forContainer, NavigatorEditor *forEditor):BOutlineListView(rect,"MessageListView")
 {
@@ -26,6 +41,7 @@ MessageListView::MessageListView(PDocument *document,BRect rect, BMessage * forC
 	baseEditMessage->AddString("Command::Name","ChangeValue");
 	baseEditMessage->AddMessage("valueContainer",new BMessage());
 	editMessage		= new BMessage(*baseEditMessage);
+	activeColorItem	= NULL;
 }
 
 
@@ -187,18 +203,22 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 			{
 				int32	value;
 				message->FindInt32(name,count-1,&value);
-				Int32Item	*int32Item	= new Int32Item(name,value);
+				BaseListItem	*newItem;
+				if (NavIsColorField(name))
+					newItem	= new ColorItem(name,*(rgb_color *)&value);
+				else
+					newItem	= new Int32Item(name,value);
 				if (superItem)
-					AddUnder(int32Item,superItem);
+					AddUnder(newItem,superItem);
 				else
 				{
-					AddItem(int32Item);
+					AddItem(newItem);
 					delete editMessage;
 					editMessage		= new BMessage(*baseEditMessage);
 				}
 				BMessage *tmpMessage = new BMessage(*editMessage);
-				int32Item->SetMessage(tmpMessage);
-				int32Item->SetTarget(doc);
+				newItem->SetMessage(tmpMessage);
+				newItem->SetTarget(doc);
 				break;
 			}
 			case B_POINTER_TYPE:
@@ -280,12 +300,35 @@ void MessageListView::MessageReceived(BMessage *message)
 {
 	TRACE();
 	BaseListItem	*item;
+	ColorItem		*colorItem;
 	switch(message->what) 
 	{
 		case ITEM_CHANDED:
 		{
 			if ( (message->FindPointer("item",(void **)&item)==B_OK) && (item != NULL) )
 				item->Invoke();
+			break;
+		}
+		case COLOR_ITEM_OPEN:
+		{
+			if ( (message->FindPointer("item",(void **)&colorItem)==B_OK) && (colorItem != NULL) ) {
+				activeColorItem	= colorItem;
+				colorItem->OpenPicker(this);
+			}
+			break;
+		}
+		case COLOR_ITEM_REPORT:
+		{
+			if ( (message->FindPointer("item",(void **)&colorItem)==B_OK) && (colorItem != NULL) )
+				colorItem->ApplyReport(message);
+			break;
+		}
+		case PW_CLOSED:
+		{
+			if (activeColorItem != NULL) {
+				activeColorItem->ClosePicker(message);
+				activeColorItem	= NULL;
+			}
 			break;
 		}
 		default:

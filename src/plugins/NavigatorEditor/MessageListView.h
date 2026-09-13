@@ -10,6 +10,7 @@
 
 class PDocument;
 class NavigatorEditor;
+class ColorItem;
 const uint32	M_L_VALUE_CHANGED		= 'mlVC';
 
 class MessageListView : public BOutlineListView
@@ -31,6 +32,12 @@ protected:
 	BMessage			*baseEditMessage;
 	PDocument			*doc;
 	NavigatorEditor		*editor;
+	// PW_CLOSED (unlike COLOR_ITEM_REPORT, which we construct ourselves)
+	// is ColorPickerWindow's own fixed notification and carries no way
+	// to say which ColorItem's picker it was - this is the one open at
+	// a time this list view actually has, tracked so PW_CLOSED knows
+	// who to tell.
+	ColorItem			*activeColorItem;
 private:
 };
 #endif

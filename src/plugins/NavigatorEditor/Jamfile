@@ -15,6 +15,7 @@ AddResources pc_navigator_editor : NavigatorEditor.rsrc ;
 
 Addon pc_navigator_editor :
 	BoolItem.cpp
+	ColorItem.cpp
 	FloatItem.cpp
 	Int32Item.cpp
 	MessageListView.cpp
