@@ -7,8 +7,13 @@
 #include "MessageListView.h"
 #include "StringItem.h"
 #include "RectItem.h"
+#include "PointItem.h"
 #include "FloatItem.h"
+#include "DoubleItem.h"
+#include "Int8Item.h"
+#include "Int16Item.h"
 #include "Int32Item.h"
+#include "Int64Item.h"
 #include "ColorItem.h"
 #include "ColorPickerWindow.h"
 #include "BoolItem.h"
@@ -163,6 +168,24 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 				rectItem->SetTarget(doc);
 				break;
 			}
+			case B_POINT_TYPE:
+			{
+				BPoint	point;
+				message->FindPoint(name,count-1,&point);
+				PointItem	*pointItem	= new PointItem(name,point);
+				if (superItem)
+					AddUnder(pointItem,superItem);
+				else
+				{
+					AddItem(pointItem);
+					delete editMessage;
+					editMessage		= new BMessage(*baseEditMessage);
+				}
+				BMessage *tmpMessage = new BMessage(*editMessage);
+				pointItem->SetMessage(tmpMessage);
+				pointItem->SetTarget(doc);
+				break;
+			}
 			case B_FLOAT_TYPE:
 			{
 				float	value;
@@ -179,6 +202,24 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 				BMessage *tmpMessage = new BMessage(*editMessage);
 				floatItem->SetMessage(tmpMessage);
 				floatItem->SetTarget(doc);
+				break;
+			}
+			case B_DOUBLE_TYPE:
+			{
+				double	value;
+				message->FindDouble(name,count-1,&value);
+				DoubleItem	*doubleItem	= new DoubleItem(name,value);
+				if (superItem)
+					AddUnder(doubleItem,superItem);
+				else
+				{
+					AddItem(doubleItem);
+					delete editMessage;
+					editMessage		= new BMessage(*baseEditMessage);
+				}
+				BMessage *tmpMessage = new BMessage(*editMessage);
+				doubleItem->SetMessage(tmpMessage);
+				doubleItem->SetTarget(doc);
 				break;
 			}
 			case B_BOOL_TYPE:
@@ -219,6 +260,60 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 				BMessage *tmpMessage = new BMessage(*editMessage);
 				newItem->SetMessage(tmpMessage);
 				newItem->SetTarget(doc);
+				break;
+			}
+			case B_INT8_TYPE:
+			{
+				int8	value;
+				message->FindInt8(name,count-1,&value);
+				Int8Item	*int8Item	= new Int8Item(name,value);
+				if (superItem)
+					AddUnder(int8Item,superItem);
+				else
+				{
+					AddItem(int8Item);
+					delete editMessage;
+					editMessage		= new BMessage(*baseEditMessage);
+				}
+				BMessage *tmpMessage = new BMessage(*editMessage);
+				int8Item->SetMessage(tmpMessage);
+				int8Item->SetTarget(doc);
+				break;
+			}
+			case B_INT16_TYPE:
+			{
+				int16	value;
+				message->FindInt16(name,count-1,&value);
+				Int16Item	*int16Item	= new Int16Item(name,value);
+				if (superItem)
+					AddUnder(int16Item,superItem);
+				else
+				{
+					AddItem(int16Item);
+					delete editMessage;
+					editMessage		= new BMessage(*baseEditMessage);
+				}
+				BMessage *tmpMessage = new BMessage(*editMessage);
+				int16Item->SetMessage(tmpMessage);
+				int16Item->SetTarget(doc);
+				break;
+			}
+			case B_INT64_TYPE:
+			{
+				int64	value;
+				message->FindInt64(name,count-1,&value);
+				Int64Item	*int64Item	= new Int64Item(name,value);
+				if (superItem)
+					AddUnder(int64Item,superItem);
+				else
+				{
+					AddItem(int64Item);
+					delete editMessage;
+					editMessage		= new BMessage(*baseEditMessage);
+				}
+				BMessage *tmpMessage = new BMessage(*editMessage);
+				int64Item->SetMessage(tmpMessage);
+				int64Item->SetTarget(doc);
 				break;
 			}
 			case B_POINTER_TYPE:

@@ -29,14 +29,19 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
 #	in folder names do not work well with this makefile.
 SRCS= 	BoolItem.cpp \
 		ColorItem.cpp \
+		DoubleItem.cpp \
 		FloatItem.cpp \
+		Int8Item.cpp \
+		Int16Item.cpp \
 		Int32Item.cpp \
+		Int64Item.cpp \
 		MessageListView.cpp \
 		NavigatorCommands.cpp \
 		NavigatorEditor.cpp \
 		NavigatorEditorPlugin.cpp \
 		NodeItem.cpp \
 		NodeListView.cpp \
+		PointItem.cpp \
 		PointerItem.cpp \
 		RectItem.cpp \
 		StringItem.cpp

@@ -16,14 +16,19 @@ AddResources pc_navigator_editor : NavigatorEditor.rsrc ;
 Addon pc_navigator_editor :
 	BoolItem.cpp
 	ColorItem.cpp
+	DoubleItem.cpp
 	FloatItem.cpp
+	Int8Item.cpp
+	Int16Item.cpp
 	Int32Item.cpp
+	Int64Item.cpp
 	MessageListView.cpp
 	NavigatorCommands.cpp
 	NavigatorEditor.cpp
 	NavigatorEditorPlugin.cpp
 	NodeItem.cpp
 	NodeListView.cpp
+	PointItem.cpp
 	PointerItem.cpp
 	RectItem.cpp
 	StringItem.cpp

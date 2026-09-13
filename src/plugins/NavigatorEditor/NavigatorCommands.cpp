@@ -141,9 +141,14 @@ static void NavAddField(PDocument *doc, BMessage *node, int32 type)
 	// can be edited in place like any other row.
 	switch (type) {
 		case B_BOOL_TYPE:	valueContainer->AddBool("newAttribute",false); break;
+		case B_INT8_TYPE:	valueContainer->AddInt8("newAttribute",0); break;
+		case B_INT16_TYPE:	valueContainer->AddInt16("newAttribute",0); break;
 		case B_INT32_TYPE:	valueContainer->AddInt32("newAttribute",0); break;
+		case B_INT64_TYPE:	valueContainer->AddInt64("newAttribute",0); break;
 		case B_FLOAT_TYPE:	valueContainer->AddFloat("newAttribute",0.0f); break;
+		case B_DOUBLE_TYPE:	valueContainer->AddDouble("newAttribute",0.0); break;
 		case B_STRING_TYPE:	valueContainer->AddString("newAttribute",""); break;
+		case B_POINT_TYPE:	valueContainer->AddPoint("newAttribute",BPoint(0,0)); break;
 		case B_RECT_TYPE:	valueContainer->AddRect("newAttribute",BRect(0,0,0,0)); break;
 		case B_MESSAGE_TYPE: {
 			// AddMessage() stores a submessage as flattened B_MESSAGE_TYPE
@@ -240,15 +245,25 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 
 	BMenu		*addFieldMenu	= new BMenu(B_TRANSLATE("Add field"));
 	BMenuItem	*addBool	= new BMenuItem(B_TRANSLATE("Boolean"),NULL);
-	BMenuItem	*addInt		= new BMenuItem(B_TRANSLATE("Integer"),NULL);
+	BMenuItem	*addInt8	= new BMenuItem(B_TRANSLATE("Integer (8-bit)"),NULL);
+	BMenuItem	*addInt16	= new BMenuItem(B_TRANSLATE("Integer (16-bit)"),NULL);
+	BMenuItem	*addInt		= new BMenuItem(B_TRANSLATE("Integer (32-bit)"),NULL);
+	BMenuItem	*addInt64	= new BMenuItem(B_TRANSLATE("Integer (64-bit)"),NULL);
 	BMenuItem	*addFloat	= new BMenuItem(B_TRANSLATE("Float"),NULL);
+	BMenuItem	*addDouble	= new BMenuItem(B_TRANSLATE("Double"),NULL);
 	BMenuItem	*addText	= new BMenuItem(B_TRANSLATE("Text"),NULL);
+	BMenuItem	*addPoint	= new BMenuItem(B_TRANSLATE("Point"),NULL);
 	BMenuItem	*addRect	= new BMenuItem(B_TRANSLATE("Rectangle"),NULL);
 	BMenuItem	*addMsg		= new BMenuItem(B_TRANSLATE("Message (nested fields)"),NULL);
 	addFieldMenu->AddItem(addBool);
+	addFieldMenu->AddItem(addInt8);
+	addFieldMenu->AddItem(addInt16);
 	addFieldMenu->AddItem(addInt);
+	addFieldMenu->AddItem(addInt64);
 	addFieldMenu->AddItem(addFloat);
+	addFieldMenu->AddItem(addDouble);
 	addFieldMenu->AddItem(addText);
+	addFieldMenu->AddItem(addPoint);
 	addFieldMenu->AddItem(addRect);
 	addFieldMenu->AddItem(addMsg);
 	menu->AddItem(addFieldMenu);
@@ -273,12 +288,22 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 		return;
 	if (chosen == addBool)
 		NavAddField(doc,node,B_BOOL_TYPE);
+	else if (chosen == addInt8)
+		NavAddField(doc,node,B_INT8_TYPE);
+	else if (chosen == addInt16)
+		NavAddField(doc,node,B_INT16_TYPE);
 	else if (chosen == addInt)
 		NavAddField(doc,node,B_INT32_TYPE);
+	else if (chosen == addInt64)
+		NavAddField(doc,node,B_INT64_TYPE);
 	else if (chosen == addFloat)
 		NavAddField(doc,node,B_FLOAT_TYPE);
+	else if (chosen == addDouble)
+		NavAddField(doc,node,B_DOUBLE_TYPE);
 	else if (chosen == addText)
 		NavAddField(doc,node,B_STRING_TYPE);
+	else if (chosen == addPoint)
+		NavAddField(doc,node,B_POINT_TYPE);
 	else if (chosen == addRect)
 		NavAddField(doc,node,B_RECT_TYPE);
 	else if (chosen == addMsg)
