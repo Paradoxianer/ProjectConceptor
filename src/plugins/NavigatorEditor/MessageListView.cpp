@@ -8,6 +8,7 @@
 #include "StringItem.h"
 #include "RectItem.h"
 #include "FloatItem.h"
+#include "Int32Item.h"
 #include "BoolItem.h"
 #include "NodeItem.h"
 #include "NavigatorCommands.h"
@@ -180,6 +181,24 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 				BMessage *tmpMessage = new BMessage(*editMessage);
 				boolItem->SetMessage(tmpMessage);
 				boolItem->SetTarget(doc);
+				break;
+			}
+			case B_INT32_TYPE:
+			{
+				int32	value;
+				message->FindInt32(name,count-1,&value);
+				Int32Item	*int32Item	= new Int32Item(name,value);
+				if (superItem)
+					AddUnder(int32Item,superItem);
+				else
+				{
+					AddItem(int32Item);
+					delete editMessage;
+					editMessage		= new BMessage(*baseEditMessage);
+				}
+				BMessage *tmpMessage = new BMessage(*editMessage);
+				int32Item->SetMessage(tmpMessage);
+				int32Item->SetTarget(doc);
 				break;
 			}
 			case B_POINTER_TYPE:

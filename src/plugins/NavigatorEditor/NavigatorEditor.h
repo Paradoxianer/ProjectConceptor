@@ -21,8 +21,7 @@ const uint32	N_A_RENDERER			= 'naRr';
 const uint32	N_A_SELECTION_CHANGED	= 'naSC';
 const uint32	N_A_INVOKATION			= 'naIK';
 const uint32	N_A_VALUE_CHANGED		= 'naVC';
-const uint32	N_A_ADD_NODE			= 'naAN';
-const uint32	N_A_ADD_ATTRIBUTE		= 'naAA';
+const uint32	N_A_ADD					= 'naAd';
 const uint32	N_A_DELETE_NODE			= 'naDN';
 
 class ToolBar;
@@ -95,9 +94,8 @@ protected:
 			BListView		*focusedList;
 
 			ToolBar			*toolBar;
-			ToolItem		*addNode;
-			ToolItem		*addAttribute;
-			ToolItem		*deleteNode;
+			ToolItem		*addItem;
+			ToolItem		*deleteItem;
 
 			BList			*viewLine;
 private:

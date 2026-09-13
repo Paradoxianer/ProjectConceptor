@@ -18,10 +18,17 @@
 class PDocument;
 class NavigatorEditor;
 
-/** Context menu for a node row: add attribute (bool/text), delete
- * attribute (submenu listing the node's current ones), delete node,
- * and - only when isChildList is true, i.e. this node lives in a
- * group's own P_C_NODE_ALLNODES list - add a child node. */
+/** Context menu for a node row: "Add field" (a submenu of BMessage
+ * types - boolean/integer/float/text/rect - each added as a plain field
+ * directly on the node, not wrapped in GraphEditor's own Name/Value
+ * attribute shape, so NavigatorEditor can manipulate the BMessage
+ * itself rather than being limited to what GraphEditor knows how to
+ * render), "Delete field" (submenu listing both those attribute-shaped
+ * fields and any plain top-level ones - not the node's structural
+ * fields like Frame/Font/Pattern, deleting those would just break
+ * rendering elsewhere for no benefit), delete node, and - only when
+ * isChildList is true, i.e. this node lives in a group's own
+ * P_C_NODE_ALLNODES list - add a child node. */
 void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 	BView *owner, BPoint screenPoint);
 
@@ -35,13 +42,11 @@ void NavShowEmptyContextMenu(PDocument *doc, BMessage *parentNode,
  * knows which list the user last interacted with. */
 void NavSetFocusedList(NavigatorEditor *editor, BListView *list);
 
-/** Toolbar actions - same commands as the context menu, but the target
- * node is whichever NodeItem is currently selected in focusedList
- * (add-node/add-attribute act on it like "add child"/"add attribute" in
- * the context menu; with nothing selected, add-node falls back to a
- * top-level node, same as the empty-space context menu). */
-void NavToolbarAddNode(PDocument *doc, BListView *focusedList);
-void NavToolbarAddAttribute(PDocument *doc, BListView *focusedList,
+/** Toolbar actions - same menus/commands the context menu uses, just
+ * reached a second way. The "+" button shows exactly the menu a
+ * right-click on the currently selected NodeItem in focusedList would
+ * (or the empty-space "Add node" menu if nothing valid is selected). */
+void NavToolbarShowAddMenu(PDocument *doc, BListView *focusedList,
 	BView *owner, BPoint screenPoint);
 void NavToolbarDeleteNode(PDocument *doc, BListView *focusedList);
 

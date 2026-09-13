@@ -21,31 +21,32 @@
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "NavigatorEditor"
 
-// Small glyph-on-a-tile icon, drawn once instead of shipped as a PNG
-// resource - the toolbar just needs three unambiguous, distinctly
-// labelled buttons, not hand-authored pixel art.
-static BBitmap* MakeGlyphIcon(const char *glyph, rgb_color tint)
+// A plain, filled "+" or "-" tile, drawn once instead of shipped as a
+// PNG resource. Deliberately just the bare symbol at near-maximum size -
+// an earlier version combined the symbol with a letter ("+N"/"+A") to
+// tell add-node/add-attribute apart, which nobody could actually read
+// at toolbar size. The two operations this toolbar exposes now (add,
+// delete) map onto the two symbols everyone already recognizes; which
+// *kind* of thing gets added is spelled out in the popup menu "+"
+// opens, in words, same as the right-click menu.
+static BBitmap* MakeSymbolIcon(char symbol, rgb_color tint)
 {
 	BRect	bounds(0,0,19,19);
 	BBitmap	*bmp	= new BBitmap(bounds,B_RGBA32,true);
-	BView	*view	= new BView(bounds,"glyph",B_FOLLOW_NONE,B_WILL_DRAW);
+	BView	*view	= new BView(bounds,"symbol",B_FOLLOW_NONE,B_WILL_DRAW);
 	bmp->AddChild(view);
 	bmp->Lock();
 	view->SetHighColor(0,0,0,0);
 	view->FillRect(bounds,B_SOLID_HIGH);
 	view->SetHighColor(tint);
 	view->SetDrawingMode(B_OP_ALPHA);
-	view->SetPenSize(2);
-	view->StrokeRoundRect(bounds.InsetByCopy(1,1),4,4);
-	BFont	font(be_bold_font);
-	font.SetSize(11);
-	view->SetFont(&font);
-	float	width	= view->StringWidth(glyph);
-	font_height	fh;
-	font.GetHeight(&fh);
-	view->MovePenTo((bounds.Width()-width)/2,
-		(bounds.Height()+fh.ascent)/2-1);
-	view->DrawString(glyph);
+	view->FillRoundRect(bounds.InsetByCopy(0.5,0.5),4,4);
+	view->SetHighColor(255,255,255,255);
+	view->SetPenSize(2.5);
+	BPoint	center((bounds.left+bounds.right)/2,(bounds.top+bounds.bottom)/2);
+	view->StrokeLine(BPoint(center.x-5,center.y),BPoint(center.x+5,center.y));
+	if (symbol == '+')
+		view->StrokeLine(BPoint(center.x,center.y-5),BPoint(center.x,center.y+5));
 	view->Sync();
 	bmp->Unlock();
 	return bmp;
@@ -67,6 +68,8 @@ void NavigatorEditor::Init(void)
 	TRACE();
 	renderString	= new char[30];
 	configMessage 	= new BMessage();
+	toolBar			= NULL;
+	focusedList		= NULL;
 	font_family		family;
 	font_style		style;
 	
@@ -132,34 +135,24 @@ void NavigatorEditor::InitToolBar(void)
 
 	toolBar			= new ToolBar(BRect(1,1,30,2800),"N_A_TOOL_BAR",B_ITEMS_IN_COLUMN);
 
-	rgb_color	addNodeTint			= {40,150,40,255};
-	rgb_color	addAttributeTint	= {40,110,190,255};
-	rgb_color	deleteNodeTint		= {190,60,60,255};
+	rgb_color	addTint		= {40,150,40,255};
+	rgb_color	deleteTint	= {190,60,60,255};
 
-	addNode			= new ToolItem("addNode",
-		MakeGlyphIcon("+N",addNodeTint),new BMessage(N_A_ADD_NODE));
-	addNode->BButton::SetToolTip(B_TRANSLATE(
-		"Add a node (child of the selected node, or top-level)"));
-	toolBar->AddItem(addNode);
+	addItem			= new ToolItem("addItem",
+		MakeSymbolIcon('+',addTint),new BMessage(N_A_ADD));
+	addItem->BButton::SetToolTip(B_TRANSLATE(
+		"Add a node or field - same choices as the right-click menu"));
+	toolBar->AddItem(addItem);
 
-	addAttribute	= new ToolItem("addAttribute",
-		MakeGlyphIcon("+A",addAttributeTint),new BMessage(N_A_ADD_ATTRIBUTE));
-	addAttribute->BButton::SetToolTip(B_TRANSLATE(
-		"Add an attribute to the selected node"));
-	toolBar->AddItem(addAttribute);
-
-	toolBar->AddSeperator();
-
-	deleteNode		= new ToolItem("deleteNode",
-		MakeGlyphIcon("-",deleteNodeTint),new BMessage(N_A_DELETE_NODE));
-	deleteNode->BButton::SetToolTip(B_TRANSLATE("Delete the selected node"));
-	toolBar->AddItem(deleteNode);
+	deleteItem		= new ToolItem("deleteItem",
+		MakeSymbolIcon('-',deleteTint),new BMessage(N_A_DELETE_NODE));
+	deleteItem->BButton::SetToolTip(B_TRANSLATE("Delete the selected node"));
+	toolBar->AddItem(deleteItem);
 
 	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
 	pWindow->AddToolBar(toolBar);
-	addNode->SetTarget(this);
-	addAttribute->SetTarget(this);
-	deleteNode->SetTarget(this);
+	addItem->SetTarget(this);
+	deleteItem->SetTarget(this);
 }
 
 void NavigatorEditor::AttachedToManager(void)
@@ -254,6 +247,18 @@ void NavigatorEditor::AttachedToWindow(void)
 void NavigatorEditor::DetachedFromWindow(void)
 {
 	TRACE();
+	// The tab view detaches/reattaches this editor's BView on every tab
+	// switch (not just once at document close) - GraphEditor's own
+	// AttachedToWindow/DetachedFromWindow follow the same pattern for the
+	// same reason. Without this, InitToolBar() re-adds a second toolbar
+	// every time NavigatorEditor is switched back to, and the first one
+	// is never removed while some other tab is active.
+	if (Window() && toolBar != NULL) {
+		PWindow	*pWindow	= (PWindow *)Window();
+		if (!pWindow->IsClosing())
+			pWindow->RemoveToolBar("N_A_TOOL_BAR");
+		toolBar	= NULL;
+	}
 	while (ChildAt(0)!=NULL)
 	{
 		RemoveChild(ChildAt(0));
@@ -306,16 +311,11 @@ void NavigatorEditor::MessageReceived(BMessage *message)
 			ValueChanged();
 			break;
 		}
-		case N_A_ADD_NODE:
+		case N_A_ADD:
 		{
-			NavToolbarAddNode(doc,focusedList);
-			break;
-		}
-		case N_A_ADD_ATTRIBUTE:
-		{
-			BPoint	point	= addAttribute->Frame().LeftBottom();
-			addAttribute->Parent()->ConvertToScreen(&point);
-			NavToolbarAddAttribute(doc,focusedList,this,point);
+			BPoint	point	= addItem->Frame().LeftBottom();
+			addItem->Parent()->ConvertToScreen(&point);
+			NavToolbarShowAddMenu(doc,focusedList,this,point);
 			break;
 		}
 		case N_A_DELETE_NODE:

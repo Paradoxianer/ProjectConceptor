@@ -3,7 +3,9 @@
 #include <app/Messenger.h>
 #include <interface/GraphicsDefs.h>
 #include <interface/MenuItem.h>
+#include <interface/OutlineListView.h>
 #include <interface/PopUpMenu.h>
+#include <interface/StringItem.h>
 #include <support/List.h>
 #include <support/TypeConstants.h>
 
@@ -87,10 +89,41 @@ static void NavInsertNode(PDocument *doc, BMessage *parentNode)
 	BMessenger(doc).SendMessage(commandMessage);
 }
 
-static void NavAddAttribute(PDocument *doc, BMessage *node, int32 type)
+// A node's structural fields - always present, read by GraphEditor/
+// LayoutEditor/the renderers. The generic "delete field" menu leaves
+// these out: unlike a field the user added through NavigatorEditor
+// itself, removing one of these doesn't just make the data invisible
+// elsewhere, it breaks this app's own rendering (a node with no Frame,
+// say). "Node::name" isn't listed separately - it lives inside
+// Node::data, not at the node's own top level.
+static bool NavIsStructuralField(const char *name)
 {
-	InputRequest	*inputAlert	= new InputRequest(B_TRANSLATE("Input attribute name"),
-		B_TRANSLATE("Name"),B_TRANSLATE("Attribute"),B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
+	return strcmp(name,P_C_NODE_DATA) == 0
+		|| strcmp(name,P_C_NODE_FRAME) == 0
+		|| strcmp(name,P_C_NODE_FONT) == 0
+		|| strcmp(name,P_C_NODE_PATTERN) == 0
+		|| strcmp(name,P_C_NODE_SELECTED) == 0
+		|| strcmp(name,P_C_NODE_OUTGOING) == 0
+		|| strcmp(name,P_C_NODE_INCOMING) == 0
+		|| strcmp(name,P_C_NODE_PARENT) == 0
+		|| strcmp(name,P_C_NODE_ALLNODES) == 0
+		|| strstr(name,"GraphEditor") != NULL
+		|| strcmp(name,"ProjectConceptor::doc") == 0;
+}
+
+// Adds a plain field directly to "node" itself - not wrapped in
+// GraphEditor's own Name/Value attribute shape (see AddAttribute's
+// G_E_ADD_ATTRIBUTE handling in GraphEditor.cpp), which only its own
+// ClassRenderer knows how to draw. NavigatorEditor's job is to reach
+// the BMessage directly: whatever field type BMessage itself supports,
+// this can add, whether or not any other editor can make sense of it
+// afterwards. AddAttribute::DoAddAttribute() is already fully generic
+// (just AddData(name,type,value,size) on whatever "subgroup" chain it's
+// given - empty here, meaning the node itself) - no new command needed.
+static void NavAddField(PDocument *doc, BMessage *node, int32 type)
+{
+	InputRequest	*inputAlert	= new InputRequest(B_TRANSLATE("Field name"),
+		B_TRANSLATE("Name"),B_TRANSLATE("Field"),B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
 	char			*input		= NULL;
 	if (inputAlert->Go(&input) >= 1) {
 		free(input);
@@ -101,28 +134,34 @@ static void NavAddAttribute(PDocument *doc, BMessage *node, int32 type)
 	addMessage->AddString("Command::Name","AddAttribute");
 	addMessage->AddPointer("node",(void *)node);
 	BMessage	*valueContainer	= new BMessage();
-	valueContainer->AddInt32("type",B_MESSAGE_TYPE);
+	valueContainer->AddInt32("type",type);
 	valueContainer->AddString("name",input);
-	valueContainer->AddString("subgroup",P_C_NODE_DATA);
-	BMessage	*newAttribute	= new BMessage(type);
-	newAttribute->AddString("Name",input);
-	if (type == B_STRING_TYPE)
-		newAttribute->AddString("Value","");
-	else if (type == B_BOOL_TYPE)
-		newAttribute->AddBool("Value",true);
-	valueContainer->AddMessage("newAttribute",newAttribute);
+	// A sensible empty/zero default - the field shows up right away and
+	// can be edited in place like any other row.
+	switch (type) {
+		case B_BOOL_TYPE:	valueContainer->AddBool("newAttribute",false); break;
+		case B_INT32_TYPE:	valueContainer->AddInt32("newAttribute",0); break;
+		case B_FLOAT_TYPE:	valueContainer->AddFloat("newAttribute",0.0f); break;
+		case B_STRING_TYPE:	valueContainer->AddString("newAttribute",""); break;
+		case B_RECT_TYPE:	valueContainer->AddRect("newAttribute",BRect(0,0,0,0)); break;
+	}
 	addMessage->AddMessage("valueContainer",valueContainer);
 	free(input);
 	BMessenger(doc).SendMessage(addMessage);
 }
 
-static void NavDeleteAttribute(PDocument *doc, BMessage *node, const char *name, int32 index)
+// subgroup == NULL means "name" lives directly on "node" itself; a
+// non-NULL subgroup (only ever P_C_NODE_DATA today) reaches one of
+// GraphEditor's own Name/Value-wrapped attributes instead.
+static void NavDeleteField(PDocument *doc, BMessage *node, const char *subgroup,
+	const char *name, int32 index)
 {
 	BMessage	*removeMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 	removeMessage->AddString("Command::Name","RemoveAttribute");
 	removeMessage->AddPointer("node",(void *)node);
 	BMessage	*valueContainer	= new BMessage();
-	valueContainer->AddString("subgroup",P_C_NODE_DATA);
+	if (subgroup != NULL)
+		valueContainer->AddString("subgroup",subgroup);
 	valueContainer->AddString("name",name);
 	valueContainer->AddInt32("index",index);
 	removeMessage->AddMessage("valueContainer",valueContainer);
@@ -143,25 +182,39 @@ static void NavDeleteNode(PDocument *doc, BMessage *node)
 	BMessenger(doc).SendMessage(deleteMessage);
 }
 
-// Every current attribute under this node's Node::Data - each is stored
-// as its own B_MESSAGE_TYPE field there (Name/Value sub-fields), the same
-// shape AddAttribute/GraphEditor's own toolbar build (see
-// ClassRenderer::InsertAttribute()) - not the node's plain Node::name
-// string, which never matches a B_MESSAGE_TYPE lookup here.
-static void NavAddDeleteAttributeItems(BMenu *deleteAttrMenu, BMessage *node)
+// One menu item per deletable field, both kinds:
+//  - GraphEditor's own Name/Value-wrapped attributes under Node::data
+//    (each its own B_MESSAGE_TYPE field there)
+//  - plain top-level fields NavAddField() creates directly on the node,
+//    excluding the structural ones (see NavIsStructuralField())
+// The payload carries enough for NavDeleteField() to reach either kind
+// without the caller needing to know which one it picked.
+static void NavAddDeleteFieldItems(BMenu *deleteMenu, BMessage *node)
 {
 	BMessage	data;
-	if (node->FindMessage(P_C_NODE_DATA,&data) != B_OK)
-		return;
-	char	*name;
-	uint32	type;
-	int32	count;
-	int32	i	= 0;
-	while (data.GetInfo(B_MESSAGE_TYPE,i,(char **)&name,&type,&count) == B_OK) {
-		BMessage	*payload	= new BMessage();
-		payload->AddString("name",name);
-		payload->AddInt32("index",count-1);
-		deleteAttrMenu->AddItem(new BMenuItem(name,payload));
+	char		*name;
+	uint32		type;
+	int32		count;
+	int32		i	= 0;
+	if (node->FindMessage(P_C_NODE_DATA,&data) == B_OK) {
+		while (data.GetInfo(B_MESSAGE_TYPE,i,(char **)&name,&type,&count) == B_OK) {
+			BMessage	*payload	= new BMessage();
+			payload->AddString("subgroup",P_C_NODE_DATA);
+			payload->AddString("name",name);
+			payload->AddInt32("index",count-1);
+			deleteMenu->AddItem(new BMenuItem(name,payload));
+			i++;
+		}
+	}
+	i = 0;
+	while (node->GetInfo(B_ANY_TYPE,i,(char **)&name,&type,&count) == B_OK) {
+		if ((type != B_MESSAGE_TYPE) && (type != B_POINTER_TYPE)
+				&& !NavIsStructuralField(name)) {
+			BMessage	*payload	= new BMessage();
+			payload->AddString("name",name);
+			payload->AddInt32("index",count-1);
+			deleteMenu->AddItem(new BMenuItem(name,payload));
+		}
 		i++;
 	}
 }
@@ -170,15 +223,24 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 	BView *owner, BPoint screenPoint)
 {
 	BPopUpMenu	*menu		= new BPopUpMenu("nodeContext",false,false);
-	BMenuItem	*addBool	= new BMenuItem(B_TRANSLATE("Add boolean attribute"),NULL);
-	BMenuItem	*addText	= new BMenuItem(B_TRANSLATE("Add text attribute"),NULL);
-	menu->AddItem(addBool);
-	menu->AddItem(addText);
 
-	BMenu	*deleteAttrMenu	= new BMenu(B_TRANSLATE("Delete attribute"));
-	NavAddDeleteAttributeItems(deleteAttrMenu,node);
-	deleteAttrMenu->SetEnabled(deleteAttrMenu->CountItems() > 0);
-	menu->AddItem(deleteAttrMenu);
+	BMenu		*addFieldMenu	= new BMenu(B_TRANSLATE("Add field"));
+	BMenuItem	*addBool	= new BMenuItem(B_TRANSLATE("Boolean"),NULL);
+	BMenuItem	*addInt		= new BMenuItem(B_TRANSLATE("Integer"),NULL);
+	BMenuItem	*addFloat	= new BMenuItem(B_TRANSLATE("Float"),NULL);
+	BMenuItem	*addText	= new BMenuItem(B_TRANSLATE("Text"),NULL);
+	BMenuItem	*addRect	= new BMenuItem(B_TRANSLATE("Rectangle"),NULL);
+	addFieldMenu->AddItem(addBool);
+	addFieldMenu->AddItem(addInt);
+	addFieldMenu->AddItem(addFloat);
+	addFieldMenu->AddItem(addText);
+	addFieldMenu->AddItem(addRect);
+	menu->AddItem(addFieldMenu);
+
+	BMenu	*deleteFieldMenu	= new BMenu(B_TRANSLATE("Delete field"));
+	NavAddDeleteFieldItems(deleteFieldMenu,node);
+	deleteFieldMenu->SetEnabled(deleteFieldMenu->CountItems() > 0);
+	menu->AddItem(deleteFieldMenu);
 
 	menu->AddSeparatorItem();
 	BMenuItem	*addChild	= NULL;
@@ -194,20 +256,28 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 	if (chosen == NULL)
 		return;
 	if (chosen == addBool)
-		NavAddAttribute(doc,node,B_BOOL_TYPE);
+		NavAddField(doc,node,B_BOOL_TYPE);
+	else if (chosen == addInt)
+		NavAddField(doc,node,B_INT32_TYPE);
+	else if (chosen == addFloat)
+		NavAddField(doc,node,B_FLOAT_TYPE);
 	else if (chosen == addText)
-		NavAddAttribute(doc,node,B_STRING_TYPE);
+		NavAddField(doc,node,B_STRING_TYPE);
+	else if (chosen == addRect)
+		NavAddField(doc,node,B_RECT_TYPE);
 	else if (chosen == addChild)
 		NavInsertNode(doc,node);
 	else if (chosen == deleteNode)
 		NavDeleteNode(doc,node);
 	else if (chosen->Message() != NULL) {
-		const char	*name	= NULL;
-		int32		index	= 0;
+		const char	*subgroup	= NULL;
+		const char	*name		= NULL;
+		int32		index		= 0;
+		chosen->Message()->FindString("subgroup",&subgroup);
 		chosen->Message()->FindString("name",&name);
 		chosen->Message()->FindInt32("index",&index);
 		if (name != NULL)
-			NavDeleteAttribute(doc,node,name,index);
+			NavDeleteField(doc,node,subgroup,name,index);
 	}
 }
 
@@ -229,52 +299,41 @@ void NavSetFocusedList(NavigatorEditor *editor, BListView *list)
 	editor->SetFocusedList(list);
 }
 
-// The toolbar has no click position to work out its target from like the
-// context menu does - it always acts on whichever NodeItem is currently
-// selected in whichever list the user last clicked in (tracked via
-// NavSetFocusedList()).
-static BMessage* NavCurrentToolbarNode(BListView *focusedList)
+// Whether "item" (a NodeItem row) lives in a group's own Node::allNodes
+// list, i.e. is itself a child - same check MessageListView::MouseDown()
+// uses for the same reason (only such rows can sensibly get a child of
+// their own added to them through this menu).
+static bool NavIsChildListItem(BListView *list, BListItem *item)
 {
-	if (focusedList == NULL)
-		return NULL;
-	NodeItem	*item	= dynamic_cast<NodeItem *>(
-		focusedList->ItemAt(focusedList->CurrentSelection(0)));
-	return item ? item->GetNode() : NULL;
+	BOutlineListView	*outline	= dynamic_cast<BOutlineListView *>(list);
+	if (outline == NULL)
+		return false;
+	BStringItem	*superLabel	= dynamic_cast<BStringItem *>(outline->Superitem(item));
+	return (superLabel != NULL) && (strcmp(superLabel->Text(),P_C_NODE_ALLNODES) == 0);
 }
 
-void NavToolbarAddNode(PDocument *doc, BListView *focusedList)
-{
-	BMessage	*selectedNode	= NavCurrentToolbarNode(focusedList);
-	if (selectedNode != NULL)
-		NavInsertNode(doc,selectedNode);
-	else if (focusedList != NULL && focusedList->CurrentSelection(0) < 0)
-		// nothing selected - top-level, same as the empty-space menu
-		NavInsertNode(doc,NULL);
-}
-
-void NavToolbarAddAttribute(PDocument *doc, BListView *focusedList,
+void NavToolbarShowAddMenu(PDocument *doc, BListView *focusedList,
 	BView *owner, BPoint screenPoint)
 {
-	BMessage	*node	= NavCurrentToolbarNode(focusedList);
-	if (node == NULL)
+	if (focusedList == NULL)
 		return;
-
-	BPopUpMenu	*menu		= new BPopUpMenu("toolbarAddAttribute",false,false);
-	BMenuItem	*addBool	= new BMenuItem(B_TRANSLATE("Add boolean attribute"),NULL);
-	BMenuItem	*addText	= new BMenuItem(B_TRANSLATE("Add text attribute"),NULL);
-	menu->AddItem(addBool);
-	menu->AddItem(addText);
-	menu->SetTargetForItems(owner);
-	BMenuItem	*chosen	= menu->Go(screenPoint,true,true);
-	if (chosen == addBool)
-		NavAddAttribute(doc,node,B_BOOL_TYPE);
-	else if (chosen == addText)
-		NavAddAttribute(doc,node,B_STRING_TYPE);
+	BListItem	*item	= focusedList->ItemAt(focusedList->CurrentSelection(0));
+	NodeItem	*node	= dynamic_cast<NodeItem *>(item);
+	if (node != NULL)
+		NavShowNodeContextMenu(doc,node->GetNode(),
+			NavIsChildListItem(focusedList,item),owner,screenPoint);
+	else if (item == NULL)
+		// nothing selected - only the root list has a sensible top-level
+		// action here (a node column has no "add a field to nothing").
+		NavShowEmptyContextMenu(doc,NULL,owner,screenPoint);
 }
 
 void NavToolbarDeleteNode(PDocument *doc, BListView *focusedList)
 {
-	BMessage	*node	= NavCurrentToolbarNode(focusedList);
-	if (node != NULL)
-		NavDeleteNode(doc,node);
+	if (focusedList == NULL)
+		return;
+	NodeItem	*item	= dynamic_cast<NodeItem *>(
+		focusedList->ItemAt(focusedList->CurrentSelection(0)));
+	if (item != NULL)
+		NavDeleteNode(doc,item->GetNode());
 }

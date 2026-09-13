@@ -29,6 +29,7 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
 #	in folder names do not work well with this makefile.
 SRCS= 	BoolItem.cpp \
 		FloatItem.cpp \
+		Int32Item.cpp \
 		MessageListView.cpp \
 		NavigatorCommands.cpp \
 		NavigatorEditor.cpp \
