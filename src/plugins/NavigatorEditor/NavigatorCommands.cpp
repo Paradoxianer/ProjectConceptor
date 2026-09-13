@@ -145,6 +145,16 @@ static void NavAddField(PDocument *doc, BMessage *node, int32 type)
 		case B_FLOAT_TYPE:	valueContainer->AddFloat("newAttribute",0.0f); break;
 		case B_STRING_TYPE:	valueContainer->AddString("newAttribute",""); break;
 		case B_RECT_TYPE:	valueContainer->AddRect("newAttribute",BRect(0,0,0,0)); break;
+		case B_MESSAGE_TYPE: {
+			// AddMessage() stores a submessage as flattened B_MESSAGE_TYPE
+			// data internally - the exact same shape AddAttribute's own
+			// generic AddData(name,type,value,size) then writes onto the
+			// node, so an empty BMessage here round-trips through
+			// FindMessage() like any other nested field.
+			BMessage	empty;
+			valueContainer->AddMessage("newAttribute",&empty);
+			break;
+		}
 	}
 	addMessage->AddMessage("valueContainer",valueContainer);
 	free(input);
@@ -209,8 +219,11 @@ static void NavAddDeleteFieldItems(BMenu *deleteMenu, BMessage *node)
 	}
 	i = 0;
 	while (node->GetInfo(B_ANY_TYPE,i,(char **)&name,&type,&count) == B_OK) {
-		if ((type != B_MESSAGE_TYPE) && (type != B_POINTER_TYPE)
-				&& !NavIsStructuralField(name)) {
+		// B_MESSAGE_TYPE isn't excluded here the way it is above - Data/
+		// Font/Pattern are already kept out by name via
+		// NavIsStructuralField(), and a user-added nested Message field
+		// (see NavAddField()) needs to be deletable like anything else.
+		if ((type != B_POINTER_TYPE) && !NavIsStructuralField(name)) {
 			BMessage	*payload	= new BMessage();
 			payload->AddString("name",name);
 			payload->AddInt32("index",count-1);
@@ -231,11 +244,13 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 	BMenuItem	*addFloat	= new BMenuItem(B_TRANSLATE("Float"),NULL);
 	BMenuItem	*addText	= new BMenuItem(B_TRANSLATE("Text"),NULL);
 	BMenuItem	*addRect	= new BMenuItem(B_TRANSLATE("Rectangle"),NULL);
+	BMenuItem	*addMsg		= new BMenuItem(B_TRANSLATE("Message (nested fields)"),NULL);
 	addFieldMenu->AddItem(addBool);
 	addFieldMenu->AddItem(addInt);
 	addFieldMenu->AddItem(addFloat);
 	addFieldMenu->AddItem(addText);
 	addFieldMenu->AddItem(addRect);
+	addFieldMenu->AddItem(addMsg);
 	menu->AddItem(addFieldMenu);
 
 	BMenu	*deleteFieldMenu	= new BMenu(B_TRANSLATE("Delete field"));
@@ -266,6 +281,8 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 		NavAddField(doc,node,B_STRING_TYPE);
 	else if (chosen == addRect)
 		NavAddField(doc,node,B_RECT_TYPE);
+	else if (chosen == addMsg)
+		NavAddField(doc,node,B_MESSAGE_TYPE);
 	else if (chosen == addChild)
 		NavInsertNode(doc,node);
 	else if (chosen == deleteNode)
