@@ -69,6 +69,7 @@ void NavigatorEditor::Init(void)
 	renderString	= new char[30];
 	configMessage 	= new BMessage();
 	toolBar			= NULL;
+	myScrollParent	= NULL;
 	focusedList		= NULL;
 	font_family		family;
 	font_style		style;
@@ -126,7 +127,36 @@ void NavigatorEditor::InitGraph()
 		root->SetTarget(this);
 		AddChild(new BScrollView("root",root,B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true));
 		SetViewColor(255,255,255,255);
+		UpdateScrollBars();
 		Invalidate();
+}
+
+BView* NavigatorEditor::GetView(void)
+{
+	if (myScrollParent)
+		return myScrollParent;
+	myScrollParent	= new BScrollView("NEScrolly",this,B_FOLLOW_ALL_SIDES,0,true,false);
+	return myScrollParent;
+}
+
+void NavigatorEditor::UpdateScrollBars(void)
+{
+	// myScrollParent can already be torn down by the time some deferred
+	// update runs during window close - same guard GraphEditor's own
+	// UpdateScrollBars() needs for the same reason.
+	if (myScrollParent == NULL)
+		return;
+	BRect		contentRect	= Bounds();
+	BRect		viewRect	= myScrollParent->Bounds();
+	float		widthDiff	= contentRect.Width()-viewRect.Width();
+	if (widthDiff < 0)
+		widthDiff = 0;
+	BScrollBar	*sb	= myScrollParent->ScrollBar(B_HORIZONTAL);
+	if (sb != NULL) {
+		sb->SetRange(0,widthDiff);
+		sb->SetProportion(viewRect.Width()/contentRect.Width());
+		sb->SetSteps(contentRect.Width()/8.0,contentRect.Width()/2.0);
+	}
 }
 
 void NavigatorEditor::InitToolBar(void)
@@ -245,6 +275,12 @@ void NavigatorEditor::AttachedToWindow(void)
 		InitGraph();
 }
 
+void NavigatorEditor::FrameResized(float width, float height)
+{
+	TRACE();
+	UpdateScrollBars();
+}
+
 void NavigatorEditor::DetachedFromWindow(void)
 {
 	TRACE();
@@ -357,8 +393,9 @@ void NavigatorEditor::InsertNewList(BListView *source)
 			BMessage *invoked 			= new BMessage(N_A_INVOKATION);
 			invoked->AddPointer("ListView",list);
 			list->SetInvocationMessage(invoked);
-			list->SetTarget(this);	
+			list->SetTarget(this);
 			AddChild(new BScrollView("root",list,B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true));
+			UpdateScrollBars();
 		}
 		Invalidate();
 	}

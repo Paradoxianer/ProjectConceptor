@@ -26,6 +26,7 @@ const uint32	N_A_DELETE_NODE			= 'naDN';
 
 class ToolBar;
 class ToolItem;
+class BScrollView;
 
 class NavigatorEditor : public PEditor, public BView
 {
@@ -40,7 +41,14 @@ public:
 	virtual void			PreprocessBeforSave(BMessage *container);
 	virtual void			PreprocessAfterLoad(BMessage *container);
 
-	virtual	BView*			GetView(void){return this;};
+	// Wraps "this" in a horizontal-only BScrollView, lazily created on
+	// first call - GraphEditor's GetView() follows the exact same shape
+	// for the same reason (see GraphEditor::UpdateScrollBars()). Only
+	// horizontal: each column already scrolls vertically on its own via
+	// its own BScrollView (see InitGraph()/InsertNewList()), but nothing
+	// previously let the *columns themselves* scroll into view once
+	// drilling down made this view wider than the tab.
+	virtual	BView*			GetView(void);
 	virtual BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
 
@@ -62,6 +70,7 @@ public:
 		
 	virtual void			AttachedToWindow(void);
 	virtual void			DetachedFromWindow(void);
+	virtual void			FrameResized(float width, float height);
 	
 	virtual	void			KeyDown(const char *bytes, int32 numBytes);
 	virtual	void			KeyUp(const char *bytes, int32 numBytes);
@@ -82,6 +91,7 @@ protected:
 //			void			InsertRenderObject(BMessage *node);
 			void			DeleteRenderObject(BMessage *node);
 			void			InitToolBar(void);
+			void			UpdateScrollBars(void);
 
 			int32			id;
 			char*			renderString;
@@ -89,6 +99,8 @@ protected:
 			BMessage		*configMessage;
 
 			BMessenger		*sentTo;
+
+			BScrollView		*myScrollParent;
 
 			NodeListView	*root;
 			BListView		*focusedList;
