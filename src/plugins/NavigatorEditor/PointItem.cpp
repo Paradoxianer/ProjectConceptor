@@ -90,10 +90,10 @@ void PointItem::DrawItem(BView *owner, BRect bounds, bool complete)
 			owner->RemoveChild(y);
 		}
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-(textControlHeight)-textLine);
-		owner->DrawString("x: ");
+		owner->DrawString(B_TRANSLATE("x: "));
 		owner->DrawString(sx);
 		owner->MovePenTo(newBounds.right-SEPERATOR+3, newBounds.bottom-textLine);
-		owner->DrawString("y: ");
+		owner->DrawString(B_TRANSLATE("y: "));
 		owner->DrawString(sy);
 	}
 	owner->SetHighColor(205,205,205,255);
