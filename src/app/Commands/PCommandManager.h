@@ -71,8 +71,18 @@ public:
 	 * Concatenates every registered command's own PropertyInfo() entries
 	 * into one BPropertyInfo, for #55's scripting suite (PDocument) and
 	 * the MacroEditor's DSL field validation - the single canonical
-	 * schema source, not duplicated between the two. Caller owns the
-	 * returned object.
+	 * schema source, not duplicated between the two.
+	 *
+	 * Caller owns and must `delete` the returned BPropertyInfo, but must
+	 * NOT try to free the underlying property_info array itself - it's
+	 * kept alive on this object (fPropertyInfoArray, rebuilt on every
+	 * call) since every command's name/usage/field-name strings inside
+	 * it are pointers into that command's own `static const` array
+	 * (string literals), not individually heap-allocated. The returned
+	 * BPropertyInfo is therefore constructed with freeOnDelete=false -
+	 * BPropertyInfo's freeOnDelete=true calls plain free() on every one
+	 * of those string pointers individually (matching how Unflatten()
+	 * malloc()s them), which crashes on a string literal's address.
 	 */
 	virtual	BPropertyInfo	*BuildPropertyInfo(void);
 	
@@ -83,6 +93,10 @@ protected:
 
 			BList		*undoList;
 			BList		*macroList;
+			/** owned by this object, not by any BPropertyInfo wrapper -
+			 * see BuildPropertyInfo(). Freed and rebuilt on every
+			 * BuildPropertyInfo() call, freed once more in ~PCommandManager(). */
+			property_info	*fPropertyInfoArray;
 			int32		undoStatus;
 			map<BString, PCommand*>	 commandMap;
 			PDocument	*doc;

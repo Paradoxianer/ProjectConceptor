@@ -30,6 +30,7 @@ PCommandManager::PCommandManager(PDocument *initDoc) {
 PCommandManager::~PCommandManager(void) {
 	delete undoList;
 	delete macroList;
+	delete[] fPropertyInfoArray;
 }
 
 void PCommandManager::Init(void) {
@@ -38,6 +39,7 @@ void PCommandManager::Init(void) {
 	macroList		= new BList();
 	undoStatus		= 0;
 	recording		= NULL;
+	fPropertyInfoArray	= NULL;
 
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*commands		= pluginManager->GetPluginsByType(P_C_COMMANDO_PLUGIN_TYPE);
@@ -376,14 +378,26 @@ BPropertyInfo* PCommandManager::BuildPropertyInfo(void) {
 	// value-initialized (all-zero) slot at the end provides that sentinel
 	// - without it, the constructor reads past this array into whatever
 	// heap memory follows, corrupting fPropCount and crashing later.
-	property_info	*combined	= new property_info[total+1]();
+	delete[] fPropertyInfoArray;
+	fPropertyInfoArray	= new property_info[total+1]();
 	int32			offset		= 0;
 	for (i = 0; i < commandCount; i++) {
 		int32				n		= 0;
 		const property_info	*props	= PCommandAt(i)->PropertyInfo(&n);
 		for (int32 j = 0; j < n; j++)
-			combined[offset+j]	= props[j];
+			fPropertyInfoArray[offset+j]	= props[j];
 		offset	+= n;
 	}
-	return new BPropertyInfo(combined, NULL, true);
+	// freeOnDelete=false: every name/usage/field-name string in this
+	// array is a pointer into some command's own `static const`
+	// property_info array (a string literal), not individually malloc()d
+	// - BPropertyInfo's freeOnDelete=true calls plain free() on each one
+	// of those pointers (and on the array itself via free(), not
+	// delete[]) to match how Unflatten() builds one; doing that to a
+	// string literal's address is a crash (confirmed live - see #55
+	// commit history). This array is owned by PCommandManager
+	// (fPropertyInfoArray) instead, across the life of the returned
+	// BPropertyInfo - callers must delete the BPropertyInfo, never touch
+	// the array directly.
+	return new BPropertyInfo(fPropertyInfoArray, NULL, false);
 }

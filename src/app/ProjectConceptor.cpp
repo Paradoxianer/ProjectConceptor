@@ -3,6 +3,8 @@
 #include "PWindow.h"
 #include "About/AboutWindow.h"
 
+#include <app/Messenger.h>
+#include <app/PropertyInfo.h>
 #include <app/Roster.h>
 #include <interface/Alert.h>
 #include <interface/Rect.h>
@@ -45,6 +47,57 @@ ProjektConceptor::~ProjektConceptor() {
 	delete documentManager;
 	delete openPanel;
 	delete configManager;
+}
+
+
+// Pure specifier hop, like BWindow's own "View" entry (Window.cpp) - no
+// commands/specifiers of its own to advertise (empty arrays mean "accept
+// any"), the actual index handling happens in ResolveSpecifier() below.
+static const property_info kAppProperties[] = {
+	{ "Document", {}, {}, "The open document at the given index.", 0, {0}, {} },
+};
+
+
+status_t ProjektConceptor::GetSupportedSuites(BMessage *data) {
+	data->AddString("suites","suite/vnd.ProjectConceptor-application");
+	BPropertyInfo	propertyInfo(const_cast<property_info*>(kAppProperties));
+	data->AddFlat("messages",&propertyInfo);
+	return BApplication::GetSupportedSuites(data);
+}
+
+
+BHandler* ProjektConceptor::ResolveSpecifier(BMessage *message, int32 index,
+	BMessage *specifier, int32 what, const char *property) {
+	BPropertyInfo	propertyInfo(const_cast<property_info*>(kAppProperties));
+	if (propertyInfo.FindMatch(message,index,specifier,what,property) >= 0) {
+		if (strcmp(property,"Document") == 0) {
+			int32	docIndex	= -1;
+			if (what == B_INDEX_SPECIFIER)
+				specifier->FindInt32("index",&docIndex);
+			if ((docIndex >= 0) && (docIndex < documentManager->CountPDocuments())) {
+				// PDocument runs on its own BLooper thread, not be_app's -
+				// returning its pointer here the way BWindow returns
+				// fTopView (same-looper hop) doesn't work: DispatchMessage()
+				// expects the returned handler to belong to the *current*
+				// looper. Crossing loopers means forwarding the message
+				// ourselves and returning NULL, exactly how BApplication's
+				// own built-in "Window N" resolution does it
+				// (Application.cpp: message->PopSpecifier();
+				// BMessenger(window).SendMessage(message);) - not something
+				// specific to PDocument, this is the general BeOS pattern
+				// for a specifier hop into a different looper.
+				message->PopSpecifier();
+				BMessenger(documentManager->PDocumentAt(docIndex)).SendMessage(message);
+				return NULL;
+			}
+			BMessage	replyMsg(B_MESSAGE_NOT_UNDERSTOOD);
+			replyMsg.AddInt32("error",B_BAD_INDEX);
+			replyMsg.AddString("message","No document at that index");
+			message->SendReply(&replyMsg);
+			return NULL;
+		}
+	}
+	return BApplication::ResolveSpecifier(message,index,specifier,what,property);
 }
 
 /**
