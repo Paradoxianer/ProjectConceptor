@@ -352,6 +352,8 @@ void PCommandManager::Redo(BMessage *redo) {
 
 
 PCommand* PCommandManager::PCommandAt(int32 index) {
+	if ((index < 0) || (index >= (int32)commandMap.size()))
+		return NULL;
 	map<BString, PCommand*>::iterator iter;
 	iter=commandMap.begin();
 	for (int i=0;i< index;i++)
@@ -364,10 +366,17 @@ BPropertyInfo* PCommandManager::BuildPropertyInfo(void) {
 	int32			total		= 0;
 	int32			i			= 0;
 	int32			commandCount	= CountPCommand();
-	// two passes - first count, so the array is allocated exactly once
+	// two passes - first count, so the array is allocated exactly once.
+	// PCommandAt(i) is guarded (not just trusted to be non-NULL) - this
+	// walks every index up to CountPCommand() in one go, unlike any
+	// pre-existing caller, and PCommandAt() itself is a raw std::map
+	// iterator walk with no bounds check of its own.
 	for (i = 0; i < commandCount; i++) {
+		PCommand	*command	= PCommandAt(i);
+		if (command == NULL)
+			continue;
 		int32	n	= 0;
-		PCommandAt(i)->PropertyInfo(&n);
+		command->PropertyInfo(&n);
 		total	+= n;
 	}
 	// BPropertyInfo's own constructor doesn't take a count - it scans the
@@ -382,8 +391,11 @@ BPropertyInfo* PCommandManager::BuildPropertyInfo(void) {
 	fPropertyInfoArray	= new property_info[total+1]();
 	int32			offset		= 0;
 	for (i = 0; i < commandCount; i++) {
+		PCommand	*command	= PCommandAt(i);
+		if (command == NULL)
+			continue;
 		int32				n		= 0;
-		const property_info	*props	= PCommandAt(i)->PropertyInfo(&n);
+		const property_info	*props	= command->PropertyInfo(&n);
 		for (int32 j = 0; j < n; j++)
 			fPropertyInfoArray[offset+j]	= props[j];
 		offset	+= n;

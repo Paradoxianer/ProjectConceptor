@@ -41,8 +41,15 @@ void MacroEditor::Init(void)
 void MacroEditor::AttachedToWindow(void)
 {
 	TRACE();
-	if (fMacroList != NULL)
-		return;	// already built - a tab detach/reattach shouldn't duplicate children
+	if (fMacroList != NULL) {
+		// already built (a tab detach/reattach shouldn't duplicate
+		// children) - but re-check the macro list every time the tab is
+		// switched to, not just on the P_C_VALUE_CHANGED broadcast path,
+		// since a macro recorded elsewhere should show up on revisiting
+		// this tab even if that broadcast is ever delayed/missed.
+		RefreshMacroList();
+		return;
+	}
 
 	SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 
@@ -170,10 +177,18 @@ void MacroEditor::RefreshMacroList(void)
 			reselectIndex	= i;
 	}
 
+	// BListView::Select() alone does not send the selection message (that
+	// only happens for a real user click, or an explicit InvokeNotify) -
+	// so this always calls ShowSelectedMacro() directly afterwards rather
+	// than relying on a M_E_MACRO_SELECTED round-trip that may never
+	// arrive. Falls back to showing the first macro (if any) when there
+	// was nothing to preserve - never leaves a stale selection showing
+	// after the underlying macro list changed under it.
 	if (reselectIndex >= 0)
 		fMacroList->Select(reselectIndex);
-	else
-		ShowSelectedMacro();
+	else if (fMacroList->CountItems() > 0)
+		fMacroList->Select(0);
+	ShowSelectedMacro();
 }
 
 
@@ -270,6 +285,15 @@ void MacroEditor::SetStatus(const char *text, bool isError)
 void MacroEditor::MessageReceived(BMessage *message)
 {
 	switch (message->what) {
+		// PEditorManager::BroadCast() sends this to every registered
+		// editor's GetHandler() - ValueChanged() is documented on PEditor
+		// as reacting to it, but nothing calls ValueChanged() for us
+		// automatically (see PEditor.h), so it needs catching here like
+		// every other PEditor does in its own MessageReceived().
+		case P_C_VALUE_CHANGED: {
+			ValueChanged();
+			break;
+		}
 		case M_E_MACRO_SELECTED: {
 			ShowSelectedMacro();
 			break;
