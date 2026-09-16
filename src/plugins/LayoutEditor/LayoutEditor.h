@@ -55,7 +55,7 @@ public:
 	virtual	void			SetConfiguration(BMessage *message)
 								{delete configMessage;configMessage=message;};
 
-	virtual	void			ValueChanged(void);
+	virtual	void			ValueChanged(BMessage *changedNodes);
 
 	virtual	void			SetShortCutFilter(ShortCutFilter *_shortCutFilter);
 	//----------------PEditor

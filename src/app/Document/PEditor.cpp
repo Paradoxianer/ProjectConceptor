@@ -22,7 +22,7 @@ void PEditor::Init(void)
  * Called if a value, wich this editor is, waching was changed
  */
 
-void PEditor::ValueChanged(void)
+void PEditor::ValueChanged(BMessage *changedNodes)
 {
 	TRACE();
 

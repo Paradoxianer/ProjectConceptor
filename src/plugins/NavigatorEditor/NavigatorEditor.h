@@ -55,7 +55,7 @@ public:
 	virtual	BMessage*		GetConfiguration(void){return configMessage;};
 	virtual	void			SetConfiguration(BMessage *message){delete configMessage;configMessage=message;};
 
-	virtual	void			ValueChanged(void);
+	virtual	void			ValueChanged(BMessage *changedNodes);
 
 	virtual	bool			IsFocus(void) const;
 	virtual	void			MakeFocus(bool focus = true);

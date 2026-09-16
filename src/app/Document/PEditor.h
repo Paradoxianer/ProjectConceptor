@@ -117,11 +117,16 @@ public:
 	virtual bool			NeedLiveFeed(void){return false;}
 	/**
 	 * this Method isnt called direcly (at the moment) instead a P_C_VALUE_CHANGED Message is send to the by  GetHandler returned Handler
-	 * imlement this that it handle alle changed Nodes wich returned in the doc->GetChangedNodes()
-	 * and also in doc->GetTrash() all deleted nodes ;-)
+	 * changedNodes carries the affected node/connection pointers directly
+	 * (repeated "node" fields, see PDocument::BuildChangedNodesMessage()) -
+	 * read them from there, not from doc->GetChangedNodes(): that shared
+	 * set can already have been cleared and repopulated by a later
+	 * command's Execute() by the time this message is actually processed,
+	 * since BroadCast() is fire-and-forget and this only runs whenever the
+	 * editor's own thread gets scheduled to it.
 	 * @see GetHandler()
 	 */
-	virtual	void			ValueChanged(void);
+	virtual	void			ValueChanged(BMessage *changedNodes);
 	/**
 	 * @brief set the Manager to wich the PEditor  shoud belong  to
 	 * calls also the AttachedToManager Method or DetachedFromManager

@@ -252,7 +252,7 @@ status_t PCommandManager::Execute(BMessage *settings) {
 				// dereference otherwise: reproduced by sending a real
 				// P_C_EXECUTE_COMMAND via BMessenger to a headless doc.
 				if (doc->GetEditorManager() != NULL)
-					doc->GetEditorManager()->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+					doc->GetEditorManager()->BroadCast(doc->BuildChangedNodesMessage());
 			}
 		}
 		else
@@ -307,7 +307,7 @@ void PCommandManager::Undo(BMessage *undo) {
 		}
 		// see the same guard/comment in Execute() above
 		if (doc->GetEditorManager() != NULL)
-			doc->GetEditorManager()->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+			doc->GetEditorManager()->BroadCast(doc->BuildChangedNodesMessage());
 		doc->Unlock();
 	}
 	else
@@ -343,7 +343,7 @@ void PCommandManager::Redo(BMessage *redo) {
 		}
 		// see the same guard/comment in Execute() above
 		if (doc->GetEditorManager() != NULL)
-			doc->GetEditorManager()->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+			doc->GetEditorManager()->BroadCast(doc->BuildChangedNodesMessage());
 		doc->Unlock();
 	}
 	else

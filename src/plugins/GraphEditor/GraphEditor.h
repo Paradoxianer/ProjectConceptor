@@ -83,7 +83,7 @@ public:
 	virtual BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
 
-	virtual	void			ValueChanged(void);
+	virtual	void			ValueChanged(BMessage *changedNodes);
 	virtual	void			InitAll(void);
 
 	virtual	void			SetDirty(BRegion *region);

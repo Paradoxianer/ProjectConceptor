@@ -106,6 +106,15 @@ public:
 			void				ResetModified(void);
 
 			set<BMessage*>			*GetChangedNodes(void){return valueChanged;};
+			/** Snapshots GetChangedNodes() into a fresh P_C_VALUE_CHANGED
+			 * BMessage (repeated "node" pointer fields) - the caller then
+			 * broadcasts this instead of an empty P_C_VALUE_CHANGED, so a
+			 * receiving PEditor::ValueChanged() gets its own immutable copy
+			 * of what changed rather than having to read the shared
+			 * GetChangedNodes() set later, after it may already have been
+			 * cleared and repopulated by a subsequent command.
+			 */
+			BMessage*			BuildChangedNodesMessage(void);
 
 			BList				*GetSelected(void){return selected;};
 			BList				*GetAllNodes(void){return allNodes;};

@@ -211,7 +211,7 @@ void MacroEditor::DetachedFromManager(void)
 }
 
 
-void MacroEditor::ValueChanged(void)
+void MacroEditor::ValueChanged(BMessage *changedNodes)
 {
 	TRACE();
 	RefreshMacroList();
@@ -370,7 +370,7 @@ void MacroEditor::MessageReceived(BMessage *message)
 		// automatically (see PEditor.h), so it needs catching here like
 		// every other PEditor does in its own MessageReceived().
 		case P_C_VALUE_CHANGED: {
-			ValueChanged();
+			ValueChanged(message);
 			break;
 		}
 		case M_E_MACRO_SELECTED: {

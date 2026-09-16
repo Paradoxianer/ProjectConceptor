@@ -246,7 +246,7 @@ BList* NavigatorEditor::GetPCommandList(void)
 }
 
 
-void NavigatorEditor::ValueChanged()
+void NavigatorEditor::ValueChanged(BMessage *changedNodes)
 {
 	TRACE();
 	BView 			*child 				= NULL;
@@ -333,7 +333,7 @@ void NavigatorEditor::MessageReceived(BMessage *message)
 	{
 		case P_C_VALUE_CHANGED:
 		{
-			ValueChanged();
+			ValueChanged(message);
 			break;
 		}
 		case N_A_INVOKATION:
@@ -345,7 +345,7 @@ void NavigatorEditor::MessageReceived(BMessage *message)
 		}
 		case P_C_EDITOR_SWITCHED_ACTIV:
 		{
-			ValueChanged();
+			ValueChanged(message);
 			break;
 		}
 		case N_A_ADD:

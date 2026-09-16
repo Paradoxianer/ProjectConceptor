@@ -140,7 +140,7 @@ void LayoutEditor::DetachedFromManager(void)
 }
 
 
-void LayoutEditor::ValueChanged(void)
+void LayoutEditor::ValueChanged(BMessage *changedNodes)
 {
 	// no-op by design - only reacts to explicit ApplyLayout() triggers.
 	if (applyingLayout)

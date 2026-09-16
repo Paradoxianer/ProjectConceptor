@@ -149,16 +149,22 @@ const uint32	MENU_MACRO_SAVE					= 'MMsv';
 const uint32	MENU_HELP_ABOUT					= 'MHab';
 
 // bigtime_t is microseconds - this was 10 (i.e. 0.01ms), which meant
-// LockWithTimeout() calls sharing this constant (PCommandManager::Execute(),
-// GraphEditor::ValueChanged(), PDocumentManager) failed under almost any
-// real lock contention rather than the rare/exceptional case a timeout is
-// meant to guard against. Confirmed as the direct cause of a live crash:
-// GraphEditor::ValueChanged() proceeded to iterate PDocument's changedNodes
-// set without actually holding the lock whenever this timeout fired,
-// racing against PCommandManager::Execute() clearing/repopulating that
-// same set on another thread (see the fix at GraphEditor.cpp's
-// ValueChanged()). 50ms comfortably covers normal command execution time
+// LockWithTimeout() calls sharing this constant (PCommandManager::Execute()/
+// Undo()/Redo(), PDocumentManager) failed under almost any real lock
+// contention rather than the rare/exceptional case a timeout is meant to
+// guard against. 50ms comfortably covers normal command execution time
 // without making a genuinely stuck lock hang the UI for long.
+//
+// GraphEditor::ValueChanged() used to share this constant too, and that
+// combination was confirmed as the direct cause of a live crash: it
+// proceeded to iterate PDocument's changedNodes set without actually
+// holding the lock whenever the timeout fired, racing against
+// PCommandManager::Execute() clearing/repopulating that same set on
+// another thread. It no longer reads that shared set at all - the changed
+// nodes now travel in the P_C_VALUE_CHANGED message itself (see
+// PDocument::BuildChangedNodesMessage()), so GraphEditor::ValueChanged()
+// now uses a plain blocking Lock() instead of this timeout - see the
+// comment there for why that is safe.
 const bigtime_t	TIMEOUT_LOCK					= 50000;
 
 

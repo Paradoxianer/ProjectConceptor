@@ -822,8 +822,19 @@ void PDocument::Load(void)
 	// Load() test; the fix is the same one #117 already applied to
 	// PCommandManager's three call sites
 	if (editorManager != NULL)
-		editorManager->BroadCast(new BMessage(P_C_VALUE_CHANGED));
+		editorManager->BroadCast(BuildChangedNodesMessage());
 }
+
+
+BMessage* PDocument::BuildChangedNodesMessage(void)
+{
+	BMessage	*message	= new BMessage(P_C_VALUE_CHANGED);
+	set<BMessage*>::iterator	it;
+	for (it = valueChanged->begin(); it != valueChanged->end(); ++it)
+		message->AddPointer("node",*it);
+	return message;
+}
+
 
 void PDocument::SavePanel()
 {

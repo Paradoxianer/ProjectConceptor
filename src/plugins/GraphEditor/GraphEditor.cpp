@@ -432,58 +432,49 @@ void GraphEditor::ProcessChangedNode(BMessage *node,BList *allNodes,BList *allCo
 	}
 }
 
-void GraphEditor::ValueChanged() {
+void GraphEditor::ValueChanged(BMessage *changedNodes) {
 	TRACE();
-	//try to lock the document during we are painting
-	printf("ValueChanged - trying to Lock the Document now\n");
-
-	status_t err = doc->LockWithTimeout(TIMEOUT_LOCK);
-	printf("DocLocError - %s\n",strerror(err));
-	if (err != B_OK) {
-		// PCommandManager::Execute() holds this same document lock while it
-		// clears and then repopulates GetChangedNodes() (PCommandManager.cpp,
-		// around the clear() at the top and the command's own Do() call) -
-		// proceeding to iterate that set below without actually holding the
-		// lock here can race against that clear()/insert() on a different
-		// thread and corrupt the set mid-iteration. Confirmed via a live
-		// crash report: _Rb_tree_increment on an invalidated iterator. This
-		// used to happen unconditionally - err was checked only to decide
-		// whether to call Unlock(), never to gate the loop itself.
-		// Skipping this cycle avoids the crash; a node whose only change
-		// lands in a skipped cycle can go stale until something else
-		// touches it, which is the pre-existing trade-off of TIMEOUT_LOCK
-		// being a timeout at all - better than corrupting the set.
-		return;
-	}
-
-	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
-	set<BMessage*>::iterator it;
+	// The changed nodes travel in changedNodes itself (repeated "node"
+	// pointer fields - see PDocument::BuildChangedNodesMessage()), not
+	// read from doc->GetChangedNodes() here: that shared set can already
+	// have been cleared and repopulated by a later command's Execute() by
+	// the time this message actually gets processed, since BroadCast() is
+	// fire-and-forget and this only runs whenever this view's thread gets
+	// scheduled to it. A blocking Lock() below is safe precisely because
+	// of that - we are not iterating any state that could be concurrently
+	// mutated out from under us (that was the old bug: iterating
+	// doc->GetChangedNodes() while Execute() could be clearing/repopulating
+	// it on another thread - confirmed via a live crash report,
+	// _Rb_tree_increment on an invalidated iterator), only protecting
+	// access to allNodes/allConnections/each node's own renderer pointer
+	// below. Execute() always Unlocks before broadcasting, so this cannot
+	// deadlock against it.
+	doc->Lock();
 
 	BList		*allNodes	= doc->GetAllNodes();
 	BList		*allConnections	= doc->GetAllConnections();
 
 	BMessage	*node			= NULL;
+	int32		i				= 0;
 	// ConnectionRenderer resolves its endpoints' renderer pointers once, at
 	// construction (see ConnectionRenderer::ValueChanged()) - if a connection
 	// gets its own renderer built before its endpoint nodes have theirs, it
 	// is left with from/to == NULL and silently never draws (CalcLine() just
 	// skips it) until some later, unrelated P_C_VALUE_CHANGED happens to
-	// refresh it. changedNodes is a std::set<BMessage*>, so a single pass
-	// over it processes nodes and connections in pointer-address order, not
-	// dependency order - two passes here guarantees every node/group already
-	// has a renderer before any connection referencing it is built.
-	for ( it=changedNodes->begin();it!=changedNodes->end();++it) {
-		node = *it;
+	// refresh it. Two passes here guarantees every node/group already has a
+	// renderer before any connection referencing it is built.
+	while (changedNodes->FindPointer("node",i,(void**)&node) == B_OK) {
 		if (node->what != P_C_CONNECTION_TYPE)
 			ProcessChangedNode(node,allNodes,allConnections);
+		i++;
 	}
-	for ( it=changedNodes->begin();it!=changedNodes->end();++it) {
-		node = *it;
+	i = 0;
+	while (changedNodes->FindPointer("node",i,(void**)&node) == B_OK) {
 		if (node->what == P_C_CONNECTION_TYPE)
 			ProcessChangedNode(node,allNodes,allConnections);
+		i++;
 	}
-	if (err == B_OK)
-	    doc->Unlock();
+	doc->Unlock();
 	Invalidate();
 }
 
@@ -765,7 +756,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 	//TRACE();
 	switch(message->what) {
 		case P_C_VALUE_CHANGED: {
-			ValueChanged();
+			ValueChanged(message);
 			break;
 		}
 		case P_C_DOC_BOUNDS_CHANGED: {
