@@ -7,7 +7,7 @@
 ## Application Specific Settings ---------------------------------------------
 
 # specify the name of the binary
-NAME= LayoutEditor
+NAME= Layout
 
 # specify the type of binary
 #	APP:	Application
@@ -18,7 +18,6 @@ TYPE= SHARED
 
 APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
 
-
 #	specify the source files to use
 #	full paths or paths relative to the makefile can be included
 # 	all files, regardless of directory, will have their object
@@ -27,14 +26,16 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
 #	if two source files with the same name (source.c or source.cpp)
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
-SRCS= 	DotLayouter.cpp \
-		LayoutCommandBuilder.cpp \
-		LayoutEditor.cpp \
-		LayoutEditorPlugin.cpp
-
-#	Specify the resource definition files to use. Full or relative paths can be
-#	used.
-RDEFS= LayoutEditor.rdef
+#	DotLayouter/LayoutCommandBuilder are NOT recompiled here - they're
+#	linked from LayoutEditor's own already-built add-on binary below
+#	instead (see LIBS). Recompiling the same source into two plugin
+#	add-ons that both land in objects.../<name>.o hits a VPATH collision
+#	in this makefile-engine (make resolves the target against whichever
+#	sibling plugin directory already built that object first, then the
+#	link step can't find a local copy) - see src/plugins/makefile's
+#	comment on LayoutEditor/LayoutCommand build order.
+SRCS= 	Layout.cpp \
+		LayoutPlugin.cpp
 
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.
@@ -50,7 +51,7 @@ RSRCS=
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be localestub ../../../$(APP_DIR)/libProjectConceptor.so
+LIBS= be ../../../$(APP_DIR)/libProjectConceptor.so
 
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
@@ -71,11 +72,7 @@ SYSTEM_INCLUDE_PATHS =
 LOCAL_INCLUDE_PATHS = \
 		../../include \
 		../../include/plugins \
-		../../app/Document \
-		../../app/Commands \
-		../../app/ToolBar \
-		../../app/Config \
-		../../app/Tools
+		../LayoutEditor
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
@@ -106,9 +103,15 @@ LOCAL_INCLUDE_PATHS = \
 COMPILER_FLAGS =
 
 #	specify additional linker flags
-LINKER_FLAGS = -Xlinker -rpath=\$$ORIGIN/..
+#	two rpath entries: ../.. reaches $(APP_DIR) itself (libProjectConceptor.so,
+#	same as every other Command plugin), .. reaches Plugins/ (LayoutEditor's
+#	own binary, linked directly below - LIBS' "libXXX.so"-name heuristic
+#	doesn't fit a plain add-on filename like "LayoutEditor", so it's passed
+#	as a raw linker arg here instead, unprocessed)
+LINKER_FLAGS = -Xlinker -rpath=\$$ORIGIN/../.. -Xlinker -rpath=\$$ORIGIN/.. \
+		../../../$(APP_DIR)/$(PLUGIN_DIR)/LayoutEditor
 
-INSTALL_DIR    = /boot/apps/ProjectConceptor/Plugins/
+INSTALL_DIR    = /boot/apps/ProjectConceptor/Plugins/Commands
 
 ## include the makefile-engine
 DEVEL_DIRECTORY := \
@@ -123,5 +126,5 @@ install:: default
 	@echo "Done copying."
 
 default .DEFAULT:
-	mkdir -p ../../../$(APP_DIR)/$(PLUGIN_DIR)
-	cp -rf  $(OBJ_DIR)/$(NAME) ../../../$(APP_DIR)/$(PLUGIN_DIR)
+	mkdir -p ../../../$(APP_DIR)/$(PLUGIN_DIR)/Commands
+	cp -rf  $(OBJ_DIR)/$(NAME) ../../../$(APP_DIR)/$(PLUGIN_DIR)/Commands

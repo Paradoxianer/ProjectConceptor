@@ -13,6 +13,7 @@
 #include "BaseItem.h"
 #include "ChoiceToolItem.h"
 #include "DotLayouter.h"
+#include "LayoutCommandBuilder.h"
 #include "PCommandManager.h"
 #include "PWindow.h"
 #include "ProjectConceptorDefs.h"
@@ -181,80 +182,18 @@ void LayoutEditor::MessageReceived(BMessage *message)
 
 BMessage* LayoutEditor::BuildLayoutCommand(BMessage *positions)
 {
-	// One "Batch" wrapper, one ChangeValue subPCommand per node - single
-	// undo step (see #116). ChangeValue not Move: Move applies one dx/dy
-	// to doc->GetSelected() as a whole, no way to target one node's
-	// absolute position; ChangeValue takes an explicit per-node value
-	// directly (same technique ClassRenderer.cpp already uses).
-	BMessage	*wrapper		= new BMessage(P_C_EXECUTE_COMMAND);
-	wrapper->AddString("Command::Name","Batch");
-
-	int32		i				= 0;
-	void		*nodePtr		= NULL;
-	BRect		newFrame;
-	int32		subCommandCount	= 0;
-	while (positions->FindPointer("node",i,&nodePtr) == B_OK) {
-		if (positions->FindRect("frame",i,&newFrame) == B_OK) {
-			BMessage	*subCommand		= new BMessage(P_C_EXECUTE_COMMAND);
-			BMessage	*valueContainer	= new BMessage();
-			subCommand->AddString("Command::Name","ChangeValue");
-			subCommand->AddPointer("node",nodePtr);
-			valueContainer->AddString("name",P_C_NODE_FRAME);
-			valueContainer->AddInt32("type",(int32)B_RECT_TYPE);
-			valueContainer->AddRect("newValue",newFrame);
-			subCommand->AddMessage("valueContainer",valueContainer);
-			wrapper->AddMessage("PCommand::subPCommand",subCommand);
-			subCommandCount++;
-		}
-		i++;
-	}
-
-	if (subCommandCount == 0) {
-		delete wrapper;
-		return NULL;
-	}
-	return wrapper;
+	// Shared with the Layout PCommand plugin (#55) - see
+	// LayoutCommandBuilder.h for why (ChangeValue, not Move: Move applies
+	// one dx/dy to doc->GetSelected() as a whole, no way to target one
+	// node's absolute position).
+	return LayoutBuildBatchCommand(positions);
 }
 
 
 void LayoutEditor::CenterOnOldBounds(const BList *nodes, BMessage *positions)
 {
-	BRect	oldBounds;
-	bool	haveOld		= false;
-	for (int32 i = 0; i < nodes->CountItems(); i++) {
-		BMessage	*node	= (BMessage*)nodes->ItemAt(i);
-		BRect		nodeFrame;
-		if ((node != NULL) && (node->FindRect(P_C_NODE_FRAME,&nodeFrame) == B_OK)) {
-			oldBounds	= haveOld ? (oldBounds | nodeFrame) : nodeFrame;
-			haveOld		= true;
-		}
-	}
-
-	BRect	newBounds;
-	bool	haveNew		= false;
-	int32	i			= 0;
-	BRect	positionFrame;
-	while (positions->FindRect("frame",i,&positionFrame) == B_OK) {
-		newBounds	= haveNew ? (newBounds | positionFrame) : positionFrame;
-		haveNew		= true;
-		i++;
-	}
-
-	if ((!haveOld) || (!haveNew))
-		return;
-
-	BPoint	oldCenter((oldBounds.left+oldBounds.right)/2,(oldBounds.top+oldBounds.bottom)/2);
-	BPoint	newCenter((newBounds.left+newBounds.right)/2,(newBounds.top+newBounds.bottom)/2);
-	BPoint	delta	= oldCenter-newCenter;
-	if (delta == BPoint(0,0))
-		return;
-
-	i	= 0;
-	while (positions->FindRect("frame",i,&positionFrame) == B_OK) {
-		positionFrame.OffsetBy(delta);
-		positions->ReplaceRect("frame",i,positionFrame);
-		i++;
-	}
+	// Shared with the Layout PCommand plugin (#55) - see LayoutCommandBuilder.h.
+	LayoutCenterOnOldBounds(nodes,positions);
 }
 
 
@@ -276,42 +215,31 @@ void LayoutEditor::SetEngine(const char *engine)
 
 void LayoutEditor::ApplyLayout(void)
 {
-	if ((applyingLayout) || (layouter == NULL) || (doc == NULL))
+	if ((applyingLayout) || (doc == NULL))
 		return;
-
-	BList	*nodes			= doc->GetAllNodes();
-	BList	*connections	= doc->GetAllConnections();
-	if ((nodes == NULL) || (nodes->CountItems() == 0))
-		return;
-
 	applyingLayout	= true;
 
-	if (!layouter->IsAvailable()) {
-		BString	text;
-		text.SetToFormat(B_TRANSLATE("%s is not available - is it installed and on PATH?"),
-			layouter->Name());
-		(new BAlert(B_TRANSLATE("Auto-Layout"),text.String(),B_TRANSLATE("OK"),
-			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go();
-		applyingLayout	= false;
-		return;
+	// Delegates to the "Layout" PCommand (#55) - same algorithm, but now
+	// undoable/scriptable/macro-recordable through the normal command
+	// registry instead of this toolbar button being the only way in.
+	// `settings` is kept by this caller (not just handed off), so the
+	// "error" field Layout::Do() may add is still readable afterwards -
+	// Do()'s own non-interactive contract (see Layout.cpp) means it never
+	// pops a BAlert itself; that stays here, the interactive caller.
+	BMessage	*settings	= new BMessage(P_C_EXECUTE_COMMAND);
+	settings->AddString("Command::Name","Layout");
+	DotLayouter	*dotLayouter	= dynamic_cast<DotLayouter *>(layouter);
+	if (dotLayouter != NULL) {
+		settings->AddString("direction",dotLayouter->RankDir());
+		settings->AddString("engine",dotLayouter->Engine());
 	}
+	doc->GetCommandManager()->Execute(settings);
 
-	BMessage	positions;
-	status_t	err	= layouter->Layout(nodes,connections,&positions);
-	if (err != B_OK) {
-		BString	text;
-		text.SetToFormat(B_TRANSLATE("%s failed: %s"),layouter->Name(),strerror(err));
-		(new BAlert(B_TRANSLATE("Auto-Layout"),text.String(),B_TRANSLATE("OK"),
+	const char	*error	= NULL;
+	if (settings->FindString("error",&error) == B_OK) {
+		(new BAlert(B_TRANSLATE("Auto-Layout"),error,B_TRANSLATE("OK"),
 			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go();
-		applyingLayout	= false;
-		return;
 	}
-
-	CenterOnOldBounds(nodes,&positions);
-
-	BMessage	*wrapper	= BuildLayoutCommand(&positions);
-	if (wrapper != NULL)
-		(new BMessenger(doc))->SendMessage(wrapper);
 
 	applyingLayout	= false;
 }

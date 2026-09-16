@@ -22,6 +22,7 @@ SRCS= 	TestMain.cpp \
 		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
 		../plugins/LayoutEditor/DotLayouter.cpp \
+		../plugins/LayoutEditor/LayoutCommandBuilder.cpp \
 		../plugins/BatchCommand/Batch.cpp \
 		../app/ProjectConceptorDefs.cpp \
 		../app/Config/ConfigManager.cpp \

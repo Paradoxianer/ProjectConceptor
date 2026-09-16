@@ -12,6 +12,7 @@ AddResources pc_layout_editor : LayoutEditor.rdef ;
 
 Addon pc_layout_editor :
 	DotLayouter.cpp
+	LayoutCommandBuilder.cpp
 	LayoutEditor.cpp
 	LayoutEditorPlugin.cpp
         : be tracker translation libprojectconceptor.a

@@ -1,0 +1,13 @@
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins LayoutCommand ;
+
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src plugins LayoutEditor ] ;
+
+Addon pc_command_layout :
+	Layout.cpp
+	LayoutPlugin.cpp
+	DotLayouter.cpp
+	LayoutCommandBuilder.cpp
+        : be tracker translation libprojectconceptor.a
+;
