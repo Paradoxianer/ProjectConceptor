@@ -1,6 +1,7 @@
 #include "ToolItem.h"
 
 #include "ToolBar.h"
+#include <interface/ControlLook.h>
 #include <interface/InterfaceDefs.h>
 
 ToolItem::ToolItem(const char *name, BBitmap *bmp,BMessage *msg,uint32 behave):BaseItem(name),BButton(BRect(0,0,ITEM_WIDTH,ITEM_HEIGHT),name,"",msg)
@@ -154,23 +155,27 @@ void ToolItem::Draw(BRect updateRect)
 {
 	if (fButtonBorder)
 		BButton::Draw(updateRect); //enable button border
-	SetDrawingMode(B_OP_ALPHA);
-	BRect buttonFrame=BRect(0,0,18,18);
 
 	// The 1px icon inset below was, on its own, the only visual
 	// difference between a two-state item's on/off look - too subtle to
-	// actually read as "toggled" (#127 feedback). A filled background
-	// behind the icon is the same "pressed" cue a real toggle button
-	// gives, and doesn't affect one-state items in practice: those never
-	// persist Value() at B_CONTROL_ON, only flash it momentarily while
-	// physically held down, which is the normal "pressed" look for any
-	// button anyway.
-	if (Value() == B_CONTROL_ON) {
-		BRect	highlight	= Bounds();
-		SetHighColor(tint_color(ui_color(B_CONTROL_HIGHLIGHT_COLOR),B_DARKEN_1_TINT));
-		FillRoundRect(highlight,3,3);
-		SetDrawingMode(B_OP_ALPHA);
-	}
+	// actually read as "toggled" (#127 feedback). A flat color fill was
+	// the first attempt at fixing that, but read as un-Haiku-native (no
+	// bevel, doesn't track the system theme). ColorToolItem's own
+	// ColorPickerArrowView solves the identical problem the identical
+	// way: be_control_look with B_ACTIVATED gives the real sunken/
+	// pressed button look the system theme actually uses, not a
+	// hand-picked color - and doesn't affect one-state items in
+	// practice, since those never persist Value() at B_CONTROL_ON, only
+	// flash it momentarily while physically held down (the normal
+	// "pressed" look for any button anyway).
+	rgb_color	base		= ui_color(B_PANEL_BACKGROUND_COLOR);
+	uint32		flags		= (Value() == B_CONTROL_ON) ? BControlLook::B_ACTIVATED : 0;
+	BRect		buttonRect	= Bounds();
+	be_control_look->DrawButtonFrame(this,buttonRect,updateRect,base,base,flags);
+	be_control_look->DrawButtonBackground(this,buttonRect,updateRect,base,flags);
+
+	SetDrawingMode(B_OP_ALPHA);
+	BRect buttonFrame=BRect(0,0,18,18);
 
 	if (Value() != B_CONTROL_ON)
 		buttonFrame.OffsetTo(4,4);
