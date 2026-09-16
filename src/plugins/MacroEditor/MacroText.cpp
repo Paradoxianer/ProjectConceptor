@@ -195,10 +195,10 @@ static void SerializeValue(BMessage *msg, const char *fieldName, type_code type,
 		default: {
 			// Escape hatch for any type with no readable syntax above
 			// (e.g. pattern/color data). B_MESSAGE_TYPE fields never reach
-			// here - SerializeCommand()/SerializeFieldBlock() give those
-			// their own readable "~fieldName ..." block instead. Lossless,
-			// opaque, not meant to be hand-authored - never silently drops
-			// data (see MacroText.h).
+			// here - SerializeFieldLines() gives those their own readable
+			// "~fieldName" line/block instead. Lossless, opaque, not meant
+			// to be hand-authored - never silently drops data (see
+			// MacroText.h).
 			const void	*data	= NULL;
 			ssize_t		size	= 0;
 			if (msg->FindData(fieldName,type,index,&data,&size) == B_OK) {
@@ -212,58 +212,60 @@ static void SerializeValue(BMessage *msg, const char *fieldName, type_code type,
 }
 
 
-struct FieldChild {
-	BString		name;
-	BMessage	*msg;
-};
+static void SerializeCommand(BMessage *command, int depth, BString *out);
 
 
-/** Renders one nested B_MESSAGE_TYPE field (e.g. Indexer-embedded
- * "included_node", ChangeValue's "valueContainer") as "~fieldName key=val
- * ..." plus, recursively, any further-nested B_MESSAGE_TYPE fields inside
- * it at depth+1 - the same block shape ParseCommands()'s "~" branch reads
- * back. Keeps recorded macros readable instead of falling into the raw:
- * base64 escape hatch (see MacroText.h). */
-static void SerializeFieldBlock(const char *fieldName, BMessage *fieldMsg, int depth, BString *out)
+/** Writes msg's own fields as one "fieldName=value" line each (or, for a
+ * nested B_MESSAGE_TYPE field, a "~fieldName" header line followed by its
+ * own fields the same way, recursively) at the given depth - every
+ * BMessage entry is its own line, matching ParseCommands()'s "~"/"=" line
+ * grammar exactly. skipName1/skipName2 exclude fields that render some
+ * other way (a command's own "Command::Name"/"<name>::Undo"); pass NULL
+ * for a nested field block, which has none of those. */
+static void SerializeFieldLines(BMessage *msg, int depth, const char *skipName1,
+	const char *skipName2, BString *out)
 {
 	BString	indent;
 	for (int d = 0; d < depth; d++)
 		indent << "  ";
-	*out << indent << "~" << fieldName;
 
-	BList		nested;	// FieldChild* - further-nested B_MESSAGE_TYPE fields
-	char		*subFieldName;
+	char		*fieldName;
 	type_code	type;
 	int32		count;
 	int32		i		= 0;
-	while (fieldMsg->GetInfo(B_ANY_TYPE,i,&subFieldName,&type,&count) == B_OK) {
+	while (msg->GetInfo(B_ANY_TYPE,i,&fieldName,&type,&count) == B_OK) {
+		BString	fn(fieldName);
+		if (((skipName1 != NULL) && (fn == skipName1)) ||
+			((skipName2 != NULL) && (fn == skipName2))) {
+			i++;
+			continue;
+		}
+		if (fn == "PCommand::subPCommand") {
+			for (int32 j = 0; j < count; j++) {
+				BMessage	child;
+				if (msg->FindMessage(fieldName,j,&child) == B_OK)
+					SerializeCommand(&child,depth,out);
+			}
+			i++;
+			continue;
+		}
 		if (type == B_MESSAGE_TYPE) {
 			for (int32 j = 0; j < count; j++) {
-				BMessage	*child	= new BMessage();
-				if (fieldMsg->FindMessage(subFieldName,j,child) == B_OK) {
-					FieldChild	*fc	= new FieldChild();
-					fc->name	= subFieldName;
-					fc->msg		= child;
-					nested.AddItem(fc);
-				} else
-					delete child;
+				BMessage	child;
+				if (msg->FindMessage(fieldName,j,&child) == B_OK) {
+					*out << indent << "~" << fieldName << "\n";
+					SerializeFieldLines(&child,depth+1,NULL,NULL,out);
+				}
 			}
 			i++;
 			continue;
 		}
 		for (int32 j = 0; j < count; j++) {
-			*out << " " << subFieldName << "=";
-			SerializeValue(fieldMsg,subFieldName,type,j,out);
+			*out << indent << fieldName << "=";
+			SerializeValue(msg,fieldName,type,j,out);
+			*out << "\n";
 		}
 		i++;
-	}
-	*out << "\n";
-
-	for (int32 c = 0; c < nested.CountItems(); c++) {
-		FieldChild	*fc	= (FieldChild*)nested.ItemAt(c);
-		SerializeFieldBlock(fc->name.String(),fc->msg,depth+1,out);
-		delete fc->msg;
-		delete fc;
 	}
 }
 
@@ -278,68 +280,11 @@ static void SerializeCommand(BMessage *command, int depth, BString *out)
 	command->FindString("Command::Name",&name);
 	if (name == NULL)
 		name	= "";
-	*out << indent << name;
+	*out << indent << name << "\n";
 
 	BString	undoFieldName;
 	undoFieldName << name << "::Undo";
-
-	BList		subCommands;	// BMessage* - PCommand::subPCommand entries
-	BList		fieldChildren;	// FieldChild* - other nested B_MESSAGE_TYPE fields
-	char		*fieldName;
-	type_code	type;
-	int32		count;
-	int32		i		= 0;
-	while (command->GetInfo(B_ANY_TYPE,i,&fieldName,&type,&count) == B_OK) {
-		BString	fn(fieldName);
-		if ((fn == "Command::Name") || (fn == undoFieldName)) {
-			i++;
-			continue;
-		}
-		if (fn == "PCommand::subPCommand") {
-			for (int32 j = 0; j < count; j++) {
-				BMessage	*child	= new BMessage();
-				if (command->FindMessage(fieldName,j,child) == B_OK)
-					subCommands.AddItem(child);
-				else
-					delete child;
-			}
-			i++;
-			continue;
-		}
-		if (type == B_MESSAGE_TYPE) {
-			for (int32 j = 0; j < count; j++) {
-				BMessage	*child	= new BMessage();
-				if (command->FindMessage(fieldName,j,child) == B_OK) {
-					FieldChild	*fc	= new FieldChild();
-					fc->name	= fieldName;
-					fc->msg		= child;
-					fieldChildren.AddItem(fc);
-				} else
-					delete child;
-			}
-			i++;
-			continue;
-		}
-		for (int32 j = 0; j < count; j++) {
-			*out << " " << fieldName << "=";
-			SerializeValue(command,fieldName,type,j,out);
-		}
-		i++;
-	}
-	*out << "\n";
-
-	for (int32 c = 0; c < fieldChildren.CountItems(); c++) {
-		FieldChild	*fc	= (FieldChild*)fieldChildren.ItemAt(c);
-		SerializeFieldBlock(fc->name.String(),fc->msg,depth+1,out);
-		delete fc->msg;
-		delete fc;
-	}
-
-	for (int32 c = 0; c < subCommands.CountItems(); c++) {
-		BMessage	*child	= (BMessage*)subCommands.ItemAt(c);
-		SerializeCommand(child,depth+1,out);
-		delete child;
-	}
+	SerializeFieldLines(command,depth+1,"Command::Name",undoFieldName.String(),out);
 }
 
 
@@ -616,11 +561,17 @@ struct PendingChild {
 /** One open command or nested "~fieldName" block, indentation-tracked.
  * isField distinguishes the two, since a command's own pending children
  * always attach as "PCommand::subPCommand" while a field block's pending
- * children attach under their own individual field names - see PopOneFrame(). */
+ * children attach under their own individual field names - see PopOneFrame().
+ * A field="value" line now always sits on its own following line rather
+ * than packed onto the command's own line, so a command frame keeps its
+ * PCommand* (not owned - just the registry's pointer) to validate those
+ * later field lines against; a field-block frame has none, its content is
+ * schema-free (see ParseAndAddValue()'s B_ANY_TYPE sentinel). */
 struct MacroStackFrame {
 	BMessage	*msg;
 	BString		attachName;	// unused for a frame that ends up top-level
 	bool		isField;
+	PCommand	*command;	// NULL for a field-block frame
 	int			depth;
 	BList		*pending;	// PendingChild*
 };
@@ -719,101 +670,25 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 				break;
 			continue;
 		}
-
-		BString	*firstTok	= (BString*)tokens.ItemAt(0);
-		bool	isField		= (firstTok->Length() > 0) && (firstTok->ByteAt(0) == '~');
-
-		BMessage	*msg		= NULL;
-		BString		attachName;	// "PCommand::subPCommand" for a command, else the ~fieldName text
-		status_t	fieldErr	= B_OK;
-
-		if (isField) {
-			// "~fieldName key=value ..." - a nested B_MESSAGE_TYPE field
-			// (e.g. Indexer-embedded "included_node", ChangeValue's
-			// "valueContainer") written back out by SerializeFieldBlock().
-			// There is no PropertyInfo schema for arbitrary nested field
-			// content, so values are parsed with the B_ANY_TYPE sentinel -
-			// see ParseAndAddValue().
-			firstTok->CopyInto(attachName,1,firstTok->Length()-1);
-			if (attachName.Length() == 0) {
-				errorOut->SetTo("");
-				*errorOut	<< "line " << lineNo << ": empty field name after \"~\"";
-				DeleteStringList(&tokens);
-				CleanupFrames(stack,&built);
-				return B_BAD_VALUE;
-			}
-			msg	= new BMessage();
-			for (int32 t = 1; t < tokens.CountItems(); t++) {
-				BString	*tok	= (BString*)tokens.ItemAt(t);
-				int32	eq		= tok->FindFirst('=');
-				if (eq < 0) {
-					errorOut->SetTo("");
-					*errorOut	<< "line " << lineNo << ": malformed token \"" << *tok << "\" (expected field=value)";
-					fieldErr	= B_BAD_VALUE;
-					break;
-				}
-				BString	fieldName,valueText;
-				tok->CopyInto(fieldName,0,eq);
-				tok->CopyInto(valueText,eq+1,tok->Length()-eq-1);
-
-				BString	valueError;
-				if (ParseAndAddValue(msg,fieldName.String(),B_ANY_TYPE,valueText,&valueError) != B_OK) {
-					errorOut->SetTo("");
-					*errorOut	<< "line " << lineNo << ": " << valueError;
-					fieldErr	= B_BAD_VALUE;
-					break;
-				}
-			}
-		} else {
-			BString	commandName(*firstTok);
-			PCommand	*command	= registry->GetPCommand((char*)commandName.String());
-			if (command == NULL) {
-				errorOut->SetTo("");
-				*errorOut	<< "line " << lineNo << ": unknown command \"" << commandName << "\"";
-				DeleteStringList(&tokens);
-				CleanupFrames(stack,&built);
-				return B_NAME_NOT_FOUND;
-			}
-
-			msg	= new BMessage();
-			msg->AddString("Command::Name",commandName);
-			attachName	= "PCommand::subPCommand";
-
-			for (int32 t = 1; t < tokens.CountItems(); t++) {
-				BString	*tok	= (BString*)tokens.ItemAt(t);
-				int32	eq		= tok->FindFirst('=');
-				if (eq < 0) {
-					errorOut->SetTo("");
-					*errorOut	<< "line " << lineNo << ": malformed token \"" << *tok << "\" (expected field=value)";
-					fieldErr	= B_BAD_VALUE;
-					break;
-				}
-				BString	fieldName,valueText;
-				tok->CopyInto(fieldName,0,eq);
-				tok->CopyInto(valueText,eq+1,tok->Length()-eq-1);
-
-				type_code	expectedType;
-				if (!FindFieldType(command,fieldName.String(),&expectedType)) {
-					errorOut->SetTo("");
-					*errorOut	<< "line " << lineNo << ": " << commandName << " has no field \"" << fieldName << "\"";
-					fieldErr	= B_BAD_VALUE;
-					break;
-				}
-				BString	valueError;
-				if (ParseAndAddValue(msg,fieldName.String(),expectedType,valueText,&valueError) != B_OK) {
-					errorOut->SetTo("");
-					*errorOut	<< "line " << lineNo << ": " << valueError;
-					fieldErr	= B_BAD_VALUE;
-					break;
-				}
-			}
-		}
-		DeleteStringList(&tokens);
-		if (fieldErr != B_OK) {
-			delete msg;
+		if (tokens.CountItems() != 1) {
+			errorOut->SetTo("");
+			*errorOut	<< "line " << lineNo << ": expected one item per line";
+			DeleteStringList(&tokens);
 			CleanupFrames(stack,&built);
-			return fieldErr;
+			return B_BAD_VALUE;
 		}
+		BString	token(*(BString*)tokens.ItemAt(0));
+		DeleteStringList(&tokens);
+
+		// every BMessage entry is its own line: a bare name is a command
+		// (opens a frame for its own field/subcommand lines below it), a
+		// "~fieldName" line is a nested B_MESSAGE_TYPE field (ditto), and
+		// a "fieldName=value" line sets one field directly on whichever
+		// frame is open at the matching depth - it never opens a frame of
+		// its own, since a scalar value cannot have children.
+		bool	isFieldBlock	= (token.Length() > 0) && (token.ByteAt(0) == '~');
+		int32	eq				= isFieldBlock ? -1 : token.FindFirst('=');
+		bool	isScalarField	= (!isFieldBlock) && (eq >= 0);
 
 		// pop frames back to (and including) the first one whose depth is
 		// >= this line's depth - each popped frame's pending children get
@@ -822,37 +697,104 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 		while ((!stack.empty()) && (stack.back().depth >= depth))
 			PopOneFrame(stack,&built);
 
-		if (isField && stack.empty()) {
-			errorOut->SetTo("");
-			*errorOut	<< "line " << lineNo << ": \"~" << attachName << "\" has no enclosing command to attach to";
-			delete msg;
-			CleanupFrames(stack,&built);
-			return B_BAD_VALUE;
+		if (isFieldBlock) {
+			BString	fieldName;
+			token.CopyInto(fieldName,1,token.Length()-1);
+			if (fieldName.Length() == 0) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": empty field name after \"~\"";
+				CleanupFrames(stack,&built);
+				return B_BAD_VALUE;
+			}
+			if (stack.empty()) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": \"~" << fieldName << "\" has no enclosing command to attach to";
+				CleanupFrames(stack,&built);
+				return B_BAD_VALUE;
+			}
+			int32	expectedDepth	= stack.back().depth+1;
+			if (depth != expectedDepth) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": unexpected indent";
+				CleanupFrames(stack,&built);
+				return B_BAD_VALUE;
+			}
+			MacroStackFrame	newFrame;
+			newFrame.msg		= new BMessage();
+			newFrame.attachName	= fieldName;
+			newFrame.isField	= true;
+			newFrame.command	= NULL;
+			newFrame.depth		= depth;
+			newFrame.pending	= new BList();
+			stack.push_back(newFrame);
+		} else if (isScalarField) {
+			BString	fieldName,valueText;
+			token.CopyInto(fieldName,0,eq);
+			token.CopyInto(valueText,eq+1,token.Length()-eq-1);
+			if (stack.empty()) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": \"" << fieldName << "\" has no enclosing command to attach to";
+				CleanupFrames(stack,&built);
+				return B_BAD_VALUE;
+			}
+			int32	expectedDepth	= stack.back().depth+1;
+			if (depth != expectedDepth) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": unexpected indent";
+				CleanupFrames(stack,&built);
+				return B_BAD_VALUE;
+			}
+			MacroStackFrame	&parent			= stack.back();
+			type_code		expectedType	= B_ANY_TYPE;
+			if (!parent.isField) {
+				if (!FindFieldType(parent.command,fieldName.String(),&expectedType)) {
+					errorOut->SetTo("");
+					*errorOut	<< "line " << lineNo << ": " << parent.command->Name() << " has no field \"" << fieldName << "\"";
+					CleanupFrames(stack,&built);
+					return B_BAD_VALUE;
+				}
+			}
+			BString	valueError;
+			if (ParseAndAddValue(parent.msg,fieldName.String(),expectedType,valueText,&valueError) != B_OK) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": " << valueError;
+				CleanupFrames(stack,&built);
+				return B_BAD_VALUE;
+			}
+			// no frame pushed - a scalar field line has no children of its own
+		} else {
+			BString	commandName(token);
+			PCommand	*command	= registry->GetPCommand((char*)commandName.String());
+			if (command == NULL) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": unknown command \"" << commandName << "\"";
+				CleanupFrames(stack,&built);
+				return B_NAME_NOT_FOUND;
+			}
+			if ((!stack.empty()) && stack.back().isField) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": a command cannot appear inside a \"~\" field block";
+				CleanupFrames(stack,&built);
+				return B_BAD_VALUE;
+			}
+			int32	expectedDepth	= stack.empty() ? 0 : stack.back().depth+1;
+			if (depth != expectedDepth) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": unexpected indent";
+				CleanupFrames(stack,&built);
+				return B_BAD_VALUE;
+			}
+			BMessage	*cmd	= new BMessage();
+			cmd->AddString("Command::Name",commandName);
+			MacroStackFrame	newFrame;
+			newFrame.msg		= cmd;
+			newFrame.attachName	= "PCommand::subPCommand";
+			newFrame.isField	= false;
+			newFrame.command	= command;
+			newFrame.depth		= depth;
+			newFrame.pending	= new BList();
+			stack.push_back(newFrame);
 		}
-		if ((!isField) && (!stack.empty()) && stack.back().isField) {
-			errorOut->SetTo("");
-			*errorOut	<< "line " << lineNo << ": a command cannot appear inside a \"~\" field block";
-			delete msg;
-			CleanupFrames(stack,&built);
-			return B_BAD_VALUE;
-		}
-
-		int32	expectedDepth	= stack.empty() ? 0 : stack.back().depth+1;
-		if (depth != expectedDepth) {
-			errorOut->SetTo("");
-			*errorOut	<< "line " << lineNo << ": unexpected indent";
-			delete msg;
-			CleanupFrames(stack,&built);
-			return B_BAD_VALUE;
-		}
-
-		MacroStackFrame	newFrame;
-		newFrame.msg		= msg;
-		newFrame.attachName	= attachName;
-		newFrame.isField	= isField;
-		newFrame.depth		= depth;
-		newFrame.pending	= new BList();
-		stack.push_back(newFrame);
 
 		if (lineEnd >= len)
 			break;

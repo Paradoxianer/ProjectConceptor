@@ -19,28 +19,40 @@ class PCommandManager;
  * connection pointers already replaced by stable int32 ids, so this never
  * touches a live pointer.
  *
- * One command per line/block:
+ * One BMessage entry per line - a command, one of its fields, or a nested
+ * field's own field - indentation is nesting depth:
  *
- *   Insert node=@1 frame=[0,0,80,40]
- *     ~included_node Node::Name="A" Node::Frame=[0,0,80,40]
- *   Group node=@2 deselect=true
- *     Move dx=10.5 dy=-3
+ *   Insert
+ *     node=@1
+ *     frame=[0,0,80,40]
+ *     ~included_node
+ *       Node::Name="A"
+ *       Node::Frame=[0,0,80,40]
+ *   Group
+ *     node=@2
+ *     deselect=true
+ *     Move
+ *       dx=10.5
+ *       dy=-3
  *
- * - Leading whitespace = nesting depth = "PCommand::subPCommand" children
- *   (the same mechanism Batch relies on).
- * - Value tokens: true/false (bool); a plain integer (int32, default) or
- *   with an explicit i8/i16/i64 suffix; a number with a decimal point
- *   (float) or an explicit d suffix (double); "..." with \" and \\
- *   escapes (string); (x,y) (BPoint); [l,t,r,b] (BRect); @<id> (the
- *   "node" field specifically - an already-indexed node/connection id,
- *   stored as int32, not a live pointer).
- * - A nested B_MESSAGE_TYPE field (e.g. Indexer-embedded "included_node",
- *   ChangeValue's "valueContainer") gets its own indented "~fieldName
- *   key=value ..." block instead of a value token on the same line - its
- *   own fields follow the identical inline syntax, and can nest further
- *   the same way. There is no schema for this content (it is arbitrary
- *   node/value data, not a command), so values are accepted by whatever
- *   their own token syntax implies rather than cross-checked.
+ * - A bare name is a command line - its own fields and, indented the same
+ *   one level deeper, any "PCommand::subPCommand" children (the mechanism
+ *   Batch relies on) follow below it.
+ * - A "fieldName=value" line sets one field on whichever command or "~"
+ *   block is open at that indent depth - it never has children of its
+ *   own. Value syntax: true/false (bool); a plain integer (int32,
+ *   default) or with an explicit i8/i16/i64 suffix; a number with a
+ *   decimal point (float) or an explicit d suffix (double); "..." with
+ *   \" and \\ escapes (string); (x,y) (BPoint); [l,t,r,b] (BRect); @<id>
+ *   (the "node" field specifically - an already-indexed node/connection
+ *   id, stored as int32, not a live pointer).
+ * - A "~fieldName" line is a nested B_MESSAGE_TYPE field (e.g.
+ *   Indexer-embedded "included_node", ChangeValue's "valueContainer") -
+ *   its own fields follow indented one level deeper, in the same
+ *   line-per-entry shape, and can nest further the same way. There is no
+ *   schema for this content (it is arbitrary node/value data, not a
+ *   command), so values are accepted by whatever their own syntax implies
+ *   rather than cross-checked.
  * - Anything else (a type not in the list above, in either a command's
  *   own fields or a "~" block's) is preserved losslessly but opaquely as
  *   raw:<type_code>:<base64> - never silently dropped, not meant to be

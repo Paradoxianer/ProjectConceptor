@@ -22,6 +22,8 @@ public:
 	void RoundTripsRecursiveNestedFieldBlock(void);
 	void RoundTripsRepeatedNestedFieldBlocks(void);
 	void RawEscapeHatchPreservesOpaqueType(void);
+	void EachFieldRendersOnItsOwnLine(void);
+	void MultipleTokensOnOneLineIsRejected(void);
 	void UnknownCommandNameIsRejected(void);
 	void UnknownFieldIsRejected(void);
 	void TypeMismatchIsRejected(void);
@@ -37,6 +39,8 @@ public:
 	CPPUNIT_TEST(RoundTripsRecursiveNestedFieldBlock);
 	CPPUNIT_TEST(RoundTripsRepeatedNestedFieldBlocks);
 	CPPUNIT_TEST(RawEscapeHatchPreservesOpaqueType);
+	CPPUNIT_TEST(EachFieldRendersOnItsOwnLine);
+	CPPUNIT_TEST(MultipleTokensOnOneLineIsRejected);
 	CPPUNIT_TEST(UnknownCommandNameIsRejected);
 	CPPUNIT_TEST(UnknownFieldIsRejected);
 	CPPUNIT_TEST(TypeMismatchIsRejected);

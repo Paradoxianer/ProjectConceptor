@@ -137,7 +137,10 @@ void MacroTextTest::RoundTripsInsertWithNodeRef(void)
 	commands.AddItem(&insert);
 	BString	text;
 	SerializeCommands(&commands,&text);
-	CPPUNIT_ASSERT(text.FindFirst("Insert node=@7") == 0);
+	// every BMessage entry is its own line - the command name line, then
+	// its "node" field indented on the following line
+	CPPUNIT_ASSERT(text.FindFirst("Insert\n") == 0);
+	CPPUNIT_ASSERT(text.FindFirst("  node=@7") >= 0);
 
 	BList		parsed;
 	BString		error;
@@ -475,13 +478,54 @@ void MacroTextTest::RawEscapeHatchPreservesOpaqueType(void)
 }
 
 
+void MacroTextTest::EachFieldRendersOnItsOwnLine(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+
+	BMessage	select;
+	select.AddString("Command::Name","Select");
+	select.AddInt32("node",3);
+	select.AddRect("frame",BRect(0,0,10,10));
+	select.AddBool("deselect",true);
+
+	BList	commands;
+	commands.AddItem(&select);
+	BString	text;
+	SerializeCommands(&commands,&text);
+
+	// the whole point of #55's readability fix: "Select" carries only the
+	// command name, none of its own field values packed onto that same
+	// line - every field is its own indented line below it
+	CPPUNIT_ASSERT(text.FindFirst("Select\n") == 0);
+	CPPUNIT_ASSERT(text.FindFirst("Select ") < 0);
+	CPPUNIT_ASSERT(text.FindFirst("  node=@3\n") >= 0);
+	CPPUNIT_ASSERT(text.FindFirst("  deselect=true\n") >= 0);
+	CPPUNIT_ASSERT(text.FindFirst("  frame=[") >= 0);
+}
+
+
+void MacroTextTest::MultipleTokensOnOneLineIsRejected(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+
+	// the old inline "Move dx=1.0" shape is no longer valid syntax - every
+	// BMessage entry needs its own line now
+	BList		parsed;
+	BString		error;
+	status_t	err	= ParseCommands(BString("Move dx=1.0\n"),&parsed,
+		doc->GetCommandManager(),&error);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,err);
+	CPPUNIT_ASSERT_EQUAL((int32)0,parsed.CountItems());
+}
+
+
 void MacroTextTest::UnknownCommandNameIsRejected(void)
 {
 	PDocument	*doc	= NewRegisteredTestDocument();
 
 	BList		parsed;
 	BString		error;
-	status_t	err	= ParseCommands(BString("Frobnicate node=@1\n"),&parsed,
+	status_t	err	= ParseCommands(BString("Frobnicate\n"),&parsed,
 		doc->GetCommandManager(),&error);
 	CPPUNIT_ASSERT_EQUAL((status_t)B_NAME_NOT_FOUND,err);
 	CPPUNIT_ASSERT_EQUAL((int32)0,parsed.CountItems());
@@ -495,7 +539,7 @@ void MacroTextTest::UnknownFieldIsRejected(void)
 
 	BList		parsed;
 	BString		error;
-	status_t	err	= ParseCommands(BString("Move bogus=1\n"),&parsed,
+	status_t	err	= ParseCommands(BString("Move\n  bogus=1\n"),&parsed,
 		doc->GetCommandManager(),&error);
 	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,err);
 	CPPUNIT_ASSERT_EQUAL((int32)0,parsed.CountItems());
@@ -509,7 +553,7 @@ void MacroTextTest::TypeMismatchIsRejected(void)
 
 	BList		parsed;
 	BString		error;
-	status_t	err	= ParseCommands(BString("Move dx=\"nope\" dy=1.0\n"),&parsed,
+	status_t	err	= ParseCommands(BString("Move\n  dx=\"nope\"\n  dy=1.0\n"),&parsed,
 		doc->GetCommandManager(),&error);
 	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,err);
 	CPPUNIT_ASSERT_EQUAL((int32)0,parsed.CountItems());
