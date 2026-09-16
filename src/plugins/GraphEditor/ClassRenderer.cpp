@@ -12,6 +12,44 @@
 #include <support/String.h>
 #include "AttributRenderer.h"
 #include "GroupRenderer.h"
+#include "SmartGuides.h"
+
+// #127: candidate frames for GuidesEnabled() to align against - every
+// unselected node renderer (the dragged node's own selected siblings are
+// moving in lockstep this tick, see MoveAll(), and would be a moving
+// target; connections have no meaningful Frame() to align to here).
+static BList*
+CollectGuideTargets(GraphEditor *editor)
+{
+	BList	*targets	= new BList();
+	BList	*renderers	= editor->RenderList();
+	for (int32 i=0;i<renderers->CountItems();i++) {
+		Renderer	*candidate	= (Renderer *)renderers->ItemAt(i);
+		if (candidate->Selected())
+			continue;
+		if (candidate->GetMessage()->what == P_C_CONNECTION_TYPE)
+			continue;
+		targets->AddItem(new BRect(candidate->Frame()));
+	}
+	return targets;
+}
+
+static void
+DeleteGuideTargets(BList *targets)
+{
+	for (int32 i=0;i<targets->CountItems();i++)
+		delete (BRect *)targets->ItemAt(i);
+	delete targets;
+}
+
+// Screen-space snap distance, converted to document space the same way
+// grid-snap's own dx/dy math already implicitly works in document units -
+// GraphEditor::Scale() is applied to mouse coordinates well before they
+// reach here (see GraphEditor::MouseMoved()'s scaledWhere), so "pt"/
+// "startFrame" here are already document-space; the threshold just needs
+// the same conversion so it stays a constant number of *screen* pixels
+// regardless of zoom.
+static const float	kGuideScreenThreshold	= 6.0f;
 
 
 ClassRenderer::ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer):Renderer(parentEditor, forContainer)
@@ -146,9 +184,24 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
 				rdx	= newPosX - frame.right;
 				rdy	= newPosY - frame.bottom;
 			}
+			else if (!resizing && editor->GuidesEnabled()) {
+				// Same absolute-from-drag-start shape as the grid branch
+				// above (not incremental from oldPt) - guide matches have
+				// to be recomputed against the true current candidate
+				// position every tick, not accumulated.
+				float	rawDx			= pt.x - startMouseDown->x;
+				float	rawDy			= pt.y - startMouseDown->y;
+				BList	*targets		= CollectGuideTargets(editor);
+				float	thresholdDoc	= kGuideScreenThreshold / editor->Scale();
+				GuideSnapResult	snap	= ComputeGuideSnap(*startFrame,rawDx,rawDy,targets,thresholdDoc);
+				DeleteGuideTargets(targets);
+				dx	= (startFrame->left + snap.dx) - frame.left;
+				dy	= (startFrame->top + snap.dy) - frame.top;
+				editor->SetActiveGuides(snap);
+			}
 			else {
 				dx = pt.x - oldPt->x;
-				dy = pt.y - oldPt->y;	
+				dy = pt.y - oldPt->y;
 			}
 			oldPt	= new BPoint(pt);
 			if (!resizing) { 
@@ -214,6 +267,18 @@ void ClassRenderer::MouseUp(BPoint where) {
 				dx = newPosX-startFrame->left;
 				dy = newPosY-startFrame->top;
 			}
+			else if (!resizing && editor->GuidesEnabled()) {
+				// dx/dy above are already absolute-from-startFrame (same
+				// shape ComputeGuideSnap() expects/returns), unlike
+				// MouseMoved()'s incremental case - matches the last
+				// on-screen preview exactly.
+				BList	*targets		= CollectGuideTargets(editor);
+				float	thresholdDoc	= kGuideScreenThreshold / editor->Scale();
+				GuideSnapResult	snap	= ComputeGuideSnap(*startFrame,dx,dy,targets,thresholdDoc);
+				DeleteGuideTargets(targets);
+				dx	= snap.dx;
+				dy	= snap.dy;
+			}
 			if (!resizing) {
 				BMessage	*mover		= new BMessage(P_C_EXECUTE_COMMAND);
 				mover->AddString("Command::Name","Move");
@@ -243,6 +308,8 @@ void ClassRenderer::MouseUp(BPoint where) {
 		startMouseDown	= NULL;
 		oldPt			= NULL;
 		connecting		= 0;
+		editor->ClearActiveGuides();
+		editor->Invalidate();
 	}
 }
 

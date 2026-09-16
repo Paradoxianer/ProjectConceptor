@@ -17,6 +17,7 @@
 #include "BasePlugin.h"
 #include "PDocument.h"
 #include "PluginManager.h"
+#include "SmartGuides.h"
 
 #include "PatternToolItem.h"
 #include "ColorToolItem.h"
@@ -32,6 +33,7 @@ const uint32			G_E_GROUP				= 'geGR';
 const uint32			G_E_NEW_SCALE			= 'geNS';
 const uint32			G_E_INVALIDATE			= 'geIV';
 const uint32			G_E_GRID_CHANGED		= 'geGC';
+const uint32			G_E_GUIDES_CHANGED		= 'geGU';
 
 const uint32			G_E_PATTERN_CHANGED		= 'gePC';
 const uint32			G_E_COLOR_CHANGED		= 'geCC';
@@ -128,6 +130,14 @@ public:
 			bool			GridEnabled(void){return gridEnabled;};
 			float			GridWidth(void){return gridWidth;};
 
+			// #127: only meaningful while GuidesEnabled() and a drag is in
+			// progress - ClassRenderer feeds the live snap result in during
+			// MouseMoved() so Draw() can render the matched line(s);
+			// cleared once the drag ends (MouseUp()) or nothing matches.
+			bool			GuidesEnabled(void){return guidesEnabled;};
+			void			SetActiveGuides(GuideSnapResult guides){activeGuides=guides; hasActiveGuides=true;};
+			void			ClearActiveGuides(void){hasActiveGuides=false;};
+
 			Renderer*		FindRenderer(BPoint where);
 			Renderer*		FindNodeRenderer(BPoint where);
 			Renderer*		FindConnectionRenderer(BPoint where);
@@ -190,6 +200,7 @@ protected:
 			BMenu			*scaleMenu;
 			ToolBar			*toolBar;
 			ToolItem		*grid;
+			ToolItem		*guides;
 
 			ToolItem		*addGroup;
 			ToolItem		*addBool;
@@ -249,6 +260,9 @@ protected:
 			bigtime_t		animationLastTick;
 
 			bool			gridEnabled;
+			bool			guidesEnabled;
+			bool			hasActiveGuides;
+			GuideSnapResult	activeGuides;
 			image_id 		pluginID;
 
 			BScrollView		*myScrollParent;

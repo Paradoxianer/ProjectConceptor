@@ -22,6 +22,7 @@ Addon pc_graph_editor :
 	GraphEditorPlugin.cpp
 	GroupBoundary.cpp
 	GroupRenderer.cpp
+	SmartGuides.cpp
 	StringRenderer.cpp
 	TextEditorControl.cpp
         : be tracker translation libprojectconceptor.a

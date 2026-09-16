@@ -34,6 +34,35 @@ LoadPluginIcon(BResources *res, const char *name)
 		return NULL;
 	return BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
 }
+
+// Drawn at runtime rather than shipped as a PNG resource - same reasoning
+// as NavigatorEditor's MakeSymbolIcon(): no existing icon fits "smart
+// guides" and this sidesteps hand-authoring a new .rdef resource. Two
+// small squares (nodes) aligned on a dashed guide line, in the same accent
+// color the live guide lines are drawn in (see Draw()), so the toolbar
+// icon and the feature it toggles read as the same thing.
+static BBitmap*
+MakeGuidesIcon(void)
+{
+	BRect	bounds(0,0,19,19);
+	BBitmap	*bmp	= new BBitmap(bounds,B_RGBA32,true);
+	BView	*view	= new BView(bounds,"guidesIcon",B_FOLLOW_NONE,B_WILL_DRAW);
+	bmp->AddChild(view);
+	bmp->Lock();
+	view->SetHighColor(0,0,0,0);
+	view->FillRect(bounds,B_SOLID_HIGH);
+	rgb_color	accent	= {230,20,140,255};
+	view->SetHighColor(accent);
+	view->SetDrawingMode(B_OP_ALPHA);
+	float	midY	= (bounds.top+bounds.bottom)/2.0f;
+	for (float x = 4; x < bounds.right-3; x += 3)
+		view->StrokeLine(BPoint(x,midY),BPoint(x+1.5f,midY));
+	view->FillRect(BRect(1,midY-3,7,midY+3));
+	view->FillRect(BRect(bounds.right-7,midY-3,bounds.right-1,midY+3));
+	view->Sync();
+	bmp->Unlock();
+	return bmp;
+}
 #include "PWindow.h"
 #include "PEditorManager.h"
 
@@ -83,6 +112,8 @@ void GraphEditor::Init(void) {
 	key_hold		= false;
 	connecting		= false;
 	gridEnabled		= false;
+	guidesEnabled	= false;
+	hasActiveGuides	= false;
 	fromPoint		= new BPoint(0,0);
 	toPoint			= new BPoint(0,0);
 	renderer		= new BList();
@@ -167,6 +198,10 @@ void GraphEditor::Init(void) {
 
 	grid		= new ToolItem(B_TRANSLATE("Grid"),BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
 	grid->BButton::SetToolTip(B_TRANSLATE("Toggle grid"));
+	// #127: an alternative to grid-snap, not layered on top of it - see
+	// the !GridEnabled() guard in ClassRenderer::MouseMoved()/MouseUp().
+	guides		= new ToolItem(B_TRANSLATE("Guides"),MakeGuidesIcon(),new BMessage(G_E_GUIDES_CHANGED),P_M_TWO_STATE_ITEM);
+	guides->BButton::SetToolTip(B_TRANSLATE("Toggle smart alignment guides"));
 	penSize		= new FloatToolItem(B_TRANSLATE("Pen size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
 	penSize->BButton::SetToolTip(B_TRANSLATE("Border pen size for selected nodes"));
 	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED),new BMessage(G_E_COLOR_PREVIEW));
@@ -518,6 +553,18 @@ void GraphEditor::Draw(BRect updateRect) {
 		EndLineArray();
 	}
 	renderer->DoForEach(DrawRenderer,this);
+	if (hasActiveGuides) {
+		// Same accent color as the toolbar toggle's own icon (MakeGuidesIcon())
+		// so the button and the feature it drives read as one thing.
+		SetHighColor(230,20,140,255);
+		SetPenSize(1.0);
+		if (activeGuides.horizontal.active)
+			StrokeLine(BPoint(activeGuides.horizontal.lineStart,activeGuides.horizontal.linePos),
+				BPoint(activeGuides.horizontal.lineEnd,activeGuides.horizontal.linePos));
+		if (activeGuides.vertical.active)
+			StrokeLine(BPoint(activeGuides.vertical.linePos,activeGuides.vertical.lineStart),
+				BPoint(activeGuides.vertical.linePos,activeGuides.vertical.lineEnd));
+	}
 	if (selectRect) {
 		SetHighColor(81,131,171,120);
 		FillRect(*selectRect);
@@ -679,6 +726,7 @@ void GraphEditor::AttachedToWindow(void) {
 	configBar->AddSeperator();
 	configBar->AddSeperator();
 	configBar->AddItem(grid);
+	configBar->AddItem(guides);
 	configBar->AddSeperator();
 	configBar->AddItem(penSize);
 	configBar->AddItem(colorItem);
@@ -687,6 +735,7 @@ void GraphEditor::AttachedToWindow(void) {
 	configBar->AddItem(connectionArrows);
 
 	grid->SetTarget(this);
+	guides->SetTarget(this);
 	penSize->SetTarget(this);
 	colorItem->SetTarget(this);
 	connectionStyle->SetTarget(this);
@@ -747,6 +796,7 @@ void GraphEditor::DetachedFromWindow(void) {
 				configBar->RemoveItem(patternItem);
 				configBar->RemoveSeperator();
 				configBar->RemoveItem(grid);
+				configBar->RemoveItem(guides);
 				configBar->RemoveSeperator();
 				configBar->RemoveSeperator();
 				configBar->RemoveSeperator();
@@ -865,6 +915,11 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		}
 		case G_E_GRID_CHANGED: {
 			gridEnabled =! gridEnabled;
+			Invalidate();
+			break;
+		}
+		case G_E_GUIDES_CHANGED: {
+			guidesEnabled =! guidesEnabled;
 			Invalidate();
 			break;
 		}
