@@ -6,9 +6,12 @@ Group::Group():PCommand() {
 }
 
 static const property_info kGroupProperties[] = {
+	// included_node: see Insert.cpp's kInsertProperties for why any
+	// command with a "node" field can carry this.
 	{ "Group", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
 		"Groups the current selection under the given group node.", 0, {0},
-		{ { { {"node", B_POINTER_TYPE}, {"deselect", B_BOOL_TYPE} } } } },
+		{ { { {"node", B_POINTER_TYPE}, {"deselect", B_BOOL_TYPE},
+			  {"included_node", B_MESSAGE_TYPE} } } } },
 };
 
 const property_info* Group::PropertyInfo(int32 *count) {

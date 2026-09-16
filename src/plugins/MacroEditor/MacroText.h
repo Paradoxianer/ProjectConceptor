@@ -22,6 +22,7 @@ class PCommandManager;
  * One command per line/block:
  *
  *   Insert node=@1 frame=[0,0,80,40]
+ *     ~included_node Node::Name="A" Node::Frame=[0,0,80,40]
  *   Group node=@2 deselect=true
  *     Move dx=10.5 dy=-3
  *
@@ -33,10 +34,17 @@ class PCommandManager;
  *   escapes (string); (x,y) (BPoint); [l,t,r,b] (BRect); @<id> (the
  *   "node" field specifically - an already-indexed node/connection id,
  *   stored as int32, not a live pointer).
- * - Anything else (nested BMessage fields such as ChangeValue's
- *   valueContainer, or any other type not in the list above) is
- *   preserved losslessly but opaquely as raw:<type_code>:<base64> -
- *   never silently dropped, not meant to be hand-authored.
+ * - A nested B_MESSAGE_TYPE field (e.g. Indexer-embedded "included_node",
+ *   ChangeValue's "valueContainer") gets its own indented "~fieldName
+ *   key=value ..." block instead of a value token on the same line - its
+ *   own fields follow the identical inline syntax, and can nest further
+ *   the same way. There is no schema for this content (it is arbitrary
+ *   node/value data, not a command), so values are accepted by whatever
+ *   their own token syntax implies rather than cross-checked.
+ * - Anything else (a type not in the list above, in either a command's
+ *   own fields or a "~" block's) is preserved losslessly but opaquely as
+ *   raw:<type_code>:<base64> - never silently dropped, not meant to be
+ *   hand-authored.
  * - Every command name is checked against the real PCommandManager
  *   registry, and every field name/type against that command's own
  *   PropertyInfo() (ctypes[0].pairs[]) - the same schema the scripting

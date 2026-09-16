@@ -76,6 +76,36 @@ public:
 	virtual void*	GetNewObject(void *value) { return new TestStringCommand(); }
 };
 
+// A field type with no readable syntax at all (not bool/int/float/string/
+// point/rect/BMessage) - the only thing left in MacroText.cpp's default:
+// raw:<type_code>:<base64> escape hatch once B_MESSAGE_TYPE gets its own
+// "~fieldName" block syntax (see RawEscapeHatchPreservesOpaqueType below).
+class TestRawCommand : public PCommand {
+public:
+	virtual void	AttachedToManager(void) {}
+	virtual void	DetachedFromManager(void) {}
+	virtual char*	Name(void) { return (char *)"TestRaw"; }
+	virtual const property_info* PropertyInfo(int32 *count) {
+		static const property_info	props[] = {
+			{ "TestRaw", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
+				"test", 0, {0}, { { { {"blob", (type_code)'TRBL'} } } } },
+		};
+		*count	= 1;
+		return props;
+	}
+};
+
+class TestRawPlugin : public BasePlugin {
+public:
+	TestRawPlugin(void) : BasePlugin(0) {}
+	virtual char*	GetName(void) { return (char *)"TestRaw"; }
+	virtual char*	GetAutor(void) { return (char *)"test"; }
+	virtual char*	GetVersionsString(void) { return (char *)"0"; }
+	virtual char*	GetDescription(void) { return (char *)"test"; }
+	virtual uint32	GetType(void) { return P_C_COMMANDO_PLUGIN_TYPE; }
+	virtual void*	GetNewObject(void *value) { return new TestRawCommand(); }
+};
+
 PDocument* NewRegisteredTestDocument(void)
 {
 	PDocument	*doc	= NewHeadlessTestDocument();
@@ -85,6 +115,7 @@ PDocument* NewRegisteredTestDocument(void)
 	doc->GetCommandManager()->RegisterPCommand(new TestSelectPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestStringPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestRawPlugin());
 	// Batch is already compiled into every real PCommandManager - not
 	// registered via plugin loading in a headless test doc either, so it
 	// needs the same manual registration as everything else here.
@@ -281,7 +312,7 @@ void MacroTextTest::RoundTripsStringField(void)
 }
 
 
-void MacroTextTest::RawEscapeHatchPreservesNestedMessage(void)
+void MacroTextTest::RoundTripsNestedFieldBlock(void)
 {
 	PDocument	*doc	= NewRegisteredTestDocument();
 
@@ -299,7 +330,11 @@ void MacroTextTest::RawEscapeHatchPreservesNestedMessage(void)
 	commands.AddItem(&changeValue);
 	BString	text;
 	SerializeCommands(&commands,&text);
-	CPPUNIT_ASSERT(text.FindFirst("raw:") >= 0);
+	// the whole point of the "~fieldName" block syntax: this must now be
+	// readable, not fall into the opaque raw:<type>:<base64> escape hatch
+	CPPUNIT_ASSERT(text.FindFirst("~valueContainer") >= 0);
+	CPPUNIT_ASSERT(text.FindFirst("Node::name") >= 0);
+	CPPUNIT_ASSERT(text.FindFirst("raw:") < 0);
 
 	BList		parsed;
 	BString		error;
@@ -311,10 +346,132 @@ void MacroTextTest::RawEscapeHatchPreservesNestedMessage(void)
 	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("valueContainer",&restoredContainer));
 	const char	*restoredName	= NULL;
 	const char	*restoredValue	= NULL;
+	int32		restoredType	= -1;
 	restoredContainer.FindString("name",&restoredName);
 	restoredContainer.FindString("newValue",&restoredValue);
+	restoredContainer.FindInt32("type",&restoredType);
 	CPPUNIT_ASSERT(strcmp(restoredName,"Node::name") == 0);
 	CPPUNIT_ASSERT(strcmp(restoredValue,"Untitled") == 0);
+	CPPUNIT_ASSERT_EQUAL((int32)B_STRING_TYPE,restoredType);
+}
+
+
+void MacroTextTest::RoundTripsRecursiveNestedFieldBlock(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+
+	// two levels deep: Insert's "included_node" (Indexer-embedded full
+	// node content) containing its own nested "font" sub-message -
+	// proves SerializeFieldBlock()/the "~" parser branch actually recurse,
+	// not just handle one level.
+	BMessage	font;
+	font.AddString("family","Swis721 BT");
+	font.AddFloat("size",12.0f);
+
+	BMessage	includedNode;
+	includedNode.AddString("name","New Node");
+	includedNode.AddRect("frame",BRect(0,0,80,40));
+	includedNode.AddMessage("font",&font);
+
+	BMessage	insert;
+	insert.AddString("Command::Name","Insert");
+	insert.AddInt32("node",11);
+	insert.AddMessage("included_node",&includedNode);
+
+	BList	commands;
+	commands.AddItem(&insert);
+	BString	text;
+	SerializeCommands(&commands,&text);
+	CPPUNIT_ASSERT(text.FindFirst("~included_node") >= 0);
+	CPPUNIT_ASSERT(text.FindFirst("~font") >= 0);
+	CPPUNIT_ASSERT(text.FindFirst("raw:") < 0);
+
+	BList		parsed;
+	BString		error;
+	status_t	err	= ParseCommands(text,&parsed,doc->GetCommandManager(),&error);
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,err);
+
+	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
+	BMessage	restoredIncluded;
+	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("included_node",&restoredIncluded));
+	BRect	restoredFrame;
+	CPPUNIT_ASSERT_EQUAL(B_OK,restoredIncluded.FindRect("frame",&restoredFrame));
+	CPPUNIT_ASSERT(restoredFrame == BRect(0,0,80,40));
+	BMessage	restoredFont;
+	CPPUNIT_ASSERT_EQUAL(B_OK,restoredIncluded.FindMessage("font",&restoredFont));
+	float	restoredSize	= 0;
+	CPPUNIT_ASSERT_EQUAL(B_OK,restoredFont.FindFloat("size",&restoredSize));
+	CPPUNIT_ASSERT((restoredSize > 11.99f) && (restoredSize < 12.01f));
+}
+
+
+void MacroTextTest::RoundTripsRepeatedNestedFieldBlocks(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+
+	// Indexer attaches one "included_node" per newly-referenced node, so a
+	// single Insert command can carry several - same field name repeated,
+	// must round-trip in order.
+	BMessage	includedA;
+	includedA.AddString("name","A");
+	BMessage	includedB;
+	includedB.AddString("name","B");
+
+	BMessage	insert;
+	insert.AddString("Command::Name","Insert");
+	insert.AddInt32("node",1);
+	insert.AddInt32("node",2);
+	insert.AddMessage("included_node",&includedA);
+	insert.AddMessage("included_node",&includedB);
+
+	BList	commands;
+	commands.AddItem(&insert);
+	BString	text;
+	SerializeCommands(&commands,&text);
+
+	BList		parsed;
+	BString		error;
+	status_t	err	= ParseCommands(text,&parsed,doc->GetCommandManager(),&error);
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,err);
+
+	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
+	BMessage	restoredA,restoredB;
+	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("included_node",0,&restoredA));
+	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("included_node",1,&restoredB));
+	const char	*nameA	= NULL;
+	const char	*nameB	= NULL;
+	restoredA.FindString("name",&nameA);
+	restoredB.FindString("name",&nameB);
+	CPPUNIT_ASSERT(strcmp(nameA,"A") == 0);
+	CPPUNIT_ASSERT(strcmp(nameB,"B") == 0);
+}
+
+
+void MacroTextTest::RawEscapeHatchPreservesOpaqueType(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+
+	const char	*payload	= "opaque bytes";
+	BMessage	cmd;
+	cmd.AddString("Command::Name","TestRaw");
+	cmd.AddData("blob",(type_code)'TRBL',payload,strlen(payload)+1);
+
+	BList	commands;
+	commands.AddItem(&cmd);
+	BString	text;
+	SerializeCommands(&commands,&text);
+	CPPUNIT_ASSERT(text.FindFirst("raw:") >= 0);
+
+	BList		parsed;
+	BString		error;
+	status_t	err	= ParseCommands(text,&parsed,doc->GetCommandManager(),&error);
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,err);
+
+	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
+	const void	*data	= NULL;
+	ssize_t		size	= 0;
+	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindData("blob",(type_code)'TRBL',&data,&size));
+	CPPUNIT_ASSERT(strcmp((const char*)data,payload) == 0);
 }
 
 

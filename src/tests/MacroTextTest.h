@@ -18,7 +18,10 @@ public:
 	void RoundTripsSelectWithRepeatedFields(void);
 	void RoundTripsNestedSubCommand(void);
 	void RoundTripsStringField(void);
-	void RawEscapeHatchPreservesNestedMessage(void);
+	void RoundTripsNestedFieldBlock(void);
+	void RoundTripsRecursiveNestedFieldBlock(void);
+	void RoundTripsRepeatedNestedFieldBlocks(void);
+	void RawEscapeHatchPreservesOpaqueType(void);
 	void UnknownCommandNameIsRejected(void);
 	void UnknownFieldIsRejected(void);
 	void TypeMismatchIsRejected(void);
@@ -30,7 +33,10 @@ public:
 	CPPUNIT_TEST(RoundTripsSelectWithRepeatedFields);
 	CPPUNIT_TEST(RoundTripsNestedSubCommand);
 	CPPUNIT_TEST(RoundTripsStringField);
-	CPPUNIT_TEST(RawEscapeHatchPreservesNestedMessage);
+	CPPUNIT_TEST(RoundTripsNestedFieldBlock);
+	CPPUNIT_TEST(RoundTripsRecursiveNestedFieldBlock);
+	CPPUNIT_TEST(RoundTripsRepeatedNestedFieldBlocks);
+	CPPUNIT_TEST(RawEscapeHatchPreservesOpaqueType);
 	CPPUNIT_TEST(UnknownCommandNameIsRejected);
 	CPPUNIT_TEST(UnknownFieldIsRejected);
 	CPPUNIT_TEST(TypeMismatchIsRejected);

@@ -7,9 +7,14 @@ Insert::Insert():PCommand() {
 }
 
 static const property_info kInsertProperties[] = {
+	// included_node: Indexer::IndexCommand() embeds the full node content
+	// here the first time a "node" pointer is seen while recording a
+	// macro (true for every command with a "node" field, not just
+	// Insert - but Insert's node is typically brand new, so it almost
+	// always carries one). See MacroText.h for how this round-trips.
 	{ "Insert", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
 		"Inserts one or more nodes (repeated \"node\" pointers).", 0, {0},
-		{ { { {"node", B_POINTER_TYPE} } } } },
+		{ { { {"node", B_POINTER_TYPE}, {"included_node", B_MESSAGE_TYPE} } } } },
 };
 
 const property_info* Insert::PropertyInfo(int32 *count) {

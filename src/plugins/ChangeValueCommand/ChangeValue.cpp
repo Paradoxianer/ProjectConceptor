@@ -9,10 +9,13 @@ ChangeValue::ChangeValue():PCommand()
 }
 
 static const property_info kChangeValueProperties[] = {
+	// included_node: see Insert.cpp's kInsertProperties for why any
+	// command with a "node" field can carry this.
 	{ "ChangeValue", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
 		"Sets one field on a node - valueContainer holds the field name, "
 		"type and new value (see the paired \"node\").", 0, {0},
-		{ { { {"node", B_POINTER_TYPE}, {"valueContainer", B_MESSAGE_TYPE} } } } },
+		{ { { {"node", B_POINTER_TYPE}, {"valueContainer", B_MESSAGE_TYPE},
+			  {"included_node", B_MESSAGE_TYPE} } } } },
 };
 
 const property_info* ChangeValue::PropertyInfo(int32 *count)

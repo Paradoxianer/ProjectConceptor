@@ -5,11 +5,16 @@ Select::Select():PCommand() {
 }
 
 static const property_info kSelectProperties[] = {
+	// included_node: see Insert.cpp's kInsertProperties for why any
+	// command with a "node" field can carry this. This fills the 5th
+	// and last pair slot compound_type::pairs[] has - do not add a 6th
+	// field here without a second ctypes[] entry.
 	{ "Select", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
 		"Selects nodes by frame, by pointer, or all - clears the old "
 		"selection first unless \"deselect\" is set.", 0, {0},
 		{ { { {"frame", B_RECT_TYPE}, {"node", B_POINTER_TYPE},
-			  {"deselect", B_BOOL_TYPE}, {"selectAll", B_BOOL_TYPE} } } } },
+			  {"deselect", B_BOOL_TYPE}, {"selectAll", B_BOOL_TYPE},
+			  {"included_node", B_MESSAGE_TYPE} } } } },
 };
 
 const property_info* Select::PropertyInfo(int32 *count) {
