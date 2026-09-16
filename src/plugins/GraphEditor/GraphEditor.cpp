@@ -51,7 +51,7 @@ MakeGuidesIcon(void)
 	bmp->Lock();
 	view->SetHighColor(0,0,0,0);
 	view->FillRect(bounds,B_SOLID_HIGH);
-	rgb_color	accent	= {230,20,140,255};
+	rgb_color	accent	= {30,144,255,255};
 	view->SetHighColor(accent);
 	view->SetDrawingMode(B_OP_ALPHA);
 	float	midY	= (bounds.top+bounds.bottom)/2.0f;
@@ -556,7 +556,7 @@ void GraphEditor::Draw(BRect updateRect) {
 	if (hasActiveGuides) {
 		// Same accent color as the toolbar toggle's own icon (MakeGuidesIcon())
 		// so the button and the feature it drives read as one thing.
-		SetHighColor(230,20,140,255);
+		SetHighColor(30,144,255,255);
 		SetPenSize(1.0);
 		if (activeGuides.horizontal.active)
 			StrokeLine(BPoint(activeGuides.horizontal.lineStart,activeGuides.horizontal.linePos),
@@ -915,11 +915,20 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		}
 		case G_E_GRID_CHANGED: {
 			gridEnabled =! gridEnabled;
+			// ToolItem's own two-state visual tracking is dead code
+			// (ToolItem::MouseUp() unconditionally forces Value() back to
+			// B_CONTROL_OFF after every click, regardless of "behavior") -
+			// setting it explicitly here, right after the one place the
+			// real state actually flips, ties the button's look to the
+			// boolean directly rather than depending on that click
+			// handling ever getting fixed.
+			grid->SetValue(gridEnabled ? B_CONTROL_ON : B_CONTROL_OFF);
 			Invalidate();
 			break;
 		}
 		case G_E_GUIDES_CHANGED: {
 			guidesEnabled =! guidesEnabled;
+			guides->SetValue(guidesEnabled ? B_CONTROL_ON : B_CONTROL_OFF);
 			Invalidate();
 			break;
 		}

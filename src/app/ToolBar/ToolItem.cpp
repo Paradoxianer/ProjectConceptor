@@ -1,6 +1,7 @@
 #include "ToolItem.h"
 
 #include "ToolBar.h"
+#include <interface/InterfaceDefs.h>
 
 ToolItem::ToolItem(const char *name, BBitmap *bmp,BMessage *msg,uint32 behave):BaseItem(name),BButton(BRect(0,0,ITEM_WIDTH,ITEM_HEIGHT),name,"",msg)
 {
@@ -155,6 +156,21 @@ void ToolItem::Draw(BRect updateRect)
 		BButton::Draw(updateRect); //enable button border
 	SetDrawingMode(B_OP_ALPHA);
 	BRect buttonFrame=BRect(0,0,18,18);
+
+	// The 1px icon inset below was, on its own, the only visual
+	// difference between a two-state item's on/off look - too subtle to
+	// actually read as "toggled" (#127 feedback). A filled background
+	// behind the icon is the same "pressed" cue a real toggle button
+	// gives, and doesn't affect one-state items in practice: those never
+	// persist Value() at B_CONTROL_ON, only flash it momentarily while
+	// physically held down, which is the normal "pressed" look for any
+	// button anyway.
+	if (Value() == B_CONTROL_ON) {
+		BRect	highlight	= Bounds();
+		SetHighColor(tint_color(ui_color(B_CONTROL_HIGHLIGHT_COLOR),B_DARKEN_1_TINT));
+		FillRoundRect(highlight,3,3);
+		SetDrawingMode(B_OP_ALPHA);
+	}
 
 	if (Value() != B_CONTROL_ON)
 		buttonFrame.OffsetTo(4,4);

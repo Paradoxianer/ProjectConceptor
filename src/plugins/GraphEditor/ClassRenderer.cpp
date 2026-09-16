@@ -49,7 +49,7 @@ DeleteGuideTargets(BList *targets)
 // "startFrame" here are already document-space; the threshold just needs
 // the same conversion so it stays a constant number of *screen* pixels
 // regardless of zoom.
-static const float	kGuideScreenThreshold	= 6.0f;
+static const float	kGuideScreenThreshold	= 8.0f;
 
 
 ClassRenderer::ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer):Renderer(parentEditor, forContainer)
