@@ -38,6 +38,19 @@ import/export and a plain-text export are included.
 **Full undo/redo** - every change, from creating a node to grouping,
 moving, or drawing a connection, can be undone and redone.
 
+**Navigator editor** - a second view of the same document: a plain
+list of every node, drilling into any of them shows its raw BMessage
+fields directly - boolean, integer, float, text, point, rectangle,
+color, or nested sub-messages, each with its own inline editor - not
+just what the graph view happens to render.
+
+![Navigator editor](docs/help/screenshots/08-navigator-editor.png)
+
+**Scales to large graphs** - a generated 2200-node/1000+-connection
+test document, grouped and laid out, stays responsive.
+
+![A large generated graph](docs/help/screenshots/09-large-graph.png)
+
 ## Getting started
 
 See the [user guide](docs/help/user-guide.md) for a full walkthrough,
