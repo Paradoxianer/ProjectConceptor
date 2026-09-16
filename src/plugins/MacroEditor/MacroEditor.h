@@ -18,8 +18,6 @@
 
 const uint32	M_E_MACRO_SELECTED	= 'meMS';
 const uint32	M_E_APPLY			= 'meAP';
-const uint32	M_E_EXPORT			= 'meEX';
-const uint32	M_E_IMPORT			= 'meIM';
 
 class BScrollView;
 
@@ -73,7 +71,18 @@ protected:
 			 * nothing is selected. */
 			void			ShowSelectedMacro(void);
 			void			ApplyEdits(void);
+			/** Exports the currently selected macro's text (#55) - reached
+			 * from Macro > Save (MENU_MACRO_SAVE), not a button (see #55
+			 * follow-up: macro-management actions belong in the Macro
+			 * menu, not duplicated as panel buttons). Shows a BAlert
+			 * instead of the save panel if nothing is selected. */
 			void			ExportToFile(void);
+			/** Imports a file as a brand new macro entry - reached from
+			 * Macro > Open (MENU_MACRO_OPEN). Never touches whatever is
+			 * currently selected; the import always becomes its own new
+			 * list entry (named from the file), selected and shown for
+			 * review - not committed into Macro::Commmand until the user
+			 * clicks Apply. */
 			void			ImportFromFile(void);
 			void			SetStatus(const char *text, bool isError);
 			void			LayoutChildren(void);
@@ -86,8 +95,6 @@ protected:
 			BScrollView		*fTextScroll;
 			BStringView		*fStatus;
 			BButton			*fApplyButton;
-			BButton			*fExportButton;
-			BButton			*fImportButton;
 
 			BFilePanel		*fExportPanel;
 			BFilePanel		*fImportPanel;

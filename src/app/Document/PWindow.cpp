@@ -595,6 +595,26 @@ void PWindow::RemoveEditor(void)
 	}
 }
 
+bool PWindow::SelectEditorTab(const char *label)
+{
+	if (label == NULL)
+		return false;
+	bool	locked	= LockLooper();
+	int32	found	= -1;
+	for (int32 i = 0; i < mainView->CountTabs(); i++) {
+		BTab	*tab	= mainView->TabAt(i);
+		if ((tab != NULL) && (tab->Label() != NULL) && (strcmp(tab->Label(),label) == 0)) {
+			found	= i;
+			break;
+		}
+	}
+	if (found >= 0)
+		mainView->Select(found);
+	if (locked)
+		UnlockLooper();
+	return found >= 0;
+}
+
 BMenu*	PWindow::GetMenu(const char *signature)
 {
 	TRACE();

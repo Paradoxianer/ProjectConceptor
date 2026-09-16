@@ -1,7 +1,9 @@
 #include "MacroEditor.h"
 
 #include <Catalog.h>
+#include <interface/Alert.h>
 #include <interface/ListItem.h>
+#include <interface/MenuItem.h>
 #include <interface/ScrollView.h>
 #include <storage/Directory.h>
 #include <storage/File.h>
@@ -30,8 +32,6 @@ void MacroEditor::Init(void)
 	fTextScroll			= NULL;
 	fStatus				= NULL;
 	fApplyButton		= NULL;
-	fExportButton		= NULL;
-	fImportButton		= NULL;
 	fExportPanel		= NULL;
 	fImportPanel		= NULL;
 	fSelectedMacro		= NULL;
@@ -70,20 +70,13 @@ void MacroEditor::AttachedToWindow(void)
 	fStatus	= new BStringView(BRect(0,0,340,16),"status","");
 	AddChild(fStatus);
 
+	// Export/Import used to be buttons here too - moved to the Macro menu
+	// (Save/Open, #55 follow-up) since they're macro-management actions,
+	// not edits to the text currently on screen the way Apply is.
 	fApplyButton	= new BButton(BRect(0,0,80,24),"apply",B_TRANSLATE("Apply"),
 		new BMessage(M_E_APPLY));
 	fApplyButton->SetTarget(this);
 	AddChild(fApplyButton);
-
-	fExportButton	= new BButton(BRect(0,0,80,24),"export",B_TRANSLATE("Export..."),
-		new BMessage(M_E_EXPORT));
-	fExportButton->SetTarget(this);
-	AddChild(fExportButton);
-
-	fImportButton	= new BButton(BRect(0,0,80,24),"import",B_TRANSLATE("Import..."),
-		new BMessage(M_E_IMPORT));
-	fImportButton->SetTarget(this);
-	AddChild(fImportButton);
 
 	LayoutChildren();
 	RefreshMacroList();
@@ -113,8 +106,6 @@ void MacroEditor::LayoutChildren(void)
 
 	float	buttonY	= bounds.bottom-buttonH+2;
 	fApplyButton->MoveTo(left,buttonY);
-	fExportButton->MoveTo(left+90,buttonY);
-	fImportButton->MoveTo(left+180,buttonY);
 }
 
 
@@ -258,6 +249,12 @@ void MacroEditor::ApplyEdits(void)
 
 void MacroEditor::ExportToFile(void)
 {
+	if (fSelectedMacro == NULL) {
+		(new BAlert(B_TRANSLATE("Export Macro"),
+			B_TRANSLATE("No macro selected - select one in the MacroEditor tab first."),
+			B_TRANSLATE("OK")))->Go();
+		return;
+	}
 	if (fExportPanel == NULL)
 		fExportPanel	= new BFilePanel(B_SAVE_PANEL,new BMessenger(this));
 	fExportPanel->Show();
@@ -302,11 +299,15 @@ void MacroEditor::MessageReceived(BMessage *message)
 			ApplyEdits();
 			break;
 		}
-		case M_E_EXPORT: {
+		// Reached from the Macro menu (Save/Open), not a button here -
+		// see ExportToFile()/ImportFromFile()'s own comments (#55 follow-up).
+		// PDocument forwards its MENU_MACRO_SAVE/MENU_MACRO_OPEN handlers
+		// straight to this editor's handler by view name.
+		case MENU_MACRO_SAVE: {
 			ExportToFile();
 			break;
 		}
-		case M_E_IMPORT: {
+		case MENU_MACRO_OPEN: {
 			ImportFromFile();
 			break;
 		}
@@ -324,17 +325,47 @@ void MacroEditor::MessageReceived(BMessage *message)
 			break;
 		}
 		case B_REFS_RECEIVED: {
+			// Import always creates a brand new macro list entry - it
+			// never touches whatever happened to be selected before the
+			// file panel opened (#55 follow-up: unambiguous regardless of
+			// what's currently shown, unlike replacing the open macro's
+			// text would be).
 			entry_ref	ref;
-			if (message->FindRef("refs",&ref) == B_OK) {
+			if ((message->FindRef("refs",&ref) == B_OK) && (doc != NULL)) {
 				BFile	file(&ref,B_READ_ONLY);
 				off_t	size	= 0;
 				file.GetSize(&size);
 				char	*buffer	= new char[size+1];
 				file.Read(buffer,size);
 				buffer[size]	= '\0';
-				fTextView->SetText(buffer);
+				BString	importedText(buffer);
 				delete[] buffer;
-				SetStatus(B_TRANSLATE("Imported - review, then Apply."),false);
+
+				BString	name(ref.name);
+				int32	dot	= name.FindLast('.');
+				if (dot > 0)
+					name.Truncate(dot);
+
+				BMessage	*newMacro	= new BMessage(P_C_MACRO_TYPE);
+				newMacro->AddString("Name",name);
+				BList	*macroList	= doc->GetCommandManager()->GetMacroList();
+				macroList->AddItem(newMacro);
+				BMenuItem	*item	= new BMenuItem(name.String(),newMacro);
+				item->SetTarget(doc);
+				doc->AddMenuItem(P_MENU_MACRO_PLAY,item);
+
+				fSelectedMacro	= newMacro;
+				RefreshMacroList();
+				// RefreshMacroList()->ShowSelectedMacro() just serialized
+				// the new (still empty) macro's real command list - this
+				// overrides that with the raw imported DSL text instead,
+				// which is only a draft until Apply commits it.
+				fTextView->SetText(importedText.String());
+
+				BString	status;
+				status.SetToFormat(B_TRANSLATE("Imported as new macro \"%s\" - review, then Apply."),
+					name.String());
+				SetStatus(status.String(),false);
 			}
 			break;
 		}

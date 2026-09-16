@@ -1,8 +1,10 @@
+#include <app/Messenger.h>
 #include <app/PropertyInfo.h>
 #include <app/Roster.h>
 #include <interface/Alert.h>
 #include <interface/PrintJob.h>
 #include <interface/Screen.h>
+#include <interface/View.h>
 #include <support/Autolock.h>
 #include <support/Debug.h>
 #include <support/String.h>
@@ -22,6 +24,7 @@
 #include "PDocument.h"
 #include "PDocLoader.h"
 #include "PDocumentManager.h"
+#include "PEditorManager.h"
 #include "PluginManager.h"
 #include "ProjectConceptor.h"
 
@@ -169,10 +172,33 @@ void PDocument::MessageReceived(BMessage* message) {
 			commandManager->PlayMacro(message);
 			break;
 		}
-		case MENU_MACRO_SAVE:{
-			break;
-		}
-		case MENU_MACRO_OPEN:{
+		// Both forward the menu's own message as-is to whichever
+		// registered editor's view is named "MacroEditor" - found by
+		// view name only (not a dynamic_cast to a concrete plugin type),
+		// so this core file never needs to #include a plugin header. The
+		// actual Save/Open logic (which macro, what "no macro selected"
+		// means) lives entirely in MacroEditor - see its MessageReceived()
+		// (#55 follow-up: these were empty stubs before MacroEditor gave
+		// "Save"/"Open" something concrete to mean).
+		//
+		// SelectEditorTab() first: a non-active tab's view has no Looper
+		// in this app's MainView (confirmed live - only the selected tab
+		// stays attached, see CreatEditorList()'s own comment on this),
+		// so sending to it before switching to it silently goes nowhere.
+		case MENU_MACRO_SAVE:
+		case MENU_MACRO_OPEN: {
+			if ((window != NULL) && (editorManager != NULL)) {
+				window->SelectEditorTab("MacroEditor");
+				for (int32 i = 0; i < editorManager->CountPEditors(); i++) {
+					PEditor	*editor	= editorManager->PEditorAt(i);
+					BView	*view	= (editor != NULL) ? editor->GetView() : NULL;
+					if ((view != NULL) && (view->Name() != NULL) &&
+							(strcmp(view->Name(),"MacroEditor") == 0)) {
+						BMessenger(editor->GetHandler()).SendMessage(message);
+						break;
+					}
+				}
+			}
 			break;
 		}
 		case  B_SAVE_REQUESTED: {
