@@ -28,7 +28,8 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
 #	in folder names do not work well with this makefile.
 SRCS= 	MacroEditor.cpp \
 		MacroEditorPlugin.cpp \
-		MacroText.cpp
+		MacroText.cpp \
+		MacroTextView.cpp
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.

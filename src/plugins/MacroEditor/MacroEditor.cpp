@@ -31,7 +31,6 @@ void MacroEditor::Init(void)
 	fTextView			= NULL;
 	fTextScroll			= NULL;
 	fStatus				= NULL;
-	fApplyButton		= NULL;
 	fExportPanel		= NULL;
 	fImportPanel		= NULL;
 	fSelectedMacro		= NULL;
@@ -46,14 +45,13 @@ void MacroEditor::AttachedToWindow(void)
 	if (fMacroList != NULL) {
 		// already built (a tab detach/reattach shouldn't duplicate
 		// children) - but LayoutChildren() again on every reattach: a
-		// non-B_FOLLOW_ALL_SIDES child like fApplyButton only tracks the
-		// parent's size automatically via its own resizing mode, not via
-		// LayoutChildren()'s bottom-anchored placement, and the tab
-		// container can hand back a different frame on a later reattach
-		// than it did the first time this view was built - without this,
-		// the button stayed at its very first position and could end up
-		// stranded mid-textview after a tab switch. Also re-check the
-		// macro list every time the tab is switched to, not just on the
+		// child positioned by explicit MoveTo()/ResizeTo() below doesn't
+		// track the parent's size on its own, and the tab container can
+		// hand back a different frame on a later reattach than it did the
+		// first time this view was built - without this, children could
+		// end up stranded at a stale position after a tab switch. Also
+		// re-check the macro list every time the tab is switched to, not
+		// just on the
 		// P_C_VALUE_CHANGED broadcast path, since a macro recorded
 		// elsewhere should show up on revisiting this tab even if that
 		// broadcast is ever delayed/missed. Same reasoning applies to the
@@ -78,8 +76,9 @@ void MacroEditor::AttachedToWindow(void)
 		B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true);
 	AddChild(fMacroListScroll);
 
-	fTextView	= new BTextView(BRect(0,0,340,240),"macroText",BRect(4,4,336,236),
+	fTextView	= new MacroTextView(BRect(0,0,340,240),"macroText",BRect(4,4,336,236),
 		B_FOLLOW_ALL_SIDES,B_WILL_DRAW | B_NAVIGABLE);
+	fTextView->SetEditor(this);
 	fTextScroll	= new BScrollView("macroTextScroll",fTextView,
 		B_FOLLOW_ALL_SIDES,0,false,true,B_FANCY_BORDER);
 	AddChild(fTextScroll);
@@ -88,12 +87,10 @@ void MacroEditor::AttachedToWindow(void)
 	AddChild(fStatus);
 
 	// Export/Import used to be buttons here too - moved to the Macro menu
-	// (Save/Open, #55 follow-up) since they're macro-management actions,
-	// not edits to the text currently on screen the way Apply is.
-	fApplyButton	= new BButton(BRect(0,0,80,24),"apply",B_TRANSLATE("Apply"),
-		new BMessage(M_E_APPLY));
-	fApplyButton->SetTarget(this);
-	AddChild(fApplyButton);
+	// (Save/Open, #55 follow-up) since they're macro-management actions.
+	// No Apply button either (#55 follow-up) - MacroTextView auto-applies
+	// at natural pause points instead (Enter, losing focus), see
+	// ApplyEdits()/MacroTextView.
 
 	// reference list of registered commands/fields (#55 follow-up) - read
 	// only, built once below since the command registry never changes
@@ -116,7 +113,6 @@ void MacroEditor::LayoutChildren(void)
 	BRect	bounds	= Bounds();
 	float	listW		= 140;
 	float	cmdListW	= 160;
-	float	buttonH	= 28;
 	float	statusH	= 18;
 
 	fMacroListScroll->MoveTo(bounds.left,bounds.top);
@@ -132,10 +128,7 @@ void MacroEditor::LayoutChildren(void)
 	fStatus->ResizeTo(right-left-8,statusH-4);
 
 	fTextScroll->MoveTo(left,bounds.top+statusH);
-	fTextScroll->ResizeTo(right-left,bounds.Height()-statusH-buttonH);
-
-	float	buttonY	= bounds.bottom-buttonH+2;
-	fApplyButton->MoveTo(left,buttonY);
+	fTextScroll->ResizeTo(right-left,bounds.Height()-statusH);
 }
 
 
@@ -375,10 +368,6 @@ void MacroEditor::MessageReceived(BMessage *message)
 		}
 		case M_E_MACRO_SELECTED: {
 			ShowSelectedMacro();
-			break;
-		}
-		case M_E_APPLY: {
-			ApplyEdits();
 			break;
 		}
 		// Reached from the Macro menu (Save/Open), not a button here -

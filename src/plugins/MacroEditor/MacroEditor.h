@@ -4,21 +4,19 @@
  * @author Paradoxon powered by Jesus Christ
  */
 #include <app/Message.h>
-#include <interface/Button.h>
 #include <interface/ListView.h>
 #include <interface/OutlineListView.h>
 #include <interface/StringView.h>
-#include <interface/TextView.h>
 #include <interface/View.h>
 #include <storage/FilePanel.h>
 #include <support/List.h>
 
+#include "MacroTextView.h"
 #include "PEditor.h"
 #include "PDocument.h"
 #include "ShortCutFilter.h"
 
 const uint32	M_E_MACRO_SELECTED	= 'meMS';
-const uint32	M_E_APPLY			= 'meAP';
 
 class BScrollView;
 
@@ -61,6 +59,15 @@ public:
 	virtual	void			MessageReceived(BMessage *message);
 	//----------------BView
 
+	/** Parses fTextView's current text and, on success, replaces the
+	 * selected macro's stored commands with it - silently (see the status
+	 * line for confirmation), never blocking further edits. On a parse
+	 * error the stored macro is left untouched and the error is shown in
+	 * the status line instead. No separate Apply button (#55 follow-up):
+	 * MacroTextView calls this itself at natural pause points (Enter,
+	 * losing focus) - public so it can. */
+			void			ApplyEdits(void);
+
 protected:
 			void			Init(void);
 			/** Rebuilds the macro-name BListView from
@@ -71,7 +78,6 @@ protected:
 			 * fTextView. Clears the view (and the selected macro) if
 			 * nothing is selected. */
 			void			ShowSelectedMacro(void);
-			void			ApplyEdits(void);
 			/** Exports the currently selected macro's text (#55) - reached
 			 * from Macro > Save (MENU_MACRO_SAVE), not a button (see #55
 			 * follow-up: macro-management actions belong in the Macro
@@ -82,8 +88,8 @@ protected:
 			 * Macro > Open (MENU_MACRO_OPEN). Never touches whatever is
 			 * currently selected; the import always becomes its own new
 			 * list entry (named from the file), selected and shown for
-			 * review - not committed into Macro::Commmand until the user
-			 * clicks Apply. */
+			 * review - not committed into Macro::Commmand until the text
+			 * is auto-applied (see ApplyEdits()). */
 			void			ImportFromFile(void);
 			void			SetStatus(const char *text, bool isError);
 			void			LayoutChildren(void);
@@ -99,10 +105,9 @@ protected:
 
 			BListView		*fMacroList;
 			BScrollView		*fMacroListScroll;
-			BTextView		*fTextView;
+			MacroTextView	*fTextView;
 			BScrollView		*fTextScroll;
 			BStringView		*fStatus;
-			BButton			*fApplyButton;
 			BOutlineListView	*fCommandList;
 			BScrollView		*fCommandListScroll;
 
