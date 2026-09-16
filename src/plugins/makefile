@@ -10,6 +10,7 @@ plugins = \
 	InsertCommand \
 	LayoutEditor \
 	LayoutCommand \
+	MacroEditor \
 	MoveCommand \
 	NavigatorEditor \
 	PasteCommand \

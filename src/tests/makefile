@@ -19,10 +19,12 @@ SRCS= 	TestMain.cpp \
 		PCommandTest.cpp \
 		LayoutEditorTest.cpp \
 		GroupBoundaryTest.cpp \
+		MacroTextTest.cpp \
 		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
 		../plugins/LayoutEditor/DotLayouter.cpp \
 		../plugins/LayoutEditor/LayoutCommandBuilder.cpp \
+		../plugins/MacroEditor/MacroText.cpp \
 		../plugins/BatchCommand/Batch.cpp \
 		../app/ProjectConceptorDefs.cpp \
 		../app/Config/ConfigManager.cpp \
@@ -102,6 +104,7 @@ LOCAL_INCLUDE_PATHS =	. \
 						../plugins/InsertCommand \
 						../plugins/GroupCommand \
 						../plugins/LayoutEditor \
+						../plugins/MacroEditor \
 						../plugins/BatchCommand \
 						../plugins/GraphEditor
 
