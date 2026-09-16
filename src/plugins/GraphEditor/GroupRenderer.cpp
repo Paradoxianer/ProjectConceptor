@@ -379,9 +379,17 @@ void GroupRenderer::PlaceLabel(void)
 	if (rects.empty())
 		return;
 
+	// Ties on .left (children stacked in a column, all starting at the
+	// same x - exactly what dragging three nodes into a vertical stack
+	// produces) used to fall through to whichever child CollectChildRects()
+	// happened to list first, which is insertion/z-order, not position -
+	// the label ended up floating next to some arbitrary middle or bottom
+	// child instead of above the actual top-left one. Break the tie by
+	// picking the smallest .top among equally-left children.
 	BRect	leftmost	= rects[0];
 	for (uint32 i=1; i<rects.size(); i++) {
-		if (rects[i].left < leftmost.left)
+		if ((rects[i].left < leftmost.left) ||
+				((rects[i].left == leftmost.left) && (rects[i].top < leftmost.top)))
 			leftmost	= rects[i];
 	}
 
