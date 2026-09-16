@@ -35,6 +35,8 @@ void MacroEditor::Init(void)
 	fExportPanel		= NULL;
 	fImportPanel		= NULL;
 	fSelectedMacro		= NULL;
+	fCommandList		= NULL;
+	fCommandListScroll	= NULL;
 }
 
 
@@ -54,9 +56,15 @@ void MacroEditor::AttachedToWindow(void)
 		// macro list every time the tab is switched to, not just on the
 		// P_C_VALUE_CHANGED broadcast path, since a macro recorded
 		// elsewhere should show up on revisiting this tab even if that
-		// broadcast is ever delayed/missed.
+		// broadcast is ever delayed/missed. Same reasoning applies to the
+		// command reference list: this view's first attach happens while
+		// PWindow::CreatEditorList() is still cycling through tabs, which
+		// can run before command plugins finish registering - a first
+		// build here can legitimately see an empty registry, so this has
+		// to re-run on every visit rather than only once.
 		LayoutChildren();
 		RefreshMacroList();
+		BuildCommandList();
 		return;
 	}
 
@@ -87,6 +95,15 @@ void MacroEditor::AttachedToWindow(void)
 	fApplyButton->SetTarget(this);
 	AddChild(fApplyButton);
 
+	// reference list of registered commands/fields (#55 follow-up) - read
+	// only, built once below since the command registry never changes
+	// after startup.
+	fCommandList	= new BOutlineListView(BRect(0,0,160,280),"commandList");
+	fCommandListScroll	= new BScrollView("commandListScroll",fCommandList,
+		B_FOLLOW_RIGHT | B_FOLLOW_TOP_BOTTOM,0,false,true);
+	AddChild(fCommandListScroll);
+	BuildCommandList();
+
 	LayoutChildren();
 	RefreshMacroList();
 }
@@ -97,14 +114,18 @@ void MacroEditor::LayoutChildren(void)
 	if (fMacroList == NULL)
 		return;
 	BRect	bounds	= Bounds();
-	float	listW	= 140;
+	float	listW		= 140;
+	float	cmdListW	= 160;
 	float	buttonH	= 28;
 	float	statusH	= 18;
 
 	fMacroListScroll->MoveTo(bounds.left,bounds.top);
 	fMacroListScroll->ResizeTo(listW,bounds.Height());
 
-	float	right	= bounds.right;
+	fCommandListScroll->MoveTo(bounds.right-cmdListW,bounds.top);
+	fCommandListScroll->ResizeTo(cmdListW,bounds.Height());
+
+	float	right	= bounds.right-cmdListW-1;
 	float	left	= bounds.left+listW+1;
 
 	fStatus->MoveTo(left+4,bounds.top+2);
@@ -115,6 +136,58 @@ void MacroEditor::LayoutChildren(void)
 
 	float	buttonY	= bounds.bottom-buttonH+2;
 	fApplyButton->MoveTo(left,buttonY);
+}
+
+
+static const char* TypeDisplayName(type_code type)
+{
+	switch (type) {
+		case B_BOOL_TYPE:		return "bool";
+		case B_INT8_TYPE:		return "int8";
+		case B_INT16_TYPE:		return "int16";
+		case B_INT32_TYPE:		return "int32";
+		case B_INT64_TYPE:		return "int64";
+		case B_FLOAT_TYPE:		return "float";
+		case B_DOUBLE_TYPE:	return "double";
+		case B_STRING_TYPE:	return "string";
+		case B_POINT_TYPE:		return "point";
+		case B_RECT_TYPE:		return "rect";
+		case B_POINTER_TYPE:	return "@id";
+		case B_MESSAGE_TYPE:	return "~block";
+		default:				return "raw";
+	}
+}
+
+
+void MacroEditor::BuildCommandList(void)
+{
+	if ((fCommandList == NULL) || (doc == NULL))
+		return;
+	fCommandList->MakeEmpty();
+
+	PCommandManager	*commandManager	= doc->GetCommandManager();
+	for (int32 i = 0; i < commandManager->CountPCommand(); i++) {
+		PCommand	*command	= commandManager->PCommandAt(i);
+		if (command == NULL)
+			continue;
+		BStringItem	*commandItem	= new BStringItem(command->Name(),0,true);
+		fCommandList->AddItem(commandItem);
+
+		int32				propCount	= 0;
+		const property_info	*props	= command->PropertyInfo(&propCount);
+		for (int32 p = 0; p < propCount; p++) {
+			for (int32 c = 0; c < 3; c++) {
+				for (int32 f = 0; f < 5; f++) {
+					const char	*fieldName	= props[p].ctypes[c].pairs[f].name;
+					if (fieldName == NULL)
+						continue;
+					BString	label;
+					label << fieldName << ": " << TypeDisplayName(props[p].ctypes[c].pairs[f].type);
+					fCommandList->AddUnder(new BStringItem(label.String(),1,true),commandItem);
+				}
+			}
+		}
+	}
 }
 
 

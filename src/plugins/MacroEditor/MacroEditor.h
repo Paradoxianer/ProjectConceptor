@@ -6,6 +6,7 @@
 #include <app/Message.h>
 #include <interface/Button.h>
 #include <interface/ListView.h>
+#include <interface/OutlineListView.h>
 #include <interface/StringView.h>
 #include <interface/TextView.h>
 #include <interface/View.h>
@@ -86,6 +87,13 @@ protected:
 			void			ImportFromFile(void);
 			void			SetStatus(const char *text, bool isError);
 			void			LayoutChildren(void);
+			/** Fills fCommandList from doc->GetCommandManager()'s registry -
+			 * one top-level item per registered command (Name()), with its
+			 * declared fields (PropertyInfo()/ctypes) as child items, so the
+			 * DSL's command/field names are visible without leaving the
+			 * editor. Built once, on first AttachedToWindow() - the command
+			 * registry is loaded at startup and never changes afterward. */
+			void			BuildCommandList(void);
 
 			BMessage		*configMessage;
 
@@ -95,6 +103,8 @@ protected:
 			BScrollView		*fTextScroll;
 			BStringView		*fStatus;
 			BButton			*fApplyButton;
+			BOutlineListView	*fCommandList;
+			BScrollView		*fCommandListScroll;
 
 			BFilePanel		*fExportPanel;
 			BFilePanel		*fImportPanel;
