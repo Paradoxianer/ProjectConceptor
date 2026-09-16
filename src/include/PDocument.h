@@ -65,6 +65,13 @@ public:
 	virtual	status_t			Archive(BMessage* archive, bool deep = true) const;
 	static	BArchivable			*Instantiate(BMessage *from);
 	virtual	void				MessageReceived(BMessage* message);
+	/** Publishes "suite/vnd.ProjectConceptor-command": every registered
+	 * PCommand as one B_EXECUTE_PROPERTY property, schema from
+	 * PCommandManager::BuildPropertyInfo() - #55, makes commands
+	 * hey-invokable/discoverable, not just reachable from the app's UI. */
+	virtual	status_t			GetSupportedSuites(BMessage *data);
+	virtual	BHandler*			ResolveSpecifier(BMessage *message, int32 index,
+									BMessage *specifier, int32 what, const char *property);
 
 	/**
 	 * returns the title of the Document.. this is generated from the FileName

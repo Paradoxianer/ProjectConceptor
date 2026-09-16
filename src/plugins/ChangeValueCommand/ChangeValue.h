@@ -18,6 +18,7 @@ public:
 	virtual	char*			Name(void){return "ChangeValue";};
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
+	virtual	const property_info	*PropertyInfo(int32 *count);
 
 protected:
 			void			UndoChangeValue(BMessage *node, BMessage *valueContainer, type_code type,void *oldValue, ssize_t oldSize);

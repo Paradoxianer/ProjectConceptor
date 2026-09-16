@@ -4,6 +4,19 @@
 Select::Select():PCommand() {
 }
 
+static const property_info kSelectProperties[] = {
+	{ "Select", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
+		"Selects nodes by frame, by pointer, or all - clears the old "
+		"selection first unless \"deselect\" is set.", 0, {0},
+		{ { { {"frame", B_RECT_TYPE}, {"node", B_POINTER_TYPE},
+			  {"deselect", B_BOOL_TYPE}, {"selectAll", B_BOOL_TYPE} } } } },
+};
+
+const property_info* Select::PropertyInfo(int32 *count) {
+	*count	= 1;
+	return kSelectProperties;
+}
+
 void Select::Undo(PDocument *doc,BMessage *undo) {
 	int32 			i					= 0;
 	BMessage		*undoMessage		= new BMessage();

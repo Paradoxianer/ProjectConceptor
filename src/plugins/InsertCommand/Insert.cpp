@@ -6,6 +6,17 @@
 Insert::Insert():PCommand() {
 }
 
+static const property_info kInsertProperties[] = {
+	{ "Insert", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
+		"Inserts one or more nodes (repeated \"node\" pointers).", 0, {0},
+		{ { { {"node", B_POINTER_TYPE} } } } },
+};
+
+const property_info* Insert::PropertyInfo(int32 *count) {
+	*count	= 1;
+	return kInsertProperties;
+}
+
 void Insert::Undo(PDocument *doc,BMessage *undo) {
 	BList			*allConnectinos		= doc->GetAllConnections();
 	BList			*allNodes			= doc->GetAllNodes();

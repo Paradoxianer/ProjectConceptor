@@ -19,6 +19,7 @@ public:
 	virtual	char*			Name(void){return "Find";};
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
+	virtual	const property_info	*PropertyInfo(int32 *count);
 
 protected:
 	virtual	BList*			FindNodes(PDocument *doc,BString *searchTerm);

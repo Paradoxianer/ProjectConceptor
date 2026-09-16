@@ -6,6 +6,7 @@
 #include "Indexer.h"
 
 #include <app/Message.h>
+#include <app/PropertyInfo.h>
 #include <support/List.h>
 #include <support/String.h>
 
@@ -66,6 +67,14 @@ public:
 	
 	virtual	int32		CountPCommand(void){return commandMap.size();};
 	virtual	PCommand*	PCommandAt(int32 index);
+	/**
+	 * Concatenates every registered command's own PropertyInfo() entries
+	 * into one BPropertyInfo, for #55's scripting suite (PDocument) and
+	 * the MacroEditor's DSL field validation - the single canonical
+	 * schema source, not duplicated between the two. Caller owns the
+	 * returned object.
+	 */
+	virtual	BPropertyInfo	*BuildPropertyInfo(void);
 	
 	virtual PDocument*	BelongTo(void){return doc;};
 

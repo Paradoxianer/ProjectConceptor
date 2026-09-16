@@ -18,6 +18,7 @@ public:
 	virtual	char*			Name(void){return "Select";};
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
+	virtual	const property_info	*PropertyInfo(int32 *count);
 
 protected:
 	virtual	void			DoSelect(PDocument *doc ,BRect *rect);

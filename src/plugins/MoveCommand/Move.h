@@ -19,6 +19,7 @@ public:
 	virtual	char*			Name(void){return "Move";};
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
+	virtual	const property_info	*PropertyInfo(int32 *count);
 	
 			void			MoveNode(PDocument *doc, set<BMessage*> *changed, BMessage *node, float dx, float dy,BMessage *undoMessage);
 			void			ResizeParent(PDocument *doc, set<BMessage*> *changed, BMessage *node, float dx, float dy,BMessage *undoMessage);

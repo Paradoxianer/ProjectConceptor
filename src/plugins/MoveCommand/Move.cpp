@@ -5,6 +5,18 @@ Move::Move():PCommand()
 {
 }
 
+static const property_info kMoveProperties[] = {
+	{ "Move", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
+		"Moves the current selection by (dx, dy).", 0, {0},
+		{ { { {"dx", B_FLOAT_TYPE}, {"dy", B_FLOAT_TYPE} } } } },
+};
+
+const property_info* Move::PropertyInfo(int32 *count)
+{
+	*count	= 1;
+	return kMoveProperties;
+}
+
 
 // MoveNode() already walks a group's P_C_NODE_ALLNODES, so a group carries
 // its children along on its own. When the children are *also* in the

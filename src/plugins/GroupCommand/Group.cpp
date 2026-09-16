@@ -5,6 +5,17 @@
 Group::Group():PCommand() {
 }
 
+static const property_info kGroupProperties[] = {
+	{ "Group", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
+		"Groups the current selection under the given group node.", 0, {0},
+		{ { { {"node", B_POINTER_TYPE}, {"deselect", B_BOOL_TYPE} } } } },
+};
+
+const property_info* Group::PropertyInfo(int32 *count) {
+	*count	= 1;
+	return kGroupProperties;
+}
+
 void Group::Undo(PDocument *doc,BMessage *undo) {
 	PCommand::Undo(doc,undo);
 	int32 			i					= 0;

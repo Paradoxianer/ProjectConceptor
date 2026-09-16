@@ -1,3 +1,4 @@
+#include <app/PropertyInfo.h>
 #include <app/Roster.h>
 #include <interface/Alert.h>
 #include <interface/PrintJob.h>
@@ -16,6 +17,7 @@
 #include "BasePlugin.h"
 #include "ConfigManager.h"
 #include "Indexer.h"
+#include "PCommandManager.h"
 #include "PCSavePanel.h"
 #include "PDocument.h"
 #include "PDocLoader.h"
@@ -225,6 +227,39 @@ void PDocument::MessageReceived(BMessage* message) {
 			commandManager->Execute(message);
 			break;
 		}
+		// A resolved scripting request for the "suite/vnd.ProjectConceptor-
+		// command" suite (see ResolveSpecifier()/GetSupportedSuites() below,
+		// #55) - "property" is the command name (e.g. "Move" from
+		// `hey $SIG DO Move of ... with dx=float(10) and dy=float(0)`).
+		// Every other top-level field on `message` is the scripting
+		// client's own command data and is forwarded as-is; only the
+		// BMessage-internal specifier bookkeeping fields are skipped.
+		case B_EXECUTE_PROPERTY: {
+			const char	*property	= NULL;
+			if (message->GetCurrentSpecifier(NULL,NULL,NULL,&property) == B_OK) {
+				BMessage	*settings	= new BMessage(P_C_EXECUTE_COMMAND);
+				settings->AddString("Command::Name",property);
+				char		*fieldName;
+				type_code	fieldType;
+				int32		fieldCount;
+				int32		i			= 0;
+				while (message->GetInfo(B_ANY_TYPE,i,&fieldName,&fieldType,&fieldCount) == B_OK) {
+					if ( (strcmp(fieldName,"specifiers") != 0) &&
+							(strcmp(fieldName,"property") != 0) &&
+							(strcmp(fieldName,"current_specifier") != 0) ) {
+						for (int32 j = 0; j < fieldCount; j++) {
+							const void	*data;
+							ssize_t		size;
+							if (message->FindData(fieldName,fieldType,j,&data,&size) == B_OK)
+								settings->AddData(fieldName,fieldType,data,size);
+						}
+					}
+					i++;
+				}
+				commandManager->Execute(settings);
+			}
+			break;
+		}
 		case P_C_AUTO_SAVE: {
 			AutoSave();
 			break;
@@ -261,6 +296,26 @@ void PDocument::MessageReceived(BMessage* message) {
 			break;
 	}
 
+}
+
+
+status_t PDocument::GetSupportedSuites(BMessage *data) {
+	data->AddString("suites","suite/vnd.ProjectConceptor-command");
+	BPropertyInfo	*propertyInfo	= commandManager->BuildPropertyInfo();
+	data->AddFlat("messages",propertyInfo);
+	delete propertyInfo;
+	return BLooper::GetSupportedSuites(data);
+}
+
+
+BHandler* PDocument::ResolveSpecifier(BMessage *message, int32 index,
+	BMessage *specifier, int32 what, const char *property) {
+	BPropertyInfo	*propertyInfo	= commandManager->BuildPropertyInfo();
+	status_t		match			= propertyInfo->FindMatch(message,index,specifier,what,property);
+	delete propertyInfo;
+	if (match >= 0)
+		return this;
+	return BLooper::ResolveSpecifier(message,index,specifier,what,property);
 }
 
 void PDocument::_InitData(void){

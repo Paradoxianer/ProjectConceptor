@@ -8,6 +8,18 @@ Find::Find():PCommand()
 {
 }
 
+static const property_info kFindProperties[] = {
+	{ "Find", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
+		"Selects every node containing searchString in a string field.", 0, {0},
+		{ { { {"searchString", B_STRING_TYPE} } } } },
+};
+
+const property_info* Find::PropertyInfo(int32 *count)
+{
+	*count	= 1;
+	return kFindProperties;
+}
+
 void Find::Undo(PDocument *doc,BMessage *undo)
 {
 	PCommand::Undo(doc,undo);

@@ -356,3 +356,34 @@ PCommand* PCommandManager::PCommandAt(int32 index) {
 		iter++;
   	return iter->second;
 }
+
+
+BPropertyInfo* PCommandManager::BuildPropertyInfo(void) {
+	int32			total		= 0;
+	int32			i			= 0;
+	int32			commandCount	= CountPCommand();
+	// two passes - first count, so the array is allocated exactly once
+	for (i = 0; i < commandCount; i++) {
+		int32	n	= 0;
+		PCommandAt(i)->PropertyInfo(&n);
+		total	+= n;
+	}
+	// BPropertyInfo's own constructor doesn't take a count - it scans the
+	// array itself until it finds an all-zero "name" sentinel entry (see
+	// BPropertyInfo::BPropertyInfo() in the Haiku source: "while
+	// (fPropInfo[fPropCount].name) fPropCount++;"), the same convention
+	// BListView's own sProperties[] table ends with ({ 0 }). One extra,
+	// value-initialized (all-zero) slot at the end provides that sentinel
+	// - without it, the constructor reads past this array into whatever
+	// heap memory follows, corrupting fPropCount and crashing later.
+	property_info	*combined	= new property_info[total+1]();
+	int32			offset		= 0;
+	for (i = 0; i < commandCount; i++) {
+		int32				n		= 0;
+		const property_info	*props	= PCommandAt(i)->PropertyInfo(&n);
+		for (int32 j = 0; j < n; j++)
+			combined[offset+j]	= props[j];
+		offset	+= n;
+	}
+	return new BPropertyInfo(combined, NULL, true);
+}

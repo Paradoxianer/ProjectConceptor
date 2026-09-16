@@ -4,6 +4,7 @@
 #include "ObjectHelp.h"
 
 #include <app/Message.h>
+#include <app/PropertyInfo.h>
 #include <support/List.h>
 
 class PCommandManager;
@@ -54,6 +55,15 @@ public:
 	virtual char*				Name(void)					= 0;
 	virtual	BMessage*			Do(PDocument *doc, BMessage *settings);
 	virtual	void				Undo(PDocument *doc,BMessage *undo);
+	/**
+	 * Scripting/macro-editor schema: the command's own property_info
+	 * entries (name, commands/specifiers understood, usage, and a
+	 * compound field list in ctypes[0].pairs[] describing the settings
+	 * fields Do() reads). Defaults to none - a command that doesn't
+	 * override this just isn't scriptable/DSL-checkable yet, nothing
+	 * else breaks (see #55).
+	 */
+	virtual	const property_info	*PropertyInfo(int32 *count){*count=0;return NULL;};
 			void				SetManager(PCommandManager *newManager);
 			PCommandManager*	Manager(void){return manager;};
 protected:

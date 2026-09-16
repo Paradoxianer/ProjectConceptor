@@ -26,6 +26,7 @@ public:
 	virtual	char*			Name(void){return "Batch";};
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
+	virtual	const property_info	*PropertyInfo(int32 *count);
 
 protected:
 	//----------------PCommand
