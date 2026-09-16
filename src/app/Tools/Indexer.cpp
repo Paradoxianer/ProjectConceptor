@@ -105,20 +105,33 @@ BMessage*	Indexer::IndexConnection(BMessage *connection,bool includeNodes)
 	BMessage *to			= NULL;
 	if (includeNodes)
 	{
+		// either branch must always remove the raw pointer field - an
+		// endpoint already indexed elsewhere (e.g. its own node came
+		// first in the same command's "node" list, the common case: you
+		// draw the nodes, then connect them) used to leave the field
+		// completely untouched here, still a live pointer nothing on the
+		// replay side can resolve - the same unconvertable-pointer crash
+		// this whole function exists to prevent, just for the "already
+		// included" case instead of the "not yet included" one.
 		returnNode->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&from);
+		returnNode->RemoveName(P_C_NODE_CONNECTION_FROM);
 		if (!included->HasItem(from))
 		{
-			returnNode->RemoveName(P_C_NODE_CONNECTION_FROM);
 			returnNode->AddMessage(P_C_NODE_CONNECTION_FROM,IndexNode(from));
 			included->AddItem(from);
 		}
+		else
+			returnNode->AddInt32(P_C_NODE_CONNECTION_FROM,IdFor(from));
+
 		returnNode->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&to);
+		returnNode->RemoveName(P_C_NODE_CONNECTION_TO);
 		if (!included->HasItem(to))
 		{
-			returnNode->RemoveName(P_C_NODE_CONNECTION_TO);
 			returnNode->AddMessage(P_C_NODE_CONNECTION_TO,IndexNode(to));
 			included->AddItem(to);
 		}
+		else
+			returnNode->AddInt32(P_C_NODE_CONNECTION_TO,IdFor(to));
 	}
 	else
 	{
@@ -181,7 +194,19 @@ BMessage*	Indexer::IndexCommand(BMessage *command,bool includeNodes)
 			if (!included->HasItem(node))
 			{
 				included->AddItem(node);
-				returnCommand->AddMessage("included_node",IndexNode(node));
+				// a command's "node" field holds both plain nodes and
+				// connections (see e.g. Insert::Do()) - IndexNode() has no
+				// idea how to convert a connection's own
+				// P_C_NODE_CONNECTION_FROM/TO pointer fields, so a
+				// connection indexed through it here used to keep those as
+				// live, unconvertable pointers all the way into the stored
+				// macro text - confirmed via a live crash on replay:
+				// ConnectionRenderer::Init() dereferencing the (never
+				// resolved) from/to.
+				if (node->what == P_C_CONNECTION_TYPE)
+					returnCommand->AddMessage("included_node",IndexConnection(node,true));
+				else
+					returnCommand->AddMessage("included_node",IndexNode(node));
 			}
 			nodePointers.AddItem(node);
 			j++;
@@ -273,10 +298,15 @@ BMessage* Indexer::DeIndexConnection(BMessage *connection)
 		// (the normal save-to-file path) - never both for the same field.
 		bool		haveFromId		= (connection->FindInt32(P_C_NODE_CONNECTION_FROM,&fromId) == B_OK);
 		bool		haveToId		= (connection->FindInt32(P_C_NODE_CONNECTION_TO,&toId) == B_OK);
+		// RegisterDeIndexNode() first, same reason as everywhere else this
+		// pattern appears: this embedded node's own id has to be in
+		// `sorter` before it's resolved, both for its own parent/children
+		// (DeIndexNode()) and in case something else later in this same
+		// macro command references it by plain id.
 		if (!haveFromId && connection->FindMessage(P_C_NODE_CONNECTION_FROM,fromMessage) == B_OK)
-			resolvedFrom = DeIndexNode(fromMessage);
+			resolvedFrom = DeIndexNode(RegisterDeIndexNode(fromMessage));
 		if (!haveToId && connection->FindMessage(P_C_NODE_CONNECTION_TO,toMessage) == B_OK)
-			resolvedTo = DeIndexNode(toMessage);
+			resolvedTo = DeIndexNode(RegisterDeIndexNode(toMessage));
 		connection->RemoveName(P_C_NODE_CONNECTION_FROM);
 		connection->RemoveName(P_C_NODE_CONNECTION_TO);
 		BList	*editors	= GetCachedEditors();
@@ -325,11 +355,20 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 	// unregistered forward reference - and, more basically, this command's
 	// own top-level "node" id (resolved further below) can never find this
 	// node in `sorter` at all without the registration happening first.
+	// Connections need the same deferral for the same reason, one level
+	// further out: DeIndexConnection() resolves its endpoints against
+	// `sorter` too, so a connection listed before the plain nodes it
+	// connects (a real, unremarkable ordering - included_node just follows
+	// whatever order IndexCommand() first saw each "node" pointer in) used
+	// to hit the exact same unresolved-id failure - confirmed via a live
+	// crash: ConnectionRenderer::Init() dereferences the (then absent)
+	// P_C_NODE_CONNECTION_FROM/TO fields unconditionally.
 	BList	includedNodes;
+	BList	includedConnections;
 	while (command->FindMessage("included_node",i,node) == B_OK)
 	{
 		if (node->what == P_C_CONNECTION_TYPE)
-			DeIndexConnection(node);
+			includedConnections.AddItem(node);
 		else {
 			RegisterDeIndexNode(node);
 			includedNodes.AddItem(node);
@@ -339,6 +378,8 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 	}
 	for (int32 k = 0; k < includedNodes.CountItems(); k++)
 		DeIndexNode((BMessage*)includedNodes.ItemAt(k));
+	for (int32 k = 0; k < includedConnections.CountItems(); k++)
+		DeIndexConnection((BMessage*)includedConnections.ItemAt(k));
 	i = 0;
 	// go through all added Subcommands and Undo Messagefields
 	command->RemoveName("included_node");

@@ -34,20 +34,31 @@ void ConnectionRenderer::Init() {
 	BMessage	*toNode		= NULL;
 	BMessage	*data		= new BMessage();
 
-	container->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&fromNode);
-	container->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&toNode);
-	if (fromNode->FindPointer(P_C_NODE_OUTGOING,(void **)&outgoing) != B_OK) {
-		outgoing = new BList();
-		fromNode->AddPointer(P_C_NODE_OUTGOING,outgoing);
+	// A connection whose from/to id never resolved (see Indexer::DeIndexConnection())
+	// has neither field set here - degrade to a from/to == NULL renderer
+	// (already this class's own documented behavior for that case, see
+	// GraphEditor::ValueChanged()'s comment on build order) instead of
+	// dereferencing a NULL fromNode/toNode, which used to crash outright.
+	if (container->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&fromNode) != B_OK)
+		PRINT(("ERROR:\tConnectionRenderer::Init() - no resolved from-node\n"));
+	if (container->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&toNode) != B_OK)
+		PRINT(("ERROR:\tConnectionRenderer::Init() - no resolved to-node\n"));
+	if (fromNode != NULL) {
+		if (fromNode->FindPointer(P_C_NODE_OUTGOING,(void **)&outgoing) != B_OK) {
+			outgoing = new BList();
+			fromNode->AddPointer(P_C_NODE_OUTGOING,outgoing);
+		}
+		if (!outgoing->HasItem(container))
+			outgoing->AddItem(container);
 	}
-	if (!outgoing->HasItem(container))
-		outgoing->AddItem(container);
-	if (toNode->FindPointer(P_C_NODE_INCOMING,(void **)&incoming) != B_OK) {
-		incoming = new BList();
-		toNode->AddPointer(P_C_NODE_INCOMING,incoming);
+	if (toNode != NULL) {
+		if (toNode->FindPointer(P_C_NODE_INCOMING,(void **)&incoming) != B_OK) {
+			incoming = new BList();
+			toNode->AddPointer(P_C_NODE_INCOMING,incoming);
+		}
+		if (!incoming->HasItem(container))
+			incoming->AddItem(container);
 	}
-	if (!incoming->HasItem(container))
-		incoming->AddItem(container);
 	if (container->FindMessage(P_C_NODE_DATA,data) != B_OK) {
 		data->AddString(P_C_NODE_NAME,"Unbenannt");
 		container->AddMessage(P_C_NODE_DATA,data);
@@ -118,11 +129,16 @@ void ConnectionRenderer::MessageReceived(BMessage *message) {
 }
 
 void ConnectionRenderer::ValueChanged() {
+	// tmpNode can legitimately be NULL - an endpoint whose id never
+	// resolved (see Indexer::DeIndexConnection()) has no
+	// P_C_NODE_CONNECTION_FROM/TO field at all here. Leave from/to as
+	// they are (NULL from Init(), or whatever they last resolved to) -
+	// CalcLine() already only draws once both are non-NULL.
 	BMessage	*tmpNode	= NULL;
-	container->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&tmpNode);
-	tmpNode->FindPointer(editor->RenderString(),(void **)&from);
-	container->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&tmpNode);
-	tmpNode->FindPointer(editor->RenderString(),(void **)&to);
+	if (container->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&tmpNode) == B_OK)
+		tmpNode->FindPointer(editor->RenderString(),(void **)&from);
+	if (container->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&tmpNode) == B_OK)
+		tmpNode->FindPointer(editor->RenderString(),(void **)&to);
 	container->FindBool(P_C_NODE_SELECTED,&selected);
 	container->FindInt8(P_C_NODE_CONNECTION_TYPE, (int8 *)&connectionType);
 	// connections saved before arrow ends were selectable have no such

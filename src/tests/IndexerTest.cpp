@@ -152,6 +152,80 @@ void IndexerTest::MacroCommandIncludedNodeRoundtrip(void)
 	CPPUNIT_ASSERT(name == "Test Node");
 }
 
+void IndexerTest::MacroCommandIncludedConnectionRoundtrip(void)
+{
+	// regression test: a command's "node" field holds both plain nodes
+	// and connections (e.g. Insert::Do() inserting a drawn connection
+	// together with its two new endpoint nodes) - IndexCommand() used to
+	// route every "node" pointer through IndexNode() regardless of type,
+	// which has no idea how to convert a connection's own
+	// P_C_NODE_CONNECTION_FROM/TO pointer fields, leaving them as live,
+	// unconvertable pointers all the way into the stored macro text. Two
+	// further bugs in the same family sat behind it: IndexConnection()'s
+	// "endpoint already indexed elsewhere" branch did nothing at all
+	// (same live-pointer leak, just for nodes listed before their
+	// connection instead of after), and DeIndexConnection()'s embedded-
+	// node case resolved a node without registering its own id into
+	// `sorter` first. All three combined were confirmed as a live crash
+	// on macro replay: ConnectionRenderer::Init() dereferencing a never-
+	// resolved P_C_NODE_CONNECTION_FROM/TO.
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	*from	= new BMessage(P_C_CLASS_TYPE);
+	BMessage	*to		= new BMessage(P_C_CLASS_TYPE);
+	BMessage	fromData;
+	fromData.AddString(P_C_NODE_NAME,"From Node");
+	from->AddMessage(P_C_NODE_DATA,&fromData);
+	BMessage	toData;
+	toData.AddString(P_C_NODE_NAME,"To Node");
+	to->AddMessage(P_C_NODE_DATA,&toData);
+
+	BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
+	connection->AddPointer(P_C_NODE_CONNECTION_FROM,from);
+	connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
+
+	// nodes listed before the connection - the common real-world order
+	// (draw the nodes, then connect them) - exercises IndexConnection()'s
+	// "already included" branch, not just its "not yet included" one.
+	BMessage	command;
+	command.AddString("Command::Name","Insert");
+	command.AddPointer("node",from);
+	command.AddPointer("node",to);
+	command.AddPointer("node",connection);
+
+	Indexer		saveIndexer(doc);
+	BMessage	*indexedCommand	= saveIndexer.IndexCommand(&command,true);
+
+	Indexer		playIndexer(doc);
+	BMessage	*result	= playIndexer.DeIndexCommand(indexedCommand);
+
+	BMessage	*candidate			= NULL;
+	BMessage	*resolvedConnection	= NULL;
+	int32		connectionCount		= 0;
+	for (int32 i = 0; result->FindPointer("node",i,(void**)&candidate) == B_OK; i++) {
+		if (candidate->what == P_C_CONNECTION_TYPE) {
+			connectionCount++;
+			resolvedConnection	= candidate;
+		}
+	}
+	CPPUNIT_ASSERT_EQUAL((int32)1,connectionCount);
+	CPPUNIT_ASSERT(resolvedConnection != NULL);
+
+	void	*resolvedFrom	= NULL;
+	void	*resolvedTo		= NULL;
+	CPPUNIT_ASSERT(resolvedConnection->FindPointer(P_C_NODE_CONNECTION_FROM,&resolvedFrom) == B_OK);
+	CPPUNIT_ASSERT(resolvedConnection->FindPointer(P_C_NODE_CONNECTION_TO,&resolvedTo) == B_OK);
+	CPPUNIT_ASSERT(resolvedFrom != NULL);
+	CPPUNIT_ASSERT(resolvedTo != NULL);
+
+	BString	fromName;
+	BMessage	resolvedFromData;
+	((BMessage*)resolvedFrom)->FindMessage(P_C_NODE_DATA,&resolvedFromData);
+	resolvedFromData.FindString(P_C_NODE_NAME,&fromName);
+	CPPUNIT_ASSERT(fromName == "From Node");
+}
+
+
 void IndexerTest::ManyNodesDoNotLeakEditorInstances(void)
 {
 	// regression test for issue #71: IndexNode()/IndexConnection() used to
