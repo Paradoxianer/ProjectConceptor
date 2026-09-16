@@ -315,16 +315,30 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 	BMessage	*node		= new BMessage();
 	BMessage	*subCommand	= new BMessage();
 	int			i			= 0;
-	// extract all included Nodes :-)
+	// extract all included Nodes - register every included node's own id
+	// into `sorter` before resolving any of them (RegisterDeIndexNode()
+	// then DeIndexNode(), per the contract documented on the class above,
+	// and the same two-pass shape Paste.cpp/PDocLoader.cpp already use).
+	// A node can be included alongside a sibling that references it as
+	// its parent (e.g. a group and its child recorded in the same
+	// command), so resolving in the same pass as registering could hit an
+	// unregistered forward reference - and, more basically, this command's
+	// own top-level "node" id (resolved further below) can never find this
+	// node in `sorter` at all without the registration happening first.
+	BList	includedNodes;
 	while (command->FindMessage("included_node",i,node) == B_OK)
 	{
-		if (node->what == P_C_CLASS_TYPE)
-			DeIndexNode(node);
-		else if (node->what == P_C_CONNECTION_TYPE)
+		if (node->what == P_C_CONNECTION_TYPE)
 			DeIndexConnection(node);
+		else {
+			RegisterDeIndexNode(node);
+			includedNodes.AddItem(node);
+		}
 		i++;
 		node = new BMessage();
 	}
+	for (int32 k = 0; k < includedNodes.CountItems(); k++)
+		DeIndexNode((BMessage*)includedNodes.ItemAt(k));
 	i = 0;
 	// go through all added Subcommands and Undo Messagefields
 	command->RemoveName("included_node");

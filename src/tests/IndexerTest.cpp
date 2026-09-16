@@ -110,6 +110,48 @@ void IndexerTest::ConnectionRoundtrip(void)
 	CPPUNIT_ASSERT_EQUAL((void*)indexedTo,resolvedTo);
 }
 
+void IndexerTest::MacroCommandIncludedNodeRoundtrip(void)
+{
+	// regression test: DeIndexCommand() used to call DeIndexNode() on each
+	// "included_node" without RegisterDeIndexNode() first, so the node's
+	// own id never entered `sorter`. The command's own "node" id (added by
+	// IndexCommand()) could then never resolve back to a pointer, and
+	// PlayMacro() silently executed a command with no "node" field at all
+	// - the recorded macro's Insert did nothing, with no error surfaced.
+	// See PCommandManager::PlayMacro()/Indexer::DeIndexCommand().
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	BMessage	data;
+	data.AddString(P_C_NODE_NAME,"Test Node");
+	node->AddMessage(P_C_NODE_DATA,&data);
+
+	BMessage	command;
+	command.AddString("Command::Name","Insert");
+	command.AddPointer("node",node);
+
+	Indexer		saveIndexer(doc);
+	BMessage	*indexedCommand	= saveIndexer.IndexCommand(&command,true);
+	int32	nodeId	= -1;
+	CPPUNIT_ASSERT(indexedCommand->FindInt32("node",&nodeId) == B_OK);
+	BMessage	includedNode;
+	CPPUNIT_ASSERT(indexedCommand->FindMessage("included_node",&includedNode) == B_OK);
+
+	// mirrors PCommandManager::PlayMacro(): one fresh Indexer, DeIndexCommand()
+	// called directly on the stored/indexed command
+	Indexer		playIndexer(doc);
+	BMessage	*result	= playIndexer.DeIndexCommand(indexedCommand);
+
+	void	*resolvedNode	= NULL;
+	CPPUNIT_ASSERT(result->FindPointer("node",&resolvedNode) == B_OK);
+	CPPUNIT_ASSERT(resolvedNode != NULL);
+	BMessage	resultData;
+	CPPUNIT_ASSERT(((BMessage*)resolvedNode)->FindMessage(P_C_NODE_DATA,&resultData) == B_OK);
+	BString	name;
+	CPPUNIT_ASSERT(resultData.FindString(P_C_NODE_NAME,&name) == B_OK);
+	CPPUNIT_ASSERT(name == "Test Node");
+}
+
 void IndexerTest::ManyNodesDoNotLeakEditorInstances(void)
 {
 	// regression test for issue #71: IndexNode()/IndexConnection() used to

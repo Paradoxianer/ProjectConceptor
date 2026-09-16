@@ -15,12 +15,14 @@ public:
 	void GroupedNodeRoundtrip(void);
 	void ConnectionRoundtrip(void);
 	void ManyNodesDoNotLeakEditorInstances(void);
+	void MacroCommandIncludedNodeRoundtrip(void);
 
 	CPPUNIT_TEST_SUITE(IndexerTest);
 	CPPUNIT_TEST(NodeRoundtrip);
 	CPPUNIT_TEST(GroupedNodeRoundtrip);
 	CPPUNIT_TEST(ConnectionRoundtrip);
 	CPPUNIT_TEST(ManyNodesDoNotLeakEditorInstances);
+	CPPUNIT_TEST(MacroCommandIncludedNodeRoundtrip);
 	CPPUNIT_TEST_SUITE_END();
 };
 
