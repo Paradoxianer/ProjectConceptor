@@ -43,10 +43,19 @@ void MacroEditor::AttachedToWindow(void)
 	TRACE();
 	if (fMacroList != NULL) {
 		// already built (a tab detach/reattach shouldn't duplicate
-		// children) - but re-check the macro list every time the tab is
-		// switched to, not just on the P_C_VALUE_CHANGED broadcast path,
-		// since a macro recorded elsewhere should show up on revisiting
-		// this tab even if that broadcast is ever delayed/missed.
+		// children) - but LayoutChildren() again on every reattach: a
+		// non-B_FOLLOW_ALL_SIDES child like fApplyButton only tracks the
+		// parent's size automatically via its own resizing mode, not via
+		// LayoutChildren()'s bottom-anchored placement, and the tab
+		// container can hand back a different frame on a later reattach
+		// than it did the first time this view was built - without this,
+		// the button stayed at its very first position and could end up
+		// stranded mid-textview after a tab switch. Also re-check the
+		// macro list every time the tab is switched to, not just on the
+		// P_C_VALUE_CHANGED broadcast path, since a macro recorded
+		// elsewhere should show up on revisiting this tab even if that
+		// broadcast is ever delayed/missed.
+		LayoutChildren();
 		RefreshMacroList();
 		return;
 	}
