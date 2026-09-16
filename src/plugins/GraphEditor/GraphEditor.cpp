@@ -54,11 +54,24 @@ MakeGuidesIcon(void)
 	rgb_color	accent	= {30,144,255,255};
 	view->SetHighColor(accent);
 	view->SetDrawingMode(B_OP_ALPHA);
-	float	midY	= (bounds.top+bounds.bottom)/2.0f;
-	for (float x = 4; x < bounds.right-3; x += 3)
-		view->StrokeLine(BPoint(x,midY),BPoint(x+1.5f,midY));
-	view->FillRect(BRect(1,midY-3,7,midY+3));
-	view->FillRect(BRect(bounds.right-7,midY-3,bounds.right-1,midY+3));
+	// Two small nodes with a dashed guide line strictly *between* them -
+	// the previous version's dashes ran the icon's full width, so they
+	// drew straight through both squares instead of only the gap,
+	// reading as a messy row of bars rather than "two things, aligned".
+	BRect	squareA(1,7,6,12);
+	BRect	squareB(13,7,18,12);
+	view->FillRoundRect(squareA,1,1);
+	view->FillRoundRect(squareB,1,1);
+	view->SetPenSize(2);
+	float	midY		= (squareA.top+squareA.bottom)/2.0f;
+	float	dashLen		= 2.0f;
+	float	gapLen		= 1.5f;
+	for (float x = squareA.right+2; x < squareB.left-1; x += dashLen+gapLen) {
+		float	xEnd	= x+dashLen;
+		if (xEnd > squareB.left-1)
+			xEnd	= squareB.left-1;
+		view->StrokeLine(BPoint(x,midY),BPoint(xEnd,midY));
+	}
 	view->Sync();
 	bmp->Unlock();
 	return bmp;
