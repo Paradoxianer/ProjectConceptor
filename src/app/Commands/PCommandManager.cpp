@@ -188,7 +188,19 @@ void PCommandManager::PlayMacro(BMessage *makro) {
 	while ( (makro->FindMessage("Macro::Commmand", i,message) == B_OK) && (err==B_OK) )
 	{
 		err = Execute(playDeIndexer->DeIndexCommand(message));
-		snooze(100000);
+		// gives GraphEditor's own thread real wall-clock time to actually
+		// get scheduled, acquire the document lock and finish rendering
+		// this step before the next Execute() re-locks - 100ms wasn't
+		// enough for it to ever win that race in practice, so every
+		// step's rendering piled up and only caught up once PlayMacro()'s
+		// own loop went idle at the end (confirmed live: zero incremental
+		// redraws during a whole macro's replay, everything appearing at
+		// once afterward). A pragmatic, timing-based first pass, not a
+		// hard guarantee - a genuinely deterministic fix would make
+		// BroadCast() synchronous instead, at the cost of every editor
+		// action (not just macro playback) then waiting on every
+		// registered editor's own processing time.
+		snooze(400000);
 		i++;
 	}
 
