@@ -3,6 +3,8 @@
 /*
  * @author Paradoxon powered by Jesus Christ
  */
+#include <interface/Font.h>
+#include <interface/GraphicsDefs.h>
 #include <interface/TextView.h>
 #include <support/String.h>
 
@@ -57,8 +59,34 @@ public:
 			 * never Text() directly. */
 			void			ExpandedText(BString *out);
 
+			/** True (with a human-readable count in *outWarning) if the
+			 * view currently has fewer "~included_node" blocks - folded or
+			 * expanded - than it had right after the last SetMacroText().
+			 * A block's placeholder line looks like any other line and is
+			 * just as easy to select and delete without meaning to; this
+			 * catches that (or a legitimate whole-command deletion that
+			 * happened to remove one) so ApplyEdits() can at least warn
+			 * instead of silently storing a macro missing a node's data. */
+			bool			LostFoldedBlocks(BString *outWarning);
+
+			/** Selects and scrolls to the line at `canonicalLineNo` (1-based,
+			 * as ParseCommands()'s "line N: ..." errors count them - against
+			 * ExpandedText(), not what's on screen). Expands whichever
+			 * folded block currently contains that line first, if any - a
+			 * folded chip collapses many canonical lines into one, so the
+			 * error's own line number doesn't point anywhere meaningful in
+			 * the *displayed* text until that's undone. False if
+			 * canonicalLineNo is out of range. */
+			bool			RevealCanonicalLine(int32 canonicalLineNo);
+
 private:
 			MacroEditor		*fEditor;
+			/** This view's own starting font/color, captured once at
+			 * construction - what a folded placeholder line gets styled
+			 * back to once expanded, so an expanded block never keeps
+			 * looking like a chip. */
+			BFont			fDefaultFont;
+			rgb_color		fDefaultColor;
 			/** Full text of each folded-away "~included_node" block,
 			 * indexed by the id embedded in its placeholder line
 			 * ("~included_node[N] ..."). Re-folding a block that was
@@ -67,12 +95,34 @@ private:
 			 * old entry is still accurate, and the list only lives for as
 			 * long as one macro is shown. */
 			std::vector<BString>	fFoldedBlockText;
+			/** How many "~included_node" blocks SetMacroText() found -
+			 * see LostFoldedBlocks(). */
+			int32			fOriginalBlockCount;
+
+			/** Count of lines in the current Text() that are either a
+			 * folded placeholder or a real expanded "~included_node"
+			 * header - used by LostFoldedBlocks(). */
+			int32			CurrentBlockCount(void);
 
 			/** Finds the "~included_node" (or numbered placeholder) block
 			 * starting at `lineStart`/ending at `lineEnd` (that single
 			 * line's own range) and folds or expands it in place. No-op if
 			 * that line isn't one of the two recognized forms. */
 			void			ToggleFoldAtLine(int32 lineStart, int32 lineEnd);
+			/** Styles [start,end) as a folded chip (italic, muted color) -
+			 * or, via ClearFoldStyle(), back to this view's own starting
+			 * font/color for freshly expanded content. */
+			void			StyleAsFoldedChip(int32 start, int32 end);
+			void			ClearFoldStyle(int32 start, int32 end);
+			/** Bolds every bare command-name line ("Select", "Group", ...)
+			 * in the current text, so a subPCommand visibly stands out from
+			 * the "fieldName=value"/"~fieldName" data lines sitting at the
+			 * very same indentation depth - see IsCommandLine(). Run once,
+			 * right after SetMacroText() builds the initial folded text;
+			 * expanding/folding a "~included_node" chip never adds or
+			 * removes a command line (that content is always pure node/
+			 * connection data), so nothing else needs to re-run this. */
+			void			StyleCommandLines(void);
 };
 
 #endif

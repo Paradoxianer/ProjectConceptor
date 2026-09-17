@@ -10,6 +10,8 @@
 #include <storage/Path.h>
 #include <support/String.h>
 
+#include <stdlib.h>
+
 #include "MacroText.h"
 #include "PCommandManager.h"
 #include "ProjectConceptorDefs.h"
@@ -306,6 +308,20 @@ void MacroEditor::ApplyEdits(void)
 	BString		error;
 	status_t	err	= ParseCommands(text,&parsed,doc->GetCommandManager(),&error);
 	if (err != B_OK) {
+		// error messages are "line N: ...", counted against the expanded
+		// text ExpandedText() just built, not whatever's on screen - a
+		// folded chip collapses many of those lines into one, so "line 23"
+		// means nothing to look at until the right line is actually
+		// revealed (expanding whatever chip stands in for it, if any).
+		if (error.StartsWith("line ")) {
+			int32	numEnd	= error.FindFirst(":",5);
+			if (numEnd > 5) {
+				BString	numText;
+				error.CopyInto(numText,5,numEnd-5);
+				int32	lineNo	= atol(numText.String());
+				fTextView->RevealCanonicalLine(lineNo);
+			}
+		}
 		SetStatus(error.String(),true);
 		return;
 	}
@@ -315,6 +331,19 @@ void MacroEditor::ApplyEdits(void)
 		BMessage	*cmd	= (BMessage*)parsed.ItemAt(i);
 		fSelectedMacro->AddMessage("Macro::Commmand",cmd);
 		delete cmd;
+	}
+
+	// a missing "~included_node" block (folded or not) doesn't fail
+	// ParseCommands() - it just parses as one fewer node/connection than
+	// this macro started with, silently. This still applies the edit (it
+	// may well be an intentional whole-command deletion, not an accident -
+	// LostFoldedBlocks() can't tell the two apart) but at least surfaces it
+	// instead of leaving it to only ever show up as an unresolved-id error
+	// buried in a debug log at replay time.
+	BString	blockWarning;
+	if (fTextView->LostFoldedBlocks(&blockWarning)) {
+		SetStatus(blockWarning.String(),true);
+		return;
 	}
 
 	BString	status;
@@ -352,6 +381,12 @@ void MacroEditor::SetStatus(const char *text, bool isError)
 	fStatus->SetText(text);
 	fStatus->SetHighColor(isError ? ui_color(B_FAILURE_COLOR) : ui_color(B_PANEL_TEXT_COLOR));
 	fStatus->Invalidate();
+	// a BStringView clips rather than wraps - a longer error (field name +
+	// what's wrong with it) can easily run past the status line's width and
+	// just disappear with no way to read the rest. The tooltip always shows
+	// it in full, hover away the mystery instead of guessing at a cut-off
+	// sentence.
+	fStatus->SetToolTip((text != NULL) && (text[0] != '\0') ? text : NULL);
 }
 
 

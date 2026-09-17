@@ -1,7 +1,11 @@
 #include "MacroTextView.h"
 
+#include <interface/Font.h>
 #include <interface/InterfaceDefs.h>
 #include <interface/Window.h>
+
+#include <string.h>
+#include <utility>
 
 #include "MacroEditor.h"
 #include "ProjectConceptorDefs.h"
@@ -16,6 +20,19 @@ static const int32 kSpacesPerDepth = 2;
 // marker, not part of the field name itself, but has to be matched here too
 // since it's what actually appears in the rendered text.
 static const char *kIncludedNodeHeader = "~included_node";
+
+// prepended to every folded placeholder line, purely cosmetic (stripped
+// before matching in IsFoldedPlaceholder()) - a plain "~included_node[0]
+// ..." line looked exactly like any other line of DSL, easy to select and
+// delete without noticing it was standing in for a whole node/connection's
+// data, not just itself.
+// plain ASCII, not the more decorative U+25B8 "▸" disclosure triangle first
+// tried here - that rendered as a fallback dash in the (italic) chip font,
+// unreadable as a triangle. ">>" reads unambiguously as "expand me" without
+// depending on font glyph coverage.
+static const char *kFoldGlyph = ">> ";
+
+static const rgb_color kFoldColor = {80,100,150,255};
 
 
 static BString LineText(const BString &text, int32 start, int32 end)
@@ -112,21 +129,25 @@ static void ExtractLabel(const BString &blockText, BString *outLabel)
 }
 
 
-// true, with *outId set, for a line whose trimmed content is exactly
-// "~included_node[<digits>]" possibly followed by " <label>" - the
-// placeholder form FoldBlock()/SetMacroText() build. Never matches a real,
-// expanded "~included_node" header (no "[" there at all).
+// true, with *outId set, for a line whose trimmed content is the fold
+// glyph (if present) followed by "~included_node[<digits>]" and optionally
+// " <label>" - the placeholder form SetMacroText()/ToggleFoldAtLine()
+// build. Never matches a real, expanded "~included_node" header (no "["
+// there at all).
 static bool IsFoldedPlaceholder(const BString &trimmed, int32 *outId)
 {
+	BString	rest(trimmed);
+	if (rest.StartsWith(kFoldGlyph))
+		rest.Remove(0,strlen(kFoldGlyph));
 	BString	prefix(kIncludedNodeHeader);
 	prefix	<< "[";
-	if (!trimmed.StartsWith(prefix))
+	if (!rest.StartsWith(prefix))
 		return false;
-	int32	closeBracket	= trimmed.FindFirst("]",prefix.Length());
+	int32	closeBracket	= rest.FindFirst("]",prefix.Length());
 	if (closeBracket < 0)
 		return false;
 	BString	idText;
-	trimmed.CopyInto(idText,prefix.Length(),closeBracket-prefix.Length());
+	rest.CopyInto(idText,prefix.Length(),closeBracket-prefix.Length());
 	if (idText.Length() == 0)
 		return false;
 	for (int32 i=0;i<idText.Length();i++)
@@ -143,11 +164,53 @@ static bool IsExpandedHeader(const BString &trimmed)
 }
 
 
+// true for a bare command name - "Select", "Group", the macro's own
+// top-level command, a subPCommand nested under another one - as opposed to
+// a "fieldName=value" data line or a "~fieldName" block header. All three
+// can sit at the very same indentation depth (a subPCommand and its
+// parent's own data fields nest one level under the parent alike), which is
+// exactly why indentation alone doesn't tell them apart - this does, purely
+// from the line's own shape: a command name never contains "=" and never
+// starts with "~" (or the fold glyph that stands in for one).
+static bool IsCommandLine(const BString &trimmed)
+{
+	if (trimmed.Length() == 0)
+		return false;
+	if (trimmed.StartsWith(kFoldGlyph))
+		return false;
+	if (trimmed[0] == '~')
+		return false;
+	if (trimmed.FindFirst('=') >= 0)
+		return false;
+	return true;
+}
+
+
 MacroTextView::MacroTextView(BRect frame, const char *name, BRect textRect,
 	uint32 resizingMode, uint32 flags)
 	:BTextView(frame,name,textRect,resizingMode,flags)
 {
 	fEditor	= NULL;
+	fOriginalBlockCount	= 0;
+	GetFontAndColor(0,&fDefaultFont,&fDefaultColor);
+}
+
+
+// italic + a muted blue-gray - visibly distinct from ordinary DSL text, so
+// a folded chip reads as "there's more here, this isn't just a line" rather
+// than looking like any other line that's just as easy to select and
+// delete without noticing what it was standing in for.
+void MacroTextView::StyleAsFoldedChip(int32 start, int32 end)
+{
+	BFont	font(fDefaultFont);
+	font.SetFace(B_ITALIC_FACE);
+	SetFontAndColor(start,end,&font,B_FONT_ALL,&kFoldColor);
+}
+
+
+void MacroTextView::ClearFoldStyle(int32 start, int32 end)
+{
+	SetFontAndColor(start,end,&fDefaultFont,B_FONT_ALL,&fDefaultColor);
 }
 
 
@@ -204,6 +267,7 @@ void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 		const BString	&blockText	= fFoldedBlockText[foldedId];
 		Delete(lineStart,lineEnd);
 		Insert(lineStart,blockText.String(),blockText.Length());
+		ClearFoldStyle(lineStart,lineStart+blockText.Length());
 		return;
 	}
 
@@ -215,9 +279,11 @@ void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 		int32	id	= (int32)fFoldedBlockText.size();
 		fFoldedBlockText.push_back(blockText);
 		BString	placeholder	= LeadingWhitespace(line);
-		placeholder	<< kIncludedNodeHeader << "[" << id << "] " << label << "\n";
+		placeholder	<< kFoldGlyph << kIncludedNodeHeader << "[" << id << "] "
+			<< label << "\n";
 		Delete(lineStart,blockEnd);
 		Insert(lineStart,placeholder.String(),placeholder.Length());
+		StyleAsFoldedChip(lineStart,lineStart+placeholder.Length());
 		return;
 	}
 }
@@ -227,6 +293,7 @@ void MacroTextView::SetMacroText(const BString &canonicalText)
 {
 	fFoldedBlockText.clear();
 	BString	folded;
+	std::vector<std::pair<int32,int32> >	chipRanges;
 	int32	lineStart	= 0;
 	int32	textLength	= canonicalText.Length();
 	while (lineStart < textLength) {
@@ -241,8 +308,10 @@ void MacroTextView::SetMacroText(const BString &canonicalText)
 			ExtractLabel(blockText,&label);
 			int32	id	= (int32)fFoldedBlockText.size();
 			fFoldedBlockText.push_back(blockText);
-			folded	<< LeadingWhitespace(line) << kIncludedNodeHeader
+			int32	chipStart	= folded.Length();
+			folded	<< LeadingWhitespace(line) << kFoldGlyph << kIncludedNodeHeader
 				<< "[" << id << "] " << label << "\n";
+			chipRanges.push_back(std::make_pair(chipStart,folded.Length()));
 			lineStart	= blockEnd;
 		} else {
 			folded	<< line;
@@ -250,6 +319,65 @@ void MacroTextView::SetMacroText(const BString &canonicalText)
 		}
 	}
 	SetText(folded.String());
+	for (size_t i=0;i<chipRanges.size();i++)
+		StyleAsFoldedChip(chipRanges[i].first,chipRanges[i].second);
+	StyleCommandLines();
+	fOriginalBlockCount	= (int32)fFoldedBlockText.size();
+}
+
+
+void MacroTextView::StyleCommandLines(void)
+{
+	BString	fullText(Text());
+	int32	lineStart	= 0;
+	int32	textLength	= fullText.Length();
+	BFont	boldFont(fDefaultFont);
+	boldFont.SetFace(B_BOLD_FACE);
+	while (lineStart < textLength) {
+		int32	nl	= fullText.FindFirst("\n",lineStart);
+		int32	lineEnd	= (nl >= 0) ? nl+1 : textLength;
+		BString	trimmed	= Trimmed(LineText(fullText,lineStart,lineEnd));
+		if (IsCommandLine(trimmed)) {
+			int32	nameStart	= lineStart+LeadingWhitespace(
+				LineText(fullText,lineStart,lineEnd)).Length();
+			int32	nameEnd		= (nl >= 0) ? nl : lineEnd;
+			SetFontAndColor(nameStart,nameEnd,&boldFont,B_FONT_ALL,&fDefaultColor);
+		}
+		lineStart	= lineEnd;
+	}
+}
+
+
+int32 MacroTextView::CurrentBlockCount(void)
+{
+	BString	fullText(Text());
+	int32	count		= 0;
+	int32	lineStart	= 0;
+	int32	textLength	= fullText.Length();
+	while (lineStart < textLength) {
+		int32	nl	= fullText.FindFirst("\n",lineStart);
+		int32	lineEnd	= (nl >= 0) ? nl+1 : textLength;
+		BString	trimmed	= Trimmed(LineText(fullText,lineStart,lineEnd));
+		int32	foldedId	= -1;
+		if (IsExpandedHeader(trimmed) || IsFoldedPlaceholder(trimmed,&foldedId))
+			count++;
+		lineStart	= lineEnd;
+	}
+	return count;
+}
+
+
+bool MacroTextView::LostFoldedBlocks(BString *outWarning)
+{
+	int32	current	= CurrentBlockCount();
+	if (current >= fOriginalBlockCount)
+		return false;
+	outWarning->SetToFormat(
+		"Warning: %ld of %ld node/connection block(s) are gone - "
+		"applied anyway. If that wasn't intentional, undo (Ctrl+Z) before "
+		"editing further.",
+		(long)(fOriginalBlockCount-current),(long)fOriginalBlockCount);
+	return true;
 }
 
 
@@ -273,4 +401,67 @@ void MacroTextView::ExpandedText(BString *out)
 		}
 		lineStart	= lineEnd;
 	}
+}
+
+
+// number of lines `blockText` spans - every block SetMacroText()/
+// ToggleFoldAtLine() ever captures ends in "\n" (see LineText() - it always
+// includes the line's own trailing newline), so a plain '\n' count is exact.
+static int32 LineCountOf(const BString &blockText)
+{
+	int32	count	= 0;
+	int32	at		= 0;
+	while ((at = blockText.FindFirst("\n",at)) >= 0) {
+		count++;
+		at++;
+	}
+	return count;
+}
+
+
+bool MacroTextView::RevealCanonicalLine(int32 canonicalLineNo)
+{
+	if (canonicalLineNo < 1)
+		return false;
+	// bounded by fFoldedBlockText's size - at most that many blocks can
+	// ever need expanding, one per pass, before the target line is
+	// necessarily in the still-plain text.
+	for (size_t guard = 0; guard <= fFoldedBlockText.size(); guard++) {
+		BString	fullText(Text());
+		int32	canonicalCounter	= 1;
+		int32	lineStart			= 0;
+		int32	textLength			= fullText.Length();
+		bool	restart				= false;
+		while (lineStart < textLength) {
+			int32	nl		= fullText.FindFirst("\n",lineStart);
+			int32	lineEnd	= (nl >= 0) ? nl+1 : textLength;
+			BString	trimmed	= Trimmed(LineText(fullText,lineStart,lineEnd));
+			int32	foldedId	= -1;
+			if (IsFoldedPlaceholder(trimmed,&foldedId)
+					&& (foldedId >= 0) && (foldedId < (int32)fFoldedBlockText.size())) {
+				int32	blockLines	= LineCountOf(fFoldedBlockText[foldedId]);
+				if (canonicalLineNo < canonicalCounter+blockLines) {
+					// the target line is inside this still-folded block - expand
+					// it and restart the walk over the now-changed text, rather
+					// than try to patch up offsets in place.
+					ToggleFoldAtLine(lineStart,lineEnd);
+					restart	= true;
+					break;
+				}
+				canonicalCounter	+= blockLines;
+			} else {
+				if (canonicalLineNo == canonicalCounter) {
+					int32	selEnd	= (nl >= 0) ? nl : lineEnd;
+					Select(lineStart,selEnd);
+					ScrollToSelection();
+					return true;
+				}
+				canonicalCounter++;
+			}
+			lineStart	= lineEnd;
+		}
+		if (!restart)
+			return false;	// out of range - no block expansion will change that
+	}
+	return false;
 }
