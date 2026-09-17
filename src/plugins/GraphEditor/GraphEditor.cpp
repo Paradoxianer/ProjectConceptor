@@ -88,6 +88,7 @@ void GraphEditor::Init(void) {
 	renderer		= new BList();
 	scale			= 1.0;
 	animatingRenderers	= new BList();
+	pendingChangedNodes	= new BList();
 	animationRunner		= NULL;
 	animationLastTick	= 0;
 	configMessage	= new BMessage();
@@ -434,28 +435,39 @@ void GraphEditor::ProcessChangedNode(BMessage *node,BList *allNodes,BList *allCo
 
 void GraphEditor::ValueChanged(BMessage *changedNodes) {
 	TRACE();
-	// The changed nodes travel in changedNodes itself (repeated "node"
-	// pointer fields - see PDocument::BuildChangedNodesMessage()), not
-	// read from doc->GetChangedNodes() here: that shared set can already
-	// have been cleared and repopulated by a later command's Execute() by
-	// the time this message actually gets processed, since BroadCast() is
-	// fire-and-forget and this only runs whenever this view's thread gets
-	// scheduled to it. A blocking Lock() below is safe precisely because
-	// of that - we are not iterating any state that could be concurrently
-	// mutated out from under us (that was the old bug: iterating
-	// doc->GetChangedNodes() while Execute() could be clearing/repopulating
-	// it on another thread - confirmed via a live crash report,
-	// _Rb_tree_increment on an invalidated iterator), only protecting
-	// access to allNodes/allConnections/each node's own renderer pointer
-	// below. Execute() always Unlocks before broadcasting, so this cannot
-	// deadlock against it.
+	// Queues instead of processing immediately - this used to Lock() the
+	// document right here, but that lock is won or lost purely by luck
+	// against PCommandManager::Execute()'s own frequent re-locking:
+	// confirmed live via timestamped diagnostics that this thread's
+	// Lock() call, though dispatched within microseconds of the
+	// broadcast, then sat blocked for over a second - multiple whole
+	// commands' worth - during rapid macro playback, since nothing
+	// guarantees this thread gets scheduled to actually attempt the lock
+	// before Execute() cycles back around to it. Queuing here (touched
+	// only from this view's own thread - no lock needed for the queue
+	// itself) and draining on G_E_ANIMATION_TICK instead decouples
+	// arrival from processing entirely: this thread no longer needs to
+	// win any particular race, just get *a* tick eventually.
+	BMessage	*node	= NULL;
+	for (int32 i = 0; changedNodes->FindPointer("node",i,(void**)&node) == B_OK; i++)
+		if (!pendingChangedNodes->HasItem(node))
+			pendingChangedNodes->AddItem(node);
+	EnsureTickRunning();
+}
+
+
+void GraphEditor::DrainPendingChangedNodes(void) {
+	if (pendingChangedNodes->CountItems() == 0)
+		return;
+	// See ValueChanged() for why a blocking Lock() here is safe: the
+	// queue is only ever touched by this thread, so nothing can mutate
+	// it out from under this loop the way the old shared
+	// doc->GetChangedNodes() set could.
 	doc->Lock();
 
-	BList		*allNodes	= doc->GetAllNodes();
+	BList		*allNodes		= doc->GetAllNodes();
 	BList		*allConnections	= doc->GetAllConnections();
 
-	BMessage	*node			= NULL;
-	int32		i				= 0;
 	// ConnectionRenderer resolves its endpoints' renderer pointers once, at
 	// construction (see ConnectionRenderer::ValueChanged()) - if a connection
 	// gets its own renderer built before its endpoint nodes have theirs, it
@@ -463,19 +475,18 @@ void GraphEditor::ValueChanged(BMessage *changedNodes) {
 	// skips it) until some later, unrelated P_C_VALUE_CHANGED happens to
 	// refresh it. Two passes here guarantees every node/group already has a
 	// renderer before any connection referencing it is built.
-	while (changedNodes->FindPointer("node",i,(void**)&node) == B_OK) {
+	for (int32 i = 0; i < pendingChangedNodes->CountItems(); i++) {
+		BMessage	*node	= (BMessage*)pendingChangedNodes->ItemAt(i);
 		if (node->what != P_C_CONNECTION_TYPE)
 			ProcessChangedNode(node,allNodes,allConnections);
-		i++;
 	}
-	i = 0;
-	while (changedNodes->FindPointer("node",i,(void**)&node) == B_OK) {
+	for (int32 i = 0; i < pendingChangedNodes->CountItems(); i++) {
+		BMessage	*node	= (BMessage*)pendingChangedNodes->ItemAt(i);
 		if (node->what == P_C_CONNECTION_TYPE)
 			ProcessChangedNode(node,allNodes,allConnections);
-		i++;
 	}
+	pendingChangedNodes->MakeEmpty();
 	doc->Unlock();
-	Invalidate();
 }
 
 void GraphEditor::SetDirty(BRegion *region) {
@@ -772,7 +783,8 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				if (!r->AnimationStep(dt))
 					animatingRenderers->RemoveItem(i);
 			}
-			if (animatingRenderers->CountItems() == 0) {
+			DrainPendingChangedNodes();
+			if ((animatingRenderers->CountItems() == 0) && (pendingChangedNodes->CountItems() == 0)) {
 				delete animationRunner;
 				animationRunner	= NULL;
 			}
@@ -1174,6 +1186,11 @@ void GraphEditor::StartAnimating(Renderer *wichRenderer) {
 	TRACE();
 	if (!animatingRenderers->HasItem(wichRenderer))
 		animatingRenderers->AddItem(wichRenderer);
+	EnsureTickRunning();
+}
+
+
+void GraphEditor::EnsureTickRunning(void) {
 	if (animationRunner == NULL) {
 		animationLastTick	= system_time();
 		BMessage	*tick	= new BMessage(G_E_ANIMATION_TICK);

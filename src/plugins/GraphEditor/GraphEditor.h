@@ -157,9 +157,21 @@ protected:
 			void			InsertRenderObject(BMessage *node);
 			/** ValueChanged()'s per-node update/insert/remove logic, split out
 			 * so it can run over allNodes/allConnections in two passes - see
-			 * ValueChanged() for why the order matters.
+			 * DrainPendingChangedNodes() for why the order matters.
 			 */
 			void			ProcessChangedNode(BMessage *node,BList *allNodes,BList *allConnections);
+			/** Locks the document once and runs ProcessChangedNode() over
+			 * everything ValueChanged() queued (two passes, nodes then
+			 * connections - see ProcessChangedNode()/ConnectionRenderer for
+			 * why), then unlocks and clears the queue. Called from the
+			 * G_E_ANIMATION_TICK handler, never directly from
+			 * MessageReceived() - see ValueChanged(). */
+			void			DrainPendingChangedNodes(void);
+			/** Starts the shared G_E_ANIMATION_TICK BMessageRunner if it
+			 * isn't already running - shared between StartAnimating() and
+			 * ValueChanged(), which both need periodic attention without
+			 * a dedicated timer of their own. */
+			void			EnsureTickRunning(void);
 			/** hit's own Frame() always contains a group's children, so
 			 * MouseDown()'s top-level hit test alone can never resolve a
 			 * click to the specific child under the cursor - only ever to
@@ -247,6 +259,13 @@ protected:
 			BList			*animatingRenderers;
 			BMessageRunner	*animationRunner;
 			bigtime_t		animationLastTick;
+
+			/** node/connection pointers queued by ValueChanged() (see
+			 * there) instead of processed immediately - only ever touched
+			 * from this view's own thread (enqueued in ValueChanged(),
+			 * drained by the G_E_ANIMATION_TICK handler), so needs no
+			 * locking of its own. */
+			BList			*pendingChangedNodes;
 
 			bool			gridEnabled;
 			image_id 		pluginID;
