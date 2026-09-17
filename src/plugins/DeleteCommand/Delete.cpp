@@ -46,6 +46,16 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings) {
 	BMessage		*parent				= NULL;
 	BList			*outgoing			= NULL;
 	BList			*incoming			= NULL;
+	// i is deliberately never incremented - RemoveItem(0) repeatedly is
+	// the correct way to drain a shrinking BList, since every removal
+	// shifts the next item into index 0. The inner loops below used to
+	// reuse this same `i` as their own counter, left it at whatever value
+	// their own list's size happened to produce, and this loop's next
+	// RemoveItem(i) call then used that leftover value instead of 0 -
+	// skipping or repeating items unpredictably, and in a document with
+	// grouped nodes and connections together (any real graph, basically),
+	// producing a live hang: confirmed via ./dev.sh smoke-style manual
+	// testing, "Select all" then "Clear" on such a document never returns.
 	int32			i					= 0;
 	while (	(node = (BMessage *)selected->RemoveItem(i)) != NULL) {
 		allNodes->RemoveItem(node);
@@ -53,16 +63,16 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings) {
 		changed->insert(node);
 		undoMessage->AddPointer("node",node);
 		if (node->FindPointer(P_C_NODE_OUTGOING,(void **)&outgoing) == B_OK) {
-			for (i=0;i<outgoing->CountItems();i++) {
-				connection= (BMessage *)outgoing->ItemAt(i);
+			for (int32 j=0;j<outgoing->CountItems();j++) {
+				connection= (BMessage *)outgoing->ItemAt(j);
 				connections->RemoveItem(connection);
 				changed->insert(connection);
 				undoMessage->AddPointer("node",connection);
 			}
 		}
 		if (node->FindPointer(P_C_NODE_INCOMING,(void **)&incoming) == B_OK) {
-			for (i=0;i<incoming->CountItems();i++) {
-				connection= (BMessage *)incoming->ItemAt(i);
+			for (int32 j=0;j<incoming->CountItems();j++) {
+				connection= (BMessage *)incoming->ItemAt(j);
 				connections->RemoveItem(connection);
 				changed->insert(connection);
 				undoMessage->AddPointer("node",connection);
@@ -71,15 +81,19 @@ BMessage* Delete::Do(PDocument *doc, BMessage *settings) {
 		//** find all NOdes wich belong to a group and delete them - korrekt the undopart??
 		if  (node->what == P_C_GROUP_TYPE){
 			if (node->FindPointer(P_C_NODE_ALLNODES, (void **)&gallNodes) == B_OK)
-				for (i=0; i< gallNodes->CountItems(); i++){
-					allNodes->RemoveItem(gallNodes->ItemAt(i));
-					connections->RemoveItem(gallNodes->ItemAt(i));
-					changed->insert((BMessage*)gallNodes->ItemAt(i));
-					undoMessage->AddPointer("node",gallNodes->ItemAt(i));
+				for (int32 j=0; j< gallNodes->CountItems(); j++){
+					allNodes->RemoveItem(gallNodes->ItemAt(j));
+					connections->RemoveItem(gallNodes->ItemAt(j));
+					changed->insert((BMessage*)gallNodes->ItemAt(j));
+					undoMessage->AddPointer("node",gallNodes->ItemAt(j));
 					//***somehow store the grouping...
 				}
 		}
-		if (node->FindPointer(P_C_NODE_PARENT,(void **)&parent) != B_OK && parent != NULL) {
+		// was "!= B_OK && parent != NULL" - FindPointer failing leaves
+		// `parent` untouched (not NULL'd), so this always evaluated
+		// against whatever `parent` happened to hold from a previous
+		// iteration instead of this node's actual parent.
+		if (node->FindPointer(P_C_NODE_PARENT,(void **)&parent) == B_OK && parent != NULL) {
 			if (parent->FindPointer(P_C_NODE_ALLNODES, (void **)&gallNodes) == B_OK && gallNodes != NULL){
 				gallNodes->RemoveItem(node);
 				changed->insert(parent);
