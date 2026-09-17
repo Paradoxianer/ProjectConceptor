@@ -267,7 +267,7 @@ void MacroEditor::ShowSelectedMacro(void)
 	BList	*macroList	= doc->GetCommandManager()->GetMacroList();
 	if ((index < 0) || (index >= macroList->CountItems())) {
 		fSelectedMacro	= NULL;
-		fTextView->SetText("");
+		fTextView->SetMacroText("");
 		SetStatus("",false);
 		return;
 	}
@@ -285,7 +285,7 @@ void MacroEditor::ShowSelectedMacro(void)
 
 	BString	text;
 	SerializeCommands(&commands,&text);
-	fTextView->SetText(text.String());
+	fTextView->SetMacroText(text);
 	SetStatus("",false);
 
 	for (int32 c = 0; c < commands.CountItems(); c++)
@@ -300,7 +300,8 @@ void MacroEditor::ApplyEdits(void)
 		return;
 	}
 
-	BString	text(fTextView->Text());
+	BString	text;
+	fTextView->ExpandedText(&text);
 	BList		parsed;
 	BString		error;
 	status_t	err	= ParseCommands(text,&parsed,doc->GetCommandManager(),&error);
