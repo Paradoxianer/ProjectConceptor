@@ -4,7 +4,6 @@
 
 #include <math.h>
 #include <algorithm>
-#include <set>
 
 #include <interface/Font.h>
 #include <interface/View.h>
@@ -118,9 +117,17 @@ void GroupRenderer::ValueChanged()
 	// O(group count x total changed nodes). allNodes/renderer here are this
 	// group's own child list/renderer bookkeeping - both bounded by this
 	// group's own size, never by document size - so walk those instead and
-	// use changedNodes only for the O(log n) membership check a std::set
-	// gives for free.
-	set<BMessage*>	*changedNodes	= doc->GetChangedNodes();
+	// use editor->WasChanged() only for the membership check.
+	//
+	// This used to check doc->GetChangedNodes() directly - that set is
+	// cleared and refilled by every single PCommandManager::Execute() cycle,
+	// so during macro replay (many commands executing before GraphEditor's
+	// deferred queue actually drains - see GraphEditor::DrainPendingChangedNodes())
+	// it no longer reflected what was true when a given child last changed,
+	// only whatever the most recent command happened to also touch. A
+	// genuinely-just-grouped child not touched by anything after it was
+	// silently skipped here - the group rendered around whichever children
+	// happened to still be in that live set by pure timing, not all of them.
 	BList			*allDocNodes	= doc->GetAllNodes();
 	BMessage		*node			= NULL;
 	Renderer		*painter		= NULL;
@@ -174,7 +181,7 @@ void GroupRenderer::ValueChanged()
 	// entirely (allNodes hasn't caught up to that yet).
 	for (int32 i = allNodes->CountItems()-1; i >= 0; i--) {
 		node = (BMessage *)allNodes->ItemAt(i);
-		if (changedNodes->find(node) == changedNodes->end())
+		if (!editor->WasChanged(node))
 			continue;
 		painter = FindRenderer(node);
 		if (painter != NULL)

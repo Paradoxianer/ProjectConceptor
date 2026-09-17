@@ -145,6 +145,16 @@ public:
 			BMessage		*GetStandartPattern(void){return patternMessage;};
 			BMessage        *GenerateInsertCommand(uint32 newWhat, bool connected = false);
 
+			/** Whether `node` is part of the batch currently being drained
+			 * by DrainPendingChangedNodes() - GroupRenderer::ValueChanged()
+			 * uses this instead of doc->GetChangedNodes() to check whether a
+			 * given child actually changed, since that set is cleared and
+			 * refilled by every single PCommandManager::Execute() cycle
+			 * (PCommandManager.cpp) and, by the time a deferred/batched
+			 * drain actually runs, no longer reflects what was true when the
+			 * change this renderer is processing right now happened. */
+			bool			WasChanged(BMessage *node){return pendingChangedNodes->HasItem(node);};
+
 			/** Registers wichRenderer for per-frame AnimationStep() calls
 			 * (lazily starts the shared tick runner); the renderer removes
 			 * itself once AnimationStep() reports it has settled. */
