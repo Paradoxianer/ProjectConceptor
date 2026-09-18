@@ -8,7 +8,7 @@
 #include <interface/TextView.h>
 #include <support/String.h>
 
-#include <vector>
+#include <map>
 
 class MacroEditor;
 
@@ -87,14 +87,22 @@ private:
 			 * looking like a chip. */
 			BFont			fDefaultFont;
 			rgb_color		fDefaultColor;
-			/** Full text of each folded-away "~included_node" block,
-			 * indexed by the id embedded in its placeholder line
-			 * ("~included_node[N] ..."). Re-folding a block that was
-			 * edited while expanded appends a fresh entry rather than
-			 * reusing its old index - simpler than tracking whether the
-			 * old entry is still accurate, and the list only lives for as
-			 * long as one macro is shown. */
-			std::vector<BString>	fFoldedBlockText;
+			/** Full text of each folded-away "~included_node" block, keyed
+			 * by the SAME node/connection reference id the rest of the DSL
+			 * uses ("node=@1", "..."). Every embedded block carries its own
+			 * id as a "this=N" field (Indexer::IndexNode()/IndexConnection()
+			 * always add it) - reusing it here, shown right in the
+			 * placeholder as "[@N]", is what actually answers "is this the
+			 * same node as that @1 reference over there" instead of forcing
+			 * the reader to guess from proximity. A block that's somehow
+			 * missing "this=N" (hand-edited into that state) falls back to
+			 * a negative synthetic key from fNextSyntheticId, shown as
+			 * "[#N]" - never collides with a real (non-negative) id, so the
+			 * lookup this map exists for stays unambiguous either way. */
+			std::map<int32,BString>	fFoldedBlockText;
+			/** Next negative key to hand out for a block with no "this=N"
+			 * of its own - see fFoldedBlockText. */
+			int32			fNextSyntheticId;
 			/** How many "~included_node" blocks SetMacroText() found -
 			 * see LostFoldedBlocks(). */
 			int32			fOriginalBlockCount;

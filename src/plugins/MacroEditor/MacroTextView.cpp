@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include <utility>
+#include <vector>
 
 #include "MacroEditor.h"
 #include "ProjectConceptorDefs.h"
@@ -98,6 +99,35 @@ static int32 FindBlockEnd(const BString &text, int32 headerStart, int32 headerEn
 }
 
 
+// the block's own reference id, from its "this=N" field - Indexer::
+// IndexNode()/IndexConnection() always add this (raw literal there too,
+// there's no ProjectConceptorDefs.h constant for it), so it's present on
+// every legitimately machine-generated "~included_node" block. -1 if
+// missing (hand-edited away, or malformed input).
+static int32 ExtractThisId(const BString &blockText)
+{
+	int32	lineStart	= 0;
+	int32	textLength	= blockText.Length();
+	while (lineStart < textLength) {
+		int32	nl	= blockText.FindFirst("\n",lineStart);
+		int32	lineEnd	= (nl >= 0) ? nl+1 : textLength;
+		BString	trimmed	= Trimmed(LineText(blockText,lineStart,lineEnd));
+		if (trimmed.StartsWith("this=")) {
+			BString	idText;
+			trimmed.CopyInto(idText,5,trimmed.Length()-5);
+			bool	allDigits	= idText.Length() > 0;
+			for (int32 i=0;i<idText.Length();i++)
+				if ((idText[i] < '0') || (idText[i] > '9'))
+					allDigits	= false;
+			if (allDigits)
+				return atol(idText.String());
+		}
+		lineStart	= lineEnd;
+	}
+	return -1;
+}
+
+
 // "Connection" if the block carries Connection::type (checked first - a
 // connection's own embedded Node::Data still carries a filler name, see
 // GenerateInsertCommand(), so checking name first would always win and
@@ -129,12 +159,16 @@ static void ExtractLabel(const BString &blockText, BString *outLabel)
 }
 
 
-// true, with *outId set, for a line whose trimmed content is the fold
-// glyph (if present) followed by "~included_node[<digits>]" and optionally
-// " <label>" - the placeholder form SetMacroText()/ToggleFoldAtLine()
-// build. Never matches a real, expanded "~included_node" header (no "["
-// there at all).
-static bool IsFoldedPlaceholder(const BString &trimmed, int32 *outId)
+// true, with *outKey set to the fFoldedBlockText map key, for a line whose
+// trimmed content is the fold glyph (if present) followed by
+// "~included_node[@<digits>]" (a block with a real "this=N" reference id -
+// see ExtractThisId()) or "~included_node[#<digits>]" (the synthetic
+// fallback for a block missing one) and optionally " <label>" - the
+// placeholder form SetMacroText()/ToggleFoldAtLine() build. Never matches a
+// real, expanded "~included_node" header (no "[" there at all). "@N" maps
+// to key N itself; "#N" maps to key -N, matching how ToggleFoldAtLine()/
+// SetMacroText() insert into fFoldedBlockText.
+static bool IsFoldedPlaceholder(const BString &trimmed, int32 *outKey)
 {
 	BString	rest(trimmed);
 	if (rest.StartsWith(kFoldGlyph))
@@ -148,12 +182,18 @@ static bool IsFoldedPlaceholder(const BString &trimmed, int32 *outId)
 		return false;
 	BString	idText;
 	rest.CopyInto(idText,prefix.Length(),closeBracket-prefix.Length());
-	if (idText.Length() == 0)
+	if (idText.Length() < 2)
 		return false;
-	for (int32 i=0;i<idText.Length();i++)
-		if ((idText[i] < '0') || (idText[i] > '9'))
+	char	marker	= idText[0];
+	if ((marker != '@') && (marker != '#'))
+		return false;
+	BString	digits;
+	idText.CopyInto(digits,1,idText.Length()-1);
+	for (int32 i=0;i<digits.Length();i++)
+		if ((digits[i] < '0') || (digits[i] > '9'))
 			return false;
-	*outId	= atol(idText.String());
+	int32	value	= atol(digits.String());
+	*outKey	= (marker == '@') ? value : -value;
 	return true;
 }
 
@@ -192,7 +232,21 @@ MacroTextView::MacroTextView(BRect frame, const char *name, BRect textRect,
 {
 	fEditor	= NULL;
 	fOriginalBlockCount	= 0;
+	fNextSyntheticId	= 1;
 	GetFontAndColor(0,&fDefaultFont,&fDefaultColor);
+}
+
+
+// the placeholder text for a block keyed at `key` in fFoldedBlockText - the
+// same "@N"/"#N" formatting IsFoldedPlaceholder() parses back.
+static BString FoldKeyText(int32 key)
+{
+	BString	text;
+	if (key >= 0)
+		text << "@" << key;
+	else
+		text << "#" << -key;
+	return text;
 }
 
 
@@ -259,12 +313,13 @@ void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 	BString	fullText(Text());
 	BString	line	= LineText(fullText,lineStart,lineEnd);
 	BString	trimmed	= Trimmed(line);
-	int32	foldedId	= -1;
+	int32	foldedKey	= 0;
 
-	if (IsFoldedPlaceholder(trimmed,&foldedId)) {
-		if ((foldedId < 0) || (foldedId >= (int32)fFoldedBlockText.size()))
+	if (IsFoldedPlaceholder(trimmed,&foldedKey)) {
+		std::map<int32,BString>::iterator	found	= fFoldedBlockText.find(foldedKey);
+		if (found == fFoldedBlockText.end())
 			return;
-		const BString	&blockText	= fFoldedBlockText[foldedId];
+		BString	blockText	= found->second;
 		Delete(lineStart,lineEnd);
 		Insert(lineStart,blockText.String(),blockText.Length());
 		ClearFoldStyle(lineStart,lineStart+blockText.Length());
@@ -276,11 +331,12 @@ void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 		BString	blockText	= LineText(fullText,lineStart,blockEnd);
 		BString	label;
 		ExtractLabel(blockText,&label);
-		int32	id	= (int32)fFoldedBlockText.size();
-		fFoldedBlockText.push_back(blockText);
+		int32	thisId	= ExtractThisId(blockText);
+		int32	key		= (thisId >= 0) ? thisId : -(fNextSyntheticId++);
+		fFoldedBlockText[key]	= blockText;
 		BString	placeholder	= LeadingWhitespace(line);
-		placeholder	<< kFoldGlyph << kIncludedNodeHeader << "[" << id << "] "
-			<< label << "\n";
+		placeholder	<< kFoldGlyph << kIncludedNodeHeader << "[" << FoldKeyText(key)
+			<< "] " << label << "\n";
 		Delete(lineStart,blockEnd);
 		Insert(lineStart,placeholder.String(),placeholder.Length());
 		StyleAsFoldedChip(lineStart,lineStart+placeholder.Length());
@@ -292,6 +348,7 @@ void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 void MacroTextView::SetMacroText(const BString &canonicalText)
 {
 	fFoldedBlockText.clear();
+	fNextSyntheticId	= 1;
 	BString	folded;
 	std::vector<std::pair<int32,int32> >	chipRanges;
 	int32	lineStart	= 0;
@@ -306,11 +363,12 @@ void MacroTextView::SetMacroText(const BString &canonicalText)
 			BString	blockText	= LineText(canonicalText,lineStart,blockEnd);
 			BString	label;
 			ExtractLabel(blockText,&label);
-			int32	id	= (int32)fFoldedBlockText.size();
-			fFoldedBlockText.push_back(blockText);
+			int32	thisId	= ExtractThisId(blockText);
+			int32	key		= (thisId >= 0) ? thisId : -(fNextSyntheticId++);
+			fFoldedBlockText[key]	= blockText;
 			int32	chipStart	= folded.Length();
 			folded	<< LeadingWhitespace(line) << kFoldGlyph << kIncludedNodeHeader
-				<< "[" << id << "] " << label << "\n";
+				<< "[" << FoldKeyText(key) << "] " << label << "\n";
 			chipRanges.push_back(std::make_pair(chipStart,folded.Length()));
 			lineStart	= blockEnd;
 		} else {
@@ -392,10 +450,12 @@ void MacroTextView::ExpandedText(BString *out)
 		int32	lineEnd	= (nl >= 0) ? nl+1 : textLength;
 		BString	line	= LineText(fullText,lineStart,lineEnd);
 		BString	trimmed	= Trimmed(line);
-		int32	foldedId	= -1;
-		if (IsFoldedPlaceholder(trimmed,&foldedId)
-				&& (foldedId >= 0) && (foldedId < (int32)fFoldedBlockText.size())) {
-			*out	<< fFoldedBlockText[foldedId];
+		int32	foldedKey	= 0;
+		std::map<int32,BString>::const_iterator	found	= fFoldedBlockText.end();
+		if (IsFoldedPlaceholder(trimmed,&foldedKey))
+			found	= fFoldedBlockText.find(foldedKey);
+		if (found != fFoldedBlockText.end()) {
+			*out	<< found->second;
 		} else {
 			*out	<< line;
 		}
@@ -436,10 +496,12 @@ bool MacroTextView::RevealCanonicalLine(int32 canonicalLineNo)
 			int32	nl		= fullText.FindFirst("\n",lineStart);
 			int32	lineEnd	= (nl >= 0) ? nl+1 : textLength;
 			BString	trimmed	= Trimmed(LineText(fullText,lineStart,lineEnd));
-			int32	foldedId	= -1;
-			if (IsFoldedPlaceholder(trimmed,&foldedId)
-					&& (foldedId >= 0) && (foldedId < (int32)fFoldedBlockText.size())) {
-				int32	blockLines	= LineCountOf(fFoldedBlockText[foldedId]);
+			int32	foldedKey	= 0;
+			std::map<int32,BString>::const_iterator	found	= fFoldedBlockText.end();
+			if (IsFoldedPlaceholder(trimmed,&foldedKey))
+				found	= fFoldedBlockText.find(foldedKey);
+			if (found != fFoldedBlockText.end()) {
+				int32	blockLines	= LineCountOf(found->second);
 				if (canonicalLineNo < canonicalCounter+blockLines) {
 					// the target line is inside this still-folded block - expand
 					// it and restart the walk over the now-changed text, rather
