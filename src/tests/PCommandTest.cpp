@@ -8,6 +8,7 @@
 
 #include "BasePlugin.h"
 #include "ChangeValue.h"
+#include "Find.h"
 #include "Group.h"
 #include "Insert.h"
 #include "Move.h"
@@ -543,4 +544,207 @@ void PCommandTest::DirectManipulationOffSelectionKeepsExplicitNodeForRecording(v
 	int32	nodeId		= 0;
 	bool	hasIncluded	= recorded.HasMessage("included_node");
 	CPPUNIT_ASSERT((recorded.FindInt32("node",&nodeId) == B_OK) || hasIncluded);
+}
+
+
+void PCommandTest::FindDefaultScopeSearchesOnlyNodes(void)
+{
+	// #133: Find::FindNodes() used to walk doc->GetAllNodes() only, no way
+	// to reach connections at all - the default (no "scope" field) has to
+	// keep behaving exactly that way, or every existing macro/shortcut
+	// using Find without ever knowing "scope" exists would start also
+	// matching connections it never used to.
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	node->AddBool(P_C_NODE_SELECTED,false);
+	node->AddString("Node::name","apple");
+	doc->GetAllNodes()->AddItem(node);
+
+	BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
+	connection->AddBool(P_C_NODE_SELECTED,false);
+	connection->AddString("Node::name","apple");
+	doc->GetAllConnections()->AddItem(connection);
+
+	BMessage	settings;
+	settings.AddString("searchString","apple");
+
+	Find	command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(node));
+	CPPUNIT_ASSERT(!doc->GetSelected()->HasItem(connection));
+}
+
+
+void PCommandTest::FindScopeBothIncludesConnections(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	node->AddBool(P_C_NODE_SELECTED,false);
+	node->AddString("Node::name","apple");
+	doc->GetAllNodes()->AddItem(node);
+
+	BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
+	connection->AddBool(P_C_NODE_SELECTED,false);
+	connection->AddString("Node::name","apple");
+	doc->GetAllConnections()->AddItem(connection);
+
+	BMessage	settings;
+	settings.AddString("searchString","apple");
+	settings.AddString("scope","both");
+
+	Find	command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(node));
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(connection));
+}
+
+
+void PCommandTest::FindSetOperationAddUnionsWithSelection(void)
+{
+	// #133: without an "add" (or subtract/intersect) mode, a second Find
+	// always throws away whatever the first one selected - "everything
+	// matching X, plus everything matching Y" wasn't expressible at all.
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	*nodeA	= new BMessage(P_C_CLASS_TYPE);
+	nodeA->AddBool(P_C_NODE_SELECTED,true);
+	nodeA->AddString("Node::name","alpha");
+	doc->GetAllNodes()->AddItem(nodeA);
+	doc->GetSelected()->AddItem(nodeA);
+
+	BMessage	*nodeB	= new BMessage(P_C_CLASS_TYPE);
+	nodeB->AddBool(P_C_NODE_SELECTED,false);
+	nodeB->AddString("Node::name","beta");
+	doc->GetAllNodes()->AddItem(nodeB);
+
+	BMessage	settings;
+	settings.AddString("searchString","beta");
+	settings.AddString("setOperation","add");
+
+	Find	command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	CPPUNIT_ASSERT_EQUAL((int32)2,doc->GetSelected()->CountItems());
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(nodeA));
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(nodeB));
+}
+
+
+void PCommandTest::FindSetOperationSubtractRemovesMatches(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	*nodeA	= new BMessage(P_C_CLASS_TYPE);
+	nodeA->AddBool(P_C_NODE_SELECTED,true);
+	nodeA->AddString("Node::name","alpha");
+	doc->GetAllNodes()->AddItem(nodeA);
+	doc->GetSelected()->AddItem(nodeA);
+
+	BMessage	*nodeB	= new BMessage(P_C_CLASS_TYPE);
+	nodeB->AddBool(P_C_NODE_SELECTED,true);
+	nodeB->AddString("Node::name","beta");
+	doc->GetAllNodes()->AddItem(nodeB);
+	doc->GetSelected()->AddItem(nodeB);
+
+	BMessage	settings;
+	settings.AddString("searchString","beta");
+	settings.AddString("setOperation","subtract");
+
+	Find	command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	CPPUNIT_ASSERT_EQUAL((int32)1,doc->GetSelected()->CountItems());
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(nodeA));
+	CPPUNIT_ASSERT(!doc->GetSelected()->HasItem(nodeB));
+}
+
+
+void PCommandTest::FindSetOperationIntersectKeepsOnlyMatches(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	*nodeA	= new BMessage(P_C_CLASS_TYPE);
+	nodeA->AddBool(P_C_NODE_SELECTED,true);
+	nodeA->AddString("Node::name","shared");
+	doc->GetAllNodes()->AddItem(nodeA);
+	doc->GetSelected()->AddItem(nodeA);
+
+	BMessage	*nodeB	= new BMessage(P_C_CLASS_TYPE);
+	nodeB->AddBool(P_C_NODE_SELECTED,true);
+	nodeB->AddString("Node::name","onlyselected");
+	doc->GetAllNodes()->AddItem(nodeB);
+	doc->GetSelected()->AddItem(nodeB);
+
+	BMessage	*nodeC	= new BMessage(P_C_CLASS_TYPE);
+	nodeC->AddBool(P_C_NODE_SELECTED,false);
+	nodeC->AddString("Node::name","shared");
+	doc->GetAllNodes()->AddItem(nodeC);
+
+	BMessage	settings;
+	settings.AddString("searchString","shared");
+	settings.AddString("setOperation","intersect");
+
+	Find	command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	// only nodeA matches BOTH "was selected" and "matches the search" -
+	// nodeB was selected but doesn't match, nodeC matches but wasn't
+	// selected, neither belongs in an intersection of the two
+	CPPUNIT_ASSERT_EQUAL((int32)1,doc->GetSelected()->CountItems());
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(nodeA));
+}
+
+
+void PCommandTest::FindDoUndoRestoresExactPriorSelection(void)
+{
+	// regression check for the dead Undo() this rewrite replaced - it read
+	// "node" pointers off the command's own top-level settings message,
+	// which Do() never actually stored there (a local variable holding
+	// them was silently discarded by an unrelated reassignment a few lines
+	// later), so Undo() restored nothing at all. Do() now stores the prior
+	// selection in a proper "Find::Undo" submessage, matching every other
+	// command in this codebase.
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	*nodeA	= new BMessage(P_C_CLASS_TYPE);
+	nodeA->AddBool(P_C_NODE_SELECTED,true);
+	nodeA->AddString("Node::name","alpha");
+	doc->GetAllNodes()->AddItem(nodeA);
+	doc->GetSelected()->AddItem(nodeA);
+
+	BMessage	*nodeB	= new BMessage(P_C_CLASS_TYPE);
+	nodeB->AddBool(P_C_NODE_SELECTED,false);
+	nodeB->AddString("Node::name","beta");
+	doc->GetAllNodes()->AddItem(nodeB);
+
+	BMessage	settings;
+	settings.AddString("searchString","beta");
+
+	Find	command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+	// sanity: the find itself worked as expected before checking undo
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(nodeB));
+	CPPUNIT_ASSERT(!doc->GetSelected()->HasItem(nodeA));
+
+	command.Undo(doc,result);
+
+	CPPUNIT_ASSERT_EQUAL((int32)1,doc->GetSelected()->CountItems());
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(nodeA));
+	CPPUNIT_ASSERT(!doc->GetSelected()->HasItem(nodeB));
+	bool	nodeASelected	= false;
+	CPPUNIT_ASSERT(nodeA->FindBool(P_C_NODE_SELECTED,&nodeASelected) == B_OK);
+	CPPUNIT_ASSERT(nodeASelected);
+	bool	nodeBSelected	= true;
+	CPPUNIT_ASSERT(nodeB->FindBool(P_C_NODE_SELECTED,&nodeBSelected) == B_OK);
+	CPPUNIT_ASSERT(!nodeBSelected);
 }

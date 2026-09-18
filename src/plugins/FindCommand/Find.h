@@ -22,7 +22,9 @@ public:
 	virtual	const property_info	*PropertyInfo(int32 *count);
 
 protected:
-	virtual	BList*			FindNodes(PDocument *doc,BString *searchTerm);
+	/** `scope` is one of "nodes" (default), "connections", "both" - see
+	 * kFindScopeNodes/Connections/Both in Find.cpp. */
+	virtual	BList*			FindNodes(PDocument *doc,BString *searchTerm,const BString &scope);
 	virtual bool			FindInNode(BMessage *node,BString *searchTerm);
 
 	/*virtual	void			DoFind(PDocument *doc ,BRect *rect);

@@ -21,6 +21,12 @@ public:
 	void ExecuteViaRealMessageDispatchSurvivesProcessExit(void);
 	void DirectManipulationOnSelectionNormalizedForRecording(void);
 	void DirectManipulationOffSelectionKeepsExplicitNodeForRecording(void);
+	void FindDefaultScopeSearchesOnlyNodes(void);
+	void FindScopeBothIncludesConnections(void);
+	void FindSetOperationAddUnionsWithSelection(void);
+	void FindSetOperationSubtractRemovesMatches(void);
+	void FindSetOperationIntersectKeepsOnlyMatches(void);
+	void FindDoUndoRestoresExactPriorSelection(void);
 
 	CPPUNIT_TEST_SUITE(PCommandTest);
 	CPPUNIT_TEST(ChangeValueDoUndo);
@@ -33,6 +39,12 @@ public:
 	CPPUNIT_TEST(ExecuteViaRealMessageDispatchSurvivesProcessExit);
 	CPPUNIT_TEST(DirectManipulationOnSelectionNormalizedForRecording);
 	CPPUNIT_TEST(DirectManipulationOffSelectionKeepsExplicitNodeForRecording);
+	CPPUNIT_TEST(FindDefaultScopeSearchesOnlyNodes);
+	CPPUNIT_TEST(FindScopeBothIncludesConnections);
+	CPPUNIT_TEST(FindSetOperationAddUnionsWithSelection);
+	CPPUNIT_TEST(FindSetOperationSubtractRemovesMatches);
+	CPPUNIT_TEST(FindSetOperationIntersectKeepsOnlyMatches);
+	CPPUNIT_TEST(FindDoUndoRestoresExactPriorSelection);
 	CPPUNIT_TEST_SUITE_END();
 };
 

@@ -76,6 +76,8 @@ SRCS= 	TestMain.cpp \
 		../plugins/GroupCommand/Group.cpp \
 		../plugins/MoveCommand/Move.cpp \
 		../plugins/SelectCommand/Select.cpp \
+		../plugins/FindCommand/Find.cpp \
+		../plugins/FindCommand/FindWindow.cpp \
 		../plugins/GraphEditor/GroupBoundary.cpp
 
 RDEFS=
