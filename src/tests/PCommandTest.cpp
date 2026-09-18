@@ -9,9 +9,13 @@
 #include "BasePlugin.h"
 #include "ChangeValue.h"
 #include "Find.h"
+#include "ForEach.h"
 #include "Group.h"
+#include "If.h"
 #include "Insert.h"
 #include "Move.h"
+#include "Remember.h"
+#include "Repeat.h"
 #include "Select.h"
 #include "PCommandManager.h"
 #include "PDocument.h"
@@ -41,6 +45,32 @@ public:
 	virtual void	DetachedFromManager(void) {}
 	virtual char*	Name(void) { return (char *)"TestWrapper"; }
 };
+
+// Same minimal-BasePlugin technique as TestChangeValuePlugin above, for
+// #135's own new commands (and Move/Select, needed as PlayMacro()-driven
+// subPCommand children below - direct Do() calls elsewhere in this file
+// never needed them registered, since they bypass GetPCommand() lookup
+// entirely).
+#define TEST_PLUGIN(ClassName, CommandClass, CommandName) \
+	class ClassName : public BasePlugin { \
+	public: \
+		ClassName(void) : BasePlugin(0) {} \
+		virtual char*	GetName(void) { return (char *)CommandName; } \
+		virtual char*	GetAutor(void) { return (char *)"test"; } \
+		virtual char*	GetVersionsString(void) { return (char *)"0"; } \
+		virtual char*	GetDescription(void) { return (char *)"test"; } \
+		virtual uint32	GetType(void) { return P_C_COMMANDO_PLUGIN_TYPE; } \
+		virtual void*	GetNewObject(void *value) { return new CommandClass(); } \
+	};
+
+TEST_PLUGIN(TestMovePlugin,Move,"Move")
+TEST_PLUGIN(TestSelectPlugin,Select,"Select")
+TEST_PLUGIN(TestRepeatPlugin,Repeat,"Repeat")
+TEST_PLUGIN(TestForEachPlugin,ForEach,"ForEach")
+TEST_PLUGIN(TestIfPlugin,If,"If")
+TEST_PLUGIN(TestRememberPlugin,Remember,"Remember")
+
+#undef TEST_PLUGIN
 
 }
 
@@ -747,4 +777,278 @@ void PCommandTest::FindDoUndoRestoresExactPriorSelection(void)
 	bool	nodeBSelected	= true;
 	CPPUNIT_ASSERT(nodeB->FindBool(P_C_NODE_SELECTED,&nodeBSelected) == B_OK);
 	CPPUNIT_ASSERT(!nodeBSelected);
+}
+
+
+void PCommandTest::RepeatRunsChildNTimesWithCounterBinding(void)
+{
+	// #135 end-to-end: PlayMacro() owning the value context, Repeat
+	// publishing its 0-based iteration counter into it each pass, and
+	// PCommandManager::ResolveBindings() (invoked via PCommand::
+	// RunSubCommandsOnce(), since Move here runs as Repeat's own
+	// subPCommand child, not as a top-level Execute() call) picking that
+	// counter back up for a child field bound to "$i" - all without going
+	// through the MacroEditor DSL text at all, a macro built directly as
+	// BMessages the way IndexMacroCommand()/DeIndexCommand() actually
+	// shape one.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestRepeatPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestMovePlugin());
+
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	node->AddRect(P_C_NODE_FRAME,BRect(0,0,50,50));
+	doc->GetAllNodes()->AddItem(node);
+	doc->GetSelected()->AddItem(node);
+
+	BMessage	moveTemplate;
+	moveTemplate.AddString("Command::Name","Move");
+	moveTemplate.AddFloat("dy",0.0f);
+	BMessage	moveBindings;
+	moveBindings.AddString("dx","i");
+	moveTemplate.AddMessage("PCommand::bindings",&moveBindings);
+
+	BMessage	repeatCmd;
+	repeatCmd.AddString("Command::Name","Repeat");
+	repeatCmd.AddInt32("count",3);
+	repeatCmd.AddString("counterVariable","i");
+	repeatCmd.AddMessage("PCommand::subPCommand",&moveTemplate);
+
+	BMessage	macro(P_C_MACRO_TYPE);
+	macro.AddMessage("Macro::Commmand",&repeatCmd);
+
+	doc->GetCommandManager()->PlayMacro(&macro);
+
+	// three passes, dx bound to the counter each time: 0 + 1 + 2 = 3
+	BRect	frame;
+	CPPUNIT_ASSERT(node->FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0,frame.left,0.001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,frame.top,0.001);
+
+	// the value context is scoped to the PlayMacro() call itself - nothing
+	// should still be reachable/observable once it returns
+	CPPUNIT_ASSERT(doc->GetCommandManager()->GetValueContext() == NULL);
+}
+
+
+void PCommandTest::RepeatUndoReversesAllIterations(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestRepeatPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestMovePlugin());
+
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	node->AddRect(P_C_NODE_FRAME,BRect(0,0,50,50));
+	doc->GetAllNodes()->AddItem(node);
+	doc->GetSelected()->AddItem(node);
+
+	BMessage	moveTemplate;
+	moveTemplate.AddString("Command::Name","Move");
+	moveTemplate.AddFloat("dy",0.0f);
+	BMessage	moveBindings;
+	moveBindings.AddString("dx","i");
+	moveTemplate.AddMessage("PCommand::bindings",&moveBindings);
+
+	BMessage	repeatCmd;
+	repeatCmd.AddString("Command::Name","Repeat");
+	repeatCmd.AddInt32("count",3);
+	repeatCmd.AddString("counterVariable","i");
+	repeatCmd.AddMessage("PCommand::subPCommand",&moveTemplate);
+
+	BMessage	macro(P_C_MACRO_TYPE);
+	macro.AddMessage("Macro::Commmand",&repeatCmd);
+
+	doc->GetCommandManager()->PlayMacro(&macro);
+	BRect	moved;
+	CPPUNIT_ASSERT(node->FindRect(P_C_NODE_FRAME,&moved) == B_OK);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(3.0,moved.left,0.001);
+
+	BMessage	*undoEntry	= (BMessage*)doc->GetCommandManager()->GetUndoList()->LastItem();
+	CPPUNIT_ASSERT(undoEntry != NULL);
+	doc->GetCommandManager()->Undo(undoEntry);
+
+	// all three Move iterations rolled back - exactly the original frame
+	BRect	restored;
+	CPPUNIT_ASSERT(node->FindRect(P_C_NODE_FRAME,&restored) == B_OK);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,restored.left,0.001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0,restored.top,0.001);
+}
+
+
+void PCommandTest::ForEachRunsOncePerSelectedNodeWithNodeBinding(void)
+{
+	// #135: unlike ChangeValue's own Node::selected=true form (all
+	// selected nodes at once, in one Do() call), ForEach's whole point is
+	// running its child once *per* node, each with that one node's own
+	// pointer bound in - here checked via ChangeValue's "node" field,
+	// setting each node's own TestValue independently based on which
+	// node this particular pass is on (a plain Node::selected=true
+	// ChangeValue could never tell them apart to do that).
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestForEachPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
+
+	BMessage	*nodeA	= new BMessage(P_C_CLASS_TYPE);
+	nodeA->AddInt32("TestValue",0);
+	doc->GetAllNodes()->AddItem(nodeA);
+	doc->GetSelected()->AddItem(nodeA);
+
+	BMessage	*nodeB	= new BMessage(P_C_CLASS_TYPE);
+	nodeB->AddInt32("TestValue",0);
+	doc->GetAllNodes()->AddItem(nodeB);
+	doc->GetSelected()->AddItem(nodeB);
+
+	BMessage	*valueContainer	= new BMessage();
+	valueContainer->AddString("name","TestValue");
+	valueContainer->AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer->AddInt32("index",0);
+	int32	newValue	= 99;
+	valueContainer->AddData("newValue",B_INT32_TYPE,&newValue,sizeof(int32));
+
+	BMessage	changeValueTemplate;
+	changeValueTemplate.AddString("Command::Name","ChangeValue");
+	changeValueTemplate.AddMessage("valueContainer",valueContainer);
+	BMessage	nodeBindings;
+	nodeBindings.AddString("node","current");
+	changeValueTemplate.AddMessage("PCommand::bindings",&nodeBindings);
+
+	BMessage	forEachCmd;
+	forEachCmd.AddString("Command::Name","ForEach");
+	forEachCmd.AddString("nodeVariable","current");
+	forEachCmd.AddMessage("PCommand::subPCommand",&changeValueTemplate);
+
+	BMessage	macro(P_C_MACRO_TYPE);
+	macro.AddMessage("Macro::Commmand",&forEachCmd);
+
+	doc->GetCommandManager()->PlayMacro(&macro);
+
+	int32	valueA	= 0, valueB = 0;
+	CPPUNIT_ASSERT(nodeA->FindInt32("TestValue",&valueA) == B_OK);
+	CPPUNIT_ASSERT(nodeB->FindInt32("TestValue",&valueB) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)99,valueA);
+	CPPUNIT_ASSERT_EQUAL((int32)99,valueB);
+}
+
+
+void PCommandTest::IfRunsChildOnlyWhenPredicateMatches(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestIfPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
+
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	node->AddInt32("TestValue",0);
+	node->AddString("Node::name","findme");
+	doc->GetAllNodes()->AddItem(node);
+	doc->GetSelected()->AddItem(node);
+
+	BMessage	*valueContainer	= new BMessage();
+	valueContainer->AddString("name","TestValue");
+	valueContainer->AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer->AddInt32("index",0);
+	int32	newValue	= 42;
+	valueContainer->AddData("newValue",B_INT32_TYPE,&newValue,sizeof(int32));
+
+	BMessage	changeValueTemplate;
+	changeValueTemplate.AddString("Command::Name","ChangeValue");
+	changeValueTemplate.AddBool(P_C_NODE_SELECTED,true);
+	changeValueTemplate.AddMessage("valueContainer",valueContainer);
+
+	// matching predicate - child runs
+	BMessage	ifMatch;
+	ifMatch.AddString("Command::Name","If");
+	ifMatch.AddString("searchString","findme");
+	ifMatch.AddMessage("PCommand::subPCommand",&changeValueTemplate);
+
+	BMessage	macroMatch(P_C_MACRO_TYPE);
+	macroMatch.AddMessage("Macro::Commmand",&ifMatch);
+	doc->GetCommandManager()->PlayMacro(&macroMatch);
+
+	int32	afterMatch	= 0;
+	CPPUNIT_ASSERT(node->FindInt32("TestValue",&afterMatch) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)42,afterMatch);
+
+	// non-matching predicate - child does NOT run, value stays as it was
+	BMessage	changeValueTemplate2;
+	changeValueTemplate2.AddString("Command::Name","ChangeValue");
+	changeValueTemplate2.AddBool(P_C_NODE_SELECTED,true);
+	BMessage	*valueContainer2	= new BMessage();
+	valueContainer2->AddString("name","TestValue");
+	valueContainer2->AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer2->AddInt32("index",0);
+	int32	newValue2	= 7;
+	valueContainer2->AddData("newValue",B_INT32_TYPE,&newValue2,sizeof(int32));
+	changeValueTemplate2.AddMessage("valueContainer",valueContainer2);
+
+	BMessage	ifNoMatch;
+	ifNoMatch.AddString("Command::Name","If");
+	ifNoMatch.AddString("searchString","nothing-matches-this");
+	ifNoMatch.AddMessage("PCommand::subPCommand",&changeValueTemplate2);
+
+	BMessage	macroNoMatch(P_C_MACRO_TYPE);
+	macroNoMatch.AddMessage("Macro::Commmand",&ifNoMatch);
+	doc->GetCommandManager()->PlayMacro(&macroNoMatch);
+
+	int32	afterNoMatch	= 0;
+	CPPUNIT_ASSERT(node->FindInt32("TestValue",&afterNoMatch) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)42,afterNoMatch);
+}
+
+
+void PCommandTest::RememberThenBoundSelectRestoresSelection(void)
+{
+	// #135: Remember has no "restore" mode of its own by design (see the
+	// class comment on Remember.h) - restoring is just a plain Select
+	// with its own "node" field bound to the remembered variable. This
+	// checks that combination actually works end to end: bindings
+	// resolution copying every one of a variable's repeated pointer
+	// entries into Select's own repeated "node" field correctly, not
+	// just a single value.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestRememberPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestSelectPlugin());
+
+	BMessage	*nodeA	= new BMessage(P_C_CLASS_TYPE);
+	nodeA->AddBool(P_C_NODE_SELECTED,true);
+	doc->GetAllNodes()->AddItem(nodeA);
+	doc->GetSelected()->AddItem(nodeA);
+
+	BMessage	*nodeB	= new BMessage(P_C_CLASS_TYPE);
+	nodeB->AddBool(P_C_NODE_SELECTED,true);
+	doc->GetAllNodes()->AddItem(nodeB);
+	doc->GetSelected()->AddItem(nodeB);
+
+	BMessage	*nodeC	= new BMessage(P_C_CLASS_TYPE);
+	nodeC->AddBool(P_C_NODE_SELECTED,false);
+	doc->GetAllNodes()->AddItem(nodeC);
+
+	BMessage	rememberCmd;
+	rememberCmd.AddString("Command::Name","Remember");
+	rememberCmd.AddString("variable","saved");
+
+	// deselect everything, select only nodeC instead - proves the later
+	// bound Select genuinely restores {nodeA,nodeB}, not just "whatever
+	// was already selected"
+	BMessage	deselectCmd;
+	deselectCmd.AddString("Command::Name","Select");
+	deselectCmd.AddBool("deselect",true);
+	deselectCmd.AddPointer("node",nodeC);
+
+	BMessage	restoreCmd;
+	restoreCmd.AddString("Command::Name","Select");
+	restoreCmd.AddBool("deselect",true);
+	BMessage	restoreBindings;
+	restoreBindings.AddString("node","saved");
+	restoreCmd.AddMessage("PCommand::bindings",&restoreBindings);
+
+	BMessage	macro(P_C_MACRO_TYPE);
+	macro.AddMessage("Macro::Commmand",&rememberCmd);
+	macro.AddMessage("Macro::Commmand",&deselectCmd);
+	macro.AddMessage("Macro::Commmand",&restoreCmd);
+
+	doc->GetCommandManager()->PlayMacro(&macro);
+
+	CPPUNIT_ASSERT_EQUAL((int32)2,doc->GetSelected()->CountItems());
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(nodeA));
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(nodeB));
+	CPPUNIT_ASSERT(!doc->GetSelected()->HasItem(nodeC));
 }

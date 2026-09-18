@@ -27,6 +27,9 @@ public:
 	void UnknownCommandNameIsRejected(void);
 	void UnknownFieldIsRejected(void);
 	void TypeMismatchIsRejected(void);
+	void RoundTripsBoundField(void);
+	void BindingInsideFieldBlockIsRejected(void);
+	void EmptyVariableNameIsRejected(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -44,6 +47,9 @@ public:
 	CPPUNIT_TEST(UnknownCommandNameIsRejected);
 	CPPUNIT_TEST(UnknownFieldIsRejected);
 	CPPUNIT_TEST(TypeMismatchIsRejected);
+	CPPUNIT_TEST(RoundTripsBoundField);
+	CPPUNIT_TEST(BindingInsideFieldBlockIsRejected);
+	CPPUNIT_TEST(EmptyVariableNameIsRejected);
 	CPPUNIT_TEST_SUITE_END();
 };
 

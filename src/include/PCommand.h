@@ -67,6 +67,27 @@ public:
 			void				SetManager(PCommandManager *newManager);
 			PCommandManager*	Manager(void){return manager;};
 protected:
+	/**
+	 * Runs every "PCommand::subPCommand" entry found in `settings` once,
+	 * in order, on a fresh copy of each (never the original - Do() may
+	 * mutate it, e.g. writing its own undo data, and the original stays
+	 * the untouched template) after resolving that copy's own bindings
+	 * (see PCommandManager::ResolveBindings() - #135's "$variable"
+	 * mechanism). Returns a new BMessage holding one "PCommand::
+	 * subPCommand" entry per child actually run, each holding that
+	 * child's own post-Do() state - never written back into `settings`
+	 * itself here; the caller decides where that record belongs. The
+	 * base Do() below uses this for its own (single, unconditional) pass
+	 * and replaces settings' own subPCommand entries with the result in
+	 * place, exactly as before this was extracted; Repeat/ForEach (#135)
+	 * call this once per iteration instead and keep every iteration's
+	 * record separately (their own settings' subPCommand list is a fixed
+	 * loop-body template that Do() must never overwrite - seeded by an
+	 * unrelated loop's iteration count would otherwise corrupt the
+	 * recorded macro's own definition, not just this run's result); If
+	 * (#135) calls it once, conditionally.
+	 */
+			BMessage*			RunSubCommandsOnce(PDocument *doc, BMessage *settings);
 
 			PCommandManager*	manager;
 //			BList*				subPCommands;

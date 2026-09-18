@@ -1,12 +1,15 @@
 plugins = \
 	AddAttributeCommand \
+	AskCommand \
 	BatchCommand \
 	ChangeValueCommand \
 	CopyCommand \
 	DeleteCommand \
 	FindCommand \
+	ForEachCommand \
 	GraphEditor \
 	GroupCommand \
+	IfCommand \
 	InsertCommand \
 	LayoutEditor \
 	LayoutCommand \
@@ -14,7 +17,9 @@ plugins = \
 	MoveCommand \
 	NavigatorEditor \
 	PasteCommand \
+	RememberCommand \
 	RemoveAttributeCommand \
+	RepeatCommand \
 	ResizeCommand \
 	SelectCommand
 

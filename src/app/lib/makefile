@@ -8,17 +8,21 @@
 ## without ProjectConceptor running (Tracker previewing a .pcd, any other
 ## Translation-Kit-using app) failed to resolve these same symbols at
 ## relocation time - confirmed live via `translate` + syslog before this
-## fix existed. Scope (just these two files) verified empirically: compiled
-## them standalone and test-linked a plain command plugin, the biggest
-## editor plugin, and a translator against them in place of the old .a -
-## all resolved cleanly, nothing else needed.
+## fix existed. Scope (originally just the two files above) verified
+## empirically: compiled them standalone and test-linked a plain command
+## plugin, the biggest editor plugin, and a translator against them in
+## place of the old .a - all resolved cleanly, nothing else needed.
+## NodeSearch.cpp added for #135 - the search primitive Find and If (two
+## separate plugin .so's) both need, extracted here instead of duplicated
+## or given an ad hoc cross-plugin dependency.
 
 NAME= libProjectConceptor.so
 
 TYPE= SHARED
 
 SRCS=	../ProjectConceptorDefs.cpp \
-		../Commands/PCommand.cpp
+		../Commands/PCommand.cpp \
+		../Tools/NodeSearch.cpp
 
 RDEFS=
 

@@ -70,7 +70,29 @@ public:
 	virtual	void		Redo(BMessage *redo);
 
 	virtual	status_t	Execute(BMessage *settings);
-	
+
+	/** NULL outside macro playback; otherwise a flat BMessage of
+	 * named values (any BMessage-native type - a repeated pointer
+	 * field for a remembered selection, a string for an Ask() answer,
+	 * an int32 loop counter, ...) that Ask/Remember/Repeat/ForEach
+	 * (#135) write into as a macro plays, and ResolveBindings() reads
+	 * from. Scoped to one PlayMacro() call - see there. */
+	virtual	BMessage*	GetValueContext(void){return valueContext;};
+
+	/** #135: if `settings` carries a "PCommand::bindings" submessage
+	 * (built by MacroText.cpp's "fieldName=$variableName" syntax -
+	 * see ParseCommands()), replaces each named field's own content
+	 * with whatever the matching variable currently holds in
+	 * GetValueContext(), copied verbatim regardless of type. A no-op
+	 * outside macro playback (GetValueContext() == NULL) - bindings
+	 * only mean anything during PlayMacro(). Called on every
+	 * command's settings right before its own Do() - both here, for
+	 * a command reached via Execute(), and in PCommand::
+	 * RunSubCommandsOnce(), for one reached as somebody else's
+	 * subPCommand child - so a bound field resolves correctly no
+	 * matter how deeply nested the command carrying it is. */
+	virtual	void		ResolveBindings(BMessage *settings, PCommand *forCommand = NULL);
+
 	virtual	int32		CountPCommand(void){return commandMap.size();};
 	virtual	PCommand*	PCommandAt(int32 index);
 	/**
@@ -108,6 +130,9 @@ protected:
 			PDocument	*doc;
 			BMessage	*recording;
 			Indexer		*macroIndexer;
+			/** see GetValueContext() - owned and scoped entirely by
+			 * PlayMacro(), NULL the rest of the time. */
+			BMessage	*valueContext;
 private:
 
 };

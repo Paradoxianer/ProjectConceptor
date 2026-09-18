@@ -23,26 +23,44 @@ void PCommand::Init(void)
 //	subPCommands		= new BList();
 }
 
-BMessage* PCommand::Do(PDocument *doc,BMessage *settings)
+BMessage* PCommand::RunSubCommandsOnce(PDocument *doc, BMessage *settings)
 {
 	TRACE();
+	BMessage	*record				= new BMessage();
 	int32		i					= 0;
 	BMessage	*subPCommandMessage	= new BMessage;
-	PCommand	*subPCommand			= NULL;
+	PCommand	*subPCommand		= NULL;
 	char		*commandName		= NULL;
-	//Check if there are settings vor SubCommands
-	while 	(settings->FindMessage("PCommand::subPCommand",i,subPCommandMessage) == B_OK)
-	{		
+	while (settings->FindMessage("PCommand::subPCommand",i,subPCommandMessage) == B_OK)
+	{
+		commandName	= NULL;
 		subPCommandMessage->FindString("Command::Name",(const char **)&commandName);
-		subPCommand=manager->GetPCommand(commandName);
+		subPCommand	= manager->GetPCommand(commandName);
 		if (subPCommand)
 		{
-			subPCommandMessage = subPCommand->Do(doc,subPCommandMessage);
-			// indexed - unindexed overload always hit slot 0 (#116)
-			settings->ReplaceMessage("PCommand::subPCommand",i,subPCommandMessage);
+			manager->ResolveBindings(subPCommandMessage,subPCommand);
+			subPCommandMessage	= subPCommand->Do(doc,subPCommandMessage);
+			record->AddMessage("PCommand::subPCommand",subPCommandMessage);
 		}
 		i++;
 	}
+	return record;
+}
+
+BMessage* PCommand::Do(PDocument *doc,BMessage *settings)
+{
+	TRACE();
+	BMessage	*record	= RunSubCommandsOnce(doc,settings);
+	int32		i		= 0;
+	BMessage	subResult;
+	// indexed - unindexed overload always hit slot 0 (#116)
+	while (record->FindMessage("PCommand::subPCommand",i,&subResult) == B_OK)
+	{
+		settings->ReplaceMessage("PCommand::subPCommand",i,&subResult);
+		i++;
+		subResult.MakeEmpty();
+	}
+	delete record;
 	//settings->AddPointer("ProjectConceptor::doc",doc);
 	return settings;
 }

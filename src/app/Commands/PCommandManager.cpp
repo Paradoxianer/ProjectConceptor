@@ -41,6 +41,7 @@ void PCommandManager::Init(void) {
 	undoStatus		= 0;
 	recording		= NULL;
 	fPropertyInfoArray	= NULL;
+	valueContext	= NULL;
 
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*commands		= pluginManager->GetPluginsByType(P_C_COMMANDO_PLUGIN_TYPE);
@@ -186,6 +187,19 @@ void PCommandManager::PlayMacro(BMessage *makro) {
 	BMessage	*message		= new BMessage();
 	Indexer		*playDeIndexer	= new Indexer(doc);
 	status_t	err				= B_OK;
+	// #135: named values (Ask/Remember/Repeat/ForEach, resolved into a
+	// command's own fields by ResolveBindings()) only mean anything for
+	// the duration of one playback - a fresh, empty context per top-level
+	// PlayMacro() call, discarded (not persisted anywhere - variables are
+	// a replay-time concept, not document state) once it returns.
+	// ownsValueContext guards against a macro that plays another macro
+	// (not something that exists yet, but PlayMacroByName() could
+	// eventually be called from inside a command) stomping on its
+	// caller's still-active context instead of getting its own broken,
+	// prematurely-torn-down one.
+	bool	ownsValueContext	= (valueContext == NULL);
+	if (ownsValueContext)
+		valueContext	= new BMessage();
 	while ( (makro->FindMessage("Macro::Commmand", i,message) == B_OK) && (err==B_OK) )
 	{
 		err = Execute(playDeIndexer->DeIndexCommand(message));
@@ -203,7 +217,10 @@ void PCommandManager::PlayMacro(BMessage *makro) {
 		snooze(400000);
 		i++;
 	}
-
+	if (ownsValueContext) {
+		delete valueContext;
+		valueContext	= NULL;
+	}
 }
 
 void PCommandManager::PlayMacroByName(const char *name) {
@@ -278,6 +295,116 @@ static bool NormalizeToSelection(BMessage *settings, BList *selectionSnapshot)
 }
 
 
+// same technique MacroText.cpp's own FindFieldType() uses to validate a
+// bound field name at parse time - here to find its declared *type*
+// instead, for ResolveBindings()'s own int32<->float coercion below.
+static bool FindDeclaredFieldType(PCommand *command, const char *fieldName, type_code *outType)
+{
+	if (command == NULL)
+		return false;
+	int32				count	= 0;
+	const property_info	*props	= command->PropertyInfo(&count);
+	for (int32 p = 0; p < count; p++) {
+		for (int32 c = 0; c < 3; c++) {
+			for (int32 f = 0; f < 5; f++) {
+				const char	*pairName	= props[p].ctypes[c].pairs[f].name;
+				if (pairName == NULL)
+					continue;
+				if (strcmp(pairName,fieldName) == 0) {
+					*outType	= props[p].ctypes[c].pairs[f].type;
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+
+// #135: a field bound to "$variableName" (MacroText.cpp's ParseCommands())
+// is recorded as an entry in `settings`' own "PCommand::bindings"
+// submessage - the field name itself as the bindings entry's own field
+// name, its (single) string value the variable name to pull from - not
+// inline in the target field itself, so the literal settings structure
+// every existing command's Do() already reads stays exactly as it is; no
+// command needs to know bindings exist at all. `forCommand` (the command
+// `settings` belongs to - the caller already has it, having just looked
+// it up to call Do() in the first place) is used only for the int32<->
+// float coercion below; pass NULL if genuinely unavailable, bindings
+// still resolve, just without that coercion.
+void PCommandManager::ResolveBindings(BMessage *settings, PCommand *forCommand)
+{
+	// bindings are a replay-time-only concept - outside PlayMacro() there
+	// is no value context to resolve them against, and nothing currently
+	// constructs a "PCommand::bindings" field outside a played-back macro
+	// anyway (the interactive UI paths all still build settings directly)
+	if (valueContext == NULL)
+		return;
+	BMessage	bindings;
+	if (settings->FindMessage("PCommand::bindings",&bindings) != B_OK)
+		return;
+	char		*fieldName	= NULL;
+	type_code	type		= B_ANY_TYPE;
+	int32		count		= 0;
+	int32		i			= 0;
+	while (bindings.GetInfo(B_STRING_TYPE,i,(char **)&fieldName,&type,&count) == B_OK) {
+		const char	*variableName	= NULL;
+		if (bindings.FindString(fieldName,&variableName) == B_OK) {
+			settings->RemoveName(fieldName);
+			type_code	varType;
+			int32		varCount;
+			if (valueContext->GetInfo(variableName,&varType,&varCount) == B_OK) {
+				type_code	declaredType	= B_ANY_TYPE;
+				bool		hasDeclaredType	= FindDeclaredFieldType(forCommand,fieldName,&declaredType);
+				for (int32 v=0; v<varCount; v++) {
+					// the one type mismatch a bound *numeric* variable
+					// realistically hits: a loop counter (always int32,
+					// see Repeat's own counterVariable) fed into a field
+					// declared the other numeric type (Move's dx/dy,
+					// ChangeValue's PenSize, ...). A raw AddData() copy
+					// alone would "succeed" but mistype the field -
+					// BMessage fields are strictly typed, so the target
+					// command's own FindFloat()/FindInt32() call could
+					// then never actually read it back, a silent trap
+					// rather than a loud failure. Worth coercing instead.
+					if (hasDeclaredType && (declaredType == B_FLOAT_TYPE) && (varType == B_INT32_TYPE)) {
+						int32	intValue;
+						if (valueContext->FindInt32(variableName,v,&intValue) == B_OK)
+							settings->AddFloat(fieldName,(float)intValue);
+						continue;
+					}
+					if (hasDeclaredType && (declaredType == B_INT32_TYPE) && (varType == B_FLOAT_TYPE)) {
+						float	floatValue;
+						if (valueContext->FindFloat(variableName,v,&floatValue) == B_OK)
+							settings->AddInt32(fieldName,(int32)floatValue);
+						continue;
+					}
+					const void	*data	= NULL;
+					ssize_t		size	= 0;
+					if (valueContext->FindData(variableName,varType,v,&data,&size) == B_OK)
+						settings->AddData(fieldName,varType,data,size,false);
+				}
+			} else {
+				// no silent fallback (project convention) - an unresolved
+				// variable leaves the field genuinely empty (matches
+				// "nothing there") rather than inventing a value, but at
+				// least says so instead of failing with no trace at all
+				PRINT(("PCommandManager::ResolveBindings - variable \"%s\" "
+					"(bound to field \"%s\") not found in value context\n",
+					variableName,fieldName));
+			}
+		}
+		i++;
+	}
+	// job done - nothing later in this single Do() call needs the
+	// mapping itself, and dropping it means a command recorded while
+	// something else happens to be replaying (an edge case - the two
+	// aren't otherwise coordinated) can't ever pick up an already-
+	// resolved literal instead of a live, re-bindable "$variable".
+	settings->RemoveName("PCommand::bindings");
+}
+
+
 status_t PCommandManager::Execute(BMessage *settings) {
 	TRACE();
 	DEBUG_ONLY(settings->PrintToStream());
@@ -305,6 +432,12 @@ status_t PCommandManager::Execute(BMessage *settings) {
 				selectionSnapshot.AddItem(selected->ItemAt(i));
 		}
 		if (command != NULL) {
+			// #135: a top-level command reached straight through Execute()
+			// (as opposed to one running as someone else's subPCommand
+			// child, handled by PCommand::RunSubCommandsOnce() instead)
+			// needs its own bindings resolved here, once, before Do() -
+			// a no-op outside macro playback (see ResolveBindings()).
+			ResolveBindings(settings,command);
 			BMessage	*tmpMessage;
 			try  {
 				tmpMessage = command->Do(doc, settings);

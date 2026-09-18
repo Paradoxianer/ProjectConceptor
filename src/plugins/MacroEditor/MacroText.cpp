@@ -229,6 +229,30 @@ static void SerializeFieldLines(BMessage *msg, int depth, const char *skipName1,
 	for (int d = 0; d < depth; d++)
 		indent << "  ";
 
+	// #135: a field bound to a macro variable ("PCommand::bindings", built
+	// by ParseCommands()'s own "fieldName=$variableName" syntax) renders
+	// as "fieldName=$variableName" here too, instead of whatever literal
+	// value (usually none - a bound field is typically never given one at
+	// all) msg's own field of the same name might hold. The binding is
+	// the actual source of truth for what this field uses at replay time
+	// (see PCommandManager::ResolveBindings()), so it's rendered first,
+	// from bindings' own field list directly - msg's normal per-field
+	// walk below then skips any name already covered this way.
+	BMessage	bindings;
+	bool		hasBindings	= (msg->FindMessage("PCommand::bindings",&bindings) == B_OK);
+	if (hasBindings) {
+		char		*bindFieldName;
+		type_code	bindType;
+		int32		bindCount;
+		int32		bi	= 0;
+		while (bindings.GetInfo(B_STRING_TYPE,bi,&bindFieldName,&bindType,&bindCount) == B_OK) {
+			const char	*variableName	= NULL;
+			if (bindings.FindString(bindFieldName,&variableName) == B_OK)
+				*out << indent << bindFieldName << "=$" << variableName << "\n";
+			bi++;
+		}
+	}
+
 	char		*fieldName;
 	type_code	type;
 	int32		count;
@@ -236,7 +260,9 @@ static void SerializeFieldLines(BMessage *msg, int depth, const char *skipName1,
 	while (msg->GetInfo(B_ANY_TYPE,i,&fieldName,&type,&count) == B_OK) {
 		BString	fn(fieldName);
 		if (((skipName1 != NULL) && (fn == skipName1)) ||
-			((skipName2 != NULL) && (fn == skipName2))) {
+			((skipName2 != NULL) && (fn == skipName2)) ||
+			(fn == "PCommand::bindings") ||
+			(hasBindings && bindings.HasString(fieldName))) {
 			i++;
 			continue;
 		}
@@ -754,12 +780,56 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 					return B_BAD_VALUE;
 				}
 			}
-			BString	valueError;
-			if (ParseAndAddValue(parent.msg,fieldName.String(),expectedType,valueText,&valueError) != B_OK) {
-				errorOut->SetTo("");
-				*errorOut	<< "line " << lineNo << ": " << valueError;
-				CleanupFrames(stack,&built);
-				return B_BAD_VALUE;
+			// #135: "$variableName" isn't a literal value at all - it
+			// marks this field as bound to a macro-replay-time variable
+			// instead (see PCommandManager::ResolveBindings()), resolved
+			// fresh from whatever that variable holds right before this
+			// command's own Do() runs. Recorded as a "PCommand::bindings"
+			// entry alongside the command's own fields, never as a
+			// literal value on the field itself - unlike every other
+			// value form, its actual type isn't known until replay, so
+			// it deliberately skips ParseAndAddValue()'s own type check
+			// against expectedType entirely (the field NAME was already
+			// validated above, via the same FindFieldType() call every
+			// other value form also goes through).
+			if ((valueText.Length() > 1) && (valueText.ByteAt(0) == '$')) {
+				// only meaningful directly on a command's own field -
+				// PCommandManager::ResolveBindings() reads bindings only
+				// from a command's own top-level settings, never
+				// descending into a nested "~fieldName" block's own
+				// content, so a binding written inside one (e.g. inside
+				// ChangeValue's "~valueContainer") would silently never
+				// resolve at replay time. An immediate error here beats
+				// that silent no-op.
+				if (parent.isField) {
+					errorOut->SetTo("");
+					*errorOut	<< "line " << lineNo << ": \"$" << fieldName
+						<< "\" bindings aren't supported inside a \"~\" field block";
+					CleanupFrames(stack,&built);
+					return B_BAD_VALUE;
+				}
+				BString	variableName;
+				valueText.CopyInto(variableName,1,valueText.Length()-1);
+				if (variableName.Length() == 0) {
+					errorOut->SetTo("");
+					*errorOut	<< "line " << lineNo << ": empty variable name after \"$\"";
+					CleanupFrames(stack,&built);
+					return B_BAD_VALUE;
+				}
+				BMessage	bindings;
+				parent.msg->FindMessage("PCommand::bindings",&bindings);
+				bindings.RemoveName(fieldName.String());
+				bindings.AddString(fieldName.String(),variableName);
+				parent.msg->RemoveName("PCommand::bindings");
+				parent.msg->AddMessage("PCommand::bindings",&bindings);
+			} else {
+				BString	valueError;
+				if (ParseAndAddValue(parent.msg,fieldName.String(),expectedType,valueText,&valueError) != B_OK) {
+					errorOut->SetTo("");
+					*errorOut	<< "line " << lineNo << ": " << valueError;
+					CleanupFrames(stack,&built);
+					return B_BAD_VALUE;
+				}
 			}
 			// no frame pushed - a scalar field line has no children of its own
 		} else {

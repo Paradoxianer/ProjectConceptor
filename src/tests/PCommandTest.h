@@ -27,6 +27,11 @@ public:
 	void FindSetOperationSubtractRemovesMatches(void);
 	void FindSetOperationIntersectKeepsOnlyMatches(void);
 	void FindDoUndoRestoresExactPriorSelection(void);
+	void RepeatRunsChildNTimesWithCounterBinding(void);
+	void RepeatUndoReversesAllIterations(void);
+	void ForEachRunsOncePerSelectedNodeWithNodeBinding(void);
+	void IfRunsChildOnlyWhenPredicateMatches(void);
+	void RememberThenBoundSelectRestoresSelection(void);
 
 	CPPUNIT_TEST_SUITE(PCommandTest);
 	CPPUNIT_TEST(ChangeValueDoUndo);
@@ -45,6 +50,11 @@ public:
 	CPPUNIT_TEST(FindSetOperationSubtractRemovesMatches);
 	CPPUNIT_TEST(FindSetOperationIntersectKeepsOnlyMatches);
 	CPPUNIT_TEST(FindDoUndoRestoresExactPriorSelection);
+	CPPUNIT_TEST(RepeatRunsChildNTimesWithCounterBinding);
+	CPPUNIT_TEST(RepeatUndoReversesAllIterations);
+	CPPUNIT_TEST(ForEachRunsOncePerSelectedNodeWithNodeBinding);
+	CPPUNIT_TEST(IfRunsChildOnlyWhenPredicateMatches);
+	CPPUNIT_TEST(RememberThenBoundSelectRestoresSelection);
 	CPPUNIT_TEST_SUITE_END();
 };
 

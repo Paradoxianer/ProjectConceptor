@@ -69,6 +69,7 @@ SRCS= 	TestMain.cpp \
 		../app/Tools/MessageXmlWriter.cpp \
 		../app/Tools/ShortCutFilter.cpp \
 		../app/Tools/TextViewCompleter.cpp \
+		../app/Tools/NodeSearch.cpp \
 		../app/Tools/plugins/BasePlugin.cpp \
 		../app/Tools/plugins/PluginManager.cpp \
 		../plugins/ChangeValueCommand/ChangeValue.cpp \
@@ -78,6 +79,10 @@ SRCS= 	TestMain.cpp \
 		../plugins/SelectCommand/Select.cpp \
 		../plugins/FindCommand/Find.cpp \
 		../plugins/FindCommand/FindWindow.cpp \
+		../plugins/RepeatCommand/Repeat.cpp \
+		../plugins/ForEachCommand/ForEach.cpp \
+		../plugins/IfCommand/If.cpp \
+		../plugins/RememberCommand/Remember.cpp \
 		../plugins/GraphEditor/GroupBoundary.cpp
 
 RDEFS=

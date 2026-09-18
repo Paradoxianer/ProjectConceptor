@@ -23,9 +23,10 @@ public:
 
 protected:
 	/** `scope` is one of "nodes" (default), "connections", "both" - see
-	 * kFindScopeNodes/Connections/Both in Find.cpp. */
+	 * kFindScopeNodes/Connections/Both in Find.cpp. The actual per-node
+	 * string search itself is NodeSearch.h's NodeMatchesSearch(), shared
+	 * with the If command (#135) via libProjectConceptor.so. */
 	virtual	BList*			FindNodes(PDocument *doc,BString *searchTerm,const BString &scope);
-	virtual bool			FindInNode(BMessage *node,BString *searchTerm);
 
 	/*virtual	void			DoFind(PDocument *doc ,BRect *rect);
 	virtual	void			DoFind(PDocument *doc ,BMessage *container);

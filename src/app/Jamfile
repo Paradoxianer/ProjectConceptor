@@ -114,6 +114,7 @@ PROJECT_CONCEPTOR_SOURCES =
 	InputRequest.cpp
 	ShortCutFilter.cpp
 	TextViewCompleter.cpp
+	NodeSearch.cpp
 
 	# Tools/tinyxml
 

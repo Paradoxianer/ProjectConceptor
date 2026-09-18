@@ -2,6 +2,7 @@
 
 #include "Find.h"
 #include "FindWindow.h"
+#include "NodeSearch.h"
 #include "ProjectConceptorDefs.h"
 
 
@@ -180,55 +181,20 @@ void Find::DetachedFromManager(void)
 
 BList* Find::FindNodes(PDocument *doc,BString *search,const BString &scope)
 {
-	BList		*nodesFound			= new BList();
-	BMessage	*currentContainer	= NULL;
-	int32		i					= 0;
+	BList	*nodesFound	= new BList();
 	if ((scope == kFindScopeNodes) || (scope == kFindScopeBoth)) {
-		BList	*all	= doc->GetAllNodes();
-		for (i=0;i<all->CountItems();i++) {
-			currentContainer =(BMessage *) all->ItemAt(i);
-			if (FindInNode(currentContainer, search)== true)
-				nodesFound->AddItem(currentContainer);
-		}
+		BList	*matches	= FindMatchingNodes(doc->GetAllNodes(),*search);
+		for (int32 i=0;i<matches->CountItems();i++)
+			nodesFound->AddItem(matches->ItemAt(i));
+		delete matches;
 	}
 	if ((scope == kFindScopeConnections) || (scope == kFindScopeBoth)) {
-		BList	*allConnections	= doc->GetAllConnections();
-		for (i=0;i<allConnections->CountItems();i++) {
-			currentContainer =(BMessage *) allConnections->ItemAt(i);
-			if (FindInNode(currentContainer, search)== true)
-				nodesFound->AddItem(currentContainer);
-		}
+		BList	*matches	= FindMatchingNodes(doc->GetAllConnections(),*search);
+		for (int32 i=0;i<matches->CountItems();i++)
+			nodesFound->AddItem(matches->ItemAt(i));
+		delete matches;
 	}
 	return nodesFound;
-}
-
-bool Find::FindInNode(BMessage *node,BString *search)
-{
-	char		*attribName		= NULL;
-	BMessage	*attribMessage	= new BMessage();
-	BString		*dataString		= new BString();	
-	uint32		type			= B_ANY_TYPE;
-	int32		count			= 0;
-	bool		found			= false;
-	int32		i				= 0;
-	//first iterate through all Strings
-	while ((node->GetInfo(B_STRING_TYPE, i,(char **) &attribName, &type, &count) == B_OK) && !found)
-	{
-		if (node->FindString(attribName,count-1,dataString)==B_OK)
-		{
-			found = dataString->FindFirst(*search)!=B_ERROR;
-		}
-		i++;
-	}
-	//check all subnodes / sub bmessages
-	i=0;
-	while ((node->GetInfo(B_MESSAGE_TYPE, i,(char **) &attribName, &type, &count) == B_OK) && !found)
-	{
-		if ((node->FindMessage(attribName,count-1,attribMessage) == B_OK) && (attribMessage != NULL))
-			found = FindInNode(attribMessage, search);
-		i++;
-	}
-	return found;
 }
 
 

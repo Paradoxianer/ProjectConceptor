@@ -1,12 +1,11 @@
-SubDir HAIKU_TOP 3rdparty projectconceptor src plugins FindCommand ;
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins RememberCommand ;
 
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
-SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Tools ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Commands ] ;
 
-Addon pc_command_find :
-	Find.cpp
-	FindPlugin.cpp
+Addon pc_command_remember :
+	Remember.cpp
+	RememberPlugin.cpp
         : be tracker translation libprojectconceptor.a
 ;
-

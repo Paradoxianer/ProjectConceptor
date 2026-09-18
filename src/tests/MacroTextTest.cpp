@@ -558,3 +558,71 @@ void MacroTextTest::TypeMismatchIsRejected(void)
 	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,err);
 	CPPUNIT_ASSERT_EQUAL((int32)0,parsed.CountItems());
 }
+
+
+void MacroTextTest::RoundTripsBoundField(void)
+{
+	// #135: "$variableName" marks a field as bound instead of literal -
+	// recorded as a "PCommand::bindings" entry, never a literal value on
+	// the field itself (PCommandManager::ResolveBindings() fills that in
+	// fresh at replay time), and rendered back out the same way it was
+	// written.
+	PDocument	*doc	= NewRegisteredTestDocument();
+
+	BList		parsed;
+	BString		error;
+	status_t	err	= ParseCommands(BString("Move\n  dx=$offset\n  dy=3.0\n"),
+		&parsed,doc->GetCommandManager(),&error);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,err);
+	CPPUNIT_ASSERT_EQUAL((int32)1,parsed.CountItems());
+
+	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
+	float	dx	= -1;
+	CPPUNIT_ASSERT(result->FindFloat("dx",&dx) != B_OK);
+	float	dy	= 0;
+	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindFloat("dy",&dy));
+	CPPUNIT_ASSERT((dy > 2.99f) && (dy < 3.01f));
+
+	BMessage	bindings;
+	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("PCommand::bindings",&bindings));
+	const char	*variableName	= NULL;
+	CPPUNIT_ASSERT_EQUAL(B_OK,bindings.FindString("dx",&variableName));
+	CPPUNIT_ASSERT(BString(variableName) == "offset");
+
+	BString	text;
+	SerializeCommands(&parsed,&text);
+	CPPUNIT_ASSERT(text.FindFirst("dx=$offset") >= 0);
+	CPPUNIT_ASSERT(text.FindFirst("dx=\"$offset\"") < 0);
+}
+
+
+void MacroTextTest::BindingInsideFieldBlockIsRejected(void)
+{
+	// ResolveBindings() only ever reads a command's own top-level
+	// "PCommand::bindings" - one written inside a "~fieldName" block would
+	// silently never resolve at replay time, so the parser rejects it
+	// outright instead (see ParseCommands()'s own comment on this).
+	PDocument	*doc	= NewRegisteredTestDocument();
+
+	BList		parsed;
+	BString		error;
+	status_t	err	= ParseCommands(
+		BString("ChangeValue\n  ~valueContainer\n    name=$fieldName\n"),
+		&parsed,doc->GetCommandManager(),&error);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,err);
+	CPPUNIT_ASSERT_EQUAL((int32)0,parsed.CountItems());
+	CPPUNIT_ASSERT(error.FindFirst("field block") >= 0);
+}
+
+
+void MacroTextTest::EmptyVariableNameIsRejected(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+
+	BList		parsed;
+	BString		error;
+	status_t	err	= ParseCommands(BString("Move\n  dx=$\n  dy=1.0\n"),
+		&parsed,doc->GetCommandManager(),&error);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,err);
+	CPPUNIT_ASSERT_EQUAL((int32)0,parsed.CountItems());
+}
