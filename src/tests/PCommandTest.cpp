@@ -434,3 +434,113 @@ void PCommandTest::ExecuteViaRealMessageDispatchSurvivesProcessExit(void)
 	CPPUNIT_ASSERT(node->FindInt32("TestValue",&changed) == B_OK);
 	CPPUNIT_ASSERT_EQUAL((int32)42,changed);
 }
+
+
+void PCommandTest::DirectManipulationOnSelectionNormalizedForRecording(void)
+{
+	// #132: ChangeValue sent with an explicit "node" pointer (the shape
+	// ClassRenderer's inline rename/attribute editing and NavigatorEditor's
+	// field editor actually send - see their own "node" pointer comments)
+	// gets recorded the SAME portable way as the toolbar's own
+	// Node::selected=true form, when that pointer is exactly what was
+	// selected right before the command ran - PCommandManager::Execute()'s
+	// NormalizeToSelection() is what does this, right before the macro
+	// recording step.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
+
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	node->AddInt32("TestValue",1);
+	doc->GetAllNodes()->AddItem(node);
+	doc->GetSelected()->AddItem(node);
+
+	BMessage	*valueContainer	= new BMessage();
+	valueContainer->AddString("name","TestValue");
+	valueContainer->AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer->AddInt32("index",0);
+	int32	newValue	= 42;
+	valueContainer->AddData("newValue",B_INT32_TYPE,&newValue,sizeof(int32));
+
+	BMessage	settings(P_C_EXECUTE_COMMAND);
+	settings.AddString("Command::Name","ChangeValue");
+	settings.AddPointer("node",node);
+	settings.AddMessage("valueContainer",valueContainer);
+
+	doc->GetCommandManager()->StartMacro();
+	CPPUNIT_ASSERT(doc->GetCommandManager()->Execute(&settings) == B_OK);
+
+	BMessage	*recording	= doc->GetCommandManager()->GetRecording();
+	CPPUNIT_ASSERT(recording != NULL);
+	BMessage	recorded;
+	int32		lastIndex	= 0;
+	while (recording->FindMessage("Macro::Commmand",lastIndex,&recorded) == B_OK)
+		lastIndex++;
+	CPPUNIT_ASSERT(lastIndex > 0);
+	CPPUNIT_ASSERT(recording->FindMessage("Macro::Commmand",lastIndex-1,&recorded) == B_OK);
+
+	bool	selectedFlag	= false;
+	CPPUNIT_ASSERT(recorded.FindBool(P_C_NODE_SELECTED,&selectedFlag) == B_OK);
+	CPPUNIT_ASSERT(selectedFlag);
+	void	*ignoredPointer	= NULL;
+	CPPUNIT_ASSERT(recorded.FindPointer("node",&ignoredPointer) != B_OK);
+	int32	ignoredId	= 0;
+	CPPUNIT_ASSERT(recorded.FindInt32("node",&ignoredId) != B_OK);
+}
+
+
+void PCommandTest::DirectManipulationOffSelectionKeepsExplicitNodeForRecording(void)
+{
+	// the other half of #132's contract: an explicit "node" pointer that
+	// does NOT match the current selection is a genuinely document-local
+	// target (e.g. ClassRenderer::AdjustParents()'s own ChangeValue
+	// subcommand, computed per-node and never equal to the top-level
+	// selection) - NormalizeToSelection() must leave it alone, or replay
+	// would silently apply the edit to whatever happens to be selected
+	// instead of the node it actually targeted.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
+
+	BMessage	*selectedNode	= new BMessage(P_C_CLASS_TYPE);
+	selectedNode->AddInt32("TestValue",0);
+	doc->GetAllNodes()->AddItem(selectedNode);
+	doc->GetSelected()->AddItem(selectedNode);
+
+	BMessage	*targetNode	= new BMessage(P_C_CLASS_TYPE);
+	targetNode->AddInt32("TestValue",1);
+	doc->GetAllNodes()->AddItem(targetNode);
+	// deliberately NOT added to doc->GetSelected() - settings below targets
+	// it directly instead, same as a computed per-node edit would.
+
+	BMessage	*valueContainer	= new BMessage();
+	valueContainer->AddString("name","TestValue");
+	valueContainer->AddInt32("type",(int32)B_INT32_TYPE);
+	valueContainer->AddInt32("index",0);
+	int32	newValue	= 42;
+	valueContainer->AddData("newValue",B_INT32_TYPE,&newValue,sizeof(int32));
+
+	BMessage	settings(P_C_EXECUTE_COMMAND);
+	settings.AddString("Command::Name","ChangeValue");
+	settings.AddPointer("node",targetNode);
+	settings.AddMessage("valueContainer",valueContainer);
+
+	doc->GetCommandManager()->StartMacro();
+	CPPUNIT_ASSERT(doc->GetCommandManager()->Execute(&settings) == B_OK);
+
+	BMessage	*recording	= doc->GetCommandManager()->GetRecording();
+	CPPUNIT_ASSERT(recording != NULL);
+	BMessage	recorded;
+	int32		lastIndex	= 0;
+	while (recording->FindMessage("Macro::Commmand",lastIndex,&recorded) == B_OK)
+		lastIndex++;
+	CPPUNIT_ASSERT(lastIndex > 0);
+	CPPUNIT_ASSERT(recording->FindMessage("Macro::Commmand",lastIndex-1,&recorded) == B_OK);
+
+	bool	selectedFlag	= false;
+	CPPUNIT_ASSERT((recorded.FindBool(P_C_NODE_SELECTED,&selectedFlag) != B_OK) || !selectedFlag);
+	// the pre-existing (not #132's own) pointer->id conversion still ran -
+	// either an int32 id (already-seen node) or an embedded "included_node"
+	// (first time this Indexer has seen it) is present either way.
+	int32	nodeId		= 0;
+	bool	hasIncluded	= recorded.HasMessage("included_node");
+	CPPUNIT_ASSERT((recorded.FindInt32("node",&nodeId) == B_OK) || hasIncluded);
+}

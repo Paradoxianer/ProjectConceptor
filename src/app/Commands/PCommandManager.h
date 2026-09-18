@@ -40,6 +40,12 @@ public:
 
 			void		StartMacro(void);
 			void		StopMacro(void);
+			/** NULL when not currently recording; otherwise the in-progress
+			 * macro (same object StopMacro() would name and add to
+			 * macroList) - lets a test (or a "still recording" UI
+			 * indicator) inspect what's been captured so far without
+			 * StopMacro()'s own blocking name-prompt dialog. */
+			BMessage*	GetRecording(void){return recording;};
 			void		PlayMacro(BMessage *makro);
 			/** looks up a macro by its "Name" field in macroList and plays
 			 * it if found; logs and does nothing otherwise - a document not

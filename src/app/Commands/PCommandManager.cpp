@@ -14,6 +14,7 @@
 #include "PEditorManager.h"
 #include "PDocumentManager.h"
 #include "InputRequest.h"
+#include "ProjectConceptorDefs.h"
 
 
 #undef B_TRANSLATION_CONTEXT
@@ -220,6 +221,63 @@ void PCommandManager::PlayMacroByName(const char *name) {
 		PRINT(("PCommandManager::PlayMacroByName - no macro named \"%s\" in this document\n",name));
 }
 
+// #132: the same logical edit is recorded two different, incompatible ways
+// depending purely on which UI path triggered it - the GraphEditor toolbar
+// (fill color, pen size, connection style/arrows) already sends
+// Node::selected=true, portable and independent of the document it plays
+// back into, while direct manipulation (ClassRenderer's inline name/
+// attribute editing, NavigatorEditor's field editor) sends an explicit
+// "node" pointer, tying the recorded macro to this exact document's live
+// objects. In practice the node direct manipulation touches is always the
+// current selection (you can't type into a node without it being focused/
+// selected) - so this normalizes that case right before macro recording:
+// a command whose "node" pointers exactly match what was selected right
+// before it ran gets recorded the portable way too.
+static const char* const kSelectionNormalizableCommands[] = {
+	"ChangeValue", "AddAttribute", "RemoveAttribute", "Copy", "Move", NULL
+};
+
+static bool IsSelectionNormalizable(const char *commandName)
+{
+	if (commandName == NULL)
+		return false;
+	for (int32 i = 0; kSelectionNormalizableCommands[i] != NULL; i++)
+		if (strcmp(commandName,kSelectionNormalizableCommands[i]) == 0)
+			return true;
+	return false;
+}
+
+// true (with every top-level "node" pointer field on `settings` removed and
+// replaced by Node::selected=true) only if those pointers are exactly the
+// set in `selectionSnapshot` - same members, same count. False, `settings`
+// left untouched, if it has no "node" field at all (nothing to normalize -
+// already the portable form) or the sets don't match exactly: a genuinely
+// document-local target (e.g. a group's parent chain in ClassRenderer::
+// AdjustParents()'s own ChangeValue subcommand, computed per-node and never
+// equal to the top-level selection) must keep its real pointer, or replay
+// would silently apply the edit to the wrong node(s).
+static bool NormalizeToSelection(BMessage *settings, BList *selectionSnapshot)
+{
+	set<BMessage*>	settingsNodes;
+	BMessage		*node	= NULL;
+	int32			i		= 0;
+	while (settings->FindPointer("node",i,(void **)&node) == B_OK) {
+		settingsNodes.insert(node);
+		i++;
+	}
+	if (settingsNodes.empty())
+		return false;
+	if ((int32)settingsNodes.size() != selectionSnapshot->CountItems())
+		return false;
+	for (i=0; i<selectionSnapshot->CountItems(); i++)
+		if (settingsNodes.find((BMessage*)selectionSnapshot->ItemAt(i)) == settingsNodes.end())
+			return false;
+	settings->RemoveName("node");
+	settings->AddBool(P_C_NODE_SELECTED,true);
+	return true;
+}
+
+
 status_t PCommandManager::Execute(BMessage *settings) {
 	TRACE();
 	DEBUG_ONLY(settings->PrintToStream());
@@ -231,6 +289,21 @@ status_t PCommandManager::Execute(BMessage *settings) {
 		PCommand	*command			= NULL;
 		settings->FindString("Command::Name",(const char**)&commandName);
 		command		= GetPCommand(commandName);
+		// snapshotted BEFORE Do() runs, not after - Find/Select change
+		// doc->GetSelected() as part of what they themselves do, so a
+		// post-Do() snapshot would compare (say) ChangeValue's settings
+		// against a selection state ChangeValue never actually saw.
+		// Building the snapshot at all costs one BList walk - skipped
+		// entirely unless something is even recording right now and this
+		// command is one NormalizeToSelection() ever applies to.
+		BList	selectionSnapshot;
+		bool	wantsNormalization	= (recording != NULL)
+			&& IsSelectionNormalizable(commandName);
+		if (wantsNormalization) {
+			BList	*selected	= doc->GetSelected();
+			for (int32 i=0;i<selected->CountItems();i++)
+				selectionSnapshot.AddItem(selected->ItemAt(i));
+		}
 		if (command != NULL) {
 			BMessage	*tmpMessage;
 			try  {
@@ -244,8 +317,20 @@ status_t PCommandManager::Execute(BMessage *settings) {
 			if (err==B_OK){
 				err				= settings->FindBool("shadow",&shadow);
 				if ((err != B_OK) ) {
-					if (recording)
-						recording->AddMessage("Macro::Commmand", macroIndexer->IndexMacroCommand(settings));
+					if (recording) {
+						// a *separate* copy, never settings itself - Do()
+						// commonly returns the very same object as
+						// tmpMessage, which the undo list below copies from
+						// verbatim; stripping "node" out of settings in
+						// place would silently corrupt that undo entry,
+						// leaving Undo() with no node to act on at all.
+						BMessage	normalized(*settings);
+						BMessage	*forRecording	= settings;
+						if (wantsNormalization
+								&& NormalizeToSelection(&normalized,&selectionSnapshot))
+							forRecording	= &normalized;
+						recording->AddMessage("Macro::Commmand", macroIndexer->IndexMacroCommand(forRecording));
+					}
 					if (!shadow) {
 						undoList->RemoveItems(undoStatus+1,undoList->CountItems()-undoStatus);
 						if (tmpMessage!= NULL)
