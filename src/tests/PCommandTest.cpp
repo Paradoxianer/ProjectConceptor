@@ -17,6 +17,7 @@
 #include "Remember.h"
 #include "Repeat.h"
 #include "Select.h"
+#include "Sleep.h"
 #include "PCommandManager.h"
 #include "PDocument.h"
 #include "ProjectConceptorDefs.h"
@@ -69,6 +70,7 @@ TEST_PLUGIN(TestRepeatPlugin,Repeat,"Repeat")
 TEST_PLUGIN(TestForEachPlugin,ForEach,"ForEach")
 TEST_PLUGIN(TestIfPlugin,If,"If")
 TEST_PLUGIN(TestRememberPlugin,Remember,"Remember")
+TEST_PLUGIN(TestSleepPlugin,Sleep,"Sleep")
 
 #undef TEST_PLUGIN
 
@@ -1051,4 +1053,58 @@ void PCommandTest::RememberThenBoundSelectRestoresSelection(void)
 	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(nodeA));
 	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(nodeB));
 	CPPUNIT_ASSERT(!doc->GetSelected()->HasItem(nodeC));
+}
+
+
+void PCommandTest::SleepReturnsCleanlyAndKeepsDocumentLockUsable(void)
+{
+	// Sleep::Do() releases the document lock for the actual wait
+	// (doc->Unlock() then doc->Lock() again around snooze() - see its own
+	// class comment for why: PCommandManager::Execute() holds that lock
+	// for its whole Do() call, which would otherwise keep the exact
+	// redraw a pause exists to make visible from happening during it).
+	// BLooper::Lock()/Unlock() are reentrant per-thread via an internal
+	// count (confirmed against Looper.cpp itself, not assumed) - this
+	// checks that dance doesn't leave that count corrupted: the document
+	// must still lock/unlock normally, and Execute() itself must still
+	// return B_OK, once Sleep::Do() has released and reacquired it once
+	// from inside an already-locked Execute() call.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestSleepPlugin());
+
+	BMessage	settings(P_C_EXECUTE_COMMAND);
+	settings.AddString("Command::Name","Sleep");
+	settings.AddInt32("milliseconds",5);
+
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,doc->GetCommandManager()->Execute(&settings));
+
+	CPPUNIT_ASSERT(doc->Lock());
+	doc->Unlock();
+}
+
+
+void PCommandTest::SleepWithNoMillisecondsFieldIsANoOp(void)
+{
+	// no silent fallback (project convention) - a missing "milliseconds"
+	// means nothing to wait for, not an invented default duration
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestSleepPlugin());
+
+	BMessage	settings(P_C_EXECUTE_COMMAND);
+	settings.AddString("Command::Name","Sleep");
+
+	bigtime_t	start	= system_time();
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,doc->GetCommandManager()->Execute(&settings));
+	CPPUNIT_ASSERT((system_time()-start) < 50000);
+}
+
+
+void PCommandTest::SleepUndoDoesNothing(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+	BMessage	settings;
+	settings.AddInt32("milliseconds",5);
+
+	Sleep	command;
+	command.Undo(doc,&settings);	// must not crash - nothing to undo
 }

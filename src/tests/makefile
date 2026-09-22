@@ -83,6 +83,7 @@ SRCS= 	TestMain.cpp \
 		../plugins/ForEachCommand/ForEach.cpp \
 		../plugins/IfCommand/If.cpp \
 		../plugins/RememberCommand/Remember.cpp \
+		../plugins/SleepCommand/Sleep.cpp \
 		../plugins/GraphEditor/GroupBoundary.cpp
 
 RDEFS=

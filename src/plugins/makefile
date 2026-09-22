@@ -21,7 +21,8 @@ plugins = \
 	RemoveAttributeCommand \
 	RepeatCommand \
 	ResizeCommand \
-	SelectCommand
+	SelectCommand \
+	SleepCommand
 
 # LayoutEditor must build before LayoutCommand: LayoutCommand links against
 # LayoutEditor's already-built add-on binary (DotLayouter/

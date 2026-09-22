@@ -32,6 +32,9 @@ public:
 	void ForEachRunsOncePerSelectedNodeWithNodeBinding(void);
 	void IfRunsChildOnlyWhenPredicateMatches(void);
 	void RememberThenBoundSelectRestoresSelection(void);
+	void SleepReturnsCleanlyAndKeepsDocumentLockUsable(void);
+	void SleepWithNoMillisecondsFieldIsANoOp(void);
+	void SleepUndoDoesNothing(void);
 
 	CPPUNIT_TEST_SUITE(PCommandTest);
 	CPPUNIT_TEST(ChangeValueDoUndo);
@@ -55,6 +58,9 @@ public:
 	CPPUNIT_TEST(ForEachRunsOncePerSelectedNodeWithNodeBinding);
 	CPPUNIT_TEST(IfRunsChildOnlyWhenPredicateMatches);
 	CPPUNIT_TEST(RememberThenBoundSelectRestoresSelection);
+	CPPUNIT_TEST(SleepReturnsCleanlyAndKeepsDocumentLockUsable);
+	CPPUNIT_TEST(SleepWithNoMillisecondsFieldIsANoOp);
+	CPPUNIT_TEST(SleepUndoDoesNothing);
 	CPPUNIT_TEST_SUITE_END();
 };
 
