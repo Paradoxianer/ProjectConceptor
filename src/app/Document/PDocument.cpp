@@ -261,8 +261,31 @@ void PDocument::MessageReceived(BMessage* message) {
 		// client's own command data and is forwarded as-is; only the
 		// BMessage-internal specifier bookkeeping fields are skipped.
 		case B_EXECUTE_PROPERTY: {
+			// scripting clients that send with a reply pointer (`hey`'s own
+			// "DO" verb does - target->SendMessage(&the_message, reply))
+			// block waiting for one - confirmed live: `hey $SIG DO Sleep of
+			// Document 0 with ...` hung indefinitely before this, nothing
+			// here ever called message->SendReply(). Every return path
+			// below replies now, matching the standard scripting
+			// convention (BTextView::_SetProperty is the real, shipping
+			// example this mirrors: reply->what = B_REPLY; "error" = the
+			// status).
+			BMessage	reply(B_REPLY);
 			const char	*property	= NULL;
-			if (message->GetCurrentSpecifier(NULL,NULL,NULL,&property) == B_OK) {
+			// GetCurrentSpecifier()'s own real implementation
+			// (Message.cpp) only fills in `property` when `specifier`
+			// (its own 2nd parameter) is non-NULL too - passing NULL for
+			// it, as this did before, made every "DO <command> of
+			// Document N" scripting call silently resolve `property` to
+			// NULL while still returning B_OK, so "Command::Name" was
+			// never actually set below; GetPCommand(NULL) then found
+			// nothing and fell into Execute()'s own "unknown command"
+			// branch, which pops a BAlert::Go() - blocking forever with
+			// no one there to click it. Confirmed live (had to kill both
+			// the stuck `hey` process and the app to recover).
+			BMessage	specifier;
+			status_t	specErr	= message->GetCurrentSpecifier(NULL,&specifier,NULL,&property);
+			if (specErr == B_OK) {
 				BMessage	*settings	= new BMessage(P_C_EXECUTE_COMMAND);
 				settings->AddString("Command::Name",property);
 				char		*fieldName;
@@ -282,8 +305,10 @@ void PDocument::MessageReceived(BMessage* message) {
 					}
 					i++;
 				}
-				commandManager->Execute(settings);
-			}
+				reply.AddInt32("error",commandManager->Execute(settings));
+			} else
+				reply.AddInt32("error",B_BAD_VALUE);
+			message->SendReply(&reply);
 			break;
 		}
 		case P_C_AUTO_SAVE: {
