@@ -42,6 +42,12 @@ public:
 	virtual	void			KeyDown(const char *bytes, int32 numBytes);
 	virtual	void			MakeFocus(bool focused = true);
 	virtual	void			MouseDown(BPoint where);
+	/** BTextView's own internal mechanics (click, arrow-key navigation,
+	 * typing, drag&drop, ...) all funnel through this - the one reliable
+	 * hook for "the cursor/selection just changed", used to keep
+	 * MacroEditor's line/column status display current (#55 follow-up,
+	 * user report). */
+	virtual	void			Select(int32 startOffset, int32 endOffset);
 
 			void			SetEditor(MacroEditor *editor) {fEditor = editor;};
 

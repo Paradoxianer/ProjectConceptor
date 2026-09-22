@@ -33,6 +33,7 @@ void MacroEditor::Init(void)
 	fTextView			= NULL;
 	fTextScroll			= NULL;
 	fStatus				= NULL;
+	fLineColStatus		= NULL;
 	fExportPanel		= NULL;
 	fImportPanel		= NULL;
 	fSelectedMacro		= NULL;
@@ -70,7 +71,17 @@ void MacroEditor::AttachedToWindow(void)
 
 	SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 
-	fMacroList	= new BListView(BRect(0,0,140,280),"macroList");
+	// B_FOLLOW_LEFT_TOP (BListView's own constructor default) pins the
+	// list to its original size when the BScrollView wrapping it is later
+	// resized in LayoutChildren() - only the scrollview itself grew, the
+	// list inside stayed at its construction-time size, leaving the
+	// bottom half of the panel visibly empty and, since the scrollview's
+	// own width shrinks to fit its wrapped 140px content but this list
+	// never gave that width back either, the list rendering over/under
+	// where the vertical scrollbar needs to be. B_FOLLOW_ALL_SIDES fixes
+	// both - confirmed live (user report).
+	fMacroList	= new BListView(BRect(0,0,140,280),"macroList",
+		B_SINGLE_SELECTION_LIST,B_FOLLOW_ALL_SIDES);
 	BMessage	*selMsg	= new BMessage(M_E_MACRO_SELECTED);
 	fMacroList->SetSelectionMessage(selMsg);
 	fMacroList->SetTarget(this);
@@ -88,6 +99,10 @@ void MacroEditor::AttachedToWindow(void)
 	fStatus	= new BStringView(BRect(0,0,340,16),"status","");
 	AddChild(fStatus);
 
+	fLineColStatus	= new BStringView(BRect(0,0,100,16),"lineColStatus","");
+	fLineColStatus->SetAlignment(B_ALIGN_RIGHT);
+	AddChild(fLineColStatus);
+
 	// Export/Import used to be buttons here too - moved to the Macro menu
 	// (Save/Open, #55 follow-up) since they're macro-management actions.
 	// No Apply button either (#55 follow-up) - MacroTextView auto-applies
@@ -97,7 +112,9 @@ void MacroEditor::AttachedToWindow(void)
 	// reference list of registered commands/fields (#55 follow-up) - read
 	// only, built once below since the command registry never changes
 	// after startup.
-	fCommandList	= new BOutlineListView(BRect(0,0,160,280),"commandList");
+	// see the same fix/comment on fMacroList above
+	fCommandList	= new BOutlineListView(BRect(0,0,160,280),"commandList",
+		B_SINGLE_SELECTION_LIST,B_FOLLOW_ALL_SIDES);
 	fCommandListScroll	= new BScrollView("commandListScroll",fCommandList,
 		B_FOLLOW_RIGHT | B_FOLLOW_TOP_BOTTOM,0,false,true);
 	AddChild(fCommandListScroll);
@@ -112,25 +129,36 @@ void MacroEditor::LayoutChildren(void)
 {
 	if (fMacroList == NULL)
 		return;
-	BRect	bounds	= Bounds();
+	BRect	bounds		= Bounds();
 	float	listW		= 140;
 	float	cmdListW	= 160;
-	float	statusH	= 18;
+	float	statusH		= 18;
+	float	lineColW	= 100;
+
+	// the status bar sits at the *bottom* now (user report: it used to
+	// sit above fTextScroll only, pushing that one panel's own top edge
+	// down by statusH while fMacroListScroll/fCommandListScroll both
+	// started right at bounds.top - the three panels never lined up).
+	// All three now share the same top and the same bottom (contentBottom).
+	float	contentBottom	= bounds.bottom-statusH;
 
 	fMacroListScroll->MoveTo(bounds.left,bounds.top);
-	fMacroListScroll->ResizeTo(listW,bounds.Height());
+	fMacroListScroll->ResizeTo(listW,contentBottom-bounds.top);
 
 	fCommandListScroll->MoveTo(bounds.right-cmdListW,bounds.top);
-	fCommandListScroll->ResizeTo(cmdListW,bounds.Height());
+	fCommandListScroll->ResizeTo(cmdListW,contentBottom-bounds.top);
 
 	float	right	= bounds.right-cmdListW-1;
 	float	left	= bounds.left+listW+1;
 
-	fStatus->MoveTo(left+4,bounds.top+2);
-	fStatus->ResizeTo(right-left-8,statusH-4);
+	fTextScroll->MoveTo(left,bounds.top);
+	fTextScroll->ResizeTo(right-left,contentBottom-bounds.top);
 
-	fTextScroll->MoveTo(left,bounds.top+statusH);
-	fTextScroll->ResizeTo(right-left,bounds.Height()-statusH);
+	fLineColStatus->MoveTo(right-lineColW,contentBottom+2);
+	fLineColStatus->ResizeTo(lineColW,statusH-4);
+
+	fStatus->MoveTo(left+4,contentBottom+2);
+	fStatus->ResizeTo(right-left-lineColW-8,statusH-4);
 }
 
 
@@ -387,6 +415,16 @@ void MacroEditor::SetStatus(const char *text, bool isError)
 	// it in full, hover away the mystery instead of guessing at a cut-off
 	// sentence.
 	fStatus->SetToolTip((text != NULL) && (text[0] != '\0') ? text : NULL);
+}
+
+
+void MacroEditor::UpdateCursorPosition(int32 line, int32 column)
+{
+	if (fLineColStatus == NULL)
+		return;
+	BString	text;
+	text.SetToFormat(B_TRANSLATE("Line %" B_PRId32 ", Col %" B_PRId32),line,column);
+	fLineColStatus->SetText(text.String());
 }
 
 

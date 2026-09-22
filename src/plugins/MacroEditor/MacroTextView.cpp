@@ -292,6 +292,25 @@ void MacroTextView::MakeFocus(bool focused)
 }
 
 
+void MacroTextView::Select(int32 startOffset, int32 endOffset)
+{
+	BTextView::Select(startOffset,endOffset);
+	if (fEditor == NULL)
+		return;
+	int32		line	= 1;
+	int32		column	= 1;
+	const char	*text	= Text();
+	for (int32 i = 0; (i < startOffset) && (text[i] != '\0'); i++) {
+		if (text[i] == '\n') {
+			line++;
+			column	= 1;
+		} else
+			column++;
+	}
+	fEditor->UpdateCursorPosition(line,column);
+}
+
+
 void MacroTextView::MouseDown(BPoint where)
 {
 	BTextView::MouseDown(where);
@@ -381,6 +400,11 @@ void MacroTextView::SetMacroText(const BString &canonicalText)
 		StyleAsFoldedChip(chipRanges[i].first,chipRanges[i].second);
 	StyleCommandLines();
 	fOriginalBlockCount	= (int32)fFoldedBlockText.size();
+	// BTextView::SetText() doesn't go through the public Select() this
+	// view overrides - without this, the line/column status would keep
+	// showing wherever the cursor happened to be in whatever macro was
+	// open before, not "Line 1, Col 1" for the one actually now on screen.
+	Select(0,0);
 }
 
 

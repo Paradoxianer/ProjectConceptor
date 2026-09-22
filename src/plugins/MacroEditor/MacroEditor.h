@@ -68,6 +68,13 @@ public:
 	 * losing focus) - public so it can. */
 			void			ApplyEdits(void);
 
+	/** Called by MacroTextView::Select() on every cursor/selection change -
+	 * keeps fLineColStatus showing where the cursor actually is (1-based,
+	 * matching ParseCommands()'s own "line N: ..." counting) so an error
+	 * naming a line number can actually be found by eye instead of counted
+	 * by hand. Public for the same reason ApplyEdits() is. */
+			void			UpdateCursorPosition(int32 line, int32 column);
+
 protected:
 			void			Init(void);
 			/** Rebuilds the macro-name BListView from
@@ -108,6 +115,11 @@ protected:
 			MacroTextView	*fTextView;
 			BScrollView		*fTextScroll;
 			BStringView		*fStatus;
+			/** "Line N, Col M" for the text view's current cursor position -
+			 * see UpdateCursorPosition(). Sits next to fStatus in the same
+			 * bottom bar, not merged into the same BStringView, so it stays
+			 * visible even while fStatus is showing a long error message. */
+			BStringView		*fLineColStatus;
 			BOutlineListView	*fCommandList;
 			BScrollView		*fCommandListScroll;
 

@@ -576,7 +576,17 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 		// editor plugin has been added and attached this way.
 		mainView->Select(tab);
 		editorView->MakeFocus(true);
-		editorView->ResizeTo(rect.Width()-B_V_SCROLL_BAR_WIDTH -2,rect.Height()-B_H_SCROLL_BAR_HEIGHT-2);
+		// used to also reserve B_V_SCROLL_BAR_WIDTH/B_H_SCROLL_BAR_HEIGHT
+		// here, shrinking every editor view to leave an outer scrollbar-
+		// sized strip unused on its right/bottom edge - confirmed dead:
+		// no BScrollBar is ever placed in that reserved space anywhere in
+		// this codebase (grepped for both constants). Each editor that
+		// actually needs scrolling already manages its own BScrollView(s)
+		// internally (GraphEditor, MacroEditor, ...) - this outer
+		// reservation just wasted space for all of them. Most visible on
+		// MacroEditor's own white list/text panels (user report); likely
+		// present but less noticeable on the others.
+		editorView->ResizeTo(rect.Width()-4,rect.Height()-4);
 		editorView->MoveTo(2,2);
 	}
 	(doc->GetEditorManager())->RegisterPEditor(editor);
