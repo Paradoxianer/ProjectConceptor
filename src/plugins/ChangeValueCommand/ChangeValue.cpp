@@ -10,11 +10,18 @@ ChangeValue::ChangeValue():PCommand()
 
 static const property_info kChangeValueProperties[] = {
 	// included_node: see Insert.cpp's kInsertProperties for why any
-	// command with a "node" field can carry this.
+	// command with a "node" field can carry this. "Node::selected": the
+	// portable alternative to "node" (see #132) - every selected node at
+	// once instead of one explicit pointer, already handled in Do() but
+	// missing here, which made the MacroEditor DSL reject it as an
+	// unknown field even though it's the recommended, selection-driven
+	// form for a recorded macro.
 	{ "ChangeValue", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
 		"Sets one field on a node - valueContainer holds the field name, "
-		"type and new value (see the paired \"node\").", 0, {0},
-		{ { { {"node", B_POINTER_TYPE}, {"valueContainer", B_MESSAGE_TYPE},
+		"type and new value (see the paired \"node\" or \"Node::selected\").",
+		0, {0},
+		{ { { {"node", B_POINTER_TYPE}, {"Node::selected", B_BOOL_TYPE},
+			  {"valueContainer", B_MESSAGE_TYPE},
 			  {"included_node", B_MESSAGE_TYPE} } } } },
 };
 

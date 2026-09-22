@@ -30,6 +30,7 @@ public:
 	void RoundTripsBoundField(void);
 	void BindingInsideFieldBlockIsRejected(void);
 	void EmptyVariableNameIsRejected(void);
+	void PropertyInfoAcceptsNodeSelectedForSelectionDrivenCommands(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -50,6 +51,7 @@ public:
 	CPPUNIT_TEST(RoundTripsBoundField);
 	CPPUNIT_TEST(BindingInsideFieldBlockIsRejected);
 	CPPUNIT_TEST(EmptyVariableNameIsRejected);
+	CPPUNIT_TEST(PropertyInfoAcceptsNodeSelectedForSelectionDrivenCommands);
 	CPPUNIT_TEST_SUITE_END();
 };
 

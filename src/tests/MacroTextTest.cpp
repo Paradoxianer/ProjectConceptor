@@ -6,6 +6,7 @@
 #include <support/List.h>
 #include <support/String.h>
 
+#include "AddAttribute.h"
 #include "BasePlugin.h"
 #include "ChangeValue.h"
 #include "Group.h"
@@ -16,6 +17,7 @@
 #include "PCommandManager.h"
 #include "PDocument.h"
 #include "ProjectConceptorDefs.h"
+#include "RemoveAttribute.h"
 #include "Select.h"
 #include "TestDocument.h"
 
@@ -43,6 +45,8 @@ TEST_PLUGIN(TestMovePlugin,Move,"Move")
 TEST_PLUGIN(TestGroupPlugin,Group,"Group")
 TEST_PLUGIN(TestSelectPlugin,Select,"Select")
 TEST_PLUGIN(TestChangeValuePlugin,ChangeValue,"ChangeValue")
+TEST_PLUGIN(TestAddAttributePlugin,AddAttribute,"AddAttribute")
+TEST_PLUGIN(TestRemoveAttributePlugin,RemoveAttribute,"RemoveAttribute")
 
 #undef TEST_PLUGIN
 
@@ -114,6 +118,8 @@ PDocument* NewRegisteredTestDocument(void)
 	doc->GetCommandManager()->RegisterPCommand(new TestGroupPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestSelectPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestAddAttributePlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestRemoveAttributePlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestStringPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestRawPlugin());
 	// Batch is already compiled into every real PCommandManager - not
@@ -625,4 +631,35 @@ void MacroTextTest::EmptyVariableNameIsRejected(void)
 		&parsed,doc->GetCommandManager(),&error);
 	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,err);
 	CPPUNIT_ASSERT_EQUAL((int32)0,parsed.CountItems());
+}
+
+
+void MacroTextTest::PropertyInfoAcceptsNodeSelectedForSelectionDrivenCommands(void)
+{
+	// #132 normalizes recording of ChangeValue/AddAttribute/RemoveAttribute
+	// to "Node::selected=true" when it matches the current selection - the
+	// DSL parser rejected that as an unknown field on all three until now
+	// (user report): ChangeValue's own PropertyInfo() simply never listed
+	// it, and AddAttribute/RemoveAttribute had no PropertyInfo() override
+	// at all, so every field on them was "unknown".
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		error;
+
+	BList	changeValueParsed;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,ParseCommands(
+		BString("ChangeValue\n  Node::selected=true\n"),
+		&changeValueParsed,doc->GetCommandManager(),&error));
+	CPPUNIT_ASSERT_EQUAL((int32)1,changeValueParsed.CountItems());
+
+	BList	addAttributeParsed;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,ParseCommands(
+		BString("AddAttribute\n  Node::selected=true\n"),
+		&addAttributeParsed,doc->GetCommandManager(),&error));
+	CPPUNIT_ASSERT_EQUAL((int32)1,addAttributeParsed.CountItems());
+
+	BList	removeAttributeParsed;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,ParseCommands(
+		BString("RemoveAttribute\n  Node::selected=true\n"),
+		&removeAttributeParsed,doc->GetCommandManager(),&error));
+	CPPUNIT_ASSERT_EQUAL((int32)1,removeAttributeParsed.CountItems());
 }

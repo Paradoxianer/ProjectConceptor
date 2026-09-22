@@ -1,5 +1,5 @@
-#ifndef ADD_ATTRIBUTE_H
-#define ADD_ATTRIBUTE_H
+#ifndef REMOVE_ATTRIBUTE_H
+#define REMOVE_ATTRIBUTE_H
 /*
  * @author Paradoxon powered by Jesus Christ
  */
@@ -18,6 +18,7 @@ public:
 	virtual	char*			Name(void){return "RemoveAttribute";};
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
+	virtual	const property_info	*PropertyInfo(int32 *count);
 
 	//----------------PCommand
 protected:

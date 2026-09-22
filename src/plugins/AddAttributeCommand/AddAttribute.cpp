@@ -5,6 +5,28 @@
 AddAttribute::AddAttribute():PCommand() {
 }
 
+// no PropertyInfo() override existed at all before this - the default
+// (empty) schema made the MacroEditor DSL reject every field on
+// AddAttribute as unknown, including "Node::selected", the portable,
+// selection-driven form #132 normalizes recording to. included_node: see
+// Insert.cpp's kInsertProperties for why any command with a "node" field
+// carries this too.
+static const property_info kAddAttributeProperties[] = {
+	{ "AddAttribute", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
+		"Adds one attribute to a node's own settings (or every selected "
+		"node's, via \"Node::selected\") - valueContainer holds the "
+		"attribute's name/type/value.", 0, {0},
+		{ { { {"node", B_POINTER_TYPE}, {"Node::selected", B_BOOL_TYPE},
+			  {"valueContainer", B_MESSAGE_TYPE},
+			  {"included_node", B_MESSAGE_TYPE} } } } },
+};
+
+const property_info* AddAttribute::PropertyInfo(int32 *count)
+{
+	*count	= 1;
+	return kAddAttributeProperties;
+}
+
 void AddAttribute::Undo(PDocument *doc,BMessage *undo) {
 	BMessage	*undoMessage	= new BMessage();
 	BMessage	*selectNodes	= new BMessage();

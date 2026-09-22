@@ -73,6 +73,8 @@ SRCS= 	TestMain.cpp \
 		../app/Tools/plugins/BasePlugin.cpp \
 		../app/Tools/plugins/PluginManager.cpp \
 		../plugins/ChangeValueCommand/ChangeValue.cpp \
+		../plugins/AddAttributeCommand/AddAttribute.cpp \
+		../plugins/RemoveAttributeCommand/RemoveAttribute.cpp \
 		../plugins/InsertCommand/Insert.cpp \
 		../plugins/GroupCommand/Group.cpp \
 		../plugins/MoveCommand/Move.cpp \

@@ -6,6 +6,25 @@ RemoveAttribute::RemoveAttribute():PCommand()
 {
 }
 
+// same gap as AddAttribute (see its own comment) - no PropertyInfo()
+// override existed at all, so the MacroEditor DSL rejected every field on
+// this command, including "Node::selected".
+static const property_info kRemoveAttributeProperties[] = {
+	{ "RemoveAttribute", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
+		"Removes one attribute from a node's own settings (or every "
+		"selected node's, via \"Node::selected\") - valueContainer holds "
+		"the attribute's name/index.", 0, {0},
+		{ { { {"node", B_POINTER_TYPE}, {"Node::selected", B_BOOL_TYPE},
+			  {"valueContainer", B_MESSAGE_TYPE},
+			  {"included_node", B_MESSAGE_TYPE} } } } },
+};
+
+const property_info* RemoveAttribute::PropertyInfo(int32 *count)
+{
+	*count	= 1;
+	return kRemoveAttributeProperties;
+}
+
 void RemoveAttribute::Undo(PDocument *doc,BMessage *undo)
 {
 	BMessage	*undoMessage	= new BMessage();
