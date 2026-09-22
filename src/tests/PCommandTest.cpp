@@ -66,6 +66,7 @@ public:
 
 TEST_PLUGIN(TestMovePlugin,Move,"Move")
 TEST_PLUGIN(TestSelectPlugin,Select,"Select")
+TEST_PLUGIN(TestFindPlugin,Find,"Find")
 TEST_PLUGIN(TestRepeatPlugin,Repeat,"Repeat")
 TEST_PLUGIN(TestForEachPlugin,ForEach,"ForEach")
 TEST_PLUGIN(TestIfPlugin,If,"If")
@@ -1107,4 +1108,44 @@ void PCommandTest::SleepUndoDoesNothing(void)
 
 	Sleep	command;
 	command.Undo(doc,&settings);	// must not crash - nothing to undo
+}
+
+
+void PCommandTest::MenuSearchFindForwardsShadowFlagToRecording(void)
+{
+	// user report: typing a search live while recording (FindWindow's
+	// 'live' case, which sends "shadow"=true - see FindWindow.cpp)
+	// recorded one macro entry per keystroke instead of being filtered
+	// out entirely. Root cause: PDocument::MessageReceived()'s own
+	// MENU_SEARCH_FIND handler built a brand new settings BMessage but
+	// never copied the incoming message's own "shadow" field onto it -
+	// the line that would have was commented out - so
+	// PCommandManager::Execute()'s own "shadow means don't record" check
+	// never saw it, regardless of what FindWindow actually sent.
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->GetCommandManager()->RegisterPCommand(new TestFindPlugin());
+
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	node->AddString("Node::name","findme");
+	doc->GetAllNodes()->AddItem(node);
+
+	doc->GetCommandManager()->StartMacro();
+
+	BMessage	liveSearch(MENU_SEARCH_FIND);
+	liveSearch.AddString("searchString","findme");
+	liveSearch.AddBool("shadow",true);
+	BMessenger	sender(doc);
+	CPPUNIT_ASSERT(sender.SendMessage(&liveSearch) == B_OK);
+	snooze(200000);
+
+	BMessage	*recording	= doc->GetCommandManager()->GetRecording();
+	CPPUNIT_ASSERT(recording != NULL);
+	CPPUNIT_ASSERT(!recording->HasMessage("Macro::Commmand"));
+
+	BMessage	realSearch(MENU_SEARCH_FIND);
+	realSearch.AddString("searchString","findme");
+	CPPUNIT_ASSERT(sender.SendMessage(&realSearch) == B_OK);
+	snooze(200000);
+
+	CPPUNIT_ASSERT(recording->HasMessage("Macro::Commmand"));
 }

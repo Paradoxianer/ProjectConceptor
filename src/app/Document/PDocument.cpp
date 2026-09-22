@@ -337,7 +337,17 @@ void PDocument::MessageReceived(BMessage* message) {
 			searchMessage->AddString("Command::Name","Find");
 			if (message->FindString("searchString",searchString)==B_OK)
 				searchMessage->AddString("searchString",*searchString);
-		//	searchMessage->AddBool("shadow",true);
+			// forwarded, not hardcoded - this handler serves both
+			// FindWindow's 'live' case (shadow=true, one per keystroke -
+			// must never land in a recording) and its 'ok' case (no
+			// "shadow" field at all - the actual confirmed search). This
+			// was commented out, so every keystroke recorded a real,
+			// permanent macro entry instead of the one final search -
+			// confirmed live: typing a 4-letter search while recording
+			// added 4 separate Find entries.
+			bool	shadow	= false;
+			if (message->FindBool("shadow",&shadow)==B_OK)
+				searchMessage->AddBool("shadow",shadow);
 			commandManager->Execute(searchMessage);
 			break;
 		}

@@ -35,6 +35,7 @@ public:
 	void SleepReturnsCleanlyAndKeepsDocumentLockUsable(void);
 	void SleepWithNoMillisecondsFieldIsANoOp(void);
 	void SleepUndoDoesNothing(void);
+	void MenuSearchFindForwardsShadowFlagToRecording(void);
 
 	CPPUNIT_TEST_SUITE(PCommandTest);
 	CPPUNIT_TEST(ChangeValueDoUndo);
@@ -61,6 +62,7 @@ public:
 	CPPUNIT_TEST(SleepReturnsCleanlyAndKeepsDocumentLockUsable);
 	CPPUNIT_TEST(SleepWithNoMillisecondsFieldIsANoOp);
 	CPPUNIT_TEST(SleepUndoDoesNothing);
+	CPPUNIT_TEST(MenuSearchFindForwardsShadowFlagToRecording);
 	CPPUNIT_TEST_SUITE_END();
 };
 
