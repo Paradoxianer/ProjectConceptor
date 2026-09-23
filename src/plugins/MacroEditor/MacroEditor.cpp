@@ -11,6 +11,7 @@
 #include <support/String.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "MacroText.h"
 #include "PCommandManager.h"
@@ -18,6 +19,181 @@
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "MacroEditor"
+
+
+static void AppendDefaultValueFor(type_code type, BString *out)
+{
+	switch (type) {
+		case B_BOOL_TYPE:		*out << "false"; break;
+		case B_INT8_TYPE:
+		case B_INT16_TYPE:
+		case B_INT32_TYPE:
+		case B_INT64_TYPE:		*out << "0"; break;
+		case B_FLOAT_TYPE:
+		case B_DOUBLE_TYPE:	*out << "0.0"; break;
+		case B_POINT_TYPE:		*out << "(0,0)"; break;
+		case B_RECT_TYPE:		*out << "[0,0,0,0]"; break;
+		case B_POINTER_TYPE:	*out << "@1"; break;
+		case B_STRING_TYPE:
+		default:				*out << "\"\""; break;
+	}
+}
+
+
+/** valueContainer's own fields have no declared schema (see MacroText.h -
+ * arbitrary node/value data, not a command) - ChangeValue/AddAttribute/
+ * RemoveAttribute all shape it the same specific way their own Do()
+ * expects (confirmed by reading each one), spelled out here since nothing
+ * else in this file otherwise knows it. "type" needs the exact type_code
+ * as a decimal int32 - the single most confusing part of hand-writing one
+ * of these three commands (user report: got it wrong trying to add a bool
+ * attribute) - so a cheat sheet for the common ones goes right into the
+ * generated snippet as a comment line (ParseCommands() skips "#" lines). */
+static void AppendValueContainerSnippet(const char *commandName, BString *out)
+{
+	*out << "  ~valueContainer\n";
+	*out << "    name=\"\"\n";
+	if (strcmp(commandName,"RemoveAttribute") == 0) {
+		*out << "    index=0\n";
+	} else {
+		*out << "    # type: exact type_code as a decimal int32 - common "
+			"ones: bool=1112493900 int32=1280265799 float=1179406164 "
+			"double=1145195589 string=1129534546\n";
+		*out << "    type=1129534546\n";
+		const char	*valueField	= (strcmp(commandName,"AddAttribute") == 0)
+			? "newAttribute" : "newValue";
+		*out << "    " << valueField << "=\"\"\n";
+	}
+	*out << "    # subgroup (optional, repeatable): nests into a sub-"
+		"BMessage first, e.g. subgroup=\"Node::Data\"\n";
+}
+
+
+/** Builds a ready-to-drop DSL snippet for `command` - its own name line
+ * plus one line per declared top-level field, pre-filled with a type-
+ * appropriate placeholder instead of left empty (AppendDefaultValueFor()).
+ * A B_MESSAGE_TYPE field has no declared schema of its own to fill in
+ * generically - AppendValueContainerSnippet() covers the one shape
+ * (valueContainer) this codebase actually needs a real template for;
+ * "included_node" is left as a bare header, since its own content is
+ * always machine-recorded node/connection data nobody hand-writes. */
+static void BuildCommandSnippet(PCommand *command, BString *out)
+{
+	out->SetTo("");
+	*out << command->Name() << "\n";
+	int32				propCount		= 0;
+	const property_info	*props			= command->PropertyInfo(&propCount);
+	bool				hasNodePointer	= false;
+	bool				hasNodeSelected	= false;
+	for (int32 p = 0; p < propCount; p++) {
+		for (int32 c = 0; c < 3; c++) {
+			for (int32 f = 0; f < 5; f++) {
+				const char	*fieldName	= props[p].ctypes[c].pairs[f].name;
+				if (fieldName == NULL)
+					continue;
+				if (strcmp(fieldName,"node") == 0)
+					hasNodePointer	= true;
+				else if (strcmp(fieldName,"Node::selected") == 0)
+					hasNodeSelected	= true;
+			}
+		}
+	}
+	// ChangeValue/AddAttribute/RemoveAttribute all declare both "node"
+	// (an explicit pointer) and "Node::selected" (act on the whole
+	// selection instead, #132's portable form) - a fresh snippet
+	// otherwise fills in both at once, which looks like it's asking for
+	// both when only one is ever meant to be there.
+	if (hasNodePointer && hasNodeSelected)
+		*out << "  # use ONE of node/Node::selected below, not both\n";
+	for (int32 p = 0; p < propCount; p++) {
+		for (int32 c = 0; c < 3; c++) {
+			for (int32 f = 0; f < 5; f++) {
+				const char	*fieldName	= props[p].ctypes[c].pairs[f].name;
+				if (fieldName == NULL)
+					continue;
+				type_code	type	= props[p].ctypes[c].pairs[f].type;
+				if (strcmp(fieldName,"valueContainer") == 0)
+					AppendValueContainerSnippet(command->Name(),out);
+				else if (type == B_MESSAGE_TYPE)
+					*out << "  ~" << fieldName << "\n";
+				else {
+					*out << "  " << fieldName << "=";
+					AppendDefaultValueFor(type,out);
+					*out << "\n";
+				}
+			}
+		}
+	}
+}
+
+
+/** BStringItem carrying the two extra strings the reference list needs per
+ * item (#55 follow-up, user report: "die Syntax komplett nicht
+ * verstanden" - no way to see what a command does, or start from a
+ * correctly-shaped example, without leaving the editor): the owning
+ * command's own "usage" text, shown as a hover tooltip for both a
+ * command's own top-level item and each of its field children, and - for
+ * a top-level command item only - the drag-and-drop snippet
+ * CommandReferenceListView::InitiateDrag() hands to MacroTextView (empty
+ * for a field child item; only whole commands are draggable, not one
+ * field on its own). */
+class CommandListItem : public BStringItem
+{
+public:
+	CommandListItem(const char *text, uint32 level, bool expanded,
+		const BString &toolTip, const BString &snippet)
+		: BStringItem(text,level,expanded), fToolTip(toolTip), fSnippet(snippet) {}
+	const BString&	ToolTipText(void) const { return fToolTip; }
+	const BString&	Snippet(void) const { return fSnippet; }
+private:
+	BString	fToolTip;
+	BString	fSnippet;
+};
+
+
+/** Live per-row hover tooltips and drag-and-drop of a whole command's own
+ * snippet into MacroTextView - see CommandListItem. BTextView already
+ * accepts a dropped "text/plain" flavor as if it were dragged-in text
+ * (BTextView::_MessageDropped(), confirmed against Haiku's own
+ * TextView.cpp) - nothing needs to change on MacroTextView's own side at
+ * all for the drop half of this, only the drag *source* here needs to
+ * build that flavor. */
+class CommandReferenceListView : public BOutlineListView
+{
+public:
+	CommandReferenceListView(BRect frame, const char *name,
+			list_view_type type, uint32 resizingMode)
+		: BOutlineListView(frame,name,type,resizingMode),
+			fLastHoveredItem(NULL) {}
+
+	virtual void MouseMoved(BPoint where, uint32 code, const BMessage *dragMessage)
+	{
+		BOutlineListView::MouseMoved(where,code,dragMessage);
+		int32		index	= IndexOf(where);
+		BListItem	*hovered	= (index >= 0) ? ItemAt(index) : NULL;
+		if (hovered == fLastHoveredItem)
+			return;
+		fLastHoveredItem	= hovered;
+		CommandListItem	*item	= dynamic_cast<CommandListItem*>(hovered);
+		SetToolTip(item ? item->ToolTipText().String() : (const char*)NULL);
+	}
+
+	virtual bool InitiateDrag(BPoint where, int32 index, bool wasSelected)
+	{
+		CommandListItem	*item	= dynamic_cast<CommandListItem*>(ItemAt(index));
+		if ((item == NULL) || item->Snippet().IsEmpty())
+			return false;
+		BMessage	drag(B_MIME_DATA);
+		drag.AddData("text/plain",B_MIME_TYPE,item->Snippet().String(),
+			item->Snippet().Length());
+		DragMessage(&drag,ItemFrame(index));
+		return true;
+	}
+
+private:
+	BListItem	*fLastHoveredItem;
+};
+
 
 MacroEditor::MacroEditor()
 	:PEditor(),BView(BRect(0,0,500,300),"MacroEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW)
@@ -111,9 +287,11 @@ void MacroEditor::AttachedToWindow(void)
 
 	// reference list of registered commands/fields (#55 follow-up) - read
 	// only, built once below since the command registry never changes
-	// after startup.
-	// see the same fix/comment on fMacroList above
-	fCommandList	= new BOutlineListView(BRect(0,0,160,280),"commandList",
+	// after startup. CommandReferenceListView (not a plain
+	// BOutlineListView): per-row hover tooltips + drag-and-drop of a
+	// ready-made snippet into fTextView - see its own class comment.
+	// see the same resize-mode fix/comment on fMacroList above
+	fCommandList	= new CommandReferenceListView(BRect(0,0,160,280),"commandList",
 		B_SINGLE_SELECTION_LIST,B_FOLLOW_ALL_SIDES);
 	fCommandListScroll	= new BScrollView("commandListScroll",fCommandList,
 		B_FOLLOW_RIGHT | B_FOLLOW_TOP_BOTTOM,0,false,true);
@@ -193,11 +371,19 @@ void MacroEditor::BuildCommandList(void)
 		PCommand	*command	= commandManager->PCommandAt(i);
 		if (command == NULL)
 			continue;
-		BStringItem	*commandItem	= new BStringItem(command->Name(),0,true);
-		fCommandList->AddItem(commandItem);
 
 		int32				propCount	= 0;
 		const property_info	*props	= command->PropertyInfo(&propCount);
+		// usage is per-property_info-entry, not per-command, but every
+		// registered command here only ever declares exactly one - see
+		// each plugin's own kXxxProperties[] array (always {..., count=1}).
+		BString	usage((propCount > 0) ? props[0].usage : "");
+		BString	snippet;
+		BuildCommandSnippet(command,&snippet);
+
+		CommandListItem	*commandItem	= new CommandListItem(command->Name(),0,true,usage,snippet);
+		fCommandList->AddItem(commandItem);
+
 		for (int32 p = 0; p < propCount; p++) {
 			for (int32 c = 0; c < 3; c++) {
 				for (int32 f = 0; f < 5; f++) {
@@ -206,7 +392,11 @@ void MacroEditor::BuildCommandList(void)
 						continue;
 					BString	label;
 					label << fieldName << ": " << TypeDisplayName(props[p].ctypes[c].pairs[f].type);
-					fCommandList->AddUnder(new BStringItem(label.String(),1,true),commandItem);
+					// no snippet of its own - only a whole command is
+					// draggable (see CommandListItem's own doc comment)
+					fCommandList->AddUnder(
+						new CommandListItem(label.String(),1,true,usage,BString()),
+						commandItem);
 				}
 			}
 		}

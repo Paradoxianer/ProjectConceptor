@@ -663,3 +663,43 @@ void MacroTextTest::PropertyInfoAcceptsNodeSelectedForSelectionDrivenCommands(vo
 		&removeAttributeParsed,doc->GetCommandManager(),&error));
 	CPPUNIT_ASSERT_EQUAL((int32)1,removeAttributeParsed.CountItems());
 }
+
+
+void MacroTextTest::GeneratedAddAttributeSnippetParses(void)
+{
+	// pins the exact shape MacroEditor.cpp's BuildCommandSnippet() (#55
+	// follow-up: drag a command from the reference list into the text
+	// view with its fields pre-filled, user report - couldn't make sense
+	// of the syntax by hand at all) generates for AddAttribute - the one
+	// command whose real fields ("~valueContainer" needing "name"/"type"/
+	// "newAttribute" with no declared schema of their own, so nothing
+	// else validates this shape) are the hardest to get right by hand in
+	// the first place. Also exercises "#" comment lines nested *inside* a
+	// "~" field block (the type_code cheat sheet the generator adds right
+	// there) - ParseCommands() skips a comment "no matter the depth" by
+	// its own comment, but nothing else here happened to already combine
+	// the two.
+	PDocument	*doc	= NewRegisteredTestDocument();
+
+	BString	snippet(
+		"AddAttribute\n"
+		"  # use ONE of node/Node::selected below, not both\n"
+		"  node=@1\n"
+		"  Node::selected=false\n"
+		"  ~valueContainer\n"
+		"    name=\"\"\n"
+		"    # type: exact type_code as a decimal int32 - common ones: "
+		"bool=1112493900 int32=1280265799 float=1179406164 "
+		"double=1145195589 string=1129534546\n"
+		"    type=1129534546\n"
+		"    newAttribute=\"\"\n"
+		"    # subgroup (optional, repeatable): nests into a sub-BMessage "
+		"first, e.g. subgroup=\"Node::Data\"\n"
+		"  ~included_node\n");
+
+	BList		parsed;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		ParseCommands(snippet,&parsed,doc->GetCommandManager(),&error));
+	CPPUNIT_ASSERT_EQUAL((int32)1,parsed.CountItems());
+}

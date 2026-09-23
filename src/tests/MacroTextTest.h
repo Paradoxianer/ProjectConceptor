@@ -31,6 +31,7 @@ public:
 	void BindingInsideFieldBlockIsRejected(void);
 	void EmptyVariableNameIsRejected(void);
 	void PropertyInfoAcceptsNodeSelectedForSelectionDrivenCommands(void);
+	void GeneratedAddAttributeSnippetParses(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -52,6 +53,7 @@ public:
 	CPPUNIT_TEST(BindingInsideFieldBlockIsRejected);
 	CPPUNIT_TEST(EmptyVariableNameIsRejected);
 	CPPUNIT_TEST(PropertyInfoAcceptsNodeSelectedForSelectionDrivenCommands);
+	CPPUNIT_TEST(GeneratedAddAttributeSnippetParses);
 	CPPUNIT_TEST_SUITE_END();
 };
 
