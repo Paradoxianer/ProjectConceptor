@@ -887,8 +887,9 @@ const char* CommandExampleText(const char *commandName)
 			"    name=\"Priority\"\n    subgroup=\"Node::Data\"\n"
 			"    type=1280265799\n    newAttribute=1" },
 		{ "Ask",
-			"Ask\n  variable=\"count\"\n  prompt=\"How many?\"\n"
-			"  default=\"3\"\n# later steps can use $count" },
+			"Ask\n  variable=\"term\"\n  prompt=\"Search for?\"\n"
+			"  default=\"Test\"\n# a later command's string field can use the "
+			"answer: searchString=$term" },
 		{ "Batch",
 			"Batch\n  Move\n    dx=10.0\n    dy=0.0\n  Move\n    dx=0.0\n    dy=10.0" },
 		{ "ChangeValue",
