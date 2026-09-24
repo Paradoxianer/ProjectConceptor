@@ -393,10 +393,15 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 #endif
 
 	{
-		if ( (command->FindMessage(name,count-1,subCommand) == B_OK) && (subCommand) )
-		{
-			DeIndexCommand(subCommand);
-			command->ReplaceMessage(name,count-1,subCommand);
+		// every entry of a repeated field (PCommand::subPCommand has one per
+		// child) - only the last one used to be resolved, so the earlier
+		// children of a Batch/Repeat kept unresolved ids and did nothing
+		for (int32 entry = 0; entry < count; entry++) {
+			if ( (command->FindMessage(name,entry,subCommand) == B_OK) && (subCommand) )
+			{
+				DeIndexCommand(subCommand);
+				command->ReplaceMessage(name,entry,subCommand);
+			}
 		}
 		i++;
 	}

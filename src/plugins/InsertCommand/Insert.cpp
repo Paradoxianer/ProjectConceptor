@@ -60,6 +60,14 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings) {
 	int32			i					= 0;
 	status_t		err					= B_OK;
 	while ((err=settings->FindPointer("node",i,(void **)&node)) == B_OK) {
+		if ((node->what != P_C_CONNECTION_TYPE) && allNodes->HasItem(node)) {
+			// the same command run again (Repeat/ForEach around an Insert)
+			// carries the same node object - inserting it twice would put
+			// one node in the graph twice instead of creating a new one
+			BMessage	*copy	= new BMessage(*node);
+			settings->ReplacePointer("node",i,copy);
+			node	= copy;
+		}
 		if (node->what != P_C_CONNECTION_TYPE) {
 			allNodes->AddItem(node);
 			// a node's intended parent (e.g. set by GroupRenderer when

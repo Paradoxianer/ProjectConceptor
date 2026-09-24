@@ -1150,3 +1150,48 @@ void MacroTextTest::DroppedPrototypesGetDistinctIds(void)
 	CPPUNIT_ASSERT_EQUAL((int32)2,HighestReferencedId(second));
 	CPPUNIT_ASSERT_EQUAL((int32)-1,HighestReferencedId(BString("Find\n")));
 }
+
+
+void MacroTextTest::RepeatedInsertCreatesDistinctNodes(void)
+{
+	// user report: "create six nodes" macro - Repeat around two Inserts and
+	// a Batch of Select/Move played back and did nothing
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		first;
+	InsertPrototypeText(&first);
+	BString		second(first);
+	RenumberInsertPrototype(&second,2);
+	BString		text("Repeat\n  count=3\n");
+	BString		both(first);
+	both << second;
+	int32		at	= 0;
+	while (at < both.Length()) {
+		int32	nl	= both.FindFirst("\n",at);
+		text << "  " << BString(both.String()+at,nl+1-at);
+		at	= nl+1;
+	}
+	text <<
+		"  Batch\n"
+		"    Select\n"
+		"      node=@1\n"
+		"      deselect=false\n"
+		"      selectAll=false\n"
+		"    Move\n"
+		"      dx=100.0\n"
+		"      dy=100.0\n";
+
+	BList		parsed;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+	BMessage	macro(P_C_MACRO_TYPE);
+	for (int32 i = 0; i < parsed.CountItems(); i++)
+		macro.AddMessage("Macro::Commmand",(BMessage*)parsed.ItemAt(i));
+	doc->GetCommandManager()->PlayMacro(&macro);
+
+	BList	*nodes	= doc->GetAllNodes();
+	CPPUNIT_ASSERT_EQUAL((int32)6,nodes->CountItems());
+	for (int32 a = 0; a < nodes->CountItems(); a++)
+		for (int32 b = a+1; b < nodes->CountItems(); b++)
+			CPPUNIT_ASSERT(nodes->ItemAt(a) != nodes->ItemAt(b));
+}
