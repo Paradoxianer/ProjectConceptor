@@ -869,3 +869,40 @@ void MacroTextTest::SnippetDropSnapsToLineBoundaryWithIndent(void)
 	message << error;
 	CPPUNIT_ASSERT_MESSAGE(message.String(),err == B_OK);
 }
+
+
+void MacroTextTest::IndentChangeMovesInAndOutWithoutGoingNegative(void)
+{
+	CPPUNIT_ASSERT_EQUAL((int32)2,IndentChange(BString("Find"),1));
+	CPPUNIT_ASSERT_EQUAL((int32)4,IndentChange(BString("  Find"),2));
+	CPPUNIT_ASSERT_EQUAL((int32)-2,IndentChange(BString("    Find"),-1));
+	// already at depth 0 - nothing to remove
+	CPPUNIT_ASSERT_EQUAL((int32)0,IndentChange(BString("Find"),-1));
+	// never more than the line's own leading spaces
+	CPPUNIT_ASSERT_EQUAL((int32)-2,IndentChange(BString("  Find"),-3));
+
+	// end to end: a block moved in one level is a subcommand of the
+	// command line above it, and parses as one
+	BString	block("Find\n  searchString=\"Test\"\n");
+	BString	moved;
+	BString	line;
+	for (int32 i = 0; i < block.Length(); i++) {
+		if (block[i] != '\n') {
+			line.Append(block.String()+i,1);
+			continue;
+		}
+		for (int32 n = IndentChange(line,1); n > 0; n--)
+			moved << " ";
+		moved << line << "\n";
+		line.SetTo("");
+	}
+	BString	text("Repeat\n  count=2\n");
+	text << moved;
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BList		parsed;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+	BMessage	*repeat	= (BMessage*)parsed.ItemAt(0);
+	CPPUNIT_ASSERT(repeat->HasMessage("PCommand::subPCommand"));
+}

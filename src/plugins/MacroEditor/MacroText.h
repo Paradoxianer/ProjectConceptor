@@ -98,4 +98,10 @@ const char*	CommandExampleText(const char *commandName);
 void		SnippetInsertion(const BString &text, int32 line, bool lowerHalf,
 				const BString &snippet, int32 *outOffset, BString *outText);
 
+/** How many characters to add (positive) or remove (negative) at the start of
+ * `line` to move it `levels` indent levels (2 spaces each) in or out. An
+ * outdent never removes more than the line's own leading spaces, so a line
+ * already at depth 0 stays put. */
+int32		IndentChange(const BString &line, int32 levels);
+
 #endif

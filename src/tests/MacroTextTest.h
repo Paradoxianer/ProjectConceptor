@@ -35,6 +35,7 @@ public:
 	void FindThenAddAttributeReachesEveryFoundNode(void);
 	void EveryCommandExampleParses(void);
 	void SnippetDropSnapsToLineBoundaryWithIndent(void);
+	void IndentChangeMovesInAndOutWithoutGoingNegative(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -60,6 +61,7 @@ public:
 	CPPUNIT_TEST(FindThenAddAttributeReachesEveryFoundNode);
 	CPPUNIT_TEST(EveryCommandExampleParses);
 	CPPUNIT_TEST(SnippetDropSnapsToLineBoundaryWithIndent);
+	CPPUNIT_TEST(IndentChangeMovesInAndOutWithoutGoingNegative);
 	CPPUNIT_TEST_SUITE_END();
 };
 

@@ -271,6 +271,15 @@ void MacroTextView::ClearFoldStyle(int32 start, int32 end)
 
 void MacroTextView::KeyDown(const char *bytes, int32 numBytes)
 {
+	// Tab/Shift+Tab indent instead of moving focus - the DSL is indentation
+	// (2 spaces per level) and a literal tab character would not parse.
+	if ((numBytes == 1) && (bytes[0] == B_TAB)) {
+		int32	modifiers	= 0;
+		if ((Window() != NULL) && (Window()->CurrentMessage() != NULL))
+			Window()->CurrentMessage()->FindInt32("modifiers",&modifiers);
+		ShiftSelectedLines((modifiers & B_SHIFT_KEY) ? -1 : 1);
+		return;
+	}
 	BTextView::KeyDown(bytes,numBytes);
 	// B_RETURN and B_ENTER are the same byte (0x0a) in Haiku - covers both
 	// the main Return key and the numpad Enter key uniformly.
@@ -341,6 +350,55 @@ void MacroTextView::MessageReceived(BMessage *message)
 }
 
 
+void MacroTextView::ShiftSelectedLines(int32 levels)
+{
+	int32	selStart	= 0;
+	int32	selEnd		= 0;
+	GetSelection(&selStart,&selEnd);
+	int32	firstLine	= LineAt(selStart);
+	int32	lastLine	= LineAt(selEnd);
+	// a selection ending exactly at a line's start doesn't include that line
+	if ((selEnd > selStart) && (OffsetAt(lastLine) == selEnd) && (lastLine > firstLine))
+		lastLine--;
+	BString	all(Text());
+	int32	delta		= 0;
+	// bottom to top, so earlier offsets stay valid while editing
+	for (int32 line = lastLine; line >= firstLine; line--) {
+		int32	start	= OffsetAt(line);
+		int32	end		= start;
+		while ((end < all.Length()) && (all[end] != '\n'))
+			end++;
+		BString	lineText(LineText(all,start,end));
+		if (Trimmed(lineText).Length() == 0)
+			continue;
+		int32	change	= IndentChange(lineText,levels);
+		if (change > 0) {
+			BString	spaces;
+			for (int32 i = 0; i < change; i++)
+				spaces << " ";
+			Insert(start,spaces.String(),spaces.Length());
+			all.Insert(spaces,start);
+		} else if (change < 0) {
+			Delete(start,start-change);
+			all.Remove(start,-change);
+		}
+		if (line == firstLine)
+			delta	= change;
+	}
+	int32		newStart	= OffsetAt(firstLine);
+	if (selEnd > selStart) {
+		const char	*text	= Text();
+		int32		newEnd	= OffsetAt(lastLine);
+		while ((text[newEnd] != '\0') && (text[newEnd] != '\n'))
+			newEnd++;
+		Select(newStart,newEnd);
+	} else {
+		int32	caret	= selStart+delta;
+		Select((caret > newStart) ? caret : newStart,(caret > newStart) ? caret : newStart);
+	}
+}
+
+
 void MacroTextView::DropSnippet(BPoint where, const char *text, int32 length)
 {
 	BString	all(Text());
@@ -349,6 +407,30 @@ void MacroTextView::DropSnippet(BPoint where, const char *text, int32 length)
 		&& (where.y > PointAt(OffsetAt(line)).y + LineHeight(line)/2);
 	int32	insertOffset	= 0;
 	BString	insertText;
+
+	// Lines are selected and the drop lands on them: wrap them - the new
+	// command goes in front, the selected commands become its subcommands
+	// (indented one level deeper), in place. Dropping anywhere else with
+	// something selected is just a normal drop.
+	int32	selStart	= 0;
+	int32	selEnd		= 0;
+	GetSelection(&selStart,&selEnd);
+	if ((all.Length() > 0) && (selEnd > selStart)) {
+		int32	firstLine	= LineAt(selStart);
+		int32	lastLine	= LineAt(selEnd);
+		if ((OffsetAt(lastLine) == selEnd) && (lastLine > firstLine))
+			lastLine--;
+		if ((line >= firstLine) && (line <= lastLine)) {
+			SnippetInsertion(all,firstLine,false,BString(text,length),&insertOffset,&insertText);
+			ShiftSelectedLines(1);
+			Insert(insertOffset,insertText.String(),insertText.Length());
+			StyleCommandLines();
+			Select(insertOffset,insertOffset+insertText.Length());
+			ScrollToSelection();
+			return;
+		}
+	}
+
 	SnippetInsertion(all,line,lowerHalf,BString(text,length),&insertOffset,&insertText);
 	Insert(insertOffset,insertText.String(),insertText.Length());
 	StyleCommandLines();

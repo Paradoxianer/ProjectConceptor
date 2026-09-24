@@ -93,6 +93,12 @@ public:
 			 * canonicalLineNo is out of range. */
 			bool			RevealCanonicalLine(int32 canonicalLineNo);
 
+	/** Moves the lines touched by the selection (or the caret's line) `levels`
+	 * indent levels in (positive) or out (negative) - Tab / Shift+Tab. Turns
+	 * a block of commands into subcommands of the line above and back. Only
+	 * leading whitespace is touched, so a folded chip keeps its styling. */
+			void			ShiftSelectedLines(int32 levels);
+
 private:
 			/** Inserts a dragged-in command snippet on a line boundary, not
 			 * where the mouse happens to be: BTextView's own drop inserts at

@@ -997,3 +997,15 @@ void SnippetInsertion(const BString &text, int32 line, bool lowerHalf,
 	}
 	*outOffset	= offset;
 }
+
+
+int32 IndentChange(const BString &line, int32 levels)
+{
+	if (levels >= 0)
+		return levels*2;
+	int32	leading	= 0;
+	while ((leading < line.Length()) && (line[leading] == ' '))
+		leading++;
+	int32	remove	= (-levels)*2;
+	return -((remove < leading) ? remove : leading);
+}
