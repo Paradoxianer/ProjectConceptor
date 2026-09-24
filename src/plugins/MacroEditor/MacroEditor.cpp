@@ -802,7 +802,10 @@ void MacroEditor::MessageReceived(BMessage *message)
 					(message->FindString("name",&name) == B_OK)) {
 				BDirectory	dir(&dirRef);
 				BFile		file(&dir,name,B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
-				BString		text(fTextView->Text());
+				// the folded chips are display only - the file needs the real
+				// blocks, or it can't be imported again
+				BString		text;
+				fTextView->ExpandedText(&text);
 				file.Write(text.String(),text.Length());
 				SetStatus(B_TRANSLATE("Exported."),false);
 			}
