@@ -814,3 +814,58 @@ void MacroTextTest::EveryCommandExampleParses(void)
 	}
 	CPPUNIT_ASSERT(checked >= 12);
 }
+
+
+void MacroTextTest::SnippetDropSnapsToLineBoundaryWithIndent(void)
+{
+	// user report: dropping a command onto the word "Find" inserted the
+	// snippet mid-word and broke that command (and its Repeat).
+	BString	text(
+		"Repeat\n"
+		"  count=3\n"
+		"  Find\n"
+		"    searchString=\"Test\"\n"
+		"  Move\n"
+		"    dx=1.0\n");
+	BString	snippet("Sleep\n  milliseconds=0\n");
+	int32	offset	= -1;
+	BString	inserted;
+
+	// upper half of the "  Find" line (line 2): before it, depth 1
+	SnippetInsertion(text,2,false,snippet,&offset,&inserted);
+	CPPUNIT_ASSERT_EQUAL((int32)text.FindFirst("  Find"),offset);
+	CPPUNIT_ASSERT(inserted == "  Sleep\n    milliseconds=0\n");
+
+	// lower half of the "  Find" line: after it AND its nested searchString
+	SnippetInsertion(text,2,true,snippet,&offset,&inserted);
+	CPPUNIT_ASSERT_EQUAL((int32)text.FindFirst("  Move"),offset);
+	CPPUNIT_ASSERT(inserted == "  Sleep\n    milliseconds=0\n");
+
+	// lower half of the top-level "Repeat": after the whole block, depth 0
+	SnippetInsertion(text,0,true,snippet,&offset,&inserted);
+	CPPUNIT_ASSERT_EQUAL(text.Length(),offset);
+	CPPUNIT_ASSERT(inserted == "Sleep\n  milliseconds=0\n");
+
+	// last line without a trailing newline: gets one first
+	BString	noNewline("Move\n  dx=1.0");
+	SnippetInsertion(noNewline,1,true,snippet,&offset,&inserted);
+	CPPUNIT_ASSERT_EQUAL(noNewline.Length(),offset);
+	CPPUNIT_ASSERT(inserted == "\n  Sleep\n    milliseconds=0\n");
+
+	// empty text
+	SnippetInsertion(BString(""),0,false,snippet,&offset,&inserted);
+	CPPUNIT_ASSERT_EQUAL((int32)0,offset);
+	CPPUNIT_ASSERT(inserted == "Sleep\n  milliseconds=0\n");
+
+	// the result of dropping into the middle of the macro still parses
+	BString	result(text);
+	SnippetInsertion(text,2,false,snippet,&offset,&inserted);
+	result.Insert(inserted,offset);
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BList		parsed;
+	BString		error;
+	BString		message("dropped result: ");
+	status_t	err	= ParseCommands(result,&parsed,doc->GetCommandManager(),&error);
+	message << error;
+	CPPUNIT_ASSERT_MESSAGE(message.String(),err == B_OK);
+}

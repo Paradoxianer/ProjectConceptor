@@ -925,3 +925,74 @@ const char* CommandExampleText(const char *commandName)
 			return kExamples[i].example;
 	return NULL;
 }
+
+
+void SnippetInsertion(const BString &text, int32 line, bool lowerHalf,
+	const BString &snippet, int32 *outOffset, BString *outText)
+{
+	int32	total	= text.Length();
+	int32	offset	= 0;
+	int32	depth	= 0;
+
+	// start offset of every line
+	std::vector<int32>	starts;
+	starts.push_back(0);
+	for (int32 i = 0; i < total; i++)
+		if (text[i] == '\n')
+			starts.push_back(i+1);
+	int32	lineCount	= (int32)starts.size();
+	if (total > 0) {
+		if (line < 0)
+			line	= 0;
+		if (line >= lineCount)
+			line	= lineCount-1;
+		BString	target;
+		int32	end	= starts[line];
+		while ((end < total) && (text[end] != '\n'))
+			end++;
+		text.CopyInto(target,starts[line],end-starts[line]);
+		int32	spaces	= 0;
+		while ((spaces < target.Length()) && (target[spaces] == ' '))
+			spaces++;
+		depth	= spaces/2;
+		if (!lowerHalf)
+			offset	= starts[line];
+		else {
+			int32	next	= line+1;
+			while (next < lineCount) {
+				int32	nextEnd	= starts[next];
+				while ((nextEnd < total) && (text[nextEnd] != '\n'))
+					nextEnd++;
+				BString	nextLine;
+				text.CopyInto(nextLine,starts[next],nextEnd-starts[next]);
+				BString	trimmed(nextLine);
+				trimmed.Trim();
+				int32	nextSpaces	= 0;
+				while ((nextSpaces < nextLine.Length()) && (nextLine[nextSpaces] == ' '))
+					nextSpaces++;
+				if ((trimmed.Length() > 0) && (nextSpaces/2 <= depth))
+					break;
+				next++;
+			}
+			offset	= (next < lineCount) ? starts[next] : total;
+		}
+	}
+
+	BString	indent;
+	for (int32 d = 0; d < depth; d++)
+		indent << "  ";
+	outText->SetTo("");
+	if ((offset == total) && (total > 0) && (text[total-1] != '\n'))
+		*outText << "\n";
+	int32	pos	= 0;
+	while (pos < snippet.Length()) {
+		int32	end	= pos;
+		while ((end < snippet.Length()) && (snippet[end] != '\n'))
+			end++;
+		BString	snippetLine;
+		snippet.CopyInto(snippetLine,pos,end-pos);
+		*outText << indent << snippetLine << "\n";
+		pos	= end+1;
+	}
+	*outOffset	= offset;
+}

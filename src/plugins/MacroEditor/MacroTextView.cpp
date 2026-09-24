@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "MacroEditor.h"
+#include "MacroText.h"
 #include "ProjectConceptorDefs.h"
 
 // mirrors MacroText.cpp's own convention (SerializeFieldLines()/ParseMacro()):
@@ -308,6 +309,51 @@ void MacroTextView::Select(int32 startOffset, int32 endOffset)
 			column++;
 	}
 	fEditor->UpdateCursorPosition(line,column);
+}
+
+
+bool MacroTextView::AcceptsDrop(const BMessage *message)
+{
+	if (message->HasBool(kCommandSnippetDragMarker))
+		return false;
+	return BTextView::AcceptsDrop(message);
+}
+
+
+void MacroTextView::MessageReceived(BMessage *message)
+{
+	if (message->WasDropped() && message->HasBool(kCommandSnippetDragMarker)) {
+		// BTextView first: it does the drop's own cleanup (drag caret,
+		// auto-scroll runner) before checking AcceptsDrop() - which says no
+		// for this message, so it inserts nothing itself.
+		BTextView::MessageReceived(message);
+		const void	*data	= NULL;
+		ssize_t		length	= 0;
+		if ((message->FindData("text/plain",B_MIME_TYPE,&data,&length) == B_OK) && (length > 0)) {
+			BPoint	dropOffset;
+			BPoint	dropPoint	= message->DropPoint(&dropOffset);
+			ConvertFromScreen(&dropPoint);
+			DropSnippet(dropPoint,(const char*)data,(int32)length);
+		}
+		return;
+	}
+	BTextView::MessageReceived(message);
+}
+
+
+void MacroTextView::DropSnippet(BPoint where, const char *text, int32 length)
+{
+	BString	all(Text());
+	int32	line		= (all.Length() > 0) ? LineAt(where) : 0;
+	bool	lowerHalf	= (all.Length() > 0)
+		&& (where.y > PointAt(OffsetAt(line)).y + LineHeight(line)/2);
+	int32	insertOffset	= 0;
+	BString	insertText;
+	SnippetInsertion(all,line,lowerHalf,BString(text,length),&insertOffset,&insertText);
+	Insert(insertOffset,insertText.String(),insertText.Length());
+	StyleCommandLines();
+	Select(insertOffset,insertOffset+insertText.Length());
+	ScrollToSelection();
 }
 
 

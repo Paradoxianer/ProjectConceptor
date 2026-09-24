@@ -12,6 +12,10 @@
 
 class MacroEditor;
 
+/** Marker field on the drag message CommandReferenceListView builds - see
+ * MacroTextView::MessageReceived(). */
+const char* const kCommandSnippetDragMarker	= "pc:command_snippet";
+
 /**
  * @class MacroTextView
  *
@@ -42,6 +46,10 @@ public:
 	virtual	void			KeyDown(const char *bytes, int32 numBytes);
 	virtual	void			MakeFocus(bool focused = true);
 	virtual	void			MouseDown(BPoint where);
+	virtual	void			MessageReceived(BMessage *message);
+	/** Refuses a command-snippet drop for BTextView's own insert-at-the-
+	 * mouse-position handling - MessageReceived() places it itself. */
+	virtual	bool			AcceptsDrop(const BMessage *message);
 	/** BTextView's own internal mechanics (click, arrow-key navigation,
 	 * typing, drag&drop, ...) all funnel through this - the one reliable
 	 * hook for "the cursor/selection just changed", used to keep
@@ -86,6 +94,14 @@ public:
 			bool			RevealCanonicalLine(int32 canonicalLineNo);
 
 private:
+			/** Inserts a dragged-in command snippet on a line boundary, not
+			 * where the mouse happens to be: BTextView's own drop inserts at
+			 * the exact character under the pointer, so dropping onto the
+			 * word "Find" split it in two and broke that command (user
+			 * report). Upper half of the target line -> before it; lower
+			 * half -> after it and everything nested deeper below it. The
+			 * snippet is indented to the target line's own depth. */
+			void			DropSnippet(BPoint where, const char *text, int32 length);
 			MacroEditor		*fEditor;
 			/** This view's own starting font/color, captured once at
 			 * construction - what a folded placeholder line gets styled

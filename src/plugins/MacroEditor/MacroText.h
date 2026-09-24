@@ -86,4 +86,16 @@ status_t	ParseCommands(const BString &text, BList *outCommands,
  * entry is checked against the real parser by MacroTextTest. */
 const char*	CommandExampleText(const char *commandName);
 
+/** Where (and how indented) a dragged-in command snippet goes: on a line
+ * boundary of `text`, never mid-line - dropping onto the word "Find" used to
+ * split it in two and break the command. `line` is the 0-based line under
+ * the pointer; upper half of it (lowerHalf=false) -> before that line, lower
+ * half -> after it and every deeper-indented line that belongs to it. The
+ * snippet is indented to the target line's own depth (2 spaces per level).
+ * Returns the insert position and the exact text to insert (every line
+ * indented, newline-terminated; a leading newline if the target is the very
+ * last line and doesn't end in one). */
+void		SnippetInsertion(const BString &text, int32 line, bool lowerHalf,
+				const BString &snippet, int32 *outOffset, BString *outText);
+
 #endif

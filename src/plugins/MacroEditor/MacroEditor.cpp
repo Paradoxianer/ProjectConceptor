@@ -229,6 +229,7 @@ public:
 		if ((item == NULL) || item->Snippet().IsEmpty())
 			return false;
 		BMessage	drag(B_MIME_DATA);
+		drag.AddBool(kCommandSnippetDragMarker,true);
 		drag.AddData("text/plain",B_MIME_TYPE,item->Snippet().String(),
 			item->Snippet().Length());
 		DragMessage(&drag,ItemFrame(index));
