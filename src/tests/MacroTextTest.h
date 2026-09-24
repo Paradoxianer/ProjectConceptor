@@ -39,6 +39,10 @@ public:
 	void IncludedNodeKeepsItsMessageType(void);
 	void TypeCodesReadAsNames(void);
 	void InsertPrototypeParsesAndKeepsNodeShape(void);
+	void FoldedChipsSurviveWrapAndNewLine(void);
+	void ChipsFollowIndentShiftOfTheirLine(void);
+	void EditedChipIdStillFindsItsBlock(void);
+	void DroppedPrototypesGetDistinctIds(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -68,6 +72,10 @@ public:
 	CPPUNIT_TEST(IncludedNodeKeepsItsMessageType);
 	CPPUNIT_TEST(TypeCodesReadAsNames);
 	CPPUNIT_TEST(InsertPrototypeParsesAndKeepsNodeShape);
+	CPPUNIT_TEST(FoldedChipsSurviveWrapAndNewLine);
+	CPPUNIT_TEST(ChipsFollowIndentShiftOfTheirLine);
+	CPPUNIT_TEST(EditedChipIdStillFindsItsBlock);
+	CPPUNIT_TEST(DroppedPrototypesGetDistinctIds);
 	CPPUNIT_TEST_SUITE_END();
 };
 

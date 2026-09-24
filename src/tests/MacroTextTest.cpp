@@ -19,6 +19,16 @@
 #include "Find.h"
 #include "Group.h"
 #include "Insert.h"
+#include <interface/Font.h>
+#include <interface/GraphicsDefs.h>
+#include <interface/TextView.h>
+#include <map>
+
+// the fold toggle is private on purpose; the test drives it directly
+#define private public
+#include "MacroTextView.h"
+#undef private
+#include "MacroEditor.h"
 #include "MacroText.h"
 #include "Move.h"
 #include "PCommand.h"
@@ -993,4 +1003,150 @@ void MacroTextTest::InsertPrototypeParsesAndKeepsNodeShape(void)
 	BMessage	data;
 	CPPUNIT_ASSERT(node.FindMessage(P_C_NODE_DATA,&data) == B_OK);
 	CPPUNIT_ASSERT(node.HasMessage(P_C_NODE_PATTERN));
+}
+
+
+// MacroTextView only calls back into these two - real MacroEditor is not
+// part of the test binary
+void MacroEditor::ApplyEdits(bool) {}
+void MacroEditor::UpdateCursorPosition(int32, int32) {}
+
+
+void MacroTextTest::FoldedChipsSurviveWrapAndNewLine(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		insertText;
+	InsertPrototypeText(&insertText);
+
+	// two dropped Insert prototypes (both carry this=1), wrapped in Repeat
+	BString	canonical("Repeat\n  count=2\n");
+	for (int32 copy = 0; copy < 2; copy++) {
+		int32	at	= 0;
+		while (at < insertText.Length()) {
+			int32	nl	= insertText.FindFirst("\n",at);
+			canonical << "  " << BString(insertText.String()+at,nl+1-at);
+			at	= nl+1;
+		}
+	}
+
+	MacroTextView	view(BRect(0,0,300,300),"t",BRect(4,4,296,296),B_FOLLOW_ALL_SIDES,B_WILL_DRAW);
+	view.SetMacroText(canonical);
+
+	BList		parsed;
+	BString		expanded;
+	BString		error;
+	view.ExpandedText(&expanded);
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(expanded,&parsed,doc->GetCommandManager(),&error));
+	CPPUNIT_ASSERT(expanded == canonical);
+
+	// Enter after the last chip
+	BString	text(view.Text());
+	int32	lastChip	= text.FindLast(">> ~included_node");
+	int32	chipEnd		= text.FindFirst("\n",lastChip);
+	CPPUNIT_ASSERT(lastChip > 0);
+	view.Insert(chipEnd,"\n",1);
+
+	expanded	= "";
+	view.ExpandedText(&expanded);
+	BList	parsed2;
+	error	= "";
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(expanded,&parsed2,doc->GetCommandManager(),&error));
+
+	// chips still expand: first one via the double-click path
+	BString	afterToggle(view.Text());
+	int32	firstChip	= afterToggle.FindFirst(">> ~included_node");
+	int32	firstChipEnd	= afterToggle.FindFirst("\n",firstChip);
+	int32	firstChipStart	= afterToggle.FindLast("\n",firstChip)+1;
+	view.ToggleFoldAtLine(firstChipStart,firstChipEnd+1);
+	expanded	= "";
+	view.ExpandedText(&expanded);
+	BList	parsed3;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(expanded,&parsed3,doc->GetCommandManager(),&error));
+}
+
+
+void MacroTextTest::ChipsFollowIndentShiftOfTheirLine(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		canonical;
+	InsertPrototypeText(&canonical);
+	BString		insertText(canonical);
+	canonical << insertText;
+
+	MacroTextView	view(BRect(0,0,300,300),"t",BRect(4,4,296,296),B_FOLLOW_ALL_SIDES,B_WILL_DRAW);
+	view.SetMacroText(canonical);
+
+	// wrap: everything indented one level, Repeat in front
+	view.Select(0,view.TextLength());
+	view.ShiftSelectedLines(1);
+	BString	header("Repeat\n  count=2\n  counterVariable=\"\"\n");
+	view.Insert(0,header.String(),header.Length());
+
+	BString	expanded;
+	view.ExpandedText(&expanded);
+	BList	parsed;
+	BString	error;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(expanded,&parsed,doc->GetCommandManager(),&error));
+
+	// drop the counterVariable line, put it back, Enter after the last chip
+	view.Delete(header.Length()-BString("  counterVariable=\"\"\n").Length(),header.Length());
+	view.Insert(BString("Repeat\n  count=2\n").Length(),"  counterVariable=\"\"\n",22);
+	BString	text(view.Text());
+	int32	lastChip	= text.FindLast(">> ~included_node");
+	view.Insert(text.FindFirst("\n",lastChip),"\n",1);
+
+	expanded	= "";
+	view.ExpandedText(&expanded);
+	BList	parsed2;
+	error	= "";
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(expanded,&parsed2,doc->GetCommandManager(),&error));
+}
+
+
+void MacroTextTest::EditedChipIdStillFindsItsBlock(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		canonical;
+	InsertPrototypeText(&canonical);
+	BString		second(canonical);
+	RenumberInsertPrototype(&second,2);
+	canonical << second;
+
+	MacroTextView	view(BRect(0,0,300,300),"t",BRect(4,4,296,296),B_FOLLOW_ALL_SIDES,B_WILL_DRAW);
+	view.SetMacroText(canonical);
+
+	// retype the second chip's id, [@2] -> [@7]
+	BString	text(view.Text());
+	int32	at	= text.FindFirst("[@2]");
+	CPPUNIT_ASSERT(at > 0);
+	view.Delete(at+2,at+3);
+	view.Insert(at+2,"7",1);
+
+	BString	expanded;
+	view.ExpandedText(&expanded);
+	CPPUNIT_ASSERT(expanded.FindFirst("this=7") >= 0);
+	BList	parsed;
+	BString	error;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(expanded,&parsed,doc->GetCommandManager(),&error));
+}
+
+
+void MacroTextTest::DroppedPrototypesGetDistinctIds(void)
+{
+	BString	first;
+	InsertPrototypeText(&first);
+	CPPUNIT_ASSERT_EQUAL((int32)1,HighestReferencedId(first));
+	BString	second(first);
+	RenumberInsertPrototype(&second,2);
+	CPPUNIT_ASSERT(second.FindFirst("node=@2") >= 0);
+	CPPUNIT_ASSERT(second.FindFirst("this=2") >= 0);
+	CPPUNIT_ASSERT(second.FindFirst("node=@1") < 0);
+	CPPUNIT_ASSERT_EQUAL((int32)2,HighestReferencedId(second));
+	CPPUNIT_ASSERT_EQUAL((int32)-1,HighestReferencedId(BString("Find\n")));
 }

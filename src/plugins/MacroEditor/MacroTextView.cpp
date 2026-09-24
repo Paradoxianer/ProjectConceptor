@@ -5,6 +5,7 @@
 #include <interface/Window.h>
 
 #include <string.h>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -401,6 +402,13 @@ void MacroTextView::ShiftSelectedLines(int32 levels)
 
 void MacroTextView::DropSnippet(BPoint where, const char *text, int32 length)
 {
+	// an Insert prototype is always node 1 - a second one would clash with
+	// the first, so it takes the next free id
+	BString	snippet(text,length);
+	BString	existing;
+	ExpandedText(&existing);
+	int32	nextId	= HighestReferencedId(existing)+1;
+	RenumberInsertPrototype(&snippet,(nextId > 1) ? nextId : 1);
 	BString	all(Text());
 	int32	line		= (all.Length() > 0) ? LineAt(where) : 0;
 	bool	lowerHalf	= (all.Length() > 0)
@@ -421,7 +429,7 @@ void MacroTextView::DropSnippet(BPoint where, const char *text, int32 length)
 		if ((OffsetAt(lastLine) == selEnd) && (lastLine > firstLine))
 			lastLine--;
 		if ((line >= firstLine) && (line <= lastLine)) {
-			SnippetInsertion(all,firstLine,false,BString(text,length),&insertOffset,&insertText);
+			SnippetInsertion(all,firstLine,false,snippet,&insertOffset,&insertText);
 			ShiftSelectedLines(1);
 			Insert(insertOffset,insertText.String(),insertText.Length());
 			ClearFoldStyle(insertOffset,insertOffset+insertText.Length());
@@ -432,7 +440,7 @@ void MacroTextView::DropSnippet(BPoint where, const char *text, int32 length)
 		}
 	}
 
-	SnippetInsertion(all,line,lowerHalf,BString(text,length),&insertOffset,&insertText);
+	SnippetInsertion(all,line,lowerHalf,snippet,&insertOffset,&insertText);
 	Insert(insertOffset,insertText.String(),insertText.Length());
 	// the text takes the style of whatever it landed next to - a chip's
 	// italics would otherwise spread over the dropped commands
@@ -496,6 +504,7 @@ void MacroTextView::MouseDown(BPoint where)
 
 void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 {
+	AdoptEditedChipIds();
 	BString	fullText(Text());
 	BString	line	= LineText(fullText,lineStart,lineEnd);
 	BString	trimmed	= Trimmed(line);
@@ -531,6 +540,66 @@ void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 		StyleAsFoldedChip(lineStart,lineStart+placeholder.Length());
 		return;
 	}
+}
+
+
+static void SetThisId(BString *blockText, int32 newId)
+{
+	int32	lineStart	= 0;
+	int32	textLength	= blockText->Length();
+	while (lineStart < textLength) {
+		int32	nl		= blockText->FindFirst("\n",lineStart);
+		int32	lineEnd	= (nl >= 0) ? nl+1 : textLength;
+		BString	line	= LineText(*blockText,lineStart,lineEnd);
+		if (Trimmed(line).StartsWith("this=")) {
+			BString	replacement	= LeadingWhitespace(line);
+			replacement	<< "this=" << newId << "\n";
+			blockText->Remove(lineStart,lineEnd-lineStart);
+			blockText->Insert(replacement,lineStart);
+			return;
+		}
+		lineStart	= lineEnd;
+	}
+}
+
+
+void MacroTextView::AdoptEditedChipIds(void)
+{
+	// the "[@N]" in a chip is text like any other and gets edited (to match
+	// a hand-changed "node=@N", say) - its folded block is then no longer
+	// found under that id. With exactly one such chip and one block no chip
+	// points at anymore, the edit is the rename of that block.
+	BString	fullText(Text());
+	std::set<int32>	shownKeys;
+	std::vector<int32>	unresolved;
+	int32	lineStart	= 0;
+	int32	textLength	= fullText.Length();
+	while (lineStart < textLength) {
+		int32	nl		= fullText.FindFirst("\n",lineStart);
+		int32	lineEnd	= (nl >= 0) ? nl+1 : textLength;
+		int32	key		= 0;
+		if (IsFoldedPlaceholder(Trimmed(LineText(fullText,lineStart,lineEnd)),&key)) {
+			shownKeys.insert(key);
+			if (fFoldedBlockText.find(key) == fFoldedBlockText.end())
+				unresolved.push_back(key);
+		}
+		lineStart	= lineEnd;
+	}
+	if (unresolved.size() != 1)
+		return;
+	std::vector<int32>	orphans;
+	for (std::map<int32,BString>::iterator entry = fFoldedBlockText.begin();
+			entry != fFoldedBlockText.end(); ++entry)
+		if (shownKeys.find(entry->first) == shownKeys.end())
+			orphans.push_back(entry->first);
+	if (orphans.size() != 1)
+		return;
+	int32	newKey	= unresolved[0];
+	BString	block	= fFoldedBlockText[orphans[0]];
+	if (newKey >= 0)
+		SetThisId(&block,newKey);
+	fFoldedBlockText.erase(orphans[0]);
+	fFoldedBlockText[newKey]	= block;
 }
 
 
@@ -679,6 +748,7 @@ bool MacroTextView::LostFoldedBlocks(BString *outWarning)
 
 void MacroTextView::ExpandedText(BString *out)
 {
+	AdoptEditedChipIds();
 	out->SetTo("");
 	BString	fullText(Text());
 	int32	lineStart	= 0;

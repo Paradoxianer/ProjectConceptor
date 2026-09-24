@@ -149,6 +149,8 @@ private:
 			 * another folded block already holds that key, else a fresh
 			 * synthetic one. */
 			int32			AllocateFoldKey(int32 thisId);
+			/** Re-keys a folded block whose chip's "[@N]" was edited by hand. */
+			void			AdoptEditedChipIds(void);
 			/** Carries an edited chip label ("NewName") over into the
 			 * folded block's own name field. */
 			void			ApplyChipLabelEdit(BString *blockText,

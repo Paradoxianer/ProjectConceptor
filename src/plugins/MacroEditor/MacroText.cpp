@@ -1176,3 +1176,51 @@ void InsertPrototypeText(BString *out)
 	commands.AddItem(&insert);
 	SerializeCommands(&commands,out);
 }
+
+
+int32 HighestReferencedId(const BString &text)
+{
+	int32	highest	= -1;
+	int32	length	= text.Length();
+	for (int32 i = 0; i < length; i++) {
+		int32	digitsAt	= -1;
+		if (text[i] == '@')
+			digitsAt	= i+1;
+		else if ((i+5 <= length) && (strncmp(text.String()+i,"this=",5) == 0)
+				&& ((i == 0) || (text[i-1] == ' ') || (text[i-1] == '\n')))
+			digitsAt	= i+5;
+		if ((digitsAt < 0) || (digitsAt >= length) || (text[digitsAt] < '0') || (text[digitsAt] > '9'))
+			continue;
+		int32	value	= atol(text.String()+digitsAt);
+		if (value > highest)
+			highest	= value;
+	}
+	return highest;
+}
+
+
+void RenumberInsertPrototype(BString *snippet, int32 newId)
+{
+	BString	result;
+	int32	at	= 0;
+	int32	length	= snippet->Length();
+	while (at < length) {
+		int32	nl		= snippet->FindFirst("\n",at);
+		int32	end		= (nl >= 0) ? nl+1 : length;
+		BString	line(snippet->String()+at,end-at);
+		BString	trimmed(line);
+		trimmed.Trim();
+		if (trimmed == "node=@1" || trimmed == "this=1") {
+			int32	indent	= 0;
+			while ((indent < line.Length()) && (line[indent] == ' '))
+				indent++;
+			BString	renumbered;
+			renumbered.Append(' ',indent);
+			renumbered << ((trimmed == "node=@1") ? "node=@" : "this=") << newId << "\n";
+			result	<< renumbered;
+		} else
+			result	<< line;
+		at	= end;
+	}
+	snippet->SetTo(result);
+}

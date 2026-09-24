@@ -109,4 +109,13 @@ int32		IndentChange(const BString &line, int32 levels);
  * so it isn't a bare "node=@1" pointing at nothing. */
 void		InsertPrototypeText(BString *out);
 
+/** Highest node/connection id ("@N" reference or "this=N" field) in `text`,
+ * -1 if there is none. */
+int32		HighestReferencedId(const BString &text);
+
+/** Renumbers an Insert prototype (InsertPrototypeText()) - its "node=@1" and
+ * "this=1" lines - to `newId`, so several dropped prototypes don't all claim
+ * to be node 1. */
+void		RenumberInsertPrototype(BString *snippet, int32 newId);
+
 #endif

@@ -25,6 +25,7 @@ SRCS= 	TestMain.cpp \
 		../plugins/LayoutEditor/DotLayouter.cpp \
 		../plugins/LayoutEditor/LayoutCommandBuilder.cpp \
 		../plugins/MacroEditor/MacroText.cpp \
+		../plugins/MacroEditor/MacroTextView.cpp \
 		../plugins/BatchCommand/Batch.cpp \
 		../app/ProjectConceptorDefs.cpp \
 		../app/Config/ConfigManager.cpp \
