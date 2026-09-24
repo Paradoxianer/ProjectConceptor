@@ -788,7 +788,12 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 		}
 		if (tokens.CountItems() != 1) {
 			errorOut->SetTo("");
-			*errorOut	<< "line " << lineNo << ": expected one item per line";
+			// a folded chip written into a file (older exports did that)
+			// has lost the block it stood for
+			if (*(BString*)tokens.ItemAt(0) == ">>")
+				*errorOut	<< "line " << lineNo << ": folded chip without its node data - the file was saved with the block still folded";
+			else
+				*errorOut	<< "line " << lineNo << ": expected one item per line";
 			DeleteStringList(&tokens);
 			CleanupFrames(stack,&built);
 			return B_BAD_VALUE;

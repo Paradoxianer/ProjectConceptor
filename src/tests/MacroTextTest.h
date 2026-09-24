@@ -44,6 +44,7 @@ public:
 	void EditedChipIdStillFindsItsBlock(void);
 	void DroppedPrototypesGetDistinctIds(void);
 	void RepeatedInsertCreatesDistinctNodes(void);
+	void FoldedChipInFileGivesSpecificError(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -78,6 +79,7 @@ public:
 	CPPUNIT_TEST(EditedChipIdStillFindsItsBlock);
 	CPPUNIT_TEST(DroppedPrototypesGetDistinctIds);
 	CPPUNIT_TEST(RepeatedInsertCreatesDistinctNodes);
+	CPPUNIT_TEST(FoldedChipInFileGivesSpecificError);
 	CPPUNIT_TEST_SUITE_END();
 };
 

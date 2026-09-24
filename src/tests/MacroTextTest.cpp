@@ -1008,7 +1008,7 @@ void MacroTextTest::InsertPrototypeParsesAndKeepsNodeShape(void)
 
 // MacroTextView only calls back into these two - real MacroEditor is not
 // part of the test binary
-void MacroEditor::ApplyEdits(bool) {}
+bool MacroEditor::ApplyEdits(bool) {return true;}
 void MacroEditor::UpdateCursorPosition(int32, int32) {}
 
 
@@ -1194,4 +1194,16 @@ void MacroTextTest::RepeatedInsertCreatesDistinctNodes(void)
 	for (int32 a = 0; a < nodes->CountItems(); a++)
 		for (int32 b = a+1; b < nodes->CountItems(); b++)
 			CPPUNIT_ASSERT(nodes->ItemAt(a) != nodes->ItemAt(b));
+}
+
+
+void MacroTextTest::FoldedChipInFileGivesSpecificError(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BList		parsed;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,ParseCommands(
+		BString("Insert\n  node=@1\n  >> ~included_node[@1] \"New Node 1\"\n"),
+		&parsed,doc->GetCommandManager(),&error));
+	CPPUNIT_ASSERT(error.StartsWith("line 3: folded chip"));
 }

@@ -641,10 +641,10 @@ void MacroEditor::ShowSelectedMacro(void)
 }
 
 
-void MacroEditor::ApplyEdits(bool revealErrorLine)
+bool MacroEditor::ApplyEdits(bool revealErrorLine)
 {
 	if (doc == NULL)
-		return;
+		return false;
 
 	BString	text;
 	fTextView->ExpandedText(&text);
@@ -653,7 +653,7 @@ void MacroEditor::ApplyEdits(bool revealErrorLine)
 		typed.Trim();
 		if (typed.Length() == 0) {
 			SetStatus("",false);
-			return;
+			return false;
 		}
 	}
 	BList		parsed;
@@ -679,7 +679,7 @@ void MacroEditor::ApplyEdits(bool revealErrorLine)
 			}
 		}
 		SetStatus(error.String(),true);
-		return;
+		return false;
 	}
 
 	// text typed with no macro selected creates one - otherwise there is
@@ -706,12 +706,13 @@ void MacroEditor::ApplyEdits(bool revealErrorLine)
 	BString	blockWarning;
 	if (fTextView->LostFoldedBlocks(&blockWarning)) {
 		SetStatus(blockWarning.String(),true);
-		return;
+		return true;
 	}
 
 	BString	status;
 	status.SetToFormat(B_TRANSLATE("Applied (%ld command(s))."),(long)parsed.CountItems());
 	SetStatus(status.String(),false);
+	return true;
 }
 
 
@@ -843,10 +844,16 @@ void MacroEditor::MessageReceived(BMessage *message)
 				// which is only a draft until Apply commits it.
 				fTextView->SetText(importedText.String());
 
-				BString	status;
-				status.SetToFormat(B_TRANSLATE("Imported as new macro \"%s\" - review it, then press Enter or click elsewhere to apply."),
-					name.String());
-				SetStatus(status.String(),false);
+				// applied right away: a file that doesn't parse says so now,
+				// instead of leaving an empty macro behind once the draft
+				// text is replaced by whatever is selected next
+				if (ApplyEdits(true)) {
+					ShowSelectedMacro();
+					BString	status;
+					status.SetToFormat(B_TRANSLATE("Imported as new macro \"%s\"."),
+						name.String());
+					SetStatus(status.String(),false);
+				}
 			}
 			break;
 		}
