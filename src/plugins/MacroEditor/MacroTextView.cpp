@@ -424,6 +424,7 @@ void MacroTextView::DropSnippet(BPoint where, const char *text, int32 length)
 			SnippetInsertion(all,firstLine,false,BString(text,length),&insertOffset,&insertText);
 			ShiftSelectedLines(1);
 			Insert(insertOffset,insertText.String(),insertText.Length());
+			ClearFoldStyle(insertOffset,insertOffset+insertText.Length());
 			StyleCommandLines();
 			Select(insertOffset,insertOffset+insertText.Length());
 			ScrollToSelection();
@@ -433,6 +434,9 @@ void MacroTextView::DropSnippet(BPoint where, const char *text, int32 length)
 
 	SnippetInsertion(all,line,lowerHalf,BString(text,length),&insertOffset,&insertText);
 	Insert(insertOffset,insertText.String(),insertText.Length());
+	// the text takes the style of whatever it landed next to - a chip's
+	// italics would otherwise spread over the dropped commands
+	ClearFoldStyle(insertOffset,insertOffset+insertText.Length());
 	StyleCommandLines();
 	Select(insertOffset,insertOffset+insertText.Length());
 	ScrollToSelection();
@@ -466,7 +470,11 @@ void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 		std::map<int32,BString>::iterator	found	= fFoldedBlockText.find(foldedKey);
 		if (found == fFoldedBlockText.end())
 			return;
+		ApplyChipLabelEdit(&found->second,trimmed);
 		BString	blockText	= found->second;
+		// the block's text is the view's own from here on - a stale entry
+		// would make the key look taken when the block is folded again
+		fFoldedBlockText.erase(found);
 		Delete(lineStart,lineEnd);
 		Insert(lineStart,blockText.String(),blockText.Length());
 		ClearFoldStyle(lineStart,lineStart+blockText.Length());
@@ -478,8 +486,7 @@ void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 		BString	blockText	= LineText(fullText,lineStart,blockEnd);
 		BString	label;
 		ExtractLabel(blockText,&label);
-		int32	thisId	= ExtractThisId(blockText);
-		int32	key		= (thisId >= 0) ? thisId : -(fNextSyntheticId++);
+		int32	key		= AllocateFoldKey(ExtractThisId(blockText));
 		fFoldedBlockText[key]	= blockText;
 		BString	placeholder	= LeadingWhitespace(line);
 		placeholder	<< kFoldGlyph << kIncludedNodeHeader << "[" << FoldKeyText(key)
@@ -489,6 +496,51 @@ void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 		StyleAsFoldedChip(lineStart,lineStart+placeholder.Length());
 		return;
 	}
+}
+
+
+int32 MacroTextView::AllocateFoldKey(int32 thisId)
+{
+	// two blocks can carry the same this=N (a dropped Insert prototype is
+	// always this=1): the second one must not overwrite the first's entry
+	if ((thisId >= 0) && (fFoldedBlockText.find(thisId) == fFoldedBlockText.end()))
+		return thisId;
+	return -(fNextSyntheticId++);
+}
+
+
+void MacroTextView::ApplyChipLabelEdit(BString *blockText, const BString &placeholderTrimmed)
+{
+	// a chip's label is shown as "Name" - typing into it renames the node
+	// in its folded block; anything but a plain quoted label is left alone
+	int32	closeBracket	= placeholderTrimmed.FindFirst("] ");
+	if (closeBracket < 0)
+		return;
+	BString	label;
+	placeholderTrimmed.CopyInto(label,closeBracket+2,placeholderTrimmed.Length()-closeBracket-2);
+	label.Trim();
+	if ((label.Length() < 2) || (label[0] != '"') || (label[label.Length()-1] != '"'))
+		return;
+	BString	newName;
+	label.CopyInto(newName,1,label.Length()-2);
+	if ((newName.FindFirst("\"") >= 0) || (newName.FindFirst("\\") >= 0))
+		return;
+
+	BString	currentLabel;
+	ExtractLabel(*blockText,&currentLabel);
+	if (currentLabel == label)
+		return;
+	BString	nameNeedle(P_C_NODE_NAME);
+	nameNeedle	<< "=\"";
+	int32	nameAt	= blockText->FindFirst(nameNeedle);
+	if (nameAt < 0)
+		return;
+	int32	valueStart	= nameAt+nameNeedle.Length();
+	int32	valueEnd	= blockText->FindFirst("\"",valueStart);
+	if (valueEnd < valueStart)
+		return;
+	blockText->Remove(valueStart,valueEnd-valueStart);
+	blockText->Insert(newName,valueStart);
 }
 
 
@@ -510,8 +562,7 @@ void MacroTextView::SetMacroText(const BString &canonicalText)
 			BString	blockText	= LineText(canonicalText,lineStart,blockEnd);
 			BString	label;
 			ExtractLabel(blockText,&label);
-			int32	thisId	= ExtractThisId(blockText);
-			int32	key		= (thisId >= 0) ? thisId : -(fNextSyntheticId++);
+			int32	key		= AllocateFoldKey(ExtractThisId(blockText));
 			fFoldedBlockText[key]	= blockText;
 			int32	chipStart	= folded.Length();
 			folded	<< LeadingWhitespace(line) << kFoldGlyph << kIncludedNodeHeader
@@ -603,10 +654,11 @@ void MacroTextView::ExpandedText(BString *out)
 		BString	line	= LineText(fullText,lineStart,lineEnd);
 		BString	trimmed	= Trimmed(line);
 		int32	foldedKey	= 0;
-		std::map<int32,BString>::const_iterator	found	= fFoldedBlockText.end();
+		std::map<int32,BString>::iterator	found	= fFoldedBlockText.end();
 		if (IsFoldedPlaceholder(trimmed,&foldedKey))
 			found	= fFoldedBlockText.find(foldedKey);
 		if (found != fFoldedBlockText.end()) {
+			ApplyChipLabelEdit(&found->second,trimmed);
 			*out	<< found->second;
 		} else {
 			*out	<< line;
@@ -635,10 +687,11 @@ bool MacroTextView::RevealCanonicalLine(int32 canonicalLineNo)
 {
 	if (canonicalLineNo < 1)
 		return false;
-	// bounded by fFoldedBlockText's size - at most that many blocks can
-	// ever need expanding, one per pass, before the target line is
-	// necessarily in the still-plain text.
-	for (size_t guard = 0; guard <= fFoldedBlockText.size(); guard++) {
+	// bounded by the number of folded blocks - at most that many can ever
+	// need expanding, one per pass (expanding drops the map entry, hence
+	// captured up front), before the target line is in plain text.
+	const size_t	maxPasses	= fFoldedBlockText.size();
+	for (size_t guard = 0; guard <= maxPasses; guard++) {
 		BString	fullText(Text());
 		int32	canonicalCounter	= 1;
 		int32	lineStart			= 0;

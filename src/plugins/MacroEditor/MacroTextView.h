@@ -145,6 +145,14 @@ private:
 			 * line's own range) and folds or expands it in place. No-op if
 			 * that line isn't one of the two recognized forms. */
 			void			ToggleFoldAtLine(int32 lineStart, int32 lineEnd);
+			/** Key for a block about to be folded: its own this=N unless
+			 * another folded block already holds that key, else a fresh
+			 * synthetic one. */
+			int32			AllocateFoldKey(int32 thisId);
+			/** Carries an edited chip label ("NewName") over into the
+			 * folded block's own name field. */
+			void			ApplyChipLabelEdit(BString *blockText,
+								const BString &placeholderTrimmed);
 			/** Styles [start,end) as a folded chip (italic, muted color) -
 			 * or, via ClearFoldStyle(), back to this view's own starting
 			 * font/color for freshly expanded content. */
