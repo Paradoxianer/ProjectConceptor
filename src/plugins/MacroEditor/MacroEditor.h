@@ -80,7 +80,17 @@ protected:
 			/** Rebuilds the macro-name BListView from
 			 * commandManager->GetMacroList(), preserving the selection by
 			 * name if the previously selected macro still exists. */
-			void			RefreshMacroList(void);
+			void			RefreshMacroList(bool reloadText = true);
+			/** Registers an empty macro named `name` in the command
+			 * manager's macro list and the Macro > Play submenu. Does not
+			 * select it or touch the list view. */
+			BMessage*		AddNewMacro(const BString &name);
+			/** "New macro", "New macro 2", ... - first one no macro uses. */
+			BString			UniqueMacroName(void);
+			/** Macro > New: a fresh empty macro, selected. If text was typed
+			 * with no macro selected, that text becomes the new macro
+			 * instead of being thrown away. */
+			void			NewMacro(void);
 			/** Serializes the selected macro's "Macro::Commmand" list into
 			 * fTextView. Clears the view (and the selected macro) if
 			 * nothing is selected. */

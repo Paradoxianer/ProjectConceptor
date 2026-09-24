@@ -143,6 +143,7 @@ const uint32	MENU_WINDOW_CASCADE				= 'MWcs';
 const uint32	MENU_MACRO_START_RECORDING		= 'MMsr';
 const uint32	MENU_MACRO_STOP_RECORDING		= 'MMsp';
 const uint32	MENU_MACRO_PLAY					= 'MMpl';
+const uint32	MENU_MACRO_NEW					= 'MMnw';
 const uint32	MENU_MACRO_OPEN					= 'MMop';
 const uint32	MENU_MACRO_SAVE					= 'MMsv';
 
@@ -286,6 +287,7 @@ extern const char*		P_MENU_MACRO;//					= "Macro";
 extern const char*		P_MENU_MACRO_START_RECORDING;//	= "Start Recording";
 extern const char*		P_MENU_MACRO_STOP_RECORDING;//		= "Stop Recording";
 extern const char*		P_MENU_MACRO_PLAY;//				= "Play";
+extern const char*		P_MENU_MACRO_NEW;//				= "New";
 extern const char*		P_MENU_MACRO_OPEN;//				= "Open";
 extern const char*		P_MENU_MACRO_SAVE;//				= "Save";
 

@@ -354,6 +354,10 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("item",(void *) subMenu->Superitem());
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_PLAY);
 
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("New"),new BMessage(MENU_MACRO_NEW)));
+	item->SetTarget(doc);
+	localizeMenuItems->AddPointer("item",(void *) item);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_NEW);
 	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Open"),new BMessage(MENU_MACRO_OPEN)));
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);

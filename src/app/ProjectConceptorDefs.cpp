@@ -143,6 +143,7 @@ const char*		P_MENU_MACRO					= B_TRANSLATE("Macro");
 const char*		P_MENU_MACRO_START_RECORDING	= B_TRANSLATE("Start recording");
 const char*		P_MENU_MACRO_STOP_RECORDING		= B_TRANSLATE("Stop recording");
 const char*		P_MENU_MACRO_PLAY				= B_TRANSLATE("Play");
+const char*		P_MENU_MACRO_NEW				= B_TRANSLATE("New");
 const char*		P_MENU_MACRO_OPEN				= B_TRANSLATE("Open");
 const char*		P_MENU_MACRO_SAVE				= B_TRANSLATE("Save Macro");
 

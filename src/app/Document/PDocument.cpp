@@ -187,6 +187,7 @@ void PDocument::MessageReceived(BMessage* message) {
 		// stays attached, see CreatEditorList()'s own comment on this),
 		// so sending to it before switching to it silently goes nowhere.
 		case MENU_MACRO_SAVE:
+		case MENU_MACRO_NEW:
 		case MENU_MACRO_OPEN: {
 			if ((window != NULL) && (editorManager != NULL)) {
 				window->SelectEditorTab("MacroEditor");

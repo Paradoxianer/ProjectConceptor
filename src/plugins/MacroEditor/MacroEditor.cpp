@@ -501,7 +501,7 @@ void MacroEditor::SetShortCutFilter(ShortCutFilter *_shortCutFilter)
 }
 
 
-void MacroEditor::RefreshMacroList(void)
+void MacroEditor::RefreshMacroList(bool reloadText)
 {
 	if ((fMacroList == NULL) || (doc == NULL))
 		return;
@@ -544,7 +544,65 @@ void MacroEditor::RefreshMacroList(void)
 	fKnownMacros.MakeEmpty();
 	for (int32 i = 0; i < macroList->CountItems(); i++)
 		fKnownMacros.AddItem(macroList->ItemAt(i));
-	ShowSelectedMacro();
+	if (reloadText) {
+		ShowSelectedMacro();
+		return;
+	}
+	// the text on screen stays (it is what the new macro was created from)
+	int32	selected	= fMacroList->CurrentSelection();
+	if ((selected >= 0) && (selected < macroList->CountItems()))
+		fSelectedMacro	= (BMessage*)macroList->ItemAt(selected);
+}
+
+
+BMessage* MacroEditor::AddNewMacro(const BString &name)
+{
+	BMessage	*newMacro	= new BMessage(P_C_MACRO_TYPE);
+	newMacro->AddString("Name",name);
+	doc->GetCommandManager()->GetMacroList()->AddItem(newMacro);
+	BMenuItem	*item	= new BMenuItem(name.String(),newMacro);
+	item->SetTarget(doc);
+	doc->AddMenuItem(P_MENU_MACRO_PLAY,item);
+	return newMacro;
+}
+
+
+BString MacroEditor::UniqueMacroName(void)
+{
+	BList	*macroList	= doc->GetCommandManager()->GetMacroList();
+	for (int32 number = 1; ; number++) {
+		BString	candidate(B_TRANSLATE("New macro"));
+		if (number > 1)
+			candidate << " " << number;
+		bool	taken	= false;
+		for (int32 i = 0; !taken && (i < macroList->CountItems()); i++) {
+			const char	*name	= NULL;
+			((BMessage*)macroList->ItemAt(i))->FindString("Name",&name);
+			taken	= (name != NULL) && (candidate == name);
+		}
+		if (!taken)
+			return candidate;
+	}
+}
+
+
+void MacroEditor::NewMacro(void)
+{
+	if ((doc == NULL) || (fTextView == NULL))
+		return;
+	// typed text with nothing selected turns into the new macro (ApplyEdits)
+	BString	typed(fTextView->Text());
+	typed.Trim();
+	if ((fSelectedMacro == NULL) && (typed.Length() > 0)) {
+		ApplyEdits(false);
+		return;
+	}
+	if (fSelectedMacro != NULL)
+		ApplyEdits(false);
+	fSelectedMacro	= AddNewMacro(UniqueMacroName());
+	RefreshMacroList();
+	SetStatus(B_TRANSLATE("New macro created - type its commands, Enter applies them."),false);
+	fTextView->MakeFocus(true);
 }
 
 
@@ -585,13 +643,19 @@ void MacroEditor::ShowSelectedMacro(void)
 
 void MacroEditor::ApplyEdits(bool revealErrorLine)
 {
-	if ((fSelectedMacro == NULL) || (doc == NULL)) {
-		SetStatus(B_TRANSLATE("No macro selected."),true);
+	if (doc == NULL)
 		return;
-	}
 
 	BString	text;
 	fTextView->ExpandedText(&text);
+	if (fSelectedMacro == NULL) {
+		BString	typed(text);
+		typed.Trim();
+		if (typed.Length() == 0) {
+			SetStatus("",false);
+			return;
+		}
+	}
 	BList		parsed;
 	BString		error;
 	status_t	err	= ParseCommands(text,&parsed,doc->GetCommandManager(),&error);
@@ -616,6 +680,13 @@ void MacroEditor::ApplyEdits(bool revealErrorLine)
 		}
 		SetStatus(error.String(),true);
 		return;
+	}
+
+	// text typed with no macro selected creates one - otherwise there is
+	// nothing to save or play
+	if (fSelectedMacro == NULL) {
+		fSelectedMacro	= AddNewMacro(UniqueMacroName());
+		RefreshMacroList(false);
 	}
 
 	fSelectedMacro->RemoveName("Macro::Commmand");
@@ -716,6 +787,10 @@ void MacroEditor::MessageReceived(BMessage *message)
 			ExportToFile();
 			break;
 		}
+		case MENU_MACRO_NEW: {
+			NewMacro();
+			break;
+		}
 		case MENU_MACRO_OPEN: {
 			ImportFromFile();
 			break;
@@ -755,13 +830,7 @@ void MacroEditor::MessageReceived(BMessage *message)
 				if (dot > 0)
 					name.Truncate(dot);
 
-				BMessage	*newMacro	= new BMessage(P_C_MACRO_TYPE);
-				newMacro->AddString("Name",name);
-				BList	*macroList	= doc->GetCommandManager()->GetMacroList();
-				macroList->AddItem(newMacro);
-				BMenuItem	*item	= new BMenuItem(name.String(),newMacro);
-				item->SetTarget(doc);
-				doc->AddMenuItem(P_MENU_MACRO_PLAY,item);
+				BMessage	*newMacro	= AddNewMacro(name);
 
 				fSelectedMacro	= newMacro;
 				RefreshMacroList();
