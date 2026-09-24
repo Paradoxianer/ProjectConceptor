@@ -443,6 +443,41 @@ void MacroTextView::DropSnippet(BPoint where, const char *text, int32 length)
 }
 
 
+// blockText was captured at the depth its chip stood at then; Tab/Shift+Tab
+// and wrapping in a command move the chip line but not the folded text, so
+// its lines are shifted to where the chip stands now (a block at the wrong
+// depth parses as a different command tree)
+static BString ReindentBlock(const BString &blockText, const BString &targetIndent)
+{
+	int32	baseIndent	= LeadingWhitespace(blockText).Length();
+	int32	target		= targetIndent.Length();
+	if (baseIndent == target)
+		return blockText;
+	BString	result;
+	int32	lineStart	= 0;
+	int32	textLength	= blockText.Length();
+	while (lineStart < textLength) {
+		int32	nl		= blockText.FindFirst("\n",lineStart);
+		int32	lineEnd	= (nl >= 0) ? nl+1 : textLength;
+		BString	line	= LineText(blockText,lineStart,lineEnd);
+		if (Trimmed(line).Length() == 0) {
+			result	<< line;
+		} else if (target > baseIndent) {
+			result.Append(' ',target-baseIndent);
+			result	<< line;
+		} else {
+			int32	remove	= 0;
+			while ((remove < baseIndent-target) && (remove < line.Length()) && (line[remove] == ' '))
+				remove++;
+			line.Remove(0,remove);
+			result	<< line;
+		}
+		lineStart	= lineEnd;
+	}
+	return result;
+}
+
+
 void MacroTextView::MouseDown(BPoint where)
 {
 	BTextView::MouseDown(where);
@@ -471,7 +506,7 @@ void MacroTextView::ToggleFoldAtLine(int32 lineStart, int32 lineEnd)
 		if (found == fFoldedBlockText.end())
 			return;
 		ApplyChipLabelEdit(&found->second,trimmed);
-		BString	blockText	= found->second;
+		BString	blockText	= ReindentBlock(found->second,LeadingWhitespace(line));
 		// the block's text is the view's own from here on - a stale entry
 		// would make the key look taken when the block is folded again
 		fFoldedBlockText.erase(found);
@@ -659,7 +694,7 @@ void MacroTextView::ExpandedText(BString *out)
 			found	= fFoldedBlockText.find(foldedKey);
 		if (found != fFoldedBlockText.end()) {
 			ApplyChipLabelEdit(&found->second,trimmed);
-			*out	<< found->second;
+			*out	<< ReindentBlock(found->second,LeadingWhitespace(line));
 		} else {
 			*out	<< line;
 		}
