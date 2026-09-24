@@ -66,7 +66,7 @@ public:
 	 * the status line instead. No separate Apply button (#55 follow-up):
 	 * MacroTextView calls this itself at natural pause points (Enter,
 	 * losing focus) - public so it can. */
-			void			ApplyEdits(void);
+			void			ApplyEdits(bool revealErrorLine = true);
 
 	/** Called by MacroTextView::Select() on every cursor/selection change -
 	 * keeps fLineColStatus showing where the cursor actually is (1-based,
@@ -130,6 +130,8 @@ protected:
 			 * not by this view) currently shown/edited - NULL if none
 			 * selected. */
 			BMessage		*fSelectedMacro;
+			/** macro list as of the last RefreshMacroList() - see ValueChanged(). */
+			BList			fKnownMacros;
 
 private:
 };

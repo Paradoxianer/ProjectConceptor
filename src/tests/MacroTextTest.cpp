@@ -906,3 +906,91 @@ void MacroTextTest::IndentChangeMovesInAndOutWithoutGoingNegative(void)
 	BMessage	*repeat	= (BMessage*)parsed.ItemAt(0);
 	CPPUNIT_ASSERT(repeat->HasMessage("PCommand::subPCommand"));
 }
+
+
+void MacroTextTest::IncludedNodeKeepsItsMessageType(void)
+{
+	// an embedded node's BMessage "what" (P_C_CLASS_TYPE / P_C_GROUP_TYPE /
+	// P_C_CONNECTION_TYPE) decides which renderer GraphEditor creates and
+	// whether Indexer treats it as a connection - it has to survive the
+	// text round trip, not come back as 0.
+	PDocument	*doc	= NewRegisteredTestDocument();
+	uint32		kinds[]	= { P_C_CLASS_TYPE, P_C_GROUP_TYPE, P_C_CONNECTION_TYPE };
+	for (int32 k = 0; k < 3; k++) {
+		BMessage	node(kinds[k]);
+		node.AddInt32("this",1);
+		BMessage	insert;
+		insert.AddString("Command::Name","Insert");
+		insert.AddInt32("node",1);
+		insert.AddMessage("included_node",&node);
+		BList	commands;
+		commands.AddItem(&insert);
+		BString	text;
+		SerializeCommands(&commands,&text);
+
+		BList	parsed;
+		BString	error;
+		CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+			ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+		BMessage	back;
+		CPPUNIT_ASSERT(((BMessage*)parsed.ItemAt(0))->FindMessage("included_node",&back) == B_OK);
+		CPPUNIT_ASSERT_EQUAL(kinds[k],(uint32)back.what);
+	}
+}
+
+
+void MacroTextTest::TypeCodesReadAsNames(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BMessage	container;
+	container.AddString("name","Priority");
+	container.AddInt32("type",(int32)B_STRING_TYPE);
+	container.AddString("newAttribute","x");
+	BMessage	add;
+	add.AddString("Command::Name","AddAttribute");
+	add.AddBool(P_C_NODE_SELECTED,true);
+	add.AddMessage("valueContainer",&container);
+	BList	commands;
+	commands.AddItem(&add);
+	BString	text;
+	SerializeCommands(&commands,&text);
+	CPPUNIT_ASSERT(text.FindFirst("type=string") >= 0);
+	CPPUNIT_ASSERT(text.FindFirst("1129534546") < 0);
+
+	BList	parsed;
+	BString	error;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+	BMessage	back;
+	CPPUNIT_ASSERT(((BMessage*)parsed.ItemAt(0))->FindMessage("valueContainer",&back) == B_OK);
+	int32		type	= 0;
+	CPPUNIT_ASSERT(back.FindInt32("type",&type) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)B_STRING_TYPE,type);
+
+	// a plain number (and a code with no name) keeps working
+	BList	numeric;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,ParseCommands(
+		BString("AddAttribute\n  ~valueContainer\n    type=1129534546\n"),
+		&numeric,doc->GetCommandManager(),&error));
+}
+
+
+void MacroTextTest::InsertPrototypeParsesAndKeepsNodeShape(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		text;
+	InsertPrototypeText(&text);
+	BList		parsed;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+	BMessage	*insert	= (BMessage*)parsed.ItemAt(0);
+	BMessage	node;
+	CPPUNIT_ASSERT(insert->FindMessage("included_node",&node) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_CLASS_TYPE,(uint32)node.what);
+	BRect		frame;
+	CPPUNIT_ASSERT(node.FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+	BMessage	data;
+	CPPUNIT_ASSERT(node.FindMessage(P_C_NODE_DATA,&data) == B_OK);
+	CPPUNIT_ASSERT(node.HasMessage(P_C_NODE_PATTERN));
+}

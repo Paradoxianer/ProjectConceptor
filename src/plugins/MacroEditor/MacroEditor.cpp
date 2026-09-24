@@ -56,10 +56,9 @@ static void AppendValueContainerSnippet(const char *commandName, BString *out)
 	if (strcmp(commandName,"RemoveAttribute") == 0) {
 		*out << "    index=0\n";
 	} else {
-		*out << "    # type: exact type_code as a decimal int32 - common "
-			"ones: bool=1112493900 int32=1280265799 float=1179406164 "
-			"double=1145195589 string=1129534546\n";
-		*out << "    type=1129534546\n";
+		*out << "    # type: bool int8 int16 int32 int64 float double "
+			"string point rect message (or the raw number)\n";
+		*out << "    type=string\n";
 		const char	*valueField	= (strcmp(commandName,"AddAttribute") == 0)
 			? "newAttribute" : "newValue";
 		*out << "    " << valueField << "=\"\"\n";
@@ -79,6 +78,10 @@ static void AppendValueContainerSnippet(const char *commandName, BString *out)
  * always machine-recorded node/connection data nobody hand-writes. */
 static void BuildCommandSnippet(PCommand *command, BString *out)
 {
+	if (strcmp(command->Name(),"Insert") == 0) {
+		InsertPrototypeText(out);
+		return;
+	}
 	out->SetTo("");
 	*out << command->Name() << "\n";
 	int32				propCount		= 0;
@@ -474,6 +477,17 @@ void MacroEditor::DetachedFromManager(void)
 void MacroEditor::ValueChanged(BMessage *changedNodes)
 {
 	TRACE();
+	// every command anywhere in the document broadcasts here (a Select
+	// all, a node moved, ...). RefreshMacroList() ends in ShowSelectedMacro(),
+	// which reloads the text view from the stored macro - wiping anything
+	// typed but not yet applied. Only a changed *set* of macros (a new
+	// recording, an import) is worth that.
+	BList	*macroList	= doc->GetCommandManager()->GetMacroList();
+	bool	unchanged	= (macroList->CountItems() == fKnownMacros.CountItems());
+	for (int32 i = 0; unchanged && (i < macroList->CountItems()); i++)
+		unchanged	= (macroList->ItemAt(i) == fKnownMacros.ItemAt(i));
+	if (unchanged)
+		return;
 	RefreshMacroList();
 }
 
@@ -527,6 +541,9 @@ void MacroEditor::RefreshMacroList(void)
 	else if (fMacroList->CountItems() > 0)
 		fMacroList->Select(0);
 	fMacroList->SetSelectionMessage(new BMessage(M_E_MACRO_SELECTED));
+	fKnownMacros.MakeEmpty();
+	for (int32 i = 0; i < macroList->CountItems(); i++)
+		fKnownMacros.AddItem(macroList->ItemAt(i));
 	ShowSelectedMacro();
 }
 
@@ -566,7 +583,7 @@ void MacroEditor::ShowSelectedMacro(void)
 }
 
 
-void MacroEditor::ApplyEdits(void)
+void MacroEditor::ApplyEdits(bool revealErrorLine)
 {
 	if ((fSelectedMacro == NULL) || (doc == NULL)) {
 		SetStatus(B_TRANSLATE("No macro selected."),true);
@@ -584,7 +601,11 @@ void MacroEditor::ApplyEdits(void)
 		// folded chip collapses many of those lines into one, so "line 23"
 		// means nothing to look at until the right line is actually
 		// revealed (expanding whatever chip stands in for it, if any).
-		if (error.StartsWith("line ")) {
+		// not when this comes from losing focus: that runs the moment the
+		// user clicks/drags something else (the reference list, say), and
+		// moving the selection to the error line then destroyed the
+		// selection they were about to use (user report)
+		if (revealErrorLine && error.StartsWith("line ")) {
 			int32	numEnd	= error.FindFirst(":",5);
 			if (numEnd > 5) {
 				BString	numText;

@@ -298,7 +298,7 @@ void MacroTextView::MakeFocus(bool focused)
 	// ShowSelectedMacro() overwrites this view's text with the last
 	// applied version.
 	if (wasFocused && (!focused) && (fEditor != NULL))
-		fEditor->ApplyEdits();
+		fEditor->ApplyEdits(false);
 }
 
 

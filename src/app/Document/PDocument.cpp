@@ -3,6 +3,7 @@
 #include <app/Roster.h>
 #include <interface/Alert.h>
 #include <interface/PrintJob.h>
+#include <interface/TextView.h>
 #include <interface/Screen.h>
 #include <interface/View.h>
 #include <support/Autolock.h>
@@ -235,6 +236,20 @@ void PDocument::MessageReceived(BMessage* message) {
 		// field is added on purpose, so the command clears the old selection
 		// first (its default when the field is absent).
 		case B_SELECT_ALL: {
+			// with a text field focused (the MacroEditor's, say), Alt+A means
+			// "select the text" - it used to run the graph's Select all
+			// instead, whose broadcast made the MacroEditor reload its
+			// macro over whatever was being typed (user report: "Alt+A
+			// deletes everything").
+			if ((window != NULL) && (window->LockLooperWithTimeout(100000) == B_OK)) {
+				BTextView	*focusText	= dynamic_cast<BTextView*>(window->CurrentFocus());
+				BMessenger	target(focusText);
+				window->UnlockLooper();
+				if (focusText != NULL) {
+					target.SendMessage(B_SELECT_ALL);
+					break;
+				}
+			}
 			BMessage	*selectAllMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			selectAllMessage->AddString("Command::Name","Select");
 			selectAllMessage->AddBool("selectAll",true);

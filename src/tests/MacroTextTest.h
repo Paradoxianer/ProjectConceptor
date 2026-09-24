@@ -36,6 +36,9 @@ public:
 	void EveryCommandExampleParses(void);
 	void SnippetDropSnapsToLineBoundaryWithIndent(void);
 	void IndentChangeMovesInAndOutWithoutGoingNegative(void);
+	void IncludedNodeKeepsItsMessageType(void);
+	void TypeCodesReadAsNames(void);
+	void InsertPrototypeParsesAndKeepsNodeShape(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -62,6 +65,9 @@ public:
 	CPPUNIT_TEST(EveryCommandExampleParses);
 	CPPUNIT_TEST(SnippetDropSnapsToLineBoundaryWithIndent);
 	CPPUNIT_TEST(IndentChangeMovesInAndOutWithoutGoingNegative);
+	CPPUNIT_TEST(IncludedNodeKeepsItsMessageType);
+	CPPUNIT_TEST(TypeCodesReadAsNames);
+	CPPUNIT_TEST(InsertPrototypeParsesAndKeepsNodeShape);
 	CPPUNIT_TEST_SUITE_END();
 };
 

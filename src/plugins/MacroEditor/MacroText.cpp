@@ -7,6 +7,8 @@
 #include <vector>
 
 #include <app/PropertyInfo.h>
+#include <interface/Font.h>
+#include <interface/GraphicsDefs.h>
 #include <interface/Point.h>
 #include <interface/Rect.h>
 
@@ -212,6 +214,81 @@ static void SerializeValue(BMessage *msg, const char *fieldName, type_code type,
 }
 
 
+static const struct { const char *name; type_code type; } kTypeNames[] = {
+	{ "bool",		B_BOOL_TYPE },
+	{ "int8",		B_INT8_TYPE },
+	{ "int16",		B_INT16_TYPE },
+	{ "int32",		B_INT32_TYPE },
+	{ "int64",		B_INT64_TYPE },
+	{ "float",		B_FLOAT_TYPE },
+	{ "double",		B_DOUBLE_TYPE },
+	{ "string",		B_STRING_TYPE },
+	{ "point",		B_POINT_TYPE },
+	{ "rect",		B_RECT_TYPE },
+	{ "message",	B_MESSAGE_TYPE },
+	{ "pointer",	B_POINTER_TYPE },
+	{ "rgb_color",	B_RGB_COLOR_TYPE },
+	{ "pattern",	B_PATTERN_TYPE },
+	{ "raw",		B_RAW_TYPE },
+};
+
+
+/** NULL if `type` has no readable name. */
+static const char* TypeName(type_code type)
+{
+	for (size_t i = 0; i < sizeof(kTypeNames)/sizeof(kTypeNames[0]); i++)
+		if (kTypeNames[i].type == type)
+			return kTypeNames[i].name;
+	return NULL;
+}
+
+
+static bool TypeFromName(const BString &name, type_code *outType)
+{
+	for (size_t i = 0; i < sizeof(kTypeNames)/sizeof(kTypeNames[0]); i++)
+		if (name == kTypeNames[i].name) {
+			*outType	= kTypeNames[i].type;
+			return true;
+		}
+	return false;
+}
+
+
+static BString WhatToText(uint32 what)
+{
+	BString	text;
+	if (what == P_C_CLASS_TYPE)
+		text	= "class";
+	else if (what == P_C_GROUP_TYPE)
+		text	= "group";
+	else if (what == P_C_CONNECTION_TYPE)
+		text	= "connection";
+	else
+		text << (unsigned long)what;
+	return text;
+}
+
+
+static bool TextToWhat(const BString &text, uint32 *outWhat)
+{
+	if (text == "class")
+		*outWhat	= P_C_CLASS_TYPE;
+	else if (text == "group")
+		*outWhat	= P_C_GROUP_TYPE;
+	else if (text == "connection")
+		*outWhat	= P_C_CONNECTION_TYPE;
+	else {
+		if (text.Length() == 0)
+			return false;
+		for (int32 i = 0; i < text.Length(); i++)
+			if ((text[i] < '0') || (text[i] > '9'))
+				return false;
+		*outWhat	= (uint32)strtoul(text.String(),NULL,10);
+	}
+	return true;
+}
+
+
 static void SerializeCommand(BMessage *command, int depth, BString *out);
 
 
@@ -280,6 +357,10 @@ static void SerializeFieldLines(BMessage *msg, int depth, const char *skipName1,
 				BMessage	child;
 				if (msg->FindMessage(fieldName,j,&child) == B_OK) {
 					*out << indent << "~" << fieldName << "\n";
+					// the block's own BMessage type (an embedded node's is
+					// what GraphEditor picks its renderer by) isn't a field
+					if (child.what != 0)
+						*out << indent << "  what=" << WhatToText(child.what) << "\n";
 					SerializeFieldLines(&child,depth+1,NULL,NULL,out);
 				}
 			}
@@ -288,7 +369,16 @@ static void SerializeFieldLines(BMessage *msg, int depth, const char *skipName1,
 		}
 		for (int32 j = 0; j < count; j++) {
 			*out << indent << fieldName << "=";
-			SerializeValue(msg,fieldName,type,j,out);
+			// a "type" field holds a raw type_code - shown by name
+			// (string, int32, ...) instead of an opaque 10-digit number
+			int32		typeCode	= 0;
+			const char	*typeName	= ((fn == "type") && (type == B_INT32_TYPE)
+				&& (msg->FindInt32(fieldName,j,&typeCode) == B_OK))
+				? TypeName((type_code)typeCode) : NULL;
+			if (typeName != NULL)
+				*out << typeName;
+			else
+				SerializeValue(msg,fieldName,type,j,out);
 			*out << "\n";
 		}
 		i++;
@@ -771,6 +861,30 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 				return B_BAD_VALUE;
 			}
 			MacroStackFrame	&parent			= stack.back();
+			// "what=" inside a "~" block sets that block's own BMessage
+			// type (see SerializeFieldLines()), not a field
+			if (parent.isField && (fieldName == "what")) {
+				uint32	what	= 0;
+				if (!TextToWhat(valueText,&what)) {
+					errorOut->SetTo("");
+					*errorOut	<< "line " << lineNo << ": what= needs class, group, connection or a number";
+					CleanupFrames(stack,&built);
+					return B_BAD_VALUE;
+				}
+				parent.msg->what	= what;
+				if (lineEnd >= len)
+					break;
+				continue;
+			}
+			// type=string / type=int32 / ... - the readable form of a raw
+			// type_code (see SerializeFieldLines()); a plain number still works
+			type_code		namedType		= 0;
+			if ((fieldName == "type") && TypeFromName(valueText,&namedType)) {
+				parent.msg->AddInt32("type",(int32)namedType);
+				if (lineEnd >= len)
+					break;
+				continue;
+			}
 			type_code		expectedType	= B_ANY_TYPE;
 			if (!parent.isField) {
 				if (!FindFieldType(parent.command,fieldName.String(),&expectedType)) {
@@ -885,7 +999,7 @@ const char* CommandExampleText(const char *commandName)
 		{ "AddAttribute",
 			"AddAttribute\n  Node::selected=true\n  ~valueContainer\n"
 			"    name=\"Priority\"\n    subgroup=\"Node::Data\"\n"
-			"    type=1280265799\n    newAttribute=1" },
+			"    type=int32\n    newAttribute=1" },
 		{ "Ask",
 			"Ask\n  variable=\"term\"\n  prompt=\"Search for?\"\n"
 			"  default=\"Test\"\n# a later command's string field can use the "
@@ -895,14 +1009,14 @@ const char* CommandExampleText(const char *commandName)
 		{ "ChangeValue",
 			"ChangeValue\n  Node::selected=true\n  ~valueContainer\n"
 			"    name=\"Node::name\"\n    subgroup=\"Node::Data\"\n"
-			"    type=1129534546\n    newValue=\"Renamed\"" },
+			"    type=string\n    newValue=\"Renamed\"" },
 		{ "Find",
 			"Find\n  searchString=\"Test\"\n  scope=\"both\"\n"
 			"  setOperation=\"add\"" },
 		{ "ForEach",
 			"ForEach\n  nodeVariable=\"n\"\n  ChangeValue\n    node=$n\n"
 			"    ~valueContainer\n      name=\"Node::name\"\n"
-			"      subgroup=\"Node::Data\"\n      type=1129534546\n"
+			"      subgroup=\"Node::Data\"\n      type=string\n"
 			"      newValue=\"Renamed\"" },
 		{ "Group", "Group\n  node=@1\n  deselect=true" },
 		{ "If",
@@ -1008,4 +1122,57 @@ int32 IndentChange(const BString &line, int32 levels)
 		leading++;
 	int32	remove	= (-levels)*2;
 	return -((remove < leading) ? remove : leading);
+}
+
+
+void InsertPrototypeText(BString *out)
+{
+	// the same node GraphEditor::GenerateInsertCommand() builds for the
+	// toolbar's "new node" - font, pattern (colors/pen) and a frame - so a
+	// hand-written Insert starts from something that actually renders
+	font_family	family;
+	font_style	style;
+	be_plain_font->GetFamilyAndStyle(&family,&style);
+	BMessage	font('fOTy');
+	font.AddInt8("Font::Encoding",be_plain_font->Encoding());
+	font.AddInt16("Font::Face",be_plain_font->Face());
+	font.AddString("Font::Family",(const char*)&family);
+	font.AddInt32("Font::Flags",be_plain_font->Flags());
+	font.AddFloat("Font::Rotation",be_plain_font->Rotation());
+	font.AddFloat("Font::Shear",be_plain_font->Shear());
+	font.AddFloat("Font::Size",be_plain_font->Size());
+	font.AddInt8("Font::Spacing",be_plain_font->Spacing());
+	font.AddString("Font::Style",(const char*)&style);
+	rgb_color	fontColor	= {111,151,181,255};
+	font.AddInt32("Font::Color",*(int32*)&fontColor);
+
+	BMessage	pattern;
+	rgb_color	fillColor	= {152,180,190,255};
+	rgb_color	borderColor	= {0,0,0,255};
+	rgb_color	lowColor	= {128,128,128,255};
+	pattern.AddInt32("FillColor",*(int32*)&fillColor);
+	pattern.AddInt32("BorderColor",*(int32*)&borderColor);
+	pattern.AddFloat("PenSize",1.0);
+	pattern.AddInt8("DrawingMode",B_OP_ALPHA);
+	pattern.AddInt32("HighColor",*(int32*)&borderColor);
+	pattern.AddInt32("LowColor",*(int32*)&lowColor);
+	pattern.AddData("Pattern",B_PATTERN_TYPE,(const void*)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH),false);
+
+	BMessage	data;
+	data.AddString(P_C_NODE_NAME,"Untitled");
+
+	BMessage	node(P_C_CLASS_TYPE);
+	node.AddInt32("this",1);
+	node.AddMessage(P_C_NODE_DATA,&data);
+	node.AddMessage(P_C_NODE_FONT,&font);
+	node.AddMessage(P_C_NODE_PATTERN,&pattern);
+	node.AddRect(P_C_NODE_FRAME,BRect(100,100,200,180));
+
+	BMessage	insert;
+	insert.AddString("Command::Name","Insert");
+	insert.AddInt32("node",1);
+	insert.AddMessage("included_node",&node);
+	BList	commands;
+	commands.AddItem(&insert);
+	SerializeCommands(&commands,out);
 }

@@ -104,4 +104,9 @@ void		SnippetInsertion(const BString &text, int32 line, bool lowerHalf,
  * already at depth 0 stays put. */
 int32		IndentChange(const BString &line, int32 levels);
 
+/** A complete "Insert" command text with a ready node prototype embedded
+ * (name, font, colors, frame) - what dragging Insert into the editor drops,
+ * so it isn't a bare "node=@1" pointing at nothing. */
+void		InsertPrototypeText(BString *out);
+
 #endif
