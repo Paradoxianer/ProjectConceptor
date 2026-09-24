@@ -127,6 +127,51 @@ static void BuildCommandSnippet(PCommand *command, BString *out)
 }
 
 
+/** Word-wraps `text` at `width` columns - a BView tooltip doesn't wrap on
+ * its own, so a command's one-line usage sentence otherwise becomes one
+ * extremely wide line (user report). */
+static void WrapText(const char *text, int32 width, BString *out)
+{
+	BString		word;
+	int32		lineLen	= 0;
+	for (const char *c = text; ; c++) {
+		if ((*c == ' ') || (*c == '\0')) {
+			if (word.Length() > 0) {
+				if ((lineLen > 0) && (lineLen+1+word.Length() > width)) {
+					*out << "\n";
+					lineLen	= 0;
+				} else if (lineLen > 0) {
+					*out << " ";
+					lineLen++;
+				}
+				*out << word;
+				lineLen	+= word.Length();
+				word.SetTo("");
+			}
+			if (*c == '\0')
+				break;
+		} else
+			word.Append(c,1);
+	}
+}
+
+
+/** Tooltip text for `commandName`: its usage sentence wrapped to a
+ * readable width, then a blank line and the example (if there is one). */
+static void BuildToolTipText(const char *commandName, const char *usage, BString *out)
+{
+	out->SetTo("");
+	if ((usage != NULL) && (usage[0] != '\0'))
+		WrapText(usage,48,out);
+	const char	*example	= CommandExampleText(commandName);
+	if (example != NULL) {
+		if (out->Length() > 0)
+			*out << "\n\n";
+		*out << "Example:\n" << example;
+	}
+}
+
+
 /** BStringItem carrying the two extra strings the reference list needs per
  * item (#55 follow-up, user report: "die Syntax komplett nicht
  * verstanden" - no way to see what a command does, or start from a
@@ -377,7 +422,8 @@ void MacroEditor::BuildCommandList(void)
 		// usage is per-property_info-entry, not per-command, but every
 		// registered command here only ever declares exactly one - see
 		// each plugin's own kXxxProperties[] array (always {..., count=1}).
-		BString	usage((propCount > 0) ? props[0].usage : "");
+		BString	usage;
+		BuildToolTipText(command->Name(),(propCount > 0) ? props[0].usage : NULL,&usage);
 		BString	snippet;
 		BuildCommandSnippet(command,&snippet);
 
@@ -463,17 +509,23 @@ void MacroEditor::RefreshMacroList(void)
 			reselectIndex	= i;
 	}
 
-	// BListView::Select() alone does not send the selection message (that
-	// only happens for a real user click, or an explicit InvokeNotify) -
-	// so this always calls ShowSelectedMacro() directly afterwards rather
-	// than relying on a M_E_MACRO_SELECTED round-trip that may never
-	// arrive. Falls back to showing the first macro (if any) when there
-	// was nothing to preserve - never leaves a stale selection showing
-	// after the underlying macro list changed under it.
+	// BListView::Select() DOES post the selection message (InvokeNotify(
+	// fSelectMessage), Haiku's own ListView.cpp) - and it arrives
+	// asynchronously, after whatever the caller does next. ImportFromFile()
+	// sets the imported text right after this returns, then that late
+	// M_E_MACRO_SELECTED ran ShowSelectedMacro() and overwrote it with the
+	// (still empty) new macro - an import always "loaded empty" (user
+	// report). ShowSelectedMacro() is called directly below anyway, so the
+	// message is simply switched off while selecting programmatically.
+	// Falls back to showing the first macro (if any) when there was
+	// nothing to preserve - never leaves a stale selection showing after
+	// the underlying macro list changed under it.
+	fMacroList->SetSelectionMessage(NULL);
 	if (reselectIndex >= 0)
 		fMacroList->Select(reselectIndex);
 	else if (fMacroList->CountItems() > 0)
 		fMacroList->Select(0);
+	fMacroList->SetSelectionMessage(new BMessage(M_E_MACRO_SELECTED));
 	ShowSelectedMacro();
 }
 
@@ -698,7 +750,7 @@ void MacroEditor::MessageReceived(BMessage *message)
 				fTextView->SetText(importedText.String());
 
 				BString	status;
-				status.SetToFormat(B_TRANSLATE("Imported as new macro \"%s\" - review, then Apply."),
+				status.SetToFormat(B_TRANSLATE("Imported as new macro \"%s\" - review it, then press Enter or click elsewhere to apply."),
 					name.String());
 				SetStatus(status.String(),false);
 			}

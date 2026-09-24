@@ -32,6 +32,8 @@ public:
 	void EmptyVariableNameIsRejected(void);
 	void PropertyInfoAcceptsNodeSelectedForSelectionDrivenCommands(void);
 	void GeneratedAddAttributeSnippetParses(void);
+	void FindThenAddAttributeReachesEveryFoundNode(void);
+	void EveryCommandExampleParses(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -54,6 +56,8 @@ public:
 	CPPUNIT_TEST(EmptyVariableNameIsRejected);
 	CPPUNIT_TEST(PropertyInfoAcceptsNodeSelectedForSelectionDrivenCommands);
 	CPPUNIT_TEST(GeneratedAddAttributeSnippetParses);
+	CPPUNIT_TEST(FindThenAddAttributeReachesEveryFoundNode);
+	CPPUNIT_TEST(EveryCommandExampleParses);
 	CPPUNIT_TEST_SUITE_END();
 };
 

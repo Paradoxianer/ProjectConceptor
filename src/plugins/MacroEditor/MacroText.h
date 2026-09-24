@@ -79,4 +79,11 @@ void		SerializeCommands(BList *commands, BString *outText);
 status_t	ParseCommands(const BString &text, BList *outCommands,
 				PCommandManager *registry, BString *errorOut);
 
+/** One short, working example of `commandName` in this DSL (NULL if there
+ * is none) - shown under the command's description in the MacroEditor's
+ * reference-list tooltip, since the description alone doesn't say how to
+ * write it (user report). Kept next to the grammar it demonstrates; every
+ * entry is checked against the real parser by MacroTextTest. */
+const char*	CommandExampleText(const char *commandName);
+
 #endif

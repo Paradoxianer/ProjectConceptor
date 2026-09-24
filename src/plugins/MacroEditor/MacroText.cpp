@@ -877,3 +877,51 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 		outCommands->AddItem(built.ItemAt(i));
 	return B_OK;
 }
+
+
+const char* CommandExampleText(const char *commandName)
+{
+	static const struct { const char *name; const char *example; } kExamples[] = {
+		{ "AddAttribute",
+			"AddAttribute\n  Node::selected=true\n  ~valueContainer\n"
+			"    name=\"Priority\"\n    subgroup=\"Node::Data\"\n"
+			"    type=1280265799\n    newAttribute=1" },
+		{ "Ask",
+			"Ask\n  variable=\"count\"\n  prompt=\"How many?\"\n"
+			"  default=\"3\"\n# later steps can use $count" },
+		{ "Batch",
+			"Batch\n  Move\n    dx=10.0\n    dy=0.0\n  Move\n    dx=0.0\n    dy=10.0" },
+		{ "ChangeValue",
+			"ChangeValue\n  Node::selected=true\n  ~valueContainer\n"
+			"    name=\"Node::name\"\n    subgroup=\"Node::Data\"\n"
+			"    type=1129534546\n    newValue=\"Renamed\"" },
+		{ "Find",
+			"Find\n  searchString=\"Test\"\n  scope=\"both\"\n"
+			"  setOperation=\"add\"" },
+		{ "ForEach",
+			"ForEach\n  nodeVariable=\"n\"\n  ChangeValue\n    node=$n\n"
+			"    ~valueContainer\n      name=\"Node::name\"\n"
+			"      subgroup=\"Node::Data\"\n      type=1129534546\n"
+			"      newValue=\"Renamed\"" },
+		{ "Group", "Group\n  node=@1\n  deselect=true" },
+		{ "If",
+			"If\n  searchString=\"Test\"\n  Select\n    selectAll=true" },
+		{ "Insert", "Insert\n  node=@1\n# usually recorded, not hand-written" },
+		{ "Layout", "Layout\n  direction=\"LR\"\n  engine=\"dot\"" },
+		{ "Move", "Move\n  dx=10.0\n  dy=-5.0" },
+		{ "Remember",
+			"Remember\n  variable=\"saved\"\n# later: Select with node=$saved" },
+		{ "RemoveAttribute",
+			"RemoveAttribute\n  Node::selected=true\n  ~valueContainer\n"
+			"    name=\"Priority\"\n    subgroup=\"Node::Data\"\n    index=0" },
+		{ "Repeat",
+			"Repeat\n  count=3\n  counterVariable=\"i\"\n  Move\n"
+			"    dx=$i\n    dy=0.0" },
+		{ "Select", "Select\n  selectAll=true" },
+		{ "Sleep", "Sleep\n  milliseconds=500" },
+	};
+	for (size_t i = 0; i < sizeof(kExamples)/sizeof(kExamples[0]); i++)
+		if (strcmp(kExamples[i].name,commandName) == 0)
+			return kExamples[i].example;
+	return NULL;
+}

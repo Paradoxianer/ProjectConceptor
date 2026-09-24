@@ -7,8 +7,16 @@
 #include <support/String.h>
 
 #include "AddAttribute.h"
+#include "Ask.h"
+#include "Batch.h"
+#include "ForEach.h"
+#include "If.h"
+#include "Layout.h"
+#include "Remember.h"
+#include "Sleep.h"
 #include "BasePlugin.h"
 #include "ChangeValue.h"
+#include "Find.h"
 #include "Group.h"
 #include "Insert.h"
 #include "MacroText.h"
@@ -18,6 +26,7 @@
 #include "PDocument.h"
 #include "ProjectConceptorDefs.h"
 #include "RemoveAttribute.h"
+#include "Repeat.h"
 #include "Select.h"
 #include "TestDocument.h"
 
@@ -45,6 +54,15 @@ TEST_PLUGIN(TestMovePlugin,Move,"Move")
 TEST_PLUGIN(TestGroupPlugin,Group,"Group")
 TEST_PLUGIN(TestSelectPlugin,Select,"Select")
 TEST_PLUGIN(TestChangeValuePlugin,ChangeValue,"ChangeValue")
+TEST_PLUGIN(TestFindPlugin,Find,"Find")
+TEST_PLUGIN(TestRepeatPlugin,Repeat,"Repeat")
+TEST_PLUGIN(TestAskPlugin,Ask,"Ask")
+TEST_PLUGIN(TestBatchPlugin,Batch,"Batch")
+TEST_PLUGIN(TestForEachPlugin,ForEach,"ForEach")
+TEST_PLUGIN(TestIfPlugin,If,"If")
+TEST_PLUGIN(TestLayoutPlugin,Layout,"Layout")
+TEST_PLUGIN(TestRememberPlugin,Remember,"Remember")
+TEST_PLUGIN(TestSleepPlugin,Sleep,"Sleep")
 TEST_PLUGIN(TestAddAttributePlugin,AddAttribute,"AddAttribute")
 TEST_PLUGIN(TestRemoveAttributePlugin,RemoveAttribute,"RemoveAttribute")
 
@@ -118,6 +136,15 @@ PDocument* NewRegisteredTestDocument(void)
 	doc->GetCommandManager()->RegisterPCommand(new TestGroupPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestSelectPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestChangeValuePlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestFindPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestRepeatPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestAskPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestBatchPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestForEachPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestIfPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestLayoutPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestRememberPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestSleepPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestAddAttributePlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestRemoveAttributePlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestStringPlugin());
@@ -702,4 +729,88 @@ void MacroTextTest::GeneratedAddAttributeSnippetParses(void)
 	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
 		ParseCommands(snippet,&parsed,doc->GetCommandManager(),&error));
 	CPPUNIT_ASSERT_EQUAL((int32)1,parsed.CountItems());
+}
+
+
+void MacroTextTest::FindThenAddAttributeReachesEveryFoundNode(void)
+{
+	// user report: a hand-written Repeat{Find "Test"; AddAttribute
+	// Node::selected=true} macro "only added one attribute" to three
+	// nodes named Test. Same text, same three nodes, played back through
+	// the real parse + PlayMacro() path - counts how many "Attribute"
+	// entries each node's Node::Data ends up with.
+	PDocument	*doc	= NewRegisteredTestDocument();
+
+	BMessage	*nodes[3];
+	for (int32 i = 0; i < 3; i++) {
+		nodes[i]	= new BMessage(P_C_CLASS_TYPE);
+		BString	name;
+		name << "Test " << (i+1);
+		nodes[i]->AddString("Node::name",name.String());
+		nodes[i]->AddBool(P_C_NODE_SELECTED,false);
+		BMessage	data;
+		nodes[i]->AddMessage(P_C_NODE_DATA,&data);
+		doc->GetAllNodes()->AddItem(nodes[i]);
+	}
+
+	BString	text(
+		"Repeat\n"
+		"  count=1\n"
+		"  Find\n"
+		"    searchString=\"Test\"\n"
+		"  AddAttribute\n"
+		"    Node::selected=true\n"
+		"    ~valueContainer\n"
+		"      type=1297303367\n"
+		"      name=\"Attribute\"\n"
+		"      subgroup=\"Node::Data\"\n"
+		"      ~newAttribute\n"
+		"        Name=\"Attribute\"\n"
+		"        Value=true\n");
+	BList		parsed;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+
+	BMessage	macro(P_C_MACRO_TYPE);
+	for (int32 i = 0; i < parsed.CountItems(); i++)
+		macro.AddMessage("Macro::Commmand",(BMessage*)parsed.ItemAt(i));
+	doc->GetCommandManager()->PlayMacro(&macro);
+
+	for (int32 i = 0; i < 3; i++) {
+		BMessage	data;
+		CPPUNIT_ASSERT(nodes[i]->FindMessage(P_C_NODE_DATA,&data) == B_OK);
+		type_code	type;
+		int32		count	= 0;
+		CPPUNIT_ASSERT(data.GetInfo("Attribute",&type,&count) == B_OK);
+		CPPUNIT_ASSERT_EQUAL((int32)1,count);
+	}
+}
+
+
+void MacroTextTest::EveryCommandExampleParses(void)
+{
+	// the tooltip examples (CommandExampleText()) are hand-written text -
+	// this keeps each one honest against the real parser and the real
+	// PropertyInfo() schemas, so a field rename or type change that breaks
+	// an example fails here instead of quietly showing wrong syntax.
+	PDocument		*doc		= NewRegisteredTestDocument();
+	PCommandManager	*manager	= doc->GetCommandManager();
+	int32			checked		= 0;
+	for (int32 i = 0; i < manager->CountPCommand(); i++) {
+		PCommand	*command	= manager->PCommandAt(i);
+		const char	*example	= CommandExampleText(command->Name());
+		if (example == NULL)
+			continue;
+		BList		parsed;
+		BString		error;
+		BString		text(example);
+		text << "\n";
+		status_t	err	= ParseCommands(text,&parsed,manager,&error);
+		BString		message;
+		message << command->Name() << " example: " << error;
+		CPPUNIT_ASSERT_MESSAGE(message.String(),err == B_OK);
+		checked++;
+	}
+	CPPUNIT_ASSERT(checked >= 12);
 }
