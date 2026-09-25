@@ -182,7 +182,7 @@ void PCommandManager::StopMacro() {
 
 }
 
-void PCommandManager::PlayMacro(BMessage *makro) {
+status_t PCommandManager::PlayMacro(BMessage *makro, BString *report) {
 	int32 		i				= 0;
 	BMessage	*message		= new BMessage();
 	Indexer		*playDeIndexer	= new Indexer(doc);
@@ -200,9 +200,15 @@ void PCommandManager::PlayMacro(BMessage *makro) {
 	bool	ownsValueContext	= (valueContext == NULL);
 	if (ownsValueContext)
 		valueContext	= new BMessage();
+	BString		failedCommand;
 	while ( (makro->FindMessage("Macro::Commmand", i,message) == B_OK) && (err==B_OK) )
 	{
+		const char	*commandName	= NULL;
+		message->FindString("Command::Name",&commandName);
+		BString		name(commandName != NULL ? commandName : "?");
 		err = Execute(playDeIndexer->DeIndexCommand(message));
+		if (err != B_OK)
+			failedCommand.SetToFormat(B_TRANSLATE("Command %ld (%s) failed."),(long)(i+1),name.String());
 		// Meant to give GraphEditor's own thread a chance to catch up
 		// visually between steps - confirmed live this doesn't actually
 		// work: 400ms (like the original 100ms) still shows nothing
@@ -221,6 +227,34 @@ void PCommandManager::PlayMacro(BMessage *makro) {
 		delete valueContext;
 		valueContext	= NULL;
 	}
+
+	BString		result;
+	status_t	status	= B_OK;
+	if (i == 0) {
+		status	= B_BAD_VALUE;
+		result	= B_TRANSLATE("The macro is empty - nothing to play.");
+	} else if (err != B_OK) {
+		status	= err;
+		result	= failedCommand;
+	} else if (playDeIndexer->UnresolvedCount() > 0) {
+		status	= B_BAD_VALUE;
+		result.SetToFormat(B_TRANSLATE("%ld node reference(s) point to nodes the macro never creates - it did not do what it says."),
+			(long)playDeIndexer->UnresolvedCount());
+	} else
+		result.SetToFormat(B_TRANSLATE("Played %ld command(s)."),(long)i);
+
+	if (report != NULL)
+		*report	= result;
+	if (doc->GetEditorManager() != NULL) {
+		BMessage	played(P_C_MACRO_PLAYED);
+		played.AddString("report",result.String());
+		played.AddBool("error",status != B_OK);
+		doc->GetEditorManager()->BroadCast(&played);
+		if (status != B_OK)
+			(new BAlert(B_TRANSLATE("Macro"),result.String(),B_TRANSLATE("OK"),NULL,NULL,
+				B_WIDTH_AS_USUAL,B_OFFSET_SPACING,B_WARNING_ALERT))->Go(NULL);
+	}
+	return status;
 }
 
 void PCommandManager::PlayMacroByName(const char *name) {

@@ -45,6 +45,8 @@ public:
 	void DroppedPrototypesGetDistinctIds(void);
 	void RepeatedInsertCreatesDistinctNodes(void);
 	void FoldedChipInFileGivesSpecificError(void);
+	void MacroSurvivesDocumentSaveAndLoad(void);
+	void PlayMacroReportsWhatHappened(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -80,6 +82,8 @@ public:
 	CPPUNIT_TEST(DroppedPrototypesGetDistinctIds);
 	CPPUNIT_TEST(RepeatedInsertCreatesDistinctNodes);
 	CPPUNIT_TEST(FoldedChipInFileGivesSpecificError);
+	CPPUNIT_TEST(MacroSurvivesDocumentSaveAndLoad);
+	CPPUNIT_TEST(PlayMacroReportsWhatHappened);
 	CPPUNIT_TEST_SUITE_END();
 };
 

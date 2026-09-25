@@ -46,7 +46,13 @@ public:
 			 * indicator) inspect what's been captured so far without
 			 * StopMacro()'s own blocking name-prompt dialog. */
 			BMessage*	GetRecording(void){return recording;};
-			void		PlayMacro(BMessage *makro);
+			/** Plays every command of `makro`. B_OK only if all of them ran and
+			 * every node reference resolved; *report (if given) then says what
+			 * happened in words. The same text goes to the editors
+			 * (P_C_MACRO_PLAYED), and a failure also gets a non-blocking alert
+			 * when the document has a UI - a macro that silently does nothing
+			 * is the worst outcome. */
+			status_t	PlayMacro(BMessage *makro, BString *report = NULL);
 			/** looks up a macro by its "Name" field in macroList and plays
 			 * it if found; logs and does nothing otherwise - a document not
 			 * having a macro under an app-wide shortcut's name is a normal

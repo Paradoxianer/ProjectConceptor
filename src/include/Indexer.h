@@ -62,6 +62,10 @@ public:
 			 * only as "could not resolve", and should log it.
 			 */
 			bool				ResolveId(int32 id,BMessage **node);
+			/** how many "node" references DeIndexCommand() could not resolve
+			 * since this Indexer was built - a macro played with any of
+			 * those did not do what it says. */
+			int32				UnresolvedCount(void) const {return unresolvedCount;};
 
 protected:
 			void				Init(void);
@@ -80,6 +84,7 @@ protected:
 			std::map<int32,BMessage*>	sorter;
 			std::map<BMessage*,int32>	ids;
 			int32				nextId;
+			int32				unresolvedCount;
 			BList				*included;
 
 			PluginManager		*pluginManager;

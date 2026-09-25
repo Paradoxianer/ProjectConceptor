@@ -5,6 +5,7 @@
  */
 #include <app/Message.h>
 #include <interface/ListView.h>
+#include <interface/MenuItem.h>
 #include <interface/OutlineListView.h>
 #include <interface/StringView.h>
 #include <interface/View.h>
@@ -84,13 +85,21 @@ protected:
 			/** Registers an empty macro named `name` in the command
 			 * manager's macro list and the Macro > Play submenu. Does not
 			 * select it or touch the list view. */
-			BMessage*		AddNewMacro(const BString &name);
+			BMessage*		AddNewMacro(const BString &name, const BMessage *contentFrom = NULL);
 			/** "New macro", "New macro 2", ... - first one no macro uses. */
 			BString			UniqueMacroName(void);
 			/** Macro > New: a fresh empty macro, selected. If text was typed
 			 * with no macro selected, that text becomes the new macro
 			 * instead of being thrown away. */
 			void			NewMacro(void);
+			/** Macro > Rename / Duplicate / Delete, on the selected macro. Keep
+			 * the Macro > Play submenu in step with the macro list. */
+			void			RenameSelectedMacro(void);
+			void			DuplicateSelectedMacro(void);
+			void			DeleteSelectedMacro(void);
+			/** the Play submenu's entry for `macro` (its menu message is the
+			 * macro itself), NULL if there is none */
+			BMenuItem*		PlayItemFor(BMessage *macro);
 			/** Serializes the selected macro's "Macro::Commmand" list into
 			 * fTextView. Clears the view (and the selected macro) if
 			 * nothing is selected. */

@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "InputRequest.h"
 #include "MacroText.h"
 #include "PCommandManager.h"
 #include "ProjectConceptorDefs.h"
@@ -555,9 +556,10 @@ void MacroEditor::RefreshMacroList(bool reloadText)
 }
 
 
-BMessage* MacroEditor::AddNewMacro(const BString &name)
+BMessage* MacroEditor::AddNewMacro(const BString &name, const BMessage *contentFrom)
 {
-	BMessage	*newMacro	= new BMessage(P_C_MACRO_TYPE);
+	BMessage	*newMacro	= (contentFrom != NULL) ? new BMessage(*contentFrom) : new BMessage(P_C_MACRO_TYPE);
+	newMacro->RemoveName("Name");
 	newMacro->AddString("Name",name);
 	doc->GetCommandManager()->GetMacroList()->AddItem(newMacro);
 	BMenuItem	*item	= new BMenuItem(name.String(),newMacro);
@@ -583,6 +585,99 @@ BString MacroEditor::UniqueMacroName(void)
 		if (!taken)
 			return candidate;
 	}
+}
+
+
+BMenuItem* MacroEditor::PlayItemFor(BMessage *macro)
+{
+	BMenu	*playMenu	= doc->GetMenu(P_MENU_MACRO_PLAY);
+	if (playMenu == NULL)
+		return NULL;
+	for (int32 i = 0; i < playMenu->CountItems(); i++) {
+		BMenuItem	*item	= playMenu->ItemAt(i);
+		if ((item != NULL) && (item->Message() == macro))
+			return item;
+	}
+	return NULL;
+}
+
+
+void MacroEditor::RenameSelectedMacro(void)
+{
+	if ((doc == NULL) || (fSelectedMacro == NULL)) {
+		SetStatus(B_TRANSLATE("No macro selected."),true);
+		return;
+	}
+	BString	oldName;
+	fSelectedMacro->FindString("Name",&oldName);
+	InputRequest	*request	= new InputRequest(B_TRANSLATE("Rename macro"),
+		B_TRANSLATE("Name"),oldName.String(),B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
+	char	*input		= NULL;
+	bool	accepted	= (request->Go(&input) < 1) && (input != NULL);
+	BString	newName(accepted ? input : "");
+	delete[] input;
+	request->Lock();
+	request->Quit();
+	newName.Trim();
+	if (!accepted || (newName.Length() == 0) || (newName == oldName))
+		return;
+
+	fSelectedMacro->ReplaceString("Name",newName.String());
+	BMenuItem	*item	= PlayItemFor(fSelectedMacro);
+	if (item != NULL)
+		item->SetLabel(newName.String());
+	RefreshMacroList(false);
+	SetStatus(B_TRANSLATE("Renamed."),false);
+}
+
+
+void MacroEditor::DuplicateSelectedMacro(void)
+{
+	if ((doc == NULL) || (fSelectedMacro == NULL)) {
+		SetStatus(B_TRANSLATE("No macro selected."),true);
+		return;
+	}
+	ApplyEdits(false);
+	BString	name;
+	fSelectedMacro->FindString("Name",&name);
+	BString	copyName(name);
+	copyName	<< B_TRANSLATE(" copy");
+	fSelectedMacro	= AddNewMacro(copyName,fSelectedMacro);
+	RefreshMacroList();
+	SetStatus(B_TRANSLATE("Duplicated."),false);
+}
+
+
+void MacroEditor::DeleteSelectedMacro(void)
+{
+	if ((doc == NULL) || (fSelectedMacro == NULL)) {
+		SetStatus(B_TRANSLATE("No macro selected."),true);
+		return;
+	}
+	BString	name;
+	fSelectedMacro->FindString("Name",&name);
+	BString	question;
+	question.SetToFormat(B_TRANSLATE("Delete the macro \"%s\"? This cannot be undone."),name.String());
+	BAlert	*alert	= new BAlert(B_TRANSLATE("Delete macro"),question.String(),
+		B_TRANSLATE("Cancel"),B_TRANSLATE("Delete"),NULL,B_WIDTH_AS_USUAL,B_WARNING_ALERT);
+	if (alert->Go() != 1)
+		return;
+
+	BList		*macroList	= doc->GetCommandManager()->GetMacroList();
+	BMessage	*macro		= fSelectedMacro;
+	macroList->RemoveItem(macro);
+	fSelectedMacro	= NULL;
+	// the Play entry owns the macro as its message - deleting the entry
+	// deletes the macro too; without an entry the macro is deleted here
+	BMenuItem	*item	= PlayItemFor(macro);
+	if (item != NULL) {
+		BMenu	*playMenu	= item->Menu();
+		playMenu->RemoveItem(item);
+		delete item;
+	} else
+		delete macro;
+	RefreshMacroList();
+	SetStatus(B_TRANSLATE("Deleted."),false);
 }
 
 
@@ -776,7 +871,34 @@ void MacroEditor::MessageReceived(BMessage *message)
 			ValueChanged(message);
 			break;
 		}
+		case P_C_MACRO_PLAYED: {
+			const char	*report	= NULL;
+			bool		failed	= false;
+			message->FindBool("error",&failed);
+			if (message->FindString("report",&report) == B_OK)
+				SetStatus(report,failed);
+			break;
+		}
 		case M_E_MACRO_SELECTED: {
+			// switching away from text that does not parse would throw it
+			// away (the stored macro still has the last good version)
+			BList	*macroList	= doc->GetCommandManager()->GetMacroList();
+			int32	newIndex	= fMacroList->CurrentSelection();
+			bool	switching	= (fSelectedMacro != NULL) && (newIndex >= 0)
+				&& (newIndex < macroList->CountItems())
+				&& (macroList->ItemAt(newIndex) != fSelectedMacro);
+			if (switching && !ApplyEdits(false)) {
+				BAlert	*alert	= new BAlert(B_TRANSLATE("Macro has errors"),
+					B_TRANSLATE("The text of this macro has errors and was not applied. Switching now discards it."),
+					B_TRANSLATE("Keep editing"),B_TRANSLATE("Discard"),NULL,
+					B_WIDTH_AS_USUAL,B_WARNING_ALERT);
+				if (alert->Go() == 0) {
+					fMacroList->SetSelectionMessage(NULL);
+					fMacroList->Select(macroList->IndexOf(fSelectedMacro));
+					fMacroList->SetSelectionMessage(new BMessage(M_E_MACRO_SELECTED));
+					break;
+				}
+			}
 			ShowSelectedMacro();
 			break;
 		}
@@ -786,6 +908,18 @@ void MacroEditor::MessageReceived(BMessage *message)
 		// straight to this editor's handler by view name.
 		case MENU_MACRO_SAVE: {
 			ExportToFile();
+			break;
+		}
+		case MENU_MACRO_RENAME: {
+			RenameSelectedMacro();
+			break;
+		}
+		case MENU_MACRO_DUPLICATE: {
+			DuplicateSelectedMacro();
+			break;
+		}
+		case MENU_MACRO_DELETE: {
+			DeleteSelectedMacro();
 			break;
 		}
 		case MENU_MACRO_NEW: {

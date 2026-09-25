@@ -30,6 +30,11 @@
 #undef private
 #include "MacroEditor.h"
 #include "MacroText.h"
+#include <support/DataIO.h>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include "PDocLoader.h"
 #include "Move.h"
 #include "PCommand.h"
 #include "PCommandManager.h"
@@ -1206,4 +1211,106 @@ void MacroTextTest::FoldedChipInFileGivesSpecificError(void)
 		BString("Insert\n  node=@1\n  >> ~included_node[@1] \"New Node 1\"\n"),
 		&parsed,doc->GetCommandManager(),&error));
 	CPPUNIT_ASSERT(error.StartsWith("line 3: folded chip"));
+}
+
+
+static std::string SortedLines(const BString &text)
+{
+	std::vector<std::string>	lines;
+	int32	at	= 0;
+	while (at < text.Length()) {
+		int32	nl	= text.FindFirst("\n",at);
+		if (nl < 0)
+			nl	= text.Length();
+		lines.push_back(std::string(text.String()+at,nl-at));
+		at	= nl+1;
+	}
+	std::sort(lines.begin(),lines.end());
+	std::string	joined;
+	for (size_t i = 0; i < lines.size(); i++)
+		joined	+= lines[i] + "\n";
+	return joined;
+}
+
+
+void MacroTextTest::MacroSurvivesDocumentSaveAndLoad(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		text;
+	InsertPrototypeText(&text);
+	text << "Move\n  dx=10.0\n  dy=5.0\n";
+	BList		parsed;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+	BMessage	*macro	= new BMessage(P_C_MACRO_TYPE);
+	macro->AddString("Name","kept");
+	for (int32 i = 0; i < parsed.CountItems(); i++)
+		macro->AddMessage("Macro::Commmand",(BMessage*)parsed.ItemAt(i));
+	doc->GetCommandManager()->GetMacroList()->AddItem(macro);
+
+	// what Save()/Load() do around the file: archive, flatten, unflatten
+	BMessage	archive;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,doc->Archive(&archive,true));
+	BMallocIO	buffer;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,archive.Flatten(&buffer));
+	buffer.Seek(0,SEEK_SET);
+	BMessage	loaded;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,loaded.Unflatten(&buffer));
+
+	PDocLoader	loader(doc,&loaded);
+	BList		*macros	= loader.GetMacroList();
+	CPPUNIT_ASSERT_EQUAL((int32)1,macros->CountItems());
+	BMessage	*again	= (BMessage*)macros->ItemAt(0);
+	const char	*name	= NULL;
+	CPPUNIT_ASSERT(again->FindString("Name",&name) == B_OK);
+	CPPUNIT_ASSERT(BString("kept") == name);
+
+	BList		commands;
+	BMessage	entry;
+	for (int32 i = 0; again->FindMessage("Macro::Commmand",i,&entry) == B_OK; i++) {
+		commands.AddItem(new BMessage(entry));
+		entry.MakeEmpty();
+	}
+	BString	roundTripped;
+	SerializeCommands(&commands,&roundTripped);
+	// field order inside a message is not kept by flatten/unflatten
+	// (Node::Frame moves) - same lines, same values is what matters
+	CPPUNIT_ASSERT_EQUAL(SortedLines(text),SortedLines(roundTripped));
+}
+
+
+void MacroTextTest::PlayMacroReportsWhatHappened(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		report;
+
+	// nothing to play
+	BMessage	empty(P_C_MACRO_TYPE);
+	CPPUNIT_ASSERT(doc->GetCommandManager()->PlayMacro(&empty,&report) != B_OK);
+	CPPUNIT_ASSERT(report.FindFirst("empty") >= 0);
+
+	// a Select naming a node the macro never creates
+	BString		text("Select\n  node=@9\n  deselect=false\n  selectAll=false\n");
+	BList		parsed;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+	BMessage	dangling(P_C_MACRO_TYPE);
+	for (int32 i = 0; i < parsed.CountItems(); i++)
+		dangling.AddMessage("Macro::Commmand",(BMessage*)parsed.ItemAt(i));
+	CPPUNIT_ASSERT(doc->GetCommandManager()->PlayMacro(&dangling,&report) != B_OK);
+	CPPUNIT_ASSERT(report.FindFirst("never creates") >= 0);
+
+	// the real thing
+	BString		insertText;
+	InsertPrototypeText(&insertText);
+	BList		parsedInsert;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		ParseCommands(insertText,&parsedInsert,doc->GetCommandManager(),&error));
+	BMessage	good(P_C_MACRO_TYPE);
+	for (int32 i = 0; i < parsedInsert.CountItems(); i++)
+		good.AddMessage("Macro::Commmand",(BMessage*)parsedInsert.ItemAt(i));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,doc->GetCommandManager()->PlayMacro(&good,&report));
+	CPPUNIT_ASSERT(report.FindFirst("Played 1") >= 0);
 }

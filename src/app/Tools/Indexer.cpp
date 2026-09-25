@@ -417,8 +417,10 @@ BMessage* Indexer::DeIndexCommand(BMessage *command)
 		std::map<int32,BMessage*>::iterator	nodeIndex	= sorter.find(nodeId);
 		if (nodeIndex != sorter.end())
 			resolvedNodes.AddItem(nodeIndex->second);
-		else
+		else {
+			unresolvedCount++;
 			PRINT(("ERROR:\tDeIndexCommand - unresolved node id %ld\n",(long)nodeId));
+		}
 		i++;
 	}
 	if (i > 0)
@@ -444,6 +446,7 @@ void Indexer::Init(void)
 	sorter				= std::map<int32,BMessage*>();
 	ids					= std::map<BMessage*,int32>();
 	nextId				= 1;
+	unresolvedCount		= 0;
 	included			= new BList();
 	pluginManager		= (doc->BelongTo())->GetPluginManager();
 	cachedEditors		= NULL;

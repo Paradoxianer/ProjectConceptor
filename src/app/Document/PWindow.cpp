@@ -366,6 +366,19 @@ BMenuBar *PWindow::MakeMenu(void)
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_SAVE);
+	menu->AddSeparatorItem();
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Rename"),new BMessage(MENU_MACRO_RENAME)));
+	item->SetTarget(doc);
+	localizeMenuItems->AddPointer("item",(void *) item);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_RENAME);
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Duplicate"),new BMessage(MENU_MACRO_DUPLICATE)));
+	item->SetTarget(doc);
+	localizeMenuItems->AddPointer("item",(void *) item);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_DUPLICATE);
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Delete"),new BMessage(MENU_MACRO_DELETE)));
+	item->SetTarget(doc);
+	localizeMenuItems->AddPointer("item",(void *) item);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_DELETE);
 
 	tmpBar->AddItem(menu);
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());

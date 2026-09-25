@@ -85,6 +85,8 @@ const uint32	P_C_CONNECTED					= 'pcCd';*/
 const uint32	P_C_EXECUTE_COMMAND				= 'pcEC';
 
 const uint32	P_C_VALUE_CHANGED				= 'pcVC';
+/** sent to every editor after a macro ran: string "report", bool "error" */
+const uint32	P_C_MACRO_PLAYED				= 'pcMP';
 const uint32	P_C_DOC_BOUNDS_CHANGED			= 'pcDB';
 
 const uint32	P_C_EDITOR_SWITCHED_ACTIV		= 'pcSA';
@@ -144,6 +146,9 @@ const uint32	MENU_MACRO_START_RECORDING		= 'MMsr';
 const uint32	MENU_MACRO_STOP_RECORDING		= 'MMsp';
 const uint32	MENU_MACRO_PLAY					= 'MMpl';
 const uint32	MENU_MACRO_NEW					= 'MMnw';
+const uint32	MENU_MACRO_RENAME				= 'MMrn';
+const uint32	MENU_MACRO_DUPLICATE			= 'MMdp';
+const uint32	MENU_MACRO_DELETE				= 'MMdl';
 const uint32	MENU_MACRO_OPEN					= 'MMop';
 const uint32	MENU_MACRO_SAVE					= 'MMsv';
 
@@ -288,6 +293,9 @@ extern const char*		P_MENU_MACRO_START_RECORDING;//	= "Start Recording";
 extern const char*		P_MENU_MACRO_STOP_RECORDING;//		= "Stop Recording";
 extern const char*		P_MENU_MACRO_PLAY;//				= "Play";
 extern const char*		P_MENU_MACRO_NEW;//				= "New";
+extern const char*		P_MENU_MACRO_RENAME;
+extern const char*		P_MENU_MACRO_DUPLICATE;
+extern const char*		P_MENU_MACRO_DELETE;
 extern const char*		P_MENU_MACRO_OPEN;//				= "Open";
 extern const char*		P_MENU_MACRO_SAVE;//				= "Save";
 

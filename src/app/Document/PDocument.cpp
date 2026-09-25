@@ -188,6 +188,9 @@ void PDocument::MessageReceived(BMessage* message) {
 		// so sending to it before switching to it silently goes nowhere.
 		case MENU_MACRO_SAVE:
 		case MENU_MACRO_NEW:
+		case MENU_MACRO_RENAME:
+		case MENU_MACRO_DUPLICATE:
+		case MENU_MACRO_DELETE:
 		case MENU_MACRO_OPEN: {
 			if ((window != NULL) && (editorManager != NULL)) {
 				window->SelectEditorTab("MacroEditor");
