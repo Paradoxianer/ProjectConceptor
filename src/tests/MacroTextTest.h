@@ -4,10 +4,13 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 /** MacroText.cpp (#55) - the guided text DSL a recorded macro's
- * "Macro::Commmand" list round-trips through in the MacroEditor. Pure
- * functions, exercised directly here the same way GroupBoundaryTest/
- * LayoutEditorTest exercise their own pure-geometry/pure-logic targets -
- * no running MacroEditor view needed.
+ * "Macro::Commmand" list round-trips through (still used for Macro >
+ * Save/Open - see MacroText.h), plus the BMessage-tree helpers
+ * (BuildInsertPrototype/HighestReferencedId/AssignInsertId/
+ * FormatFieldValue/ParseFieldValue) the tree editor (MacroOutlineView)
+ * shares with it. Pure functions, exercised directly here the same way
+ * GroupBoundaryTest/LayoutEditorTest exercise their own pure-geometry/
+ * pure-logic targets - no running editor view needed.
  */
 class MacroTextTest : public CppUnit::TestFixture
 {
@@ -34,19 +37,14 @@ public:
 	void GeneratedAddAttributeSnippetParses(void);
 	void FindThenAddAttributeReachesEveryFoundNode(void);
 	void EveryCommandExampleParses(void);
-	void SnippetDropSnapsToLineBoundaryWithIndent(void);
-	void IndentChangeMovesInAndOutWithoutGoingNegative(void);
 	void IncludedNodeKeepsItsMessageType(void);
 	void TypeCodesReadAsNames(void);
 	void InsertPrototypeParsesAndKeepsNodeShape(void);
-	void FoldedChipsSurviveWrapAndNewLine(void);
-	void ChipsFollowIndentShiftOfTheirLine(void);
-	void EditedChipIdStillFindsItsBlock(void);
 	void DroppedPrototypesGetDistinctIds(void);
 	void RepeatedInsertCreatesDistinctNodes(void);
-	void FoldedChipInFileGivesSpecificError(void);
 	void MacroSurvivesDocumentSaveAndLoad(void);
 	void PlayMacroReportsWhatHappened(void);
+	void FormatAndParseFieldValueRoundTripEveryType(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -71,19 +69,14 @@ public:
 	CPPUNIT_TEST(GeneratedAddAttributeSnippetParses);
 	CPPUNIT_TEST(FindThenAddAttributeReachesEveryFoundNode);
 	CPPUNIT_TEST(EveryCommandExampleParses);
-	CPPUNIT_TEST(SnippetDropSnapsToLineBoundaryWithIndent);
-	CPPUNIT_TEST(IndentChangeMovesInAndOutWithoutGoingNegative);
 	CPPUNIT_TEST(IncludedNodeKeepsItsMessageType);
 	CPPUNIT_TEST(TypeCodesReadAsNames);
 	CPPUNIT_TEST(InsertPrototypeParsesAndKeepsNodeShape);
-	CPPUNIT_TEST(FoldedChipsSurviveWrapAndNewLine);
-	CPPUNIT_TEST(ChipsFollowIndentShiftOfTheirLine);
-	CPPUNIT_TEST(EditedChipIdStillFindsItsBlock);
 	CPPUNIT_TEST(DroppedPrototypesGetDistinctIds);
 	CPPUNIT_TEST(RepeatedInsertCreatesDistinctNodes);
-	CPPUNIT_TEST(FoldedChipInFileGivesSpecificError);
 	CPPUNIT_TEST(MacroSurvivesDocumentSaveAndLoad);
 	CPPUNIT_TEST(PlayMacroReportsWhatHappened);
+	CPPUNIT_TEST(FormatAndParseFieldValueRoundTripEveryType);
 	CPPUNIT_TEST_SUITE_END();
 };
 

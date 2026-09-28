@@ -254,6 +254,21 @@ static bool TypeFromName(const BString &name, type_code *outType)
 }
 
 
+void FormatFieldValue(BMessage *msg, const char *fieldName, type_code type, int32 index, BString *out)
+{
+	// a "type" field holds a raw type_code - shown by name (string, int32,
+	// ...) instead of an opaque 10-digit number
+	int32		typeCode	= 0;
+	const char	*typeName	= ((strcmp(fieldName,"type") == 0) && (type == B_INT32_TYPE)
+		&& (msg->FindInt32(fieldName,index,&typeCode) == B_OK))
+		? TypeName((type_code)typeCode) : NULL;
+	if (typeName != NULL)
+		*out << typeName;
+	else
+		SerializeValue(msg,fieldName,type,index,out);
+}
+
+
 static BString WhatToText(uint32 what)
 {
 	BString	text;
@@ -369,16 +384,7 @@ static void SerializeFieldLines(BMessage *msg, int depth, const char *skipName1,
 		}
 		for (int32 j = 0; j < count; j++) {
 			*out << indent << fieldName << "=";
-			// a "type" field holds a raw type_code - shown by name
-			// (string, int32, ...) instead of an opaque 10-digit number
-			int32		typeCode	= 0;
-			const char	*typeName	= ((fn == "type") && (type == B_INT32_TYPE)
-				&& (msg->FindInt32(fieldName,j,&typeCode) == B_OK))
-				? TypeName((type_code)typeCode) : NULL;
-			if (typeName != NULL)
-				*out << typeName;
-			else
-				SerializeValue(msg,fieldName,type,j,out);
+			FormatFieldValue(msg,fieldName,type,j,out);
 			*out << "\n";
 		}
 		i++;
@@ -459,7 +465,7 @@ static void DeleteStringList(BList *list)
 
 /** Looks up fieldName in command's own PropertyInfo() ctypes - returns
  * true and the declared type_code if found. */
-static bool FindFieldType(PCommand *command, const char *fieldName, type_code *outType)
+bool FindFieldType(PCommand *command, const char *fieldName, type_code *outType)
 {
 	int32				count	= 0;
 	const property_info	*props	= command->PropertyInfo(&count);
@@ -668,6 +674,49 @@ static status_t ParseAndAddValue(BMessage *cmd, const char *fieldName, type_code
 }
 
 
+status_t ParseFieldValue(BMessage *msg, const char *fieldName, type_code expectedType,
+	const BString &valueText, bool allowBinding, BString *errorOut)
+{
+	// type=string / type=int32 / ... - the readable form of a raw type_code
+	// (see FormatFieldValue()); a plain number still works via the generic
+	// path below
+	type_code	namedType	= 0;
+	if ((strcmp(fieldName,"type") == 0) && TypeFromName(valueText,&namedType)) {
+		msg->AddInt32(fieldName,(int32)namedType);
+		return B_OK;
+	}
+
+	// #135: "$variableName" isn't a literal value - it marks this field as
+	// bound to a macro-replay-time variable instead (see
+	// PCommandManager::ResolveBindings()), resolved fresh from whatever
+	// that variable holds right before this command's own Do() runs.
+	// Recorded as a "PCommand::bindings" entry alongside the command's own
+	// fields, never as a literal value on the field itself.
+	if ((valueText.Length() > 1) && (valueText.ByteAt(0) == '$')) {
+		if (!allowBinding) {
+			*errorOut	<< "\"$" << fieldName
+				<< "\" bindings aren't supported inside a \"~\" field block";
+			return B_BAD_VALUE;
+		}
+		BString	variableName;
+		valueText.CopyInto(variableName,1,valueText.Length()-1);
+		if (variableName.Length() == 0) {
+			*errorOut	<< "empty variable name after \"$\"";
+			return B_BAD_VALUE;
+		}
+		BMessage	bindings;
+		msg->FindMessage("PCommand::bindings",&bindings);
+		bindings.RemoveName(fieldName);
+		bindings.AddString(fieldName,variableName);
+		msg->RemoveName("PCommand::bindings");
+		msg->AddMessage("PCommand::bindings",&bindings);
+		return B_OK;
+	}
+
+	return ParseAndAddValue(msg,fieldName,expectedType,valueText,errorOut);
+}
+
+
 struct PendingChild {
 	BString		name;	// field name to AddMessage() this under, in the parent frame
 	BMessage	*msg;
@@ -788,12 +837,7 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 		}
 		if (tokens.CountItems() != 1) {
 			errorOut->SetTo("");
-			// a folded chip written into a file (older exports did that)
-			// has lost the block it stood for
-			if (*(BString*)tokens.ItemAt(0) == ">>")
-				*errorOut	<< "line " << lineNo << ": folded chip without its node data - the file was saved with the block still folded";
-			else
-				*errorOut	<< "line " << lineNo << ": expected one item per line";
+			*errorOut	<< "line " << lineNo << ": expected one item per line";
 			DeleteStringList(&tokens);
 			CleanupFrames(stack,&built);
 			return B_BAD_VALUE;
@@ -881,15 +925,6 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 					break;
 				continue;
 			}
-			// type=string / type=int32 / ... - the readable form of a raw
-			// type_code (see SerializeFieldLines()); a plain number still works
-			type_code		namedType		= 0;
-			if ((fieldName == "type") && TypeFromName(valueText,&namedType)) {
-				parent.msg->AddInt32("type",(int32)namedType);
-				if (lineEnd >= len)
-					break;
-				continue;
-			}
 			type_code		expectedType	= B_ANY_TYPE;
 			if (!parent.isField) {
 				if (!FindFieldType(parent.command,fieldName.String(),&expectedType)) {
@@ -899,56 +934,18 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 					return B_BAD_VALUE;
 				}
 			}
-			// #135: "$variableName" isn't a literal value at all - it
-			// marks this field as bound to a macro-replay-time variable
-			// instead (see PCommandManager::ResolveBindings()), resolved
-			// fresh from whatever that variable holds right before this
-			// command's own Do() runs. Recorded as a "PCommand::bindings"
-			// entry alongside the command's own fields, never as a
-			// literal value on the field itself - unlike every other
-			// value form, its actual type isn't known until replay, so
-			// it deliberately skips ParseAndAddValue()'s own type check
-			// against expectedType entirely (the field NAME was already
-			// validated above, via the same FindFieldType() call every
-			// other value form also goes through).
-			if ((valueText.Length() > 1) && (valueText.ByteAt(0) == '$')) {
-				// only meaningful directly on a command's own field -
-				// PCommandManager::ResolveBindings() reads bindings only
-				// from a command's own top-level settings, never
-				// descending into a nested "~fieldName" block's own
-				// content, so a binding written inside one (e.g. inside
-				// ChangeValue's "~valueContainer") would silently never
-				// resolve at replay time. An immediate error here beats
-				// that silent no-op.
-				if (parent.isField) {
-					errorOut->SetTo("");
-					*errorOut	<< "line " << lineNo << ": \"$" << fieldName
-						<< "\" bindings aren't supported inside a \"~\" field block";
-					CleanupFrames(stack,&built);
-					return B_BAD_VALUE;
-				}
-				BString	variableName;
-				valueText.CopyInto(variableName,1,valueText.Length()-1);
-				if (variableName.Length() == 0) {
-					errorOut->SetTo("");
-					*errorOut	<< "line " << lineNo << ": empty variable name after \"$\"";
-					CleanupFrames(stack,&built);
-					return B_BAD_VALUE;
-				}
-				BMessage	bindings;
-				parent.msg->FindMessage("PCommand::bindings",&bindings);
-				bindings.RemoveName(fieldName.String());
-				bindings.AddString(fieldName.String(),variableName);
-				parent.msg->RemoveName("PCommand::bindings");
-				parent.msg->AddMessage("PCommand::bindings",&bindings);
-			} else {
-				BString	valueError;
-				if (ParseAndAddValue(parent.msg,fieldName.String(),expectedType,valueText,&valueError) != B_OK) {
-					errorOut->SetTo("");
-					*errorOut	<< "line " << lineNo << ": " << valueError;
-					CleanupFrames(stack,&built);
-					return B_BAD_VALUE;
-				}
+			// #135's "$variableName" binding syntax is only meaningful directly
+			// on a command's own field - PCommandManager::ResolveBindings()
+			// never descends into a nested "~fieldName" block's own content, so
+			// a binding written inside one would silently never resolve at
+			// replay time. ParseFieldValue() rejects it there instead (see
+			// allowBinding).
+			BString	valueError;
+			if (ParseFieldValue(parent.msg,fieldName.String(),expectedType,valueText,!parent.isField,&valueError) != B_OK) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": " << valueError;
+				CleanupFrames(stack,&built);
+				return B_BAD_VALUE;
 			}
 			// no frame pushed - a scalar field line has no children of its own
 		} else {
@@ -1046,95 +1043,11 @@ const char* CommandExampleText(const char *commandName)
 	return NULL;
 }
 
-
-void SnippetInsertion(const BString &text, int32 line, bool lowerHalf,
-	const BString &snippet, int32 *outOffset, BString *outText)
-{
-	int32	total	= text.Length();
-	int32	offset	= 0;
-	int32	depth	= 0;
-
-	// start offset of every line
-	std::vector<int32>	starts;
-	starts.push_back(0);
-	for (int32 i = 0; i < total; i++)
-		if (text[i] == '\n')
-			starts.push_back(i+1);
-	int32	lineCount	= (int32)starts.size();
-	if (total > 0) {
-		if (line < 0)
-			line	= 0;
-		if (line >= lineCount)
-			line	= lineCount-1;
-		BString	target;
-		int32	end	= starts[line];
-		while ((end < total) && (text[end] != '\n'))
-			end++;
-		text.CopyInto(target,starts[line],end-starts[line]);
-		int32	spaces	= 0;
-		while ((spaces < target.Length()) && (target[spaces] == ' '))
-			spaces++;
-		depth	= spaces/2;
-		if (!lowerHalf)
-			offset	= starts[line];
-		else {
-			int32	next	= line+1;
-			while (next < lineCount) {
-				int32	nextEnd	= starts[next];
-				while ((nextEnd < total) && (text[nextEnd] != '\n'))
-					nextEnd++;
-				BString	nextLine;
-				text.CopyInto(nextLine,starts[next],nextEnd-starts[next]);
-				BString	trimmed(nextLine);
-				trimmed.Trim();
-				int32	nextSpaces	= 0;
-				while ((nextSpaces < nextLine.Length()) && (nextLine[nextSpaces] == ' '))
-					nextSpaces++;
-				if ((trimmed.Length() > 0) && (nextSpaces/2 <= depth))
-					break;
-				next++;
-			}
-			offset	= (next < lineCount) ? starts[next] : total;
-		}
-	}
-
-	BString	indent;
-	for (int32 d = 0; d < depth; d++)
-		indent << "  ";
-	outText->SetTo("");
-	if ((offset == total) && (total > 0) && (text[total-1] != '\n'))
-		*outText << "\n";
-	int32	pos	= 0;
-	while (pos < snippet.Length()) {
-		int32	end	= pos;
-		while ((end < snippet.Length()) && (snippet[end] != '\n'))
-			end++;
-		BString	snippetLine;
-		snippet.CopyInto(snippetLine,pos,end-pos);
-		*outText << indent << snippetLine << "\n";
-		pos	= end+1;
-	}
-	*outOffset	= offset;
-}
-
-
-int32 IndentChange(const BString &line, int32 levels)
-{
-	if (levels >= 0)
-		return levels*2;
-	int32	leading	= 0;
-	while ((leading < line.Length()) && (line[leading] == ' '))
-		leading++;
-	int32	remove	= (-levels)*2;
-	return -((remove < leading) ? remove : leading);
-}
-
-
-void InsertPrototypeText(BString *out)
+BMessage* BuildInsertPrototype(void)
 {
 	// the same node GraphEditor::GenerateInsertCommand() builds for the
 	// toolbar's "new node" - font, pattern (colors/pen) and a frame - so a
-	// hand-written Insert starts from something that actually renders
+	// freshly dropped Insert starts from something that actually renders
 	font_family	family;
 	font_style	style;
 	be_plain_font->GetFamilyAndStyle(&family,&style);
@@ -1166,66 +1079,66 @@ void InsertPrototypeText(BString *out)
 	BMessage	data;
 	data.AddString(P_C_NODE_NAME,"Untitled");
 
-	BMessage	node(P_C_CLASS_TYPE);
-	node.AddInt32("this",1);
-	node.AddMessage(P_C_NODE_DATA,&data);
-	node.AddMessage(P_C_NODE_FONT,&font);
-	node.AddMessage(P_C_NODE_PATTERN,&pattern);
-	node.AddRect(P_C_NODE_FRAME,BRect(100,100,200,180));
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	node->AddInt32("this",1);
+	node->AddMessage(P_C_NODE_DATA,&data);
+	node->AddMessage(P_C_NODE_FONT,&font);
+	node->AddMessage(P_C_NODE_PATTERN,&pattern);
+	node->AddRect(P_C_NODE_FRAME,BRect(100,100,200,180));
 
-	BMessage	insert;
-	insert.AddString("Command::Name","Insert");
-	insert.AddInt32("node",1);
-	insert.AddMessage("included_node",&node);
-	BList	commands;
-	commands.AddItem(&insert);
-	SerializeCommands(&commands,out);
+	BMessage	*insert	= new BMessage();
+	insert->AddString("Command::Name","Insert");
+	insert->AddInt32("node",1);
+	insert->AddMessage("included_node",node);
+	delete node;
+	return insert;
 }
 
 
-int32 HighestReferencedId(const BString &text)
+/** Recursively folds the max "this" id (every "included_node"/
+ * "included_connection" field, in `command` and every "PCommand::
+ * subPCommand" child, arbitrarily deep) into *highest. */
+static void FoldHighestId(BMessage *command, int32 *highest)
+{
+	static const char *kEmbeddedNames[] = { "included_node", "included_connection" };
+	for (size_t n = 0; n < sizeof(kEmbeddedNames)/sizeof(kEmbeddedNames[0]); n++) {
+		BMessage	embedded;
+		for (int32 i = 0; command->FindMessage(kEmbeddedNames[n],i,&embedded) == B_OK; i++) {
+			int32	thisId	= 0;
+			if ((embedded.FindInt32("this",&thisId) == B_OK) && (thisId > *highest))
+				*highest	= thisId;
+			embedded.MakeEmpty();
+		}
+	}
+	BMessage	child;
+	for (int32 i = 0; command->FindMessage("PCommand::subPCommand",i,&child) == B_OK; i++) {
+		FoldHighestId(&child,highest);
+		child.MakeEmpty();
+	}
+}
+
+
+int32 HighestReferencedId(BList *commands)
 {
 	int32	highest	= -1;
-	int32	length	= text.Length();
-	for (int32 i = 0; i < length; i++) {
-		int32	digitsAt	= -1;
-		if (text[i] == '@')
-			digitsAt	= i+1;
-		else if ((i+5 <= length) && (strncmp(text.String()+i,"this=",5) == 0)
-				&& ((i == 0) || (text[i-1] == ' ') || (text[i-1] == '\n')))
-			digitsAt	= i+5;
-		if ((digitsAt < 0) || (digitsAt >= length) || (text[digitsAt] < '0') || (text[digitsAt] > '9'))
-			continue;
-		int32	value	= atol(text.String()+digitsAt);
-		if (value > highest)
-			highest	= value;
+	for (int32 i = 0; i < commands->CountItems(); i++) {
+		BMessage	*command	= (BMessage*)commands->ItemAt(i);
+		if (command != NULL)
+			FoldHighestId(command,&highest);
 	}
 	return highest;
 }
 
 
-void RenumberInsertPrototype(BString *snippet, int32 newId)
+void AssignInsertId(BMessage *insertCommand, int32 newId)
 {
-	BString	result;
-	int32	at	= 0;
-	int32	length	= snippet->Length();
-	while (at < length) {
-		int32	nl		= snippet->FindFirst("\n",at);
-		int32	end		= (nl >= 0) ? nl+1 : length;
-		BString	line(snippet->String()+at,end-at);
-		BString	trimmed(line);
-		trimmed.Trim();
-		if (trimmed == "node=@1" || trimmed == "this=1") {
-			int32	indent	= 0;
-			while ((indent < line.Length()) && (line[indent] == ' '))
-				indent++;
-			BString	renumbered;
-			renumbered.Append(' ',indent);
-			renumbered << ((trimmed == "node=@1") ? "node=@" : "this=") << newId << "\n";
-			result	<< renumbered;
-		} else
-			result	<< line;
-		at	= end;
+	insertCommand->RemoveName("node");
+	insertCommand->AddInt32("node",newId);
+	BMessage	node;
+	if (insertCommand->FindMessage("included_node",&node) == B_OK) {
+		node.RemoveName("this");
+		node.AddInt32("this",newId);
+		insertCommand->RemoveName("included_node");
+		insertCommand->AddMessage("included_node",&node);
 	}
-	snippet->SetTo(result);
 }

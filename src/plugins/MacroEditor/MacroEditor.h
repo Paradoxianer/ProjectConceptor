@@ -12,7 +12,7 @@
 #include <storage/FilePanel.h>
 #include <support/List.h>
 
-#include "MacroTextView.h"
+#include "MacroOutlineView.h"
 #include "PEditor.h"
 #include "PDocument.h"
 #include "ShortCutFilter.h"
@@ -20,14 +20,17 @@
 const uint32	M_E_MACRO_SELECTED	= 'meMS';
 
 class BScrollView;
+class PCommandManager;
 
 /**
  * @class MacroEditor
  *
- * @brief View/edit already-recorded macros as text (#55) - a guided DSL
- * (see MacroText.h) round-tripping a macro's "Macro::Commmand" list.
- * Recording itself (Start/Stop Macro) is untouched; this is a viewer/
- * editor for what's already in PCommandManager::GetMacroList().
+ * @brief View/edit already-recorded macros (#55) as a direct structural
+ * tree (see MacroOutlineView) of a macro's "Macro::Commmand" list - no
+ * text/DSL surface to edit anymore (still used for Save/Open, see
+ * ExportToFile()/ImportFromFile()). Recording itself (Start/Stop Macro) is
+ * untouched; this is a viewer/editor for what's already in
+ * PCommandManager::GetMacroList().
  */
 class MacroEditor : public PEditor, public BView
 {
@@ -60,21 +63,24 @@ public:
 	virtual	void			MessageReceived(BMessage *message);
 	//----------------BView
 
-	/** Parses fTextView's current text and, on success, replaces the
-	 * selected macro's stored commands with it - silently (see the status
-	 * line for confirmation), never blocking further edits. On a parse
-	 * error the stored macro is left untouched and the error is shown in
-	 * the status line instead. No separate Apply button (#55 follow-up):
-	 * MacroTextView calls this itself at natural pause points (Enter,
-	 * losing focus) - public so it can. */
-			bool			ApplyEdits(bool revealErrorLine = true);
-
-	/** Called by MacroTextView::Select() on every cursor/selection change -
-	 * keeps fLineColStatus showing where the cursor actually is (1-based,
-	 * matching ParseCommands()'s own "line N: ..." counting) so an error
-	 * naming a line number can actually be found by eye instead of counted
-	 * by hand. Public for the same reason ApplyEdits() is. */
-			void			UpdateCursorPosition(int32 line, int32 column);
+	/** Writes fOutlineView's current command list into the selected macro's
+	 * "Macro::Commmand" field and updates the status line - called by
+	 * MacroOutlineView right after any edit (a field commits, a row is
+	 * added/deleted/moved, a command is dropped in). There is no draft to
+	 * apply: fOutlineView's own working copy is always already a fully
+	 * valid, typed BMessage tree, so this never fails. Public so
+	 * MacroOutlineView can call it. */
+			void			CommitOutlineChange(void);
+	/** Shows `text` as an error in the status line - MacroOutlineView calls
+	 * this when a field's typed-in value doesn't parse (e.g. a string typed
+	 * into a float field), instead of silently keeping the old value with
+	 * no explanation. Public for the same reason CommitOutlineChange() is. */
+			void			ShowOutlineError(const char *text);
+	/** doc->GetCommandManager(), or NULL if there is no doc yet - what
+	 * MacroOutlineView needs for every command-name/schema lookup, without
+	 * needing to know about PDocument itself. Public for the same reason
+	 * CommitOutlineChange() is. */
+			PCommandManager*	CommandManagerForOutline(void);
 
 protected:
 			void			Init(void);
@@ -100,22 +106,24 @@ protected:
 			/** the Play submenu's entry for `macro` (its menu message is the
 			 * macro itself), NULL if there is none */
 			BMenuItem*		PlayItemFor(BMessage *macro);
-			/** Serializes the selected macro's "Macro::Commmand" list into
-			 * fTextView. Clears the view (and the selected macro) if
+			/** Loads the selected macro's "Macro::Commmand" list into
+			 * fOutlineView. Clears the view (and the selected macro) if
 			 * nothing is selected. */
 			void			ShowSelectedMacro(void);
-			/** Exports the currently selected macro's text (#55) - reached
-			 * from Macro > Save (MENU_MACRO_SAVE), not a button (see #55
-			 * follow-up: macro-management actions belong in the Macro
-			 * menu, not duplicated as panel buttons). Shows a BAlert
-			 * instead of the save panel if nothing is selected. */
+			/** Exports the currently selected macro's DSL text (#55) -
+			 * reached from Macro > Save (MENU_MACRO_SAVE), not a button
+			 * (see #55 follow-up: macro-management actions belong in the
+			 * Macro menu, not duplicated as panel buttons). Shows a BAlert
+			 * instead of the save panel if nothing is selected. Still text
+			 * (SerializeCommands()) - a good diffable/shareable file format,
+			 * even though nothing in the editor itself is text anymore. */
 			void			ExportToFile(void);
 			/** Imports a file as a brand new macro entry - reached from
 			 * Macro > Open (MENU_MACRO_OPEN). Never touches whatever is
-			 * currently selected; the import always becomes its own new
-			 * list entry (named from the file), selected and shown for
-			 * review - not committed into Macro::Commmand until the text
-			 * is auto-applied (see ApplyEdits()). */
+			 * currently selected; parses the file with ParseCommands() and,
+			 * on success, installs the result directly as a new, selected
+			 * macro - on failure, nothing is created and the error is
+			 * shown in the status line. */
 			void			ImportFromFile(void);
 			void			SetStatus(const char *text, bool isError);
 			void			LayoutChildren(void);
@@ -131,14 +139,9 @@ protected:
 
 			BListView		*fMacroList;
 			BScrollView		*fMacroListScroll;
-			MacroTextView	*fTextView;
-			BScrollView		*fTextScroll;
+			MacroOutlineView	*fOutlineView;
+			BScrollView		*fOutlineScroll;
 			BStringView		*fStatus;
-			/** "Line N, Col M" for the text view's current cursor position -
-			 * see UpdateCursorPosition(). Sits next to fStatus in the same
-			 * bottom bar, not merged into the same BStringView, so it stays
-			 * visible even while fStatus is showing a long error message. */
-			BStringView		*fLineColStatus;
 			BOutlineListView	*fCommandList;
 			BScrollView		*fCommandListScroll;
 

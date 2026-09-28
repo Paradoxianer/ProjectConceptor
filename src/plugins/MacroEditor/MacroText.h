@@ -7,6 +7,7 @@
 #include <support/List.h>
 #include <support/String.h>
 
+class PCommand;
 class PCommandManager;
 
 /**
@@ -86,36 +87,55 @@ status_t	ParseCommands(const BString &text, BList *outCommands,
  * entry is checked against the real parser by MacroTextTest. */
 const char*	CommandExampleText(const char *commandName);
 
-/** Where (and how indented) a dragged-in command snippet goes: on a line
- * boundary of `text`, never mid-line - dropping onto the word "Find" used to
- * split it in two and break the command. `line` is the 0-based line under
- * the pointer; upper half of it (lowerHalf=false) -> before that line, lower
- * half -> after it and every deeper-indented line that belongs to it. The
- * snippet is indented to the target line's own depth (2 spaces per level).
- * Returns the insert position and the exact text to insert (every line
- * indented, newline-terminated; a leading newline if the target is the very
- * last line and doesn't end in one). */
-void		SnippetInsertion(const BString &text, int32 line, bool lowerHalf,
-				const BString &snippet, int32 *outOffset, BString *outText);
+/** A freshly allocated, ready-to-embed "Insert" command (own field "node",
+ * embedded "included_node" with name/font/colors/frame - the same node
+ * GraphEditor::GenerateInsertCommand() builds for the toolbar's "new node")
+ * - what dropping Insert into the tree editor inserts, so it isn't a bare
+ * "node=@1" pointing at nothing. Both the command's own "node" field and
+ * the embedded node's "this" field are set to 1 - see AssignInsertId() to
+ * renumber before adding a second one to the same macro. Caller owns the
+ * returned BMessage. */
+BMessage*	BuildInsertPrototype(void);
 
-/** How many characters to add (positive) or remove (negative) at the start of
- * `line` to move it `levels` indent levels (2 spaces each) in or out. An
- * outdent never removes more than the line's own leading spaces, so a line
- * already at depth 0 stays put. */
-int32		IndentChange(const BString &line, int32 levels);
+/** Highest node/connection id in `commands` (BList of BMessage*) - every
+ * "this" field on an embedded "included_node"/"included_connection" block,
+ * found recursively through every command's own subPCommand children -
+ * -1 if there is none. Used to give a freshly added node a fresh,
+ * non-colliding id instead of letting two dropped Insert prototypes both
+ * claim to be node 1. */
+int32		HighestReferencedId(BList *commands);
 
-/** A complete "Insert" command text with a ready node prototype embedded
- * (name, font, colors, frame) - what dragging Insert into the editor drops,
- * so it isn't a bare "node=@1" pointing at nothing. */
-void		InsertPrototypeText(BString *out);
+/** Renumbers a BuildInsertPrototype() result in place - its "node" field
+ * and its embedded "included_node"'s "this" field - to `newId`. */
+void		AssignInsertId(BMessage *insertCommand, int32 newId);
 
-/** Highest node/connection id ("@N" reference or "this=N" field) in `text`,
- * -1 if there is none. */
-int32		HighestReferencedId(const BString &text);
+/** How one field value looks as display text - the same rendering
+ * SerializeCommands() uses for its "fieldName=value" lines, minus the
+ * field name and "=" - shared with the tree editor's inline value overlay
+ * so there is exactly one answer to "what does a bool/float/point/... field
+ * look like as text", not two. `fieldName` matters only for the "type"
+ * field's special-cased readable type name (e.g. "string" instead of a raw
+ * type_code number) and the "node" field's "@" prefix. */
+void		FormatFieldValue(BMessage *msg, const char *fieldName, type_code type,
+				int32 index, BString *out);
 
-/** Renumbers an Insert prototype (InsertPrototypeText()) - its "node=@1" and
- * "this=1" lines - to `newId`, so several dropped prototypes don't all claim
- * to be node 1. */
-void		RenumberInsertPrototype(BString *snippet, int32 newId);
+/** Parses `valueText` (the same syntax FormatFieldValue() produces - see
+ * MacroText.h's grammar comment above) and adds it to `msg` under
+ * `fieldName`. `expectedType` cross-checks the parsed value's type against
+ * a command's own PropertyInfo() schema - pass B_ANY_TYPE where none
+ * applies (a nested "~fieldName" block's own content). If `allowBinding` and
+ * `valueText` starts with "$", it is instead recorded as a
+ * "PCommand::bindings" entry (see PCommandManager::ResolveBindings()) -
+ * pass false for a field inside a nested block, where a binding can never
+ * resolve (see ParseCommands()'s own check). Shared by ParseCommands() (DSL
+ * text) and the tree editor's inline value overlay. */
+status_t	ParseFieldValue(BMessage *msg, const char *fieldName, type_code expectedType,
+				const BString &valueText, bool allowBinding, BString *errorOut);
+
+/** Looks up fieldName in command's own PropertyInfo() ctypes - true and the
+ * declared type_code if found. Shared by ParseCommands() (field-name/type
+ * validation) and the tree editor (same validation, plus driving the "+
+ * Feld hinzufügen" menu's field list and each field row's overlay). */
+bool		FindFieldType(PCommand *command, const char *fieldName, type_code *outType);
 
 #endif

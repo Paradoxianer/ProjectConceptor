@@ -29,7 +29,7 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-plugin
 SRCS= 	MacroEditor.cpp \
 		MacroEditorPlugin.cpp \
 		MacroText.cpp \
-		MacroTextView.cpp
+		MacroOutlineView.cpp
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.

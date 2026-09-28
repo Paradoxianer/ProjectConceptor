@@ -24,11 +24,6 @@
 #include <interface/TextView.h>
 #include <map>
 
-// the fold toggle is private on purpose; the test drives it directly
-#define private public
-#include "MacroTextView.h"
-#undef private
-#include "MacroEditor.h"
 #include "MacroText.h"
 #include <support/DataIO.h>
 #include <algorithm>
@@ -831,98 +826,6 @@ void MacroTextTest::EveryCommandExampleParses(void)
 }
 
 
-void MacroTextTest::SnippetDropSnapsToLineBoundaryWithIndent(void)
-{
-	// user report: dropping a command onto the word "Find" inserted the
-	// snippet mid-word and broke that command (and its Repeat).
-	BString	text(
-		"Repeat\n"
-		"  count=3\n"
-		"  Find\n"
-		"    searchString=\"Test\"\n"
-		"  Move\n"
-		"    dx=1.0\n");
-	BString	snippet("Sleep\n  milliseconds=0\n");
-	int32	offset	= -1;
-	BString	inserted;
-
-	// upper half of the "  Find" line (line 2): before it, depth 1
-	SnippetInsertion(text,2,false,snippet,&offset,&inserted);
-	CPPUNIT_ASSERT_EQUAL((int32)text.FindFirst("  Find"),offset);
-	CPPUNIT_ASSERT(inserted == "  Sleep\n    milliseconds=0\n");
-
-	// lower half of the "  Find" line: after it AND its nested searchString
-	SnippetInsertion(text,2,true,snippet,&offset,&inserted);
-	CPPUNIT_ASSERT_EQUAL((int32)text.FindFirst("  Move"),offset);
-	CPPUNIT_ASSERT(inserted == "  Sleep\n    milliseconds=0\n");
-
-	// lower half of the top-level "Repeat": after the whole block, depth 0
-	SnippetInsertion(text,0,true,snippet,&offset,&inserted);
-	CPPUNIT_ASSERT_EQUAL(text.Length(),offset);
-	CPPUNIT_ASSERT(inserted == "Sleep\n  milliseconds=0\n");
-
-	// last line without a trailing newline: gets one first
-	BString	noNewline("Move\n  dx=1.0");
-	SnippetInsertion(noNewline,1,true,snippet,&offset,&inserted);
-	CPPUNIT_ASSERT_EQUAL(noNewline.Length(),offset);
-	CPPUNIT_ASSERT(inserted == "\n  Sleep\n    milliseconds=0\n");
-
-	// empty text
-	SnippetInsertion(BString(""),0,false,snippet,&offset,&inserted);
-	CPPUNIT_ASSERT_EQUAL((int32)0,offset);
-	CPPUNIT_ASSERT(inserted == "Sleep\n  milliseconds=0\n");
-
-	// the result of dropping into the middle of the macro still parses
-	BString	result(text);
-	SnippetInsertion(text,2,false,snippet,&offset,&inserted);
-	result.Insert(inserted,offset);
-	PDocument	*doc	= NewRegisteredTestDocument();
-	BList		parsed;
-	BString		error;
-	BString		message("dropped result: ");
-	status_t	err	= ParseCommands(result,&parsed,doc->GetCommandManager(),&error);
-	message << error;
-	CPPUNIT_ASSERT_MESSAGE(message.String(),err == B_OK);
-}
-
-
-void MacroTextTest::IndentChangeMovesInAndOutWithoutGoingNegative(void)
-{
-	CPPUNIT_ASSERT_EQUAL((int32)2,IndentChange(BString("Find"),1));
-	CPPUNIT_ASSERT_EQUAL((int32)4,IndentChange(BString("  Find"),2));
-	CPPUNIT_ASSERT_EQUAL((int32)-2,IndentChange(BString("    Find"),-1));
-	// already at depth 0 - nothing to remove
-	CPPUNIT_ASSERT_EQUAL((int32)0,IndentChange(BString("Find"),-1));
-	// never more than the line's own leading spaces
-	CPPUNIT_ASSERT_EQUAL((int32)-2,IndentChange(BString("  Find"),-3));
-
-	// end to end: a block moved in one level is a subcommand of the
-	// command line above it, and parses as one
-	BString	block("Find\n  searchString=\"Test\"\n");
-	BString	moved;
-	BString	line;
-	for (int32 i = 0; i < block.Length(); i++) {
-		if (block[i] != '\n') {
-			line.Append(block.String()+i,1);
-			continue;
-		}
-		for (int32 n = IndentChange(line,1); n > 0; n--)
-			moved << " ";
-		moved << line << "\n";
-		line.SetTo("");
-	}
-	BString	text("Repeat\n  count=2\n");
-	text << moved;
-	PDocument	*doc	= NewRegisteredTestDocument();
-	BList		parsed;
-	BString		error;
-	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
-		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
-	BMessage	*repeat	= (BMessage*)parsed.ItemAt(0);
-	CPPUNIT_ASSERT(repeat->HasMessage("PCommand::subPCommand"));
-}
-
-
 void MacroTextTest::IncludedNodeKeepsItsMessageType(void)
 {
 	// an embedded node's BMessage "what" (P_C_CLASS_TYPE / P_C_GROUP_TYPE /
@@ -992,14 +895,7 @@ void MacroTextTest::TypeCodesReadAsNames(void)
 
 void MacroTextTest::InsertPrototypeParsesAndKeepsNodeShape(void)
 {
-	PDocument	*doc	= NewRegisteredTestDocument();
-	BString		text;
-	InsertPrototypeText(&text);
-	BList		parsed;
-	BString		error;
-	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
-		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
-	BMessage	*insert	= (BMessage*)parsed.ItemAt(0);
+	BMessage	*insert	= BuildInsertPrototype();
 	BMessage	node;
 	CPPUNIT_ASSERT(insert->FindMessage("included_node",&node) == B_OK);
 	CPPUNIT_ASSERT_EQUAL((uint32)P_C_CLASS_TYPE,(uint32)node.what);
@@ -1008,152 +904,38 @@ void MacroTextTest::InsertPrototypeParsesAndKeepsNodeShape(void)
 	BMessage	data;
 	CPPUNIT_ASSERT(node.FindMessage(P_C_NODE_DATA,&data) == B_OK);
 	CPPUNIT_ASSERT(node.HasMessage(P_C_NODE_PATTERN));
-}
-
-
-// MacroTextView only calls back into these two - real MacroEditor is not
-// part of the test binary
-bool MacroEditor::ApplyEdits(bool) {return true;}
-void MacroEditor::UpdateCursorPosition(int32, int32) {}
-
-
-void MacroTextTest::FoldedChipsSurviveWrapAndNewLine(void)
-{
-	PDocument	*doc	= NewRegisteredTestDocument();
-	BString		insertText;
-	InsertPrototypeText(&insertText);
-
-	// two dropped Insert prototypes (both carry this=1), wrapped in Repeat
-	BString	canonical("Repeat\n  count=2\n");
-	for (int32 copy = 0; copy < 2; copy++) {
-		int32	at	= 0;
-		while (at < insertText.Length()) {
-			int32	nl	= insertText.FindFirst("\n",at);
-			canonical << "  " << BString(insertText.String()+at,nl+1-at);
-			at	= nl+1;
-		}
-	}
-
-	MacroTextView	view(BRect(0,0,300,300),"t",BRect(4,4,296,296),B_FOLLOW_ALL_SIDES,B_WILL_DRAW);
-	view.SetMacroText(canonical);
-
-	BList		parsed;
-	BString		expanded;
-	BString		error;
-	view.ExpandedText(&expanded);
-	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
-		ParseCommands(expanded,&parsed,doc->GetCommandManager(),&error));
-	CPPUNIT_ASSERT(expanded == canonical);
-
-	// Enter after the last chip
-	BString	text(view.Text());
-	int32	lastChip	= text.FindLast(">> ~included_node");
-	int32	chipEnd		= text.FindFirst("\n",lastChip);
-	CPPUNIT_ASSERT(lastChip > 0);
-	view.Insert(chipEnd,"\n",1);
-
-	expanded	= "";
-	view.ExpandedText(&expanded);
-	BList	parsed2;
-	error	= "";
-	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
-		ParseCommands(expanded,&parsed2,doc->GetCommandManager(),&error));
-
-	// chips still expand: first one via the double-click path
-	BString	afterToggle(view.Text());
-	int32	firstChip	= afterToggle.FindFirst(">> ~included_node");
-	int32	firstChipEnd	= afterToggle.FindFirst("\n",firstChip);
-	int32	firstChipStart	= afterToggle.FindLast("\n",firstChip)+1;
-	view.ToggleFoldAtLine(firstChipStart,firstChipEnd+1);
-	expanded	= "";
-	view.ExpandedText(&expanded);
-	BList	parsed3;
-	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
-		ParseCommands(expanded,&parsed3,doc->GetCommandManager(),&error));
-}
-
-
-void MacroTextTest::ChipsFollowIndentShiftOfTheirLine(void)
-{
-	PDocument	*doc	= NewRegisteredTestDocument();
-	BString		canonical;
-	InsertPrototypeText(&canonical);
-	BString		insertText(canonical);
-	canonical << insertText;
-
-	MacroTextView	view(BRect(0,0,300,300),"t",BRect(4,4,296,296),B_FOLLOW_ALL_SIDES,B_WILL_DRAW);
-	view.SetMacroText(canonical);
-
-	// wrap: everything indented one level, Repeat in front
-	view.Select(0,view.TextLength());
-	view.ShiftSelectedLines(1);
-	BString	header("Repeat\n  count=2\n  counterVariable=\"\"\n");
-	view.Insert(0,header.String(),header.Length());
-
-	BString	expanded;
-	view.ExpandedText(&expanded);
-	BList	parsed;
-	BString	error;
-	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
-		ParseCommands(expanded,&parsed,doc->GetCommandManager(),&error));
-
-	// drop the counterVariable line, put it back, Enter after the last chip
-	view.Delete(header.Length()-BString("  counterVariable=\"\"\n").Length(),header.Length());
-	view.Insert(BString("Repeat\n  count=2\n").Length(),"  counterVariable=\"\"\n",22);
-	BString	text(view.Text());
-	int32	lastChip	= text.FindLast(">> ~included_node");
-	view.Insert(text.FindFirst("\n",lastChip),"\n",1);
-
-	expanded	= "";
-	view.ExpandedText(&expanded);
-	BList	parsed2;
-	error	= "";
-	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
-		ParseCommands(expanded,&parsed2,doc->GetCommandManager(),&error));
-}
-
-
-void MacroTextTest::EditedChipIdStillFindsItsBlock(void)
-{
-	PDocument	*doc	= NewRegisteredTestDocument();
-	BString		canonical;
-	InsertPrototypeText(&canonical);
-	BString		second(canonical);
-	RenumberInsertPrototype(&second,2);
-	canonical << second;
-
-	MacroTextView	view(BRect(0,0,300,300),"t",BRect(4,4,296,296),B_FOLLOW_ALL_SIDES,B_WILL_DRAW);
-	view.SetMacroText(canonical);
-
-	// retype the second chip's id, [@2] -> [@7]
-	BString	text(view.Text());
-	int32	at	= text.FindFirst("[@2]");
-	CPPUNIT_ASSERT(at > 0);
-	view.Delete(at+2,at+3);
-	view.Insert(at+2,"7",1);
-
-	BString	expanded;
-	view.ExpandedText(&expanded);
-	CPPUNIT_ASSERT(expanded.FindFirst("this=7") >= 0);
-	BList	parsed;
-	BString	error;
-	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
-		ParseCommands(expanded,&parsed,doc->GetCommandManager(),&error));
+	int32		nodeField	= 0;
+	CPPUNIT_ASSERT(insert->FindInt32("node",&nodeField) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)1,nodeField);
+	delete insert;
 }
 
 
 void MacroTextTest::DroppedPrototypesGetDistinctIds(void)
 {
-	BString	first;
-	InsertPrototypeText(&first);
-	CPPUNIT_ASSERT_EQUAL((int32)1,HighestReferencedId(first));
-	BString	second(first);
-	RenumberInsertPrototype(&second,2);
-	CPPUNIT_ASSERT(second.FindFirst("node=@2") >= 0);
-	CPPUNIT_ASSERT(second.FindFirst("this=2") >= 0);
-	CPPUNIT_ASSERT(second.FindFirst("node=@1") < 0);
-	CPPUNIT_ASSERT_EQUAL((int32)2,HighestReferencedId(second));
-	CPPUNIT_ASSERT_EQUAL((int32)-1,HighestReferencedId(BString("Find\n")));
+	BMessage	*first	= BuildInsertPrototype();
+	BList		one;
+	one.AddItem(first);
+	CPPUNIT_ASSERT_EQUAL((int32)1,HighestReferencedId(&one));
+
+	BMessage	*second	= BuildInsertPrototype();
+	AssignInsertId(second,2);
+	int32	secondNode	= 0;
+	second->FindInt32("node",&secondNode);
+	CPPUNIT_ASSERT_EQUAL((int32)2,secondNode);
+	BMessage	secondEmbedded;
+	second->FindMessage("included_node",&secondEmbedded);
+	int32	secondThis	= 0;
+	secondEmbedded.FindInt32("this",&secondThis);
+	CPPUNIT_ASSERT_EQUAL((int32)2,secondThis);
+
+	BList	both;
+	both.AddItem(first);
+	both.AddItem(second);
+	CPPUNIT_ASSERT_EQUAL((int32)2,HighestReferencedId(&both));
+
+	BList	empty;
+	CPPUNIT_ASSERT_EQUAL((int32)-1,HighestReferencedId(&empty));
 }
 
 
@@ -1162,36 +944,38 @@ void MacroTextTest::RepeatedInsertCreatesDistinctNodes(void)
 	// user report: "create six nodes" macro - Repeat around two Inserts and
 	// a Batch of Select/Move played back and did nothing
 	PDocument	*doc	= NewRegisteredTestDocument();
-	BString		first;
-	InsertPrototypeText(&first);
-	BString		second(first);
-	RenumberInsertPrototype(&second,2);
-	BString		text("Repeat\n  count=3\n");
-	BString		both(first);
-	both << second;
-	int32		at	= 0;
-	while (at < both.Length()) {
-		int32	nl	= both.FindFirst("\n",at);
-		text << "  " << BString(both.String()+at,nl+1-at);
-		at	= nl+1;
-	}
-	text <<
-		"  Batch\n"
-		"    Select\n"
-		"      node=@1\n"
-		"      deselect=false\n"
-		"      selectAll=false\n"
-		"    Move\n"
-		"      dx=100.0\n"
-		"      dy=100.0\n";
 
-	BList		parsed;
-	BString		error;
-	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
-		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+	BMessage	*insertA	= BuildInsertPrototype();
+	BMessage	*insertB	= BuildInsertPrototype();
+	AssignInsertId(insertB,2);
+
+	BMessage	select;
+	select.AddString("Command::Name","Select");
+	select.AddInt32("node",1);
+	select.AddBool("deselect",false);
+	select.AddBool("selectAll",false);
+
+	BMessage	move;
+	move.AddString("Command::Name","Move");
+	move.AddFloat("dx",100.0f);
+	move.AddFloat("dy",100.0f);
+
+	BMessage	batch;
+	batch.AddString("Command::Name","Batch");
+	batch.AddMessage("PCommand::subPCommand",&select);
+	batch.AddMessage("PCommand::subPCommand",&move);
+
+	BMessage	repeat;
+	repeat.AddString("Command::Name","Repeat");
+	repeat.AddInt32("count",3);
+	repeat.AddMessage("PCommand::subPCommand",insertA);
+	repeat.AddMessage("PCommand::subPCommand",insertB);
+	repeat.AddMessage("PCommand::subPCommand",&batch);
+	delete insertA;
+	delete insertB;
+
 	BMessage	macro(P_C_MACRO_TYPE);
-	for (int32 i = 0; i < parsed.CountItems(); i++)
-		macro.AddMessage("Macro::Commmand",(BMessage*)parsed.ItemAt(i));
+	macro.AddMessage("Macro::Commmand",&repeat);
 	doc->GetCommandManager()->PlayMacro(&macro);
 
 	BList	*nodes	= doc->GetAllNodes();
@@ -1199,18 +983,6 @@ void MacroTextTest::RepeatedInsertCreatesDistinctNodes(void)
 	for (int32 a = 0; a < nodes->CountItems(); a++)
 		for (int32 b = a+1; b < nodes->CountItems(); b++)
 			CPPUNIT_ASSERT(nodes->ItemAt(a) != nodes->ItemAt(b));
-}
-
-
-void MacroTextTest::FoldedChipInFileGivesSpecificError(void)
-{
-	PDocument	*doc	= NewRegisteredTestDocument();
-	BList		parsed;
-	BString		error;
-	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,ParseCommands(
-		BString("Insert\n  node=@1\n  >> ~included_node[@1] \"New Node 1\"\n"),
-		&parsed,doc->GetCommandManager(),&error));
-	CPPUNIT_ASSERT(error.StartsWith("line 3: folded chip"));
 }
 
 
@@ -1236,18 +1008,29 @@ static std::string SortedLines(const BString &text)
 void MacroTextTest::MacroSurvivesDocumentSaveAndLoad(void)
 {
 	PDocument	*doc	= NewRegisteredTestDocument();
-	BString		text;
-	InsertPrototypeText(&text);
-	text << "Move\n  dx=10.0\n  dy=5.0\n";
-	BList		parsed;
-	BString		error;
-	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
-		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+	BMessage	*insert	= BuildInsertPrototype();
+	BMessage	move;
+	move.AddString("Command::Name","Move");
+	move.AddFloat("dx",10.0f);
+	move.AddFloat("dy",5.0f);
+
 	BMessage	*macro	= new BMessage(P_C_MACRO_TYPE);
 	macro->AddString("Name","kept");
-	for (int32 i = 0; i < parsed.CountItems(); i++)
-		macro->AddMessage("Macro::Commmand",(BMessage*)parsed.ItemAt(i));
+	macro->AddMessage("Macro::Commmand",insert);
+	macro->AddMessage("Macro::Commmand",&move);
+	delete insert;
 	doc->GetCommandManager()->GetMacroList()->AddItem(macro);
+
+	BList	original;
+	BMessage	entry;
+	for (int32 i = 0; macro->FindMessage("Macro::Commmand",i,&entry) == B_OK; i++) {
+		original.AddItem(new BMessage(entry));
+		entry.MakeEmpty();
+	}
+	BString	text;
+	SerializeCommands(&original,&text);
+	for (int32 i = 0; i < original.CountItems(); i++)
+		delete (BMessage*)original.ItemAt(i);
 
 	// what Save()/Load() do around the file: archive, flatten, unflatten
 	BMessage	archive;
@@ -1267,10 +1050,10 @@ void MacroTextTest::MacroSurvivesDocumentSaveAndLoad(void)
 	CPPUNIT_ASSERT(BString("kept") == name);
 
 	BList		commands;
-	BMessage	entry;
-	for (int32 i = 0; again->FindMessage("Macro::Commmand",i,&entry) == B_OK; i++) {
-		commands.AddItem(new BMessage(entry));
-		entry.MakeEmpty();
+	BMessage	reloadedEntry;
+	for (int32 i = 0; again->FindMessage("Macro::Commmand",i,&reloadedEntry) == B_OK; i++) {
+		commands.AddItem(new BMessage(reloadedEntry));
+		reloadedEntry.MakeEmpty();
 	}
 	BString	roundTripped;
 	SerializeCommands(&commands,&roundTripped);
@@ -1303,14 +1086,69 @@ void MacroTextTest::PlayMacroReportsWhatHappened(void)
 	CPPUNIT_ASSERT(report.FindFirst("never creates") >= 0);
 
 	// the real thing
-	BString		insertText;
-	InsertPrototypeText(&insertText);
-	BList		parsedInsert;
-	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
-		ParseCommands(insertText,&parsedInsert,doc->GetCommandManager(),&error));
+	BMessage	*insert	= BuildInsertPrototype();
 	BMessage	good(P_C_MACRO_TYPE);
-	for (int32 i = 0; i < parsedInsert.CountItems(); i++)
-		good.AddMessage("Macro::Commmand",(BMessage*)parsedInsert.ItemAt(i));
+	good.AddMessage("Macro::Commmand",insert);
+	delete insert;
 	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,doc->GetCommandManager()->PlayMacro(&good,&report));
 	CPPUNIT_ASSERT(report.FindFirst("Played 1") >= 0);
+}
+
+
+void MacroTextTest::FormatAndParseFieldValueRoundTripEveryType(void)
+{
+	BMessage	msg;
+	msg.AddBool("b",true);
+	msg.AddInt8("i8",-5);
+	msg.AddInt16("i16",-300);
+	msg.AddInt32("i32",70000);
+	msg.AddInt64("i64",5000000000LL);
+	msg.AddFloat("f",1.5f);
+	msg.AddDouble("d",2.5);
+	msg.AddString("s","hi \"there\"");
+	msg.AddPoint("pt",BPoint(3,4));
+	msg.AddRect("r",BRect(1,2,3,4));
+	msg.AddInt32("node",7);	// the one field name FormatFieldValue() special-cases
+
+	static const struct { const char *field; type_code type; } kFields[] = {
+		{ "b", B_BOOL_TYPE }, { "i8", B_INT8_TYPE }, { "i16", B_INT16_TYPE },
+		{ "i32", B_INT32_TYPE }, { "i64", B_INT64_TYPE }, { "f", B_FLOAT_TYPE },
+		{ "d", B_DOUBLE_TYPE }, { "s", B_STRING_TYPE }, { "pt", B_POINT_TYPE },
+		{ "r", B_RECT_TYPE },
+	};
+	for (size_t i = 0; i < sizeof(kFields)/sizeof(kFields[0]); i++) {
+		BString	text;
+		FormatFieldValue(&msg,kFields[i].field,kFields[i].type,0,&text);
+		BMessage	roundTripped;
+		BString		error;
+		CPPUNIT_ASSERT_EQUAL_MESSAGE(kFields[i].field,(status_t)B_OK,
+			ParseFieldValue(&roundTripped,kFields[i].field,kFields[i].type,text,false,&error));
+		BString	again;
+		FormatFieldValue(&roundTripped,kFields[i].field,kFields[i].type,0,&again);
+		CPPUNIT_ASSERT_EQUAL_MESSAGE(kFields[i].field,text,again);
+	}
+
+	// "node" - schema type is B_POINTER_TYPE, stored type is int32 (see
+	// MacroText.h's FormatFieldValue doc comment)
+	BString	nodeText;
+	FormatFieldValue(&msg,"node",B_INT32_TYPE,0,&nodeText);
+	CPPUNIT_ASSERT(nodeText == "@7");
+	BMessage	nodeMsg;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,ParseFieldValue(&nodeMsg,"node",B_POINTER_TYPE,nodeText,false,&error));
+	int32	roundTrippedNode	= 0;
+	CPPUNIT_ASSERT(nodeMsg.FindInt32("node",&roundTrippedNode) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)7,roundTrippedNode);
+
+	// $binding - allowed at command level, rejected inside a field block
+	BMessage	bound;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		ParseFieldValue(&bound,"dx",B_FLOAT_TYPE,BString("$i"),true,&error));
+	BMessage	bindings;
+	CPPUNIT_ASSERT(bound.FindMessage("PCommand::bindings",&bindings) == B_OK);
+	const char	*variable	= NULL;
+	CPPUNIT_ASSERT(bindings.FindString("dx",&variable) == B_OK);
+	CPPUNIT_ASSERT(BString("i") == variable);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,
+		ParseFieldValue(&bound,"dx",B_FLOAT_TYPE,BString("$i"),false,&error));
 }

@@ -80,7 +80,11 @@ static void AppendValueContainerSnippet(const char *commandName, BString *out)
 static void BuildCommandSnippet(PCommand *command, BString *out)
 {
 	if (strcmp(command->Name(),"Insert") == 0) {
-		InsertPrototypeText(out);
+		BMessage	*proto	= BuildInsertPrototype();
+		BList		one;
+		one.AddItem(proto);
+		SerializeCommands(&one,out);
+		delete proto;
 		return;
 	}
 	out->SetTo("");
@@ -183,7 +187,7 @@ static void BuildToolTipText(const char *commandName, const char *usage, BString
  * command's own "usage" text, shown as a hover tooltip for both a
  * command's own top-level item and each of its field children, and - for
  * a top-level command item only - the drag-and-drop snippet
- * CommandReferenceListView::InitiateDrag() hands to MacroTextView (empty
+ * CommandReferenceListView::InitiateDrag() hands to MacroOutlineView (empty
  * for a field child item; only whole commands are draggable, not one
  * field on its own). */
 class CommandListItem : public BStringItem
@@ -201,12 +205,12 @@ private:
 
 
 /** Live per-row hover tooltips and drag-and-drop of a whole command's own
- * snippet into MacroTextView - see CommandListItem. BTextView already
- * accepts a dropped "text/plain" flavor as if it were dragged-in text
- * (BTextView::_MessageDropped(), confirmed against Haiku's own
- * TextView.cpp) - nothing needs to change on MacroTextView's own side at
- * all for the drop half of this, only the drag *source* here needs to
- * build that flavor. */
+ * snippet into MacroOutlineView - see CommandListItem. The drag payload is
+ * still plain DSL text (a one-command example, same as before) - only the
+ * drop side changed, parsing it into a real BMessage instead of inserting
+ * text (see MacroOutlineView::DropCommandSnippet()); nothing here needed to
+ * change for that, only the drag *source* still builds the "text/plain"
+ * flavor. */
 class CommandReferenceListView : public BOutlineListView
 {
 public:
@@ -256,10 +260,9 @@ void MacroEditor::Init(void)
 	configMessage		= new BMessage();
 	fMacroList			= NULL;
 	fMacroListScroll	= NULL;
-	fTextView			= NULL;
-	fTextScroll			= NULL;
+	fOutlineView		= NULL;
+	fOutlineScroll		= NULL;
 	fStatus				= NULL;
-	fLineColStatus		= NULL;
 	fExportPanel		= NULL;
 	fImportPanel		= NULL;
 	fSelectedMacro		= NULL;
@@ -315,31 +318,26 @@ void MacroEditor::AttachedToWindow(void)
 		B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true);
 	AddChild(fMacroListScroll);
 
-	fTextView	= new MacroTextView(BRect(0,0,340,240),"macroText",BRect(4,4,336,236),
-		B_FOLLOW_ALL_SIDES,B_WILL_DRAW | B_NAVIGABLE);
-	fTextView->SetEditor(this);
-	fTextScroll	= new BScrollView("macroTextScroll",fTextView,
+	fOutlineView	= new MacroOutlineView(BRect(0,0,340,240),"macroOutline",B_FOLLOW_ALL_SIDES);
+	fOutlineView->SetEditor(this);
+	fOutlineScroll	= new BScrollView("macroOutlineScroll",fOutlineView,
 		B_FOLLOW_ALL_SIDES,0,false,true,B_FANCY_BORDER);
-	AddChild(fTextScroll);
+	AddChild(fOutlineScroll);
 
 	fStatus	= new BStringView(BRect(0,0,340,16),"status","");
 	AddChild(fStatus);
 
-	fLineColStatus	= new BStringView(BRect(0,0,100,16),"lineColStatus","");
-	fLineColStatus->SetAlignment(B_ALIGN_RIGHT);
-	AddChild(fLineColStatus);
-
 	// Export/Import used to be buttons here too - moved to the Macro menu
 	// (Save/Open, #55 follow-up) since they're macro-management actions.
-	// No Apply button either (#55 follow-up) - MacroTextView auto-applies
-	// at natural pause points instead (Enter, losing focus), see
-	// ApplyEdits()/MacroTextView.
+	// No Apply/draft step either - every edit in fOutlineView is already a
+	// fully valid, typed BMessage, committed the moment it's made (see
+	// MacroOutlineView, CommitOutlineChange()).
 
 	// reference list of registered commands/fields (#55 follow-up) - read
 	// only, built once below since the command registry never changes
 	// after startup. CommandReferenceListView (not a plain
 	// BOutlineListView): per-row hover tooltips + drag-and-drop of a
-	// ready-made snippet into fTextView - see its own class comment.
+	// ready-made snippet into fOutlineView - see its own class comment.
 	// see the same resize-mode fix/comment on fMacroList above
 	fCommandList	= new CommandReferenceListView(BRect(0,0,160,280),"commandList",
 		B_SINGLE_SELECTION_LIST,B_FOLLOW_ALL_SIDES);
@@ -361,11 +359,10 @@ void MacroEditor::LayoutChildren(void)
 	float	listW		= 140;
 	float	cmdListW	= 160;
 	float	statusH		= 18;
-	float	lineColW	= 100;
 
 	// the status bar sits at the *bottom* now (user report: it used to
-	// sit above fTextScroll only, pushing that one panel's own top edge
-	// down by statusH while fMacroListScroll/fCommandListScroll both
+	// sit above the editor panel only, pushing that one panel's own top
+	// edge down by statusH while fMacroListScroll/fCommandListScroll both
 	// started right at bounds.top - the three panels never lined up).
 	// All three now share the same top and the same bottom (contentBottom).
 	float	contentBottom	= bounds.bottom-statusH;
@@ -379,14 +376,11 @@ void MacroEditor::LayoutChildren(void)
 	float	right	= bounds.right-cmdListW-1;
 	float	left	= bounds.left+listW+1;
 
-	fTextScroll->MoveTo(left,bounds.top);
-	fTextScroll->ResizeTo(right-left,contentBottom-bounds.top);
-
-	fLineColStatus->MoveTo(right-lineColW,contentBottom+2);
-	fLineColStatus->ResizeTo(lineColW,statusH-4);
+	fOutlineScroll->MoveTo(left,bounds.top);
+	fOutlineScroll->ResizeTo(right-left,contentBottom-bounds.top);
 
 	fStatus->MoveTo(left+4,contentBottom+2);
-	fStatus->ResizeTo(right-left-lineColW-8,statusH-4);
+	fStatus->ResizeTo(right-left-8,statusH-4);
 }
 
 
@@ -637,7 +631,6 @@ void MacroEditor::DuplicateSelectedMacro(void)
 		SetStatus(B_TRANSLATE("No macro selected."),true);
 		return;
 	}
-	ApplyEdits(false);
 	BString	name;
 	fSelectedMacro->FindString("Name",&name);
 	BString	copyName(name);
@@ -683,34 +676,24 @@ void MacroEditor::DeleteSelectedMacro(void)
 
 void MacroEditor::NewMacro(void)
 {
-	if ((doc == NULL) || (fTextView == NULL))
+	if (doc == NULL)
 		return;
-	// typed text with nothing selected turns into the new macro (ApplyEdits)
-	BString	typed(fTextView->Text());
-	typed.Trim();
-	if ((fSelectedMacro == NULL) && (typed.Length() > 0)) {
-		ApplyEdits(false);
-		return;
-	}
-	if (fSelectedMacro != NULL)
-		ApplyEdits(false);
 	fSelectedMacro	= AddNewMacro(UniqueMacroName());
 	RefreshMacroList();
-	SetStatus(B_TRANSLATE("New macro created - type its commands, Enter applies them."),false);
-	fTextView->MakeFocus(true);
+	SetStatus(B_TRANSLATE("New macro created - drag commands in from the list on the right."),false);
 }
 
 
 void MacroEditor::ShowSelectedMacro(void)
 {
-	if ((fTextView == NULL) || (doc == NULL))
+	if ((fOutlineView == NULL) || (doc == NULL))
 		return;
 
 	int32	index	= fMacroList->CurrentSelection();
 	BList	*macroList	= doc->GetCommandManager()->GetMacroList();
 	if ((index < 0) || (index >= macroList->CountItems())) {
 		fSelectedMacro	= NULL;
-		fTextView->SetMacroText("");
+		fOutlineView->SetCommands(NULL);
 		SetStatus("",false);
 		return;
 	}
@@ -725,10 +708,7 @@ void MacroEditor::ShowSelectedMacro(void)
 		entry.MakeEmpty();
 		i++;
 	}
-
-	BString	text;
-	SerializeCommands(&commands,&text);
-	fTextView->SetMacroText(text);
+	fOutlineView->SetCommands(&commands);
 	SetStatus("",false);
 
 	for (int32 c = 0; c < commands.CountItems(); c++)
@@ -736,78 +716,29 @@ void MacroEditor::ShowSelectedMacro(void)
 }
 
 
-bool MacroEditor::ApplyEdits(bool revealErrorLine)
+void MacroEditor::CommitOutlineChange(void)
 {
-	if (doc == NULL)
-		return false;
-
-	BString	text;
-	fTextView->ExpandedText(&text);
-	if (fSelectedMacro == NULL) {
-		BString	typed(text);
-		typed.Trim();
-		if (typed.Length() == 0) {
-			SetStatus("",false);
-			return false;
-		}
-	}
-	BList		parsed;
-	BString		error;
-	status_t	err	= ParseCommands(text,&parsed,doc->GetCommandManager(),&error);
-	if (err != B_OK) {
-		// error messages are "line N: ...", counted against the expanded
-		// text ExpandedText() just built, not whatever's on screen - a
-		// folded chip collapses many of those lines into one, so "line 23"
-		// means nothing to look at until the right line is actually
-		// revealed (expanding whatever chip stands in for it, if any).
-		// not when this comes from losing focus: that runs the moment the
-		// user clicks/drags something else (the reference list, say), and
-		// moving the selection to the error line then destroyed the
-		// selection they were about to use (user report)
-		if (revealErrorLine && error.StartsWith("line ")) {
-			int32	numEnd	= error.FindFirst(":",5);
-			if (numEnd > 5) {
-				BString	numText;
-				error.CopyInto(numText,5,numEnd-5);
-				int32	lineNo	= atol(numText.String());
-				fTextView->RevealCanonicalLine(lineNo);
-			}
-		}
-		SetStatus(error.String(),true);
-		return false;
-	}
-
-	// text typed with no macro selected creates one - otherwise there is
-	// nothing to save or play
-	if (fSelectedMacro == NULL) {
-		fSelectedMacro	= AddNewMacro(UniqueMacroName());
-		RefreshMacroList(false);
-	}
-
+	if ((fSelectedMacro == NULL) || (fOutlineView == NULL))
+		return;
 	fSelectedMacro->RemoveName("Macro::Commmand");
-	for (int32 i = 0; i < parsed.CountItems(); i++) {
-		BMessage	*cmd	= (BMessage*)parsed.ItemAt(i);
-		fSelectedMacro->AddMessage("Macro::Commmand",cmd);
-		delete cmd;
-	}
-
-	// a missing "~included_node" block (folded or not) doesn't fail
-	// ParseCommands() - it just parses as one fewer node/connection than
-	// this macro started with, silently. This still applies the edit (it
-	// may well be an intentional whole-command deletion, not an accident -
-	// LostFoldedBlocks() can't tell the two apart) but at least surfaces it
-	// instead of leaving it to only ever show up as an unresolved-id error
-	// buried in a debug log at replay time.
-	BString	blockWarning;
-	if (fTextView->LostFoldedBlocks(&blockWarning)) {
-		SetStatus(blockWarning.String(),true);
-		return true;
-	}
-
+	BList	*commands	= fOutlineView->Commands();
+	for (int32 i = 0; i < commands->CountItems(); i++)
+		fSelectedMacro->AddMessage("Macro::Commmand",(BMessage*)commands->ItemAt(i));
 	BString	status;
-	status.SetToFormat(B_TRANSLATE("Applied (%ld command(s))."),(long)parsed.CountItems());
+	status.SetToFormat(B_TRANSLATE("%ld command(s)."),(long)commands->CountItems());
 	SetStatus(status.String(),false);
-	return true;
+}
+
+
+void MacroEditor::ShowOutlineError(const char *text)
+{
+	SetStatus(text,true);
+}
+
+
+PCommandManager* MacroEditor::CommandManagerForOutline(void)
+{
+	return (doc != NULL) ? doc->GetCommandManager() : NULL;
 }
 
 
@@ -849,16 +780,6 @@ void MacroEditor::SetStatus(const char *text, bool isError)
 }
 
 
-void MacroEditor::UpdateCursorPosition(int32 line, int32 column)
-{
-	if (fLineColStatus == NULL)
-		return;
-	BString	text;
-	text.SetToFormat(B_TRANSLATE("Line %" B_PRId32 ", Col %" B_PRId32),line,column);
-	fLineColStatus->SetText(text.String());
-}
-
-
 void MacroEditor::MessageReceived(BMessage *message)
 {
 	switch (message->what) {
@@ -880,25 +801,8 @@ void MacroEditor::MessageReceived(BMessage *message)
 			break;
 		}
 		case M_E_MACRO_SELECTED: {
-			// switching away from text that does not parse would throw it
-			// away (the stored macro still has the last good version)
-			BList	*macroList	= doc->GetCommandManager()->GetMacroList();
-			int32	newIndex	= fMacroList->CurrentSelection();
-			bool	switching	= (fSelectedMacro != NULL) && (newIndex >= 0)
-				&& (newIndex < macroList->CountItems())
-				&& (macroList->ItemAt(newIndex) != fSelectedMacro);
-			if (switching && !ApplyEdits(false)) {
-				BAlert	*alert	= new BAlert(B_TRANSLATE("Macro has errors"),
-					B_TRANSLATE("The text of this macro has errors and was not applied. Switching now discards it."),
-					B_TRANSLATE("Keep editing"),B_TRANSLATE("Discard"),NULL,
-					B_WIDTH_AS_USUAL,B_WARNING_ALERT);
-				if (alert->Go() == 0) {
-					fMacroList->SetSelectionMessage(NULL);
-					fMacroList->Select(macroList->IndexOf(fSelectedMacro));
-					fMacroList->SetSelectionMessage(new BMessage(M_E_MACRO_SELECTED));
-					break;
-				}
-			}
+			// every edit already commits straight into fSelectedMacro (see
+			// CommitOutlineChange()) - nothing left to lose by switching
 			ShowSelectedMacro();
 			break;
 		}
@@ -937,10 +841,9 @@ void MacroEditor::MessageReceived(BMessage *message)
 					(message->FindString("name",&name) == B_OK)) {
 				BDirectory	dir(&dirRef);
 				BFile		file(&dir,name,B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
-				// the folded chips are display only - the file needs the real
-				// blocks, or it can't be imported again
 				BString		text;
-				fTextView->ExpandedText(&text);
+				if (fOutlineView != NULL)
+					SerializeCommands(fOutlineView->Commands(),&text);
 				file.Write(text.String(),text.Length());
 				SetStatus(B_TRANSLATE("Exported."),false);
 			}
@@ -951,7 +854,9 @@ void MacroEditor::MessageReceived(BMessage *message)
 			// never touches whatever happened to be selected before the
 			// file panel opened (#55 follow-up: unambiguous regardless of
 			// what's currently shown, unlike replacing the open macro's
-			// text would be).
+			// content would be). Parsed straight away - nothing here is
+			// ever a draft the user can leave half-fixed, unlike the old
+			// text editor's "review, then Enter applies it" import.
 			entry_ref	ref;
 			if ((message->FindRef("refs",&ref) == B_OK) && (doc != NULL)) {
 				BFile	file(&ref,B_READ_ONLY);
@@ -963,31 +868,30 @@ void MacroEditor::MessageReceived(BMessage *message)
 				BString	importedText(buffer);
 				delete[] buffer;
 
+				BList		parsed;
+				BString		error;
+				if (ParseCommands(importedText,&parsed,doc->GetCommandManager(),&error) != B_OK) {
+					SetStatus(error.String(),true);
+					break;
+				}
+
 				BString	name(ref.name);
 				int32	dot	= name.FindLast('.');
 				if (dot > 0)
 					name.Truncate(dot);
 
-				BMessage	*newMacro	= AddNewMacro(name);
-
-				fSelectedMacro	= newMacro;
-				RefreshMacroList();
-				// RefreshMacroList()->ShowSelectedMacro() just serialized
-				// the new (still empty) macro's real command list - this
-				// overrides that with the raw imported DSL text instead,
-				// which is only a draft until Apply commits it.
-				fTextView->SetText(importedText.String());
-
-				// applied right away: a file that doesn't parse says so now,
-				// instead of leaving an empty macro behind once the draft
-				// text is replaced by whatever is selected next
-				if (ApplyEdits(true)) {
-					ShowSelectedMacro();
-					BString	status;
-					status.SetToFormat(B_TRANSLATE("Imported as new macro \"%s\"."),
-						name.String());
-					SetStatus(status.String(),false);
+				fSelectedMacro	= AddNewMacro(name);
+				for (int32 i = 0; i < parsed.CountItems(); i++) {
+					BMessage	*cmd	= (BMessage*)parsed.ItemAt(i);
+					fSelectedMacro->AddMessage("Macro::Commmand",cmd);
+					delete cmd;
 				}
+				RefreshMacroList();
+
+				BString	status;
+				status.SetToFormat(B_TRANSLATE("Imported as new macro \"%s\" (%ld command(s))."),
+					name.String(),(long)parsed.CountItems());
+				SetStatus(status.String(),false);
 			}
 			break;
 		}

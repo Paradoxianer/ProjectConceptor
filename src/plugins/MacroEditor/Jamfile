@@ -12,6 +12,6 @@ Addon pc_macro_editor :
 	MacroEditor.cpp
 	MacroEditorPlugin.cpp
 	MacroText.cpp
-	MacroTextView.cpp
+	MacroOutlineView.cpp
         : be tracker translation libprojectconceptor.a
 ;
