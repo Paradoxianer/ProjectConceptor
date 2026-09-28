@@ -21,6 +21,10 @@ class PCommandManager;
  * use, kept so CommandReferenceListView (unchanged) doesn't need to know
  * which editor view is on the receiving end. */
 extern const char* const kCommandSnippetDragMarker;
+/** Marker on the drag message InitiateDrag() builds for an existing
+ * command row being repositioned (as opposed to a brand new one coming in
+ * from the reference sidebar) - see MoveCommandRow(). */
+extern const char* const kCommandMoveDragMarker;
 
 /** One {field name, repeat index} step locating a BMessage inside another -
  * see MacroOutlineView.cpp's path-based read/write/delete. A row's own
@@ -33,6 +37,25 @@ struct MacroPathStep
 	int32	index;
 };
 typedef std::vector<MacroPathStep>	MacroPath;
+
+/** Where a drop/move lands, resolved once from the row under the pointer -
+ * shared by dropping a new command in from the reference sidebar and
+ * moving an existing command row (see MacroOutlineView.cpp's
+ * ResolveTargetPosition()/InsertCommandAt()). `valid` false means "no row
+ * there, insert as a new top-level command". `containerPath`+`fieldName`+
+ * `fieldIndex` locate the TARGET row itself (its own container, and which
+ * slot in it), same convention as MacroRowItem. */
+struct MacroTargetPosition
+{
+	bool		valid;
+	bool		isCommandRow;
+	bool		isTopLevelCommand;
+	int32		topLevel;
+	MacroPath	containerPath;
+	BString		fieldName;
+	int32		fieldIndex;
+	bool		lowerHalf;
+};
 
 /**
  * @class MacroOutlineView
@@ -84,6 +107,13 @@ public:
 			 * own the BMessage* entries. */
 			BList*			Commands(void) {return &fCommands;};
 
+			/** The row index of the command at `topLevel`/`selfPath` (its
+			 * own SelfPath() - empty for a top-level command), -1 if none
+			 * matches. Exposed mainly so tests can find a target row
+			 * without reaching into MacroRowItem (private to the .cpp) -
+			 * see MacroTextTest.cpp's MoveCommandRow() coverage. */
+			int32			RowIndexForCommand(int32 topLevel, const MacroPath &selfPath);
+
 private:
 			/** BOutlineListView::AddUnder() appends right after `superitem`,
 			 * not after its last existing child - see the .cpp for why this
@@ -128,11 +158,27 @@ private:
 			void			MoveRow(int32 rowIndex, int32 direction);
 			/** Parses `snippet` (a DSL example string, see
 			 * CommandExampleText()/BuildCommandSnippet()) into a real
-			 * command BMessage and inserts it as a sibling of (or, dropped
-			 * onto a container command, a subcommand of) the row at
-			 * `targetRow`. */
+			 * command BMessage and inserts it via InsertCommandAt(). */
 			void			DropCommandSnippet(int32 targetRow, BPoint where,
 								const char *snippet, int32 length);
+			/** Moves the existing command at `sourceTopLevel`/`sourcePath`
+			 * (its own SelfPath(), empty = a top-level command) to wherever
+			 * `targetRow` resolves to - a sibling of it (or, dropped onto a
+			 * container command, that command's first subcommand), also
+			 * reachable by dropping below every row to move it out to the
+			 * macro's own top level. Refuses (beeps) a drop onto the
+			 * command's own current position or into one of its own
+			 * subcommands - that would either do nothing or corrupt the
+			 * tree by nesting a command inside itself. */
+			void			MoveCommandRow(int32 sourceTopLevel, const MacroPath &sourcePath,
+								int32 targetRow, BPoint where);
+			/** Inserts `command` (caller transfers ownership) at `pos` -
+			 * shared insertion-position logic for both a freshly parsed
+			 * drop (DropCommandSnippet()) and an existing row being moved
+			 * (MoveCommandRow(), called only once `pos` already accounts
+			 * for the source's own removal shifting other indices - see
+			 * its own comment). */
+			void			InsertCommandAt(BMessage *command, const MacroTargetPosition &pos);
 
 			MacroEditor		*fEditor;
 			/** Working copy of the selected macro's "Macro::Commmand" list -

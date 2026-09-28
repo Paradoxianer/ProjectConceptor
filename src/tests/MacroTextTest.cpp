@@ -25,6 +25,14 @@
 #include <interface/TextView.h>
 #include <map>
 
+#include <interface/Window.h>
+
+// the move/insert internals are private on purpose; the test drives them
+// directly (same technique this file always used for MacroTextView before it)
+#define private public
+#include "MacroOutlineView.h"
+#undef private
+#include "MacroEditor.h"
 #include "MacroText.h"
 #include <support/DataIO.h>
 #include <algorithm>
@@ -1239,4 +1247,192 @@ void MacroTextTest::CalculateExampleParses(void)
 	text << "\n";
 	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
 		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+}
+
+
+// MacroOutlineView only calls back into these three - real MacroEditor is
+// not part of the test binary
+void MacroEditor::CommitOutlineChange(void) {}
+void MacroEditor::ShowOutlineError(const char*) {}
+PCommandManager* MacroEditor::CommandManagerForOutline(void) {return NULL;}
+
+
+static BMessage* FindTopLevelCommand(BList *commands, const char *name, int32 occurrence = 0)
+{
+	int32	seen	= 0;
+	for (int32 i = 0; i < commands->CountItems(); i++) {
+		BMessage	*cmd	= (BMessage*)commands->ItemAt(i);
+		const char	*cmdName	= NULL;
+		cmd->FindString("Command::Name",&cmdName);
+		if ((cmdName != NULL) && (strcmp(cmdName,name) == 0)) {
+			if (seen == occurrence)
+				return cmd;
+			seen++;
+		}
+	}
+	return NULL;
+}
+
+
+void MacroTextTest::MoveCommandReparentsIntoAnotherContainer(void)
+{
+	// Repeat[ Move(dx=1) ], Batch[ Move(dx=2) ] - drag Repeat's Move into Batch
+	BMessage	moveA;
+	moveA.AddString("Command::Name","Move");
+	moveA.AddFloat("dx",1.0f);
+	BMessage	repeat;
+	repeat.AddString("Command::Name","Repeat");
+	repeat.AddInt32("count",1);
+	repeat.AddMessage("PCommand::subPCommand",&moveA);
+
+	BMessage	moveB;
+	moveB.AddString("Command::Name","Move");
+	moveB.AddFloat("dx",2.0f);
+	BMessage	batch;
+	batch.AddString("Command::Name","Batch");
+	batch.AddMessage("PCommand::subPCommand",&moveB);
+
+	BList	commands;
+	commands.AddItem(&repeat);
+	commands.AddItem(&batch);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetCommands(&commands);
+
+	// Repeat's Move (topLevel 0, path [subPCommand#0]) dropped onto Batch
+	// (topLevel 1, self path empty) - lands as Batch's first subcommand
+	MacroPath	sourcePath;
+	MacroPathStep	step; step.field = "PCommand::subPCommand"; step.index = 0;
+	sourcePath.push_back(step);
+	// find Batch's own row index
+	MacroPath	emptySelf;
+	int32	batchRow	= view.RowIndexForCommand(1,emptySelf);
+	CPPUNIT_ASSERT(batchRow >= 0);
+	view.MoveCommandRow(0,sourcePath,batchRow,BPoint(0,0));
+
+	BList		*result	= view.Commands();
+	CPPUNIT_ASSERT_EQUAL((int32)2,result->CountItems());
+	BMessage	*newRepeat	= FindTopLevelCommand(result,"Repeat");
+	BMessage	*newBatch	= FindTopLevelCommand(result,"Batch");
+	CPPUNIT_ASSERT(newRepeat != NULL && newBatch != NULL);
+	CPPUNIT_ASSERT(!newRepeat->HasMessage("PCommand::subPCommand"));
+
+	BMessage	child;
+	int32	subCount	= 0;
+	for (int32 i = 0; newBatch->FindMessage("PCommand::subPCommand",i,&child) == B_OK; i++)
+		subCount++;
+	CPPUNIT_ASSERT_EQUAL((int32)2,subCount);
+	BMessage	first;
+	newBatch->FindMessage("PCommand::subPCommand",0,&first);
+	float	firstDx	= 0.0f;
+	first.FindFloat("dx",&firstDx);
+	CPPUNIT_ASSERT_EQUAL(1.0f,firstDx);	// the moved one landed first
+}
+
+
+void MacroTextTest::MoveCommandPromotesToTopLevel(void)
+{
+	BMessage	move;
+	move.AddString("Command::Name","Move");
+	move.AddFloat("dx",5.0f);
+	BMessage	repeat;
+	repeat.AddString("Command::Name","Repeat");
+	repeat.AddInt32("count",1);
+	repeat.AddMessage("PCommand::subPCommand",&move);
+
+	BList	commands;
+	commands.AddItem(&repeat);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetCommands(&commands);
+
+	MacroPath	sourcePath;
+	MacroPathStep	step; step.field = "PCommand::subPCommand"; step.index = 0;
+	sourcePath.push_back(step);
+	// drop below everything -> promoted to the macro's own top level
+	view.MoveCommandRow(0,sourcePath,-1,BPoint(0,10000));
+
+	BList	*result	= view.Commands();
+	CPPUNIT_ASSERT_EQUAL((int32)2,result->CountItems());
+	BMessage	*promoted	= FindTopLevelCommand(result,"Move");
+	CPPUNIT_ASSERT(promoted != NULL);
+	BMessage	*newRepeat	= FindTopLevelCommand(result,"Repeat");
+	CPPUNIT_ASSERT(newRepeat != NULL);
+	CPPUNIT_ASSERT(!newRepeat->HasMessage("PCommand::subPCommand"));
+}
+
+
+void MacroTextTest::MoveCommandRefusesDroppingIntoOwnSubtree(void)
+{
+	BMessage	move;
+	move.AddString("Command::Name","Move");
+	move.AddFloat("dx",5.0f);
+	BMessage	batch;
+	batch.AddString("Command::Name","Batch");
+	batch.AddMessage("PCommand::subPCommand",&move);
+
+	BList	commands;
+	commands.AddItem(&batch);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetCommands(&commands);
+
+	// drop Batch (top-level, empty path) onto its own child Move
+	MacroPath	moveSelf;
+	MacroPathStep	moveStep; moveStep.field = "PCommand::subPCommand"; moveStep.index = 0;
+	moveSelf.push_back(moveStep);
+	int32	moveRow	= view.RowIndexForCommand(0,moveSelf);
+	CPPUNIT_ASSERT(moveRow >= 0);
+	MacroPath	emptyPath;
+	view.MoveCommandRow(0,emptyPath,moveRow,BPoint(0,0));
+
+	// nothing changed - still exactly one top-level Batch with its Move inside
+	BList	*result	= view.Commands();
+	CPPUNIT_ASSERT_EQUAL((int32)1,result->CountItems());
+	BMessage	*stillBatch	= (BMessage*)result->ItemAt(0);
+	const char	*name	= NULL;
+	stillBatch->FindString("Command::Name",&name);
+	CPPUNIT_ASSERT(BString("Batch") == name);
+	CPPUNIT_ASSERT(stillBatch->HasMessage("PCommand::subPCommand"));
+}
+
+
+void MacroTextTest::MoveCommandReordersTopLevelSiblings(void)
+{
+	BMessage	first;
+	first.AddString("Command::Name","Move");
+	first.AddFloat("dx",1.0f);
+	BMessage	second;
+	second.AddString("Command::Name","Move");
+	second.AddFloat("dx",2.0f);
+
+	BList	commands;
+	commands.AddItem(&first);
+	commands.AddItem(&second);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetCommands(&commands);
+
+	// move the SECOND top-level command to before the first one (its
+	// upper half - ItemFrame() has no real height in this headless test,
+	// so this is the one half-detection that's independent of that)
+	MacroPath	emptyPath;
+	MacroPath	firstSelf;
+	int32	firstRow	= view.RowIndexForCommand(0,firstSelf);
+	CPPUNIT_ASSERT(firstRow >= 0);
+	// a row never actually laid out in a real, attached window (this test
+	// has no BWindow at all) has no real height - ItemFrame() can come back
+	// with a nonsensical/negative one, so a point pulled from it can't be
+	// trusted to land in a specific half; a clearly far-off point still
+	// reliably resolves to "before" (any real row's own top/bottom are
+	// nowhere near this) regardless of that
+	view.MoveCommandRow(1,emptyPath,firstRow,BPoint(0,-100000));
+
+	BList	*result	= view.Commands();
+	CPPUNIT_ASSERT_EQUAL((int32)2,result->CountItems());
+	float	dx0	= 0.0f, dx1 = 0.0f;
+	((BMessage*)result->ItemAt(0))->FindFloat("dx",&dx0);
+	((BMessage*)result->ItemAt(1))->FindFloat("dx",&dx1);
+	CPPUNIT_ASSERT_EQUAL(2.0f,dx0);
+	CPPUNIT_ASSERT_EQUAL(1.0f,dx1);
 }

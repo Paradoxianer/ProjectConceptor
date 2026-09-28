@@ -48,6 +48,10 @@ public:
 	void CalculateWritesResultIntoValueContext(void);
 	void CalculateSupportsEveryOperator(void);
 	void CalculateExampleParses(void);
+	void MoveCommandReparentsIntoAnotherContainer(void);
+	void MoveCommandPromotesToTopLevel(void);
+	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
+	void MoveCommandReordersTopLevelSiblings(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -83,6 +87,10 @@ public:
 	CPPUNIT_TEST(CalculateWritesResultIntoValueContext);
 	CPPUNIT_TEST(CalculateSupportsEveryOperator);
 	CPPUNIT_TEST(CalculateExampleParses);
+	CPPUNIT_TEST(MoveCommandReparentsIntoAnotherContainer);
+	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
+	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);
+	CPPUNIT_TEST(MoveCommandReordersTopLevelSiblings);
 	CPPUNIT_TEST_SUITE_END();
 };
 
