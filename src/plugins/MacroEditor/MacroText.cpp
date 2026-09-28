@@ -1008,6 +1008,9 @@ const char* CommandExampleText(const char *commandName)
 			"answer: searchString=$term" },
 		{ "Batch",
 			"Batch\n  Move\n    dx=10.0\n    dy=0.0\n  Move\n    dx=0.0\n    dy=10.0" },
+		{ "Calculate",
+			"Calculate\n  left=10.0\n  operator=\"+\"\n  right=5.0\n"
+			"  resultVariable=\"sum\"\n# later: dx=$sum" },
 		{ "ChangeValue",
 			"ChangeValue\n  Node::selected=true\n  ~valueContainer\n"
 			"    name=\"Node::name\"\n    subgroup=\"Node::Data\"\n"

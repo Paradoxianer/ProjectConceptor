@@ -45,6 +45,9 @@ public:
 	void MacroSurvivesDocumentSaveAndLoad(void);
 	void PlayMacroReportsWhatHappened(void);
 	void FormatAndParseFieldValueRoundTripEveryType(void);
+	void CalculateWritesResultIntoValueContext(void);
+	void CalculateSupportsEveryOperator(void);
+	void CalculateExampleParses(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -77,6 +80,9 @@ public:
 	CPPUNIT_TEST(MacroSurvivesDocumentSaveAndLoad);
 	CPPUNIT_TEST(PlayMacroReportsWhatHappened);
 	CPPUNIT_TEST(FormatAndParseFieldValueRoundTripEveryType);
+	CPPUNIT_TEST(CalculateWritesResultIntoValueContext);
+	CPPUNIT_TEST(CalculateSupportsEveryOperator);
+	CPPUNIT_TEST(CalculateExampleParses);
 	CPPUNIT_TEST_SUITE_END();
 };
 

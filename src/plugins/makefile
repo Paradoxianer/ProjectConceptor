@@ -2,6 +2,7 @@ plugins = \
 	AddAttributeCommand \
 	AskCommand \
 	BatchCommand \
+	CalculateCommand \
 	ChangeValueCommand \
 	CopyCommand \
 	DeleteCommand \

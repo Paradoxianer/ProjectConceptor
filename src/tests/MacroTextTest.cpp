@@ -14,6 +14,7 @@
 #include "Layout.h"
 #include "Remember.h"
 #include "Sleep.h"
+#include "Calculate.h"
 #include "BasePlugin.h"
 #include "ChangeValue.h"
 #include "Find.h"
@@ -73,6 +74,7 @@ TEST_PLUGIN(TestIfPlugin,If,"If")
 TEST_PLUGIN(TestLayoutPlugin,Layout,"Layout")
 TEST_PLUGIN(TestRememberPlugin,Remember,"Remember")
 TEST_PLUGIN(TestSleepPlugin,Sleep,"Sleep")
+TEST_PLUGIN(TestCalculatePlugin,Calculate,"Calculate")
 TEST_PLUGIN(TestAddAttributePlugin,AddAttribute,"AddAttribute")
 TEST_PLUGIN(TestRemoveAttributePlugin,RemoveAttribute,"RemoveAttribute")
 
@@ -155,6 +157,7 @@ PDocument* NewRegisteredTestDocument(void)
 	doc->GetCommandManager()->RegisterPCommand(new TestLayoutPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestRememberPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestSleepPlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestCalculatePlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestAddAttributePlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestRemoveAttributePlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestStringPlugin());
@@ -1151,4 +1154,89 @@ void MacroTextTest::FormatAndParseFieldValueRoundTripEveryType(void)
 	CPPUNIT_ASSERT(BString("i") == variable);
 	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE,
 		ParseFieldValue(&bound,"dx",B_FLOAT_TYPE,BString("$i"),false,&error));
+}
+
+
+void MacroTextTest::CalculateWritesResultIntoValueContext(void)
+{
+	// binary op via literal operands
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BMessage	sum;
+	sum.AddString("Command::Name","Calculate");
+	sum.AddFloat("left",10.0f);
+	sum.AddString("operator","+");
+	sum.AddFloat("right",5.0f);
+	sum.AddString("resultVariable","sum");
+
+	BMessage	macro(P_C_MACRO_TYPE);
+	macro.AddMessage("Macro::Commmand",&sum);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,doc->GetCommandManager()->PlayMacro(&macro));
+
+	// the value context is scoped to PlayMacro() itself and gone once it
+	// returns - chain a second Calculate in the SAME macro that reads the
+	// first one's result via "$sum" (PCommandManager::ResolveBindings())
+	// to actually observe it, exactly like Repeat's own dx=$i test does
+	BMessage	rounded;
+	rounded.AddString("Command::Name","Calculate");
+	BMessage	bindings;
+	bindings.AddString("left","sum");
+	rounded.AddMessage("PCommand::bindings",&bindings);
+	rounded.AddString("operator","round");
+	rounded.AddString("resultVariable","roundedSum");
+
+	BMessage	chained(P_C_MACRO_TYPE);
+	BMessage	sumAgain(sum);
+	chained.AddMessage("Macro::Commmand",&sumAgain);
+	chained.AddMessage("Macro::Commmand",&rounded);
+	BString	report;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,doc->GetCommandManager()->PlayMacro(&chained,&report));
+	CPPUNIT_ASSERT(report.FindFirst("Played 2") >= 0);
+}
+
+
+void MacroTextTest::CalculateSupportsEveryOperator(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	static const struct { const char *op; float left; float right; } kOps[] = {
+		{ "+", 2.0f, 3.0f }, { "-", 5.0f, 2.0f }, { "*", 4.0f, 2.5f },
+		{ "/", 9.0f, 3.0f }, { "mod", 7.0f, 3.0f }, { "min", 2.0f, 9.0f },
+		{ "max", 2.0f, 9.0f }, { "round", 2.4f, 0.0f }, { "floor", 2.9f, 0.0f },
+		{ "ceil", 2.1f, 0.0f }, { "abs", -3.0f, 0.0f },
+	};
+	for (size_t i = 0; i < sizeof(kOps)/sizeof(kOps[0]); i++) {
+		BMessage	calc;
+		calc.AddString("Command::Name","Calculate");
+		calc.AddFloat("left",kOps[i].left);
+		calc.AddString("operator",kOps[i].op);
+		calc.AddFloat("right",kOps[i].right);
+		calc.AddString("resultVariable","r");
+		BMessage	macro(P_C_MACRO_TYPE);
+		macro.AddMessage("Macro::Commmand",&calc);
+		BString	error;
+		CPPUNIT_ASSERT_EQUAL_MESSAGE(kOps[i].op,(status_t)B_OK,
+			doc->GetCommandManager()->PlayMacro(&macro,&error));
+	}
+
+	// unrecognized operator: no crash, just no result written (no silent
+	// fallback - see Calculate::Do())
+	BMessage	bad;
+	bad.AddString("Command::Name","Calculate");
+	bad.AddFloat("left",1.0f);
+	bad.AddString("operator","???");
+	bad.AddString("resultVariable","r");
+	BMessage	macro(P_C_MACRO_TYPE);
+	macro.AddMessage("Macro::Commmand",&bad);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,doc->GetCommandManager()->PlayMacro(&macro));
+}
+
+
+void MacroTextTest::CalculateExampleParses(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BList		parsed;
+	BString		error;
+	BString		text(CommandExampleText("Calculate"));
+	text << "\n";
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
 }
