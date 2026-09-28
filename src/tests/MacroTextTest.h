@@ -53,6 +53,9 @@ public:
 	void DeleteSelectedRowsRemovesOnlyChosenSiblings(void);
 	void DeleteSelectedRowsSkipsDescendantsOfAnotherSelectedRow(void);
 	void AddNamedFieldAddsCustomFieldToGenericBlock(void);
+	void AddFieldMenuOffersRepeatableFieldAgain(void);
+	void MoveCommandRowsMovesSeveralTogetherInOrder(void);
+	void MoveCommandRowsOntoContainerAppendsAtEnd(void);
 	void MoveCommandReparentsIntoAnotherContainer(void);
 	void MoveCommandPromotesToTopLevel(void);
 	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
@@ -97,6 +100,9 @@ public:
 	CPPUNIT_TEST(DeleteSelectedRowsRemovesOnlyChosenSiblings);
 	CPPUNIT_TEST(DeleteSelectedRowsSkipsDescendantsOfAnotherSelectedRow);
 	CPPUNIT_TEST(AddNamedFieldAddsCustomFieldToGenericBlock);
+	CPPUNIT_TEST(AddFieldMenuOffersRepeatableFieldAgain);
+	CPPUNIT_TEST(MoveCommandRowsMovesSeveralTogetherInOrder);
+	CPPUNIT_TEST(MoveCommandRowsOntoContainerAppendsAtEnd);
 	CPPUNIT_TEST(MoveCommandReparentsIntoAnotherContainer);
 	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
 	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);

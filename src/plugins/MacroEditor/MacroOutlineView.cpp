@@ -1066,8 +1066,26 @@ static MacroTargetPosition ResolveTargetPosition(MacroOutlineView *view, int32 t
 
 void MacroOutlineView::InsertCommandAt(BMessage *command, const MacroTargetPosition &pos)
 {
+	std::vector<BMessage>	one;
+	one.push_back(*command);
+	delete command;
+	InsertCommandsAt(one,pos);
+}
+
+
+/** The actual insertion InsertCommandAt() (one freshly parsed command) and
+ * MoveCommandRows() (several existing commands, moved together) share -
+ * `commands` is inserted as one contiguous, order-preserved block at `pos`,
+ * a single BList/vector splice either way so their relative order among
+ * each other survives regardless of which of the four positions below they
+ * land at. */
+void MacroOutlineView::InsertCommandsAt(std::vector<BMessage> &commands, const MacroTargetPosition &pos)
+{
+	if (commands.empty())
+		return;
 	if (!pos.valid) {
-		fCommands.AddItem(command);
+		for (size_t i = 0; i < commands.size(); i++)
+			fCommands.AddItem(new BMessage(commands[i]));
 	} else if (pos.isCommandRow) {
 		MacroPath	selfPath(pos.containerPath);
 		if (pos.fieldName.Length() > 0) {
@@ -1079,37 +1097,40 @@ void MacroOutlineView::InsertCommandAt(BMessage *command, const MacroTargetPosit
 		ownData.FindString("Command::Name",&targetName);
 
 		if (IsContainerCommandName(targetName)) {
-			// dropped onto a container command - becomes its first subcommand
+			// dropped onto a container command - becomes its LAST
+			// subcommand(s) (user report - runs after whatever's already
+			// there, not before)
 			BMessage	container	= MacroOutlineView_ResolveContainer(&fCommands,pos.topLevel,selfPath);
 			std::vector<BMessage>	entries;
 			ExtractMessageEntries(&container,"PCommand::subPCommand",&entries);
-			entries.insert(entries.begin(),*command);
+			entries.insert(entries.end(),commands.begin(),commands.end());
 			ReplaceMessageEntries(&container,"PCommand::subPCommand",entries);
 			WriteContainer(&fCommands,pos.topLevel,selfPath,container);
-			delete command;
 		} else if (pos.isTopLevelCommand) {
-			// a sibling of a top-level command
+			// sibling(s) of a top-level command
 			int32	at	= pos.topLevel + (pos.lowerHalf ? 1 : 0);
-			fCommands.AddItem(command,at);
+			for (size_t i = 0; i < commands.size(); i++)
+				fCommands.AddItem(new BMessage(commands[i]),at+(int32)i);
 		} else if (pos.fieldName == "PCommand::subPCommand") {
-			// a sibling of a subcommand
+			// sibling(s) of a subcommand
 			BMessage	container	= MacroOutlineView_ResolveContainer(&fCommands,pos.topLevel,pos.containerPath);
 			std::vector<BMessage>	entries;
 			ExtractMessageEntries(&container,"PCommand::subPCommand",&entries);
 			int32	at	= pos.fieldIndex + (pos.lowerHalf ? 1 : 0);
 			if (at > (int32)entries.size())
 				at	= (int32)entries.size();
-			entries.insert(entries.begin()+at,*command);
+			entries.insert(entries.begin()+at,commands.begin(),commands.end());
 			ReplaceMessageEntries(&container,"PCommand::subPCommand",entries);
 			WriteContainer(&fCommands,pos.topLevel,pos.containerPath,container);
-			delete command;
 		} else {
-			fCommands.AddItem(command,pos.topLevel+1);
+			for (size_t i = 0; i < commands.size(); i++)
+				fCommands.AddItem(new BMessage(commands[i]),pos.topLevel+1+(int32)i);
 		}
 	} else {
 		// dropped on a field/chip/block row - falls back to the top of
 		// that row's own top-level command
-		fCommands.AddItem(command,pos.topLevel+1);
+		for (size_t i = 0; i < commands.size(); i++)
+			fCommands.AddItem(new BMessage(commands[i]),pos.topLevel+1+(int32)i);
 	}
 
 	RebuildAllRows();
@@ -1201,6 +1222,131 @@ void MacroOutlineView::MoveCommandRow(int32 sourceTopLevel, const MacroPath &sou
 	}
 
 	InsertCommandAt(new BMessage(sourceCopy),pos);
+}
+
+
+/** True if `path` (at `topLevel`) is `ancestorPath` itself or nested inside
+ * it - shared by MoveCommandRows()' two uses of the same check (dropping
+ * one selected command into another, and refusing a drop into any of
+ * their own subtrees). `ancestorPath` empty always matches (a top-level
+ * command's subtree is everything under it). */
+static bool IsWithin(int32 topLevel, const MacroPath &path, int32 ancestorTopLevel, const MacroPath &ancestorPath)
+{
+	if (topLevel != ancestorTopLevel)
+		return false;
+	if (ancestorPath.size() > path.size())
+		return false;
+	for (size_t i = 0; i < ancestorPath.size(); i++)
+		if ((path[i].field != ancestorPath[i].field) || (path[i].index != ancestorPath[i].index))
+			return false;
+	return true;
+}
+
+
+void MacroOutlineView::MoveCommandRows(std::vector<std::pair<int32,MacroPath> > &sources,
+	int32 targetRow, BPoint where)
+{
+	// a source nested inside another selected source is skipped - moving
+	// the ancestor already carries it along, and resolving it separately
+	// afterward would read from a parent that's already been relocated
+	std::vector<std::pair<int32,MacroPath> >	kept;
+	for (size_t i = 0; i < sources.size(); i++) {
+		bool	nested	= false;
+		for (size_t j = 0; (j < sources.size()) && !nested; j++)
+			if ((i != j) && (sources[j].second.size() < sources[i].second.size())
+					&& IsWithin(sources[i].first,sources[i].second,sources[j].first,sources[j].second))
+				nested	= true;
+		if (!nested)
+			kept.push_back(sources[i]);
+	}
+	if (kept.empty())
+		return;
+
+	MacroTargetPosition	pos	= ResolveTargetPosition(this,targetRow,where);
+
+	// refuse a drop onto (or into) any kept source's own subtree - same
+	// reasoning as the single-row guard in MoveCommandRow()
+	if (pos.valid) {
+		MacroPath	targetSelf(pos.containerPath);
+		if (pos.fieldName.Length() > 0) {
+			MacroPathStep	step; step.field = pos.fieldName; step.index = pos.fieldIndex;
+			targetSelf.push_back(step);
+		}
+		for (size_t i = 0; i < kept.size(); i++)
+			if (IsWithin(pos.topLevel,targetSelf,kept[i].first,kept[i].second)) {
+				beep();
+				return;
+			}
+	}
+
+	// the moved commands' own relative order (lowest (topLevel,fieldIndex)
+	// first) - captured from the still-intact tree, before anything below
+	// removes/shifts any of it
+	std::vector<BMessage>	orderedCopies;
+	std::vector<std::pair<int32,MacroPath> >	byOriginalOrder(kept);
+	while (!byOriginalOrder.empty()) {
+		size_t	first	= 0;
+		for (size_t i = 1; i < byOriginalOrder.size(); i++) {
+			int32	firstTop	= byOriginalOrder[first].first;
+			int32	iTop		= byOriginalOrder[i].first;
+			int32	firstIdx	= byOriginalOrder[first].second.empty() ? -1 : byOriginalOrder[first].second.back().index;
+			int32	iIdx		= byOriginalOrder[i].second.empty() ? -1 : byOriginalOrder[i].second.back().index;
+			if ((iTop < firstTop) || ((iTop == firstTop) && (iIdx < firstIdx)))
+				first	= i;
+		}
+		orderedCopies.push_back(MacroOutlineView_ResolveContainer(&fCommands,
+			byOriginalOrder[first].first,byOriginalOrder[first].second));
+		byOriginalOrder.erase(byOriginalOrder.begin()+first);
+	}
+
+	// remove every kept source, highest (topLevel,fieldIndex) first (see
+	// DeleteSelectedRows() - the same removal order that never needs an
+	// already-processed source's own identity corrected afterward),
+	// adjusting `pos` after each removal exactly like MoveCommandRow()
+	// does for its one source
+	std::vector<std::pair<int32,MacroPath> >	toRemove(kept);
+	while (!toRemove.empty()) {
+		size_t	last	= 0;
+		for (size_t i = 1; i < toRemove.size(); i++) {
+			int32	lastTop	= toRemove[last].first;
+			int32	iTop	= toRemove[i].first;
+			int32	lastIdx	= toRemove[last].second.empty() ? -1 : toRemove[last].second.back().index;
+			int32	iIdx	= toRemove[i].second.empty() ? -1 : toRemove[i].second.back().index;
+			if ((iTop > lastTop) || ((iTop == lastTop) && (iIdx > lastIdx)))
+				last	= i;
+		}
+		int32		srcTop	= toRemove[last].first;
+		MacroPath	srcPath	= toRemove[last].second;
+
+		if (srcPath.empty()) {
+			BMessage	*old	= (BMessage*)fCommands.RemoveItem(srcTop);
+			delete old;
+			if (pos.topLevel > srcTop)
+				pos.topLevel--;
+		} else {
+			MacroPath	parentPath(srcPath.begin(),srcPath.end()-1);
+			const MacroPathStep	&lastStep	= srcPath.back();
+			BMessage	parent	= MacroOutlineView_ResolveContainer(&fCommands,srcTop,parentPath);
+			std::vector<BMessage>	entries;
+			ExtractMessageEntries(&parent,lastStep.field.String(),&entries);
+			if (lastStep.index < (int32)entries.size())
+				entries.erase(entries.begin()+lastStep.index);
+			ReplaceMessageEntries(&parent,lastStep.field.String(),entries);
+			WriteContainer(&fCommands,srcTop,parentPath,parent);
+			if ((pos.topLevel == srcTop) && (pos.fieldName == lastStep.field)
+					&& (pos.containerPath.size() == parentPath.size())) {
+				bool	sameParent	= true;
+				for (size_t i = 0; sameParent && (i < parentPath.size()); i++)
+					if ((pos.containerPath[i].field != parentPath[i].field) || (pos.containerPath[i].index != parentPath[i].index))
+						sameParent	= false;
+				if (sameParent && (pos.fieldIndex > lastStep.index))
+					pos.fieldIndex--;
+			}
+		}
+		toRemove.erase(toRemove.begin()+last);
+	}
+
+	InsertCommandsAt(orderedCopies,pos);
 }
 
 
@@ -1313,11 +1459,30 @@ bool MacroOutlineView::InitiateDrag(BPoint where, int32 index, bool wasSelected)
 	CloseOverlay(true);
 	BMessage	drag(B_SIMPLE_DATA);
 	drag.AddBool(kCommandMoveDragMarker,true);
-	drag.AddInt32("topLevel",item->TopLevelIndex());
-	MacroPath	selfPath(item->SelfPath());
-	for (size_t i = 0; i < selfPath.size(); i++) {
-		drag.AddString("pathField",selfPath[i].field);
-		drag.AddInt32("pathIndex",selfPath[i].index);
+
+	// dragging a row that's part of a multi-selection of commands carries
+	// the whole selection along (user report); dragging one that isn't -
+	// even while other, unrelated rows happen to be selected - only ever
+	// moves that one, same as everywhere else in Haiku
+	int32	sourceCount	= 0;
+	if (item->IsSelected()) {
+		for (int32 s = 0; ; s++) {
+			int32	full	= CurrentSelection(s);
+			if (full < 0)
+				break;
+			MacroRowItem	*selectedItem	= (MacroRowItem*)FullListItemAt(full);
+			if ((selectedItem != NULL) && (selectedItem->Kind() == kRowCommand)) {
+				BMessage	source;
+				AddFieldTargetFields(&source,selectedItem->TopLevelIndex(),selectedItem->SelfPath());
+				drag.AddMessage("source",&source);
+				sourceCount++;
+			}
+		}
+	}
+	if (sourceCount == 0) {
+		BMessage	source;
+		AddFieldTargetFields(&source,item->TopLevelIndex(),item->SelfPath());
+		drag.AddMessage("source",&source);
 	}
 	DragMessage(&drag,ItemFrame(index));
 	return true;
@@ -1399,20 +1564,23 @@ void MacroOutlineView::MessageReceived(BMessage *message)
 	}
 
 	if (message->WasDropped() && message->HasBool(kCommandMoveDragMarker)) {
-		int32	sourceTopLevel	= 0;
-		message->FindInt32("topLevel",&sourceTopLevel);
-		MacroPath	sourcePath;
-		BString		pathField;
-		int32		pathIndex;
-		for (int32 i = 0; message->FindString("pathField",i,&pathField) == B_OK; i++) {
-			message->FindInt32("pathIndex",i,&pathIndex);
-			MacroPathStep	step; step.field = pathField; step.index = pathIndex;
-			sourcePath.push_back(step);
+		std::vector<std::pair<int32,MacroPath> >	sources;
+		BMessage	source;
+		for (int32 i = 0; message->FindMessage("source",i,&source) == B_OK; i++) {
+			MacroPath	path;
+			int32		topLevel	= ReadFieldTargetMessage(&source,&path);
+			sources.push_back(std::make_pair(topLevel,path));
+			source.MakeEmpty();
 		}
+		if (sources.empty())
+			return;
 		BPoint	dropPoint	= message->DropPoint();
 		ConvertFromScreen(&dropPoint);
 		int32	target	= IndexOf(dropPoint);
-		MoveCommandRow(sourceTopLevel,sourcePath,target,dropPoint);
+		if (sources.size() == 1)
+			MoveCommandRow(sources[0].first,sources[0].second,target,dropPoint);
+		else
+			MoveCommandRows(sources,target,dropPoint);
 		return;
 	}
 

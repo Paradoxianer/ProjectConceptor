@@ -5,6 +5,7 @@
 #include <interface/Rect.h>
 #include <support/List.h>
 #include <support/String.h>
+#include <utility>
 
 #include "AddAttribute.h"
 #include "Ask.h"
@@ -1300,7 +1301,7 @@ void MacroTextTest::MoveCommandReparentsIntoAnotherContainer(void)
 	view.SetCommands(&commands);
 
 	// Repeat's Move (topLevel 0, path [subPCommand#0]) dropped onto Batch
-	// (topLevel 1, self path empty) - lands as Batch's first subcommand
+	// (topLevel 1, self path empty) - lands as Batch's LAST subcommand
 	MacroPath	sourcePath;
 	MacroPathStep	step; step.field = "PCommand::subPCommand"; step.index = 0;
 	sourcePath.push_back(step);
@@ -1322,11 +1323,11 @@ void MacroTextTest::MoveCommandReparentsIntoAnotherContainer(void)
 	for (int32 i = 0; newBatch->FindMessage("PCommand::subPCommand",i,&child) == B_OK; i++)
 		subCount++;
 	CPPUNIT_ASSERT_EQUAL((int32)2,subCount);
-	BMessage	first;
-	newBatch->FindMessage("PCommand::subPCommand",0,&first);
-	float	firstDx	= 0.0f;
-	first.FindFloat("dx",&firstDx);
-	CPPUNIT_ASSERT_EQUAL(1.0f,firstDx);	// the moved one landed first
+	BMessage	last;
+	newBatch->FindMessage("PCommand::subPCommand",1,&last);
+	float	lastDx	= 0.0f;
+	last.FindFloat("dx",&lastDx);
+	CPPUNIT_ASSERT_EQUAL(1.0f,lastDx);	// the moved one landed last
 }
 
 
@@ -1638,4 +1639,115 @@ void MacroTextTest::AddNamedFieldAddsCustomFieldToGenericBlock(void)
 	const char	*added	= NULL;
 	CPPUNIT_ASSERT(block.FindString("umlStereotype",&added) == B_OK);
 	CPPUNIT_ASSERT(BString("") == added);	// zero value, ready to edit
+}
+
+
+void MacroTextTest::AddFieldMenuOffersRepeatableFieldAgain(void)
+{
+	// Select's "node" is repeatable (Select::Do() loops FindPointer("node",
+	// i,...)) - adding it via "+ Feld hinzufügen" twice should give two
+	// separate entries, not overwrite the first (user report)
+	BMessage	select;
+	select.AddString("Command::Name","Select");
+
+	BList	commands;
+	commands.AddItem(&select);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetCommands(&commands);
+
+	MacroPath	empty;
+	view.AddNamedField(0,empty,"node",B_POINTER_TYPE);
+	view.AddNamedField(0,empty,"node",B_POINTER_TYPE);
+
+	BList	*result	= view.Commands();
+	BMessage	*again	= (BMessage*)result->ItemAt(0);
+	type_code	type;
+	int32		count	= 0;
+	again->GetInfo("node",&type,&count);
+	CPPUNIT_ASSERT_EQUAL((int32)2,count);
+}
+
+
+void MacroTextTest::MoveCommandRowsMovesSeveralTogetherInOrder(void)
+{
+	// three top-level Moves - drag the first two together to after the
+	// third, they should land in their own relative order (1,2), not
+	// reversed or interleaved
+	BMessage	m0; m0.AddString("Command::Name","Move"); m0.AddFloat("dx",1.0f);
+	BMessage	m1; m1.AddString("Command::Name","Move"); m1.AddFloat("dx",2.0f);
+	BMessage	m2; m2.AddString("Command::Name","Move"); m2.AddFloat("dx",3.0f);
+
+	BList	commands;
+	commands.AddItem(&m0);
+	commands.AddItem(&m1);
+	commands.AddItem(&m2);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetCommands(&commands);
+
+	MacroPath	empty;
+	int32	row2	= view.RowIndexForCommand(2,empty);
+	CPPUNIT_ASSERT(row2 >= 0);
+
+	std::vector<std::pair<int32,MacroPath> >	sources;
+	sources.push_back(std::make_pair((int32)0,empty));
+	sources.push_back(std::make_pair((int32)1,empty));
+	view.MoveCommandRows(sources,row2,BPoint(0,1000000));	// far below -> after
+
+	BList	*result	= view.Commands();
+	CPPUNIT_ASSERT_EQUAL((int32)3,result->CountItems());
+	float	dx0 = 0, dx1 = 0, dx2 = 0;
+	((BMessage*)result->ItemAt(0))->FindFloat("dx",&dx0);
+	((BMessage*)result->ItemAt(1))->FindFloat("dx",&dx1);
+	((BMessage*)result->ItemAt(2))->FindFloat("dx",&dx2);
+	CPPUNIT_ASSERT_EQUAL(3.0f,dx0);
+	CPPUNIT_ASSERT_EQUAL(1.0f,dx1);
+	CPPUNIT_ASSERT_EQUAL(2.0f,dx2);
+}
+
+
+void MacroTextTest::MoveCommandRowsOntoContainerAppendsAtEnd(void)
+{
+	BMessage	existing;
+	existing.AddString("Command::Name","Move");
+	existing.AddFloat("dx",9.0f);
+	BMessage	batch;
+	batch.AddString("Command::Name","Batch");
+	batch.AddMessage("PCommand::subPCommand",&existing);
+
+	BMessage	a; a.AddString("Command::Name","Move"); a.AddFloat("dx",1.0f);
+	BMessage	b; b.AddString("Command::Name","Move"); b.AddFloat("dx",2.0f);
+
+	BList	commands;
+	commands.AddItem(&batch);
+	commands.AddItem(&a);
+	commands.AddItem(&b);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetCommands(&commands);
+
+	MacroPath	empty;
+	int32	batchRow	= view.RowIndexForCommand(0,empty);
+	CPPUNIT_ASSERT(batchRow >= 0);
+
+	std::vector<std::pair<int32,MacroPath> >	sources;
+	sources.push_back(std::make_pair((int32)1,empty));
+	sources.push_back(std::make_pair((int32)2,empty));
+	view.MoveCommandRows(sources,batchRow,BPoint(0,0));
+
+	BList		*result	= view.Commands();
+	CPPUNIT_ASSERT_EQUAL((int32)1,result->CountItems());
+	BMessage	*newBatch	= (BMessage*)result->ItemAt(0);
+	BMessage	child;
+	int32		count	= 0;
+	float		dxs[3]	= {0,0,0};
+	for (int32 i = 0; newBatch->FindMessage("PCommand::subPCommand",i,&child) == B_OK; i++) {
+		child.FindFloat("dx",&dxs[i]);
+		count++;
+	}
+	CPPUNIT_ASSERT_EQUAL((int32)3,count);
+	CPPUNIT_ASSERT_EQUAL(9.0f,dxs[0]);	// already there, untouched
+	CPPUNIT_ASSERT_EQUAL(1.0f,dxs[1]);	// appended, in order
+	CPPUNIT_ASSERT_EQUAL(2.0f,dxs[2]);
 }

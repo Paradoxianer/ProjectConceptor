@@ -10,6 +10,7 @@
 #include <support/String.h>
 
 #include <set>
+#include <utility>
 #include <vector>
 
 class MacroEditor;
@@ -177,10 +178,10 @@ private:
 			 * one pass - a row nested inside another selected row is
 			 * skipped (removing the ancestor already removes it). Move Up/
 			 * Move Down stay single-row only (the context menu disables
-			 * them outright once more than one row is selected) - genuine
-			 * multi-row reordering would need the same kind of index-shift
-			 * bookkeeping this needed, once per moved row instead of once
-			 * per deleted one, for a need that hasn't come up yet. */
+			 * them outright once more than one row is selected) - the
+			 * context menu's own Move Up/Move Down, not dragging (see
+			 * MoveCommandRows(), which does support moving several rows
+			 * together). */
 			void			DeleteSelectedRows(void);
 			/** The actual removal DeleteRow()/DeleteSelectedRows() share -
 			 * see DeleteSelectedRows()'s own comment on why it doesn't
@@ -196,21 +197,36 @@ private:
 			/** Moves the existing command at `sourceTopLevel`/`sourcePath`
 			 * (its own SelfPath(), empty = a top-level command) to wherever
 			 * `targetRow` resolves to - a sibling of it (or, dropped onto a
-			 * container command, that command's first subcommand), also
+			 * container command, that command's LAST subcommand), also
 			 * reachable by dropping below every row to move it out to the
 			 * macro's own top level. Refuses (beeps) a drop onto the
 			 * command's own current position or into one of its own
 			 * subcommands - that would either do nothing or corrupt the
-			 * tree by nesting a command inside itself. */
+			 * tree by nesting a command inside itself. A thin single-source
+			 * wrapper around MoveCommandRows() - InitiateDrag() only ever
+			 * calls this one directly when just one command is selected. */
 			void			MoveCommandRow(int32 sourceTopLevel, const MacroPath &sourcePath,
 								int32 targetRow, BPoint where);
-			/** Inserts `command` (caller transfers ownership) at `pos` -
-			 * shared insertion-position logic for both a freshly parsed
-			 * drop (DropCommandSnippet()) and an existing row being moved
-			 * (MoveCommandRow(), called only once `pos` already accounts
-			 * for the source's own removal shifting other indices - see
-			 * its own comment). */
+			/** MoveCommandRow(), for several commands (every one InitiateDrag()
+			 * found selected) dragged and dropped together in one go - they
+			 * land at the target in their own original relative order. A
+			 * source nested inside another one being moved is skipped
+			 * (moving the ancestor already carries it along); the drop is
+			 * refused (beeps) if it would land inside any moved source's own
+			 * subtree, same as the single-source guard. */
+			void			MoveCommandRows(std::vector<std::pair<int32,MacroPath> > &sources,
+								int32 targetRow, BPoint where);
+			/** Inserts `command` (caller transfers ownership) at `pos` - a
+			 * single-item wrapper around InsertCommandsAt(). */
 			void			InsertCommandAt(BMessage *command, const MacroTargetPosition &pos);
+			/** Inserts `commands`, in the order given, as one contiguous
+			 * block at `pos` - shared insertion-position logic for a
+			 * freshly parsed drop (DropCommandSnippet(), always one
+			 * command), and one or several existing rows being moved
+			 * (MoveCommandRow()/MoveCommandRows(), called only once `pos`
+			 * already accounts for every source's own removal shifting
+			 * other indices - see their own comments). */
+			void			InsertCommandsAt(std::vector<BMessage> &commands, const MacroTargetPosition &pos);
 
 			MacroEditor		*fEditor;
 			/** Working copy of the selected macro's "Macro::Commmand" list -
