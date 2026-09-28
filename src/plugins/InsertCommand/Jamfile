@@ -2,6 +2,7 @@ SubDir HAIKU_TOP 3rdparty projectconceptor src plugins InsertCommand ;
 
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Commands ] ;
 
 Addon pc_command_insert :
 	Insert.cpp

@@ -139,6 +139,22 @@ protected:
 			/** see GetValueContext() - owned and scoped entirely by
 			 * PlayMacro(), NULL the rest of the time. */
 			BMessage	*valueContext;
+			/** the current PlayMacro() call's own Indexer, not owned here
+			 * (PlayMacro() keeps the real pointer on its own stack, this is
+			 * only ever a borrowed reference to it) - saved/restored around
+			 * a nested PlayMacro() the same way GetValueContext() is, not
+			 * cleared to NULL first the way that one is (a nested call gets
+			 * its own fresh Indexer either way, nothing to guard against
+			 * beyond restoring the outer one correctly). NULL outside macro
+			 * playback. ResolveBindings() uses this to translate a bound
+			 * "node" field's already-computed target id (see Calculate)
+			 * into the live node/connection pointer the command's own Do()
+			 * actually needs - the same translation Indexer::
+			 * DeIndexCommand() does for a *literal* "node=@id" already in
+			 * the macro, needed again here because a *bound* field never
+			 * goes through DeIndexCommand() at all (see ResolveBindings()'s
+			 * own comment on when it runs). */
+			Indexer		*replayIndexer;
 private:
 
 };

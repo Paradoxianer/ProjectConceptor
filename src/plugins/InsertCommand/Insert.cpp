@@ -3,6 +3,8 @@
 
 #include <support/TypeConstants.h>
 
+#include "PCommandManager.h"
+
 Insert::Insert():PCommand() {
 }
 
@@ -13,8 +15,12 @@ static const property_info kInsertProperties[] = {
 	// Insert - but Insert's node is typically brand new, so it almost
 	// always carries one). See MacroText.h for how this round-trips.
 	{ "Insert", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
-		"Inserts one or more nodes (repeated \"node\" pointers).", 0, {0},
-		{ { { {"node", B_POINTER_TYPE}, {"included_node", B_MESSAGE_TYPE} } } } },
+		"Inserts one or more nodes (repeated \"node\" pointers) - "
+		"resultVariable (optional) saves the inserted node(s) under that "
+		"name in the macro's value context, e.g. to reposition or select "
+		"them right after in the same Repeat/ForEach iteration.", 0, {0},
+		{ { { {"node", B_POINTER_TYPE}, {"included_node", B_MESSAGE_TYPE},
+			  {"resultVariable", B_STRING_TYPE} } } } },
 };
 
 const property_info* Insert::PropertyInfo(int32 *count) {
@@ -59,6 +65,11 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings) {
 	BList			*allNodes			= doc->GetAllNodes();
 	int32			i					= 0;
 	status_t		err					= B_OK;
+	BString			resultVariable;
+	bool			hasResultVariable	= (settings->FindString("resultVariable",&resultVariable) == B_OK)
+		&& (resultVariable.Length() > 0);
+	if (hasResultVariable && (manager->GetValueContext() != NULL))
+		manager->GetValueContext()->RemoveName(resultVariable.String());
 	while ((err=settings->FindPointer("node",i,(void **)&node)) == B_OK) {
 		if ((node->what != P_C_CONNECTION_TYPE) && allNodes->HasItem(node)) {
 			// the same command run again (Repeat/ForEach around an Insert)
@@ -104,6 +115,8 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings) {
 		}
 		i++;
 		changed->insert(node);
+		if (hasResultVariable && (manager->GetValueContext() != NULL))
+			manager->GetValueContext()->AddPointer(resultVariable.String(),node);
 	}
 	doc->SetModified();
 	settings = PCommand::Do(doc,settings);

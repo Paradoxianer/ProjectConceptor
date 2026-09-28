@@ -42,6 +42,7 @@ void PCommandManager::Init(void) {
 	recording		= NULL;
 	fPropertyInfoArray	= NULL;
 	valueContext	= NULL;
+	replayIndexer	= NULL;
 
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*commands		= pluginManager->GetPluginsByType(P_C_COMMANDO_PLUGIN_TYPE);
@@ -200,6 +201,8 @@ status_t PCommandManager::PlayMacro(BMessage *makro, BString *report) {
 	bool	ownsValueContext	= (valueContext == NULL);
 	if (ownsValueContext)
 		valueContext	= new BMessage();
+	Indexer	*previousReplayIndexer	= replayIndexer;
+	replayIndexer	= playDeIndexer;
 	BString		failedCommand;
 	while ( (makro->FindMessage("Macro::Commmand", i,message) == B_OK) && (err==B_OK) )
 	{
@@ -227,6 +230,7 @@ status_t PCommandManager::PlayMacro(BMessage *makro, BString *report) {
 		delete valueContext;
 		valueContext	= NULL;
 	}
+	replayIndexer	= previousReplayIndexer;
 
 	BString		result;
 	status_t	status	= B_OK;
@@ -411,6 +415,45 @@ void PCommandManager::ResolveBindings(BMessage *settings, PCommand *forCommand)
 						float	floatValue;
 						if (valueContext->FindFloat(variableName,v,&floatValue) == B_OK)
 							settings->AddInt32(fieldName,(int32)floatValue);
+						continue;
+					}
+					// a "node" field is declared B_POINTER_TYPE, but by the
+					// time a *bound* field is resolved here, the command's
+					// own Do() expects an already-live node/connection
+					// pointer (see PCommand::Do() implementations'
+					// FindPointer("node",...) calls) - the int32<->float
+					// coercion above is the wrong shape for it even when
+					// varType matches int32 exactly. A bound "node" instead
+					// holds either an id number (int32 or, from Calculate,
+					// float - user report: wants @id references left as
+					// plain, computable numbers on purpose) that still
+					// needs resolving through replayIndexer, same as
+					// Indexer::DeIndexCommand() already does for a
+					// *literal* "node=@id" in the macro text - or, from
+					// Remember()/Insert's own resultVariable, an already-
+					// live pointer (varType B_POINTER_TYPE), which the
+					// generic fallback below already copies through
+					// correctly as-is.
+					if (hasDeclaredType && (declaredType == B_POINTER_TYPE)
+							&& ((varType == B_FLOAT_TYPE) || (varType == B_INT32_TYPE))) {
+						int32	idValue	= 0;
+						bool	haveId	= false;
+						if (varType == B_FLOAT_TYPE) {
+							float	floatValue;
+							if (valueContext->FindFloat(variableName,v,&floatValue) == B_OK) {
+								idValue	= (int32)floatValue;
+								haveId	= true;
+							}
+						} else if (valueContext->FindInt32(variableName,v,&idValue) == B_OK) {
+							haveId	= true;
+						}
+						BMessage	*resolved	= NULL;
+						if (haveId && (replayIndexer != NULL) && replayIndexer->ResolveId(idValue,&resolved) && (resolved != NULL))
+							settings->AddPointer(fieldName,resolved);
+						else
+							PRINT(("PCommandManager::ResolveBindings - \"%s\" (bound to field "
+								"\"%s\") is %ld, not an id this macro has created\n",
+								variableName,fieldName,(long)idValue));
 						continue;
 					}
 					const void	*data	= NULL;

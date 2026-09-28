@@ -65,7 +65,8 @@ SYSTEM_INCLUDE_PATHS =
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS = \
 		../../include \
-		../../include/plugins
+		../../include/plugins \
+		../../app/Commands
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL

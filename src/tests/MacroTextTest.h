@@ -48,6 +48,8 @@ public:
 	void CalculateWritesResultIntoValueContext(void);
 	void CalculateSupportsEveryOperator(void);
 	void CalculateExampleParses(void);
+	void InsertResultVariableEnablesFollowUpReference(void);
+	void CalculatedNodeIdBindsAsInt32NotFloat(void);
 	void MoveCommandReparentsIntoAnotherContainer(void);
 	void MoveCommandPromotesToTopLevel(void);
 	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
@@ -87,6 +89,8 @@ public:
 	CPPUNIT_TEST(CalculateWritesResultIntoValueContext);
 	CPPUNIT_TEST(CalculateSupportsEveryOperator);
 	CPPUNIT_TEST(CalculateExampleParses);
+	CPPUNIT_TEST(InsertResultVariableEnablesFollowUpReference);
+	CPPUNIT_TEST(CalculatedNodeIdBindsAsInt32NotFloat);
 	CPPUNIT_TEST(MoveCommandReparentsIntoAnotherContainer);
 	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
 	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);

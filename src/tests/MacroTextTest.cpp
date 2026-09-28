@@ -1436,3 +1436,84 @@ void MacroTextTest::MoveCommandReordersTopLevelSiblings(void)
 	CPPUNIT_ASSERT_EQUAL(2.0f,dx0);
 	CPPUNIT_ASSERT_EQUAL(1.0f,dx1);
 }
+
+
+void MacroTextTest::InsertResultVariableEnablesFollowUpReference(void)
+{
+	// Insert resultVariable="n", then Select node=$n right after - both in
+	// the SAME macro/PlayMacro() call, since the value context is scoped
+	// to exactly that (see PCommandManager::PlayMacro())
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BMessage	*insert	= BuildInsertPrototype();
+	insert->AddString("resultVariable","n");
+
+	BMessage	select;
+	select.AddString("Command::Name","Select");
+	BMessage	bindings;
+	bindings.AddString("node","n");
+	select.AddMessage("PCommand::bindings",&bindings);
+	select.AddBool("deselect",true);
+	select.AddBool("selectAll",false);
+
+	BMessage	macro(P_C_MACRO_TYPE);
+	macro.AddMessage("Macro::Commmand",insert);
+	macro.AddMessage("Macro::Commmand",&select);
+	delete insert;
+
+	BString	report;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(report.String(),(status_t)B_OK,
+		doc->GetCommandManager()->PlayMacro(&macro,&report));
+
+	BList	*nodes	= doc->GetAllNodes();
+	CPPUNIT_ASSERT_EQUAL((int32)1,nodes->CountItems());
+	bool	selected	= false;
+	((BMessage*)nodes->ItemAt(0))->FindBool(P_C_NODE_SELECTED,&selected);
+	CPPUNIT_ASSERT(selected);
+}
+
+
+void MacroTextTest::CalculatedNodeIdBindsAsInt32NotFloat(void)
+{
+	// a Calculate result (always float) bound into a "node" field (schema
+	// B_POINTER_TYPE, stored int32) must coerce, or the target command's
+	// own FindInt32()/FindPointer() could never read it back - without the
+	// coercion, ResolveBindings() would add "node" as a float field,
+	// Indexer::DeIndexCommand()'s FindInt32("node",...) walk would never
+	// even see it (wrong type), and Select would silently select nothing
+	// at all (not an error PlayMacro() would report either) - so the only
+	// reliable way to tell coerced-and-wrong-id apart from not-coerced-
+	// at-all is to check the node actually ended up selected.
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BMessage	*insert	= BuildInsertPrototype();	// embeds a node with this=1
+
+	BMessage	calc;
+	calc.AddString("Command::Name","Calculate");
+	calc.AddFloat("left",1.0f);
+	calc.AddString("operator","+");
+	calc.AddFloat("right",0.0f);
+	calc.AddString("resultVariable","computedId");
+
+	BMessage	select;
+	select.AddString("Command::Name","Select");
+	BMessage	bindings;
+	bindings.AddString("node","computedId");
+	select.AddMessage("PCommand::bindings",&bindings);
+	select.AddBool("deselect",false);
+	select.AddBool("selectAll",false);
+
+	BMessage	macro(P_C_MACRO_TYPE);
+	macro.AddMessage("Macro::Commmand",insert);
+	macro.AddMessage("Macro::Commmand",&calc);
+	macro.AddMessage("Macro::Commmand",&select);
+	delete insert;
+
+	BString	report;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(report.String(),(status_t)B_OK,
+		doc->GetCommandManager()->PlayMacro(&macro,&report));
+
+	BList	*nodes	= doc->GetAllNodes();
+	CPPUNIT_ASSERT_EQUAL((int32)1,nodes->CountItems());
+	bool	selected	= false;
+	((BMessage*)nodes->ItemAt(0))->FindBool(P_C_NODE_SELECTED,&selected);
+	CPPUNIT_ASSERT(selected);
+}
