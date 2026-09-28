@@ -85,6 +85,10 @@ public:
 			BList*			Commands(void) {return &fCommands;};
 
 private:
+			/** BOutlineListView::AddUnder() appends right after `superitem`,
+			 * not after its last existing child - see the .cpp for why this
+			 * exists instead. */
+			void			AppendUnder(class MacroRowItem *item, class MacroRowItem *superitem);
 			/** Ends any open inline value-edit overlay, committing it
 			 * first unless `commit` is false (Escape). */
 			void			CloseOverlay(bool commit);

@@ -756,6 +756,52 @@ void MacroEditor::ExportToFile(void)
 }
 
 
+void MacroEditor::ImportMacroFromOpenFile(BFile *file, const BString &name)
+{
+	if ((file == NULL) || (doc == NULL) || (file->InitCheck() != B_OK))
+		return;
+	off_t	size	= 0;
+	file->GetSize(&size);
+	char	*buffer	= new char[size+1];
+	file->Read(buffer,size);
+	buffer[size]	= '\0';
+	BString	text(buffer);
+	delete[] buffer;
+
+	BList		parsed;
+	BString		error;
+	if (ParseCommands(text,&parsed,doc->GetCommandManager(),&error) != B_OK) {
+		SetStatus(error.String(),true);
+		return;
+	}
+
+	// re-running the same smoke-test import (or re-importing a file the
+	// user is iterating on) shouldn't pile up "fixture", "fixture 2", ... -
+	// replace the existing macro of the same name instead of always adding
+	BList	*macroList	= doc->GetCommandManager()->GetMacroList();
+	BMessage	*existing	= NULL;
+	for (int32 i = 0; (existing == NULL) && (i < macroList->CountItems()); i++) {
+		const char	*existingName	= NULL;
+		BMessage	*candidate	= (BMessage*)macroList->ItemAt(i);
+		if ((candidate->FindString("Name",&existingName) == B_OK) && (name == existingName))
+			existing	= candidate;
+	}
+	fSelectedMacro	= (existing != NULL) ? existing : AddNewMacro(name);
+	fSelectedMacro->RemoveName("Macro::Commmand");
+	for (int32 i = 0; i < parsed.CountItems(); i++) {
+		BMessage	*cmd	= (BMessage*)parsed.ItemAt(i);
+		fSelectedMacro->AddMessage("Macro::Commmand",cmd);
+		delete cmd;
+	}
+	RefreshMacroList();
+
+	BString	status;
+	status.SetToFormat(B_TRANSLATE("Imported as macro \"%s\" (%ld command(s))."),
+		name.String(),(long)parsed.CountItems());
+	SetStatus(status.String(),false);
+}
+
+
 void MacroEditor::ImportFromFile(void)
 {
 	if (fImportPanel == NULL)
@@ -850,48 +896,34 @@ void MacroEditor::MessageReceived(BMessage *message)
 			break;
 		}
 		case B_REFS_RECEIVED: {
-			// Import always creates a brand new macro list entry - it
-			// never touches whatever happened to be selected before the
-			// file panel opened (#55 follow-up: unambiguous regardless of
-			// what's currently shown, unlike replacing the open macro's
-			// content would be). Parsed straight away - nothing here is
-			// ever a draft the user can leave half-fixed, unlike the old
-			// text editor's "review, then Enter applies it" import.
 			entry_ref	ref;
-			if ((message->FindRef("refs",&ref) == B_OK) && (doc != NULL)) {
+			if (message->FindRef("refs",&ref) == B_OK) {
 				BFile	file(&ref,B_READ_ONLY);
-				off_t	size	= 0;
-				file.GetSize(&size);
-				char	*buffer	= new char[size+1];
-				file.Read(buffer,size);
-				buffer[size]	= '\0';
-				BString	importedText(buffer);
-				delete[] buffer;
-
-				BList		parsed;
-				BString		error;
-				if (ParseCommands(importedText,&parsed,doc->GetCommandManager(),&error) != B_OK) {
-					SetStatus(error.String(),true);
-					break;
-				}
-
 				BString	name(ref.name);
 				int32	dot	= name.FindLast('.');
 				if (dot > 0)
 					name.Truncate(dot);
-
-				fSelectedMacro	= AddNewMacro(name);
-				for (int32 i = 0; i < parsed.CountItems(); i++) {
-					BMessage	*cmd	= (BMessage*)parsed.ItemAt(i);
-					fSelectedMacro->AddMessage("Macro::Commmand",cmd);
-					delete cmd;
-				}
-				RefreshMacroList();
-
-				BString	status;
-				status.SetToFormat(B_TRANSLATE("Imported as new macro \"%s\" (%ld command(s))."),
-					name.String(),(long)parsed.CountItems());
-				SetStatus(status.String(),false);
+				ImportMacroFromOpenFile(&file,name);
+			}
+			break;
+		}
+		case M_E_IMPORT_MACRO_FILE: {
+			// scripting/smoke-test hook (./dev.sh smoke-macro): a "hey"
+			// DO can't easily build an entry_ref (B_REFS_RECEIVED's own
+			// "refs" field) but can pass a plain path string trivially -
+			// same import logic as a real file-panel Open either way, see
+			// ImportMacroFromOpenFile().
+			const char	*path	= NULL;
+			if (message->FindString("path",&path) == B_OK) {
+				BFile	file(path,B_READ_ONLY);
+				BString	name(path);
+				int32	slash	= name.FindLast('/');
+				if (slash >= 0)
+					name.Remove(0,slash+1);
+				int32	dot	= name.FindLast('.');
+				if (dot > 0)
+					name.Truncate(dot);
+				ImportMacroFromOpenFile(&file,name);
 			}
 			break;
 		}

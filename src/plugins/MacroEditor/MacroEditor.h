@@ -18,6 +18,10 @@
 #include "ShortCutFilter.h"
 
 const uint32	M_E_MACRO_SELECTED	= 'meMS';
+/** Same import as Macro > Open, but by plain path string instead of a real
+ * file panel selection - a scripting/smoke-test hook (see
+ * ImportMacroFromOpenFile()), not reached from any menu. */
+const uint32	M_E_IMPORT_MACRO_FILE	= 'meIF';
 
 class BScrollView;
 class PCommandManager;
@@ -125,6 +129,16 @@ protected:
 			 * macro - on failure, nothing is created and the error is
 			 * shown in the status line. */
 			void			ImportFromFile(void);
+			/** Shared by the real B_REFS_RECEIVED (file panel/Tracker drop)
+			 * and M_E_IMPORT_MACRO_FILE (scripting hook) paths: reads
+			 * `file`, parses it, and on success installs the result as a
+			 * new macro named `name` (deduplicated the same way
+			 * UniqueMacroName() would if `name` is already taken - a
+			 * repeated smoke-test import shouldn't pile up "Name",
+			 * "Name 2", ... every run, it should just replace). On a parse
+			 * error nothing is created and the error goes to the status
+			 * line - never a half-imported macro. */
+			void			ImportMacroFromOpenFile(BFile *file, const BString &name);
 			void			SetStatus(const char *text, bool isError);
 			void			LayoutChildren(void);
 			/** Fills fCommandList from doc->GetCommandManager()'s registry -

@@ -391,6 +391,27 @@ static void WriteContainer(BList *commands, int32 topLevelIndex, const MacroPath
 }
 
 
+/** BOutlineListView::AddUnder() inserts right after `superitem` itself,
+ * not after its existing last child (confirmed against Haiku's own
+ * OutlineListView.cpp: `fFullList.AddItem(item, FullListIndexOf(superItem)
+ * + 1)`) - calling it once per child in build order therefore builds every
+ * level's children in REVERSE order (each new one pushed in right after
+ * the parent, ahead of its already-added older siblings). This appends
+ * `item` after superitem's entire current subtree instead, so children
+ * come out in the order BuildChildren() actually adds them. `item`'s own
+ * level must already be set correctly (its constructor already does
+ * this - one more than `superitem`'s). */
+void MacroOutlineView::AppendUnder(MacroRowItem *item, MacroRowItem *superitem)
+{
+	if (superitem == NULL) {
+		AddItem(item);
+		return;
+	}
+	int32	insertAt	= FullListIndexOf(superitem)+1+CountItemsUnder(superitem,false);
+	BOutlineListView::AddItem(item,insertAt);
+}
+
+
 void MacroOutlineView::RebuildAllRows(void)
 {
 	std::set<BString>	expanded;
@@ -445,7 +466,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 				MacroRowItem	*row	= new MacroRowItem(label.String(),level,true,kRowField,
 					topLevelIndex,containerPath,bindField,0,schemaType,true,NULL,
 					BString(bindField).Length()+2);
-				AddUnder(row,superitem);
+				AppendUnder(row,superitem);
 				boundNames.insert(bindField);
 			}
 		}
@@ -486,7 +507,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 				MacroRowItem	*row	= new MacroRowItem(childName ? childName : "?",level,true,
 					kRowCommand,topLevelIndex,containerPath,"PCommand::subPCommand",j,
 					B_ANY_TYPE,false,childCommand,-1);
-				AddUnder(row,superitem);
+				AppendUnder(row,superitem);
 				BuildChildren(&child,topLevelIndex,childPath,row,level+1,childCommand,expandedKeys);
 			}
 			continue;
@@ -510,7 +531,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 				MacroRowItem	*row	= new MacroRowItem(label.String(),level,expandThis,
 					isChip ? kRowChip : kRowBlock,topLevelIndex,containerPath,fieldName,j,
 					B_ANY_TYPE,false,NULL,-1);
-				AddUnder(row,superitem);
+				AppendUnder(row,superitem);
 				// no schema inside a nested block/chip (see MacroText.h) -
 				// its own children get no "+ Feld hinzufügen" of their own
 				BuildChildren(&child,topLevelIndex,childPath,row,level+1,NULL,expandedKeys);
@@ -529,7 +550,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 			MacroRowItem	*row	= new MacroRowItem(label.String(),level,true,kRowField,
 				topLevelIndex,containerPath,fieldName,j,schemaType,(schemaCommand != NULL),
 				NULL,valueStart);
-			AddUnder(row,superitem);
+			AppendUnder(row,superitem);
 		}
 	}
 
@@ -539,7 +560,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 		if (propCount > 0) {
 			MacroRowItem	*addRow	= new MacroRowItem(B_TRANSLATE("+ Feld hinzufügen"),level,true,
 				kRowAddField,topLevelIndex,containerPath,"",-1,B_ANY_TYPE,false,schemaCommand,-1);
-			AddUnder(addRow,superitem);
+			AppendUnder(addRow,superitem);
 		}
 	}
 }
