@@ -153,8 +153,25 @@ private:
 			 * one (e.g. Select's "node") stays offered after being added. */
 			void			ShowAddFieldMenu(BPoint screenWhere, int32 topLevelIndex,
 								const MacroPath &path, PCommand *command);
-			/** Deletes the field/chip/block/subcommand row at `rowIndex`. */
+			/** Deletes the field/chip/block/subcommand/command row at
+			 * `rowIndex` (or, if it's a top-level command, that whole
+			 * macro entry). */
 			void			DeleteRow(int32 rowIndex);
+			/** Deletes every currently selected row (Delete key, or the
+			 * context menu's Delete with more than one row selected) in
+			 * one pass - a row nested inside another selected row is
+			 * skipped (removing the ancestor already removes it). Move Up/
+			 * Move Down stay single-row only (the context menu disables
+			 * them outright once more than one row is selected) - genuine
+			 * multi-row reordering would need the same kind of index-shift
+			 * bookkeeping this needed, once per moved row instead of once
+			 * per deleted one, for a need that hasn't come up yet. */
+			void			DeleteSelectedRows(void);
+			/** The actual removal DeleteRow()/DeleteSelectedRows() share -
+			 * see DeleteSelectedRows()'s own comment on why it doesn't
+			 * just call DeleteRow() once per row. */
+			void			DeleteIdentity(int32 topLevel, const MacroPath &containerPath,
+								const BString &fieldName, int32 fieldIndex, bool isTopLevelCommand);
 			void			MoveRow(int32 rowIndex, int32 direction);
 			/** Parses `snippet` (a DSL example string, see
 			 * CommandExampleText()/BuildCommandSnippet()) into a real

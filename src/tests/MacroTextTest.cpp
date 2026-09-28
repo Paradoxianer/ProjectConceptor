@@ -1517,3 +1517,87 @@ void MacroTextTest::CalculatedNodeIdBindsAsInt32NotFloat(void)
 	((BMessage*)nodes->ItemAt(0))->FindBool(P_C_NODE_SELECTED,&selected);
 	CPPUNIT_ASSERT(selected);
 }
+
+
+void MacroTextTest::DeleteSelectedRowsRemovesOnlyChosenSiblings(void)
+{
+	BMessage	m0; m0.AddString("Command::Name","Move"); m0.AddFloat("dx",1.0f);
+	BMessage	m1; m1.AddString("Command::Name","Move"); m1.AddFloat("dx",2.0f);
+	BMessage	m2; m2.AddString("Command::Name","Move"); m2.AddFloat("dx",3.0f);
+	BMessage	batch;
+	batch.AddString("Command::Name","Batch");
+	batch.AddMessage("PCommand::subPCommand",&m0);
+	batch.AddMessage("PCommand::subPCommand",&m1);
+	batch.AddMessage("PCommand::subPCommand",&m2);
+
+	BList	commands;
+	commands.AddItem(&batch);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetCommands(&commands);
+
+	MacroPath	p0,p2;
+	MacroPathStep	s0; s0.field = "PCommand::subPCommand"; s0.index = 0; p0.push_back(s0);
+	MacroPathStep	s2; s2.field = "PCommand::subPCommand"; s2.index = 2; p2.push_back(s2);
+	int32	row0	= view.RowIndexForCommand(0,p0);
+	int32	row2	= view.RowIndexForCommand(0,p2);
+	CPPUNIT_ASSERT((row0 >= 0) && (row2 >= 0));
+	view.Select(row0,false);
+	view.Select(row2,true);
+
+	view.DeleteSelectedRows();
+
+	BList	*result	= view.Commands();
+	CPPUNIT_ASSERT_EQUAL((int32)1,result->CountItems());
+	BMessage	*newBatch	= (BMessage*)result->ItemAt(0);
+	BMessage	child;
+	int32	count	= 0;
+	float	remainingDx	= 0.0f;
+	for (int32 i = 0; newBatch->FindMessage("PCommand::subPCommand",i,&child) == B_OK; i++) {
+		count++;
+		child.FindFloat("dx",&remainingDx);
+	}
+	CPPUNIT_ASSERT_EQUAL((int32)1,count);
+	CPPUNIT_ASSERT_EQUAL(2.0f,remainingDx);
+}
+
+
+void MacroTextTest::DeleteSelectedRowsSkipsDescendantsOfAnotherSelectedRow(void)
+{
+	BMessage	move;
+	move.AddString("Command::Name","Move");
+	move.AddFloat("dx",1.0f);
+	BMessage	batch;
+	batch.AddString("Command::Name","Batch");
+	batch.AddMessage("PCommand::subPCommand",&move);
+
+	BMessage	second;
+	second.AddString("Command::Name","Move");
+	second.AddFloat("dx",9.0f);
+
+	BList	commands;
+	commands.AddItem(&batch);
+	commands.AddItem(&second);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetCommands(&commands);
+
+	MacroPath	emptyPath, movePath;
+	MacroPathStep	step; step.field = "PCommand::subPCommand"; step.index = 0;
+	movePath.push_back(step);
+	int32	batchRow	= view.RowIndexForCommand(0,emptyPath);
+	int32	moveRow		= view.RowIndexForCommand(0,movePath);
+	CPPUNIT_ASSERT((batchRow >= 0) && (moveRow >= 0));
+	// select the container AND its own child at once - deleting both
+	// should not double-free/crash, and should still just remove Batch
+	view.Select(batchRow,false);
+	view.Select(moveRow,true);
+
+	view.DeleteSelectedRows();
+
+	BList	*result	= view.Commands();
+	CPPUNIT_ASSERT_EQUAL((int32)1,result->CountItems());
+	const char	*name	= NULL;
+	((BMessage*)result->ItemAt(0))->FindString("Command::Name",&name);
+	CPPUNIT_ASSERT(BString("Move") == name);
+}

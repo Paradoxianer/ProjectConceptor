@@ -370,7 +370,7 @@ private:
 // ------------------------------------------------------------- the view --
 
 MacroOutlineView::MacroOutlineView(BRect frame, const char *name, uint32 resizingMode)
-	:BOutlineListView(frame,name,B_SINGLE_SELECTION_LIST,resizingMode),
+	:BOutlineListView(frame,name,B_MULTIPLE_SELECTION_LIST,resizingMode),
 		fEditor(NULL), fOverlay(NULL), fOverlayRow(-1)
 {
 }
@@ -764,28 +764,124 @@ void MacroOutlineView::ShowAddFieldMenu(BPoint screenWhere, int32 topLevelIndex,
 }
 
 
+/** The actual removal, shared by DeleteRow() (one row, via Delete key or
+ * the context menu) and DeleteSelectedRows() (every selected row, via a
+ * multi-selection Delete). Does not rebuild/commit itself - callers batch
+ * that once after however many identities they remove, since a multi-
+ * delete rebuilding after every single one would repeatedly resolve
+ * against a tree its own later removals haven't happened in yet. */
+void MacroOutlineView::DeleteIdentity(int32 topLevel, const MacroPath &containerPath,
+	const BString &fieldName, int32 fieldIndex, bool isTopLevelCommand)
+{
+	if (isTopLevelCommand) {
+		BMessage	*old	= (BMessage*)fCommands.RemoveItem(topLevel);
+		delete old;
+		return;
+	}
+	BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,topLevel,containerPath);
+	std::vector<BMessage>	entries;
+	ExtractMessageEntries(&owner,fieldName.String(),&entries);
+	if (entries.empty()) {
+		// a scalar field - RemoveData() shifts same-named entries down
+		// exactly like ExtractMessageEntries()+erase()+re-add would,
+		// cheaper (ExtractMessageEntries() only ever finds B_MESSAGE_TYPE
+		// entries, so a scalar field's own "entries" is always empty here)
+		owner.RemoveData(fieldName.String(),fieldIndex);
+	} else if (fieldIndex < (int32)entries.size()) {
+		entries.erase(entries.begin()+fieldIndex);
+		ReplaceMessageEntries(&owner,fieldName.String(),entries);
+	}
+	WriteContainer(&fCommands,topLevel,containerPath,owner);
+}
+
+
 void MacroOutlineView::DeleteRow(int32 rowIndex)
 {
 	MacroRowItem	*item	= (MacroRowItem*)ItemAt(rowIndex);
-	if (item == NULL)
+	if ((item == NULL) || (item->Kind() == kRowAddField))
 		return;
-	if ((item->Kind() == kRowCommand) && item->ContainerPath().empty() && (item->FieldName().Length() == 0)) {
-		BMessage	*old	= (BMessage*)fCommands.RemoveItem(item->TopLevelIndex());
-		delete old;
-	} else if (item->Kind() != kRowAddField) {
-		BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,item->TopLevelIndex(),item->ContainerPath());
-		std::vector<BMessage>	entries;
-		ExtractMessageEntries(&owner,item->FieldName().String(),&entries);
-		if ((item->Kind() == kRowField)) {
-			// scalar - RemoveData() shifts same-named entries down exactly
-			// like ExtractMessageEntries()+erase()+re-add would, cheaper
-			owner.RemoveData(item->FieldName().String(),item->FieldIndex());
-		} else if (item->FieldIndex() < (int32)entries.size()) {
-			entries.erase(entries.begin()+item->FieldIndex());
-			ReplaceMessageEntries(&owner,item->FieldName().String(),entries);
-		}
-		WriteContainer(&fCommands,item->TopLevelIndex(),item->ContainerPath(),owner);
+	bool	isTopLevelCommand	= (item->Kind() == kRowCommand) && item->ContainerPath().empty()
+		&& (item->FieldName().Length() == 0);
+	DeleteIdentity(item->TopLevelIndex(),item->ContainerPath(),item->FieldName(),item->FieldIndex(),isTopLevelCommand);
+	RebuildAllRows();
+	if (fEditor != NULL)
+		fEditor->CommitOutlineChange();
+}
+
+
+void MacroOutlineView::DeleteSelectedRows(void)
+{
+	struct RowIdentity {
+		int32		topLevel;
+		MacroPath	containerPath;
+		BString		fieldName;
+		int32		fieldIndex;
+		bool		isTopLevelCommand;
+		MacroPath	selfPath;	// containerPath + {fieldName,fieldIndex}, empty for a top-level command
+	};
+
+	std::vector<RowIdentity>	selected;
+	for (int32 s = 0; ; s++) {
+		int32	fullIndex	= CurrentSelection(s);
+		if (fullIndex < 0)
+			break;
+		MacroRowItem	*item	= (MacroRowItem*)FullListItemAt(fullIndex);
+		if ((item == NULL) || (item->Kind() == kRowAddField))
+			continue;
+		RowIdentity	id;
+		id.topLevel			= item->TopLevelIndex();
+		id.containerPath	= item->ContainerPath();
+		id.fieldName		= item->FieldName();
+		id.fieldIndex		= item->FieldIndex();
+		id.isTopLevelCommand	= (item->Kind() == kRowCommand) && id.containerPath.empty()
+			&& (id.fieldName.Length() == 0);
+		id.selfPath	= item->SelfPath();
+		selected.push_back(id);
 	}
+	if (selected.empty())
+		return;
+
+	// drop anything that's inside another selected row's own subtree -
+	// removing the ancestor already removes it; processing both would
+	// resolve the descendant against a container that's already gone
+	std::vector<RowIdentity>	toRemove;
+	for (size_t i = 0; i < selected.size(); i++) {
+		bool	isNested	= false;
+		for (size_t j = 0; (j < selected.size()) && !isNested; j++) {
+			if ((i == j) || (selected[i].topLevel != selected[j].topLevel))
+				continue;
+			const MacroPath	&ancestor	= selected[j].selfPath;
+			const MacroPath	&mine		= selected[i].selfPath;
+			if (ancestor.size() < mine.size()) {
+				bool	within	= true;
+				for (size_t k = 0; within && (k < ancestor.size()); k++)
+					if ((mine[k].field != ancestor[k].field) || (mine[k].index != ancestor[k].index))
+						within	= false;
+				if (within)
+					isNested	= true;
+			}
+		}
+		if (!isNested)
+			toRemove.push_back(selected[i]);
+	}
+
+	// remove highest (topLevel, then fieldIndex) first - the only two ways
+	// removing one row shifts another's index (see MoveCommandRow()'s own
+	// comment on the same two cases) - so nothing removed here ever needs
+	// its own already-captured identity corrected afterward
+	while (!toRemove.empty()) {
+		size_t	best	= 0;
+		for (size_t i = 1; i < toRemove.size(); i++) {
+			if ((toRemove[i].topLevel > toRemove[best].topLevel) ||
+					((toRemove[i].topLevel == toRemove[best].topLevel)
+						&& (toRemove[i].fieldIndex > toRemove[best].fieldIndex)))
+				best	= i;
+		}
+		DeleteIdentity(toRemove[best].topLevel,toRemove[best].containerPath,
+			toRemove[best].fieldName,toRemove[best].fieldIndex,toRemove[best].isTopLevelCommand);
+		toRemove.erase(toRemove.begin()+best);
+	}
+
 	RebuildAllRows();
 	if (fEditor != NULL)
 		fEditor->CommitOutlineChange();
@@ -1028,7 +1124,12 @@ void MacroOutlineView::MouseDown(BPoint where)
 	CloseOverlay(true);
 
 	if ((buttons & B_SECONDARY_MOUSE_BUTTON) && (item != NULL) && (item->Kind() != kRowAddField)) {
-		Select(index);
+		// right-clicking a row already part of a multi-selection keeps
+		// that whole selection (so Delete below acts on all of it);
+		// right-clicking outside it replaces the selection with just
+		// this one row, same as a plain left click would
+		if (!item->IsSelected())
+			Select(index);
 		bool	isTopLevel	= (item->Kind() == kRowCommand) && item->ContainerPath().empty()
 			&& (item->FieldName().Length() == 0);
 		int32	count, i;
@@ -1043,16 +1144,24 @@ void MacroOutlineView::MouseDown(BPoint where)
 		}
 		BMessage	*upMsg		= new BMessage('mvUp'); upMsg->AddInt32("row",index);
 		BMessage	*downMsg	= new BMessage('mvDn'); downMsg->AddInt32("row",index);
-		BMessage	*delMsg		= new BMessage('mvDl'); delMsg->AddInt32("row",index);
+		int32	selectedCount	= 0;
+		for (int32 s = 0; CurrentSelection(s) >= 0; s++)
+			selectedCount++;
+		BString	deleteLabel(B_TRANSLATE("Delete"));
+		if (selectedCount > 1)
+			deleteLabel.SetToFormat(B_TRANSLATE("Delete %ld rows"),(long)selectedCount);
 		BPopUpMenu	*menu	= new BPopUpMenu("rowMenu",false,false);
 		BMenuItem	*up		= new BMenuItem(B_TRANSLATE("Move Up"),upMsg);
 		BMenuItem	*down	= new BMenuItem(B_TRANSLATE("Move Down"),downMsg);
-		up->SetEnabled(i > 0);
-		down->SetEnabled(i < count-1);
+		// moving stays single-row (see MacroOutlineView.h) - disabled
+		// outright on a multi-selection instead of silently only moving
+		// the one row that happened to be right-clicked
+		up->SetEnabled((selectedCount <= 1) && (i > 0));
+		down->SetEnabled((selectedCount <= 1) && (i < count-1));
 		menu->AddItem(up);
 		menu->AddItem(down);
 		menu->AddSeparatorItem();
-		menu->AddItem(new BMenuItem(B_TRANSLATE("Delete"),delMsg));
+		menu->AddItem(new BMenuItem(deleteLabel.String(),new BMessage('mvDl')));
 		menu->SetTargetForItems(this);
 		menu->Go(ConvertToScreen(where),true,true,true);
 		return;
@@ -1066,7 +1175,15 @@ void MacroOutlineView::MouseDown(BPoint where)
 
 	BOutlineListView::MouseDown(where);
 
-	if ((item != NULL) && (item->Kind() == kRowField)) {
+	// Shift/Ctrl held means "extend the selection", not "edit this value" -
+	// even when the click itself lands on the value portion of a field row
+	// that's now part of a multi-selection
+	int32	modifiers	= 0;
+	if ((Window() != NULL) && (Window()->CurrentMessage() != NULL))
+		Window()->CurrentMessage()->FindInt32("modifiers",&modifiers);
+	bool	extendingSelection	= (modifiers & (B_SHIFT_KEY | B_CONTROL_KEY | B_COMMAND_KEY)) != 0;
+
+	if ((item != NULL) && (item->Kind() == kRowField) && !extendingSelection) {
 		if (item->FieldType() == B_BOOL_TYPE) {
 			ToggleBoolField(index);
 		} else if (where.x >= ValuePixelX(item,ItemFrame(index))) {
@@ -1083,9 +1200,7 @@ void MacroOutlineView::MouseDown(BPoint where)
 void MacroOutlineView::KeyDown(const char *bytes, int32 numBytes)
 {
 	if ((numBytes == 1) && ((bytes[0] == B_DELETE) || (bytes[0] == B_BACKSPACE))) {
-		int32	index	= CurrentSelection();
-		if (index >= 0)
-			DeleteRow(index);
+		DeleteSelectedRows();
 		return;
 	}
 	BOutlineListView::KeyDown(bytes,numBytes);
@@ -1141,13 +1256,9 @@ void MacroOutlineView::MessageReceived(BMessage *message)
 				MoveRow(row,1);
 			return;
 		}
-		case 'mvDl': {
-			int32	row	= -1;
-			message->FindInt32("row",&row);
-			if (row >= 0)
-				DeleteRow(row);
+		case 'mvDl':
+			DeleteSelectedRows();
 			return;
-		}
 		case 'mvAF': {
 			const char	*field	= NULL;
 			int32		type	= 0;
