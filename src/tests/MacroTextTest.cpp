@@ -1601,3 +1601,41 @@ void MacroTextTest::DeleteSelectedRowsSkipsDescendantsOfAnotherSelectedRow(void)
 	((BMessage*)result->ItemAt(0))->FindString("Command::Name",&name);
 	CPPUNIT_ASSERT(BString("Move") == name);
 }
+
+
+void MacroTextTest::AddNamedFieldAddsCustomFieldToGenericBlock(void)
+{
+	// a generic block (no schema - see MacroText.h) still needs a way to
+	// grow a brand new, user-named field (user report, forward-looking:
+	// e.g. UML-specific node attributes later) - AddNamedField() is the
+	// part of that reachable without a modal dialog (the freeform "+ Feld
+	// hinzufügen" flow prompts for the name via InputRequest first, see
+	// MacroOutlineView::MessageReceived()'s 'mvFT' case)
+	BMessage	container;
+	container.AddString("name","Priority");
+
+	BMessage	changeValue;
+	changeValue.AddString("Command::Name","ChangeValue");
+	changeValue.AddMessage("valueContainer",&container);
+
+	BList	commands;
+	commands.AddItem(&changeValue);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetCommands(&commands);
+
+	MacroPath	blockPath;
+	MacroPathStep	step; step.field = "valueContainer"; step.index = 0;
+	blockPath.push_back(step);
+	view.AddNamedField(0,blockPath,"umlStereotype",B_STRING_TYPE);
+
+	BList		*result	= view.Commands();
+	BMessage	block;
+	((BMessage*)result->ItemAt(0))->FindMessage("valueContainer",&block);
+	const char	*existingName	= NULL;
+	block.FindString("name",&existingName);
+	CPPUNIT_ASSERT(BString("Priority") == existingName);	// untouched
+	const char	*added	= NULL;
+	CPPUNIT_ASSERT(block.FindString("umlStereotype",&added) == B_OK);
+	CPPUNIT_ASSERT(BString("") == added);	// zero value, ready to edit
+}

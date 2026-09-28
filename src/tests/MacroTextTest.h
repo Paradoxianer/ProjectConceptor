@@ -52,6 +52,7 @@ public:
 	void CalculatedNodeIdBindsAsInt32NotFloat(void);
 	void DeleteSelectedRowsRemovesOnlyChosenSiblings(void);
 	void DeleteSelectedRowsSkipsDescendantsOfAnotherSelectedRow(void);
+	void AddNamedFieldAddsCustomFieldToGenericBlock(void);
 	void MoveCommandReparentsIntoAnotherContainer(void);
 	void MoveCommandPromotesToTopLevel(void);
 	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
@@ -95,6 +96,7 @@ public:
 	CPPUNIT_TEST(CalculatedNodeIdBindsAsInt32NotFloat);
 	CPPUNIT_TEST(DeleteSelectedRowsRemovesOnlyChosenSiblings);
 	CPPUNIT_TEST(DeleteSelectedRowsSkipsDescendantsOfAnotherSelectedRow);
+	CPPUNIT_TEST(AddNamedFieldAddsCustomFieldToGenericBlock);
 	CPPUNIT_TEST(MoveCommandReparentsIntoAnotherContainer);
 	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
 	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);

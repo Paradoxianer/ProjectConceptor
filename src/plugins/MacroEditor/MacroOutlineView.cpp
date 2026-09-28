@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "InputRequest.h"
 #include "MacroEditor.h"
 #include "MacroText.h"
 #include "PCommand.h"
@@ -617,6 +618,15 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 				kRowAddField,topLevelIndex,containerPath,"",-1,B_ANY_TYPE,false,schemaCommand,-1);
 			AppendUnder(addRow,superitem);
 		}
+	} else {
+		// a generic block/chip has no schema to offer field names from,
+		// but a user-named custom field is still meaningful there (user
+		// report, forward-looking - see ShowFreeformAddFieldMenu()) -
+		// command==NULL on this row is exactly what tells
+		// ShowAddFieldMenu() which of the two flows to open
+		MacroRowItem	*addRow	= new MacroRowItem(B_TRANSLATE("+ Feld hinzufügen"),level,true,
+			kRowAddField,topLevelIndex,containerPath,"",-1,B_ANY_TYPE,false,NULL,-1);
+		AppendUnder(addRow,superitem);
 	}
 }
 
@@ -713,11 +723,68 @@ void MacroOutlineView::ToggleBoolField(int32 rowIndex)
 }
 
 
+/** Every field/pathField+pathIndex pair topLevelIndex/path expands to on a
+ * drag/add-field message - the write side of ReadFieldTargetMessage(). One
+ * spelling of this, shared by every place that builds such a message
+ * ('mvAF'/'mvFT' menu items here, InitiateDrag()'s own move message). */
+static void AddFieldTargetFields(BMessage *msg, int32 topLevelIndex, const MacroPath &path)
+{
+	msg->AddInt32("topLevel",topLevelIndex);
+	for (size_t s = 0; s < path.size(); s++) {
+		msg->AddString("pathField",path[s].field);
+		msg->AddInt32("pathIndex",path[s].index);
+	}
+}
+
+
+/** The read side of AddFieldTargetFields() - topLevel/path back out of a
+ * message 'mvAF'/'mvFT' built. */
+static int32 ReadFieldTargetMessage(BMessage *message, MacroPath *outPath)
+{
+	int32	topLevel	= 0;
+	message->FindInt32("topLevel",&topLevel);
+	BString	pathField;
+	int32	pathIndex;
+	for (int32 i = 0; message->FindString("pathField",i,&pathField) == B_OK; i++) {
+		message->FindInt32("pathIndex",i,&pathIndex);
+		MacroPathStep	step; step.field = pathField; step.index = pathIndex;
+		outPath->push_back(step);
+	}
+	return topLevel;
+}
+
+
+void MacroOutlineView::AddNamedField(int32 topLevel, const MacroPath &path,
+	const char *field, type_code type)
+{
+	BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,topLevel,path);
+	if (strcmp(field,"included_node") == 0) {
+		BMessage	*proto	= BuildInsertPrototype();
+		BMessage	node;
+		proto->FindMessage("included_node",&node);
+		int32	newId	= HighestReferencedId(&fCommands)+1;
+		if (newId < 1)
+			newId	= 1;
+		node.RemoveName("this");
+		node.AddInt32("this",newId);
+		owner.AddMessage(field,&node);
+		delete proto;
+	} else
+		AddZeroValue(&owner,field,type);
+	WriteContainer(&fCommands,topLevel,path,owner);
+	RebuildAllRows();
+	if (fEditor != NULL)
+		fEditor->CommitOutlineChange();
+}
+
+
 void MacroOutlineView::ShowAddFieldMenu(BPoint screenWhere, int32 topLevelIndex,
 	const MacroPath &path, PCommand *command)
 {
-	if (command == NULL)
+	if (command == NULL) {
+		ShowFreeformAddFieldMenu(screenWhere,topLevelIndex,path);
 		return;
+	}
 	int32				propCount	= 0;
 	const property_info	*props	= command->PropertyInfo(&propCount);
 	BPopUpMenu	*menu	= new BPopUpMenu("addField",false,false);
@@ -750,14 +817,39 @@ void MacroOutlineView::ShowAddFieldMenu(BPoint screenWhere, int32 topLevelIndex,
 				BMessage	*msg	= new BMessage('mvAF');
 				msg->AddString("field",fieldName);
 				msg->AddInt32("type",(int32)type);
-				msg->AddInt32("topLevel",topLevelIndex);
-				for (size_t s = 0; s < path.size(); s++) {
-					msg->AddString("pathField",path[s].field);
-					msg->AddInt32("pathIndex",path[s].index);
-				}
+				AddFieldTargetFields(msg,topLevelIndex,path);
 				menu->AddItem(new BMenuItem(label.String(),msg));
 			}
 		}
+	}
+	menu->SetTargetForItems(this);
+	menu->Go(screenWhere,true,true,true);
+}
+
+
+void MacroOutlineView::ShowFreeformAddFieldMenu(BPoint screenWhere, int32 topLevelIndex,
+	const MacroPath &path)
+{
+	// a generic block (~valueContainer, an included_node's own Node::Data,
+	// ...) has no schema (see MacroText.h) to offer field names from - the
+	// type is still a fixed, safe choice (only the types FormatFieldValue()/
+	// ParseFieldValue() actually round-trip), but the name is typed in
+	// (see MessageReceived()'s 'mvFT' case) - forward-looking (user report):
+	// today's "add a custom attribute" tool is AddAttribute, but a node's
+	// own data being free-form BMessage content already meant this was
+	// always technically possible, just not from inside the tree itself.
+	static const struct { const char *name; type_code type; } kTypes[] = {
+		{ "bool", B_BOOL_TYPE }, { "int8", B_INT8_TYPE }, { "int16", B_INT16_TYPE },
+		{ "int32", B_INT32_TYPE }, { "int64", B_INT64_TYPE }, { "float", B_FLOAT_TYPE },
+		{ "double", B_DOUBLE_TYPE }, { "string", B_STRING_TYPE },
+		{ "point", B_POINT_TYPE }, { "rect", B_RECT_TYPE },
+	};
+	BPopUpMenu	*menu	= new BPopUpMenu("addFreeformField",false,false);
+	for (size_t i = 0; i < sizeof(kTypes)/sizeof(kTypes[0]); i++) {
+		BMessage	*msg	= new BMessage('mvFT');
+		msg->AddInt32("type",(int32)kTypes[i].type);
+		AddFieldTargetFields(msg,topLevelIndex,path);
+		menu->AddItem(new BMenuItem(kTypes[i].name,msg));
 	}
 	menu->SetTargetForItems(this);
 	menu->Go(screenWhere,true,true,true);
@@ -1262,38 +1354,32 @@ void MacroOutlineView::MessageReceived(BMessage *message)
 		case 'mvAF': {
 			const char	*field	= NULL;
 			int32		type	= 0;
-			int32		topLevel	= 0;
-			message->FindString("field",&field);
 			message->FindInt32("type",&type);
-			message->FindInt32("topLevel",&topLevel);
 			MacroPath	path;
-			BString	pathField;
-			int32	pathIndex;
-			for (int32 i = 0; message->FindString("pathField",i,&pathField) == B_OK; i++) {
-				message->FindInt32("pathIndex",i,&pathIndex);
-				MacroPathStep	step; step.field = pathField; step.index = pathIndex;
-				path.push_back(step);
-			}
-			if (field != NULL) {
-				BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,topLevel,path);
-				if (strcmp(field,"included_node") == 0) {
-					BMessage	*proto	= BuildInsertPrototype();
-					BMessage	node;
-					proto->FindMessage("included_node",&node);
-					int32	newId	= HighestReferencedId(&fCommands)+1;
-					if (newId < 1)
-						newId	= 1;
-					node.RemoveName("this");
-					node.AddInt32("this",newId);
-					owner.AddMessage(field,&node);
-					delete proto;
-				} else
-					AddZeroValue(&owner,field,(type_code)type);
-				WriteContainer(&fCommands,topLevel,path,owner);
-				RebuildAllRows();
-				if (fEditor != NULL)
-					fEditor->CommitOutlineChange();
-			}
+			int32		topLevel	= ReadFieldTargetMessage(message,&path);
+			if (message->FindString("field",&field) == B_OK)
+				AddNamedField(topLevel,path,field,(type_code)type);
+			return;
+		}
+		case 'mvFT': {
+			// freeform type picked (a generic block's own "+ Feld
+			// hinzufügen" - see ShowAddFieldMenu()) - still needs a name,
+			// which has no fixed list to offer here (no schema - see
+			// MacroText.h), so it's typed in, same as renaming a macro
+			int32		type	= 0;
+			MacroPath	path;
+			int32		topLevel	= ReadFieldTargetMessage(message,&path);
+			message->FindInt32("type",&type);
+			InputRequest	*request	= new InputRequest(B_TRANSLATE("Add field"),
+				B_TRANSLATE("Name"),"",B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
+			char	*input		= NULL;
+			bool	accepted	= (request->Go(&input) < 1) && (input != NULL) && (input[0] != '\0');
+			BString	name(accepted ? input : "");
+			delete[] input;
+			request->Lock();
+			request->Quit();
+			if (accepted)
+				AddNamedField(topLevel,path,name.String(),(type_code)type);
 			return;
 		}
 		default:

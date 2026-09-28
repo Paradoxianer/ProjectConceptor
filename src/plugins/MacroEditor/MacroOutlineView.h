@@ -148,11 +148,26 @@ private:
 								uint32 level, PCommand *schemaCommand,
 								const std::set<BString> &expandedKeys);
 			/** Shows the "+ Feld hinzufügen" popup for the command/block at
-			 * `containerPath` (topLevelIndex + path), offering whichever of
-			 * its schema's fields aren't already exhausted - a repeatable
-			 * one (e.g. Select's "node") stays offered after being added. */
+			 * `containerPath` (topLevelIndex + path). `command` NULL (a
+			 * generic block/chip, no schema) opens ShowFreeformAddFieldMenu()
+			 * instead of the schema-driven list below. */
 			void			ShowAddFieldMenu(BPoint screenWhere, int32 topLevelIndex,
 								const MacroPath &path, PCommand *command);
+			/** A generic block/chip has no schema to offer field names
+			 * from (see MacroText.h) - offers a fixed type choice instead
+			 * (every type FormatFieldValue()/ParseFieldValue() round-trip),
+			 * the field's own name typed in afterward (see
+			 * MessageReceived()'s 'mvFT' case). Reached only via
+			 * ShowAddFieldMenu()'s `command == NULL` branch. */
+			void			ShowFreeformAddFieldMenu(BPoint screenWhere, int32 topLevelIndex,
+								const MacroPath &path);
+			/** Adds a fresh `field` of `type` (a per-type zero value, or -
+			 * for "field"=="included_node" - a renumbered node prototype,
+			 * see BuildInsertPrototype()) to the container at
+			 * `topLevel`/`path`. Shared by the schema-driven 'mvAF' menu
+			 * items and the freeform 'mvFT' flow's typed-in name. */
+			void			AddNamedField(int32 topLevel, const MacroPath &path,
+								const char *field, type_code type);
 			/** Deletes the field/chip/block/subcommand/command row at
 			 * `rowIndex` (or, if it's a top-level command, that whole
 			 * macro entry). */
