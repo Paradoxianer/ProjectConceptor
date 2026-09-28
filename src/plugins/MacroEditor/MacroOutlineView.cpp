@@ -138,6 +138,29 @@ private:
 };
 
 
+/** A command row's own "chip" shape - a ribbon with a pointed notch cut
+ * into both ends ("<===>", the user's own suggestion) - visually distinct
+ * from a data chip's rounded pill, so every row with its own expand
+ * triangle (a command or a data chip) has an unmistakable shape that
+ * triangle belongs to, instead of the triangle floating next to plain
+ * text. */
+static void DrawChevronShape(BView *owner, BRect frame, rgb_color fill)
+{
+	float	notch	= frame.Height()/2.2f;
+	if (notch > 11)
+		notch	= 11;
+	BPoint	points[6];
+	points[0]	= BPoint(frame.left,(frame.top+frame.bottom)/2);
+	points[1]	= BPoint(frame.left+notch,frame.top);
+	points[2]	= BPoint(frame.right-notch,frame.top);
+	points[3]	= BPoint(frame.right,(frame.top+frame.bottom)/2);
+	points[4]	= BPoint(frame.right-notch,frame.bottom);
+	points[5]	= BPoint(frame.left+notch,frame.bottom);
+	owner->SetHighColor(fill);
+	owner->FillPolygon(points,6);
+}
+
+
 void MacroRowItem::DrawItem(BView *owner, BRect frame, bool complete)
 {
 	rgb_color	background	= IsSelected() ? ui_color(B_LIST_SELECTED_BACKGROUND_COLOR)
@@ -164,10 +187,22 @@ void MacroRowItem::DrawItem(BView *owner, BRect frame, bool complete)
 		return;
 	}
 
-	BFont	font(be_plain_font);
-	if (fKind == kRowCommand)
+	if (fKind == kRowCommand) {
+		rgb_color	fill	= {237,214,168,255};
+		float	width	= owner->StringWidth(Text());
+		BRect	shape(frame.left+2,frame.top+1,frame.left+26+width,frame.bottom-1);
+		DrawChevronShape(owner,shape,fill);
+		BFont	font(be_plain_font);
 		font.SetFace(B_BOLD_FACE);
-	else if (fKind == kRowBlock)
+		owner->SetFont(&font);
+		owner->SetHighColor(textColor);
+		owner->DrawString(Text(),BPoint(shape.left+13,baseline));
+		owner->SetFont(be_plain_font);
+		return;
+	}
+
+	BFont	font(be_plain_font);
+	if (fKind == kRowBlock)
 		font.SetFace(B_ITALIC_FACE);
 	owner->SetFont(&font);
 
@@ -430,7 +465,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 	while (container->GetInfo(B_ANY_TYPE,i,&fieldName,&type,&count) == B_OK) {
 		BString	fn(fieldName);
 		i++;
-		if ((fn == "Command::Name") || (fn == "PCommand::bindings") ||
+		if ((fn == "Command::Name") || (fn == "PCommand::bindings") || (fn == "this") ||
 				(commandName != NULL && fn == undoFieldName) ||
 				(boundNames.find(fn) != boundNames.end()))
 			continue;
@@ -605,10 +640,22 @@ void MacroOutlineView::ShowAddFieldMenu(BPoint screenWhere, int32 topLevelIndex,
 					continue;
 				type_code	type	= props[p].ctypes[c].pairs[f].type;
 				// no safe generic zero value for an arbitrary nested block
-				// (no schema for its own content - see MacroText.h) except
-				// "included_node", which gets a real node prototype
-				if ((type == B_MESSAGE_TYPE) && (strcmp(fieldName,"included_node") != 0))
-					continue;
+				// (no schema for its own content - see MacroText.h). Every
+				// command with a "node" field declares "included_node" too
+				// (Indexer bookkeeping - it carries the referenced node's
+				// data so its @id resolves at replay time, never read by
+				// the command's own Do() - see Insert.h's kInsertProperties
+				// comment), but "Insert" is the one command actually meant
+				// to introduce a new node by hand (user report/single
+				// source of truth) - offering it here on e.g. AddAttribute
+				// or Select would let a macro claim to "insert" a node
+				// nobody would ever expect it to.
+				if (type == B_MESSAGE_TYPE) {
+					bool	isInsertNode	= (strcmp(fieldName,"included_node") == 0)
+						&& (strcmp(command->Name(),"Insert") == 0);
+					if (!isInsertNode)
+						continue;
+				}
 				BString	label(fieldName);
 				label	<< " (" << TypeDisplayName(type) << ")";
 				BMessage	*msg	= new BMessage('mvAF');
