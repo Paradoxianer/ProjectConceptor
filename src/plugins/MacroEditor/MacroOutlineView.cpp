@@ -105,6 +105,7 @@ public:
 	type_code			FieldType(void) const {return fFieldType;}
 	bool				AllowBinding(void) const {return fAllowBinding;}
 	PCommand*			Command(void) const {return fCommand;}
+	int32				ValueStart(void) const {return fValueStart;}
 
 	/** The path this row's own children (if any) are rooted on - itself,
 	 * as a container: containerPath plus this row's own field slot. Only
@@ -287,6 +288,39 @@ static const char* TypeDisplayName(type_code type)
 		case B_MESSAGE_TYPE:	return "block";
 		default:				return "raw";
 	}
+}
+
+
+/** How a field's value looks for display in the tree and for the inline
+ * overlay's starting text - FormatFieldValue() (the DSL's own quoted/
+ * suffixed syntax) for everything except strings, which show/edit as their
+ * own plain text with no quotes to type or strip (user report: quoting a
+ * string by hand felt like DSL leftovers, not a real text field). */
+static void FormatValueForEditing(BMessage *msg, const char *field, type_code storedType,
+	int32 index, BString *out)
+{
+	if (storedType == B_STRING_TYPE) {
+		const char	*value	= NULL;
+		msg->FindString(field,index,&value);
+		*out << (value ? value : "");
+		return;
+	}
+	FormatFieldValue(msg,field,storedType,index,out);
+}
+
+
+/** Pixel x where `item`'s own value text starts within `frame` - matches
+ * MacroRowItem::DrawItem()'s split exactly (same font, same "label" prefix
+ * length), so the overlay lands exactly on top of the value it replaces,
+ * and a click past that x is unambiguously "on the value" (see MouseDown()). */
+static float ValuePixelX(MacroRowItem *item, BRect frame)
+{
+	if (item->ValueStart() <= 0)
+		return frame.left+2;
+	BString	label(item->Text());
+	label.Truncate(item->ValueStart());
+	BFont	font(be_plain_font);
+	return frame.left+2+font.StringWidth(label.String());
 }
 
 
@@ -546,7 +580,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 			BString	label(fieldName);
 			label	<< ": ";
 			int32	valueStart	= label.Length();
-			FormatFieldValue(container,fieldName,type,j,&label);
+			FormatValueForEditing(container,fieldName,type,j,&label);
 			MacroRowItem	*row	= new MacroRowItem(label.String(),level,true,kRowField,
 				topLevelIndex,containerPath,fieldName,j,schemaType,(schemaCommand != NULL),
 				NULL,valueStart);
@@ -587,13 +621,22 @@ void MacroOutlineView::CloseOverlay(bool commit)
 
 	BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,item->TopLevelIndex(),item->ContainerPath());
 	owner.RemoveData(item->FieldName().String(),item->FieldIndex());
-	BString	error;
-	if (ParseFieldValue(&owner,item->FieldName().String(),item->FieldType(),text,
-			item->AllowBinding(),&error) != B_OK) {
-		// invalid input - row keeps its old value, nothing is written back
-		if (fEditor != NULL)
-			fEditor->ShowOutlineError(error.String());
-		return;
+	// a string field takes the overlay's text verbatim, no quotes to type
+	// or strip - matches how it was shown (see FormatValueForEditing()).
+	// Still checked for "$name" first, same as every other field, so a
+	// string field stays bindable.
+	bool	isBoundLiteral	= item->AllowBinding() && text.StartsWith("$");
+	if ((item->FieldType() == B_STRING_TYPE) && !isBoundLiteral) {
+		owner.AddString(item->FieldName().String(),text);
+	} else {
+		BString	error;
+		if (ParseFieldValue(&owner,item->FieldName().String(),item->FieldType(),text,
+				item->AllowBinding(),&error) != B_OK) {
+			// invalid input - row keeps its old value, nothing is written back
+			if (fEditor != NULL)
+				fEditor->ShowOutlineError(error.String());
+			return;
+		}
 	}
 	WriteContainer(&fCommands,item->TopLevelIndex(),item->ContainerPath(),owner);
 	RebuildAllRows();
@@ -618,9 +661,13 @@ void MacroOutlineView::BeginOverlayEdit(int32 rowIndex)
 	int32		storedCount	= 0;
 	owner.GetInfo(item->FieldName().String(),&storedType,&storedCount);
 	BString	text;
-	FormatFieldValue(&owner,item->FieldName().String(),storedType,item->FieldIndex(),&text);
+	FormatValueForEditing(&owner,item->FieldName().String(),storedType,item->FieldIndex(),&text);
 
+	// starts exactly where the value is already drawn (user report: it
+	// used to span the whole row, starting at the label instead of the
+	// value it replaces)
 	BRect	frame	= ItemFrame(rowIndex);
+	frame.left	= ValuePixelX(item,frame);
 	fOverlay	= new MacroOverlayControl(frame,text.String(),this);
 	AddChild(fOverlay);
 	fOverlayRow	= rowIndex;
@@ -869,12 +916,9 @@ void MacroOutlineView::DropCommandSnippet(int32 targetRow, BPoint where,
 
 void MacroOutlineView::MouseDown(BPoint where)
 {
-	int32	clicks	= 1;
 	uint32	buttons	= 0;
-	if ((Window() != NULL) && (Window()->CurrentMessage() != NULL)) {
-		Window()->CurrentMessage()->FindInt32("clicks",&clicks);
+	if ((Window() != NULL) && (Window()->CurrentMessage() != NULL))
 		Window()->CurrentMessage()->FindInt32("buttons",(int32*)&buttons);
-	}
 	int32	index	= IndexOf(where);
 	MacroRowItem	*item	= (index >= 0) ? (MacroRowItem*)ItemAt(index) : NULL;
 	CloseOverlay(true);
@@ -919,10 +963,15 @@ void MacroOutlineView::MouseDown(BPoint where)
 	BOutlineListView::MouseDown(where);
 
 	if ((item != NULL) && (item->Kind() == kRowField)) {
-		if (item->FieldType() == B_BOOL_TYPE)
+		if (item->FieldType() == B_BOOL_TYPE) {
 			ToggleBoolField(index);
-		else if (clicks == 2)
+		} else if (where.x >= ValuePixelX(item,ItemFrame(index))) {
+			// one click, right on the value itself, starts editing it in
+			// place (user report: double-click-anywhere-on-the-row felt
+			// disconnected from "edit this value" - clicking the label
+			// part still just selects the row, same as any other row)
 			BeginOverlayEdit(index);
+		}
 	}
 }
 
