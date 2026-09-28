@@ -56,6 +56,8 @@ public:
 	void AddFieldMenuOffersRepeatableFieldAgain(void);
 	void MoveCommandRowsMovesSeveralTogetherInOrder(void);
 	void MoveCommandRowsOntoContainerAppendsAtEnd(void);
+	void AddNodeReferenceWiresChipIdIntoTargetCommand(void);
+	void AddNodeReferenceRefusesCommandWithNoNodeField(void);
 	void MoveCommandReparentsIntoAnotherContainer(void);
 	void MoveCommandPromotesToTopLevel(void);
 	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
@@ -103,6 +105,8 @@ public:
 	CPPUNIT_TEST(AddFieldMenuOffersRepeatableFieldAgain);
 	CPPUNIT_TEST(MoveCommandRowsMovesSeveralTogetherInOrder);
 	CPPUNIT_TEST(MoveCommandRowsOntoContainerAppendsAtEnd);
+	CPPUNIT_TEST(AddNodeReferenceWiresChipIdIntoTargetCommand);
+	CPPUNIT_TEST(AddNodeReferenceRefusesCommandWithNoNodeField);
 	CPPUNIT_TEST(MoveCommandReparentsIntoAnotherContainer);
 	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
 	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);

@@ -26,6 +26,12 @@ extern const char* const kCommandSnippetDragMarker;
  * command row being repositioned (as opposed to a brand new one coming in
  * from the reference sidebar) - see MoveCommandRow(). */
 extern const char* const kCommandMoveDragMarker;
+/** Marker on the drag message InitiateDrag() builds for a data chip (an
+ * included_node/included_connection's own "this=N" id) being dragged onto
+ * another command to reference it - see AddNodeReference(). The chip
+ * itself never moves or gets removed, only a new "node=@N" field is added
+ * to whatever it's dropped on. */
+extern const char* const kNodeReferenceDragMarker;
 
 /** One {field name, repeat index} step locating a BMessage inside another -
  * see MacroOutlineView.cpp's path-based read/write/delete. A row's own
@@ -92,6 +98,12 @@ public:
 	virtual	bool			InitiateDrag(BPoint where, int32 index, bool wasSelected);
 
 			void			SetEditor(MacroEditor *editor) {fEditor = editor;};
+			/** A real PCommandManager for tests to exercise schema-dependent
+			 * behavior against (AddNodeReference()'s refusal, the add-field
+			 * menu's contents, ...), where a real MacroEditor/PDocument
+			 * doesn't exist to reach one through - see Registry(). Not used
+			 * outside tests; normal operation always goes through fEditor. */
+			void			SetRegistryForTests(PCommandManager *registry) {fTestRegistry = registry;};
 
 			/** Rebuilds every row from `commands` (BList of BMessage*, the
 			 * same shape as a macro's "Macro::Commmand" entries) - takes
@@ -169,6 +181,16 @@ private:
 			 * items and the freeform 'mvFT' flow's typed-in name. */
 			void			AddNamedField(int32 topLevel, const MacroPath &path,
 								const char *field, type_code type);
+			/** Adds a new "node"=@nodeId reference field to the command at
+			 * `topLevel`/`selfPath` (its own SelfPath() - empty for a
+			 * top-level command) - a data chip dragged onto that command
+			 * (see InitiateDrag()/kNodeReferenceDragMarker), so e.g.
+			 * dragging Insert's own node chip onto a Select adds a
+			 * "node=@<that id>" field to it, wiring the two together
+			 * without typing the id by hand. Refuses (beeps) if the
+			 * command's own schema doesn't declare a "node" field at all -
+			 * nothing to wire up there. */
+			void			AddNodeReference(int32 topLevel, const MacroPath &selfPath, int32 nodeId);
 			/** Deletes the field/chip/block/subcommand/command row at
 			 * `rowIndex` (or, if it's a top-level command, that whole
 			 * macro entry). */
@@ -227,11 +249,18 @@ private:
 			 * already accounts for every source's own removal shifting
 			 * other indices - see their own comments). */
 			void			InsertCommandsAt(std::vector<BMessage> &commands, const MacroTargetPosition &pos);
+			/** fTestRegistry if a test set one (see SetRegistryForTests()),
+			 * else fEditor->CommandManagerForOutline() - every command-
+			 * schema lookup in this file goes through this, not fEditor
+			 * directly. */
+			PCommandManager*	Registry(void);
 
 			MacroEditor		*fEditor;
 			/** Working copy of the selected macro's "Macro::Commmand" list -
 			 * owns every BMessage* in it. */
 			BList			fCommands;
+			/** See SetRegistryForTests(). NULL outside tests. */
+			PCommandManager	*fTestRegistry;
 
 			BTextControl	*fOverlay;
 			/** Row the open overlay belongs to, -1 if none is open. */

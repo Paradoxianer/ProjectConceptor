@@ -1751,3 +1751,54 @@ void MacroTextTest::MoveCommandRowsOntoContainerAppendsAtEnd(void)
 	CPPUNIT_ASSERT_EQUAL(1.0f,dxs[1]);	// appended, in order
 	CPPUNIT_ASSERT_EQUAL(2.0f,dxs[2]);
 }
+
+
+void MacroTextTest::AddNodeReferenceWiresChipIdIntoTargetCommand(void)
+{
+	// dragging Insert's own node chip onto Select should add a
+	// "node=@<that id>" field to Select (user report)
+	BMessage	*insert	= BuildInsertPrototype();	// this=1
+	BMessage	select;
+	select.AddString("Command::Name","Select");
+
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BList	commands;
+	commands.AddItem(insert);
+	commands.AddItem(&select);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetRegistryForTests(doc->GetCommandManager());
+	view.SetCommands(&commands);
+
+	MacroPath	empty;
+	view.AddNodeReference(1,empty,1);
+
+	BList		*result	= view.Commands();
+	BMessage	*newSelect	= (BMessage*)result->ItemAt(1);
+	int32		node	= 0;
+	CPPUNIT_ASSERT(newSelect->FindInt32("node",&node) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)1,node);
+}
+
+
+void MacroTextTest::AddNodeReferenceRefusesCommandWithNoNodeField(void)
+{
+	BMessage	sleep;
+	sleep.AddString("Command::Name","Sleep");
+	sleep.AddInt32("milliseconds",100);
+
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BList	commands;
+	commands.AddItem(&sleep);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetRegistryForTests(doc->GetCommandManager());
+	view.SetCommands(&commands);
+
+	MacroPath	empty;
+	view.AddNodeReference(0,empty,1);
+
+	BList		*result	= view.Commands();
+	int32		node	= 0;
+	CPPUNIT_ASSERT(((BMessage*)result->ItemAt(0))->FindInt32("node",&node) != B_OK);
+}

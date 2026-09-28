@@ -28,6 +28,7 @@
 
 const char* const kCommandSnippetDragMarker	= "pc:command_snippet";
 const char* const kCommandMoveDragMarker		= "pc:command_move";
+const char* const kNodeReferenceDragMarker		= "pc:node_reference";
 
 // Commands that hold their own children as "PCommand::subPCommand" -
 // dropping a snippet onto one of these nests it, dropping onto anything
@@ -372,8 +373,16 @@ private:
 
 MacroOutlineView::MacroOutlineView(BRect frame, const char *name, uint32 resizingMode)
 	:BOutlineListView(frame,name,B_MULTIPLE_SELECTION_LIST,resizingMode),
-		fEditor(NULL), fOverlay(NULL), fOverlayRow(-1)
+		fEditor(NULL), fTestRegistry(NULL), fOverlay(NULL), fOverlayRow(-1)
 {
+}
+
+
+PCommandManager* MacroOutlineView::Registry(void)
+{
+	if (fTestRegistry != NULL)
+		return fTestRegistry;
+	return (fEditor != NULL) ? fEditor->CommandManagerForOutline() : NULL;
 }
 
 
@@ -478,7 +487,7 @@ void MacroOutlineView::RebuildAllRows(void)
 	}
 
 	MakeEmpty();
-	PCommandManager	*registry	= (fEditor != NULL) ? fEditor->CommandManagerForOutline() : NULL;
+	PCommandManager	*registry	= Registry();
 
 	for (int32 i = 0; i < fCommands.CountItems(); i++) {
 		BMessage	*cmd	= (BMessage*)fCommands.ItemAt(i);
@@ -554,7 +563,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 					continue;
 				const char	*childName	= NULL;
 				child.FindString("Command::Name",&childName);
-				PCommandManager	*registry	= (fEditor != NULL) ? fEditor->CommandManagerForOutline() : NULL;
+				PCommandManager	*registry	= Registry();
 				PCommand	*childCommand	= (registry != NULL)
 					? registry->GetPCommand((char*)(childName ? childName : "")) : NULL;
 				MacroPath	childPath(containerPath);
@@ -772,6 +781,32 @@ void MacroOutlineView::AddNamedField(int32 topLevel, const MacroPath &path,
 	} else
 		AddZeroValue(&owner,field,type);
 	WriteContainer(&fCommands,topLevel,path,owner);
+	RebuildAllRows();
+	if (fEditor != NULL)
+		fEditor->CommitOutlineChange();
+}
+
+
+void MacroOutlineView::AddNodeReference(int32 topLevel, const MacroPath &selfPath, int32 nodeId)
+{
+	BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,topLevel,selfPath);
+	const char	*commandName	= NULL;
+	owner.FindString("Command::Name",&commandName);
+	PCommandManager	*registry	= Registry();
+	PCommand	*command	= (registry != NULL)
+		? registry->GetPCommand((char*)(commandName ? commandName : "")) : NULL;
+	type_code	declaredType	= B_ANY_TYPE;
+	if ((command == NULL) || !FindFieldType(command,"node",&declaredType) || (declaredType != B_POINTER_TYPE)) {
+		// no "node" field to wire up on this command at all - the DSL/
+		// schema is the single source of truth on that (see AddAttribute's
+		// own comment on why "included_node" alone isn't enough of a
+		// signal either), so this just refuses rather than adding a field
+		// the command's own Do() would never read
+		beep();
+		return;
+	}
+	owner.AddInt32("node",nodeId);
+	WriteContainer(&fCommands,topLevel,selfPath,owner);
 	RebuildAllRows();
 	if (fEditor != NULL)
 		fEditor->CommitOutlineChange();
@@ -1142,7 +1177,7 @@ void MacroOutlineView::InsertCommandsAt(std::vector<BMessage> &commands, const M
 void MacroOutlineView::DropCommandSnippet(int32 targetRow, BPoint where,
 	const char *snippet, int32 length)
 {
-	PCommandManager	*registry	= (fEditor != NULL) ? fEditor->CommandManagerForOutline() : NULL;
+	PCommandManager	*registry	= Registry();
 	if (registry == NULL)
 		return;
 	BString	text(snippet,length);
@@ -1454,7 +1489,27 @@ void MacroOutlineView::SelectionChanged(void)
 bool MacroOutlineView::InitiateDrag(BPoint where, int32 index, bool wasSelected)
 {
 	MacroRowItem	*item	= (MacroRowItem*)ItemAt(index);
-	if ((item == NULL) || (item->Kind() != kRowCommand))
+	if (item == NULL)
+		return false;
+
+	if (item->Kind() == kRowChip) {
+		// a node/connection chip dragged onto another command wires that
+		// command's own "node" field to it (user report) - the chip
+		// itself never moves, only its own id travels
+		CloseOverlay(true);
+		BMessage	chipData	= MacroOutlineView_ResolveContainer(&fCommands,
+			item->TopLevelIndex(),item->SelfPath());
+		int32	nodeId	= 0;
+		if (chipData.FindInt32("this",&nodeId) != B_OK)
+			return false;
+		BMessage	drag(B_SIMPLE_DATA);
+		drag.AddBool(kNodeReferenceDragMarker,true);
+		drag.AddInt32("nodeId",nodeId);
+		DragMessage(&drag,ItemFrame(index));
+		return true;
+	}
+
+	if (item->Kind() != kRowCommand)
 		return false;
 	CloseOverlay(true);
 	BMessage	drag(B_SIMPLE_DATA);
@@ -1581,6 +1636,26 @@ void MacroOutlineView::MessageReceived(BMessage *message)
 			MoveCommandRow(sources[0].first,sources[0].second,target,dropPoint);
 		else
 			MoveCommandRows(sources,target,dropPoint);
+		return;
+	}
+
+	if (message->WasDropped() && message->HasBool(kNodeReferenceDragMarker)) {
+		int32	nodeId	= 0;
+		message->FindInt32("nodeId",&nodeId);
+		BPoint	dropPoint	= message->DropPoint();
+		ConvertFromScreen(&dropPoint);
+		int32	targetRow	= IndexOf(dropPoint);
+		MacroRowItem	*target	= ((targetRow >= 0) && (targetRow < FullListCountItems()))
+			? (MacroRowItem*)ItemAt(targetRow) : NULL;
+		// only a command's own row is a valid target - dropping on one of
+		// its fields/chips/blocks would be ambiguous about which command
+		// is actually meant (see the same restriction on "onto a
+		// container" drops elsewhere in this file)
+		if ((target == NULL) || (target->Kind() != kRowCommand)) {
+			beep();
+			return;
+		}
+		AddNodeReference(target->TopLevelIndex(),target->SelfPath(),nodeId);
 		return;
 	}
 
