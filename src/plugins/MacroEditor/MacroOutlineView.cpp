@@ -813,6 +813,19 @@ void MacroOutlineView::AddNodeReference(int32 topLevel, const MacroPath &selfPat
 }
 
 
+void MacroOutlineView::ReplaceNodeReferenceField(int32 topLevel, const MacroPath &containerPath,
+	const char *fieldName, int32 fieldIndex, int32 nodeId)
+{
+	BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,topLevel,containerPath);
+	owner.RemoveData(fieldName,fieldIndex);
+	owner.AddInt32(fieldName,nodeId);
+	WriteContainer(&fCommands,topLevel,containerPath,owner);
+	RebuildAllRows();
+	if (fEditor != NULL)
+		fEditor->CommitOutlineChange();
+}
+
+
 void MacroOutlineView::ShowAddFieldMenu(BPoint screenWhere, int32 topLevelIndex,
 	const MacroPath &path, PCommand *command)
 {
@@ -1647,10 +1660,18 @@ void MacroOutlineView::MessageReceived(BMessage *message)
 		int32	targetRow	= IndexOf(dropPoint);
 		MacroRowItem	*target	= ((targetRow >= 0) && (targetRow < FullListCountItems()))
 			? (MacroRowItem*)ItemAt(targetRow) : NULL;
-		// only a command's own row is a valid target - dropping on one of
-		// its fields/chips/blocks would be ambiguous about which command
-		// is actually meant (see the same restriction on "onto a
-		// container" drops elsewhere in this file)
+		if ((target != NULL) && (target->Kind() == kRowField)
+				&& (target->FieldType() == B_POINTER_TYPE)) {
+			// dropped directly onto an existing "node:"-shaped field - set
+			// that one instance's value instead of adding another
+			ReplaceNodeReferenceField(target->TopLevelIndex(),target->ContainerPath(),
+				target->FieldName().String(),target->FieldIndex(),nodeId);
+			return;
+		}
+		// otherwise only a command's own row is a valid target - dropping
+		// on one of its other fields/chips/blocks would be ambiguous about
+		// which command is actually meant (see the same restriction on
+		// "onto a container" drops elsewhere in this file)
 		if ((target == NULL) || (target->Kind() != kRowCommand)) {
 			beep();
 			return;

@@ -1802,3 +1802,32 @@ void MacroTextTest::AddNodeReferenceRefusesCommandWithNoNodeField(void)
 	int32		node	= 0;
 	CPPUNIT_ASSERT(((BMessage*)result->ItemAt(0))->FindInt32("node",&node) != B_OK);
 }
+
+
+void MacroTextTest::ReplaceNodeReferenceFieldOverwritesExistingValue(void)
+{
+	// dropped directly onto Select's own existing "node:" field row (not
+	// its header) - replaces that one instance instead of adding a second
+	BMessage	select;
+	select.AddString("Command::Name","Select");
+	select.AddInt32("node",1);
+
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BList	commands;
+	commands.AddItem(&select);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetRegistryForTests(doc->GetCommandManager());
+	view.SetCommands(&commands);
+
+	MacroPath	empty;
+	view.ReplaceNodeReferenceField(0,empty,"node",0,2);
+
+	BList		*result	= view.Commands();
+	BMessage	*newSelect	= (BMessage*)result->ItemAt(0);
+	int32		node	= 0;
+	CPPUNIT_ASSERT(newSelect->FindInt32("node",0,&node) == B_OK);
+	CPPUNIT_ASSERT_EQUAL((int32)2,node);		// overwritten, not appended
+	int32		second	= 0;
+	CPPUNIT_ASSERT(newSelect->FindInt32("node",1,&second) != B_OK);	// still one entry, not two
+}

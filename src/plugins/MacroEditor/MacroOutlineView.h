@@ -191,6 +191,15 @@ private:
 			 * command's own schema doesn't declare a "node" field at all -
 			 * nothing to wire up there. */
 			void			AddNodeReference(int32 topLevel, const MacroPath &selfPath, int32 nodeId);
+			/** Same drag, dropped directly onto an EXISTING field row
+			 * instead of the command's header - replaces that one field
+			 * instance's value in place (same remove-then-add idiom
+			 * CloseOverlay() uses for a normal edit) rather than adding a
+			 * new field next to it. No schema check needed here: the field
+			 * already passed AddNodeReference()'s check (or the add-field
+			 * menu's own type filter) to exist at all. */
+			void			ReplaceNodeReferenceField(int32 topLevel, const MacroPath &containerPath,
+								const char *fieldName, int32 fieldIndex, int32 nodeId);
 			/** Deletes the field/chip/block/subcommand/command row at
 			 * `rowIndex` (or, if it's a top-level command, that whole
 			 * macro entry). */

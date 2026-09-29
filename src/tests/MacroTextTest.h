@@ -58,6 +58,7 @@ public:
 	void MoveCommandRowsOntoContainerAppendsAtEnd(void);
 	void AddNodeReferenceWiresChipIdIntoTargetCommand(void);
 	void AddNodeReferenceRefusesCommandWithNoNodeField(void);
+	void ReplaceNodeReferenceFieldOverwritesExistingValue(void);
 	void MoveCommandReparentsIntoAnotherContainer(void);
 	void MoveCommandPromotesToTopLevel(void);
 	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
@@ -107,6 +108,7 @@ public:
 	CPPUNIT_TEST(MoveCommandRowsOntoContainerAppendsAtEnd);
 	CPPUNIT_TEST(AddNodeReferenceWiresChipIdIntoTargetCommand);
 	CPPUNIT_TEST(AddNodeReferenceRefusesCommandWithNoNodeField);
+	CPPUNIT_TEST(ReplaceNodeReferenceFieldOverwritesExistingValue);
 	CPPUNIT_TEST(MoveCommandReparentsIntoAnotherContainer);
 	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
 	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);
