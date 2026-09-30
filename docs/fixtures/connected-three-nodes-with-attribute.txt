@@ -1,0 +1,129 @@
+Insert
+  node=@1
+  ~included_node
+    this=1
+    what=class
+    Node::Frame=[100.0,100.0,200.0,180.0]
+    ~Node::Data
+      Node::name="Node A"
+    ~Node::Font
+      what=1716475001
+      Font::Encoding=0i8
+      Font::Face=64i8
+      Font::Family="Noto Sans"
+      Font::Flags=0
+      Font::Rotation=0.0
+      Font::Shear=90.0
+      Font::Size=12.0
+      Font::Spacing=2i8
+      Font::Style="Regular"
+      Font::Color=-4876433
+    ~Node::Pattern
+      FillColor=-4279144
+      BorderColor=-16777216
+      PenSize=1.0
+      DrawingMode=10i8
+      HighColor=-16777216
+      LowColor=-8355712
+      Pattern=raw:1346458702://////////8=
+
+Insert
+  node=@2
+  ~included_node
+    this=2
+    what=class
+    Node::Frame=[300.0,100.0,400.0,180.0]
+    ~Node::Data
+      Node::name="Node B"
+    ~Node::Font
+      what=1716475001
+      Font::Encoding=0i8
+      Font::Face=64i8
+      Font::Family="Noto Sans"
+      Font::Flags=0
+      Font::Rotation=0.0
+      Font::Shear=90.0
+      Font::Size=12.0
+      Font::Spacing=2i8
+      Font::Style="Regular"
+      Font::Color=-4876433
+    ~Node::Pattern
+      FillColor=-4279144
+      BorderColor=-16777216
+      PenSize=1.0
+      DrawingMode=10i8
+      HighColor=-16777216
+      LowColor=-8355712
+      Pattern=raw:1346458702://////////8=
+
+Insert
+  node=@3
+  ~included_node
+    this=3
+    what=class
+    Node::Frame=[500.0,100.0,600.0,180.0]
+    ~Node::Data
+      Node::name="Node C"
+    ~Node::Font
+      what=1716475001
+      Font::Encoding=0i8
+      Font::Face=64i8
+      Font::Family="Noto Sans"
+      Font::Flags=0
+      Font::Rotation=0.0
+      Font::Shear=90.0
+      Font::Size=12.0
+      Font::Spacing=2i8
+      Font::Style="Regular"
+      Font::Color=-4876433
+    ~Node::Pattern
+      FillColor=-4279144
+      BorderColor=-16777216
+      PenSize=1.0
+      DrawingMode=10i8
+      HighColor=-16777216
+      LowColor=-8355712
+      Pattern=raw:1346458702://////////8=
+
+# verbindet A->B - "this=4" ist die id der Verbindung selbst, Node::from/
+# Node::to referenzieren die schon eingefuegten Knoten ueber ihre eigenen
+# "this"-ids (siehe Indexer::DeIndexConnection - Klartext-Zahl, kein "@")
+Insert
+  node=@4
+  ~included_node
+    this=4
+    what=connection
+    Node::from=1
+    Node::to=2
+    Connection::type=1i8
+    Connection::arrows=1i8
+    ~Node::Pattern
+      FillColor=-16777216
+      PenSize=2.0
+
+# verbindet B->C
+Insert
+  node=@5
+  ~included_node
+    this=5
+    what=connection
+    Node::from=2
+    Node::to=3
+    Connection::type=1i8
+    Connection::arrows=1i8
+    ~Node::Pattern
+      FillColor=-16777216
+      PenSize=2.0
+
+Select
+  node=@1
+  node=@2
+  node=@3
+
+AddAttribute
+  Node::selected=true
+  ~valueContainer
+    name="Priority"
+    subgroup="Node::Data"
+    type=int32
+    newAttribute=1
