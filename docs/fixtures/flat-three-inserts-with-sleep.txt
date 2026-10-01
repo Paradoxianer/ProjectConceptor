@@ -1,0 +1,92 @@
+Insert
+  node=@1
+  ~included_node
+    this=1
+    what=class
+    Node::Frame=[100.0,100.0,200.0,180.0]
+    ~Node::Data
+      Node::name="Node A"
+    ~Node::Font
+      what=1716475001
+      Font::Encoding=0i8
+      Font::Face=64i8
+      Font::Family="Noto Sans"
+      Font::Flags=0
+      Font::Rotation=0.0
+      Font::Shear=90.0
+      Font::Size=12.0
+      Font::Spacing=2i8
+      Font::Style="Regular"
+      Font::Color=-4876433
+    ~Node::Pattern
+      FillColor=-4279144
+      BorderColor=-16777216
+      PenSize=1.0
+      DrawingMode=10i8
+      HighColor=-16777216
+      LowColor=-8355712
+      Pattern=raw:1346458702://////////8=
+
+Sleep
+  milliseconds=2000
+
+Insert
+  node=@2
+  ~included_node
+    this=2
+    what=class
+    Node::Frame=[300.0,100.0,400.0,180.0]
+    ~Node::Data
+      Node::name="Node B"
+    ~Node::Font
+      what=1716475001
+      Font::Encoding=0i8
+      Font::Face=64i8
+      Font::Family="Noto Sans"
+      Font::Flags=0
+      Font::Rotation=0.0
+      Font::Shear=90.0
+      Font::Size=12.0
+      Font::Spacing=2i8
+      Font::Style="Regular"
+      Font::Color=-4876433
+    ~Node::Pattern
+      FillColor=-4279144
+      BorderColor=-16777216
+      PenSize=1.0
+      DrawingMode=10i8
+      HighColor=-16777216
+      LowColor=-8355712
+      Pattern=raw:1346458702://////////8=
+
+Sleep
+  milliseconds=2000
+
+Insert
+  node=@3
+  ~included_node
+    this=3
+    what=class
+    Node::Frame=[500.0,100.0,600.0,180.0]
+    ~Node::Data
+      Node::name="Node C"
+    ~Node::Font
+      what=1716475001
+      Font::Encoding=0i8
+      Font::Face=64i8
+      Font::Family="Noto Sans"
+      Font::Flags=0
+      Font::Rotation=0.0
+      Font::Shear=90.0
+      Font::Size=12.0
+      Font::Spacing=2i8
+      Font::Style="Regular"
+      Font::Color=-4876433
+    ~Node::Pattern
+      FillColor=-4279144
+      BorderColor=-16777216
+      PenSize=1.0
+      DrawingMode=10i8
+      HighColor=-16777216
+      LowColor=-8355712
+      Pattern=raw:1346458702://////////8=
