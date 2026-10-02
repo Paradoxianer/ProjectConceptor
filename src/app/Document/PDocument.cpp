@@ -170,7 +170,15 @@ void PDocument::MessageReceived(BMessage* message) {
 			break;
 		}
 		case P_C_MACRO_TYPE: {
-			commandManager->PlayMacro(message);
+			// interactive (see #142) - PlayMacro() itself stays synchronous
+			// for tests/programmatic callers, this spreads a GUI-triggered
+			// play across one dispatch per command instead of locking the
+			// document for the whole macro inside this one message
+			commandManager->PlayMacroInteractive(message);
+			break;
+		}
+		case P_C_MACRO_PLAY_STEP: {
+			commandManager->PlayMacroStep();
 			break;
 		}
 		// Both forward the menu's own message as-is to whichever

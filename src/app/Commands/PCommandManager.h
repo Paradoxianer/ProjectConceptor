@@ -56,9 +56,35 @@ public:
 			/** looks up a macro by its "Name" field in macroList and plays
 			 * it if found; logs and does nothing otherwise - a document not
 			 * having a macro under an app-wide shortcut's name is a normal
-			 * case, not an error
+			 * case, not an error. Interactive (see PlayMacroInteractive()),
+			 * same as the menu's "Macro > Play" - an app-wide shortcut is
+			 * just another GUI trigger.
 			 */
 			void		PlayMacroByName(const char *name);
+			/** The GUI/interactive counterpart to PlayMacro() - same
+			 * "Macro::Commmand" list, same Execute()/report/P_C_MACRO_PLAYED
+			 * outcome, but spread across one P_C_MACRO_PLAY_STEP dispatch
+			 * per top-level command instead of one synchronous call that
+			 * holds the document locked (via BLooper::DispatchMessage()'s
+			 * own implicit lock around the whole thing) for the entire
+			 * macro. See #142 - PlayMacro() itself stays exactly as it was
+			 * (tests and any future programmatic caller keep its simple
+			 * synchronous contract); this is only for the two places that
+			 * trigger a play from outside already-running command code
+			 * (PDocument's P_C_MACRO_TYPE/P_C_PLAY_MACRO_BY_NAME handlers).
+			 * Refuses (beeps, logs) if a previous interactive play is
+			 * still in progress - never stomps a live one's state. */
+			void		PlayMacroInteractive(BMessage *makro);
+			/** Runs exactly the next command of an in-progress
+			 * PlayMacroInteractive() call, then posts another
+			 * P_C_MACRO_PLAY_STEP for the one after (or finishes - same
+			 * report/broadcast/alert PlayMacro() itself ends with - if that
+			 * was the last one). A no-op if nothing is currently playing
+			 * interactively (a stray/duplicate message, e.g. arriving after
+			 * a failure already ended the run). Called from PDocument's own
+			 * P_C_MACRO_PLAY_STEP handler - not meant to be called directly
+			 * from anywhere else. */
+			void		PlayMacroStep(void);
 	virtual	status_t	RegisterPCommand(BasePlugin *commandPlugin);
 	virtual	void		UnregisterPCommand(char *name);
 
@@ -124,6 +150,14 @@ public:
 
 protected:
 	virtual void		Init(void);
+			/** Shared by PlayMacro() and PlayMacroStep()'s own finish -
+			 * same report text, same P_C_MACRO_PLAYED broadcast, same
+			 * failure alert, built from whichever of the two actually
+			 * drove the playback. Returns the overall status (what
+			 * PlayMacro() itself returns). */
+			status_t	FinishMacroPlayback(int32 playedCount, status_t err,
+							const BString &failedCommand, int32 unresolvedCount,
+							BString *report);
 
 			BList		*undoList;
 			BList		*macroList;
@@ -155,6 +189,18 @@ protected:
 			 * goes through DeIndexCommand() at all (see ResolveBindings()'s
 			 * own comment on when it runs). */
 			Indexer		*replayIndexer;
+
+			/** Interactive (stepwise) playback state - see
+			 * PlayMacroInteractive()/PlayMacroStep(). All NULL/zero
+			 * whenever no interactive play is in progress; that's also
+			 * how PlayMacroStep() recognizes a stray message and how
+			 * PlayMacroInteractive() recognizes (and refuses) a second
+			 * play trying to start while one is still running. */
+			BMessage	*playingMacro;			// this run's own private copy
+			int32		playingIndex;
+			Indexer		*playingIndexer;
+			status_t	playingErr;
+			BString		playingFailedCommand;
 private:
 
 };

@@ -57,6 +57,13 @@ const uint32	P_C_DOC_SETTINGS_CHANGED		= 'pcSC';
  *  document's own macro list; if it has none by that name this is a no-op,
  *  not an error - the same binding is meant to apply across documents. */
 const uint32	P_C_PLAY_MACRO_BY_NAME			= 'pcPN';
+/** PDocument sends this to itself, one at a time, while a macro plays
+ *  interactively (PCommandManager::PlayMacroInteractive()/PlayMacroStep())
+ *  - each arrival runs exactly one top-level command, then (if more
+ *  remain) posts the next one, so BLooper::DispatchMessage() genuinely
+ *  releases the document lock between commands instead of holding it for
+ *  the whole macro in one synchronous call. See #142. */
+const uint32	P_C_MACRO_PLAY_STEP				= 'pcMS';
 
 /*const uint32	P_C_GROUP_TYPE					= 'pcGr';
 const uint32	P_C_NODE_TYPE					= 'pcNd';

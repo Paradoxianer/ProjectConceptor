@@ -1,4 +1,5 @@
 #include <set>
+#include <Beep.h>
 #include <Catalog.h>
 
 #include <string.h>
@@ -43,6 +44,10 @@ void PCommandManager::Init(void) {
 	fPropertyInfoArray	= NULL;
 	valueContext	= NULL;
 	replayIndexer	= NULL;
+	playingMacro	= NULL;
+	playingIndex	= 0;
+	playingIndexer	= NULL;
+	playingErr		= B_OK;
 
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*commands		= pluginManager->GetPluginsByType(P_C_COMMANDO_PLUGIN_TYPE);
@@ -183,9 +188,41 @@ void PCommandManager::StopMacro() {
 
 }
 
+status_t PCommandManager::FinishMacroPlayback(int32 playedCount, status_t err,
+	const BString &failedCommand, int32 unresolvedCount, BString *report)
+{
+	BString		result;
+	status_t	status	= B_OK;
+	if (playedCount == 0) {
+		status	= B_BAD_VALUE;
+		result	= B_TRANSLATE("The macro is empty - nothing to play.");
+	} else if (err != B_OK) {
+		status	= err;
+		result	= failedCommand;
+	} else if (unresolvedCount > 0) {
+		status	= B_BAD_VALUE;
+		result.SetToFormat(B_TRANSLATE("%ld node reference(s) point to nodes the macro never creates - it did not do what it says."),
+			(long)unresolvedCount);
+	} else
+		result.SetToFormat(B_TRANSLATE("Played %ld command(s)."),(long)playedCount);
+
+	if (report != NULL)
+		*report	= result;
+	if (doc->GetEditorManager() != NULL) {
+		BMessage	played(P_C_MACRO_PLAYED);
+		played.AddString("report",result.String());
+		played.AddBool("error",status != B_OK);
+		doc->GetEditorManager()->BroadCast(&played);
+		if (status != B_OK)
+			(new BAlert(B_TRANSLATE("Macro"),result.String(),B_TRANSLATE("OK"),NULL,NULL,
+				B_WIDTH_AS_USUAL,B_OFFSET_SPACING,B_WARNING_ALERT))->Go(NULL);
+	}
+	return status;
+}
+
 status_t PCommandManager::PlayMacro(BMessage *makro, BString *report) {
 	int32 		i				= 0;
-	BMessage	*message		= new BMessage();
+	BMessage	message;
 	Indexer		*playDeIndexer	= new Indexer(doc);
 	status_t	err				= B_OK;
 	// #135: named values (Ask/Remember/Repeat/ForEach, resolved into a
@@ -204,25 +241,27 @@ status_t PCommandManager::PlayMacro(BMessage *makro, BString *report) {
 	Indexer	*previousReplayIndexer	= replayIndexer;
 	replayIndexer	= playDeIndexer;
 	BString		failedCommand;
-	while ( (makro->FindMessage("Macro::Commmand", i,message) == B_OK) && (err==B_OK) )
+	while ( (makro->FindMessage("Macro::Commmand", i,&message) == B_OK) && (err==B_OK) )
 	{
 		const char	*commandName	= NULL;
-		message->FindString("Command::Name",&commandName);
+		message.FindString("Command::Name",&commandName);
 		BString		name(commandName != NULL ? commandName : "?");
-		err = Execute(playDeIndexer->DeIndexCommand(message));
+		err = Execute(playDeIndexer->DeIndexCommand(&message));
 		if (err != B_OK)
 			failedCommand.SetToFormat(B_TRANSLATE("Command %ld (%s) failed."),(long)(i+1),name.String());
-		// Meant to give GraphEditor's own thread a chance to catch up
-		// visually between steps - confirmed live this doesn't actually
-		// work: 400ms (like the original 100ms) still shows nothing
-		// incrementally, everything appears at once only once the whole
-		// macro finishes. Tried and reverted: making BroadCast()
-		// synchronous instead of fire-and-forget (PEditorManager::
-		// SendMessage()) - deadlocked PCommandManager::Undo()/Redo(),
-		// which broadcast while still holding the document lock, and
-		// GraphEditor::ValueChanged() needs that same lock to process the
-		// synchronous send. The real reason nothing renders incrementally
-		// during PlayMacro() is still open.
+		// This used to be the only thing trying to give GraphEditor's own
+		// thread a chance to catch up visually between steps - confirmed
+		// live it never worked, no matter the duration: the document stays
+		// locked for this whole loop regardless (BLooper::DispatchMessage()
+		// holds its own implicit lock for the entire PDocument::
+		// MessageReceived() call this all runs inside, independent of
+		// whatever Execute() itself does with its own nested Lock()/
+		// Unlock()). See #142 - PlayMacroInteractive()/PlayMacroStep() is
+		// the actual fix, for the two places (menu Play, macro shortcuts)
+		// that call this from outside already-running command code. This
+		// synchronous PlayMacro() itself is kept exactly as simple as
+		// before on purpose - tests rely on it returning only once
+		// everything has actually happened.
 		snooze(400000);
 		i++;
 	}
@@ -232,32 +271,8 @@ status_t PCommandManager::PlayMacro(BMessage *makro, BString *report) {
 	}
 	replayIndexer	= previousReplayIndexer;
 
-	BString		result;
-	status_t	status	= B_OK;
-	if (i == 0) {
-		status	= B_BAD_VALUE;
-		result	= B_TRANSLATE("The macro is empty - nothing to play.");
-	} else if (err != B_OK) {
-		status	= err;
-		result	= failedCommand;
-	} else if (playDeIndexer->UnresolvedCount() > 0) {
-		status	= B_BAD_VALUE;
-		result.SetToFormat(B_TRANSLATE("%ld node reference(s) point to nodes the macro never creates - it did not do what it says."),
-			(long)playDeIndexer->UnresolvedCount());
-	} else
-		result.SetToFormat(B_TRANSLATE("Played %ld command(s)."),(long)i);
-
-	if (report != NULL)
-		*report	= result;
-	if (doc->GetEditorManager() != NULL) {
-		BMessage	played(P_C_MACRO_PLAYED);
-		played.AddString("report",result.String());
-		played.AddBool("error",status != B_OK);
-		doc->GetEditorManager()->BroadCast(&played);
-		if (status != B_OK)
-			(new BAlert(B_TRANSLATE("Macro"),result.String(),B_TRANSLATE("OK"),NULL,NULL,
-				B_WIDTH_AS_USUAL,B_OFFSET_SPACING,B_WARNING_ALERT))->Go(NULL);
-	}
+	status_t	status	= FinishMacroPlayback(i,err,failedCommand,playDeIndexer->UnresolvedCount(),report);
+	delete playDeIndexer;
 	return status;
 }
 
@@ -271,9 +286,80 @@ void PCommandManager::PlayMacroByName(const char *name) {
 			found = true;
 	}
 	if (found)
-		PlayMacro(macro);
+		PlayMacroInteractive(macro);
 	else
 		PRINT(("PCommandManager::PlayMacroByName - no macro named \"%s\" in this document\n",name));
+}
+
+void PCommandManager::PlayMacroInteractive(BMessage *makro) {
+	if (playingMacro != NULL) {
+		// a second "Play" arriving while one is still in progress - never
+		// stomp its still-active state (same "no silent fallback" reason
+		// StartMacro() itself alerts on, just without the modal dialog:
+		// this path is driven by stray double-clicks/shortcuts, not a
+		// deliberate "restart recording" choice)
+		beep();
+		PRINT(("PCommandManager::PlayMacroInteractive - already playing a macro, ignored\n"));
+		return;
+	}
+	// own copy - `makro` may be a menu item's long-lived BMessage (fine,
+	// survives) or something more transient the caller doesn't guarantee
+	// past this call (P_C_PLAY_MACRO_BY_NAME's lookup result happens to be
+	// long-lived too, but nothing here should have to assume that everywhere
+	// a future caller might come from)
+	playingMacro	= new BMessage(*makro);
+	playingIndex	= 0;
+	playingIndexer	= new Indexer(doc);
+	playingErr		= B_OK;
+	playingFailedCommand.SetTo("");
+	// see PlayMacro()'s own comment on ownsValueContext - interactive play
+	// is only ever started fresh from outside any command's own Do(), so
+	// there is no nested-call case to guard against here
+	valueContext	= new BMessage();
+	replayIndexer	= playingIndexer;
+	// first step runs on its own dispatch too, same as every step after it
+	// - see P_C_MACRO_PLAY_STEP's own comment for why that's the whole point
+	doc->PostMessage(P_C_MACRO_PLAY_STEP);
+}
+
+void PCommandManager::PlayMacroStep(void) {
+	if (playingMacro == NULL)
+		return;		// stray/duplicate message - nothing is playing
+	BMessage	message;
+	if ((playingErr == B_OK)
+			&& (playingMacro->FindMessage("Macro::Commmand",playingIndex,&message) == B_OK)) {
+		const char	*commandName	= NULL;
+		message.FindString("Command::Name",&commandName);
+		BString		name(commandName != NULL ? commandName : "?");
+		playingErr	= Execute(playingIndexer->DeIndexCommand(&message));
+		if (playingErr != B_OK)
+			playingFailedCommand.SetToFormat(B_TRANSLATE("Command %ld (%s) failed."),
+				(long)(playingIndex+1),name.String());
+		playingIndex++;
+		// more to do and nothing failed yet - post the next step instead of
+		// looping right here; THIS is the actual fix (see #142): returning
+		// all the way back out through PDocument::MessageReceived() lets
+		// BLooper::DispatchMessage() genuinely unlock the document before
+		// the next P_C_MACRO_PLAY_STEP is even read off the port, giving
+		// GraphEditor's own thread a real chance to lock it, drain its
+		// pending changed nodes and redraw in between
+		if ((playingErr == B_OK)
+				&& playingMacro->HasMessage("Macro::Commmand",playingIndex)) {
+			doc->PostMessage(P_C_MACRO_PLAY_STEP);
+			return;
+		}
+	}
+	// done (ran out of commands, or one failed) - same report/broadcast/
+	// alert PlayMacro() itself ends with, then tear down this run's state
+	FinishMacroPlayback(playingIndex,playingErr,playingFailedCommand,
+		playingIndexer->UnresolvedCount(),NULL);
+	replayIndexer	= NULL;
+	delete valueContext;
+	valueContext	= NULL;
+	delete playingIndexer;
+	playingIndexer	= NULL;
+	delete playingMacro;
+	playingMacro	= NULL;
 }
 
 // #132: the same logical edit is recorded two different, incompatible ways
