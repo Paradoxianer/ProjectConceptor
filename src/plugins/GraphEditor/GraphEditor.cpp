@@ -34,6 +34,48 @@ LoadPluginIcon(BResources *res, const char *name)
 		return NULL;
 	return BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
 }
+
+// Drawn at runtime rather than shipped as a PNG resource - same reasoning
+// as NavigatorEditor's MakeSymbolIcon(): no existing icon fits "smart
+// guides" and this sidesteps hand-authoring a new .rdef resource. Two
+// small squares (nodes) aligned on a dashed guide line, in the same accent
+// color the live guide lines are drawn in (see Draw()), so the toolbar
+// icon and the feature it toggles read as the same thing.
+static BBitmap*
+MakeGuidesIcon(void)
+{
+	BRect	bounds(0,0,19,19);
+	BBitmap	*bmp	= new BBitmap(bounds,B_RGBA32,true);
+	BView	*view	= new BView(bounds,"guidesIcon",B_FOLLOW_NONE,B_WILL_DRAW);
+	bmp->AddChild(view);
+	bmp->Lock();
+	view->SetHighColor(0,0,0,0);
+	view->FillRect(bounds,B_SOLID_HIGH);
+	rgb_color	accent	= {30,144,255,255};
+	view->SetHighColor(accent);
+	view->SetDrawingMode(B_OP_ALPHA);
+	// Two small nodes with a dashed guide line strictly *between* them -
+	// the previous version's dashes ran the icon's full width, so they
+	// drew straight through both squares instead of only the gap,
+	// reading as a messy row of bars rather than "two things, aligned".
+	BRect	squareA(1,7,6,12);
+	BRect	squareB(13,7,18,12);
+	view->FillRoundRect(squareA,1,1);
+	view->FillRoundRect(squareB,1,1);
+	view->SetPenSize(2);
+	float	midY		= (squareA.top+squareA.bottom)/2.0f;
+	float	dashLen		= 2.0f;
+	float	gapLen		= 1.5f;
+	for (float x = squareA.right+2; x < squareB.left-1; x += dashLen+gapLen) {
+		float	xEnd	= x+dashLen;
+		if (xEnd > squareB.left-1)
+			xEnd	= squareB.left-1;
+		view->StrokeLine(BPoint(x,midY),BPoint(xEnd,midY));
+	}
+	view->Sync();
+	bmp->Unlock();
+	return bmp;
+}
 #include "PWindow.h"
 #include "PEditorManager.h"
 
@@ -83,6 +125,8 @@ void GraphEditor::Init(void) {
 	key_hold		= false;
 	connecting		= false;
 	gridEnabled		= false;
+	guidesEnabled	= false;
+	hasActiveGuides	= false;
 	fromPoint		= new BPoint(0,0);
 	toPoint			= new BPoint(0,0);
 	renderer		= new BList();
@@ -168,6 +212,10 @@ void GraphEditor::Init(void) {
 
 	grid		= new ToolItem(B_TRANSLATE("Grid"),BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
 	grid->BButton::SetToolTip(B_TRANSLATE("Toggle grid"));
+	// #127: an alternative to grid-snap, not layered on top of it - see
+	// the !GridEnabled() guard in ClassRenderer::MouseMoved()/MouseUp().
+	guides		= new ToolItem(B_TRANSLATE("Guides"),MakeGuidesIcon(),new BMessage(G_E_GUIDES_CHANGED),P_M_TWO_STATE_ITEM);
+	guides->BButton::SetToolTip(B_TRANSLATE("Toggle smart alignment guides"));
 	penSize		= new FloatToolItem(B_TRANSLATE("Pen size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
 	penSize->BButton::SetToolTip(B_TRANSLATE("Border pen size for selected nodes"));
 	colorItem	= new ColorToolItem(B_TRANSLATE("Fill"),fillColor,new BMessage(G_E_COLOR_CHANGED),new BMessage(G_E_COLOR_PREVIEW));
@@ -524,6 +572,18 @@ void GraphEditor::Draw(BRect updateRect) {
 		EndLineArray();
 	}
 	renderer->DoForEach(DrawRenderer,this);
+	if (hasActiveGuides) {
+		// Same accent color as the toolbar toggle's own icon (MakeGuidesIcon())
+		// so the button and the feature it drives read as one thing.
+		SetHighColor(30,144,255,255);
+		SetPenSize(1.0);
+		if (activeGuides.horizontal.active)
+			StrokeLine(BPoint(activeGuides.horizontal.lineStart,activeGuides.horizontal.linePos),
+				BPoint(activeGuides.horizontal.lineEnd,activeGuides.horizontal.linePos));
+		if (activeGuides.vertical.active)
+			StrokeLine(BPoint(activeGuides.vertical.linePos,activeGuides.vertical.lineStart),
+				BPoint(activeGuides.vertical.linePos,activeGuides.vertical.lineEnd));
+	}
 	if (selectRect) {
 		SetHighColor(81,131,171,120);
 		FillRect(*selectRect);
@@ -685,6 +745,7 @@ void GraphEditor::AttachedToWindow(void) {
 	configBar->AddSeperator();
 	configBar->AddSeperator();
 	configBar->AddItem(grid);
+	configBar->AddItem(guides);
 	configBar->AddSeperator();
 	configBar->AddItem(penSize);
 	configBar->AddItem(colorItem);
@@ -693,6 +754,7 @@ void GraphEditor::AttachedToWindow(void) {
 	configBar->AddItem(connectionArrows);
 
 	grid->SetTarget(this);
+	guides->SetTarget(this);
 	penSize->SetTarget(this);
 	colorItem->SetTarget(this);
 	connectionStyle->SetTarget(this);
@@ -753,6 +815,7 @@ void GraphEditor::DetachedFromWindow(void) {
 				configBar->RemoveItem(patternItem);
 				configBar->RemoveSeperator();
 				configBar->RemoveItem(grid);
+				configBar->RemoveItem(guides);
 				configBar->RemoveSeperator();
 				configBar->RemoveSeperator();
 				configBar->RemoveSeperator();
@@ -872,6 +935,20 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		}
 		case G_E_GRID_CHANGED: {
 			gridEnabled =! gridEnabled;
+			// ToolItem's own two-state visual tracking is dead code
+			// (ToolItem::MouseUp() unconditionally forces Value() back to
+			// B_CONTROL_OFF after every click, regardless of "behavior") -
+			// setting it explicitly here, right after the one place the
+			// real state actually flips, ties the button's look to the
+			// boolean directly rather than depending on that click
+			// handling ever getting fixed.
+			grid->SetValue(gridEnabled ? B_CONTROL_ON : B_CONTROL_OFF);
+			Invalidate();
+			break;
+		}
+		case G_E_GUIDES_CHANGED: {
+			guidesEnabled =! guidesEnabled;
+			guides->SetValue(guidesEnabled ? B_CONTROL_ON : B_CONTROL_OFF);
 			Invalidate();
 			break;
 		}

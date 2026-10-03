@@ -3,7 +3,7 @@ resource app_flags B_MULTIPLE_LAUNCH;
 resource app_version {
 	major  = 0,
 	middle = 2,
-	minor  = 4,
+	minor  = 5,
 	variety = B_APPV_ALPHA,
 	internal = 1,
 

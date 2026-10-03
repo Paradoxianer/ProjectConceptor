@@ -20,6 +20,7 @@ SRCS= 	TestMain.cpp \
 		LayoutEditorTest.cpp \
 		GroupBoundaryTest.cpp \
 		MacroTextTest.cpp \
+		SmartGuidesTest.cpp \
 		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
 		../plugins/LayoutEditor/DotLayouter.cpp \
@@ -90,7 +91,8 @@ SRCS= 	TestMain.cpp \
 		../plugins/CalculateCommand/Calculate.cpp \
 		../plugins/AskCommand/Ask.cpp \
 		../plugins/LayoutCommand/Layout.cpp \
-		../plugins/GraphEditor/GroupBoundary.cpp
+		../plugins/GraphEditor/GroupBoundary.cpp \
+		../plugins/GraphEditor/SmartGuides.cpp
 
 RDEFS=
 

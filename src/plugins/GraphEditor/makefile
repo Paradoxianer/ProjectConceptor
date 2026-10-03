@@ -35,6 +35,7 @@ SRCS=	AttributRenderer.cpp	\
 		GraphEditorPlugin.cpp	\
 		GroupBoundary.cpp		\
 		GroupRenderer.cpp		\
+		SmartGuides.cpp			\
 		StringRenderer.cpp		\
 		TextEditorControl.cpp
 

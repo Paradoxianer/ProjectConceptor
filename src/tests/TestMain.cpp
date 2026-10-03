@@ -8,6 +8,7 @@
 #include "MacroTextTest.h"
 #include "MessageXmlWriterTest.h"
 #include "PCommandTest.h"
+#include "SmartGuidesTest.h"
 #include "TestDocument.h"
 
 const char *TEST_APP_SIGNATURE = "application/x-vnd.ProjectConceptorTests";
@@ -25,6 +26,7 @@ int main(int argc, char **argv)
 	runner.addTest(LayoutEditorTest::suite());
 	runner.addTest(GroupBoundaryTest::suite());
 	runner.addTest(MacroTextTest::suite());
+	runner.addTest(SmartGuidesTest::suite());
 	runner.addTest(MessageXmlWriterTest::suite());
 	bool success = runner.run("", false);
 	// #117: every headless PDocument any test created is still running a
