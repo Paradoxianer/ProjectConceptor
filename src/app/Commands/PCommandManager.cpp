@@ -249,19 +249,13 @@ status_t PCommandManager::PlayMacro(BMessage *makro, BString *report) {
 		err = Execute(playDeIndexer->DeIndexCommand(&message));
 		if (err != B_OK)
 			failedCommand.SetToFormat(B_TRANSLATE("Command %ld (%s) failed."),(long)(i+1),name.String());
-		// This used to be the only thing trying to give GraphEditor's own
-		// thread a chance to catch up visually between steps - confirmed
-		// live it never worked, no matter the duration: the document stays
-		// locked for this whole loop regardless (BLooper::DispatchMessage()
-		// holds its own implicit lock for the entire PDocument::
-		// MessageReceived() call this all runs inside, independent of
-		// whatever Execute() itself does with its own nested Lock()/
-		// Unlock()). See #142 - PlayMacroInteractive()/PlayMacroStep() is
-		// the actual fix, for the two places (menu Play, macro shortcuts)
-		// that call this from outside already-running command code. This
-		// synchronous PlayMacro() itself is kept exactly as simple as
-		// before on purpose - tests rely on it returning only once
-		// everything has actually happened.
+		// Doesn't let GraphEditor redraw in between: when called from
+		// PDocument::MessageReceived(), the document stays locked for this
+		// whole loop (BLooper::DispatchMessage()'s own lock), whatever
+		// Execute() does with its nested Lock()/Unlock(). The GUI paths use
+		// PlayMacroInteractive() for step-by-step display instead; this
+		// stays synchronous because tests rely on it returning only once
+		// everything has happened.
 		snooze(400000);
 		i++;
 	}
@@ -337,12 +331,11 @@ void PCommandManager::PlayMacroStep(void) {
 				(long)(playingIndex+1),name.String());
 		playingIndex++;
 		// more to do and nothing failed yet - post the next step instead of
-		// looping right here; THIS is the actual fix (see #142): returning
-		// all the way back out through PDocument::MessageReceived() lets
-		// BLooper::DispatchMessage() genuinely unlock the document before
-		// the next P_C_MACRO_PLAY_STEP is even read off the port, giving
-		// GraphEditor's own thread a real chance to lock it, drain its
-		// pending changed nodes and redraw in between
+		// looping right here: returning all the way out of
+		// PDocument::MessageReceived() lets BLooper::DispatchMessage()
+		// unlock the document before the next P_C_MACRO_PLAY_STEP is read,
+		// so GraphEditor's tick can lock it, drain its pending changed
+		// nodes and redraw in between
 		if ((playingErr == B_OK)
 				&& playingMacro->HasMessage("Macro::Commmand",playingIndex)) {
 			doc->PostMessage(P_C_MACRO_PLAY_STEP);

@@ -67,7 +67,8 @@ public:
 			 * per top-level command instead of one synchronous call that
 			 * holds the document locked (via BLooper::DispatchMessage()'s
 			 * own implicit lock around the whole thing) for the entire
-			 * macro. See #142 - PlayMacro() itself stays exactly as it was
+			 * macro - that's what lets GraphEditor redraw between steps.
+			 * PlayMacro() itself stays exactly as it was
 			 * (tests and any future programmatic caller keep its simple
 			 * synchronous contract); this is only for the two places that
 			 * trigger a play from outside already-running command code

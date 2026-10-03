@@ -459,11 +459,15 @@ void GraphEditor::ValueChanged(BMessage *changedNodes) {
 void GraphEditor::DrainPendingChangedNodes(void) {
 	if (pendingChangedNodes->CountItems() == 0)
 		return;
-	// See ValueChanged() for why a blocking Lock() here is safe: the
-	// queue is only ever touched by this thread, so nothing can mutate
-	// it out from under this loop the way the old shared
-	// doc->GetChangedNodes() set could.
-	doc->Lock();
+	// Never block here (#142): while a macro holds the document, this
+	// thread would stop reading its port, the 20ms tick runner fills it
+	// (the registrar re-delivers into every freed slot), and the next
+	// BroadCast() from Execute() then blocks on that full port while
+	// still holding the document - a permanent deadlock. Not getting
+	// the lock just leaves the queue for the next tick; it's only ever
+	// touched by this thread, so nothing is lost.
+	if (doc->LockWithTimeout(0) != B_OK)
+		return;
 
 	BList		*allNodes		= doc->GetAllNodes();
 	BList		*allConnections	= doc->GetAllConnections();

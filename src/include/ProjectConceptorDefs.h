@@ -62,7 +62,8 @@ const uint32	P_C_PLAY_MACRO_BY_NAME			= 'pcPN';
  *  - each arrival runs exactly one top-level command, then (if more
  *  remain) posts the next one, so BLooper::DispatchMessage() genuinely
  *  releases the document lock between commands instead of holding it for
- *  the whole macro in one synchronous call. See #142. */
+ *  the whole macro in one synchronous call - so the editors can redraw
+ *  after every step. */
 const uint32	P_C_MACRO_PLAY_STEP				= 'pcMS';
 
 /*const uint32	P_C_GROUP_TYPE					= 'pcGr';
