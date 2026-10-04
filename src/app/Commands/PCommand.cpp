@@ -39,6 +39,7 @@ BMessage* PCommand::RunSubCommandsOnce(PDocument *doc, BMessage *settings)
 		if (subPCommand)
 		{
 			manager->ResolveBindings(subPCommandMessage,subPCommand);
+			manager->InterpolateStrings(subPCommandMessage);
 			subPCommandMessage	= subPCommand->Do(doc,subPCommandMessage);
 			record->AddMessage("PCommand::subPCommand",subPCommandMessage);
 		}

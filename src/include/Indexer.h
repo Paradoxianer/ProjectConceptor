@@ -62,6 +62,11 @@ public:
 			 * only as "could not resolve", and should log it.
 			 */
 			bool				ResolveId(int32 id,BMessage **node);
+			/** every id currently resolving to `from` resolves to `to`
+			 * instead - for a node replaced by a copy after it was
+			 * registered (see Insert::Do()'s text interpolation), so later
+			 * "@id" references reach the node actually in the document. */
+			void				Repoint(BMessage *from,BMessage *to);
 			/** how many "node" references DeIndexCommand() could not resolve
 			 * since this Indexer was built - a macro played with any of
 			 * those did not do what it says. */

@@ -692,7 +692,9 @@ status_t ParseFieldValue(BMessage *msg, const char *fieldName, type_code expecte
 	// that variable holds right before this command's own Do() runs.
 	// Recorded as a "PCommand::bindings" entry alongside the command's own
 	// fields, never as a literal value on the field itself.
-	if ((valueText.Length() > 1) && (valueText.ByteAt(0) == '$')) {
+	// "${name}" is text interpolation (PCommandManager::InterpolateStrings()),
+	// only valid inside a quoted string - not a binding
+	if ((valueText.Length() > 1) && (valueText.ByteAt(0) == '$') && (valueText.ByteAt(1) != '{')) {
 		if (!allowBinding) {
 			*errorOut	<< "\"$" << fieldName
 				<< "\" bindings aren't supported inside a \"~\" field block";

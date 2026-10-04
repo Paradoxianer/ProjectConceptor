@@ -125,6 +125,22 @@ public:
 	 * subPCommand child - so a bound field resolves correctly no
 	 * matter how deeply nested the command carrying it is. */
 	virtual	void		ResolveBindings(BMessage *settings, PCommand *forCommand = NULL);
+	/** Replaces "${name}" inside every string field of `message` - nested
+	 * blocks included, except "PCommand::subPCommand" (a loop body is a
+	 * template, interpolated per run) and "PCommand::bindings" - with the
+	 * value context's "name" as text: strings as-is, whole numbers without
+	 * decimals, other numbers via %g, bools as true/false. "$${" is a
+	 * literal "${". An unknown, multi-valued or non-text variable is left
+	 * as written and reported in the playback result. A no-op outside
+	 * playback, like ResolveBindings(). Returns true if anything changed. */
+	virtual	bool		InterpolateStrings(BMessage *message);
+	/** true if any string field of `message` (recursively, same skips as
+	 * InterpolateStrings()) contains a "${" placeholder. */
+	virtual	bool		HasInterpolation(const BMessage *message);
+	/** a node registered under some id during playback was replaced by a
+	 * copy (see Insert::Do()) - later "@id" references reach the copy.
+	 * A no-op outside playback. */
+	virtual	void		RepointReplayNode(BMessage *from, BMessage *to);
 
 	virtual	int32		CountPCommand(void){return commandMap.size();};
 	virtual	PCommand*	PCommandAt(int32 index);
@@ -159,6 +175,12 @@ protected:
 			status_t	FinishMacroPlayback(int32 playedCount, status_t err,
 							const BString &failedCommand, int32 unresolvedCount,
 							BString *report);
+			bool		InterpolateText(const BString &text, BString *result);
+			bool		FormatVariable(const char *name, BString *text, BString *error);
+			/** see InterpolateStrings() - reset when a playback starts,
+			 * reported by FinishMacroPlayback() */
+			int32		interpolationErrors;
+			BString		firstInterpolationError;
 
 			BList		*undoList;
 			BList		*macroList;

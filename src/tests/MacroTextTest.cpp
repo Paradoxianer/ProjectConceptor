@@ -1831,3 +1831,209 @@ void MacroTextTest::ReplaceNodeReferenceFieldOverwritesExistingValue(void)
 	int32		second	= 0;
 	CPPUNIT_ASSERT(newSelect->FindInt32("node",1,&second) != B_OK);	// still one entry, not two
 }
+
+
+// ------------------------------------------- "${name}" text interpolation --
+
+static status_t PlayMacroText(PDocument *doc, const char *text, BString *report)
+{
+	BList		parsed;
+	BString		error;
+	if (ParseCommands(BString(text),&parsed,doc->GetCommandManager(),&error) != B_OK) {
+		*report	= error;
+		return B_BAD_VALUE;
+	}
+	BMessage	macro(P_C_MACRO_TYPE);
+	for (int32 i = 0; i < parsed.CountItems(); i++) {
+		macro.AddMessage("Macro::Commmand",(BMessage*)parsed.ItemAt(i));
+		delete (BMessage*)parsed.ItemAt(i);
+	}
+	return doc->GetCommandManager()->PlayMacro(&macro,report);
+}
+
+
+static BString NodeName(BMessage *node)
+{
+	BMessage	data;
+	const char	*name	= "";
+	node->FindMessage(P_C_NODE_DATA,&data);
+	data.FindString(P_C_NODE_NAME,&name);
+	return BString(name);
+}
+
+
+void MacroTextTest::InterpolatesCounterIntoInsertedNodeNames(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		report;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(report.String(),(status_t)B_OK,PlayMacroText(doc,
+		"Repeat\n"
+		"  count=3\n"
+		"  counterVariable=\"i\"\n"
+		"  Insert\n"
+		"    node=@1\n"
+		"    ~included_node\n"
+		"      this=1\n"
+		"      what=class\n"
+		"      Node::Frame=[0.0,0.0,50.0,50.0]\n"
+		"      ~Node::Data\n"
+		"        Node::name=\"N ${i}\"\n",&report));
+	BList	*nodes	= doc->GetAllNodes();
+	CPPUNIT_ASSERT_EQUAL((int32)3,nodes->CountItems());
+	// the loop's template keeps its placeholder - every pass gets its own value
+	CPPUNIT_ASSERT(NodeName((BMessage*)nodes->ItemAt(0)) == "N 0");
+	CPPUNIT_ASSERT(NodeName((BMessage*)nodes->ItemAt(1)) == "N 1");
+	CPPUNIT_ASSERT(NodeName((BMessage*)nodes->ItemAt(2)) == "N 2");
+}
+
+
+void MacroTextTest::InterpolatedNodeStaysReachableById(void)
+{
+	// Insert puts in a filled-in copy, not the template - a later "@1"
+	// must still reach the node actually in the document. Also: a whole
+	// float from Calculate reads "6", "$${" stays a literal "${".
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		report;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(report.String(),(status_t)B_OK,PlayMacroText(doc,
+		"Calculate\n"
+		"  left=5.0\n"
+		"  operator=\"+\"\n"
+		"  right=1.0\n"
+		"  resultVariable=\"x\"\n"
+		"Insert\n"
+		"  node=@1\n"
+		"  ~included_node\n"
+		"    this=1\n"
+		"    what=class\n"
+		"    Node::Frame=[0.0,0.0,50.0,50.0]\n"
+		"    ~Node::Data\n"
+		"      Node::name=\"${x} $${x}\"\n"
+		"Select\n"
+		"  node=@1\n",&report));
+	BList		*nodes	= doc->GetAllNodes();
+	CPPUNIT_ASSERT_EQUAL((int32)1,nodes->CountItems());
+	BMessage	*node	= (BMessage*)nodes->ItemAt(0);
+	CPPUNIT_ASSERT(NodeName(node) == "6 ${x}");
+	CPPUNIT_ASSERT(doc->GetSelected()->HasItem(node));
+}
+
+
+void MacroTextTest::UnknownPlaceholderIsReported(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		report;
+	CPPUNIT_ASSERT(PlayMacroText(doc,
+		"Insert\n"
+		"  node=@1\n"
+		"  ~included_node\n"
+		"    this=1\n"
+		"    what=class\n"
+		"    Node::Frame=[0.0,0.0,50.0,50.0]\n"
+		"    ~Node::Data\n"
+		"      Node::name=\"N ${nope}\"\n",&report) != B_OK);
+	CPPUNIT_ASSERT(report.FindFirst("nope") >= 0);
+	// left as written, not silently emptied
+	CPPUNIT_ASSERT(NodeName((BMessage*)doc->GetAllNodes()->ItemAt(0)) == "N ${nope}");
+}
+
+
+void MacroTextTest::ConnectionFollowsInterpolatedNodes(void)
+{
+	// node + node + connection in one Insert (what GraphEditor records for
+	// "insert connected"), repeated: every pass's connection must join that
+	// pass's own copies, never the templates
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		report;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(report.String(),(status_t)B_OK,PlayMacroText(doc,
+		"Repeat\n"
+		"  count=2\n"
+		"  counterVariable=\"i\"\n"
+		"  Insert\n"
+		"    node=@1\n"
+		"    node=@2\n"
+		"    node=@3\n"
+		"    ~included_node\n"
+		"      this=1\n"
+		"      what=class\n"
+		"      Node::Frame=[0.0,0.0,50.0,50.0]\n"
+		"      ~Node::Data\n"
+		"        Node::name=\"A${i}\"\n"
+		"    ~included_node\n"
+		"      this=2\n"
+		"      what=class\n"
+		"      Node::Frame=[100.0,0.0,150.0,50.0]\n"
+		"      ~Node::Data\n"
+		"        Node::name=\"B${i}\"\n"
+		"    ~included_node\n"
+		"      this=3\n"
+		"      what=connection\n"
+		"      Node::from=1\n"
+		"      Node::to=2\n",&report));
+	BList	*nodes			= doc->GetAllNodes();
+	BList	*connections	= doc->GetAllConnections();
+	CPPUNIT_ASSERT_EQUAL((int32)4,nodes->CountItems());
+	CPPUNIT_ASSERT_EQUAL((int32)2,connections->CountItems());
+	for (int32 i = 0; i < connections->CountItems(); i++) {
+		BMessage	*connection	= (BMessage*)connections->ItemAt(i);
+		BMessage	*from		= NULL;
+		BMessage	*to			= NULL;
+		connection->FindPointer(P_C_NODE_CONNECTION_FROM,(void**)&from);
+		connection->FindPointer(P_C_NODE_CONNECTION_TO,(void**)&to);
+		CPPUNIT_ASSERT(nodes->HasItem(from));
+		CPPUNIT_ASSERT(nodes->HasItem(to));
+		BString	expectedTo(NodeName(from));
+		expectedTo.ReplaceFirst("A","B");
+		CPPUNIT_ASSERT(NodeName(to) == expectedTo);
+	}
+}
+
+
+void MacroTextTest::PlaceholderAloneIsNotABinding(void)
+{
+	// the tree editor passes a string field's text without quotes - "${i}"
+	// alone must not turn into a binding to a variable named "{i}"
+	BMessage	msg;
+	BString		error;
+	CPPUNIT_ASSERT(ParseFieldValue(&msg,"name",B_STRING_TYPE,BString("${i}"),true,&error) != B_OK);
+	CPPUNIT_ASSERT(!msg.HasMessage("PCommand::bindings"));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		ParseFieldValue(&msg,"name",B_STRING_TYPE,BString("\"${i}\""),true,&error));
+	const char	*value	= NULL;
+	CPPUNIT_ASSERT(msg.FindString("name",&value) == B_OK);
+	CPPUNIT_ASSERT(BString(value) == "${i}");
+}
+
+
+void MacroTextTest::InterpolatesCommandSettingsInNestedBlocks(void)
+{
+	// the generic part: any command's own string fields, nested blocks
+	// included - here AddAttribute's ~valueContainer/newAttribute
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		report;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(report.String(),(status_t)B_OK,PlayMacroText(doc,
+		"Calculate\n"
+		"  left=2.5\n"
+		"  operator=\"+\"\n"
+		"  right=0.0\n"
+		"  resultVariable=\"x\"\n"
+		"Insert\n"
+		"  node=@1\n"
+		"  ~included_node\n"
+		"    this=1\n"
+		"    what=class\n"
+		"    Node::Frame=[0.0,0.0,50.0,50.0]\n"
+		"    ~Node::Data\n"
+		"      Node::name=\"plain\"\n"
+		"AddAttribute\n"
+		"  node=@1\n"
+		"  ~valueContainer\n"
+		"    name=\"Pos\"\n"
+		"    subgroup=\"Node::Data\"\n"
+		"    type=string\n"
+		"    newAttribute=\"P ${x}\"\n",&report));
+	BMessage	data;
+	const char	*value	= NULL;
+	((BMessage*)doc->GetAllNodes()->ItemAt(0))->FindMessage(P_C_NODE_DATA,&data);
+	CPPUNIT_ASSERT(data.FindString("Pos",&value) == B_OK);
+	CPPUNIT_ASSERT(BString(value) == "P 2.5");
+}

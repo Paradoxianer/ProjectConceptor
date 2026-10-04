@@ -2,6 +2,7 @@
 #include <Beep.h>
 #include <Catalog.h>
 
+#include <math.h>
 #include <string.h>
 #include <interface/Alert.h>
 #include <interface/MenuItem.h>
@@ -48,6 +49,7 @@ void PCommandManager::Init(void) {
 	playingIndex	= 0;
 	playingIndexer	= NULL;
 	playingErr		= B_OK;
+	interpolationErrors	= 0;
 
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*commands		= pluginManager->GetPluginsByType(P_C_COMMANDO_PLUGIN_TYPE);
@@ -203,6 +205,10 @@ status_t PCommandManager::FinishMacroPlayback(int32 playedCount, status_t err,
 		status	= B_BAD_VALUE;
 		result.SetToFormat(B_TRANSLATE("%ld node reference(s) point to nodes the macro never creates - it did not do what it says."),
 			(long)unresolvedCount);
+	} else if (interpolationErrors > 0) {
+		status	= B_BAD_VALUE;
+		result.SetToFormat(B_TRANSLATE("%ld text placeholder(s) could not be filled in, first: %s"),
+			(long)interpolationErrors,firstInterpolationError.String());
 	} else
 		result.SetToFormat(B_TRANSLATE("Played %ld command(s)."),(long)playedCount);
 
@@ -236,8 +242,11 @@ status_t PCommandManager::PlayMacro(BMessage *makro, BString *report) {
 	// caller's still-active context instead of getting its own broken,
 	// prematurely-torn-down one.
 	bool	ownsValueContext	= (valueContext == NULL);
-	if (ownsValueContext)
+	if (ownsValueContext) {
 		valueContext	= new BMessage();
+		interpolationErrors	= 0;
+		firstInterpolationError.SetTo("");
+	}
 	Indexer	*previousReplayIndexer	= replayIndexer;
 	replayIndexer	= playDeIndexer;
 	BString		failedCommand;
@@ -310,6 +319,8 @@ void PCommandManager::PlayMacroInteractive(BMessage *makro) {
 	// is only ever started fresh from outside any command's own Do(), so
 	// there is no nested-call case to guard against here
 	valueContext	= new BMessage();
+	interpolationErrors	= 0;
+	firstInterpolationError.SetTo("");
 	replayIndexer	= playingIndexer;
 	// first step runs on its own dispatch too, same as every step after it
 	// - see P_C_MACRO_PLAY_STEP's own comment for why that's the whole point
@@ -449,6 +460,193 @@ static bool FindDeclaredFieldType(PCommand *command, const char *fieldName, type
 // it up to call Do() in the first place) is used only for the int32<->
 // float coercion below; pass NULL if genuinely unavailable, bindings
 // still resolve, just without that coercion.
+// a loop body is a template run (and interpolated) once per pass; bindings
+// name variables, they aren't text to fill in
+static bool IsInterpolationSkipped(const char *fieldName)
+{
+	return (strcmp(fieldName,"PCommand::subPCommand") == 0)
+		|| (strcmp(fieldName,"PCommand::bindings") == 0);
+}
+
+
+bool PCommandManager::HasInterpolation(const BMessage *message)
+{
+	char		*name	= NULL;
+	type_code	type	= B_ANY_TYPE;
+	int32		count	= 0;
+	for (int32 i = 0; message->GetInfo(B_ANY_TYPE,i,&name,&type,&count) == B_OK; i++) {
+		BString	fieldName(name);
+		if (IsInterpolationSkipped(fieldName.String()))
+			continue;
+		for (int32 j = 0; j < count; j++) {
+			if (type == B_STRING_TYPE) {
+				const char	*text	= NULL;
+				if ((message->FindString(fieldName.String(),j,&text) == B_OK)
+						&& (strstr(text,"${") != NULL))
+					return true;
+			} else if (type == B_MESSAGE_TYPE) {
+				BMessage	nested;
+				if ((message->FindMessage(fieldName.String(),j,&nested) == B_OK)
+						&& HasInterpolation(&nested))
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+
+bool PCommandManager::InterpolateStrings(BMessage *message)
+{
+	if ((valueContext == NULL) || (message == NULL))
+		return false;
+	bool		changed	= false;
+	char		*name	= NULL;
+	type_code	type	= B_ANY_TYPE;
+	int32		count	= 0;
+	for (int32 i = 0; message->GetInfo(B_ANY_TYPE,i,&name,&type,&count) == B_OK; i++) {
+		// copied - replacing a value can move the message's own storage
+		BString	fieldName(name);
+		if (IsInterpolationSkipped(fieldName.String()))
+			continue;
+		for (int32 j = 0; j < count; j++) {
+			if (type == B_STRING_TYPE) {
+				const char	*text	= NULL;
+				BString		result;
+				if ((message->FindString(fieldName.String(),j,&text) == B_OK)
+						&& InterpolateText(text,&result)) {
+					message->ReplaceString(fieldName.String(),j,result);
+					changed	= true;
+				}
+			} else if (type == B_MESSAGE_TYPE) {
+				BMessage	nested;
+				if ((message->FindMessage(fieldName.String(),j,&nested) == B_OK)
+						&& InterpolateStrings(&nested)) {
+					message->ReplaceMessage(fieldName.String(),j,&nested);
+					changed	= true;
+				}
+			}
+		}
+	}
+	return changed;
+}
+
+
+bool PCommandManager::InterpolateText(const BString &text, BString *result)
+{
+	if (text.FindFirst("${") < 0)
+		return false;
+	bool	changed	= false;
+	int32	length	= text.Length();
+	int32	i		= 0;
+	result->SetTo("");
+	while (i < length) {
+		if ((text[i] == '$') && (i+2 < length) && (text[i+1] == '$') && (text[i+2] == '{')) {
+			result->Append("${");
+			i		+= 3;
+			changed	= true;
+			continue;
+		}
+		if ((text[i] == '$') && (i+1 < length) && (text[i+1] == '{')) {
+			int32	close	= text.FindFirst('}',i+2);
+			BString	error;
+			if (close < 0) {
+				error.SetToFormat(B_TRANSLATE("\"%s\": \"${\" without a closing \"}\""),text.String());
+				result->Append(text.String()+i,length-i);
+				i	= length;
+			} else {
+				BString	variableName;
+				BString	value;
+				text.CopyInto(variableName,i+2,close-(i+2));
+				if (FormatVariable(variableName.String(),&value,&error)) {
+					result->Append(value);
+					changed	= true;
+				} else
+					result->Append(text.String()+i,close+1-i);
+				i	= close+1;
+			}
+			if (error.Length() > 0) {
+				// left as written - no silent empty string
+				interpolationErrors++;
+				if (firstInterpolationError.Length() == 0)
+					firstInterpolationError	= error;
+				PRINT(("PCommandManager::InterpolateText - %s\n",error.String()));
+			}
+			continue;
+		}
+		result->Append(text[i],1);
+		i++;
+	}
+	return changed;
+}
+
+
+bool PCommandManager::FormatVariable(const char *name, BString *text, BString *error)
+{
+	type_code	type	= B_ANY_TYPE;
+	int32		count	= 0;
+	if ((valueContext == NULL) || (valueContext->GetInfo(name,&type,&count) != B_OK)) {
+		error->SetToFormat(B_TRANSLATE("\"${%s}\": no such variable"),name);
+		return false;
+	}
+	if (count != 1) {
+		error->SetToFormat(B_TRANSLATE("\"${%s}\" holds %ld values, not one"),name,(long)count);
+		return false;
+	}
+	switch (type) {
+		case B_STRING_TYPE: {
+			const char	*value	= NULL;
+			valueContext->FindString(name,&value);
+			text->SetTo(value);
+			return true;
+		}
+		case B_INT32_TYPE: {
+			int32	value	= 0;
+			valueContext->FindInt32(name,&value);
+			text->SetToFormat("%ld",(long)value);
+			return true;
+		}
+		case B_INT64_TYPE: {
+			int64	value	= 0;
+			valueContext->FindInt64(name,&value);
+			text->SetToFormat("%lld",(long long)value);
+			return true;
+		}
+		case B_FLOAT_TYPE:
+		case B_DOUBLE_TYPE: {
+			double	value	= 0;
+			if (type == B_FLOAT_TYPE) {
+				float	floatValue	= 0;
+				valueContext->FindFloat(name,&floatValue);
+				value	= floatValue;
+			} else
+				valueContext->FindDouble(name,&value);
+			// Calculate always yields float - "3", not "3.000000"
+			if ((value == floor(value)) && (fabs(value) < 1e15))
+				text->SetToFormat("%lld",(long long)value);
+			else
+				text->SetToFormat("%g",value);
+			return true;
+		}
+		case B_BOOL_TYPE: {
+			bool	value	= false;
+			valueContext->FindBool(name,&value);
+			text->SetTo(value ? "true" : "false");
+			return true;
+		}
+	}
+	error->SetToFormat(B_TRANSLATE("\"${%s}\" is not text or a number"),name);
+	return false;
+}
+
+
+void PCommandManager::RepointReplayNode(BMessage *from, BMessage *to)
+{
+	if (replayIndexer != NULL)
+		replayIndexer->Repoint(from,to);
+}
+
+
 void PCommandManager::ResolveBindings(BMessage *settings, PCommand *forCommand)
 {
 	// bindings are a replay-time-only concept - outside PlayMacro() there
@@ -594,6 +792,7 @@ status_t PCommandManager::Execute(BMessage *settings) {
 			// needs its own bindings resolved here, once, before Do() -
 			// a no-op outside macro playback (see ResolveBindings()).
 			ResolveBindings(settings,command);
+			InterpolateStrings(settings);
 			BMessage	*tmpMessage;
 			try  {
 				tmpMessage = command->Do(doc, settings);

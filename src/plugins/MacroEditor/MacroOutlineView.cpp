@@ -664,8 +664,10 @@ void MacroOutlineView::CloseOverlay(bool commit)
 	// a string field takes the overlay's text verbatim, no quotes to type
 	// or strip - matches how it was shown (see FormatValueForEditing()).
 	// Still checked for "$name" first, same as every other field, so a
-	// string field stays bindable.
-	bool	isBoundLiteral	= item->AllowBinding() && text.StartsWith("$");
+	// string field stays bindable - "${name}" is text interpolation, not a
+	// binding (PCommandManager::InterpolateStrings()).
+	bool	isBoundLiteral	= item->AllowBinding() && text.StartsWith("$")
+		&& !text.StartsWith("${");
 	if ((item->FieldType() == B_STRING_TYPE) && !isBoundLiteral) {
 		owner.AddString(item->FieldName().String(),text);
 	} else {

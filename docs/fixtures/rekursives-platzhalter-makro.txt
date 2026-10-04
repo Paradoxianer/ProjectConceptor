@@ -1,0 +1,247 @@
+# Rekursives Testmakro fuer "${name}"-Platzhalter in Textfeldern.
+# Baut ein 3x4-Raster: verschachteltes Repeat, laufender Zaehler ueber
+# beide Schleifen, Zeilen-Knotenpaar mit Verbindung im selben Insert,
+# If auf einen erzeugten Namen, ForEach ueber die ganze Auswahl, und
+# einen Knoten nach den Schleifen, der per @6 wiedergefunden werden muss.
+# Erwartet: 20 Knoten, 3 Verbindungen, Bericht "Played 9 command(s).".
+
+Calculate
+  left=0.0
+  operator="+"
+  right=0.0
+  resultVariable="total"
+
+Repeat
+  count=3
+  counterVariable="r"
+  Calculate
+    left=$r
+    operator="+"
+    right=1.0
+    resultVariable="row"
+  Repeat
+    count=4
+    counterVariable="c"
+    Calculate
+      left=$c
+      operator="+"
+      right=1.0
+      resultVariable="col"
+    Calculate
+      left=$total
+      operator="+"
+      right=1.0
+      resultVariable="total"
+    Insert
+      resultVariable="cell"
+      node=@1
+      ~included_node
+        this=1
+        what=class
+        Node::Frame=[200.0,40.0,310.0,100.0]
+        ~Node::Data
+          Node::name="R${row}/C${col} #${total}"
+        ~Node::Font
+          what=1716475001
+          Font::Encoding=0i8
+          Font::Face=64i8
+          Font::Family="Noto Sans"
+          Font::Flags=0
+          Font::Rotation=0.0
+          Font::Shear=90.0
+          Font::Size=12.0
+          Font::Spacing=2i8
+          Font::Style="Regular"
+          Font::Color=-4876433
+        ~Node::Pattern
+          FillColor=-4279144
+          BorderColor=-16777216
+          PenSize=1.0
+          DrawingMode=10i8
+          HighColor=-16777216
+          LowColor=-8355712
+          Pattern=raw:1346458702://////////8=
+    AddAttribute
+      node=$cell
+      ~valueContainer
+        name="Position"
+        subgroup="Node::Data"
+        type=string
+        newAttribute="Zeile ${row}, Spalte ${col} von ${total}"
+    Select
+      node=$cell
+    Calculate
+      left=$c
+      operator="*"
+      right=130.0
+      resultVariable="dx"
+    Calculate
+      left=$r
+      operator="*"
+      right=100.0
+      resultVariable="dy"
+    Move
+      dx=$dx
+      dy=$dy
+  Insert
+    resultVariable="rowNodes"
+    node=@2
+    node=@3
+    node=@4
+    ~included_node
+      this=2
+      what=class
+      Node::Frame=[40.0,40.0,150.0,100.0]
+      ~Node::Data
+        Node::name="Zeile ${row} >"
+      ~Node::Font
+        what=1716475001
+        Font::Encoding=0i8
+        Font::Face=64i8
+        Font::Family="Noto Sans"
+        Font::Flags=0
+        Font::Rotation=0.0
+        Font::Shear=90.0
+        Font::Size=12.0
+        Font::Spacing=2i8
+        Font::Style="Regular"
+        Font::Color=-4876433
+      ~Node::Pattern
+        FillColor=-3355546
+        BorderColor=-16777216
+        PenSize=1.0
+        DrawingMode=10i8
+        HighColor=-16777216
+        LowColor=-8355712
+        Pattern=raw:1346458702://////////8=
+    ~included_node
+      this=3
+      what=class
+      Node::Frame=[740.0,40.0,850.0,100.0]
+      ~Node::Data
+        Node::name="Ende Zeile ${row}"
+      ~Node::Font
+        what=1716475001
+        Font::Encoding=0i8
+        Font::Face=64i8
+        Font::Family="Noto Sans"
+        Font::Flags=0
+        Font::Rotation=0.0
+        Font::Shear=90.0
+        Font::Size=12.0
+        Font::Spacing=2i8
+        Font::Style="Regular"
+        Font::Color=-4876433
+      ~Node::Pattern
+        FillColor=-3355546
+        BorderColor=-16777216
+        PenSize=1.0
+        DrawingMode=10i8
+        HighColor=-16777216
+        LowColor=-8355712
+        Pattern=raw:1346458702://////////8=
+    ~included_node
+      this=4
+      what=connection
+      Node::from=2
+      Node::to=3
+      Connection::type=1i8
+      Connection::arrows=1i8
+      ~Node::Pattern
+        FillColor=-16777216
+        PenSize=2.0
+  Select
+    node=$rowNodes
+  Calculate
+    left=$r
+    operator="*"
+    right=100.0
+    resultVariable="rowDy"
+  Move
+    dx=0.0
+    dy=$rowDy
+
+Insert
+  node=@6
+  ~included_node
+    this=6
+    what=class
+    Node::Frame=[40.0,700.0,560.0,760.0]
+    ~Node::Data
+      Node::name="Summe: ${total} Zellen (Preis $${egal})"
+    ~Node::Font
+      what=1716475001
+      Font::Encoding=0i8
+      Font::Face=64i8
+      Font::Family="Noto Sans"
+      Font::Flags=0
+      Font::Rotation=0.0
+      Font::Shear=90.0
+      Font::Size=12.0
+      Font::Spacing=2i8
+      Font::Style="Regular"
+      Font::Color=-4876433
+    ~Node::Pattern
+      FillColor=-6697831
+      BorderColor=-16777216
+      PenSize=1.0
+      DrawingMode=10i8
+      HighColor=-16777216
+      LowColor=-8355712
+      Pattern=raw:1346458702://////////8=
+Select
+  node=@6
+Move
+  dx=0.0
+  dy=-360.0
+If
+  searchString="R3/C4"
+  Insert
+    node=@7
+    ~included_node
+      this=7
+      what=class
+      Node::Frame=[600.0,340.0,850.0,400.0]
+      ~Node::Data
+        Node::name="If: R3/C4 gefunden (${total})"
+      ~Node::Font
+        what=1716475001
+        Font::Encoding=0i8
+        Font::Face=64i8
+        Font::Family="Noto Sans"
+        Font::Flags=0
+        Font::Rotation=0.0
+        Font::Shear=90.0
+        Font::Size=12.0
+        Font::Spacing=2i8
+        Font::Style="Regular"
+        Font::Color=-4876433
+      ~Node::Pattern
+        FillColor=-6697831
+        BorderColor=-16777216
+        PenSize=1.0
+        DrawingMode=10i8
+        HighColor=-16777216
+        LowColor=-8355712
+        Pattern=raw:1346458702://////////8=
+Select
+  selectAll=true
+Calculate
+  left=0.0
+  operator="+"
+  right=0.0
+  resultVariable="idx"
+ForEach
+  nodeVariable="n"
+  Calculate
+    left=$idx
+    operator="+"
+    right=1.0
+    resultVariable="idx"
+  AddAttribute
+    node=$n
+    ~valueContainer
+      name="Nummer"
+      subgroup="Node::Data"
+      type=string
+      newAttribute="${idx} von ${total}"

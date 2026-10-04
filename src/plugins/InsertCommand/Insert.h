@@ -22,5 +22,8 @@ public:
 
 protected:
 	//----------------PCommand
+			/** during playback: nodes/connections with "${...}"
+			 * placeholders replaced by filled-in copies - see Do() */
+			void			ReplaceInterpolatedNodes(BMessage *settings);
 };
 #endif

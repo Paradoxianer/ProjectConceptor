@@ -3,6 +3,8 @@
 
 #include <support/TypeConstants.h>
 
+#include <map>
+
 #include "PCommandManager.h"
 
 Insert::Insert():PCommand() {
@@ -57,6 +59,49 @@ void Insert::Undo(PDocument *doc,BMessage *undo) {
 	doc->SetModified();
 }
 
+void Insert::ReplaceInterpolatedNodes(BMessage *settings) {
+	if ((manager == NULL) || (manager->GetValueContext() == NULL))
+		return;
+	// a node with "${...}" placeholders goes in as a filled-in copy, never
+	// the template itself - inside a Repeat the template is reused for the
+	// next pass and must keep its placeholders
+	std::map<BMessage*,BMessage*>	replaced;
+	BMessage	*node	= NULL;
+	for (int32 i = 0; settings->FindPointer("node",i,(void **)&node) == B_OK; i++) {
+		if ((node->what == P_C_CONNECTION_TYPE) || !manager->HasInterpolation(node))
+			continue;
+		BMessage	*copy	= new BMessage(*node);
+		manager->InterpolateStrings(copy);
+		settings->ReplacePointer("node",i,copy);
+		manager->RepointReplayNode(node,copy);
+		replaced[node]	= copy;
+	}
+	// a connection in this same Insert must point at the copies, not at
+	// templates that never reach the document - and so becomes a copy too
+	for (int32 i = 0; settings->FindPointer("node",i,(void **)&node) == B_OK; i++) {
+		if (node->what != P_C_CONNECTION_TYPE)
+			continue;
+		BMessage	*from	= NULL;
+		BMessage	*to		= NULL;
+		node->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&from);
+		node->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&to);
+		std::map<BMessage*,BMessage*>::iterator	newFrom	= replaced.find(from);
+		std::map<BMessage*,BMessage*>::iterator	newTo	= replaced.find(to);
+		bool	hasText	= manager->HasInterpolation(node);
+		if ((newFrom == replaced.end()) && (newTo == replaced.end()) && !hasText)
+			continue;
+		BMessage	*copy	= new BMessage(*node);
+		if (newFrom != replaced.end())
+			copy->ReplacePointer(P_C_NODE_CONNECTION_FROM,newFrom->second);
+		if (newTo != replaced.end())
+			copy->ReplacePointer(P_C_NODE_CONNECTION_TO,newTo->second);
+		if (hasText)
+			manager->InterpolateStrings(copy);
+		settings->ReplacePointer("node",i,copy);
+		manager->RepointReplayNode(node,copy);
+	}
+}
+
 BMessage* Insert::Do(PDocument *doc, BMessage *settings) {
 	TRACE();
 	BMessage		*node				= NULL;
@@ -70,6 +115,7 @@ BMessage* Insert::Do(PDocument *doc, BMessage *settings) {
 		&& (resultVariable.Length() > 0);
 	if (hasResultVariable && (manager->GetValueContext() != NULL))
 		manager->GetValueContext()->RemoveName(resultVariable.String());
+	ReplaceInterpolatedNodes(settings);
 	while ((err=settings->FindPointer("node",i,(void **)&node)) == B_OK) {
 		if ((node->what != P_C_CONNECTION_TYPE) && allNodes->HasItem(node)) {
 			// the same command run again (Repeat/ForEach around an Insert)

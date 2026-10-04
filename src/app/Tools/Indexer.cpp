@@ -464,6 +464,13 @@ int32 Indexer::IdFor(BMessage *node)
 	return id;
 }
 
+void Indexer::Repoint(BMessage *from,BMessage *to)
+{
+	for (std::map<int32,BMessage*>::iterator it = sorter.begin(); it != sorter.end(); it++)
+		if (it->second == from)
+			it->second	= to;
+}
+
 bool Indexer::ResolveId(int32 id,BMessage **node)
 {
 	std::map<int32,BMessage*>::iterator it = sorter.find(id);

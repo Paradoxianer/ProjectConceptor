@@ -59,6 +59,12 @@ public:
 	void AddNodeReferenceWiresChipIdIntoTargetCommand(void);
 	void AddNodeReferenceRefusesCommandWithNoNodeField(void);
 	void ReplaceNodeReferenceFieldOverwritesExistingValue(void);
+	void InterpolatesCounterIntoInsertedNodeNames(void);
+	void InterpolatedNodeStaysReachableById(void);
+	void UnknownPlaceholderIsReported(void);
+	void ConnectionFollowsInterpolatedNodes(void);
+	void PlaceholderAloneIsNotABinding(void);
+	void InterpolatesCommandSettingsInNestedBlocks(void);
 	void MoveCommandReparentsIntoAnotherContainer(void);
 	void MoveCommandPromotesToTopLevel(void);
 	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
@@ -109,6 +115,12 @@ public:
 	CPPUNIT_TEST(AddNodeReferenceWiresChipIdIntoTargetCommand);
 	CPPUNIT_TEST(AddNodeReferenceRefusesCommandWithNoNodeField);
 	CPPUNIT_TEST(ReplaceNodeReferenceFieldOverwritesExistingValue);
+	CPPUNIT_TEST(InterpolatesCounterIntoInsertedNodeNames);
+	CPPUNIT_TEST(InterpolatedNodeStaysReachableById);
+	CPPUNIT_TEST(UnknownPlaceholderIsReported);
+	CPPUNIT_TEST(ConnectionFollowsInterpolatedNodes);
+	CPPUNIT_TEST(PlaceholderAloneIsNotABinding);
+	CPPUNIT_TEST(InterpolatesCommandSettingsInNestedBlocks);
 	CPPUNIT_TEST(MoveCommandReparentsIntoAnotherContainer);
 	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
 	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);
