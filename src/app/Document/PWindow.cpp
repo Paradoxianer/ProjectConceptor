@@ -3,6 +3,7 @@
 #include <interface/ScrollBar.h>
 #include <interface/ScrollView.h>
 #include <storage/Entry.h>
+#include <support/Autolock.h>
 #include <stdio.h>
 #include <string.h>
 #include <translation/TranslationUtils.h>
@@ -82,6 +83,11 @@ void PWindow::Init(void)
 void PWindow::ReloadMacroShortcuts(void)
 {
 	TRACE();
+	// also called from the settings window's thread (ShortCutView) -
+	// Add/RemoveCommonFilter() need this window locked
+	BAutolock	locker(this);
+	if (!locker.IsLocked())
+		return;
 	if (shortcutFilter != NULL) {
 		RemoveCommonFilter(shortcutFilter);
 		delete shortcutFilter;
