@@ -610,7 +610,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 					B_ANY_TYPE,false,NULL,-1);
 				AppendUnder(row,superitem);
 				// no schema inside a nested block/chip (see MacroText.h) -
-				// its own children get no "+ Feld hinzufügen" of their own
+				// its own children get no "+ Add field" row of their own
 				BuildChildren(&child,topLevelIndex,childPath,row,level+1,NULL,expandedKeys,collapsedKeys);
 			}
 			continue;
@@ -635,7 +635,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 		int32	propCount	= 0;
 		schemaCommand->PropertyInfo(&propCount);
 		if (propCount > 0) {
-			MacroRowItem	*addRow	= new MacroRowItem(B_TRANSLATE("+ Feld hinzufügen"),level,true,
+			MacroRowItem	*addRow	= new MacroRowItem(B_TRANSLATE("+ Add field"),level,true,
 				kRowAddField,topLevelIndex,containerPath,"",-1,B_ANY_TYPE,false,schemaCommand,-1);
 			AppendUnder(addRow,superitem);
 		}
@@ -645,7 +645,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 		// report, forward-looking - see ShowFreeformAddFieldMenu()) -
 		// command==NULL on this row is exactly what tells
 		// ShowAddFieldMenu() which of the two flows to open
-		MacroRowItem	*addRow	= new MacroRowItem(B_TRANSLATE("+ Feld hinzufügen"),level,true,
+		MacroRowItem	*addRow	= new MacroRowItem(B_TRANSLATE("+ Add field"),level,true,
 			kRowAddField,topLevelIndex,containerPath,"",-1,B_ANY_TYPE,false,NULL,-1);
 		AppendUnder(addRow,superitem);
 	}

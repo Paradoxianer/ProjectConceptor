@@ -633,8 +633,8 @@ void MacroEditor::DuplicateSelectedMacro(void)
 	}
 	BString	name;
 	fSelectedMacro->FindString("Name",&name);
-	BString	copyName(name);
-	copyName	<< B_TRANSLATE(" copy");
+	BString	copyName;
+	copyName.SetToFormat(B_TRANSLATE_COMMENT("%s copy","name of a duplicated macro"),name.String());
 	fSelectedMacro	= AddNewMacro(copyName,fSelectedMacro);
 	RefreshMacroList();
 	SetStatus(B_TRANSLATE("Duplicated."),false);

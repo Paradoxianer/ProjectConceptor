@@ -1,61 +1,57 @@
-1	English	application/x-vnd.ProjectConceptor	279221209
-Save Macro	ProjectConceptor		Save Macro
-Macro	ProjectConceptor		Macro
-Stop recording	ProjectConceptor		Stop recording
+1	English	application/x-vnd.ProjectConceptor	4038765573
+Macro shortcuts (double-click to change the key)	ShortCutView		Macro shortcuts (double-click to change the key)
+Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Press the key combination for the macro \"%s\" (Esc to cancel).
 About	MainWindow		About
 Input macro name	CommandManager		Input macro name
+Open the settings from a document window to pick one of its macros.	ShortCutView		Open the settings from a document window to pick one of its macros.
 Redo	MainWindow		Redo
 Settings	SavePanel		Settings
 Replace	MainWindow		Replace
 Start recording	MainWindow		Start recording
 OK	CommandManager		OK
-Paste	ProjectConceptor		Paste
-Help	ProjectConceptor		Help
-Play	ProjectConceptor		Play
+OK	ShortCutView		OK
+\"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		\"$%s\" (for \"%s\") is \"%s\", not a number
 New	MainWindow		New
-Window	ProjectConceptor		Window
-Undo	ProjectConceptor		Undo
+%ld problem(s) while playing, first: %s	CommandManager		%ld problem(s) while playing, first: %s
+This document has no macros yet. Record or create one first (Macro menu).	ShortCutView		This document has no macros yet. Record or create one first (Macro menu).
 Edit	MainWindow		Edit
 Save	MainWindow		Save
-Edit	ProjectConceptor		Edit
+Shortcuts	ShortCutView		Shortcuts
 Open	MainWindow		Open
-Redo	ProjectConceptor		Redo
 Settings	ConfigWindow		Settings
-Save	ProjectConceptor		Save
+\"%s\": \"${\" without a closing \"}\"	CommandManager		\"%s\": \"${\" without a closing \"}\"
 Cancel	CommandManager		Cancel
 Save as	SavePanel		Save as
+\"${%s}\" is not text or a number	CommandManager		\"${%s}\" is not text or a number
 Clear	MainWindow		Clear
-Search	ProjectConceptor		Search
 Macro	MainWindow		Macro
-Replace	ProjectConceptor		Replace
 Undo	MainWindow		Undo
-File format	SavePanel		File format
 Macro	CommandManager		Macro
-Settings	ProjectConceptor		Settings
-Print	ProjectConceptor		Print
-Open	ProjectConceptor		Open
+File format	SavePanel		File format
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		This file was saved by an incompatible version of ProjectConceptor and cannot be opened.
 Save before close	Document		Save before close
-Start recording	ProjectConceptor		Start recording
-Replace all	ProjectConceptor		Replace all
-Page setup	ProjectConceptor		Page setup
 Paste	MainWindow		Paste
 Help	MainWindow		Help
-Find next	ProjectConceptor		Find next
+Remove	ShortCutView		Remove
 Problems while trying to save the file	Document		Problems while trying to save the file
+The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.
 Select all	MainWindow		Select all
-Cascade	ProjectConceptor		Cascade
+No document	ShortCutView		No document
+Alpha:	ColorPickerWindow		Alpha:
+Press the new key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Press the new key combination for the macro \"%s\" (Esc to cancel).
 Stop recording	MainWindow		Stop recording
 ProjectConceptor	PluginManager		ProjectConceptor
-Find & Replace	ProjectConceptor		Find & Replace
 Play	MainWindow		Play
+\"$%s\" (for \"%s\"): no such variable	CommandManager		\"$%s\" (for \"%s\"): no such variable
+%ld node reference(s) point to nodes the macro never creates - it did not do what it says.	CommandManager		%ld node reference(s) point to nodes the macro never creates - it did not do what it says.
 There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		There is no FTP client on your machine that is configured as the default program to connect to an FTP server.
-Title	ProjectConceptor		Title
 Replace all	MainWindow		Replace all
+Open Recent	MainWindow		Open Recent
 Cascade	MainWindow		Cascade
 Don't save	Document		Don't save
+\"${%s}\" holds %ld values, not one	CommandManager		\"${%s}\" holds %ld values, not one
 Close	MainWindow		Close
-Title Vertical	ProjectConceptor		Title Vertical
+Rename	MainWindow		Rename
 Could not find command	CommandManager		Could not find command
 Name	CommandManager		Name
 Quit	MainWindow		Quit
@@ -64,46 +60,44 @@ Save	Document		Save
 Search	MainWindow		Search
 OK	PluginManager		OK
 Could not find plugins	SavePanel		Could not find plugins
-Copy	ProjectConceptor		Copy
-Select all	ProjectConceptor		Select all
 File	MainWindow		File
-Export	ProjectConceptor		Export
+The macro is empty - nothing to play.	CommandManager		The macro is empty - nothing to play.
+No active editor - please install an editor plugin.	Document		No active editor - please install an editor plugin.
 Continue recording	CommandManager		Continue recording
 Restart recording	CommandManager		Restart recording
-No active editor - please install an editor plugin.	Document		No active editor - please install an editor plugin.
-Close	ProjectConceptor		Close
 Macro recording already started!	CommandManager		Macro recording already started!
-Save as	ProjectConceptor		Save as
-Cut	ProjectConceptor		Cut
 Project settings	MainWindow		Project settings
 Error	Document		Error
 Error on execution of Command.	CommandManager		Error on execution of Command.
 Page setup	MainWindow		Page setup
-File	ProjectConceptor		File
 Title	MainWindow		Title
-Clear	ProjectConceptor		Clear
+Delete	MainWindow		Delete
 Save as	MainWindow		Save as
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		There is no e-mail program on your machine that is configured as the default program to send e-mail.
 Web Browser Warning	AboutURLView		Web Browser Warning
 Window	MainWindow		Window
+\"${%s}\": no such variable	CommandManager		\"${%s}\": no such variable
 I had problems while setting up the Printer!	Document		I had problems while setting up the Printer!
 E-mail Warning	AboutURLView		E-mail Warning
-Quit	ProjectConceptor		Quit
+Editor shortcuts (double-click to change)	ShortCutView		Editor shortcuts (double-click to change)
 There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		There is no web browser on your machine that is configured as the default program to view web pages.
 FTP Warning	AboutURLView		FTP Warning
+No macros	ShortCutView		No macros
+Shortcut	KeyCaptureWindow		Shortcut
+Command %ld (%s) failed.	CommandManager		Command %ld (%s) failed.
 Replace & Find	MainWindow		Replace & Find
-Find	ProjectConceptor		Find
 Cut	MainWindow		Cut
 Can't find plugins	PluginManager		Can't find plugins
 Help	HelpWindow		Help
-New	ProjectConceptor		New
 Find	MainWindow		Find
 OK	AboutURLView		OK
-About	ProjectConceptor		About
-New Tab	ProjectConceptor		New Tab
+Duplicate	MainWindow		Duplicate
+Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Press the new key combination for \"%s\" (Esc to cancel).
+New…	ShortCutView		New…
 Cancel	Document		Cancel
 Print	MainWindow		Print
 Find next	MainWindow		Find next
 Error!	CommandManager		Error!
 Title Vertical	MainWindow		Title Vertical
+Played %ld command(s).	CommandManager		Played %ld command(s).
 Copy	MainWindow		Copy

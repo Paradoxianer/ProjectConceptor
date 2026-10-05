@@ -162,7 +162,7 @@ private:
 								uint32 level, PCommand *schemaCommand,
 								const std::set<BString> &expandedKeys,
 								const std::set<BString> &collapsedKeys);
-			/** Shows the "+ Feld hinzufügen" popup for the command/block at
+			/** Shows the "+ Add field" popup for the command/block at
 			 * `containerPath` (topLevelIndex + path). `command` NULL (a
 			 * generic block/chip, no schema) opens ShowFreeformAddFieldMenu()
 			 * instead of the schema-driven list below. */

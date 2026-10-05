@@ -8,6 +8,7 @@
 #include <interface/PopUpMenu.h>
 #include <interface/ScrollView.h>
 #include <interface/StringView.h>
+#include <locale/Catalog.h>
 
 #include "ConfigManager.h"
 #include "KeyCaptureWindow.h"
@@ -16,6 +17,9 @@
 #include "PDocumentManager.h"
 #include "ProjectConceptor.h"
 #include "ProjectConceptorDefs.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "ShortCutView"
 
 
 static void FormatKeyBinding(BString *out,int32 key,int32 modifiers)
@@ -112,9 +116,9 @@ void ShortCutView::Init(void)
 	fMacroList->SetInvocationMessage(new BMessage(MSG_MACRO_LIST_INVOKED));
 	fMacroList->SetTarget(this);
 
-	BButton	*addMacroShortcut		= new BButton("addMacroShortcut","New...",new BMessage(MSG_ADD_MACRO_SHORTCUT));
+	BButton	*addMacroShortcut		= new BButton("addMacroShortcut",B_TRANSLATE("New" B_UTF8_ELLIPSIS),new BMessage(MSG_ADD_MACRO_SHORTCUT));
 	addMacroShortcut->SetTarget(this);
-	BButton	*removeMacroShortcut	= new BButton("removeMacroShortcut","Remove",new BMessage(MSG_REMOVE_MACRO_SHORTCUT));
+	BButton	*removeMacroShortcut	= new BButton("removeMacroShortcut",B_TRANSLATE("Remove"),new BMessage(MSG_REMOVE_MACRO_SHORTCUT));
 	removeMacroShortcut->SetTarget(this);
 
 	BView	*macroButtonRow	= new BView("macroButtonRow",0);
@@ -122,10 +126,10 @@ void ShortCutView::Init(void)
 	macroButtonRow->AddChild(addMacroShortcut);
 	macroButtonRow->AddChild(removeMacroShortcut);
 
-	AddChild(new BStringView("actionShortcutsLabel","Editor Shortcuts (double-click to change)"));
+	AddChild(new BStringView("actionShortcutsLabel",B_TRANSLATE("Editor shortcuts (double-click to change)")));
 	AddChild(new BScrollView("actionShortcutsScroller",fActionList,0,false,true));
 
-	AddChild(new BStringView("macroShortcutsLabel","Macro Shortcuts (double-click to change the key)"));
+	AddChild(new BStringView("macroShortcutsLabel",B_TRANSLATE("Macro shortcuts (double-click to change the key)")));
 	AddChild(new BScrollView("macroShortcutsScroller",fMacroList,0,false,true));
 	AddChild(macroButtonRow);
 
@@ -214,7 +218,7 @@ void ShortCutView::_SaveActionShortcuts(void)
 	ConfigManager	*configManager	= ((ProjektConceptor*)be_app)->GetConfigManager();
 	configManager->SetConfigMessage(P_C_CONFIG_SHORTCUTS_FIELD,&shortcuts);
 	configManager->SaveConfig();
-	(new BAlert("Shortcuts","The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.","OK"))->Go();
+	(new BAlert(B_TRANSLATE("Shortcuts"),B_TRANSLATE("The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with."),B_TRANSLATE("OK")))->Go();
 }
 
 void ShortCutView::_SaveMacroShortcuts(void)
@@ -243,8 +247,9 @@ void ShortCutView::_RebindAction(int32 index)
 	ActionShortcutItem	*item	= (ActionShortcutItem *)fActionList->ItemAt(index);
 	if (item == NULL)
 		return;
-	BString	prompt("Press the new key combination for \"");
-	prompt << item->Action() << "\" (Esc to cancel).";
+	BString	prompt;
+	prompt.SetToFormat(B_TRANSLATE("Press the new key combination for \"%s\" (Esc to cancel)."),
+		item->Action());
 	KeyCaptureWindow	*capture	= new KeyCaptureWindow(prompt.String());
 	int32	key			= 0;
 	int32	modifiers	= 0;
@@ -260,8 +265,9 @@ void ShortCutView::_RebindMacroShortcut(int32 index)
 	MacroShortcutItem	*item	= (MacroShortcutItem *)fMacroList->ItemAt(index);
 	if (item == NULL)
 		return;
-	BString	prompt("Press the new key combination for the macro \"");
-	prompt << item->MacroName() << "\" (Esc to cancel).";
+	BString	prompt;
+	prompt.SetToFormat(B_TRANSLATE("Press the new key combination for the macro \"%s\" (Esc to cancel)."),
+		item->MacroName());
 	KeyCaptureWindow	*capture	= new KeyCaptureWindow(prompt.String());
 	int32	key			= 0;
 	int32	modifiers	= 0;
@@ -275,12 +281,12 @@ void ShortCutView::_RebindMacroShortcut(int32 index)
 void ShortCutView::_AddMacroShortcut(void)
 {
 	if (fDoc == NULL) {
-		(new BAlert("No document","Open Project settings from a document window to pick one of its macros.","OK"))->Go();
+		(new BAlert(B_TRANSLATE("No document"),B_TRANSLATE("Open the settings from a document window to pick one of its macros."),B_TRANSLATE("OK")))->Go();
 		return;
 	}
 	BList	*macroList	= fDoc->GetCommandManager()->GetMacroList();
 	if ((macroList == NULL) || (macroList->CountItems() == 0)) {
-		(new BAlert("No macros","This document has no recorded macros yet. Record one first (Macro menu > Start recording).","OK"))->Go();
+		(new BAlert(B_TRANSLATE("No macros"),B_TRANSLATE("This document has no macros yet. Record or create one first (Macro menu)."),B_TRANSLATE("OK")))->Go();
 		return;
 	}
 
@@ -301,8 +307,9 @@ void ShortCutView::_AddMacroShortcut(void)
 	BString	macroName(chosen->Label());
 	delete menu;
 
-	BString	prompt("Press the key combination for the macro \"");
-	prompt << macroName << "\" (Esc to cancel).";
+	BString	prompt;
+	prompt.SetToFormat(B_TRANSLATE("Press the key combination for the macro \"%s\" (Esc to cancel)."),
+		macroName.String());
 	KeyCaptureWindow	*capture	= new KeyCaptureWindow(prompt.String());
 	int32	key			= 0;
 	int32	modifiers	= 0;

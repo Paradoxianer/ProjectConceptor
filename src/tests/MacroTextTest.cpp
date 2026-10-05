@@ -1651,7 +1651,7 @@ void MacroTextTest::AddNamedFieldAddsCustomFieldToGenericBlock(void)
 void MacroTextTest::AddFieldMenuOffersRepeatableFieldAgain(void)
 {
 	// Select's "node" is repeatable (Select::Do() loops FindPointer("node",
-	// i,...)) - adding it via "+ Feld hinzufügen" twice should give two
+	// i,...)) - adding it via "+ Add field" twice should give two
 	// separate entries, not overwrite the first (user report)
 	BMessage	select;
 	select.AddString("Command::Name","Select");

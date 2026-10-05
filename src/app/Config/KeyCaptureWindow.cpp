@@ -5,6 +5,10 @@
 #include <interface/StringView.h>
 #include <interface/View.h>
 #include <kernel/OS.h>
+#include <locale/Catalog.h>
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "KeyCaptureWindow"
 
 
 class KeyCatcherView : public BView
@@ -43,7 +47,7 @@ private:
 
 
 KeyCaptureWindow::KeyCaptureWindow(const char *prompt)
-	:BWindow(BRect(0,0,320,80),"Shortcut",B_MODAL_WINDOW_LOOK,B_MODAL_APP_WINDOW_FEEL,
+	:BWindow(BRect(0,0,320,80),B_TRANSLATE("Shortcut"),B_MODAL_WINDOW_LOOK,B_MODAL_APP_WINDOW_FEEL,
 			 B_NOT_RESIZABLE | B_NOT_ZOOMABLE)
 {
 	BScreen	screen;

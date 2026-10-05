@@ -76,6 +76,10 @@ LOCAL_INCLUDE_PATHS = \
 		../../app/Config \
 		../../app/Tools
 
+# other languages: copy locales/en.catkeys to <lang>.catkeys, translate,
+# add the language here
+LOCALES = de en
+
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
 #OPTIMIZE= FULL

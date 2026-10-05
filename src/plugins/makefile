@@ -59,6 +59,7 @@ catkeys:
 
 bindcatalogs:
 	$(MAKE) -C GraphEditor bindcatalogs; \
+	$(MAKE) -C MacroEditor bindcatalogs; \
 	$(MAKE) -C NavigatorEditor bindcatalogs; \
 
 

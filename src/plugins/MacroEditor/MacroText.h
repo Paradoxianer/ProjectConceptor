@@ -135,7 +135,7 @@ status_t	ParseFieldValue(BMessage *msg, const char *fieldName, type_code expecte
 /** Looks up fieldName in command's own PropertyInfo() ctypes - true and the
  * declared type_code if found. Shared by ParseCommands() (field-name/type
  * validation) and the tree editor (same validation, plus driving the "+
- * Feld hinzufügen" menu's field list and each field row's overlay). */
+ * Add field" menu's field list and each field row's overlay). */
 bool		FindFieldType(PCommand *command, const char *fieldName, type_code *outType);
 
 #endif

@@ -1,108 +1,103 @@
-1	German	application/x-vnd.ProjectConceptor	2706318720
-New Tab	ProjectConceptor		Neuer Tab
-Settings	ProjectConceptor		Einstellungen
-Macro	ProjectConceptor		Makro
-Cut	ProjectConceptor		Ausschneiden
-Save Macro	ProjectConceptor		Makro speichern
-Replace all	ProjectConceptor		Alles ersetzen
-Paste	ProjectConceptor		Einfügen
-Help	ProjectConceptor		Hilfe
-Save as	ProjectConceptor		Speichern als
-Play	ProjectConceptor		Abspielen
-Find & Replace	ProjectConceptor		Suchen and Ersetzen
-New	ProjectConceptor		Neu
-Tile Vertical	ProjectConceptor		Tile Vertical
-Copy	ProjectConceptor		Kopieren
-About	ProjectConceptor		Über...
-Find	ProjectConceptor		Suchen
-Stop recording	ProjectConceptor		Aufnahme stoppen
-Export	ProjectConceptor		Exportieren
-Save	ProjectConceptor		Speichern
-Find next	ProjectConceptor		Weitersuchen
-Undo	ProjectConceptor		Rückgängig
-File	ProjectConceptor		Datei
-Print	ProjectConceptor		Drucken
-Open	ProjectConceptor		Öffnen
-Window	ProjectConceptor		Fenster
-Replace	ProjectConceptor		Ersetzen
-Edit	ProjectConceptor		Bearbeiten
-Tile	ProjectConceptor		Tile
-Close	ProjectConceptor		Schließen
-Redo	ProjectConceptor		Wiederherstellen
-Quit	ProjectConceptor		Beenden
-Page setup	ProjectConceptor		Seiten einrichten
-Search	ProjectConceptor		Suchen
-Start recording	ProjectConceptor		Ausnahme starten
-Cascade	ProjectConceptor		Cascade
-Clear	ProjectConceptor		Clear
-Select all	ProjectConceptor		Alles auswählen
-Select all	MainWindow		Alles auswählen
-Macro	MainWindow		Makro
-Title	MainWindow		Titel
-New	MainWindow		Neu
-Save	MainWindow		Speichern
-Open	MainWindow		Öffnen
-Stop recording	MainWindow		Aufnahme stoppen
-Page setup	MainWindow		Seiten einrichten
-Search	MainWindow		Suchen
-Project settings	MainWindow		Projekt-Eigenschaften
-Print	MainWindow		Drucken
-Window	MainWindow		Fenster
-Find next	MainWindow		Weitersuchen
-File	MainWindow		Datei
-Play	MainWindow		Abspielen
-Quit	MainWindow		Beenden
-Redo	MainWindow		Wiederherstellen
-Paste	MainWindow		Einfügen
-Edit	MainWindow		Bearbeiten
-Replace	MainWindow		Ersetzen
-Title vertical	MainWindow		Title vertical
-Cascade	MainWindow		Cascade
-Replace & Find	MainWindow		Finden und ersetzen
-Undo	MainWindow		Rückgängig
-Find	MainWindow		Suchen
-Copy	MainWindow		Kopieren
-Close	MainWindow		Schließen
-Help	MainWindow		Hilfe
-Clear	MainWindow		Clear
-Cut	MainWindow		Ausschneiden
-Start recording	MainWindow		Aufnahme starten
+1	German	application/x-vnd.ProjectConceptor	4038765573
+Macro shortcuts (double-click to change the key)	ShortCutView		Makro-Kürzel (Doppelklick ändert die Taste)
+Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tastenkombination für das Makro \"%s\" drücken (Esc bricht ab).
 About	MainWindow		Über...
-Replace all	MainWindow		Alles ersetzen
-Save as	MainWindow		Speichern als
+Input macro name	CommandManager		Makroname eingeben
+Open the settings from a document window to pick one of its macros.	ShortCutView		Öffne die Einstellungen aus einem Dokumentfenster, um eines seiner Makros zu wählen.
+Redo	MainWindow		Wiederherstellen
 Settings	SavePanel		Einstellungen
-Fileformat	SavePanel		Dateiformat
-Save as	SavePanel		Speichern als
-Could not find plugins	SavePanel		Keine Plugins gefunden
-Error on execution of Command.	CommandManager		Fehler beim Ausführen des Befehls
-Coud not find command	CommandManager		Befehl nicht gefunden
-Input macroname	CommandManager		Input macroname
+Replace	MainWindow		Ersetzen
+Start recording	MainWindow		Aufnahme starten
 OK	CommandManager		OK
-Macro recording already started!	CommandManager		Aufnahme eines Makros läuft bereits!
-Cancel	CommandManager		Abbrechen
-Macro	CommandManager		Makro
-Contiune recording	CommandManager		Aufzeichnung fortsetzen
-Restart recording	CommandManager		Aufnahme neu beginnen
-Name	CommandManager		Name
-Error!	CommandManager		Fehler!
+OK	ShortCutView		OK
+\"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		\"$%s\" (für \"%s\") ist \"%s\", keine Zahl
+New	MainWindow		Neu
+%ld problem(s) while playing, first: %s	CommandManager		%ld Problem(e) beim Abspielen, zuerst: %s
+This document has no macros yet. Record or create one first (Macro menu).	ShortCutView		Dieses Dokument hat noch keine Makros. Zuerst eines aufnehmen oder anlegen (Menü Makro).
+Edit	MainWindow		Bearbeiten
+Save	MainWindow		Speichern
+Shortcuts	ShortCutView		Tastenkürzel
+Open	MainWindow		Öffnen
 Settings	ConfigWindow		Einstellungen
-FTP Warning	AboutURLView		FTP-Warnung
-Web Browser Warning	AboutURLView		Web-Browser-Warnung
-Ok	AboutURLView		Ok
-E-mail Warning	AboutURLView		E-Mail-Warnung
-There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Es ist keine Standard-Anwendung definiert, um Internetseiten anzuzeigen.
-There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Es ist keine Standard-Anwendung definiert, um eine Verbindung mit einem FTP-Server aufzubauen.
-There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Es ist kein E-Mail-Programm als Standard-Anwendung zum Senden von E-Mails definiert.
-Problems while trying to save the file	Document		Es gab ein Problem beim Speichern der Datei
-Save	Document		Speichern
-Save changes to  	Document		Änderungen speichern
+\"%s\": \"${\" without a closing \"}\"	CommandManager		\"%s\": \"${\" ohne schließendes \"}\"
+Cancel	CommandManager		Abbrechen
+Save as	SavePanel		Speichern als
+\"${%s}\" is not text or a number	CommandManager		\"${%s}\" ist weder Text noch Zahl
+Clear	MainWindow		Clear
+Macro	MainWindow		Makro
+Undo	MainWindow		Rückgängig
+Macro	CommandManager		Makro
+File format	SavePanel		Dateiformat
+This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Diese Datei wurde mit einer inkompatiblen Version von ProjectConceptor gespeichert und kann nicht geöffnet werden.
 Save before close	Document		Vor dem Beenden speichern
-Error	Document		Fehler
-I had problems while setting up the Printer!	Document		Es ist ein Fehler beim Einrichten des Druckers aufgetreten.
-Cancel	Document		Abbrechen
-No active Editor Pleas install a Editor Plugin.	Document		Kein aktiver Editor. Bitte einen Editor-Plugin installieren.
-Don't save	Document		Nicht speichern
-Cant find plugins	PluginManager		Keine Plugins gefunden
+Paste	MainWindow		Einfügen
+Help	MainWindow		Hilfe
+Remove	ShortCutView		Entfernen
+Problems while trying to save the file	Document		Es gab ein Problem beim Speichern der Datei
+The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Die neue Belegung gilt für ab jetzt geöffnete Dokumente – bereits offene Fenster behalten ihre bisherigen Tastenkürzel.
+Select all	MainWindow		Alles auswählen
+No document	ShortCutView		Kein Dokument
+Alpha:	ColorPickerWindow		Alpha:
+Press the new key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Neue Tastenkombination für das Makro \"%s\" drücken (Esc bricht ab).
+Stop recording	MainWindow		Aufnahme stoppen
 ProjectConceptor	PluginManager		ProjectConceptor
+Play	MainWindow		Abspielen
+\"$%s\" (for \"%s\"): no such variable	CommandManager		\"$%s\" (für \"%s\"): unbekannte Variable
+%ld node reference(s) point to nodes the macro never creates - it did not do what it says.	CommandManager		%ld Knotenverweis(e) zeigen auf Knoten, die das Makro nie anlegt – es hat nicht getan, was es soll.
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Es ist keine Standard-Anwendung definiert, um eine Verbindung mit einem FTP-Server aufzubauen.
+Replace all	MainWindow		Alles ersetzen
+Open Recent	MainWindow		Zuletzt geöffnet
+Cascade	MainWindow		Cascade
+Don't save	Document		Nicht speichern
+\"${%s}\" holds %ld values, not one	CommandManager		\"${%s}\" enthält %ld Werte statt einem
+Close	MainWindow		Schließen
+Rename	MainWindow		Umbenennen
+Could not find command	CommandManager		Befehl nicht gefunden
+Name	CommandManager		Name
+Quit	MainWindow		Beenden
+Save changes to  	Document		Änderungen speichern
+Save	Document		Speichern
+Search	MainWindow		Suchen
 OK	PluginManager		OK
+Could not find plugins	SavePanel		Keine Plugins gefunden
+File	MainWindow		Datei
+The macro is empty - nothing to play.	CommandManager		Das Makro ist leer – nichts abzuspielen.
+No active editor - please install an editor plugin.	Document		Kein aktiver Editor – bitte ein Editor-Plugin installieren.
+Continue recording	CommandManager		Aufnahme fortsetzen
+Restart recording	CommandManager		Aufnahme neu beginnen
+Macro recording already started!	CommandManager		Aufnahme eines Makros läuft bereits!
+Project settings	MainWindow		Projekt-Eigenschaften
+Error	Document		Fehler
+Error on execution of Command.	CommandManager		Fehler beim Ausführen des Befehls
+Page setup	MainWindow		Seiten einrichten
+Title	MainWindow		Titel
+Delete	MainWindow		Löschen
+Save as	MainWindow		Speichern als
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Es ist kein E-Mail-Programm als Standard-Anwendung zum Senden von E-Mails definiert.
+Web Browser Warning	AboutURLView		Web-Browser-Warnung
+Window	MainWindow		Fenster
+\"${%s}\": no such variable	CommandManager		\"${%s}\": unbekannte Variable
+I had problems while setting up the Printer!	Document		Es ist ein Fehler beim Einrichten des Druckers aufgetreten.
+E-mail Warning	AboutURLView		E-Mail-Warnung
+Editor shortcuts (double-click to change)	ShortCutView		Editor-Kürzel (Doppelklick zum Ändern)
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Es ist keine Standard-Anwendung definiert, um Internetseiten anzuzeigen.
+FTP Warning	AboutURLView		FTP-Warnung
+No macros	ShortCutView		Keine Makros
+Shortcut	KeyCaptureWindow		Tastenkürzel
+Command %ld (%s) failed.	CommandManager		Befehl %ld (%s) fehlgeschlagen.
+Replace & Find	MainWindow		Finden und ersetzen
+Cut	MainWindow		Ausschneiden
+Can't find plugins	PluginManager		Keine Plugins gefunden
 Help	HelpWindow		Hilfe
+Find	MainWindow		Suchen
+OK	AboutURLView		OK
+Duplicate	MainWindow		Duplizieren
+Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Neue Tastenkombination für \"%s\" drücken (Esc bricht ab).
+New…	ShortCutView		Neu…
+Cancel	Document		Abbrechen
+Print	MainWindow		Drucken
+Find next	MainWindow		Weitersuchen
+Error!	CommandManager		Fehler!
+Title Vertical	MainWindow		Untereinander anordnen
+Played %ld command(s).	CommandManager		%ld Befehl(e) abgespielt.
+Copy	MainWindow		Kopieren
