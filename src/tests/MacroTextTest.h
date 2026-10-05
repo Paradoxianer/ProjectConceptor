@@ -65,6 +65,7 @@ public:
 	void ConnectionFollowsInterpolatedNodes(void);
 	void PlaceholderAloneIsNotABinding(void);
 	void InterpolatesCommandSettingsInNestedBlocks(void);
+	void LayoutKeepsGraphInsideGrownCanvas(void);
 	void MoveCommandReparentsIntoAnotherContainer(void);
 	void MoveCommandPromotesToTopLevel(void);
 	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
@@ -121,6 +122,7 @@ public:
 	CPPUNIT_TEST(ConnectionFollowsInterpolatedNodes);
 	CPPUNIT_TEST(PlaceholderAloneIsNotABinding);
 	CPPUNIT_TEST(InterpolatesCommandSettingsInNestedBlocks);
+	CPPUNIT_TEST(LayoutKeepsGraphInsideGrownCanvas);
 	CPPUNIT_TEST(MoveCommandReparentsIntoAnotherContainer);
 	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
 	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);

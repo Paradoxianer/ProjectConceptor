@@ -166,3 +166,35 @@ void LayoutEditorTest::BatchAppliesAndUndoesAllSubcommands(void)
 	node2.FindRect(P_C_NODE_FRAME,&restored2);
 	CPPUNIT_ASSERT(restored2 == BRect(200,0,300,80));
 }
+
+
+void LayoutEditorTest::CenterOnOldBoundsNeverGoesNegative(void)
+{
+	// a layout much taller than the old graph, centered on it, would reach
+	// above y=0 - outside the canvas, unreachable by scrolling
+	BMessage	node1(P_C_CLASS_TYPE);
+	node1.AddRect(P_C_NODE_FRAME,BRect(100,100,200,140));
+	BMessage	node2(P_C_CLASS_TYPE);
+	node2.AddRect(P_C_NODE_FRAME,BRect(300,100,400,140));
+
+	BList	nodes;
+	nodes.AddItem(&node1);
+	nodes.AddItem(&node2);
+
+	BMessage	positions;
+	positions.AddPointer("node",&node1);
+	positions.AddRect("frame",BRect(0,0,100,40));
+	positions.AddPointer("node",&node2);
+	positions.AddRect("frame",BRect(0,960,100,1000));
+
+	LayoutEditor	editor;
+	editor.CenterOnOldBounds(&nodes,&positions);
+
+	BRect	frame1;
+	BRect	frame2;
+	CPPUNIT_ASSERT(positions.FindRect("frame",0,&frame1) == B_OK);
+	CPPUNIT_ASSERT(positions.FindRect("frame",1,&frame2) == B_OK);
+	// x is still centered (old center 250 -> shift 200), y clamped to the margin
+	CPPUNIT_ASSERT(frame1 == BRect(200,20,300,60));
+	CPPUNIT_ASSERT(frame2 == BRect(200,980,300,1020));
+}

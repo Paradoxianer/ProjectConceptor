@@ -2037,3 +2037,41 @@ void MacroTextTest::InterpolatesCommandSettingsInNestedBlocks(void)
 	CPPUNIT_ASSERT(data.FindString("Pos",&value) == B_OK);
 	CPPUNIT_ASSERT(BString(value) == "P 2.5");
 }
+
+
+void MacroTextTest::LayoutKeepsGraphInsideGrownCanvas(void)
+{
+	// 30 unconnected nodes: dot stacks them into one long column, far
+	// taller than the old graph - it must neither land above/left of the
+	// canvas origin nor stay outside the document's bounds
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BString		report;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(report.String(),(status_t)B_OK,PlayMacroText(doc,
+		"Repeat\n"
+		"  count=30\n"
+		"  Insert\n"
+		"    node=@1\n"
+		"    ~included_node\n"
+		"      this=1\n"
+		"      what=class\n"
+		"      Node::Frame=[100.0,100.0,200.0,140.0]\n"
+		"Layout\n"
+		"  direction=\"LR\"\n"
+		"  engine=\"dot\"\n",&report));
+	BList	*nodes	= doc->GetAllNodes();
+	CPPUNIT_ASSERT_EQUAL((int32)30,nodes->CountItems());
+	BRect	bounds	= doc->Bounds();
+	float	lowest	= 0;
+	for (int32 i = 0; i < nodes->CountItems(); i++) {
+		BRect	frame;
+		CPPUNIT_ASSERT(((BMessage*)nodes->ItemAt(i))->FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+		CPPUNIT_ASSERT(frame.left >= 0);
+		CPPUNIT_ASSERT(frame.top >= 0);
+		CPPUNIT_ASSERT(frame.right <= bounds.right);
+		CPPUNIT_ASSERT(frame.bottom <= bounds.bottom);
+		if (frame.bottom > lowest)
+			lowest	= frame.bottom;
+	}
+	// actually spread out, not still stacked where Insert put them
+	CPPUNIT_ASSERT(lowest > 1000);
+}

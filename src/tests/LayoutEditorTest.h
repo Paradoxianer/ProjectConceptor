@@ -13,11 +13,13 @@ class LayoutEditorTest : public CppUnit::TestFixture
 public:
 	void BuildLayoutCommandShapesOneUndoableBatch(void);
 	void CenterOnOldBoundsShiftsToMatchOldCenter(void);
+	void CenterOnOldBoundsNeverGoesNegative(void);
 	void BatchAppliesAndUndoesAllSubcommands(void);
 
 	CPPUNIT_TEST_SUITE(LayoutEditorTest);
 	CPPUNIT_TEST(BuildLayoutCommandShapesOneUndoableBatch);
 	CPPUNIT_TEST(CenterOnOldBoundsShiftsToMatchOldCenter);
+	CPPUNIT_TEST(CenterOnOldBoundsNeverGoesNegative);
 	CPPUNIT_TEST(BatchAppliesAndUndoesAllSubcommands);
 	CPPUNIT_TEST_SUITE_END();
 };

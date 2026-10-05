@@ -54,7 +54,33 @@ BMessage* Layout::Do(PDocument *doc, BMessage *settings)
 	LayoutCenterOnOldBounds(nodes,&positions);
 	LayoutAppendSubCommands(&positions,settings);
 
-	return PCommand::Do(doc,settings);
+	settings	= PCommand::Do(doc,settings);
+	GrowDocumentToFit(doc,nodes);
+	return settings;
+}
+
+
+// the frames come in via ChangeValue, which (unlike Insert/Move) never
+// grows the canvas - same 20px slack Insert/Move leave
+void Layout::GrowDocumentToFit(PDocument *doc, BList *nodes)
+{
+	BRect	docRect		= doc->Bounds();
+	bool	grown		= false;
+	for (int32 i = 0; i < nodes->CountItems(); i++) {
+		BRect	frame;
+		if (((BMessage*)nodes->ItemAt(i))->FindRect(P_C_NODE_FRAME,&frame) != B_OK)
+			continue;
+		if (frame.right+20 > docRect.right) {
+			docRect.right	= frame.right+20;
+			grown			= true;
+		}
+		if (frame.bottom+20 > docRect.bottom) {
+			docRect.bottom	= frame.bottom+20;
+			grown			= true;
+		}
+	}
+	if (grown)
+		doc->Resize(docRect.right,docRect.bottom);
 }
 
 

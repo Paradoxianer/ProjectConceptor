@@ -39,5 +39,6 @@ public:
 
 protected:
 	//----------------PCommand
+			void			GrowDocumentToFit(PDocument *doc, BList *nodes);
 };
 #endif

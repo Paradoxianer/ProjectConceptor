@@ -32,6 +32,13 @@ void LayoutCenterOnOldBounds(const BList *nodes, BMessage *positions)
 	BPoint	oldCenter((oldBounds.left+oldBounds.right)/2,(oldBounds.top+oldBounds.bottom)/2);
 	BPoint	newCenter((newBounds.left+newBounds.right)/2,(newBounds.top+newBounds.bottom)/2);
 	BPoint	delta	= oldCenter-newCenter;
+	// a layout larger than the old one, centered, would reach into negative
+	// coordinates - outside the canvas, unreachable by scrolling
+	const float	kMargin	= 20;
+	if (newBounds.left+delta.x < kMargin)
+		delta.x	= kMargin-newBounds.left;
+	if (newBounds.top+delta.y < kMargin)
+		delta.y	= kMargin-newBounds.top;
 	if (delta == BPoint(0,0))
 		return;
 
