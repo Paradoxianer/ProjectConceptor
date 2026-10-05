@@ -1,0 +1,11 @@
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins SelectConnectedCommand ;
+
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Commands ] ;
+
+Addon pc_command_select_connected :
+	SelectConnected.cpp
+	SelectConnectedPlugin.cpp
+        : be tracker translation libprojectconceptor.a
+;

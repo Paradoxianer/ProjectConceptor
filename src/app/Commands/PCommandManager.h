@@ -141,6 +141,11 @@ public:
 	 * copy (see Insert::Do()) - later "@id" references reach the copy.
 	 * A no-op outside playback. */
 	virtual	void		RepointReplayNode(BMessage *from, BMessage *to);
+	/** A command ran but couldn't do what it says (missing attribute,
+	 * unknown variable, unusable value, ...) - counted and the first one
+	 * shown in the playback result, so a macro never "succeeds" with a
+	 * silently substituted value. Outside playback only logged. */
+	virtual	void		AddPlaybackError(const BString &error);
 
 	virtual	int32		CountPCommand(void){return commandMap.size();};
 	virtual	PCommand*	PCommandAt(int32 index);
@@ -177,10 +182,10 @@ protected:
 							BString *report);
 			bool		InterpolateText(const BString &text, BString *result);
 			bool		FormatVariable(const char *name, BString *text, BString *error);
-			/** see InterpolateStrings() - reset when a playback starts,
+			/** see AddPlaybackError() - reset when a playback starts,
 			 * reported by FinishMacroPlayback() */
-			int32		interpolationErrors;
-			BString		firstInterpolationError;
+			int32		playbackErrors;
+			BString		firstPlaybackError;
 
 			BList		*undoList;
 			BList		*macroList;

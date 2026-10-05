@@ -16,6 +16,8 @@
 #include "Remember.h"
 #include "Sleep.h"
 #include "Calculate.h"
+#include "GetValue.h"
+#include "SelectConnected.h"
 #include "BasePlugin.h"
 #include "ChangeValue.h"
 #include "Find.h"
@@ -84,6 +86,8 @@ TEST_PLUGIN(TestLayoutPlugin,Layout,"Layout")
 TEST_PLUGIN(TestRememberPlugin,Remember,"Remember")
 TEST_PLUGIN(TestSleepPlugin,Sleep,"Sleep")
 TEST_PLUGIN(TestCalculatePlugin,Calculate,"Calculate")
+TEST_PLUGIN(TestGetValuePlugin,GetValue,"GetValue")
+TEST_PLUGIN(TestSelectConnectedPlugin,SelectConnected,"SelectConnected")
 TEST_PLUGIN(TestAddAttributePlugin,AddAttribute,"AddAttribute")
 TEST_PLUGIN(TestRemoveAttributePlugin,RemoveAttribute,"RemoveAttribute")
 
@@ -167,6 +171,8 @@ PDocument* NewRegisteredTestDocument(void)
 	doc->GetCommandManager()->RegisterPCommand(new TestRememberPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestSleepPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestCalculatePlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestGetValuePlugin());
+	doc->GetCommandManager()->RegisterPCommand(new TestSelectConnectedPlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestAddAttributePlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestRemoveAttributePlugin());
 	doc->GetCommandManager()->RegisterPCommand(new TestStringPlugin());
@@ -2074,4 +2080,227 @@ void MacroTextTest::LayoutKeepsGraphInsideGrownCanvas(void)
 	}
 	// actually spread out, not still stacked where Insert put them
 	CPPUNIT_ASSERT(lowest > 1000);
+}
+
+
+// ------------------------------------- SelectConnected / GetValue (#140ff) --
+
+static BMessage* AddTestNode(PDocument *doc, const char *name)
+{
+	BMessage	*node	= new BMessage(P_C_CLASS_TYPE);
+	BMessage	data;
+	data.AddString(P_C_NODE_NAME,name);
+	node->AddMessage(P_C_NODE_DATA,&data);
+	node->AddRect(P_C_NODE_FRAME,BRect(0,0,50,50));
+	doc->GetAllNodes()->AddItem(node);
+	return node;
+}
+
+
+static void AddTestConnection(PDocument *doc, BMessage *from, BMessage *to)
+{
+	BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
+	connection->AddPointer(P_C_NODE_CONNECTION_FROM,from);
+	connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
+	doc->GetAllConnections()->AddItem(connection);
+}
+
+
+static BString SelectedNames(PDocument *doc)
+{
+	std::vector<std::string>	names;
+	for (int32 i = 0; i < doc->GetSelected()->CountItems(); i++)
+		names.push_back(NodeName((BMessage*)doc->GetSelected()->ItemAt(i)).String());
+	std::sort(names.begin(),names.end());
+	BString	joined;
+	for (size_t i = 0; i < names.size(); i++)
+		joined << names[i].c_str();
+	return joined;
+}
+
+
+static void SelectOnly(PDocument *doc, BMessage *node)
+{
+	doc->GetSelected()->MakeEmpty();
+	doc->GetSelected()->AddItem(node);
+}
+
+
+void MacroTextTest::SelectConnectedFollowsConnections(void)
+{
+	// D -> A -> B -> C -> A (cycle), E unconnected
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BMessage	*a	= AddTestNode(doc,"A");
+	BMessage	*b	= AddTestNode(doc,"B");
+	BMessage	*c	= AddTestNode(doc,"C");
+	BMessage	*d	= AddTestNode(doc,"D");
+	AddTestNode(doc,"E");
+	AddTestConnection(doc,d,a);
+	AddTestConnection(doc,a,b);
+	AddTestConnection(doc,b,c);
+	AddTestConnection(doc,c,a);
+	PCommand	*command	= doc->GetCommandManager()->GetPCommand((char*)"SelectConnected");
+	CPPUNIT_ASSERT(command != NULL);
+
+	struct { const char *direction; int32 depth; const char *expected; } cases[] = {
+		{ "outgoing",	0,	"ABC" },	// the cycle back to A must end the walk
+		{ "incoming",	0,	"ABCD" },	// A <- D, A <- C <- B
+		{ "both",		1,	"ABCD" },	// direct neighbours only: B, D, C
+		{ "outgoing",	1,	"AB" },
+	};
+	for (size_t i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+		SelectOnly(doc,a);
+		BMessage	settings;
+		settings.AddString("Command::Name","SelectConnected");
+		settings.AddString("direction",cases[i].direction);
+		settings.AddInt32("depth",cases[i].depth);
+		BMessage	*result	= command->Do(doc,&settings);
+		CPPUNIT_ASSERT_EQUAL_MESSAGE(cases[i].direction,
+			std::string(cases[i].expected),std::string(SelectedNames(doc).String()));
+		command->Undo(doc,result);
+		CPPUNIT_ASSERT(SelectedNames(doc) == "A");
+	}
+}
+
+
+static const char *kCostGraph =
+	"Insert\n"
+	"  node=@1\n"
+	"  node=@2\n"
+	"  node=@3\n"
+	"  node=@4\n"
+	"  node=@5\n"
+	"  node=@6\n"
+	"  ~included_node\n"
+	"    this=1\n"
+	"    what=class\n"
+	"    Node::Frame=[0.0,0.0,50.0,50.0]\n"
+	"    ~Node::Data\n"
+	"      Node::name=\"A\"\n"
+	"      Kosten=\"1.5\"\n"			// text, as the GraphEditor toolbar adds it
+	"  ~included_node\n"
+	"    this=2\n"
+	"    what=class\n"
+	"    Node::Frame=[0.0,0.0,50.0,50.0]\n"
+	"    ~Node::Data\n"
+	"      Node::name=\"B\"\n"
+	"%s"									// B's Kosten line, or none
+	"  ~included_node\n"
+	"    this=3\n"
+	"    what=class\n"
+	"    Node::Frame=[0.0,0.0,50.0,50.0]\n"
+	"    ~Node::Data\n"
+	"      Node::name=\"C\"\n"
+	"      Kosten=0.25\n"
+	"  ~included_node\n"
+	"    this=4\n"
+	"    what=class\n"
+	"    Node::Frame=[0.0,0.0,50.0,50.0]\n"
+	"    ~Node::Data\n"
+	"      Node::name=\"Z\"\n"
+	"      Kosten=100.0\n"					// not connected - must not count
+	"  ~included_node\n"
+	"    this=5\n"
+	"    what=connection\n"
+	"    Node::from=1\n"
+	"    Node::to=2\n"
+	"  ~included_node\n"
+	"    this=6\n"
+	"    what=connection\n"
+	"    Node::from=2\n"
+	"    Node::to=3\n"
+	"Select\n"
+	"  node=@1\n"
+	"SelectConnected\n"
+	"Calculate\n"
+	"  left=0.0\n"
+	"  operator=\"+\"\n"
+	"  right=0.0\n"
+	"  resultVariable=\"summe\"\n"
+	"ForEach\n"
+	"  nodeVariable=\"n\"\n"
+	"  GetValue\n"
+	"    node=$n\n"
+	"    ~valueContainer\n"
+	"      name=\"Kosten\"\n"
+	"      subgroup=\"Node::Data\"\n"
+	"    resultVariable=\"k\"\n"
+	"%s"									// optional default line
+	"  Calculate\n"
+	"    left=$summe\n"
+	"    operator=\"+\"\n"
+	"    right=$k\n"
+	"    resultVariable=\"summe\"\n"
+	"Insert\n"
+	"  node=@7\n"
+	"  ~included_node\n"
+	"    this=7\n"
+	"    what=class\n"
+	"    Node::Frame=[0.0,0.0,50.0,50.0]\n"
+	"    ~Node::Data\n"
+	"      Node::name=\"S=${summe}\"\n";
+
+
+static BString PlayCostGraph(PDocument *doc, const char *costOfB, const char *defaultLine, status_t *status)
+{
+	BString	text;
+	text.SetToFormat(kCostGraph,costOfB,defaultLine);
+	BString	report;
+	*status	= PlayMacroText(doc,text.String(),&report);
+	BList	*nodes	= doc->GetAllNodes();
+	BString	sumNode	= NodeName((BMessage*)nodes->ItemAt(nodes->CountItems()-1));
+	return sumNode << " | " << report;
+}
+
+
+void MacroTextTest::GetValueSumsConnectedAttribute(void)
+{
+	// the user's case: everything reachable from the selected node, one
+	// attribute summed - text "1.5", int32 2, float 0.25; Z isn't connected
+	PDocument	*doc	= NewRegisteredTestDocument();
+	status_t	status	= B_ERROR;
+	BString		result	= PlayCostGraph(doc,"      Kosten=2\n","",&status);
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(result.String(),(status_t)B_OK,status);
+	CPPUNIT_ASSERT_MESSAGE(result.String(),result.StartsWith("S=3.75 |"));
+}
+
+
+void MacroTextTest::GetValueReportsMissingAttribute(void)
+{
+	// B has no "Kosten": an error, not a silent 0 - unless default is given
+	PDocument	*doc	= NewRegisteredTestDocument();
+	status_t	status	= B_OK;
+	BString		result	= PlayCostGraph(doc,"","",&status);
+	CPPUNIT_ASSERT_MESSAGE(result.String(),status != B_OK);
+	CPPUNIT_ASSERT_MESSAGE(result.String(),result.FindFirst("Kosten") >= 0);
+
+	PDocument	*doc2	= NewRegisteredTestDocument();
+	result	= PlayCostGraph(doc2,"","    default=0.0\n",&status);
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(result.String(),(status_t)B_OK,status);
+	CPPUNIT_ASSERT_MESSAGE(result.String(),result.StartsWith("S=1.75 |"));
+}
+
+
+void MacroTextTest::TextThatIsNoNumberIsReported(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	status_t	status	= B_OK;
+	BString		result	= PlayCostGraph(doc,"      Kosten=\"viel\"\n","",&status);
+	CPPUNIT_ASSERT_MESSAGE(result.String(),status != B_OK);
+	CPPUNIT_ASSERT_MESSAGE(result.String(),result.FindFirst("viel") >= 0);
+}
+
+
+void MacroTextTest::GetValueReadsEditorAttribute(void)
+{
+	// GraphEditor's "add attribute" stores Node::Data/Kosten as a block
+	// {Name, Value} - GetValue with name="Kosten" must read its Value
+	PDocument	*doc	= NewRegisteredTestDocument();
+	status_t	status	= B_ERROR;
+	BString		result	= PlayCostGraph(doc,
+		"      ~Kosten\n"
+		"        Name=\"Kosten\"\n"
+		"        Value=\"4\"\n","",&status);
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(result.String(),(status_t)B_OK,status);
+	CPPUNIT_ASSERT_MESSAGE(result.String(),result.StartsWith("S=5.75 |"));
 }

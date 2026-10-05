@@ -66,6 +66,11 @@ public:
 	void PlaceholderAloneIsNotABinding(void);
 	void InterpolatesCommandSettingsInNestedBlocks(void);
 	void LayoutKeepsGraphInsideGrownCanvas(void);
+	void SelectConnectedFollowsConnections(void);
+	void GetValueSumsConnectedAttribute(void);
+	void GetValueReportsMissingAttribute(void);
+	void TextThatIsNoNumberIsReported(void);
+	void GetValueReadsEditorAttribute(void);
 	void MoveCommandReparentsIntoAnotherContainer(void);
 	void MoveCommandPromotesToTopLevel(void);
 	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
@@ -123,6 +128,11 @@ public:
 	CPPUNIT_TEST(PlaceholderAloneIsNotABinding);
 	CPPUNIT_TEST(InterpolatesCommandSettingsInNestedBlocks);
 	CPPUNIT_TEST(LayoutKeepsGraphInsideGrownCanvas);
+	CPPUNIT_TEST(SelectConnectedFollowsConnections);
+	CPPUNIT_TEST(GetValueSumsConnectedAttribute);
+	CPPUNIT_TEST(GetValueReportsMissingAttribute);
+	CPPUNIT_TEST(TextThatIsNoNumberIsReported);
+	CPPUNIT_TEST(GetValueReadsEditorAttribute);
 	CPPUNIT_TEST(MoveCommandReparentsIntoAnotherContainer);
 	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
 	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);

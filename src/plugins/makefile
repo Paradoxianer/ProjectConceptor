@@ -8,6 +8,7 @@ plugins = \
 	DeleteCommand \
 	FindCommand \
 	ForEachCommand \
+	GetValueCommand \
 	GraphEditor \
 	GroupCommand \
 	IfCommand \
@@ -23,6 +24,7 @@ plugins = \
 	RepeatCommand \
 	ResizeCommand \
 	SelectCommand \
+	SelectConnectedCommand \
 	SleepCommand
 
 # LayoutEditor must build before LayoutCommand: LayoutCommand links against

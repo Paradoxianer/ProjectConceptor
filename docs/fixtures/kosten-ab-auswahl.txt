@@ -1,0 +1,33 @@
+# Fuer eigene Graphen: zuerst einen Knoten auswaehlen, dann abspielen.
+# Summiert das Attribut "Kosten" (wie es die GraphEditor-Leiste anlegt)
+# ueber alle Knoten, die mit der Auswahl verbunden sind, und zeigt das
+# Ergebnis im Dialog an. Knoten ohne "Kosten" zaehlen als 0 - ohne die Zeile
+# default=0.0 waere ein fehlendes Attribut ein Fehler im Bericht.
+# direction="outgoing" folgt nur den Pfeilrichtungen, depth=1 nimmt nur
+# die direkten Nachbarn.
+
+SelectConnected
+  direction="both"
+Calculate
+  left=0.0
+  operator="+"
+  right=0.0
+  resultVariable="summe"
+ForEach
+  nodeVariable="n"
+  GetValue
+    node=$n
+    ~valueContainer
+      name="Kosten"
+      subgroup="Node::Data"
+    resultVariable="k"
+    default=0.0
+  Calculate
+    left=$summe
+    operator="+"
+    right=$k
+    resultVariable="summe"
+Ask
+  variable="ok"
+  prompt="Summe:"
+  default="${summe}"

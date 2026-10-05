@@ -1025,6 +1025,10 @@ const char* CommandExampleText(const char *commandName)
 			"    ~valueContainer\n      name=\"Node::name\"\n"
 			"      subgroup=\"Node::Data\"\n      type=string\n"
 			"      newValue=\"Renamed\"" },
+		{ "GetValue",
+			"GetValue\n  node=$n\n  ~valueContainer\n    name=\"Kosten\"\n"
+			"    subgroup=\"Node::Data\"\n  resultVariable=\"k\"\n"
+			"# later: right=$k  (default=0.0 counts a missing attribute as 0)" },
 		{ "Group", "Group\n  node=@1\n  deselect=true" },
 		{ "If",
 			"If\n  searchString=\"Test\"\n  Select\n    selectAll=true" },
@@ -1040,6 +1044,9 @@ const char* CommandExampleText(const char *commandName)
 			"Repeat\n  count=3\n  counterVariable=\"i\"\n  Move\n"
 			"    dx=$i\n    dy=0.0" },
 		{ "Select", "Select\n  selectAll=true" },
+		{ "SelectConnected",
+			"SelectConnected\n  direction=\"both\"\n  depth=0\n"
+			"# adds everything reachable from the selection; depth=1: neighbours only" },
 		{ "Sleep", "Sleep\n  milliseconds=500" },
 	};
 	for (size_t i = 0; i < sizeof(kExamples)/sizeof(kExamples[0]); i++)

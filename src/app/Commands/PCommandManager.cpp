@@ -3,6 +3,7 @@
 #include <Catalog.h>
 
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 #include <interface/Alert.h>
 #include <interface/MenuItem.h>
@@ -49,7 +50,7 @@ void PCommandManager::Init(void) {
 	playingIndex	= 0;
 	playingIndexer	= NULL;
 	playingErr		= B_OK;
-	interpolationErrors	= 0;
+	playbackErrors	= 0;
 
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*commands		= pluginManager->GetPluginsByType(P_C_COMMANDO_PLUGIN_TYPE);
@@ -205,10 +206,10 @@ status_t PCommandManager::FinishMacroPlayback(int32 playedCount, status_t err,
 		status	= B_BAD_VALUE;
 		result.SetToFormat(B_TRANSLATE("%ld node reference(s) point to nodes the macro never creates - it did not do what it says."),
 			(long)unresolvedCount);
-	} else if (interpolationErrors > 0) {
+	} else if (playbackErrors > 0) {
 		status	= B_BAD_VALUE;
-		result.SetToFormat(B_TRANSLATE("%ld text placeholder(s) could not be filled in, first: %s"),
-			(long)interpolationErrors,firstInterpolationError.String());
+		result.SetToFormat(B_TRANSLATE("%ld problem(s) while playing, first: %s"),
+			(long)playbackErrors,firstPlaybackError.String());
 	} else
 		result.SetToFormat(B_TRANSLATE("Played %ld command(s)."),(long)playedCount);
 
@@ -244,8 +245,8 @@ status_t PCommandManager::PlayMacro(BMessage *makro, BString *report) {
 	bool	ownsValueContext	= (valueContext == NULL);
 	if (ownsValueContext) {
 		valueContext	= new BMessage();
-		interpolationErrors	= 0;
-		firstInterpolationError.SetTo("");
+		playbackErrors	= 0;
+		firstPlaybackError.SetTo("");
 	}
 	Indexer	*previousReplayIndexer	= replayIndexer;
 	replayIndexer	= playDeIndexer;
@@ -319,8 +320,8 @@ void PCommandManager::PlayMacroInteractive(BMessage *makro) {
 	// is only ever started fresh from outside any command's own Do(), so
 	// there is no nested-call case to guard against here
 	valueContext	= new BMessage();
-	interpolationErrors	= 0;
-	firstInterpolationError.SetTo("");
+	playbackErrors	= 0;
+	firstPlaybackError.SetTo("");
 	replayIndexer	= playingIndexer;
 	// first step runs on its own dispatch too, same as every step after it
 	// - see P_C_MACRO_PLAY_STEP's own comment for why that's the whole point
@@ -565,13 +566,9 @@ bool PCommandManager::InterpolateText(const BString &text, BString *result)
 					result->Append(text.String()+i,close+1-i);
 				i	= close+1;
 			}
-			if (error.Length() > 0) {
-				// left as written - no silent empty string
-				interpolationErrors++;
-				if (firstInterpolationError.Length() == 0)
-					firstInterpolationError	= error;
-				PRINT(("PCommandManager::InterpolateText - %s\n",error.String()));
-			}
+			// left as written - no silent empty string
+			if (error.Length() > 0)
+				AddPlaybackError(error);
 			continue;
 		}
 		result->Append(text[i],1);
@@ -640,6 +637,17 @@ bool PCommandManager::FormatVariable(const char *name, BString *text, BString *e
 }
 
 
+void PCommandManager::AddPlaybackError(const BString &error)
+{
+	PRINT(("PCommandManager - playback problem: %s\n",error.String()));
+	if (valueContext == NULL)
+		return;
+	playbackErrors++;
+	if (firstPlaybackError.Length() == 0)
+		firstPlaybackError	= error;
+}
+
+
 void PCommandManager::RepointReplayNode(BMessage *from, BMessage *to)
 {
 	if (replayIndexer != NULL)
@@ -672,6 +680,25 @@ void PCommandManager::ResolveBindings(BMessage *settings, PCommand *forCommand)
 				type_code	declaredType	= B_ANY_TYPE;
 				bool		hasDeclaredType	= FindDeclaredFieldType(forCommand,fieldName,&declaredType);
 				for (int32 v=0; v<varCount; v++) {
+					// text bound to a number field (an attribute added as
+					// text, read via GetValue): parsed, never silently 0
+					if (hasDeclaredType && (varType == B_STRING_TYPE)
+							&& ((declaredType == B_FLOAT_TYPE) || (declaredType == B_INT32_TYPE))) {
+						const char	*text	= NULL;
+						char		*end	= NULL;
+						valueContext->FindString(variableName,v,&text);
+						double		number	= (text != NULL) ? strtod(text,&end) : 0;
+						if ((text == NULL) || (end == text) || (*end != '\0')) {
+							BString	error;
+							error.SetToFormat(B_TRANSLATE("\"$%s\" (for \"%s\") is \"%s\", not a number"),
+								variableName,fieldName,(text != NULL) ? text : "");
+							AddPlaybackError(error);
+						} else if (declaredType == B_FLOAT_TYPE)
+							settings->AddFloat(fieldName,(float)number);
+						else
+							settings->AddInt32(fieldName,(int32)number);
+						continue;
+					}
 					// the one type mismatch a bound *numeric* variable
 					// realistically hits: a loop counter (always int32,
 					// see Repeat's own counterVariable) fed into a field
@@ -741,11 +768,12 @@ void PCommandManager::ResolveBindings(BMessage *settings, PCommand *forCommand)
 			} else {
 				// no silent fallback (project convention) - an unresolved
 				// variable leaves the field genuinely empty (matches
-				// "nothing there") rather than inventing a value, but at
-				// least says so instead of failing with no trace at all
-				PRINT(("PCommandManager::ResolveBindings - variable \"%s\" "
-					"(bound to field \"%s\") not found in value context\n",
-					variableName,fieldName));
+				// "nothing there") rather than inventing a value, and the
+				// playback result says so
+				BString	error;
+				error.SetToFormat(B_TRANSLATE("\"$%s\" (for \"%s\"): no such variable"),
+					variableName,fieldName);
+				AddPlaybackError(error);
 			}
 		}
 		i++;
