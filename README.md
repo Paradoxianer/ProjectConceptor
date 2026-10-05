@@ -30,6 +30,14 @@ a direction (top-to-bottom, left-to-right, ...) and a layout algorithm
 
 ![Auto-Layout toolbar](docs/help/screenshots/06-autolayout-toolbar.png)
 
+**Macros** - record edits and play them back, or build macros in the
+MacroEditor tab: a tree of commands with loops, conditions, variables
+and text placeholders, e.g. to number new nodes or add up an attribute
+over everything connected to a node. See the
+[macro guide](docs/help/macros.md).
+
+![The MacroEditor tab](docs/help/screenshots/10-macro-editor.png)
+
 **Plugin architecture** - editors, commands and file-format
 translators are all plugins, so the app can be extended without
 touching the core. Documents save to a native format; a FreeMind
@@ -55,7 +63,8 @@ test document, grouped and laid out, stays responsive.
 
 See the [user guide](docs/help/user-guide.md) for a full walkthrough,
 or the [API reference](Data/API-current/index.html) if you're building
-a new plugin.
+a new plugin. How macros work internally, and how to add a macro
+command, is in [docs/macro-system.md](docs/macro-system.md).
 
 ## Building
 

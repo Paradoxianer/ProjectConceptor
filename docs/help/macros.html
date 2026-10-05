@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ProjectConceptor - Macros</title>
+<style>
+	body {
+		margin: 0 auto;
+		max-width: 860px;
+		padding: 24px 32px 64px;
+		font-family: "Noto Sans", "DejaVu Sans", sans-serif;
+		font-size: 14px;
+		line-height: 1.55;
+		color: #1a1a1a;
+		background: #fbfbfa;
+	}
+	h1 {
+		font-size: 24px;
+		border-bottom: 2px solid #2f6fa5;
+		padding-bottom: 8px;
+	}
+	h2 {
+		font-size: 18px;
+		margin-top: 2.2em;
+		color: #2f6fa5;
+		border-bottom: 1px solid #d8d8d4;
+		padding-bottom: 4px;
+	}
+	img {
+		display: block;
+		max-width: 100%;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		margin: 12px 0 18px;
+		box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+	}
+	code {
+		background: #eef0f2;
+		padding: 1px 5px;
+		border-radius: 3px;
+		font-family: "DejaVu Sans Mono", monospace;
+		font-size: 0.92em;
+	}
+	ul { padding-left: 1.4em; }
+	li { margin-bottom: 4px; }
+	.lead {
+		font-size: 15px;
+		color: #444;
+	}
+	nav.toc {
+		background: #f0f3f6;
+		border: 1px solid #d8dfe6;
+		border-radius: 6px;
+		padding: 12px 20px;
+		margin: 20px 0 32px;
+	}
+	nav.toc ul { margin: 6px 0; }
+	nav.toc a { color: #2f6fa5; text-decoration: none; }
+	nav.toc a:hover { text-decoration: underline; }
+	pre {
+		background: #eef0f2;
+		padding: 10px 14px;
+		border-radius: 4px;
+		overflow-x: auto;
+		line-height: 1.4;
+	}
+	pre code { padding: 0; background: none; }
+	table {
+		border-collapse: collapse;
+		margin: 12px 0;
+		width: 100%;
+	}
+	th, td {
+		border: 1px solid #d8d8d4;
+		padding: 5px 8px;
+		text-align: left;
+		vertical-align: top;
+	}
+	th { background: #f0f3f6; }
+</style>
+</head>
+<body>
+
+<h1 id="projectconceptor-macros">ProjectConceptor - Macros</h1>
+<p>A macro is a list of commands - insert nodes, select, move, change an
+attribute, lay out the graph, ... - that ProjectConceptor plays back on
+the current document. Macros can be recorded while you work, built and
+edited in the <strong>MacroEditor</strong> tab, and use loops, conditions and
+variables. They are saved with the document and can be exported to a
+text file.</p>
+<p><img alt="The MacroEditor tab" src="screenshots/10-macro-editor.png"></p>
+<nav class="toc">
+<ul>
+<li><a href="#quick-start">Quick start</a></li>
+<li><a href="#the-macro-menu">The Macro menu</a></li>
+<li><a href="#the-macroeditor-tab">The MacroEditor tab</a></li>
+<li><a href="#recording">Recording</a></li>
+<li><a href="#playing">Playing</a></li>
+<li><a href="#variables">Variables</a></li>
+<li><a href="#loops-and-conditions">Loops and conditions</a></li>
+<li><a href="#command-reference">Command reference</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#macro-files">Macro files</a></li>
+<li><a href="#keyboard-shortcuts-for-macros">Keyboard shortcuts for macros</a></li>
+<li><a href="#when-something-goes-wrong">When something goes wrong</a></li>
+<li><a href="#limitations">Limitations</a></li>
+</ul>
+</nav>
+<h2 id="quick-start">Quick start</h2>
+<p><strong>Record one:</strong> choose <strong>Macro &gt; Start recording</strong>, do your edits in
+the graph, choose <strong>Macro &gt; Stop recording</strong> and give the macro a name.
+It now appears under <strong>Macro &gt; Play</strong>.</p>
+<p><strong>Build one:</strong> choose <strong>Macro &gt; New</strong>, switch to the <strong>MacroEditor</strong>
+tab and drag commands from the list on the right into the tree in the
+middle. Click a value to change it. Play it with <strong>Macro &gt; Play</strong>.</p>
+<h2 id="the-macro-menu">The Macro menu</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Start recording / Stop recording</td>
+<td>Records every edit in between as a new macro; you're asked for a name when you stop.</td>
+</tr>
+<tr>
+<td>Play</td>
+<td>Lists this document's macros - choose one to play it.</td>
+</tr>
+<tr>
+<td>New</td>
+<td>Creates an empty macro to build in the MacroEditor tab.</td>
+</tr>
+<tr>
+<td>Open</td>
+<td>Imports a macro from a text file (see <a href="#macro-files">Macro files</a>). A macro with the same name is replaced.</td>
+</tr>
+<tr>
+<td>Save</td>
+<td>Exports the macro selected in the MacroEditor tab to a text file.</td>
+</tr>
+<tr>
+<td>Rename / Duplicate / Delete</td>
+<td>Act on the macro selected in the MacroEditor tab. Delete asks first and can't be undone.</td>
+</tr>
+</tbody>
+</table>
+<p>Macros belong to the document: they are saved with it and are there
+again when you open it.</p>
+<h2 id="the-macroeditor-tab">The MacroEditor tab</h2>
+<p>The tab has three parts: the document's <strong>macros</strong> on the left, the
+selected macro as a <strong>tree</strong> in the middle, and a <strong>reference of all
+commands</strong> with their fields on the right. Hover a command in the
+reference to see what it does.</p>
+<p>In the tree, each command is a tan, arrow-shaped label; its fields are
+the lines below it (<code>name: value</code>). Commands that contain other
+commands - <strong>Repeat</strong>, <strong>ForEach</strong>, <strong>If</strong> and <strong>Batch</strong> - show those
+indented below their own fields. Nodes and connections that a command
+creates appear as blue, rounded chips; expand one to see and edit the
+node's data. Plain nested data (such as <code>valueContainer</code>) appears in
+grey italics.</p>
+<p><strong>Changing a value:</strong> click the value. A text field opens right on it;
+press Enter to keep the change or Esc to discard it. Text needs no
+quotes. A true/false value toggles with a single click. If what you
+typed doesn't fit the field (letters in a number field, say), the
+status line says so and the old value stays.</p>
+<p><strong>Adding a field:</strong> click <strong>+ Add field</strong> below a command; the menu
+lists that command's fields. Fields that can repeat (like Select's
+<code>node</code>) stay in the menu after you've added them once. Inside nested
+data you can add a field of any type under a name of your choice.</p>
+<p><strong>Adding a command:</strong> drag it from the reference on the right into the
+tree. Drop it on the upper or lower half of a row to place it before or
+after that command; drop it on a Repeat, ForEach, If or Batch to add it
+as that command's last step.</p>
+<p><strong>Moving commands:</strong> drag a command - or several selected ones - to its
+new place, with the same drop rules. Right-click a row for <strong>Move Up</strong>
+and <strong>Move Down</strong>.</p>
+<p><strong>Deleting:</strong> select one or more rows (Shift/Ctrl for several) and press
+Delete, or right-click and choose <strong>Delete</strong>.</p>
+<p><strong>Pointing a command at a node:</strong> commands such as Select, Group or
+ChangeValue take a <code>node</code> field. A node created by an earlier Insert
+in the same macro is written <code>@1</code>, <code>@2</code>, ... - the number in that
+Insert's own <code>node</code> field. Instead of typing it, drag the node's chip
+onto the command's row (adds a <code>node</code> field) or onto an existing <code>node</code>
+field (replaces it).</p>
+<p><strong>Expand All / Collapse All:</strong> right-click any row, or an empty spot in
+the tree.</p>
+<h2 id="recording">Recording</h2>
+<p>While recording, every command you carry out is added to the new macro,
+in order. Edits you make to the node you just selected - renaming it
+inline, changing an attribute, its color - are recorded as "the selected
+node(s)" rather than "this exact node", so the macro also works on
+other nodes and in other documents. Inserting new nodes records the
+complete node, so playing the macro creates it again.</p>
+<p>Typing into the search field is not recorded keystroke by keystroke.</p>
+<h2 id="playing">Playing</h2>
+<p>Choose the macro under <strong>Macro &gt; Play</strong>, or press its shortcut (see
+below). The graph updates after each step. When the macro has finished,
+the status line in the MacroEditor tab reports the result, for example
+"Played 6 command(s).".</p>
+<p>If something didn't work, an alert says what - the first problem and
+how many there were (see <a href="#when-something-goes-wrong">When something goes wrong</a>).
+A macro never quietly continues with a made-up value.</p>
+<p>Each top-level command of the macro is one step in <strong>Edit &gt; Undo</strong>. A
+Repeat, ForEach, If or Batch is undone as a whole.</p>
+<h2 id="variables">Variables</h2>
+<p>Variables carry values from one command to a later one while a macro
+plays. They exist only during that one playback.</p>
+<p>These commands put a value into a variable:</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Variable</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repeat</td>
+<td><code>counterVariable</code></td>
+<td>the pass number, starting at 0</td>
+</tr>
+<tr>
+<td>ForEach</td>
+<td><code>nodeVariable</code></td>
+<td>the node of the current pass</td>
+</tr>
+<tr>
+<td>Insert</td>
+<td><code>resultVariable</code></td>
+<td>the node(s) just inserted</td>
+</tr>
+<tr>
+<td>Remember</td>
+<td><code>variable</code></td>
+<td>the current selection</td>
+</tr>
+<tr>
+<td>Calculate</td>
+<td><code>resultVariable</code></td>
+<td>the result of the calculation</td>
+</tr>
+<tr>
+<td>GetValue</td>
+<td><code>resultVariable</code></td>
+<td>an attribute of a node</td>
+</tr>
+<tr>
+<td>Ask</td>
+<td><code>variable</code></td>
+<td>the text you typed into a dialog</td>
+</tr>
+</tbody>
+</table>
+<p>There are two ways to use a variable:</p>
+<p><strong>A whole field: <code>$name</code>.</strong> Write <code>$</code> and the variable's name as the
+field's value - <code>dx=$offset</code>, <code>node=$cell</code>. The field gets the
+variable's value when the command runs. This works for any field of a
+command itself, not inside nested data like <code>valueContainer</code>.</p>
+<p><strong>Inside text: <code>${name}</code>.</strong> In any text value - a node's name, an
+attribute's value, an Ask prompt, nested data included - <code>${name}</code> is
+replaced by the variable's value: <code>"Row ${row}, column ${col}"</code>. Whole
+numbers appear without decimals (<code>3</code>, not <code>3.000000</code>). Write <code>$${</code> for
+a literal <code>${</code>.</p>
+<p><strong>Numbers and text:</strong> text in a number field is converted - <code>12.5</code> and
+<code>12,5</code> both work. Text that isn't a number is an error, not 0. <code>1.000,5</code>
+(dot and comma together) is an error too, because it's ambiguous.</p>
+<p>Loop counters start at 0. For a count starting at 1, add a step before:</p>
+<pre><code>Calculate
+  left=$i
+  operator=&quot;+&quot;
+  right=1.0
+  resultVariable=&quot;number&quot;
+</code></pre>
+<h2 id="loops-and-conditions">Loops and conditions</h2>
+<ul>
+<li><strong>Repeat</strong> runs its steps <code>count</code> times.</li>
+<li><strong>ForEach</strong> runs its steps once for every node that is selected when
+  it starts.</li>
+<li><strong>If</strong> runs its steps only if a search for <code>searchString</code> finds
+  something - the same search as Find, but it doesn't change the
+  selection.</li>
+<li><strong>Batch</strong> groups its steps into one undo step.</li>
+<li><strong>Sleep</strong> pauses for <code>milliseconds</code> - useful to watch a long macro.</li>
+</ul>
+<p>These can be nested: a Repeat inside a Repeat walks rows and columns.</p>
+<p><strong>SelectConnected</strong> works like a loop over the graph: it adds every
+node reachable from the selection over connections, following
+<code>direction</code> (<code>both</code>, <code>outgoing</code> or <code>incoming</code>) for <code>depth</code> steps (<code>0</code>
+means until nothing new is found). Combined with ForEach and GetValue
+it can, for example, add up an attribute over everything connected to
+a node.</p>
+<h2 id="command-reference">Command reference</h2>
+<p>Fields marked <em>optional</em> can be left out.</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Fields</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AddAttribute</td>
+<td><code>node</code> or <code>Node::selected=true</code>; <code>valueContainer</code> (<code>name</code>, <code>subgroup</code>, <code>type</code>, <code>newAttribute</code>)</td>
+<td>Adds an attribute to the node(s).</td>
+</tr>
+<tr>
+<td>Ask</td>
+<td><code>variable</code>; <em>optional</em> <code>prompt</code>, <code>default</code></td>
+<td>Shows a dialog and stores the answer as text.</td>
+</tr>
+<tr>
+<td>Batch</td>
+<td>-</td>
+<td>Runs its steps as one undo step.</td>
+</tr>
+<tr>
+<td>Calculate</td>
+<td><code>left</code>, <code>operator</code>, <code>right</code>, <code>resultVariable</code></td>
+<td><code>+ - * / mod min max</code> combine <code>left</code> and <code>right</code>; <code>round floor ceil abs</code> use only <code>left</code>.</td>
+</tr>
+<tr>
+<td>ChangeValue</td>
+<td><code>node</code> or <code>Node::selected=true</code>; <code>valueContainer</code> (<code>name</code>, <code>subgroup</code>, <code>type</code>, <code>newValue</code>)</td>
+<td>Changes one field of the node(s).</td>
+</tr>
+<tr>
+<td>Find</td>
+<td><code>searchString</code>; <em>optional</em> <code>scope</code> (<code>nodes</code>, <code>connections</code>, <code>both</code>), <code>setOperation</code> (<code>replace</code>, <code>add</code>, <code>subtract</code>, <code>intersect</code>)</td>
+<td>Selects what contains the text, combined with the current selection as set by <code>setOperation</code>.</td>
+</tr>
+<tr>
+<td>ForEach</td>
+<td><em>optional</em> <code>nodeVariable</code></td>
+<td>Runs its steps once per selected node.</td>
+</tr>
+<tr>
+<td>GetValue</td>
+<td><code>node</code>, <code>valueContainer</code> (<code>name</code>, <code>subgroup</code>), <code>resultVariable</code>; <em>optional</em> <code>default</code></td>
+<td>Reads an attribute of the node into a variable. Missing attribute: <code>default</code> if given, otherwise an error.</td>
+</tr>
+<tr>
+<td>Group</td>
+<td><code>node</code>; <em>optional</em> <code>deselect</code></td>
+<td>Groups the selection under the given group node.</td>
+</tr>
+<tr>
+<td>If</td>
+<td><code>searchString</code>; <em>optional</em> <code>scope</code></td>
+<td>Runs its steps only if the search finds something.</td>
+</tr>
+<tr>
+<td>Insert</td>
+<td><code>node</code> (with the node's data); <em>optional</em> <code>resultVariable</code></td>
+<td>Inserts nodes and connections.</td>
+</tr>
+<tr>
+<td>Layout</td>
+<td><em>optional</em> <code>direction</code> (<code>TB</code>, <code>LR</code>, ...), <code>engine</code> (<code>dot</code>, <code>neato</code>, <code>fdp</code>, <code>sfdp</code>, <code>circo</code>, <code>twopi</code>)</td>
+<td>Automatic layout of the whole graph.</td>
+</tr>
+<tr>
+<td>Move</td>
+<td><code>dx</code>, <code>dy</code></td>
+<td>Moves the selection.</td>
+</tr>
+<tr>
+<td>Remember</td>
+<td><code>variable</code></td>
+<td>Stores the selection; restore it with <code>Select</code> and <code>node=$variable</code>.</td>
+</tr>
+<tr>
+<td>RemoveAttribute</td>
+<td><code>node</code> or <code>Node::selected=true</code>; <code>valueContainer</code> (<code>name</code>, <code>subgroup</code>, <code>index</code>)</td>
+<td>Removes an attribute from the node(s).</td>
+</tr>
+<tr>
+<td>Repeat</td>
+<td><code>count</code>; <em>optional</em> <code>counterVariable</code></td>
+<td>Runs its steps <code>count</code> times.</td>
+</tr>
+<tr>
+<td>Select</td>
+<td><em>one of</em> <code>node</code>, <code>frame</code>, <code>selectAll=true</code>; <em>optional</em> <code>deselect</code></td>
+<td>Selects nodes. Clears the previous selection first, unless <code>deselect=false</code>.</td>
+</tr>
+<tr>
+<td>SelectConnected</td>
+<td><em>optional</em> <code>direction</code>, <code>depth</code></td>
+<td>Adds everything connected to the selection.</td>
+</tr>
+<tr>
+<td>Sleep</td>
+<td><code>milliseconds</code></td>
+<td>Pauses playback.</td>
+</tr>
+</tbody>
+</table>
+<p>Copy, Delete, Paste and Resize can be recorded and played, but their
+fields can't be edited in the tree or in a macro file.</p>
+<p><strong>Attributes</strong> you add with the toolbar live in the node's <code>Node::Data</code>.
+To read or change one, use <code>name</code> = the attribute's name and
+<code>subgroup="Node::Data"</code>.</p>
+<h2 id="examples">Examples</h2>
+<p><strong>Three nodes in a row, named with a counter:</strong></p>
+<pre><code>Repeat
+  count=3
+  counterVariable=&quot;i&quot;
+  Insert
+    resultVariable=&quot;n&quot;
+    node=@1
+    ~included_node
+      this=1
+      what=class
+      Node::Frame=[100.0,100.0,200.0,160.0]
+      ~Node::Data
+        Node::name=&quot;Node ${i}&quot;
+  Calculate
+    left=$i
+    operator=&quot;*&quot;
+    right=130.0
+    resultVariable=&quot;x&quot;
+  Select
+    node=$n
+  Move
+    dx=$x
+    dy=0.0
+</code></pre>
+<p>Every pass inserts a fresh copy of the node at the same spot, so the
+Move pushes pass number <code>i</code> by <code>i</code> x 130 pixels to the right.</p>
+<p>A node written by hand like this needs only a name and a frame; it gets
+the default font and colors. Recorded and dragged-in Inserts bring
+their complete look.</p>
+<p><strong>Add up "Costs" over everything connected to the selected node</strong> -
+select a node first:</p>
+<pre><code>SelectConnected
+  direction=&quot;both&quot;
+Calculate
+  left=0.0
+  operator=&quot;+&quot;
+  right=0.0
+  resultVariable=&quot;sum&quot;
+ForEach
+  nodeVariable=&quot;n&quot;
+  GetValue
+    node=$n
+    ~valueContainer
+      name=&quot;Costs&quot;
+      subgroup=&quot;Node::Data&quot;
+    resultVariable=&quot;c&quot;
+    default=0.0
+  Calculate
+    left=$sum
+    operator=&quot;+&quot;
+    right=$c
+    resultVariable=&quot;sum&quot;
+Ask
+  variable=&quot;ok&quot;
+  prompt=&quot;Sum:&quot;
+  default=&quot;${sum}&quot;
+</code></pre>
+<p><img alt="Result of the costs example" src="screenshots/11-macro-result.png"></p>
+<p>Ready-to-import versions of these and larger examples are in
+<code>docs/fixtures/</code>, for instance <code>kosten-summieren-demo.txt</code> and
+<code>rekursives-platzhalter-makro.txt</code>.</p>
+<h2 id="macro-files">Macro files</h2>
+<p><strong>Macro &gt; Save</strong> writes the selected macro as text, <strong>Macro &gt; Open</strong>
+reads one back; the file name becomes the macro's name. The format is
+the one in the examples above:</p>
+<ul>
+<li>One command, field or nested block per line; indentation of two
+  spaces per level shows what belongs to what.</li>
+<li><code>name=value</code> sets a field. Values: <code>"text"</code> (with <code>\"</code> and <code>\\</code>),
+  <code>true</code>/<code>false</code>, <code>12</code> (whole number), <code>1.5</code> (decimal), <code>(x,y)</code> (point),
+  <code>[left,top,right,bottom]</code> (rectangle), <code>@1</code> (a node of this macro),
+  <code>$name</code> (a variable).</li>
+<li><code>~name</code> starts nested data; its fields follow one level deeper.
+  Inside it, <code>what=class</code>, <code>what=group</code> or <code>what=connection</code> says what
+  kind of object it is.</li>
+<li>Lines starting with <code>#</code> are comments.</li>
+<li><code>raw:...</code> values preserve data that has no readable form; they're not
+  meant to be written by hand.</li>
+</ul>
+<p>Command and field names are checked when the file is read. An unknown
+name, a value of the wrong kind or a wrong indentation is reported with
+its line number, and nothing is imported.</p>
+<h2 id="keyboard-shortcuts-for-macros">Keyboard shortcuts for macros</h2>
+<p>In <strong>Edit &gt; Project settings</strong>, tab <strong>Shortcuts</strong>, the <strong>Macro
+shortcuts</strong> list assigns a key combination to a macro name: click
+<strong>New...</strong>, pick one of the current document's macros and press the
+keys. Double-click an entry to change its keys. The shortcut plays the
+macro of that name in whichever document you're working in, from then
+on in all open windows.</p>
+<h2 id="when-something-goes-wrong">When something goes wrong</h2>
+<p>The alert after playback names the first problem. The most common ones:</p>
+<table>
+<thead>
+<tr>
+<th>Message</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Command N (Name) failed.</td>
+<td>That command couldn't run; playback stopped there.</td>
+</tr>
+<tr>
+<td>N node reference(s) point to nodes the macro never creates</td>
+<td>A <code>node=@id</code> refers to a node no Insert in this macro creates.</td>
+</tr>
+<tr>
+<td>"$name" (for "field"): no such variable</td>
+<td>The variable was never set - a typo, or it's set later in the macro.</td>
+</tr>
+<tr>
+<td>"${name}": no such variable</td>
+<td>The same for a placeholder in text. The text is left as written.</td>
+</tr>
+<tr>
+<td>... is "...", not a number</td>
+<td>Text in a number field that isn't a number.</td>
+</tr>
+<tr>
+<td>GetValue: node "..." has no attribute "..."</td>
+<td>Add <code>default=0.0</code> if nodes without the attribute should count as 0.</td>
+</tr>
+<tr>
+<td>The macro is empty - nothing to play.</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="limitations">Limitations</h2>
+<ul>
+<li>Inside a Repeat, ForEach or If, <code>@id</code> refers to the node as it was
+  defined, not to the copy a pass inserts. Use <code>resultVariable</code> to work
+  with a pass's own nodes.</li>
+<li>Connections inserted inside a Repeat are not re-created for each pass
+  (<a href="https://github.com/Paradoxianer/ProjectConceptor/issues/139">#139</a>).</li>
+<li>The graph is redrawn between top-level commands, not during a long
+  single step - the passes of one Repeat appear together when it ends.</li>
+<li>A placeholder can't show a node (<code>${n}</code> for a ForEach node is an
+  error); read one of its attributes with GetValue instead.</li>
+<li>The Ask dialog shows only a short prompt.</li>
+<li>Messages about errors in a macro file are in English.</li>
+</ul>
+
+</body>
+</html>

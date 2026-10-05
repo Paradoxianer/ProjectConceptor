@@ -115,19 +115,16 @@ next to it.
 
 ## Macros
 
-The **Macro** menu records a sequence of actions and replays it later -
-useful for a repetitive edit you'd otherwise do by hand every time.
-**Start recording** / **Stop recording** capture everything done in
-between as one named macro (you're asked for a name when you stop);
-**Play** lists the macros recorded so far, and **Open**/**Save** move a
-macro's recording to/from its own file. Macros are saved as part of the
-document.
+The **Macro** menu records a sequence of actions and plays it back
+later. The **MacroEditor** tab shows a macro as a tree you can edit -
+change values, add and move commands - and builds new macros from a
+list of all commands. Macros can repeat steps, run them per selected
+node or only when a search finds something, pass values along in
+variables and put them into text, and are saved with the document.
 
-This is still rudimentary: a macro replays the exact same sequence of
-commands regardless of what's selected or how the graph has changed
-since - there's no parameterization, conditionals, or editing a
-macro's steps after recording. Fine for "redo this exact edit again,"
-not a general scripting facility.
+![The MacroEditor tab](screenshots/10-macro-editor.png)
+
+See [Macros](macros.md) for the full guide and the command reference.
 
 ## Save, load, undo
 

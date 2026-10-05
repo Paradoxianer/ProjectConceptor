@@ -60,7 +60,7 @@ class PCommandManager;
  *   hand-authored.
  * - Every command name is checked against the real PCommandManager
  *   registry, and every field name/type against that command's own
- *   PropertyInfo() (ctypes[0].pairs[]) - the same schema the scripting
+ *   PropertyInfo() (ctypes[].pairs[]) - the same schema the scripting
  *   suite publishes (see PDocument::GetSupportedSuites()).
  */
 

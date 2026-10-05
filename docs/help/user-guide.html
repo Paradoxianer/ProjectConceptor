@@ -201,19 +201,17 @@ two fields next to it.</p>
 <h2 id="macros">Macros</h2>
 
 <p>The <strong>Macro</strong> menu records a sequence of actions and
-replays it later &mdash; useful for a repetitive edit you'd otherwise
-do by hand every time. <strong>Start recording</strong> /
-<strong>Stop recording</strong> capture everything done in between as
-one named macro (you're asked for a name when you stop);
-<strong>Play</strong> lists the macros recorded so far, and
-<strong>Open</strong>/<strong>Save</strong> move a macro's recording
-to/from its own file. Macros are saved as part of the document.</p>
+plays it back later. The <strong>MacroEditor</strong> tab shows a macro
+as a tree you can edit &mdash; change values, add and move commands
+&mdash; and builds new macros from a list of all commands. Macros can
+repeat steps, run them per selected node or only when a search finds
+something, pass values along in variables and put them into text, and
+are saved with the document.</p>
 
-<p>This is still rudimentary: a macro replays the exact same sequence
-of commands regardless of what's selected or how the graph has changed
-since &mdash; there's no parameterization, conditionals, or editing a
-macro's steps after recording. Fine for &ldquo;redo this exact edit
-again,&rdquo; not a general scripting facility.</p>
+<img src="screenshots/10-macro-editor.png" alt="The MacroEditor tab">
+
+<p>See <a href="macros.html">Macros</a> for the full guide and the
+command reference.</p>
 
 <h2 id="save-load-undo">Save, load, undo</h2>
 
