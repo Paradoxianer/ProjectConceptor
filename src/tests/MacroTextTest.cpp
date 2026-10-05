@@ -2320,3 +2320,66 @@ void MacroTextTest::DecimalCommaIsANumber(void)
 	CPPUNIT_ASSERT_MESSAGE(result.String(),status != B_OK);
 	CPPUNIT_ASSERT_MESSAGE(result.String(),result.FindFirst("1.000,5") >= 0);
 }
+
+
+// counts rows that have children, split by whether they're open
+static void CountExpandable(MacroOutlineView &view, int32 *open, int32 *closed)
+{
+	*open	= 0;
+	*closed	= 0;
+	for (int32 i = 0; i < view.FullListCountItems(); i++) {
+		BListItem	*item	= view.FullListItemAt(i);
+		if (view.CountItemsUnder(item,true) == 0)
+			continue;
+		if (item->IsExpanded())
+			(*open)++;
+		else
+			(*closed)++;
+	}
+}
+
+
+void MacroTextTest::ExpandAndCollapseAllSurviveRebuild(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BMessage	move;
+	move.AddString("Command::Name","Move");
+	move.AddFloat("dx",1.0f);
+	BMessage	repeat;
+	repeat.AddString("Command::Name","Repeat");
+	repeat.AddInt32("count",2);
+	repeat.AddMessage("PCommand::subPCommand",&move);
+	BMessage	*insert	= BuildInsertPrototype();	// a node chip with blocks
+	BList		commands;
+	commands.AddItem(&repeat);
+	commands.AddItem(insert);
+
+	MacroOutlineView	view(BRect(0,0,300,300),"t",B_FOLLOW_ALL_SIDES);
+	view.SetRegistryForTests(doc->GetCommandManager());
+	view.SetCommands(&commands);
+	int32	open, closed;
+	CountExpandable(view,&open,&closed);
+	CPPUNIT_ASSERT(open > 0);		// commands start open
+	CPPUNIT_ASSERT(closed > 0);		// the chip and its blocks start closed
+
+	view.SetAllExpanded(false);
+	CountExpandable(view,&open,&closed);
+	CPPUNIT_ASSERT_EQUAL((int32)0,open);
+	view.RebuildAllRows();			// what every edit does
+	CountExpandable(view,&open,&closed);
+	CPPUNIT_ASSERT_EQUAL((int32)0,open);
+
+	view.SetAllExpanded(true);
+	CountExpandable(view,&open,&closed);
+	CPPUNIT_ASSERT_EQUAL((int32)0,closed);
+	view.RebuildAllRows();
+	CountExpandable(view,&open,&closed);
+	CPPUNIT_ASSERT_EQUAL((int32)0,closed);
+
+	// another macro starts from the defaults again
+	view.SetCommands(&commands);
+	CountExpandable(view,&open,&closed);
+	CPPUNIT_ASSERT(open > 0);
+	CPPUNIT_ASSERT(closed > 0);
+	delete insert;
+}

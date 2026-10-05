@@ -143,9 +143,10 @@ private:
 			 * after every single edit (a macro has at most a few dozen
 			 * rows) and far simpler than surgically patching one subtree
 			 * in place. Preserves which data-chip/generic-block rows were
-			 * expanded (by a path-based key, not by BListItem identity -
-			 * every rebuild replaces every item), so editing a field
-			 * inside an expanded node chip doesn't re-collapse it. */
+			 * expanded and which command rows were collapsed (by a
+			 * path-based key, not by BListItem identity - every rebuild
+			 * replaces every item), so editing a field inside an expanded
+			 * node chip doesn't re-collapse it. */
 			void			RebuildAllRows(void);
 			/** Adds one row per field/subcommand/nested block of `container`
 			 * under `superitem`, recursing into every nested block - see
@@ -153,13 +154,14 @@ private:
 			 * `schemaCommand` is the PCommand owning `container`'s own
 			 * PropertyInfo() (NULL inside a nested block, which has none -
 			 * see MacroText.h), used for the bound-field/add-field-row
-			 * decisions. `expandedKeys` is this rebuild's snapshot of which
-			 * chip/block rows were open before it started (see
-			 * RebuildAllRows()). */
+			 * decisions. `expandedKeys`/`collapsedKeys` are this rebuild's
+			 * snapshot of which chip/block rows were open and which command
+			 * rows were closed before it started (see RebuildAllRows()). */
 			void			BuildChildren(BMessage *container, int32 topLevelIndex,
 								const MacroPath &containerPath, class MacroRowItem *superitem,
 								uint32 level, PCommand *schemaCommand,
-								const std::set<BString> &expandedKeys);
+								const std::set<BString> &expandedKeys,
+								const std::set<BString> &collapsedKeys);
 			/** Shows the "+ Feld hinzufügen" popup for the command/block at
 			 * `containerPath` (topLevelIndex + path). `command` NULL (a
 			 * generic block/chip, no schema) opens ShowFreeformAddFieldMenu()
@@ -204,6 +206,11 @@ private:
 			 * `rowIndex` (or, if it's a top-level command, that whole
 			 * macro entry). */
 			void			DeleteRow(int32 rowIndex);
+			/** Expands or collapses every row that has children - commands,
+			 * subcommands, node chips and blocks alike (context menu
+			 * "Expand All"/"Collapse All"). */
+			void			SetAllExpanded(bool expand);
+			void			AddExpandItems(class BPopUpMenu *menu);
 			/** Deletes every currently selected row (Delete key, or the
 			 * context menu's Delete with more than one row selected) in
 			 * one pass - a row nested inside another selected row is

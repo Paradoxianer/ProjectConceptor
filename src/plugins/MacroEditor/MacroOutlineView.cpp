@@ -398,6 +398,9 @@ void MacroOutlineView::SetCommands(BList *commands)
 			if (cmd != NULL)
 				fCommands.AddItem(new BMessage(*cmd));
 		}
+	// another macro: don't carry this one's expand/collapse state over by
+	// position
+	MakeEmpty();
 	RebuildAllRows();
 }
 
@@ -479,11 +482,16 @@ int32 MacroOutlineView::RowIndexForCommand(int32 topLevel, const MacroPath &self
 
 void MacroOutlineView::RebuildAllRows(void)
 {
+	// chips/blocks start collapsed, commands expanded - each keeps
+	// whatever the user changed it to across a rebuild
 	std::set<BString>	expanded;
+	std::set<BString>	collapsed;
 	for (int32 i = 0; i < FullListCountItems(); i++) {
 		MacroRowItem	*item	= (MacroRowItem*)FullListItemAt(i);
 		if (((item->Kind() == kRowChip) || (item->Kind() == kRowBlock)) && item->IsExpanded())
 			expanded.insert(PathKey(item->TopLevelIndex(),item->SelfPath()));
+		if ((item->Kind() == kRowCommand) && !item->IsExpanded())
+			collapsed.insert(PathKey(item->TopLevelIndex(),item->SelfPath()));
 	}
 
 	MakeEmpty();
@@ -498,17 +506,19 @@ void MacroOutlineView::RebuildAllRows(void)
 		PCommand	*command	= (registry != NULL) ? registry->GetPCommand((char*)(name ? name : "")) : NULL;
 
 		MacroPath	empty;
-		MacroRowItem	*row	= new MacroRowItem(name ? name : "?",0,true,kRowCommand,
+		bool		expandThis	= collapsed.find(PathKey(i,empty)) == collapsed.end();
+		MacroRowItem	*row	= new MacroRowItem(name ? name : "?",0,expandThis,kRowCommand,
 			i,empty,NULL,-1,B_ANY_TYPE,false,command,-1);
 		AddItem(row);
-		BuildChildren(cmd,i,empty,row,1,command,expanded);
+		BuildChildren(cmd,i,empty,row,1,command,expanded,collapsed);
 	}
 }
 
 
 void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 	const MacroPath &containerPath, MacroRowItem *superitem, uint32 level,
-	PCommand *schemaCommand, const std::set<BString> &expandedKeys)
+	PCommand *schemaCommand, const std::set<BString> &expandedKeys,
+	const std::set<BString> &collapsedKeys)
 {
 	// #135's bound fields ("PCommand::bindings") render as their own field
 	// row showing "$variableName" - see MacroText.cpp's SerializeFieldLines
@@ -569,11 +579,13 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 				MacroPath	childPath(containerPath);
 				MacroPathStep	step; step.field = "PCommand::subPCommand"; step.index = j;
 				childPath.push_back(step);
-				MacroRowItem	*row	= new MacroRowItem(childName ? childName : "?",level,true,
+				bool	expandThis	= collapsedKeys.find(PathKey(topLevelIndex,childPath)) == collapsedKeys.end();
+				MacroRowItem	*row	= new MacroRowItem(childName ? childName : "?",level,expandThis,
 					kRowCommand,topLevelIndex,containerPath,"PCommand::subPCommand",j,
 					B_ANY_TYPE,false,childCommand,-1);
 				AppendUnder(row,superitem);
-				BuildChildren(&child,topLevelIndex,childPath,row,level+1,childCommand,expandedKeys);
+				BuildChildren(&child,topLevelIndex,childPath,row,level+1,childCommand,expandedKeys,
+					collapsedKeys);
 			}
 			continue;
 		}
@@ -599,7 +611,7 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 				AppendUnder(row,superitem);
 				// no schema inside a nested block/chip (see MacroText.h) -
 				// its own children get no "+ Feld hinzufügen" of their own
-				BuildChildren(&child,topLevelIndex,childPath,row,level+1,NULL,expandedKeys);
+				BuildChildren(&child,topLevelIndex,childPath,row,level+1,NULL,expandedKeys,collapsedKeys);
 			}
 			continue;
 		}
@@ -1402,6 +1414,29 @@ void MacroOutlineView::MoveCommandRows(std::vector<std::pair<int32,MacroPath> > 
 
 // ------------------------------------------------------------- BView etc --
 
+void MacroOutlineView::AddExpandItems(BPopUpMenu *menu)
+{
+	menu->AddItem(new BMenuItem(B_TRANSLATE("Expand All"),new BMessage('mvXa')));
+	menu->AddItem(new BMenuItem(B_TRANSLATE("Collapse All"),new BMessage('mvXn')));
+}
+
+
+void MacroOutlineView::SetAllExpanded(bool expand)
+{
+	// the overlay sits on a row index that's about to move
+	CloseOverlay(true);
+	for (int32 i = 0; i < FullListCountItems(); i++) {
+		BListItem	*item	= FullListItemAt(i);
+		if (CountItemsUnder(item,true) == 0)
+			continue;
+		if (expand)
+			Expand(item);
+		else
+			Collapse(item);
+	}
+}
+
+
 void MacroOutlineView::MouseDown(BPoint where)
 {
 	uint32	buttons	= 0;
@@ -1450,6 +1485,15 @@ void MacroOutlineView::MouseDown(BPoint where)
 		menu->AddItem(down);
 		menu->AddSeparatorItem();
 		menu->AddItem(new BMenuItem(deleteLabel.String(),new BMessage('mvDl')));
+		menu->AddSeparatorItem();
+		AddExpandItems(menu);
+		menu->SetTargetForItems(this);
+		menu->Go(ConvertToScreen(where),true,true,true);
+		return;
+	}
+	if ((buttons & B_SECONDARY_MOUSE_BUTTON) && (item == NULL)) {
+		BPopUpMenu	*menu	= new BPopUpMenu("emptyMenu",false,false);
+		AddExpandItems(menu);
 		menu->SetTargetForItems(this);
 		menu->Go(ConvertToScreen(where),true,true,true);
 		return;
@@ -1583,6 +1627,12 @@ void MacroOutlineView::MessageReceived(BMessage *message)
 				MoveRow(row,1);
 			return;
 		}
+		case 'mvXa':
+			SetAllExpanded(true);
+			return;
+		case 'mvXn':
+			SetAllExpanded(false);
+			return;
 		case 'mvDl':
 			DeleteSelectedRows();
 			return;
