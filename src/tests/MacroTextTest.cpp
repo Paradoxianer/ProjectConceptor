@@ -2304,3 +2304,19 @@ void MacroTextTest::GetValueReadsEditorAttribute(void)
 	CPPUNIT_ASSERT_EQUAL_MESSAGE(result.String(),(status_t)B_OK,status);
 	CPPUNIT_ASSERT_MESSAGE(result.String(),result.StartsWith("S=5.75 |"));
 }
+
+
+void MacroTextTest::DecimalCommaIsANumber(void)
+{
+	// "2,5" as typed in a German UI - but "1.000,5" stays an error
+	PDocument	*doc	= NewRegisteredTestDocument();
+	status_t	status	= B_ERROR;
+	BString		result	= PlayCostGraph(doc,"      Kosten=\"2,5\"\n","",&status);
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(result.String(),(status_t)B_OK,status);
+	CPPUNIT_ASSERT_MESSAGE(result.String(),result.StartsWith("S=4.25 |"));
+
+	PDocument	*doc2	= NewRegisteredTestDocument();
+	result	= PlayCostGraph(doc2,"      Kosten=\"1.000,5\"\n","",&status);
+	CPPUNIT_ASSERT_MESSAGE(result.String(),status != B_OK);
+	CPPUNIT_ASSERT_MESSAGE(result.String(),result.FindFirst("1.000,5") >= 0);
+}

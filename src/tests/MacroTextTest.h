@@ -71,6 +71,7 @@ public:
 	void GetValueReportsMissingAttribute(void);
 	void TextThatIsNoNumberIsReported(void);
 	void GetValueReadsEditorAttribute(void);
+	void DecimalCommaIsANumber(void);
 	void MoveCommandReparentsIntoAnotherContainer(void);
 	void MoveCommandPromotesToTopLevel(void);
 	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
@@ -133,6 +134,7 @@ public:
 	CPPUNIT_TEST(GetValueReportsMissingAttribute);
 	CPPUNIT_TEST(TextThatIsNoNumberIsReported);
 	CPPUNIT_TEST(GetValueReadsEditorAttribute);
+	CPPUNIT_TEST(DecimalCommaIsANumber);
 	CPPUNIT_TEST(MoveCommandReparentsIntoAnotherContainer);
 	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
 	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);

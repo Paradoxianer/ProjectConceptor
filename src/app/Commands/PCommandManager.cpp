@@ -687,8 +687,14 @@ void PCommandManager::ResolveBindings(BMessage *settings, PCommand *forCommand)
 						const char	*text	= NULL;
 						char		*end	= NULL;
 						valueContext->FindString(variableName,v,&text);
-						double		number	= (text != NULL) ? strtod(text,&end) : 0;
-						if ((text == NULL) || (end == text) || (*end != '\0')) {
+						// "12,5": a single comma and no dot is a decimal comma;
+						// "1.000,5" stays an error rather than a guess
+						BString		normalized(text);
+						if ((normalized.FindFirst('.') < 0) && (normalized.FindFirst(',') >= 0)
+								&& (normalized.FindFirst(',') == normalized.FindLast(',')))
+							normalized.ReplaceFirst(",",".");
+						double		number	= (text != NULL) ? strtod(normalized.String(),&end) : 0;
+						if ((text == NULL) || (end == normalized.String()) || (*end != '\0')) {
 							BString	error;
 							error.SetToFormat(B_TRANSLATE("\"$%s\" (for \"%s\") is \"%s\", not a number"),
 								variableName,fieldName,(text != NULL) ? text : "");
