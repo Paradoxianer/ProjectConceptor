@@ -214,7 +214,7 @@ void MacroTextTest::RoundTripsInsertWithNodeRef(void)
 	result->FindString("Command::Name",&name);
 	CPPUNIT_ASSERT(strcmp(name,"Insert") == 0);
 	int32	node	= -1;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindInt32("node",&node));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindInt32("node",&node));
 	CPPUNIT_ASSERT_EQUAL((int32)7,node);
 }
 
@@ -239,8 +239,8 @@ void MacroTextTest::RoundTripsMoveWithFloats(void)
 
 	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
 	float	dx	= 0, dy = 0;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindFloat("dx",&dx));
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindFloat("dy",&dy));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindFloat("dx",&dx));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindFloat("dy",&dy));
 	CPPUNIT_ASSERT((dx > 10.49f) && (dx < 10.51f));
 	CPPUNIT_ASSERT((dy > -3.01f) && (dy < -2.99f));
 }
@@ -267,8 +267,8 @@ void MacroTextTest::RoundTripsGroupWithBoolAndNodeRef(void)
 	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
 	int32	node	= -1;
 	bool	deselect	= false;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindInt32("node",&node));
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindBool("deselect",&deselect));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindInt32("node",&node));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindBool("deselect",&deselect));
 	CPPUNIT_ASSERT_EQUAL((int32)3,node);
 	CPPUNIT_ASSERT(deselect);
 }
@@ -296,12 +296,12 @@ void MacroTextTest::RoundTripsSelectWithRepeatedFields(void)
 
 	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
 	int32	node0	= -1, node1 = -1;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindInt32("node",0,&node0));
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindInt32("node",1,&node1));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindInt32("node",0,&node0));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindInt32("node",1,&node1));
 	CPPUNIT_ASSERT_EQUAL((int32)1,node0);
 	CPPUNIT_ASSERT_EQUAL((int32)2,node1);
 	BRect	frame;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindRect("frame",&frame));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindRect("frame",&frame));
 	CPPUNIT_ASSERT(frame == BRect(0,0,10,10));
 }
 
@@ -337,8 +337,8 @@ void MacroTextTest::RoundTripsNestedSubCommand(void)
 
 	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
 	BMessage	sub1,sub2;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("PCommand::subPCommand",0,&sub1));
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("PCommand::subPCommand",1,&sub2));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindMessage("PCommand::subPCommand",0,&sub1));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindMessage("PCommand::subPCommand",1,&sub2));
 	const char	*sub1Name	= NULL;
 	const char	*sub2Name	= NULL;
 	sub1.FindString("Command::Name",&sub1Name);
@@ -346,7 +346,7 @@ void MacroTextTest::RoundTripsNestedSubCommand(void)
 	CPPUNIT_ASSERT(strcmp(sub1Name,"Move") == 0);
 	CPPUNIT_ASSERT(strcmp(sub2Name,"Insert") == 0);
 	int32	insertedNode	= -1;
-	CPPUNIT_ASSERT_EQUAL(B_OK,sub2.FindInt32("node",&insertedNode));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,sub2.FindInt32("node",&insertedNode));
 	CPPUNIT_ASSERT_EQUAL((int32)9,insertedNode);
 }
 
@@ -371,7 +371,7 @@ void MacroTextTest::RoundTripsStringField(void)
 
 	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
 	const char	*value	= NULL;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindString("text",&value));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindString("text",&value));
 	CPPUNIT_ASSERT(strcmp(value,"say \"hi\" \\ bye") == 0);
 }
 
@@ -407,7 +407,7 @@ void MacroTextTest::RoundTripsNestedFieldBlock(void)
 
 	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
 	BMessage	restoredContainer;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("valueContainer",&restoredContainer));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindMessage("valueContainer",&restoredContainer));
 	const char	*restoredName	= NULL;
 	const char	*restoredValue	= NULL;
 	int32		restoredType	= -1;
@@ -457,14 +457,14 @@ void MacroTextTest::RoundTripsRecursiveNestedFieldBlock(void)
 
 	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
 	BMessage	restoredIncluded;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("included_node",&restoredIncluded));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindMessage("included_node",&restoredIncluded));
 	BRect	restoredFrame;
-	CPPUNIT_ASSERT_EQUAL(B_OK,restoredIncluded.FindRect("frame",&restoredFrame));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,restoredIncluded.FindRect("frame",&restoredFrame));
 	CPPUNIT_ASSERT(restoredFrame == BRect(0,0,80,40));
 	BMessage	restoredFont;
-	CPPUNIT_ASSERT_EQUAL(B_OK,restoredIncluded.FindMessage("font",&restoredFont));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,restoredIncluded.FindMessage("font",&restoredFont));
 	float	restoredSize	= 0;
-	CPPUNIT_ASSERT_EQUAL(B_OK,restoredFont.FindFloat("size",&restoredSize));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,restoredFont.FindFloat("size",&restoredSize));
 	CPPUNIT_ASSERT((restoredSize > 11.99f) && (restoredSize < 12.01f));
 }
 
@@ -500,8 +500,8 @@ void MacroTextTest::RoundTripsRepeatedNestedFieldBlocks(void)
 
 	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
 	BMessage	restoredA,restoredB;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("included_node",0,&restoredA));
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("included_node",1,&restoredB));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindMessage("included_node",0,&restoredA));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindMessage("included_node",1,&restoredB));
 	const char	*nameA	= NULL;
 	const char	*nameB	= NULL;
 	restoredA.FindString("name",&nameA);
@@ -534,7 +534,7 @@ void MacroTextTest::RawEscapeHatchPreservesOpaqueType(void)
 	BMessage	*result	= (BMessage*)parsed.ItemAt(0);
 	const void	*data	= NULL;
 	ssize_t		size	= 0;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindData("blob",(type_code)'TRBL',&data,&size));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindData("blob",(type_code)'TRBL',&data,&size));
 	CPPUNIT_ASSERT(strcmp((const char*)data,payload) == 0);
 }
 
@@ -641,13 +641,13 @@ void MacroTextTest::RoundTripsBoundField(void)
 	float	dx	= -1;
 	CPPUNIT_ASSERT(result->FindFloat("dx",&dx) != B_OK);
 	float	dy	= 0;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindFloat("dy",&dy));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindFloat("dy",&dy));
 	CPPUNIT_ASSERT((dy > 2.99f) && (dy < 3.01f));
 
 	BMessage	bindings;
-	CPPUNIT_ASSERT_EQUAL(B_OK,result->FindMessage("PCommand::bindings",&bindings));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,result->FindMessage("PCommand::bindings",&bindings));
 	const char	*variableName	= NULL;
-	CPPUNIT_ASSERT_EQUAL(B_OK,bindings.FindString("dx",&variableName));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,bindings.FindString("dx",&variableName));
 	CPPUNIT_ASSERT(BString(variableName) == "offset");
 
 	BString	text;
