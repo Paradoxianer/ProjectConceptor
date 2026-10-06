@@ -31,7 +31,7 @@ SRCS= 	FreeMindTranslator.cpp \
 		TranslatorMain.cpp \
 		SettingsManager.cpp \
 		ConfigView.cpp \
-		../../app/ProjectConceptorFields.cpp
+		../../common/ProjectConceptorFields.cpp
 
 
 		

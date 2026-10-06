@@ -12,7 +12,7 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptorStressGen
 
 SRCS= 	GenerateStressFixture.cpp \
 		../../app/ProjectConceptorDefs.cpp \
-		../../app/ProjectConceptorFields.cpp \
+		../../common/ProjectConceptorFields.cpp \
 		../../app/Config/ConfigManager.cpp \
 		../../app/Config/ConfigWindow.cpp \
 		../../app/Config/ConfigView.cpp \

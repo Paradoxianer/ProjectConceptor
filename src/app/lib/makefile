@@ -21,7 +21,7 @@ NAME= libProjectConceptor.so
 TYPE= SHARED
 
 SRCS=	../ProjectConceptorDefs.cpp \
-		../ProjectConceptorFields.cpp \
+		../../common/ProjectConceptorFields.cpp \
 		../Commands/PCommand.cpp \
 		../Tools/NodeSearch.cpp
 

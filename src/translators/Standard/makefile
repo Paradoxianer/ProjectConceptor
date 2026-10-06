@@ -33,7 +33,7 @@ SRCS= 	StandardTranslator.cpp \
 		ConfigView.cpp \
 		MessageXmlWriter.cpp \
 		MessageXmlReader.cpp \
-		../../app/ProjectConceptorFields.cpp
+		../../common/ProjectConceptorFields.cpp
 
 		
 #	specify the resource files to use
