@@ -104,8 +104,6 @@ node(s)" rather than "this exact node", so the macro also works on
 other nodes and in other documents. Inserting new nodes records the
 complete node, so playing the macro creates it again.
 
-Typing into the search field is not recorded keystroke by keystroke.
-
 ## Playing
 
 Choose the macro under **Macro > Play**, or press its shortcut (see
