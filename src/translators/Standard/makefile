@@ -101,7 +101,8 @@ LOCALES = en
 COMPILER_FLAGS =
 
 #	specify additional linker flags
-LINKER_FLAGS = -Xlinker -rpath=\$$ORIGIN/../../apps/ProjectConceptor
+# add-ons/Translators on the primary arch, add-ons/x86/Translators on the hybrid
+LINKER_FLAGS = -Xlinker -rpath=\$$ORIGIN/../../apps/ProjectConceptor:\$$ORIGIN/../../../apps/ProjectConceptor
 INSTALL_DIR    = /boot/home/config/add-ons/Translators
 
 ## include the makefile-engine
