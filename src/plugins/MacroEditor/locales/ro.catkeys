@@ -1,0 +1,28 @@
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	1110037994
+New macro	MacroEditor		Macrocomandă nouă
+Move Up	MacroEditor		Mută în sus
+Export Macro	MacroEditor		Exportă macrocomanda
++ Add field	MacroEditor		+ Adaugă câmp
+Delete %ld rows	MacroEditor		Șterge %ld rânduri
+Delete macro	MacroEditor		Șterge macrocomanda
+Name	MacroEditor		Nume
+Deleted.	MacroEditor		Ștearsă.
+Rename macro	MacroEditor		Redenumește macrocomanda
+Move Down	MacroEditor		Mută în jos
+Delete	MacroEditor		Șterge
+Duplicated.	MacroEditor		Duplicată.
+Exported.	MacroEditor		Exportată.
+Cancel	MacroEditor		Anulează
+Add field	MacroEditor		Adaugă câmp
+Connection	MacroEditor		Conexiune
+Imported as macro \"%s\" (%ld command(s)).	MacroEditor		Importată ca macrocomanda „%s” (%ld comenzi).
+%s copy	MacroEditor	name of a duplicated macro	%s copie
+Renamed.	MacroEditor		Redenumită.
+Collapse All	MacroEditor		Restrânge tot
+%ld command(s).	MacroEditor		%ld comenzi.
+Expand All	MacroEditor		Extinde tot
+Delete the macro \"%s\"? This cannot be undone.	MacroEditor		Ștergeți macrocomanda „%s”? Acțiunea nu poate fi anulată.
+New macro created - drag commands in from the list on the right.	MacroEditor		Macrocomandă nouă creată – trageți comenzi din lista din dreapta.
+No macro selected.	MacroEditor		Nicio macrocomandă selectată.
+No macro selected - select one in the MacroEditor tab first.	MacroEditor		Nicio macrocomandă selectată – selectați mai întâi una în fila MacroEditor.
+OK	MacroEditor		OK

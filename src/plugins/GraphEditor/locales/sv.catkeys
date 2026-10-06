@@ -1,49 +1,32 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	1588829839
-New Tab	ProjectConceptor		Ny tab
-Settings	ProjectConceptor		Inställningar
-Macro	ProjectConceptor		Makro
-Cut	ProjectConceptor		Klipp ut
-Save Macro	ProjectConceptor		Spara Makro
-Replace all	ProjectConceptor		Ersätt alla
-Paste	ProjectConceptor		Klistra in
-Help	ProjectConceptor		Hjälp
-Save as	ProjectConceptor		Spara som
-Play	ProjectConceptor		Spela upp
-Find & Replace	ProjectConceptor		Hitta & Ersätt
-New	ProjectConceptor		Ny
-Tile Vertical	ProjectConceptor		Upprepa vertikalt
-Copy	ProjectConceptor		Kopiera
-About	ProjectConceptor		Om
-Find	ProjectConceptor		Hitta
-Stop recording	ProjectConceptor		Stoppa inspelning
-Export	ProjectConceptor		Exportera
-Save	ProjectConceptor		Spara
-Find next	ProjectConceptor		Hitta nästa
-Undo	ProjectConceptor		Ångra
-File	ProjectConceptor		Arkiv
-Print	ProjectConceptor		Skriv ut
-Open	ProjectConceptor		Öppna
-Window	ProjectConceptor		Fönster
-Replace	ProjectConceptor		Ersätt
-Edit	ProjectConceptor		Ändra
-Tile	ProjectConceptor		Upprepa
-Close	ProjectConceptor		Stäng
-Redo	ProjectConceptor		Gör om
-Quit	ProjectConceptor		Avsluta
-Page setup	ProjectConceptor		Utskriftsformat
-Search	ProjectConceptor		Sök
-Start recording	ProjectConceptor		Starta inspelning
-Cascade	ProjectConceptor		Kaskad
-Clear	ProjectConceptor		Rensa
-Select all	ProjectConceptor		Markera alla
-Cancel	GraphEditor		Avbryt
-Scale	GraphEditor		Skala
-Fill	GraphEditor		Fyll
-Name	GraphEditor		Namn
-Input attributname	GraphEditor		Inmatningens attributnamn
-OK	GraphEditor		OK
-Pen size	GraphEditor		Pennstorlek
-Node::Pattern	GraphEditor		Nod::Mönster
-Attribut	GraphEditor		Attribut
-Grid	GraphEditor		Rutnät
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	3862227003
 Delete	AttributeRenderer		Radera
+Group selected nodes	GraphEditor		Gruppera markerade noder
+Connection	GraphEditor		Förbindelse
+Add text attribute	GraphEditor		Lägg till textattribut
+Grid	GraphEditor		Rutnät
+Fill pattern for selected nodes	GraphEditor		Fyllnadsmönster för markerade noder
+Toggle grid	GraphEditor		Visa/dölj rutnät
+Input attribute name	GraphEditor		Ange attributets namn
+None	GraphEditor		Ingen
+Toggle smart alignment guides	GraphEditor		Slå på/av smarta justeringslinjer
+Arrows	GraphEditor		Pilar
+Rounded	GraphEditor		Rundad
+Pen size	GraphEditor		Pennstorlek
+Add boolean attribute	GraphEditor		Lägg till booleskt attribut
+OK	GraphEditor		OK
+Fill color for selected nodes	GraphEditor		Fyllnadsfärg för markerade noder
+Fill	GraphEditor		Fyll
+Both ends	GraphEditor		Båda ändar
+Pattern	GraphEditor		Mönster
+Scale	GraphEditor		Skala
+Guides	GraphEditor		Hjälplinjer
+Straight	GraphEditor		Rak
+Angular	GraphEditor		Vinklad
+At source	GraphEditor		Vid källan
+Attribute	GraphEditor		Attribut
+Name	GraphEditor		Namn
+At target	GraphEditor		Vid målet
+Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder
+Cancel	GraphEditor		Avbryt
+Which ends of the selected connections carry an arrow	GraphEditor		Vilka ändar av de markerade förbindelserna som har en pil
+Shape of the selected connections	GraphEditor		Form på de markerade förbindelserna

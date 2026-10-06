@@ -1,49 +1,32 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	1588829839
-New Tab	ProjectConceptor		Neuer Tab
-Settings	ProjectConceptor		Einstellungen
-Macro	ProjectConceptor		Makro
-Cut	ProjectConceptor		Ausschneiden
-Save Macro	ProjectConceptor		Makro speichern
-Replace all	ProjectConceptor		Alles ersetzen
-Paste	ProjectConceptor		Einfügen
-Help	ProjectConceptor		Hilfe
-Save as	ProjectConceptor		Speichern als
-Play	ProjectConceptor		Abspielen
-Find & Replace	ProjectConceptor		Suchen und Ersetzen
-New	ProjectConceptor		Neu
-Tile Vertical	ProjectConceptor		Tile Vertical
-Copy	ProjectConceptor		Kopieren
-About	ProjectConceptor		Über
-Find	ProjectConceptor		Suchen
-Stop recording	ProjectConceptor		Aufnahme stoppen
-Export	ProjectConceptor		Exportieren
-Save	ProjectConceptor		Speichern
-Find next	ProjectConceptor		Weitersuchen
-Undo	ProjectConceptor		Rückgängig
-File	ProjectConceptor		Datei
-Print	ProjectConceptor		Drucken
-Open	ProjectConceptor		Öffnen
-Window	ProjectConceptor		Fenster
-Replace	ProjectConceptor		Ersetzen
-Edit	ProjectConceptor		Bearbeiten
-Tile	ProjectConceptor		Tile
-Close	ProjectConceptor		Schließen
-Redo	ProjectConceptor		Wiederherstellen
-Quit	ProjectConceptor		Beenden
-Page setup	ProjectConceptor		Seiten einrichten
-Search	ProjectConceptor		Suchen
-Start recording	ProjectConceptor		Aufnahme starten
-Cascade	ProjectConceptor		Cascade
-Clear	ProjectConceptor		Clear
-Select all	ProjectConceptor		Alles auswählen
-Cancel	GraphEditor		Abbrechen
-Scale	GraphEditor		Skalieren
-Fill	GraphEditor		Ausfüllen
-Name	GraphEditor		Name
-Input attributname	GraphEditor		Eingabe Attributname
-OK	GraphEditor		OK
-Pen size	GraphEditor		Stiftgröße
-Node::Pattern	GraphEditor		Node::Pattern
-Attribut	GraphEditor		Attribut
-Grid	GraphEditor		Gitter
+1	German	application/x-vnd.ProjectConceptor-plugin	3862227003
 Delete	AttributeRenderer		Löschen
+Group selected nodes	GraphEditor		Ausgewählte Knoten gruppieren
+Connection	GraphEditor		Verbindung
+Add text attribute	GraphEditor		Textattribut hinzufügen
+Grid	GraphEditor		Gitter
+Fill pattern for selected nodes	GraphEditor		Füllmuster für ausgewählte Knoten
+Toggle grid	GraphEditor		Raster ein/aus
+Input attribute name	GraphEditor		Attributnamen eingeben
+None	GraphEditor		Keine
+Toggle smart alignment guides	GraphEditor		Intelligente Ausrichtungshilfen ein/aus
+Arrows	GraphEditor		Pfeile
+Rounded	GraphEditor		Abgerundet
+Pen size	GraphEditor		Stiftgröße
+Add boolean attribute	GraphEditor		Wahrheitswert-Attribut hinzufügen
+OK	GraphEditor		OK
+Fill color for selected nodes	GraphEditor		Füllfarbe für ausgewählte Knoten
+Fill	GraphEditor		Ausfüllen
+Both ends	GraphEditor		Beide Enden
+Pattern	GraphEditor		Muster
+Scale	GraphEditor		Skalieren
+Guides	GraphEditor		Hilfslinien
+Straight	GraphEditor		Gerade
+Angular	GraphEditor		Eckig
+At source	GraphEditor		Am Anfang
+Attribute	GraphEditor		Attribut
+Name	GraphEditor		Name
+At target	GraphEditor		Am Ende
+Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
+Cancel	GraphEditor		Abbrechen
+Which ends of the selected connections carry an arrow	GraphEditor		An welchen Enden die ausgewählten Verbindungen einen Pfeil tragen
+Shape of the selected connections	GraphEditor		Form der ausgewählten Verbindungen

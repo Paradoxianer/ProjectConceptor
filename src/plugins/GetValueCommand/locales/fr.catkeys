@@ -1,0 +1,4 @@
+1	French	application/x-vnd.ProjectConceptor-plugin	3402668571
+GetValue: node \"%s\" has no attribute \"%s\"	GetValue		GetValue : le nœud « %s » n'a pas d'attribut « %s »
+GetValue: \"%s\" of node \"%s\" is not a number, text or bool	GetValue		GetValue : « %s » du nœud « %s » n'est ni un nombre, ni du texte, ni un booléen
+GetValue needs node, valueContainer/name and resultVariable	GetValue		GetValue a besoin de node, valueContainer/name et resultVariable

@@ -1,0 +1,4 @@
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	3402668571
+GetValue: node \"%s\" has no attribute \"%s\"	GetValue		GetValue: il grop “%s” nol à l'atribût “%s”
+GetValue: \"%s\" of node \"%s\" is not a number, text or bool	GetValue		GetValue: “%s” dal grop “%s” nol è ni un numar ni test ni boolean
+GetValue needs node, valueContainer/name and resultVariable	GetValue		GetValue al à bisugne di node, valueContainer/name e resultVariable

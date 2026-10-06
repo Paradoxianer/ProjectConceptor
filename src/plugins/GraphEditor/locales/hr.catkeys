@@ -1,49 +1,32 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	1588829839
-New Tab	ProjectConceptor		Nova kartica
-Settings	ProjectConceptor		Postavke
-Macro	ProjectConceptor		Macro
-Cut	ProjectConceptor		Izreži
-Save Macro	ProjectConceptor		Save Macro
-Replace all	ProjectConceptor		Zamjeni sve
-Paste	ProjectConceptor		Zalijepi
-Help	ProjectConceptor		Pomoć
-Save as	ProjectConceptor		Spremi kao
-Play	ProjectConceptor		Play
-Find & Replace	ProjectConceptor		Nađi i zamjeni
-New	ProjectConceptor		Novo
-Tile Vertical	ProjectConceptor		Tile Vertical
-Copy	ProjectConceptor		Kopiraj
-About	ProjectConceptor		O programu
-Find	ProjectConceptor		Nađi
-Stop recording	ProjectConceptor		Prekini snimanje
-Export	ProjectConceptor		Izvezi
-Save	ProjectConceptor		Spremi
-Find next	ProjectConceptor		Nađi tekst
-Undo	ProjectConceptor		Undo
-File	ProjectConceptor		Datoteka
-Print	ProjectConceptor		Ispis
-Open	ProjectConceptor		Otvori
-Window	ProjectConceptor		Prozor
-Replace	ProjectConceptor		Zamjeni
-Edit	ProjectConceptor		Uredi
-Tile	ProjectConceptor		Tile
-Close	ProjectConceptor		Zatvori
-Redo	ProjectConceptor		Redo
-Quit	ProjectConceptor		Završi
-Page setup	ProjectConceptor		Postavka stranice
-Search	ProjectConceptor		Traži
-Start recording	ProjectConceptor		Započni snimanje
-Cascade	ProjectConceptor		Cascade
-Clear	ProjectConceptor		Očisti
-Select all	ProjectConceptor		Označi sve
-Cancel	GraphEditor		Otkaži
-Scale	GraphEditor		Scale
-Fill	GraphEditor		Ispuni
-Name	GraphEditor		Ime
-Input attributname	GraphEditor		Input attributname
-OK	GraphEditor		U redu
-Pen size	GraphEditor		Pen size
-Node::Pattern	GraphEditor		Node::Pattern
-Attribut	GraphEditor		Atribut
-Grid	GraphEditor		Grid
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	3862227003
 Delete	AttributeRenderer		Izbriši
+Group selected nodes	GraphEditor		Grupiraj odabrane čvorove
+Connection	GraphEditor		Veza
+Add text attribute	GraphEditor		Dodaj tekstualni atribut
+Grid	GraphEditor		Rešetka
+Fill pattern for selected nodes	GraphEditor		Uzorak ispune za odabrane čvorove
+Toggle grid	GraphEditor		Uključi/isključi rešetku
+Input attribute name	GraphEditor		Unesite naziv atributa
+None	GraphEditor		Nijedna
+Toggle smart alignment guides	GraphEditor		Uključi/isključi pametne vodilice za poravnanje
+Arrows	GraphEditor		Strelice
+Rounded	GraphEditor		Zaobljena
+Pen size	GraphEditor		Debljina olovke
+Add boolean attribute	GraphEditor		Dodaj logički atribut
+OK	GraphEditor		U redu
+Fill color for selected nodes	GraphEditor		Boja ispune za odabrane čvorove
+Fill	GraphEditor		Ispuni
+Both ends	GraphEditor		Oba kraja
+Pattern	GraphEditor		Uzorak
+Scale	GraphEditor		Mjerilo
+Guides	GraphEditor		Vodilice
+Straight	GraphEditor		Ravna
+Angular	GraphEditor		Kutna
+At source	GraphEditor		Na izvoru
+Attribute	GraphEditor		Atribut
+Name	GraphEditor		Ime
+At target	GraphEditor		Na odredištu
+Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove
+Cancel	GraphEditor		Otkaži
+Which ends of the selected connections carry an arrow	GraphEditor		Koji krajevi odabranih veza imaju strelicu
+Shape of the selected connections	GraphEditor		Oblik odabranih veza

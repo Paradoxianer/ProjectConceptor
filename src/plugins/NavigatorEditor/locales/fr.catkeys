@@ -1,44 +1,34 @@
-1	French	application/x-vnd.ProjectConceptor-plugin	2371896127
-New Tab	ProjectConceptor		Nouvel onglet
-Settings	ProjectConceptor		Réglages
-Macro	ProjectConceptor		Macro
-Cut	ProjectConceptor		Couper
-Save Macro	ProjectConceptor		Enregistrer la macro
-Replace all	ProjectConceptor		Remplacer tout
-Paste	ProjectConceptor		Coller
-Help	ProjectConceptor		Aide
-Save as	ProjectConceptor		Enregistrer sous
-Play	ProjectConceptor		Lire
-Find & Replace	ProjectConceptor		Chercher & Remplacer
-New	ProjectConceptor		Nouveau ....
-Tile Vertical	ProjectConceptor		Tuile verticale
-Copy	ProjectConceptor		Copier
-About	ProjectConceptor		À propos de
-Find	ProjectConceptor		Chercher
-Stop recording	ProjectConceptor		Stopper l'enregistrement
-Export	ProjectConceptor		Exporter
-Save	ProjectConceptor		Sauvegarder
-Find next	ProjectConceptor		Chercher l'occurence suivante ....
-Undo	ProjectConceptor		Défaire
-File	ProjectConceptor		Fichier
-Print	ProjectConceptor		Imprimer
-Open	ProjectConceptor		Ouvrir
-Window	ProjectConceptor		Fenêtre
-Replace	ProjectConceptor		Remplacer
-Edit	ProjectConceptor		Éditer
-Tile	ProjectConceptor		Tuile
-Close	ProjectConceptor		Fermer
-Redo	ProjectConceptor		Refaire
-Quit	ProjectConceptor		Quitter
-Page setup	ProjectConceptor		Mise en page
-Search	ProjectConceptor		Rechercher
-Start recording	ProjectConceptor		Démarrer l'enregistrement
-Cascade	ProjectConceptor		Cascade
-Clear	ProjectConceptor		Nettoyer
-Select all	ProjectConceptor		Sélectionner tout
+1	French	application/x-vnd.ProjectConceptor-plugin	2502389885
+Untitled	NavigatorCommands		Sans titre
+Integer (8-bit)	NavigatorCommands		Entier (8 bits)
+Field name	NavigatorCommands		Nom du champ
+Add child node	NavigatorCommands		Ajouter un nœud enfant
+Add field	NavigatorCommands		Ajouter un champ
+Float	NavigatorCommands		Flottant
+Message (nested fields)	NavigatorCommands		Message (champs imbriqués)
+x: 	PointItem		x : 
 true	BoolItem		vrai
+OK	NavigatorCommands		OK
+Boolean	NavigatorCommands		Booléen
+Delete the selected node or field	NavigatorEditor		Supprimer le nœud ou le champ sélectionné
 false	BoolItem		faux
-bottom	RectItem		bas
+Add node	NavigatorCommands		Ajouter un nœud
+Point	NavigatorCommands		Point
+Integer (16-bit)	NavigatorCommands		Entier (16 bits)
 left	RectItem		gauche
-right	RectItem		droite
+Name	NavigatorCommands		Nom
+Field	NavigatorCommands		Champ
+Integer (64-bit)	NavigatorCommands		Entier (64 bits)
+Cancel	NavigatorCommands		Abandon
 top	RectItem		haut
+Double	NavigatorCommands		Double précision
+bottom	RectItem		bas
+Rectangle	NavigatorCommands		Rectangle
+Delete field	NavigatorCommands		Supprimer le champ
+Text	NavigatorCommands		Texte
+Delete node	NavigatorCommands		Supprimer le nœud
+right	RectItem		droite
+y: 	PointItem		y : 
+Integer (32-bit)	NavigatorCommands		Entier (32 bits)
+Add a node (child of the selection, or top-level)	NavigatorEditor		Ajouter un nœud (enfant de la sélection ou de premier niveau)
+Node name	NavigatorCommands		Nom du nœud

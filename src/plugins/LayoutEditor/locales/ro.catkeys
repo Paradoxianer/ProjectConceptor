@@ -1,0 +1,18 @@
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	2057011613
+Direction	LayoutEditor		Direcție
+Right → Left	LayoutEditor		Dreapta → Stânga
+Auto-Layout	LayoutEditor		Aranjare automată
+Circular	LayoutEditor		Circular
+Topology	LayoutEditor		Topologie
+Automatically arrange the graph	LayoutEditor		Aranjează graful automat
+Left → Right	LayoutEditor		Stânga → Dreapta
+Radial	LayoutEditor		Radial
+OK	LayoutEditor		OK
+Layout direction	LayoutEditor		Direcția aranjării
+Bottom → Top	LayoutEditor		Jos → Sus
+Force-directed	LayoutEditor		Bazat pe forțe
+Force (large graphs)	LayoutEditor		Forțe (grafuri mari)
+Spring model	LayoutEditor		Model cu arcuri
+Layout topology	LayoutEditor		Topologia aranjării
+Top → Bottom	LayoutEditor		Sus → Jos
+Hierarchical	LayoutEditor		Ierarhic

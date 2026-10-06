@@ -1,0 +1,18 @@
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	2057011613
+Direction	LayoutEditor		Riktning
+Right → Left	LayoutEditor		Höger → Vänster
+Auto-Layout	LayoutEditor		Autolayout
+Circular	LayoutEditor		Cirkulär
+Topology	LayoutEditor		Topologi
+Automatically arrange the graph	LayoutEditor		Ordna grafen automatiskt
+Left → Right	LayoutEditor		Vänster → Höger
+Radial	LayoutEditor		Radiell
+OK	LayoutEditor		OK
+Layout direction	LayoutEditor		Layoutriktning
+Bottom → Top	LayoutEditor		Botten → Topp
+Force-directed	LayoutEditor		Kraftbaserad
+Force (large graphs)	LayoutEditor		Kraft (stora grafer)
+Spring model	LayoutEditor		Fjädermodell
+Layout topology	LayoutEditor		Layouttopologi
+Top → Bottom	LayoutEditor		Topp → Botten
+Hierarchical	LayoutEditor		Hierarkisk

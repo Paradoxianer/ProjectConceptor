@@ -1,49 +1,32 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	1588829839
-New Tab	ProjectConceptor		Nueva pestaña
-Settings	ProjectConceptor		Configuración
-Macro	ProjectConceptor		Macro
-Cut	ProjectConceptor		Cortar
-Save Macro	ProjectConceptor		Guardar Macro
-Replace all	ProjectConceptor		Reemplazar todo
-Paste	ProjectConceptor		Pegar
-Help	ProjectConceptor		Ayuda
-Save as	ProjectConceptor		Guardar como
-Play	ProjectConceptor		Reproducir
-Find & Replace	ProjectConceptor		Buscar & Reemplazar
-New	ProjectConceptor		Nuevo
-Tile Vertical	ProjectConceptor		Mosaico Vertical
-Copy	ProjectConceptor		Copiar
-About	ProjectConceptor		Acerca de
-Find	ProjectConceptor		Buscar
-Stop recording	ProjectConceptor		Detener grabación
-Export	ProjectConceptor		Exportar
-Save	ProjectConceptor		Guardar
-Find next	ProjectConceptor		Buscar siguiente
-Undo	ProjectConceptor		Deshacer
-File	ProjectConceptor		Archivo
-Print	ProjectConceptor		Imprimir
-Open	ProjectConceptor		Abrir
-Window	ProjectConceptor		Ventana
-Replace	ProjectConceptor		Reemplazar
-Edit	ProjectConceptor		Editar
-Tile	ProjectConceptor		Mosaico
-Close	ProjectConceptor		Cerrar
-Redo	ProjectConceptor		Rehacer
-Quit	ProjectConceptor		Salir
-Page setup	ProjectConceptor		Configurar página
-Search	ProjectConceptor		Buscar
-Start recording	ProjectConceptor		Iniciar grabación
-Cascade	ProjectConceptor		Cascada
-Clear	ProjectConceptor		Limpiar
-Select all	ProjectConceptor		Seleccionar todo
-Cancel	GraphEditor		Cancelar
-Scale	GraphEditor		Escala
-Fill	GraphEditor		Rellenar
-Name	GraphEditor		Nombre
-Input attributname	GraphEditor		Ingrese nombre de atributo
-OK	GraphEditor		Aceptar
-Pen size	GraphEditor		Tamaño de lápiz
-Node::Pattern	GraphEditor		Nodo::Patrón
-Attribut	GraphEditor		Atributo
-Grid	GraphEditor		Grilla
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	3862227003
 Delete	AttributeRenderer		Borrar
+Group selected nodes	GraphEditor		Agrupar los nodos seleccionados
+Connection	GraphEditor		Conexión
+Add text attribute	GraphEditor		Añadir atributo de texto
+Grid	GraphEditor		Grilla
+Fill pattern for selected nodes	GraphEditor		Patrón de relleno de los nodos seleccionados
+Toggle grid	GraphEditor		Mostrar/ocultar cuadrícula
+Input attribute name	GraphEditor		Introduzca el nombre del atributo
+None	GraphEditor		Ninguna
+Toggle smart alignment guides	GraphEditor		Activar/desactivar guías de alineación inteligentes
+Arrows	GraphEditor		Flechas
+Rounded	GraphEditor		Redondeada
+Pen size	GraphEditor		Tamaño de lápiz
+Add boolean attribute	GraphEditor		Añadir atributo booleano
+OK	GraphEditor		Aceptar
+Fill color for selected nodes	GraphEditor		Color de relleno de los nodos seleccionados
+Fill	GraphEditor		Rellenar
+Both ends	GraphEditor		Ambos extremos
+Pattern	GraphEditor		Patrón
+Scale	GraphEditor		Escala
+Guides	GraphEditor		Guías
+Straight	GraphEditor		Recta
+Angular	GraphEditor		Angular
+At source	GraphEditor		En el origen
+Attribute	GraphEditor		Atributo
+Name	GraphEditor		Nombre
+At target	GraphEditor		En el destino
+Border pen size for selected nodes	GraphEditor		Grosor del borde de los nodos seleccionados
+Cancel	GraphEditor		Cancelar
+Which ends of the selected connections carry an arrow	GraphEditor		Qué extremos de las conexiones seleccionadas llevan flecha
+Shape of the selected connections	GraphEditor		Forma de las conexiones seleccionadas

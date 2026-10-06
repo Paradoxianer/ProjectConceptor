@@ -23,7 +23,7 @@ Settings	ConfigWindow		Einstellungen
 Cancel	CommandManager		Abbrechen
 Save as	SavePanel		Speichern als
 \"${%s}\" is not text or a number	CommandManager		\"${%s}\" ist weder Text noch Zahl
-Clear	MainWindow		Clear
+Clear	MainWindow		Leeren
 Macro	MainWindow		Makro
 Undo	MainWindow		Rückgängig
 Macro	CommandManager		Makro
@@ -47,7 +47,7 @@ Play	MainWindow		Abspielen
 There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Es ist keine Standard-Anwendung definiert, um eine Verbindung mit einem FTP-Server aufzubauen.
 Replace all	MainWindow		Alles ersetzen
 Open Recent	MainWindow		Zuletzt geöffnet
-Cascade	MainWindow		Cascade
+Cascade	MainWindow		Überlappend
 Don't save	Document		Nicht speichern
 \"${%s}\" holds %ld values, not one	CommandManager		\"${%s}\" enthält %ld Werte statt einem
 Close	MainWindow		Schließen

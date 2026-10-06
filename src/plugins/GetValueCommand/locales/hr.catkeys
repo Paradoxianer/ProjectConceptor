@@ -1,0 +1,4 @@
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	3402668571
+GetValue: node \"%s\" has no attribute \"%s\"	GetValue		GetValue: čvor „%s” nema atribut „%s”
+GetValue: \"%s\" of node \"%s\" is not a number, text or bool	GetValue		GetValue: „%s” čvora „%s” nije broj, tekst ni logička vrijednost
+GetValue needs node, valueContainer/name and resultVariable	GetValue		GetValue treba node, valueContainer/name i resultVariable

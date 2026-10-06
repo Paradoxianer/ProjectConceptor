@@ -1,44 +1,34 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	2371896127
-New Tab	ProjectConceptor		Tab nou
-Settings	ProjectConceptor		Configurări
-Macro	ProjectConceptor		Macro
-Cut	ProjectConceptor		Tăiere
-Save Macro	ProjectConceptor		Salvare macro
-Replace all	ProjectConceptor		Înlocuiește tot
-Paste	ProjectConceptor		Lipire
-Help	ProjectConceptor		Ajutor
-Save as	ProjectConceptor		Salvare ca
-Play	ProjectConceptor		Redare
-Find & Replace	ProjectConceptor		Căutare & Înlocuire
-New	ProjectConceptor		Nou
-Tile Vertical	ProjectConceptor		Juxtapune vertical
-Copy	ProjectConceptor		Copiere
-About	ProjectConceptor		Despre
-Find	ProjectConceptor		Căutare
-Stop recording	ProjectConceptor		Oprește înregistrarea
-Export	ProjectConceptor		Exportă
-Save	ProjectConceptor		Salvare
-Find next	ProjectConceptor		Caută înainte
-Undo	ProjectConceptor		Reface
-File	ProjectConceptor		Fișier
-Print	ProjectConceptor		Tipărire
-Open	ProjectConceptor		Deschide
-Window	ProjectConceptor		Fereastră
-Replace	ProjectConceptor		Înlocuire
-Edit	ProjectConceptor		Editare
-Tile	ProjectConceptor		Juxtapune
-Close	ProjectConceptor		Închide
-Redo	ProjectConceptor		Repetă
-Quit	ProjectConceptor		Ieșire
-Page setup	ProjectConceptor		Configurare pagină
-Search	ProjectConceptor		Căutare
-Start recording	ProjectConceptor		Începe înregistrarea
-Cascade	ProjectConceptor		Cascadă
-Clear	ProjectConceptor		Eliberare
-Select all	ProjectConceptor		Selectează tot
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	2502389885
+Untitled	NavigatorCommands		Fără titlu
+Integer (8-bit)	NavigatorCommands		Întreg (8 biți)
+Field name	NavigatorCommands		Numele câmpului
+Add child node	NavigatorCommands		Adaugă nod copil
+Add field	NavigatorCommands		Adaugă câmp
+Float	NavigatorCommands		Virgulă mobilă
+Message (nested fields)	NavigatorCommands		Mesaj (câmpuri imbricate)
+x: 	PointItem		x: 
 true	BoolItem		adevărat
+OK	NavigatorCommands		OK
+Boolean	NavigatorCommands		Boolean
+Delete the selected node or field	NavigatorEditor		Șterge nodul sau câmpul selectat
 false	BoolItem		fals
-bottom	RectItem		bază
+Add node	NavigatorCommands		Adaugă nod
+Point	NavigatorCommands		Punct
+Integer (16-bit)	NavigatorCommands		Întreg (16 biți)
 left	RectItem		stânga
+Name	NavigatorCommands		Nume
+Field	NavigatorCommands		Câmp
+Integer (64-bit)	NavigatorCommands		Întreg (64 biți)
+Cancel	NavigatorCommands		Anulează
+top	RectItem		sus
+Double	NavigatorCommands		Dublă precizie
+bottom	RectItem		bază
+Rectangle	NavigatorCommands		Dreptunghi
+Delete field	NavigatorCommands		Șterge câmpul
+Text	NavigatorCommands		Text
+Delete node	NavigatorCommands		Șterge nodul
 right	RectItem		dreapta
-top	RectItem		top
+y: 	PointItem		y: 
+Integer (32-bit)	NavigatorCommands		Întreg (32 biți)
+Add a node (child of the selection, or top-level)	NavigatorEditor		Adaugă un nod (copil al selecției sau de nivel superior)
+Node name	NavigatorCommands		Numele nodului

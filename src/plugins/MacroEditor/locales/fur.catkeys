@@ -1,0 +1,28 @@
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	1110037994
+New macro	MacroEditor		Gnove macro
+Move Up	MacroEditor		Sposte in sù
+Export Macro	MacroEditor		Espuarte macro
++ Add field	MacroEditor		+ Zonte cjamp
+Delete %ld rows	MacroEditor		Elimine %ld riis
+Delete macro	MacroEditor		Elimine macro
+Name	MacroEditor		Non
+Deleted.	MacroEditor		Eliminade.
+Rename macro	MacroEditor		Cambie non ae macro
+Move Down	MacroEditor		Sposte in jù
+Delete	MacroEditor		Elimine
+Duplicated.	MacroEditor		Duplicade.
+Exported.	MacroEditor		Espuartade.
+Cancel	MacroEditor		Anule
+Add field	MacroEditor		Zonte cjamp
+Connection	MacroEditor		Conession
+Imported as macro \"%s\" (%ld command(s)).	MacroEditor		Impuartade come macro “%s” (%ld comant(s)).
+%s copy	MacroEditor	name of a duplicated macro	Copie di %s
+Renamed.	MacroEditor		Cambiât non.
+Collapse All	MacroEditor		Siere dut
+%ld command(s).	MacroEditor		%ld comant(s).
+Expand All	MacroEditor		Vierç dut
+Delete the macro \"%s\"? This cannot be undone.	MacroEditor		Eliminâ la macro “%s”? No si pues tornâ indaûr.
+New macro created - drag commands in from the list on the right.	MacroEditor		Creade une gnove macro – strissine dentri i comants de liste a diestre.
+No macro selected.	MacroEditor		Nissune macro selezionade.
+No macro selected - select one in the MacroEditor tab first.	MacroEditor		Nissune macro selezionade – selezione prime une te schede MacroEditor.
+OK	MacroEditor		Va ben

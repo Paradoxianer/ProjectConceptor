@@ -1,0 +1,28 @@
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	1110037994
+New macro	MacroEditor		Nueva macro
+Move Up	MacroEditor		Subir
+Export Macro	MacroEditor		Exportar macro
++ Add field	MacroEditor		+ Añadir campo
+Delete %ld rows	MacroEditor		Eliminar %ld filas
+Delete macro	MacroEditor		Eliminar macro
+Name	MacroEditor		Nombre
+Deleted.	MacroEditor		Eliminada.
+Rename macro	MacroEditor		Renombrar macro
+Move Down	MacroEditor		Bajar
+Delete	MacroEditor		Borrar
+Duplicated.	MacroEditor		Duplicada.
+Exported.	MacroEditor		Exportada.
+Cancel	MacroEditor		Cancelar
+Add field	MacroEditor		Añadir campo
+Connection	MacroEditor		Conexión
+Imported as macro \"%s\" (%ld command(s)).	MacroEditor		Importada como macro «%s» (%ld comando(s)).
+%s copy	MacroEditor	name of a duplicated macro	Copia de %s
+Renamed.	MacroEditor		Renombrada.
+Collapse All	MacroEditor		Contraer todo
+%ld command(s).	MacroEditor		%ld comando(s).
+Expand All	MacroEditor		Expandir todo
+Delete the macro \"%s\"? This cannot be undone.	MacroEditor		¿Eliminar la macro «%s»? No se puede deshacer.
+New macro created - drag commands in from the list on the right.	MacroEditor		Macro nueva creada: arrastre comandos desde la lista de la derecha.
+No macro selected.	MacroEditor		Ninguna macro seleccionada.
+No macro selected - select one in the MacroEditor tab first.	MacroEditor		Ninguna macro seleccionada; seleccione una primero en la pestaña MacroEditor.
+OK	MacroEditor		Aceptar

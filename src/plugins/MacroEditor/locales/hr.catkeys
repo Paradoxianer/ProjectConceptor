@@ -1,0 +1,28 @@
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	1110037994
+New macro	MacroEditor		Nova makronaredba
+Move Up	MacroEditor		Pomakni gore
+Export Macro	MacroEditor		Izvezi makronaredbu
++ Add field	MacroEditor		+ Dodaj polje
+Delete %ld rows	MacroEditor		Izbriši retke (%ld)
+Delete macro	MacroEditor		Izbriši makronaredbu
+Name	MacroEditor		Ime
+Deleted.	MacroEditor		Izbrisano.
+Rename macro	MacroEditor		Preimenuj makronaredbu
+Move Down	MacroEditor		Pomakni dolje
+Delete	MacroEditor		Izbriši
+Duplicated.	MacroEditor		Udvostručeno.
+Exported.	MacroEditor		Izvezeno.
+Cancel	MacroEditor		Otkaži
+Add field	MacroEditor		Dodaj polje
+Connection	MacroEditor		Veza
+Imported as macro \"%s\" (%ld command(s)).	MacroEditor		Uvezeno kao makronaredba „%s” (naredbi: %ld).
+%s copy	MacroEditor	name of a duplicated macro	%s (kopija)
+Renamed.	MacroEditor		Preimenovano.
+Collapse All	MacroEditor		Sažmi sve
+%ld command(s).	MacroEditor		Naredbi: %ld.
+Expand All	MacroEditor		Proširi sve
+Delete the macro \"%s\"? This cannot be undone.	MacroEditor		Izbrisati makronaredbu „%s”? To se ne može poništiti.
+New macro created - drag commands in from the list on the right.	MacroEditor		Stvorena je nova makronaredba – povucite naredbe s popisa desno.
+No macro selected.	MacroEditor		Nije odabrana makronaredba.
+No macro selected - select one in the MacroEditor tab first.	MacroEditor		Nije odabrana makronaredba – najprije je odaberite na kartici MacroEditor.
+OK	MacroEditor		U redu

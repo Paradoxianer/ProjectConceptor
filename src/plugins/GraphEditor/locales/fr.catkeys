@@ -1,49 +1,32 @@
-1	French	application/x-vnd.ProjectConceptor-plugin	1588829839
-New Tab	ProjectConceptor		Nouvel onglet
-Settings	ProjectConceptor		Réglages
-Macro	ProjectConceptor		Macro
-Cut	ProjectConceptor		Couper
-Save Macro	ProjectConceptor		Enregistrer la macro
-Replace all	ProjectConceptor		Remplacer tout
-Paste	ProjectConceptor		Coller
-Help	ProjectConceptor		Aide
-Save as	ProjectConceptor		Enregistrer sous
-Play	ProjectConceptor		Lire
-Find & Replace	ProjectConceptor		Chercher & Remplacer
-New	ProjectConceptor		Nouveau ...
-Tile Vertical	ProjectConceptor		Tuile verticale
-Copy	ProjectConceptor		Copier
-About	ProjectConceptor		À propos de
-Find	ProjectConceptor		Chercher
-Stop recording	ProjectConceptor		Stopper l'enregistrement
-Export	ProjectConceptor		Exporter
-Save	ProjectConceptor		Sauvegarder
-Find next	ProjectConceptor		Chercher l'occurence suivante ...
-Undo	ProjectConceptor		Défaire
-File	ProjectConceptor		Fichier
-Print	ProjectConceptor		Imprimer
-Open	ProjectConceptor		Ouvrir
-Window	ProjectConceptor		Fenêtre
-Replace	ProjectConceptor		Remplacer
-Edit	ProjectConceptor		Éditer
-Tile	ProjectConceptor		Tuile
-Close	ProjectConceptor		Fermer
-Redo	ProjectConceptor		Refaire
-Quit	ProjectConceptor		Quitter
-Page setup	ProjectConceptor		Mise en page
-Search	ProjectConceptor		Rechercher
-Start recording	ProjectConceptor		Démarrer l'enregistrement
-Cascade	ProjectConceptor		Cascade
-Clear	ProjectConceptor		Nettoyer
-Select all	ProjectConceptor		Sélectionner tout
-Cancel	GraphEditor		Annuler
-Scale	GraphEditor		Échelle
-Fill	GraphEditor		Remplir
-Name	GraphEditor		Nom
-Input attributname	GraphEditor		Entrer le nom de l'attribut
-OK	GraphEditor		OK
-Pen size	GraphEditor		Taille du crayon
-Node::Pattern	GraphEditor		Nœud::Motif
-Attribut	GraphEditor		Attribut
-Grid	GraphEditor		Grille
+1	French	application/x-vnd.ProjectConceptor-plugin	3862227003
 Delete	AttributeRenderer		Effacer
+Group selected nodes	GraphEditor		Grouper les nœuds sélectionnés
+Connection	GraphEditor		Connexion
+Add text attribute	GraphEditor		Ajouter un attribut texte
+Grid	GraphEditor		Grille
+Fill pattern for selected nodes	GraphEditor		Motif de remplissage des nœuds sélectionnés
+Toggle grid	GraphEditor		Afficher/masquer la grille
+Input attribute name	GraphEditor		Saisissez le nom de l'attribut
+None	GraphEditor		Aucune
+Toggle smart alignment guides	GraphEditor		Activer/désactiver les guides d'alignement intelligents
+Arrows	GraphEditor		Flèches
+Rounded	GraphEditor		Arrondie
+Pen size	GraphEditor		Taille du crayon
+Add boolean attribute	GraphEditor		Ajouter un attribut booléen
+OK	GraphEditor		OK
+Fill color for selected nodes	GraphEditor		Couleur de remplissage des nœuds sélectionnés
+Fill	GraphEditor		Remplir
+Both ends	GraphEditor		Aux deux extrémités
+Pattern	GraphEditor		Motif
+Scale	GraphEditor		Échelle
+Guides	GraphEditor		Guides
+Straight	GraphEditor		Droite
+Angular	GraphEditor		Angulaire
+At source	GraphEditor		À la source
+Attribute	GraphEditor		Attribut
+Name	GraphEditor		Nom
+At target	GraphEditor		À la cible
+Border pen size for selected nodes	GraphEditor		Épaisseur de bordure des nœuds sélectionnés
+Cancel	GraphEditor		Annuler
+Which ends of the selected connections carry an arrow	GraphEditor		Extrémités des connexions sélectionnées qui portent une flèche
+Shape of the selected connections	GraphEditor		Forme des connexions sélectionnées

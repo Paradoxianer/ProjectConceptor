@@ -1,0 +1,18 @@
+1	French	application/x-vnd.ProjectConceptor-plugin	2057011613
+Direction	LayoutEditor		Direction
+Right → Left	LayoutEditor		Droite → Gauche
+Auto-Layout	LayoutEditor		Disposition automatique
+Circular	LayoutEditor		Circulaire
+Topology	LayoutEditor		Topologie
+Automatically arrange the graph	LayoutEditor		Disposer le graphe automatiquement
+Left → Right	LayoutEditor		Gauche → Droite
+Radial	LayoutEditor		Radiale
+OK	LayoutEditor		OK
+Layout direction	LayoutEditor		Direction de la disposition
+Bottom → Top	LayoutEditor		Bas → Haut
+Force-directed	LayoutEditor		Dirigé par les forces
+Force (large graphs)	LayoutEditor		Forces (grands graphes)
+Spring model	LayoutEditor		Modèle à ressorts
+Layout topology	LayoutEditor		Topologie de la disposition
+Top → Bottom	LayoutEditor		Haut → Bas
+Hierarchical	LayoutEditor		Hiérarchique

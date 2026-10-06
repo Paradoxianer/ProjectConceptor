@@ -1,108 +1,103 @@
-1	Romanian	application/x-vnd.ProjectConceptor	2706318720
-New Tab	ProjectConceptor		Tab nou
-Settings	ProjectConceptor		Configurări
-Macro	ProjectConceptor		Macro
-Cut	ProjectConceptor		Tăiere
-Save Macro	ProjectConceptor		Salvare macro
-Replace all	ProjectConceptor		Înlocuiește tot
-Paste	ProjectConceptor		Lipire
-Help	ProjectConceptor		Ajutor
-Save as	ProjectConceptor		Salvare ca
-Play	ProjectConceptor		Redare
-Find & Replace	ProjectConceptor		Căutare & Înlocuire
-New	ProjectConceptor		Nou
-Tile Vertical	ProjectConceptor		Juxtapune vertical
-Copy	ProjectConceptor		Copiere
-About	ProjectConceptor		Despre
-Find	ProjectConceptor		Căutare
-Stop recording	ProjectConceptor		Oprește înregistrarea
-Export	ProjectConceptor		Exportă
-Save	ProjectConceptor		Salvare
-Find next	ProjectConceptor		Caută înainte
-Undo	ProjectConceptor		Reface
-File	ProjectConceptor		Fișier
-Print	ProjectConceptor		Tipărire
-Open	ProjectConceptor		Deschide
-Window	ProjectConceptor		Fereastră
-Replace	ProjectConceptor		Înlocuire
-Edit	ProjectConceptor		Editare
-Tile	ProjectConceptor		Juxtapune
-Close	ProjectConceptor		Închide
-Redo	ProjectConceptor		Repetă
-Quit	ProjectConceptor		Ieșire
-Page setup	ProjectConceptor		Configurare pagină
-Search	ProjectConceptor		Căutare
-Start recording	ProjectConceptor		Începe înregistrarea
-Cascade	ProjectConceptor		Cascadă
-Clear	ProjectConceptor		Eliberare
-Select all	ProjectConceptor		Selectează tot
-Select all	MainWindow		Selectează tot
-Macro	MainWindow		Macro
-Title	MainWindow		Titlu
-New	MainWindow		Nou
-Save	MainWindow		Salvare
-Open	MainWindow		Deschide
-Stop recording	MainWindow		Oprește înregistrarea
-Page setup	MainWindow		Configurare pagină
-Search	MainWindow		Căutare
-Project settings	MainWindow		Configurări proiect
-Print	MainWindow		Tipărire
-Window	MainWindow		Fereastră
-Find next	MainWindow		Caută înainte
-File	MainWindow		Fișier
-Play	MainWindow		Redare
-Quit	MainWindow		Ieșire
-Redo	MainWindow		Repetă
-Paste	MainWindow		Lipire
-Edit	MainWindow		Editare
-Replace	MainWindow		Înlocuire
-Title vertical	MainWindow		Juxtapune vertical
-Cascade	MainWindow		Cascadă
-Replace & Find	MainWindow		Înlocuire & Căutare
-Undo	MainWindow		Reface
-Find	MainWindow		Căutare
-Copy	MainWindow		Copiere
-Close	MainWindow		Închide
-Help	MainWindow		Ajutor
-Clear	MainWindow		Eliberează
-Cut	MainWindow		Tăiere
-Start recording	MainWindow		Începe înregistrarea
+1	Romanian	application/x-vnd.ProjectConceptor	4038765573
+Macro shortcuts (double-click to change the key)	ShortCutView		Scurtături pentru macrocomenzi (dublu clic pentru a schimba tasta)
+Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Apăsați combinația de taste pentru macrocomanda „%s” (Esc pentru anulare).
 About	MainWindow		Despre
-Replace all	MainWindow		Înlocuiește tot
-Save as	MainWindow		Salvare ca
+Input macro name	CommandManager		Introduceți numele macrocomenzii
+Open the settings from a document window to pick one of its macros.	ShortCutView		Deschideți setările dintr-o fereastră de document pentru a alege una dintre macrocomenzile sale.
+Redo	MainWindow		Repetă
 Settings	SavePanel		Configurări
-Fileformat	SavePanel		Format fișier
-Save as	SavePanel		Salvare ca
-Could not find plugins	SavePanel		Nu s-au putut găsi modulele
-Error on execution of Command.	CommandManager		Eroare la execuția Comenzii.
-Coud not find command	CommandManager		Nu s-a putut găsi comanda
-Input macroname	CommandManager		Introduce nume macro
+Replace	MainWindow		Înlocuire
+Start recording	MainWindow		Începe înregistrarea
 OK	CommandManager		OK
-Macro recording already started!	CommandManager		Înregistrarea macroului a început deja!
-Cancel	CommandManager		Anulează
-Macro	CommandManager		Macro
-Contiune recording	CommandManager		Continuă înregistrarea
-Restart recording	CommandManager		Reîncepe înregistrarea
-Name	CommandManager		Nume
-Error!	CommandManager		Eroare!
+OK	ShortCutView		OK
+\"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		„$%s” (pentru „%s”) este „%s”, nu un număr
+New	MainWindow		Nou
+%ld problem(s) while playing, first: %s	CommandManager		%ld problemă(e) la rulare, prima: %s
+This document has no macros yet. Record or create one first (Macro menu).	ShortCutView		Acest document nu are încă macrocomenzi. Înregistrați sau creați una mai întâi (meniul Macro).
+Edit	MainWindow		Editare
+Save	MainWindow		Salvare
+Shortcuts	ShortCutView		Scurtături
+Open	MainWindow		Deschide
 Settings	ConfigWindow		Configurări
-FTP Warning	AboutURLView		Avertisment FTP
-Web Browser Warning	AboutURLView		Avertisment browser web
-Ok	AboutURLView		Ok
-E-mail Warning	AboutURLView		Avertisment email
-There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Nu există niciun browser web pe mașină care este configurat ca programul implicit pentru vizualizarea paginilor web.
-There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Nu există niciun client FTP pe mașină care este configurat ca programul implicit pentru conectarea la un server FTP.
-There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nu există niciun program de email pe mașină care este configurat ca programul implicit pentru trimiterea de email.
-Problems while trying to save the file	Document		Probleme în timpul încercării de a salva fișierul
-Save	Document		Salvează
-Save changes to  	Document		Salvează modificări la
+\"%s\": \"${\" without a closing \"}\"	CommandManager		„%s”: „${” fără „}” de închidere
+Cancel	CommandManager		Anulează
+Save as	SavePanel		Salvare ca
+\"${%s}\" is not text or a number	CommandManager		„${%s}” nu este nici text, nici număr
+Clear	MainWindow		Eliberează
+Macro	MainWindow		Macro
+Undo	MainWindow		Reface
+Macro	CommandManager		Macro
+File format	SavePanel		Format fișier
+This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Acest fișier a fost salvat de o versiune incompatibilă de ProjectConceptor și nu poate fi deschis.
 Save before close	Document		Salvează înainte de închidere
-Error	Document		Eroare
-I had problems while setting up the Printer!	Document		Au fost probleme la configurarea imprimantei!
-Cancel	Document		Anulează
-No active Editor Pleas install a Editor Plugin.	Document		Niciun editor activ. Instalați un modul de editor.
-Don't save	Document		Nu salva
-Cant find plugins	PluginManager		Nu se pot găsi modulele
+Paste	MainWindow		Lipire
+Help	MainWindow		Ajutor
+Remove	ShortCutView		Elimină
+Problems while trying to save the file	Document		Probleme în timpul încercării de a salva fișierul
+The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Noua asociere se aplică documentelor deschise de acum înainte – ferestrele deja deschise își păstrează scurtăturile inițiale.
+Select all	MainWindow		Selectează tot
+No document	ShortCutView		Niciun document
+Alpha:	ColorPickerWindow		Alfa:
+Press the new key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Apăsați noua combinație de taste pentru macrocomanda „%s” (Esc pentru anulare).
+Stop recording	MainWindow		Oprește înregistrarea
 ProjectConceptor	PluginManager		ProjectConceptor
+Play	MainWindow		Redare
+\"$%s\" (for \"%s\"): no such variable	CommandManager		„$%s” (pentru „%s”): variabila nu există
+%ld node reference(s) point to nodes the macro never creates - it did not do what it says.	CommandManager		%ld referință(e) indică noduri pe care macrocomanda nu le creează niciodată – nu a făcut ce spune.
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Nu există niciun client FTP pe mașină care este configurat ca programul implicit pentru conectarea la un server FTP.
+Replace all	MainWindow		Înlocuiește tot
+Open Recent	MainWindow		Deschide recente
+Cascade	MainWindow		Cascadă
+Don't save	Document		Nu salva
+\"${%s}\" holds %ld values, not one	CommandManager		„${%s}” conține %ld valori, nu una
+Close	MainWindow		Închide
+Rename	MainWindow		Redenumește
+Could not find command	CommandManager		Comanda nu a fost găsită
+Name	CommandManager		Nume
+Quit	MainWindow		Ieșire
+Save changes to  	Document		Salvează modificări la
+Save	Document		Salvează
+Search	MainWindow		Căutare
 OK	PluginManager		OK
+Could not find plugins	SavePanel		Nu s-au putut găsi modulele
+File	MainWindow		Fișier
+The macro is empty - nothing to play.	CommandManager		Macrocomanda este goală – nimic de rulat.
+No active editor - please install an editor plugin.	Document		Niciun editor activ – instalați un modul de editare.
+Continue recording	CommandManager		Continuă înregistrarea
+Restart recording	CommandManager		Reîncepe înregistrarea
+Macro recording already started!	CommandManager		Înregistrarea macroului a început deja!
+Project settings	MainWindow		Configurări proiect
+Error	Document		Eroare
+Error on execution of Command.	CommandManager		Eroare la execuția Comenzii.
+Page setup	MainWindow		Configurare pagină
+Title	MainWindow		Titlu
+Delete	MainWindow		Șterge
+Save as	MainWindow		Salvare ca
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nu există niciun program de email pe mașină care este configurat ca programul implicit pentru trimiterea de email.
+Web Browser Warning	AboutURLView		Avertisment browser web
+Window	MainWindow		Fereastră
+\"${%s}\": no such variable	CommandManager		„${%s}”: variabila nu există
+I had problems while setting up the Printer!	Document		Au fost probleme la configurarea imprimantei!
+E-mail Warning	AboutURLView		Avertisment email
+Editor shortcuts (double-click to change)	ShortCutView		Scurtăturile editorului (dublu clic pentru a schimba)
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Nu există niciun browser web pe mașină care este configurat ca programul implicit pentru vizualizarea paginilor web.
+FTP Warning	AboutURLView		Avertisment FTP
+No macros	ShortCutView		Nicio macrocomandă
+Shortcut	KeyCaptureWindow		Scurtătură
+Command %ld (%s) failed.	CommandManager		Comanda %ld (%s) a eșuat.
+Replace & Find	MainWindow		Înlocuire & Căutare
+Cut	MainWindow		Tăiere
+Can't find plugins	PluginManager		Nu se găsesc modulele
 Help	HelpWindow		Ajutor
+Find	MainWindow		Căutare
+OK	AboutURLView		OK
+Duplicate	MainWindow		Duplică
+Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Apăsați noua combinație de taste pentru „%s” (Esc pentru anulare).
+New…	ShortCutView		Nou…
+Cancel	Document		Anulează
+Print	MainWindow		Tipărire
+Find next	MainWindow		Caută înainte
+Error!	CommandManager		Eroare!
+Title Vertical	MainWindow		Aranjare verticală
+Played %ld command(s).	CommandManager		Au fost rulate %ld comenzi.
+Copy	MainWindow		Copiere

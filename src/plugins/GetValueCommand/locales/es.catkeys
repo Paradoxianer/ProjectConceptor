@@ -1,0 +1,4 @@
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	3402668571
+GetValue: node \"%s\" has no attribute \"%s\"	GetValue		GetValue: el nodo «%s» no tiene el atributo «%s»
+GetValue: \"%s\" of node \"%s\" is not a number, text or bool	GetValue		GetValue: «%s» del nodo «%s» no es un número, texto ni booleano
+GetValue needs node, valueContainer/name and resultVariable	GetValue		GetValue necesita node, valueContainer/name y resultVariable

@@ -1,0 +1,4 @@
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	3402668571
+GetValue: node \"%s\" has no attribute \"%s\"	GetValue		GetValue: nodul „%s” nu are atributul „%s”
+GetValue: \"%s\" of node \"%s\" is not a number, text or bool	GetValue		GetValue: „%s” al nodului „%s” nu este număr, text sau boolean
+GetValue needs node, valueContainer/name and resultVariable	GetValue		GetValue are nevoie de node, valueContainer/name și resultVariable

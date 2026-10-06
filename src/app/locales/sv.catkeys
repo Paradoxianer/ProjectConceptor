@@ -1,108 +1,103 @@
-1	Swedish	application/x-vnd.ProjectConceptor	2706318720
-New Tab	ProjectConceptor		Ny Tab
-Settings	ProjectConceptor		Inställningar
-Macro	ProjectConceptor		Makro
-Cut	ProjectConceptor		Klipp ut
-Save Macro	ProjectConceptor		Spara Makro
-Replace all	ProjectConceptor		Ersätt alla
-Paste	ProjectConceptor		Klistra in
-Help	ProjectConceptor		Hjälp
-Save as	ProjectConceptor		Spara som
-Play	ProjectConceptor		Spela upp
-Find & Replace	ProjectConceptor		Sök & Ersätt
-New	ProjectConceptor		Ny
-Tile Vertical	ProjectConceptor		Vertikal titel
-Copy	ProjectConceptor		Kopiera
-About	ProjectConceptor		Om
-Find	ProjectConceptor		Hitta
-Stop recording	ProjectConceptor		Stoppa inspelning
-Export	ProjectConceptor		Exportera
-Save	ProjectConceptor		Spara
-Find next	ProjectConceptor		Hitta nästa
-Undo	ProjectConceptor		Ångra
-File	ProjectConceptor		Arkiv
-Print	ProjectConceptor		Skriv ut
-Open	ProjectConceptor		Öppna
-Window	ProjectConceptor		Fönster
-Replace	ProjectConceptor		Ersätt
-Edit	ProjectConceptor		Ändra
-Tile	ProjectConceptor		Upprepa
-Close	ProjectConceptor		Stäng
-Redo	ProjectConceptor		Gör om
-Quit	ProjectConceptor		Avsluta
-Page setup	ProjectConceptor		Utskriftsformat
-Search	ProjectConceptor		Sök
-Start recording	ProjectConceptor		Starta inspelning
-Cascade	ProjectConceptor		Kaskad
-Clear	ProjectConceptor		Rensa
-Select all	ProjectConceptor		Markera alla
-Select all	MainWindow		Välj alla
-Macro	MainWindow		Makro
-Title	MainWindow		Titel
-New	MainWindow		Ny
-Save	MainWindow		Spara
-Open	MainWindow		Öppna
-Stop recording	MainWindow		Stoppa inspelning
-Page setup	MainWindow		Utskriftsformat
-Search	MainWindow		Sök
-Project settings	MainWindow		Projektinställningar
-Print	MainWindow		Skriv ut
-Window	MainWindow		Fönster
-Find next	MainWindow		Hitta nästa
-File	MainWindow		Arkiv
-Play	MainWindow		Spela upp
-Quit	MainWindow		Avsluta
-Redo	MainWindow		Gör om
-Paste	MainWindow		Klistra in
-Edit	MainWindow		Ändra
-Replace	MainWindow		Ersätt
-Title vertical	MainWindow		Vertikal titel
-Cascade	MainWindow		Kaskad
-Replace & Find	MainWindow		Sök & Ersätt
-Undo	MainWindow		Ångra
-Find	MainWindow		Hitta
-Copy	MainWindow		Kopiera
-Close	MainWindow		Stäng
-Help	MainWindow		Hjälp
-Clear	MainWindow		Rensa
-Cut	MainWindow		Klipp ut
-Start recording	MainWindow		Starta inspelning
+1	Swedish	application/x-vnd.ProjectConceptor	4038765573
+Macro shortcuts (double-click to change the key)	ShortCutView		Makrokortkommandon (dubbelklicka för att ändra tangenten)
+Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tryck på tangentkombinationen för makrot ”%s” (Esc avbryter).
 About	MainWindow		Om
-Replace all	MainWindow		Ersätt alla
-Save as	MainWindow		Spara som
+Input macro name	CommandManager		Ange makrots namn
+Open the settings from a document window to pick one of its macros.	ShortCutView		Öppna inställningarna från ett dokumentfönster för att välja ett av dess makron.
+Redo	MainWindow		Gör om
 Settings	SavePanel		Inställningar
-Fileformat	SavePanel		Filformat
-Save as	SavePanel		Spara som
-Could not find plugins	SavePanel		Kunde inte hitta plugins
-Error on execution of Command.	CommandManager		Fel vid exekvering av kommando.
-Coud not find command	CommandManager		Kunde inte hitta kommandot
-Input macroname	CommandManager		Infoga makronamn
+Replace	MainWindow		Ersätt
+Start recording	MainWindow		Starta inspelning
 OK	CommandManager		OK
-Macro recording already started!	CommandManager		Inspelning av makro har redan startat!
-Cancel	CommandManager		Avbryt
-Macro	CommandManager		Makro
-Contiune recording	CommandManager		Fortsätt inspelning
-Restart recording	CommandManager		Börja om inspelning
-Name	CommandManager		Namn
-Error!	CommandManager		Fel!
+OK	ShortCutView		OK
+\"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		”$%s” (för ”%s”) är ”%s”, inte ett tal
+New	MainWindow		Ny
+%ld problem(s) while playing, first: %s	CommandManager		%ld problem vid uppspelning, det första: %s
+This document has no macros yet. Record or create one first (Macro menu).	ShortCutView		Det här dokumentet har inga makron än. Spela in eller skapa ett först (menyn Makro).
+Edit	MainWindow		Ändra
+Save	MainWindow		Spara
+Shortcuts	ShortCutView		Kortkommandon
+Open	MainWindow		Öppna
 Settings	ConfigWindow		Inställningar
-FTP Warning	AboutURLView		FTP-varning
-Web Browser Warning	AboutURLView		Webläsarvarning
-Ok	AboutURLView		OK
-E-mail Warning	AboutURLView		E-mailvarning
-There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Det finns ingen webläsare som är konfigurerad som standardvisare av websidor på ditt system.
-There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Det finns ingen FTP-klient konfigurerad som standardprogram för FTP-anslutningar.
-There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Det finns ingen e-postklient konfigurerad som standardprogram för att skicka och ta emot e-post.
-Problems while trying to save the file	Document		Ett fel inträffade när filen skulle sparas
-Save	Document		Spara
-Save changes to  	Document		Spara ändringar till
+\"%s\": \"${\" without a closing \"}\"	CommandManager		”%s”: ”${” utan avslutande ”}”
+Cancel	CommandManager		Avbryt
+Save as	SavePanel		Spara som
+\"${%s}\" is not text or a number	CommandManager		”${%s}” är varken text eller ett tal
+Clear	MainWindow		Rensa
+Macro	MainWindow		Makro
+Undo	MainWindow		Ångra
+Macro	CommandManager		Makro
+File format	SavePanel		Filformat
+This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Filen sparades av en inkompatibel version av ProjectConceptor och kan inte öppnas.
 Save before close	Document		Spara före stängning
-Error	Document		Fel
-I had problems while setting up the Printer!	Document		Ett fel inträffade när skrivaren ställdes in!
-Cancel	Document		Avbryt
-No active Editor Pleas install a Editor Plugin.	Document		Det finns ingen aktiv editor. Var god installera en editeringsplugin.
-Don't save	Document		Spara inte
-Cant find plugins	PluginManager		Kan inte hitta plugins
+Paste	MainWindow		Klistra in
+Help	MainWindow		Hjälp
+Remove	ShortCutView		Ta bort
+Problems while trying to save the file	Document		Ett fel inträffade när filen skulle sparas
+The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Den nya kopplingen gäller dokument som öppnas från och med nu – redan öppna fönster behåller sina ursprungliga kortkommandon.
+Select all	MainWindow		Välj alla
+No document	ShortCutView		Inget dokument
+Alpha:	ColorPickerWindow		Alfa:
+Press the new key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tryck på den nya tangentkombinationen för makrot ”%s” (Esc avbryter).
+Stop recording	MainWindow		Stoppa inspelning
 ProjectConceptor	PluginManager		ProjektConceptor
+Play	MainWindow		Spela upp
+\"$%s\" (for \"%s\"): no such variable	CommandManager		”$%s” (för ”%s”): ingen sådan variabel
+%ld node reference(s) point to nodes the macro never creates - it did not do what it says.	CommandManager		%ld nodreferens(er) pekar på noder som makrot aldrig skapar – det gjorde inte det det säger.
+There is no FTP client on your machine that is configured as the default program to connect to an FTP server.	AboutURLView		Det finns ingen FTP-klient konfigurerad som standardprogram för FTP-anslutningar.
+Replace all	MainWindow		Ersätt alla
+Open Recent	MainWindow		Öppna senaste
+Cascade	MainWindow		Kaskad
+Don't save	Document		Spara inte
+\"${%s}\" holds %ld values, not one	CommandManager		”${%s}” innehåller %ld värden, inte ett
+Close	MainWindow		Stäng
+Rename	MainWindow		Byt namn
+Could not find command	CommandManager		Kunde inte hitta kommandot
+Name	CommandManager		Namn
+Quit	MainWindow		Avsluta
+Save changes to  	Document		Spara ändringar till
+Save	Document		Spara
+Search	MainWindow		Sök
 OK	PluginManager		OK
+Could not find plugins	SavePanel		Kunde inte hitta plugins
+File	MainWindow		Arkiv
+The macro is empty - nothing to play.	CommandManager		Makrot är tomt – inget att spela upp.
+No active editor - please install an editor plugin.	Document		Ingen aktiv redigerare – installera ett redigeringsinsticksprogram.
+Continue recording	CommandManager		Fortsätt inspelningen
+Restart recording	CommandManager		Börja om inspelning
+Macro recording already started!	CommandManager		Inspelning av makro har redan startat!
+Project settings	MainWindow		Projektinställningar
+Error	Document		Fel
+Error on execution of Command.	CommandManager		Fel vid exekvering av kommando.
+Page setup	MainWindow		Utskriftsformat
+Title	MainWindow		Titel
+Delete	MainWindow		Radera
+Save as	MainWindow		Spara som
+There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Det finns ingen e-postklient konfigurerad som standardprogram för att skicka och ta emot e-post.
+Web Browser Warning	AboutURLView		Webläsarvarning
+Window	MainWindow		Fönster
+\"${%s}\": no such variable	CommandManager		”${%s}”: ingen sådan variabel
+I had problems while setting up the Printer!	Document		Ett fel inträffade när skrivaren ställdes in!
+E-mail Warning	AboutURLView		E-mailvarning
+Editor shortcuts (double-click to change)	ShortCutView		Redigerarens kortkommandon (dubbelklicka för att ändra)
+There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Det finns ingen webläsare som är konfigurerad som standardvisare av websidor på ditt system.
+FTP Warning	AboutURLView		FTP-varning
+No macros	ShortCutView		Inga makron
+Shortcut	KeyCaptureWindow		Kortkommando
+Command %ld (%s) failed.	CommandManager		Kommando %ld (%s) misslyckades.
+Replace & Find	MainWindow		Sök & Ersätt
+Cut	MainWindow		Klipp ut
+Can't find plugins	PluginManager		Hittar inga insticksprogram
 Help	HelpWindow		Hjälp
+Find	MainWindow		Hitta
+OK	AboutURLView		OK
+Duplicate	MainWindow		Duplicera
+Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Tryck på den nya tangentkombinationen för ”%s” (Esc avbryter).
+New…	ShortCutView		Ny…
+Cancel	Document		Avbryt
+Print	MainWindow		Skriv ut
+Find next	MainWindow		Hitta nästa
+Error!	CommandManager		Fel!
+Title Vertical	MainWindow		Ordna vertikalt
+Played %ld command(s).	CommandManager		Spelade upp %ld kommando(n).
+Copy	MainWindow		Kopiera

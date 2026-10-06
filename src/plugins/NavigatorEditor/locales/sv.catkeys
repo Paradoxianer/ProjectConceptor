@@ -1,44 +1,34 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	2371896127
-New Tab	ProjectConceptor		Ny tab
-Settings	ProjectConceptor		Inställningar
-Macro	ProjectConceptor		Makro
-Cut	ProjectConceptor		Klipp ut
-Save Macro	ProjectConceptor		Spara Makro
-Replace all	ProjectConceptor		Ersätt alla
-Paste	ProjectConceptor		Klistra in
-Help	ProjectConceptor		Hjälp
-Save as	ProjectConceptor		Spara som
-Play	ProjectConceptor		Spela upp
-Find & Replace	ProjectConceptor		Hitta & Ersätt
-New	ProjectConceptor		Ny
-Tile Vertical	ProjectConceptor		Upprepa vertikalt
-Copy	ProjectConceptor		Kopiera
-About	ProjectConceptor		Om
-Find	ProjectConceptor		Hitta
-Stop recording	ProjectConceptor		Stoppa inspelning
-Export	ProjectConceptor		Exportera
-Save	ProjectConceptor		Spara
-Find next	ProjectConceptor		Hitta nästa
-Undo	ProjectConceptor		Ångra
-File	ProjectConceptor		Arkiv
-Print	ProjectConceptor		Skriv ut
-Open	ProjectConceptor		Öppna
-Window	ProjectConceptor		Fönster
-Replace	ProjectConceptor		Ersätt
-Edit	ProjectConceptor		Ändra
-Tile	ProjectConceptor		Upprepa
-Close	ProjectConceptor		Stäng
-Redo	ProjectConceptor		Gör om
-Quit	ProjectConceptor		Avsluta
-Page setup	ProjectConceptor		Utskriftsformat
-Search	ProjectConceptor		Sök
-Start recording	ProjectConceptor		Starta inspelning
-Cascade	ProjectConceptor		Kaskad
-Clear	ProjectConceptor		Rensa
-Select all	ProjectConceptor		Markera alla
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	2502389885
+Untitled	NavigatorCommands		Namnlös
+Integer (8-bit)	NavigatorCommands		Heltal (8 bitar)
+Field name	NavigatorCommands		Fältnamn
+Add child node	NavigatorCommands		Lägg till undernod
+Add field	NavigatorCommands		Lägg till fält
+Float	NavigatorCommands		Flyttal
+Message (nested fields)	NavigatorCommands		Meddelande (nästlade fält)
+x: 	PointItem		x: 
 true	BoolItem		sant
+OK	NavigatorCommands		OK
+Boolean	NavigatorCommands		Boolesk
+Delete the selected node or field	NavigatorEditor		Ta bort markerad nod eller fält
 false	BoolItem		falskt
-bottom	RectItem		botten
+Add node	NavigatorCommands		Lägg till nod
+Point	NavigatorCommands		Punkt
+Integer (16-bit)	NavigatorCommands		Heltal (16 bitar)
 left	RectItem		vänster
-right	RectItem		höger
+Name	NavigatorCommands		Namn
+Field	NavigatorCommands		Fält
+Integer (64-bit)	NavigatorCommands		Heltal (64 bitar)
+Cancel	NavigatorCommands		Avbryt
 top	RectItem		topp
+Double	NavigatorCommands		Dubbel precision
+bottom	RectItem		botten
+Rectangle	NavigatorCommands		Rektangel
+Delete field	NavigatorCommands		Ta bort fält
+Text	NavigatorCommands		Text
+Delete node	NavigatorCommands		Ta bort nod
+right	RectItem		höger
+y: 	PointItem		y: 
+Integer (32-bit)	NavigatorCommands		Heltal (32 bitar)
+Add a node (child of the selection, or top-level)	NavigatorEditor		Lägg till en nod (under markeringen eller på översta nivån)
+Node name	NavigatorCommands		Nodnamn

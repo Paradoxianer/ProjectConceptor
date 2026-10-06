@@ -1,44 +1,34 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	2371896127
-New Tab	ProjectConceptor		New Tab
-Settings	ProjectConceptor		Settings
-Macro	ProjectConceptor		Macro
-Cut	ProjectConceptor		Cut
-Save Macro	ProjectConceptor		Save Macro
-Replace all	ProjectConceptor		Replace all
-Paste	ProjectConceptor		Paste
-Help	ProjectConceptor		Help
-Save as	ProjectConceptor		Save as
-Play	ProjectConceptor		Play
-Find & Replace	ProjectConceptor		Find & Replace
-New	ProjectConceptor		New
-Tile Vertical	ProjectConceptor		Tile Vertical
-Copy	ProjectConceptor		Copy
-About	ProjectConceptor		About
-Find	ProjectConceptor		Find
-Stop recording	ProjectConceptor		Stop recording
-Export	ProjectConceptor		Export
-Save	ProjectConceptor		Save
-Find next	ProjectConceptor		Find next
-Undo	ProjectConceptor		Undo
-File	ProjectConceptor		File
-Print	ProjectConceptor		Print
-Open	ProjectConceptor		Open
-Window	ProjectConceptor		Window
-Replace	ProjectConceptor		Replace
-Edit	ProjectConceptor		Edit
-Tile	ProjectConceptor		Tile
-Close	ProjectConceptor		Close
-Redo	ProjectConceptor		Redo
-Quit	ProjectConceptor		Quit
-Page setup	ProjectConceptor		Page setup
-Search	ProjectConceptor		Search
-Start recording	ProjectConceptor		Start recording
-Cascade	ProjectConceptor		Cascade
-Clear	ProjectConceptor		Clear
-Select all	ProjectConceptor		Select all
-true	BoolItem		true
-false	BoolItem		false
-bottom	RectItem		bottom
-left	RectItem		left
-right	RectItem		right
-top	RectItem		top
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	2502389885
+Untitled	NavigatorCommands		Cence titul
+Integer (8-bit)	NavigatorCommands		Intîr (8 bit)
+Field name	NavigatorCommands		Non dal cjamp
+Add child node	NavigatorCommands		Zonte grop fî
+Add field	NavigatorCommands		Zonte cjamp
+Float	NavigatorCommands		Virgule mobile
+Message (nested fields)	NavigatorCommands		Messaç (cjamps incapsulâts)
+x: 	PointItem		x: 
+true	BoolItem		vêr
+OK	NavigatorCommands		Va ben
+Boolean	NavigatorCommands		Boolean
+Delete the selected node or field	NavigatorEditor		Elimine il grop o il cjamp selezionât
+false	BoolItem		fals
+Add node	NavigatorCommands		Zonte grop
+Point	NavigatorCommands		Pont
+Integer (16-bit)	NavigatorCommands		Intîr (16 bit)
+left	RectItem		çampe
+Name	NavigatorCommands		Non
+Field	NavigatorCommands		Cjamp
+Integer (64-bit)	NavigatorCommands		Intîr (64 bit)
+Cancel	NavigatorCommands		Anule
+top	RectItem		parsore
+Double	NavigatorCommands		Virgule mobile dople
+bottom	RectItem		sot
+Rectangle	NavigatorCommands		Retangul
+Delete field	NavigatorCommands		Elimine cjamp
+Text	NavigatorCommands		Test
+Delete node	NavigatorCommands		Elimine grop
+right	RectItem		diestre
+y: 	PointItem		y: 
+Integer (32-bit)	NavigatorCommands		Intîr (32 bit)
+Add a node (child of the selection, or top-level)	NavigatorEditor		Zonte un grop (fî de selezion o di prin nivel)
+Node name	NavigatorCommands		Non dal grop
