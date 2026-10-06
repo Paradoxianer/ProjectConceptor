@@ -29,6 +29,7 @@ SRCS= 	TestMain.cpp \
 		../plugins/MacroEditor/MacroOutlineView.cpp \
 		../plugins/BatchCommand/Batch.cpp \
 		../app/ProjectConceptorDefs.cpp \
+		../app/ProjectConceptorFields.cpp \
 		../app/Config/ConfigManager.cpp \
 		../app/Config/ConfigWindow.cpp \
 		../app/Config/ConfigView.cpp \
