@@ -22,10 +22,19 @@
 #include "MessageXmlReader.h"
 #include "MessageXmlWriter.h"
 
+// 0 asks for the translator's default format (native)
+static bool CanWrite(uint32 outType)
+{
+	return (outType == 0) || (outType == P_C_DOCUMENT_TYPE)
+		|| (outType == P_C_DOCUMENT_RAW_TYPE) || (outType == P_C_DOCUMENT_TEXT_TYPE);
+}
+
 status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	BMessage * ioExtension,	translator_info * outInfo, uint32 outType)
 {
 	if ((!inSource) || (!outInfo))
 		return B_BAD_VALUE;
+	if (!CanWrite(outType))
+		return B_NO_TRANSLATOR;
 
 	// Identify() runs against every file any app on the system scans via
 	// BTranslatorRoster, not just ProjectConceptor documents - fully parsing
@@ -82,6 +91,10 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 
 status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage * ioExtension,	uint32 outType,	BPositionIO * outDestination)
 {
+	// refuse rather than falling through to the binary format below
+	if (!CanWrite(outType))
+		return B_NO_TRANSLATOR;
+
 	status_t		err					= B_OK;
 	BMessage		*allNodes			= new BMessage();
 	BMessage		*allConnections		= new BMessage();
