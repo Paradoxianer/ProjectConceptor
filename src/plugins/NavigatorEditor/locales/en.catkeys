@@ -1,7 +1,34 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	2724668264
+1	English	application/x-vnd.ProjectConceptor-plugin	2502389885
+Untitled	NavigatorCommands		Untitled
+Integer (8-bit)	NavigatorCommands		Integer (8-bit)
+Field name	NavigatorCommands		Field name
+Add child node	NavigatorCommands		Add child node
+Add field	NavigatorCommands		Add field
+Float	NavigatorCommands		Float
+Message (nested fields)	NavigatorCommands		Message (nested fields)
+x: 	PointItem		x: 
 true	BoolItem		true
-bottom	RectItem		bottom
-left	RectItem		left
+OK	NavigatorCommands		OK
+Boolean	NavigatorCommands		Boolean
+Delete the selected node or field	NavigatorEditor		Delete the selected node or field
 false	BoolItem		false
-right	RectItem		right
+Add node	NavigatorCommands		Add node
+Point	NavigatorCommands		Point
+Integer (16-bit)	NavigatorCommands		Integer (16-bit)
+left	RectItem		left
+Name	NavigatorCommands		Name
+Field	NavigatorCommands		Field
+Integer (64-bit)	NavigatorCommands		Integer (64-bit)
+Cancel	NavigatorCommands		Cancel
 top	RectItem		top
+Double	NavigatorCommands		Double
+bottom	RectItem		bottom
+Rectangle	NavigatorCommands		Rectangle
+Delete field	NavigatorCommands		Delete field
+Text	NavigatorCommands		Text
+Delete node	NavigatorCommands		Delete node
+right	RectItem		right
+y: 	PointItem		y: 
+Integer (32-bit)	NavigatorCommands		Integer (32-bit)
+Add a node (child of the selection, or top-level)	NavigatorEditor		Add a node (child of the selection, or top-level)
+Node name	NavigatorCommands		Node name

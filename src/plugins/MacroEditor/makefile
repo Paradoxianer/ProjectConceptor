@@ -78,7 +78,7 @@ LOCAL_INCLUDE_PATHS = \
 
 # other languages: copy locales/en.catkeys to <lang>.catkeys, translate,
 # add the language here
-LOCALES = de en
+LOCALES = de en es fr fur hr ro sv
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL

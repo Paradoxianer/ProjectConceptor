@@ -134,9 +134,9 @@ default: app plugins translators
 
 clean: lib_clean app_clean plugins_clean translators_clean
 
-catkeys: app_catkeys plugins_catkeys translators_clean
+catkeys: app_catkeys plugins_catkeys translators_catkeys
 
-bindcatalogs: app_bindcat plugins_bindcat translators_clean
+bindcatalogs: app_bindcat plugins_bindcat translators_bindcat
 
 install:: $(NAME)
 	@echo "making a package"

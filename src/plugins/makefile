@@ -58,9 +58,15 @@ catkeys:
 	done
 
 bindcatalogs:
-	$(MAKE) -C GraphEditor bindcatalogs; \
-	$(MAKE) -C MacroEditor bindcatalogs; \
-	$(MAKE) -C NavigatorEditor bindcatalogs; \
+	$(MAKE) -C AskCommand bindcatalogs
+	$(MAKE) -C FindCommand bindcatalogs
+	$(MAKE) -C GetValueCommand bindcatalogs
+	$(MAKE) -C GraphEditor bindcatalogs
+	$(MAKE) -C LayoutEditor bindcatalogs
+	$(MAKE) -C MacroEditor bindcatalogs
+	$(MAKE) -C NavigatorEditor bindcatalogs
+	$(MAKE) -C SelectConnectedCommand bindcatalogs
+
 
 
 

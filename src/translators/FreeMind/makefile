@@ -94,6 +94,9 @@ LOCAL_INCLUDE_PATHS =	../../include  \
 #DEBUGGER = TRUE
 
 #	specify additional compiler flags for all files
+# no translatable strings yet
+LOCALES = en
+
 COMPILER_FLAGS =
 
 #	specify additional linker flags

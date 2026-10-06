@@ -22,6 +22,8 @@ LOCAL_INCLUDE_PATHS = \
 		../../include/plugins \
 		../../app/Commands
 
+LOCALES = de en es fr fur hr ro sv
+
 COMPILER_FLAGS =
 
 LINKER_FLAGS = -Xlinker -rpath=\$$ORIGIN/../..

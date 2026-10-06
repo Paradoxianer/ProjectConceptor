@@ -1,19 +1,32 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	3243326216
+1	English	application/x-vnd.ProjectConceptor-plugin	3862227003
 Delete	AttributeRenderer		Delete
-Fill color for selected nodes	GraphEditor		Fill color for selected nodes
 Group selected nodes	GraphEditor		Group selected nodes
+Connection	GraphEditor		Connection
 Add text attribute	GraphEditor		Add text attribute
 Grid	GraphEditor		Grid
-Fill	GraphEditor		Fill
-Pattern	GraphEditor		Pattern
 Fill pattern for selected nodes	GraphEditor		Fill pattern for selected nodes
 Toggle grid	GraphEditor		Toggle grid
-Scale	GraphEditor		Scale
 Input attribute name	GraphEditor		Input attribute name
-Attribute	GraphEditor		Attribute
-Name	GraphEditor		Name
-Border pen size for selected nodes	GraphEditor		Border pen size for selected nodes
+None	GraphEditor		None
+Toggle smart alignment guides	GraphEditor		Toggle smart alignment guides
+Arrows	GraphEditor		Arrows
+Rounded	GraphEditor		Rounded
 Pen size	GraphEditor		Pen size
 Add boolean attribute	GraphEditor		Add boolean attribute
-Cancel	GraphEditor		Cancel
 OK	GraphEditor		OK
+Fill color for selected nodes	GraphEditor		Fill color for selected nodes
+Fill	GraphEditor		Fill
+Both ends	GraphEditor		Both ends
+Pattern	GraphEditor		Pattern
+Scale	GraphEditor		Scale
+Guides	GraphEditor		Guides
+Straight	GraphEditor		Straight
+Angular	GraphEditor		Angular
+At source	GraphEditor		At source
+Attribute	GraphEditor		Attribute
+Name	GraphEditor		Name
+At target	GraphEditor		At target
+Border pen size for selected nodes	GraphEditor		Border pen size for selected nodes
+Cancel	GraphEditor		Cancel
+Which ends of the selected connections carry an arrow	GraphEditor		Which ends of the selected connections carry an arrow
+Shape of the selected connections	GraphEditor		Shape of the selected connections

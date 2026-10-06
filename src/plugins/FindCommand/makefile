@@ -93,6 +93,8 @@ LOCAL_INCLUDE_PATHS = \
 # DEBUGGER = TRUE
 
 #	specify additional compiler flags for all files
+LOCALES = de en es fr fur hr ro sv
+
 COMPILER_FLAGS =
 
 #	specify additional linker flags

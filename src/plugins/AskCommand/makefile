@@ -23,6 +23,8 @@ LOCAL_INCLUDE_PATHS = \
 		../../app/Commands \
 		../../app/Tools
 
+LOCALES = de en es fr fur hr ro sv
+
 COMPILER_FLAGS =
 
 LINKER_FLAGS = -Xlinker -rpath=\$$ORIGIN/../..
