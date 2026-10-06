@@ -55,6 +55,7 @@ ProjektConceptor::~ProjektConceptor() {
 // any"), the actual index handling happens in ResolveSpecifier() below.
 static const property_info kAppProperties[] = {
 	{ "Document", {}, {}, "The open document at the given index.", 0, {0}, {} },
+	{ 0 }
 };
 
 
