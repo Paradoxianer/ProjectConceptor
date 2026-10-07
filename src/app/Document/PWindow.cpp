@@ -510,7 +510,7 @@ void PWindow::MessageReceived(BMessage *message)
 				{
 					if (!savemessage)
 					{		// if it's untitled
-						sprintf(s, "Untitled %ld", window_id);
+						sprintf(s, "Untitled %ld", (long)window_id);
 						SetTitle(s);
 					}
 				}

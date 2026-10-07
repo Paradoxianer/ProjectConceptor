@@ -244,7 +244,7 @@ ColorPickerWindow::MessageReceived(BMessage *message)
 			// as BColorControl::SetValue() always syncing "_red" etc.
 			// regardless of whether the ramp or the field itself changed
 			char	string[4];
-			sprintf(string, "%d", fAlphaSlider->Value());
+			sprintf(string, "%" B_PRId32, fAlphaSlider->Value());
 			fAlphaText->SetText(string);
 			_ReportColor();
 			break;
@@ -258,7 +258,7 @@ ColorPickerWindow::MessageReceived(BMessage *message)
 			// current value already, where it's a no-op and nothing
 			// would otherwise clamp/normalize what was actually typed
 			char	string[4];
-			sprintf(string, "%d", value);
+			sprintf(string, "%" B_PRId32, value);
 			fAlphaText->SetText(string);
 			_ReportColor();
 			break;

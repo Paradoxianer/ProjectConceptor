@@ -157,7 +157,7 @@ void RemoveAttribute::DoRemoveAttribute(PDocument *doc, BMessage *node, BMessage
 		valueContainer->FindString("subgroup",i-1,(const char**)&subGroupName);
 		if (tmpSubGroup)
 			tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(i));
-		delete subGroupList->RemoveItem(i);
+		delete (BMessage *)subGroupList->RemoveItem(i);
 	}
 	changed->insert(node);
 	
@@ -210,7 +210,7 @@ void RemoveAttribute::AddAttribute(PDocument *doc, BMessage *node, BMessage *val
 		valueContainer->FindString("subgroup",i-1,(const char**)&subGroupName);
 		if (tmpSubGroup)
 			tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)subGroupList->ItemAt(i));
-		delete subGroupList->RemoveItem(i);
+		delete (BMessage *)subGroupList->RemoveItem(i);
 	}
 	changed->insert(node);
 }

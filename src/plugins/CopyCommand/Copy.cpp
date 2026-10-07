@@ -31,7 +31,7 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 	Indexer		*indexer			= new Indexer(doc);
 	if (doc->Lock()) {
 		for (i=0;i<selected->CountItems();i++) {
-			if (node=(BMessage *)selected->ItemAt(i)) {
+			if ((node=(BMessage *)selected->ItemAt(i)) != NULL) {
 				if (node->what != P_C_CONNECTION_TYPE)
 					copyMessage->AddMessage("node",indexer->IndexNode(node));
 			}
@@ -53,7 +53,7 @@ BMessage* Copy::Do(PDocument *doc, BMessage *settings)
 	}
 	if (be_clipboard->Lock()) {
 		be_clipboard->Clear();
-		if (clip = be_clipboard->Data())  {
+		if ((clip = be_clipboard->Data()) != NULL) {
 			clip->AddData("application/x-vnd.projectconceptor-document", B_MIME_TYPE, copyMessage, sizeof(copyMessage));
 			clip->AddMessage("test",copyMessage);
 			PRINT_OBJECT(*clip);

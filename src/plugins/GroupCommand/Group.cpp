@@ -63,7 +63,7 @@ BMessage* Group::Do(PDocument *doc, BMessage *settings) {
 	BMessage		*oldParentNode		= NULL;
 
 	//the allNodes List and the allConnections List where the nodes come from
-	BList			*allNodes			= allNodes=doc->GetAllNodes();
+	BList			*allNodes			= doc->GetAllNodes();
 	
 	//the allNodes List and the allConnections List where the nodes should go to
 	BList			*gAllNodes			= NULL;

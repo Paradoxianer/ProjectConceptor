@@ -26,7 +26,7 @@ BMessage* Paste::Do(PDocument *doc, BMessage *settings)
 	int32		i					= 0;
 	Indexer		*indexer			= new Indexer(doc);
 	if (be_clipboard->Lock()) {
-		if (clip = be_clipboard->Data()) {
+		if ((clip = be_clipboard->Data()) != NULL) {
 			//clip->FindData("application/x-vnd.projectconceptor-document", B_MIME_TYPE, (const void **)&copyMessage, &messagelen);
 			clip->FindMessage("test",copyMessage);
 		}

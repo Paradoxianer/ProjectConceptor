@@ -191,7 +191,7 @@ void NavigatorEditor::AttachedToManager(void)
 	TRACE();
 	sentTo			= new BMessenger(doc);
 	id				= manager->IndexOf(this);
-	sprintf(renderString,"NavigatorEditor%ld::Renderer",id);
+	sprintf(renderString,"NavigatorEditor%ld::Renderer",(long)id);
 	InitGraph();
 }
 
@@ -253,7 +253,7 @@ void NavigatorEditor::ValueChanged(BMessage *changedNodes)
 	NodeListView	*nodeListView		= NULL;
 	MessageListView	*messageListView	= NULL;
 	root->ValueChanged();
-	if ( child = ChildAt(1) )
+	if ((child = ChildAt(1)) != NULL)
 	{
 		while ( child )
 		{

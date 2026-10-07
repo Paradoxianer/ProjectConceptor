@@ -291,6 +291,8 @@ bool ConnectionRenderer::Caught(BPoint where){
 		return CaughtBended(where);
 	else if (connectionType == 2)
 		return CaughtAngled(where);
+	// matches Draw(), which draws unknown types straight
+	return CaughtStraigt(where);
 }
 
 void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){

@@ -300,7 +300,7 @@ void GraphEditor::AttachedToManager(void) {
 	sentTo				= new BMessenger(doc);
 	id					= manager->IndexOf(this);
 	status_t	err		= B_OK;
-	sprintf(renderString,"GraphEditor%ld::Renderer",id);
+	sprintf(renderString,"GraphEditor%ld::Renderer",(long)id);
 	//put this in a seperate function??
 	nodeMessage->AddPointer("ProjectConceptor::doc",doc);
 

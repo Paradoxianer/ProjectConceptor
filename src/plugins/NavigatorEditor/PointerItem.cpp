@@ -1,4 +1,5 @@
 #include "PointerItem.h"
+#include <math.h>
 #include <stdio.h>
 #include <interface/InterfaceDefs.h>
 
@@ -23,10 +24,10 @@ void PointerItem::Update(BView *newOwner, const BFont *font)
 {
 	BListItem::Update(newOwner,font);
 	owner = newOwner;
-	float	widht,height;
-	SetHeight(height+3);
 	font_height	fontHeight;
 	font->GetHeight(&fontHeight);
+	float	height	= ceilf(fontHeight.ascent + fontHeight.descent + fontHeight.leading);
+	SetHeight(height+3);
 	textLine=((height+3)-fontHeight.ascent)/2;
 }
 

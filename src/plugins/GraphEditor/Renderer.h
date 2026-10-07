@@ -8,6 +8,7 @@ class Renderer
 
 public:
 						Renderer(GraphEditor *parentEditor, BMessage *forContainer){editor = parentEditor; container = forContainer;};
+	virtual				~Renderer() {};
 
 	virtual	void		ValueChanged(void)										= 0;
 

@@ -47,7 +47,7 @@ void ChangeValue::Undo(PDocument *doc,BMessage *undo)
 	undo->FindMessage("ChangeValue::Undo" ,undoMessage);
 	while (undoMessage->FindPointer("node",i,(void **)&node) == B_OK){
 		err = B_OK;
-		if (err = undo->FindMessage("valueContainer",i,valueContainer) != B_OK) {
+		if ((err = undo->FindMessage("valueContainer",i,valueContainer)) != B_OK) {
 			err = undo->FindMessage("valueContainer",0,valueContainer);
 		}
 		if (err == B_OK) {
