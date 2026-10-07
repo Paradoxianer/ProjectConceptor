@@ -723,6 +723,40 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 
 }
 
+// The translator that reads a flattened document and writes outType.
+static status_t FindSaveTranslator(uint32 outType, translator_id *_id)
+{
+	BTranslatorRoster	*roster			= BTranslatorRoster::Default();
+	translator_id		*translators	= NULL;
+	int32				count			= 0;
+	status_t			err				= roster->GetAllTranslators(&translators,&count);
+	if (err != B_OK)
+		return err;
+	err = B_NO_TRANSLATOR;
+	for (int32 i = 0; (i < count) && (err != B_OK); i++) {
+		const translation_format	*formats		= NULL;
+		int32						formatCount		= 0;
+		bool						readsDocument	= false;
+		if (roster->GetInputFormats(translators[i],&formats,&formatCount) == B_OK) {
+			for (int32 j = 0; j < formatCount; j++)
+				readsDocument |= (formats[j].type == P_C_DOCUMENT_RAW_TYPE);
+		}
+		if (!readsDocument
+			|| (roster->GetOutputFormats(translators[i],&formats,&formatCount) != B_OK))
+			continue;
+		for (int32 j = 0; j < formatCount; j++) {
+			if (formats[j].type == outType) {
+				*_id	= translators[i];
+				err		= B_OK;
+				break;
+			}
+		}
+	}
+	delete[] translators;
+	return err;
+}
+
+
 void PDocument::Save(void)
 {
 	TRACE();
@@ -737,25 +771,27 @@ void PDocument::Save(void)
 	BFile		file(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
 	status_t	err	= file.InitCheck();
 	BMessage	saveSettings;
-	int32		translatorId	= 0;
-	if ((err == B_OK)
+	int32		outType		= 0;
+	bool		useTranslator	= (err == B_OK)
 		&& (documentSetting->FindMessage("saveSettings",&saveSettings) == B_OK)
-		&& (saveSettings.FindInt32("translator_id",&translatorId) == B_OK)) {
+		&& (saveSettings.FindInt32("format::type",&outType) == B_OK);
+	if (useTranslator) {
+		// translator ids change between sessions; the format type doesn't
 		translator_info	translatorInfo;
-		const char		*formatName	= "";
-		int32			outType		= 0;
-		saveSettings.FindString("format::name",&formatName);
-		saveSettings.FindInt32("format::type",&outType);
-		translatorInfo.translator	= translatorId;
-		translatorInfo.type			= P_C_DOCUMENT_RAW_TYPE;
-		translatorInfo.group		= P_C_DOCUMENT_RAW_TYPE;
-		translatorInfo.quality		= 0.9;
-		translatorInfo.capability	= 0.9;
-		strlcpy(translatorInfo.name,formatName,sizeof(translatorInfo.name));
-		strlcpy(translatorInfo.MIME,P_C_DOCUMENT_MIMETYPE,sizeof(translatorInfo.MIME));
-		BMallocIO	input;
-		archived.Flatten(&input);
-		err = BTranslatorRoster::Default()->Translate(&input,&translatorInfo,NULL,&file,outType);
+		err = FindSaveTranslator((uint32)outType,&translatorInfo.translator);
+		if (err == B_OK) {
+			const char	*formatName	= "";
+			saveSettings.FindString("format::name",&formatName);
+			translatorInfo.type			= P_C_DOCUMENT_RAW_TYPE;
+			translatorInfo.group		= P_C_DOCUMENT_RAW_TYPE;
+			translatorInfo.quality		= 0.9;
+			translatorInfo.capability	= 0.9;
+			strlcpy(translatorInfo.name,formatName,sizeof(translatorInfo.name));
+			strlcpy(translatorInfo.MIME,P_C_DOCUMENT_MIMETYPE,sizeof(translatorInfo.MIME));
+			BMallocIO	input;
+			archived.Flatten(&input);
+			err = BTranslatorRoster::Default()->Translate(&input,&translatorInfo,NULL,&file,outType);
+		}
 	} else if (err == B_OK)
 		err = archived.Flatten(&file);
 

@@ -102,7 +102,6 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 					//	and take the first output format that isn't P_C_DOCUMENT_RAW_TYPE
 					if( oFormats[j].type != P_C_DOCUMENT_RAW_TYPE) {
 						message	= new BMessage();
-						message->AddInt32("translator_id",translators[i]);
 						message->AddString("format::name",oFormats[j].name);
 						message->AddString("format::MIME",oFormats[j].MIME);
 						message->AddInt32("format::type",oFormats[j].type);
