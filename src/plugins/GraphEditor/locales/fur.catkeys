@@ -1,6 +1,8 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	3461046772
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	1649170796
 Delete	AttributeRenderer		Elimine
+Triangle	GraphEditor		Triangul
 Group selected nodes	GraphEditor		Grope i grops selezionâts
+Diamond	GraphEditor		Rombo
 Connection	GraphEditor		Conession
 Add text attribute	GraphEditor		Zonte atribût di test
 Grid	GraphEditor		Grile
@@ -8,24 +10,32 @@ Fill pattern for selected nodes	GraphEditor		Motîf di jemplament pai grops sele
 Toggle grid	GraphEditor		Mostre/plate la grile
 Input attribute name	GraphEditor		Inserìs il non dal atribût
 None	GraphEditor		Nissune
+Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Ative/disative lis guidis di aliniament inteligjentis
+Ellipse	GraphEditor		Elìs
 Arrows	GraphEditor		Frecis
 Rounded	GraphEditor		Taronde
 Pen size	GraphEditor		Spessôr dal pinel
 Add boolean attribute	GraphEditor		Zonte atribût boolean
+Note	GraphEditor		Note
 OK	GraphEditor		Va ben
+Rounded rectangle	GraphEditor		Retangul taront
 Fill color for selected nodes	GraphEditor		Colôr di jemplament pai grops selezionâts
 Fill	GraphEditor		Jemplament
 Both ends	GraphEditor		Ducj i doi i cjâfs
+Rectangle	GraphEditor		Retangul
 Pattern	GraphEditor		Motîf
 Scale	GraphEditor		Scjale
 Guides	GraphEditor		Guidis
 Straight	GraphEditor		Drete
+Shape of the selected nodes	GraphEditor		Forme dai grops selezionâts
 Angular	GraphEditor		Angolâr
 At source	GraphEditor		Te origjin
 Attribute	GraphEditor		Atribût
 Name	GraphEditor		Non
+Hexagon	GraphEditor		Esagon
 At target	GraphEditor		Te destinazion
+Shape	GraphEditor		Forme
 Border pen size for selected nodes	GraphEditor		Spessôr dal ôr pai grops selezionâts
 Untitled	GraphEditor		Cence titul
 Cancel	GraphEditor		Anule

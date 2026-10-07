@@ -193,11 +193,11 @@ void ConnectionRenderer::CalcLine() {
 		float	toMiddleY	=	(toRect->bottom-toRect->top)/2;
 		alpha		= atan2((toRect->top-fromRect->top),(toRect->left-fromRect->left));
 		if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) ) {
-			first		= BPoint(toRect->right+arrowSize,toRect->top+toMiddleY-arrowSize);
-			second		= BPoint(first.x,toRect->top+toMiddleY+arrowSize);
-			third		= BPoint(toRect->right,toRect->top+toMiddleY);
+			third		= to->Anchor(BPoint(toRect->right,toRect->top+toMiddleY));
+			first		= BPoint(third.x+arrowSize,third.y-arrowSize);
+			second		= BPoint(first.x,third.y+arrowSize);
 			toPoint		= BPoint(first.x,third.y);
-			fromPoint	= BPoint(fromRect->left,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+			fromPoint	= from->Anchor(BPoint(fromRect->left,fromRect->top+(fromRect->bottom-fromRect->top)/2));
 			fromOutward	= BPoint(-1,0);
 			float	bendLength	= BEND_LENGTH* (fromPoint.x-toPoint.x);
 			firstBend.x		= fromPoint.x - bendLength;
@@ -206,11 +206,11 @@ void ConnectionRenderer::CalcLine() {
 			secondBend.y	= toPoint.y;
 		}
 		else if (alpha < -M_PI_4) {
-			first		= BPoint(toRect->left+toMiddleX-arrowSize,toRect->bottom+arrowSize);
-			second		= BPoint(toRect->left+toMiddleX+arrowSize,toRect->bottom+arrowSize);
-			third		= BPoint(toRect->left+toMiddleX,toRect->bottom);
+			third		= to->Anchor(BPoint(toRect->left+toMiddleX,toRect->bottom));
+			first		= BPoint(third.x-arrowSize,third.y+arrowSize);
+			second		= BPoint(third.x+arrowSize,third.y+arrowSize);
 			toPoint		= BPoint(third.x,first.y);
-			fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->top);
+			fromPoint	= from->Anchor(BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->top));
 			fromOutward	= BPoint(0,-1);
 			float	bendLength	= BEND_LENGTH* (fromPoint.y-toPoint.y);
 			firstBend.x		= fromPoint.x;
@@ -219,11 +219,11 @@ void ConnectionRenderer::CalcLine() {
 			secondBend.y	= toPoint.y + bendLength;
 		}
 		else if (alpha> M_PI_4) {
-			first		= BPoint(toRect->left+toMiddleX-arrowSize,toRect->top-arrowSize);
-			second		= BPoint(toRect->left+toMiddleX+arrowSize,toRect->top-arrowSize);
-			third		= BPoint(toRect->left+toMiddleX,toRect->top);
+			third		= to->Anchor(BPoint(toRect->left+toMiddleX,toRect->top));
+			first		= BPoint(third.x-arrowSize,third.y-arrowSize);
+			second		= BPoint(third.x+arrowSize,third.y-arrowSize);
 			toPoint		= BPoint(third.x,first.y);
-			fromPoint	= BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->bottom);
+			fromPoint	= from->Anchor(BPoint(fromRect->left+(fromRect->right-fromRect->left)/2,fromRect->bottom));
 			fromOutward	= BPoint(0,1);
 			float	bendLength	= BEND_LENGTH* (toPoint.y-fromPoint.y);
 			firstBend.x		= fromPoint.x;
@@ -233,11 +233,11 @@ void ConnectionRenderer::CalcLine() {
 
 		}
 		else {
-			first		= BPoint(toRect->left-arrowSize,toRect->top+toMiddleY-arrowSize);
-			second		= BPoint(toRect->left-arrowSize,toRect->top+toMiddleY+arrowSize);
-			third		= BPoint(toRect->left,toRect->top+toMiddleY);
+			third		= to->Anchor(BPoint(toRect->left,toRect->top+toMiddleY));
+			first		= BPoint(third.x-arrowSize,third.y-arrowSize);
+			second		= BPoint(third.x-arrowSize,third.y+arrowSize);
 			toPoint		= BPoint(first.x,third.y);
-			fromPoint	= BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2);
+			fromPoint	= from->Anchor(BPoint(fromRect->right,fromRect->top+(fromRect->bottom-fromRect->top)/2));
 			fromOutward	= BPoint(1,0);
 			float	bendLength	= BEND_LENGTH* (toPoint.x-fromPoint.x);
 			firstBend.x		= fromPoint.x + bendLength;

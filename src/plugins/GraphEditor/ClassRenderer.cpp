@@ -149,8 +149,8 @@ void ClassRenderer::MouseDown(BPoint where, int32 buttons,
 				connecting	= 3;
 			else if (bottomConnection.Contains(where))
 				connecting	= 4;
-			else if (SupportsResize() && (where.y >= (frame.bottom-(2*circleSize)))
-					&& (where.x >= (frame.right-(2*circleSize)))) {
+			else if (SupportsResize()
+					&& BRect(ResizeCorner()-BPoint(3*circleSize,3*circleSize),ResizeCorner()).Contains(where)) {
 				resizing = true;
 			}
 		}
@@ -335,30 +335,49 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	shadowFrame.OffsetBy(3,3);
 	drawOn->SetPenSize(penSize);
 	drawOn->SetHighColor(0,0,0,77);
-	drawOn->FillRoundRect(shadowFrame, xRadius, yRadius);
+	// BView draws a shape at the current pen location
+	if (shape.HasPath()) {
+		drawOn->MovePenTo(shadowFrame.LeftTop());
+		drawOn->FillShape(shape.Shape());
+	} else
+		drawOn->FillRoundRect(shadowFrame, xRadius, yRadius);
 	drawColor=hasPreviewFillColor ? previewFillColor : fillColor;
 	if (selected) {
 		drawOn->SetPenSize(5.0);
 		drawOn->SetHighColor(200,0,0,150);
-		BRect selectFrame = frame;
-		selectFrame.InsetBy(-2,-2);
-		drawOn->StrokeRoundRect(selectFrame, xRadius, yRadius);
+		if (shape.HasPath()) {
+			drawOn->MovePenTo(frame.LeftTop());
+			drawOn->StrokeShape(shape.Shape());
+		} else {
+			BRect selectFrame = frame;
+			selectFrame.InsetBy(-2,-2);
+			drawOn->StrokeRoundRect(selectFrame, xRadius, yRadius);
+		}
 		drawOn->SetHighColor(drawColor);
 	}
 	drawOn->SetHighColor(drawColor);
-	drawOn->FillRoundRect(frame, xRadius, yRadius);
+	if (shape.HasPath()) {
+		drawOn->MovePenTo(frame.LeftTop());
+		drawOn->FillShape(shape.Shape());
+	} else
+		drawOn->FillRoundRect(frame, xRadius, yRadius);
 	
 	
 
 	if (SupportsResize()) {
+		BPoint	corner	= ResizeCorner();
 		drawOn->SetHighColor(0,0,0,255);
-		drawOn->FillTriangle(BPoint(frame.right-(3*circleSize),frame.bottom),BPoint(frame.right,frame.bottom-(3*circleSize)),BPoint(frame.right,frame.bottom));
+		drawOn->FillTriangle(BPoint(corner.x-(3*circleSize),corner.y),BPoint(corner.x,corner.y-(3*circleSize)),corner);
 	}
 	
 
 	drawOn->SetHighColor(borderColor);
 	drawOn->SetPenSize(penSize);
-	drawOn->StrokeRoundRect(frame, xRadius, yRadius);
+	if (shape.HasPath()) {
+		drawOn->MovePenTo(frame.LeftTop());
+		drawOn->StrokeShape(shape.Shape());
+	} else
+		drawOn->StrokeRoundRect(frame, xRadius, yRadius);
 	if (showConnecter) {
 		drawOn->SetHighColor(200,0,0,255);
 
@@ -376,16 +395,17 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 
 
 	name->Draw(drawOn,updateRect);
+	BRect	content	= ContentFrame();
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
 	while( allAttributes != attributes->end() ) {
-		if (frame.Contains((*allAttributes)->Frame()))
+		if (content.Contains((*allAttributes)->Frame()))
 			(*allAttributes)->Draw(drawOn,updateRect);
 		else
 			fitIn=false;
 		allAttributes++;
 	}
 	if (!fitIn)
-		drawOn->DrawString("...",BPoint(frame.left+circleSize+2,frame.bottom-(yRadius/3)));
+		drawOn->DrawString("...",BPoint(content.left+circleSize+2,content.bottom-(yRadius/3)));
 
 	if (offsetForAnim)
 		drawOn->PopState();
@@ -447,9 +467,19 @@ void ClassRenderer::ValueChanged() {
 	// any leftover preview from a picker session is now stale, drop it
 	// so Draw() goes back to the real fillColor just read above
 	hasPreviewFillColor			= false;
+	// older documents have no shape yet; like the pattern above it is
+	// added so ChangeValue has a field to replace
+	BMessage	shapeMessage;
+	if (container->FindMessage(P_C_NODE_SHAPE,&shapeMessage) != B_OK) {
+		NodeShape::BuildBuiltIn("rounded",&shapeMessage);
+		container->AddMessage(P_C_NODE_SHAPE,&shapeMessage);
+	}
+	shape.SetTo(&shapeMessage);
+	shape.Layout(frame);
 	data->FindString(P_C_NODE_NAME,(const char **)&newName);
 	name->SetString(newName);
-	name->SetFrame(BRect(frame.left+(xRadius/3),frame.top+(yRadius/3),frame.right-(xRadius/3),frame.top+12));
+	BRect	content	= ContentFrame();
+	name->SetFrame(BRect(content.left+(xRadius/3),content.top+(yRadius/3),content.right-(xRadius/3),content.top+12));
 	
 	
 	//delete all "old" Attribs
@@ -460,12 +490,8 @@ void ClassRenderer::ValueChanged() {
 			InsertAttribute(attribName,attribMessage, count-1);
 	}
 	container->FindPointer(P_C_NODE_PARENT, (void **)&parentNode);
-	float yMiddle = frame.top+(frame.Height()/2);
-	float xMiddle = frame.left+(frame.Width()/2);
-	leftConnection.Set(frame.left-circleSize,yMiddle-circleSize,frame.left+circleSize,yMiddle+circleSize);
-	topConnection.Set(xMiddle-circleSize,frame.top-circleSize,xMiddle+circleSize,frame.top+circleSize);
-	rightConnection.Set(frame.right-circleSize,yMiddle-circleSize,frame.right+circleSize,yMiddle+circleSize);
-	bottomConnection.Set(xMiddle-circleSize,frame.bottom-circleSize,xMiddle+circleSize,frame.bottom+circleSize);
+	shape.Layout(frame);
+	UpdateConnectors();
 
 	// this node's own frame just changed via a committed command (Move,
 	// ChangeValue/Auto-Layout, either one's Undo, ...) rather than an
@@ -485,8 +511,23 @@ BRect ClassRenderer::Frame( void ) {
 	return frame;
 }
 
+void ClassRenderer::UpdateConnectors(void) {
+	float	yMiddle	= frame.top+(frame.Height()/2);
+	float	xMiddle	= frame.left+(frame.Width()/2);
+	BPoint	left	= shape.Anchor(BPoint(frame.left,yMiddle));
+	BPoint	top		= shape.Anchor(BPoint(xMiddle,frame.top));
+	BPoint	right	= shape.Anchor(BPoint(frame.right,yMiddle));
+	BPoint	bottom	= shape.Anchor(BPoint(xMiddle,frame.bottom));
+	leftConnection.Set(left.x-circleSize,left.y-circleSize,left.x+circleSize,left.y+circleSize);
+	topConnection.Set(top.x-circleSize,top.y-circleSize,top.x+circleSize,top.y+circleSize);
+	rightConnection.Set(right.x-circleSize,right.y-circleSize,right.x+circleSize,right.y+circleSize);
+	bottomConnection.Set(bottom.x-circleSize,bottom.y-circleSize,bottom.x+circleSize,bottom.y+circleSize);
+}
+
 bool  ClassRenderer::Caught(BPoint where) {
-	 bool contains	= frame.Contains(where);
+	 bool contains	= shape.HasPath() ? shape.Contains(where) : frame.Contains(where);
+	 if (!contains && SupportsResize())
+		contains = BRect(ResizeCorner()-BPoint(3*circleSize,3*circleSize),ResizeCorner()).Contains(where);
 	 if (!contains) {
 	 	contains = leftConnection.Contains(where);
 	 	if (!contains) {
@@ -539,10 +580,8 @@ bool  ClassRenderer::ResizeAll(void *arg,float dx, float dy) {
 
 void ClassRenderer::MoveBy(float dx,float dy) {
 	frame.OffsetBy(dx,dy);
-	leftConnection.OffsetBy(dx,dy);
-	topConnection.OffsetBy(dx,dy);
-	rightConnection.OffsetBy(dx,dy);
-	bottomConnection.OffsetBy(dx,dy);
+	shape.Layout(frame);
+	UpdateConnectors();
 	name->MoveBy(dx,dy);
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
 	while( allAttributes != attributes->end() ) {
@@ -562,12 +601,8 @@ void ClassRenderer::ResizeBy(float dx,float dy) {
 		(*allAttributes)->ResizeBy(dx,dy);
 		allAttributes++;
 	}
-	float yMiddle = frame.top+(frame.Height()/2);
-	float xMiddle = frame.left+(frame.Width()/2);
-	leftConnection.Set(frame.left-circleSize,yMiddle-circleSize,frame.left+circleSize,yMiddle+circleSize);
-	topConnection.Set(xMiddle-circleSize,frame.top-circleSize,xMiddle+circleSize,frame.top+circleSize);
-	rightConnection.Set(frame.right-circleSize,yMiddle-circleSize,frame.right+circleSize,yMiddle+circleSize);
-	bottomConnection.Set(xMiddle-circleSize,frame.bottom-circleSize,xMiddle+circleSize,frame.bottom+circleSize);
+	shape.Layout(frame);
+	UpdateConnectors();
 }
 
 void ClassRenderer::SetPreviewFillColor(rgb_color color) {
@@ -626,12 +661,14 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	BRect	attributeRect;
 	if (attributes->empty())
 	{
-		attributeRect = BRect(frame.left+circleSize+2,name->Frame().bottom+6,frame.right-circleSize-2,frame.bottom);
+		BRect	content	= ContentFrame();
+		attributeRect = BRect(content.left+circleSize+2,name->Frame().bottom+6,content.right-circleSize-2,content.bottom);
 	}
 	else
 	{
 		Renderer* lastRenderer = (*attributes)[attributes->size()-1];
-		attributeRect = BRect(frame.left+circleSize+2,lastRenderer->Frame().bottom,frame.right-circleSize-2,frame.bottom);
+		BRect	content	= ContentFrame();
+		attributeRect = BRect(content.left+circleSize+2,lastRenderer->Frame().bottom,content.right-circleSize-2,content.bottom);
 	}
 	BMessage*	editMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 	editMessage->AddPointer("node",container);

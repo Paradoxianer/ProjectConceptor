@@ -6,6 +6,8 @@
 #include <translation/TranslatorFormats.h>
 #include <storage/Resources.h>
 #include <support/DataIO.h>
+
+#include "NodeShape.h"
 #include <string.h>
 #include <Catalog.h>
 #include <MessageRunner.h>
@@ -41,6 +43,45 @@ LoadPluginIcon(BResources *res, const char *name)
 // small squares (nodes) aligned on a dashed guide line, in the same accent
 // color the live guide lines are drawn in (see Draw()), so the toolbar
 // icon and the feature it toggles read as the same thing.
+// Shape choices are previewed with the shape itself, so a custom or new
+// built-in shape needs no icon resource.
+static BBitmap*
+MakeShapeIcon(const char *shapeName)
+{
+	BRect	bounds(0,0,19,19);
+	BBitmap	*bmp	= new BBitmap(bounds,B_RGBA32,true);
+	BView	*view	= new BView(bounds,"shapeIcon",B_FOLLOW_NONE,B_WILL_DRAW);
+	bmp->AddChild(view);
+	bmp->Lock();
+	view->SetHighColor(0,0,0,0);
+	view->FillRect(bounds,B_SOLID_HIGH);
+	view->SetDrawingMode(B_OP_ALPHA);
+	BRect		frame(1,4,18,15);
+	BMessage	archive;
+	NodeShape	shape;
+	NodeShape::BuildBuiltIn(shapeName,&archive);
+	shape.SetTo(&archive);
+	shape.Layout(frame);
+	rgb_color	fill	= {240,240,180,255};
+	rgb_color	border	= {0,0,0,255};
+	if (shape.HasPath()) {
+		view->MovePenTo(frame.LeftTop());
+		view->SetHighColor(fill);
+		view->FillShape(shape.Shape());
+		view->MovePenTo(frame.LeftTop());
+		view->SetHighColor(border);
+		view->StrokeShape(shape.Shape());
+	} else {
+		view->SetHighColor(fill);
+		view->FillRoundRect(frame,3,3);
+		view->SetHighColor(border);
+		view->StrokeRoundRect(frame,3,3);
+	}
+	view->Sync();
+	bmp->Unlock();
+	return bmp;
+}
+
 static BBitmap*
 MakeGuidesIcon(void)
 {
@@ -147,6 +188,9 @@ void GraphEditor::Init(void) {
 	//preparing the standart ObjectMessage
 	nodeMessage	= new BMessage(P_C_CLASS_TYPE);
 	nodeMessage->AddMessage(P_C_NODE_DATA,dataMessage);
+	BMessage	defaultShape;
+	NodeShape::BuildBuiltIn("rounded",&defaultShape);
+	nodeMessage->AddMessage(P_C_NODE_SHAPE,&defaultShape);
 	//Preparing the standart FontMessage
 	//fontMessage		= new BMessage(B_FONT_TYPE);
 	fontMessage		= new BMessage('fOTy');
@@ -280,6 +324,16 @@ void GraphEditor::Init(void) {
 	connectionArrows->AddChoice(B_TRANSLATE("None"),"0",LoadPluginIcon(res,"arrow-none"));
 	connectionArrows->SetValue("1");
 	connectionArrows->SetToolTip(B_TRANSLATE("Which ends of the selected connections carry an arrow"));
+
+	nodeShape	= new ChoiceToolItem(B_TRANSLATE("Shape"),
+		new BMessage(G_E_NODE_SHAPE),ITEM_WIDTH*2);
+	nodeShape->SetIconOnly(true);
+	for (int32 i = 0; i < NodeShape::CountBuiltIn(); i++) {
+		nodeShape->AddChoice(B_TRANSLATE_NOCOLLECT(NodeShape::BuiltInLabel(i)),
+			NodeShape::BuiltInName(i),MakeShapeIcon(NodeShape::BuiltInName(i)));
+	}
+	nodeShape->SetValue("rounded");
+	nodeShape->SetToolTip(B_TRANSLATE("Shape of the selected nodes"));
 
 	data=res->LoadResource((type_code)'PNG ',"addText",&size);
 	if (data) {
@@ -750,6 +804,7 @@ void GraphEditor::AttachedToWindow(void) {
 	configBar->AddItem(penSize);
 	configBar->AddItem(colorItem);
 	configBar->AddSeperator();
+	configBar->AddItem(nodeShape);
 	configBar->AddItem(connectionStyle);
 	configBar->AddItem(connectionArrows);
 
@@ -759,6 +814,7 @@ void GraphEditor::AttachedToWindow(void) {
 	colorItem->SetTarget(this);
 	connectionStyle->SetTarget(this);
 	connectionArrows->SetTarget(this);
+	nodeShape->SetTarget(this);
 	sentToMe	= new BMessenger((BView *)this);
 	BView *parent = myScrollParent->Parent();
 	if (parent) {
@@ -811,6 +867,7 @@ void GraphEditor::DetachedFromWindow(void) {
 				configBar->RemoveItem(colorItem);
 				configBar->RemoveItem(connectionStyle);
 				configBar->RemoveItem(connectionArrows);
+				configBar->RemoveItem(nodeShape);
 				configBar->RemoveSeperator();
 				configBar->RemoveItem(patternItem);
 				configBar->RemoveSeperator();
@@ -1021,6 +1078,25 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				isStyle ? P_C_NODE_CONNECTION_TYPE : P_C_NODE_CONNECTION_ARROWS);
 			valueContainer->AddInt32("type",B_INT8_TYPE);
 			valueContainer->AddInt8("newValue",(int8)atoi(value));
+			changeMessage->AddMessage("valueContainer",valueContainer);
+			sentTo->SendMessage(changeMessage);
+			break;
+		}
+		case G_E_NODE_SHAPE: {
+			const char	*value	= NULL;
+			BMessage	shapeArchive;
+			if ((message->FindString("value",&value) != B_OK)
+				|| (NodeShape::BuildBuiltIn(value,&shapeArchive) != B_OK))
+				break;
+			BMallocIO	flat;
+			shapeArchive.Flatten(&flat);
+			BMessage	*changeMessage	= new BMessage(P_C_EXECUTE_COMMAND);
+			changeMessage->AddString("Command::Name","ChangeValue");
+			changeMessage->AddBool(P_C_NODE_SELECTED,true);
+			BMessage	*valueContainer	= new BMessage();
+			valueContainer->AddString("name",P_C_NODE_SHAPE);
+			valueContainer->AddInt32("type",B_MESSAGE_TYPE);
+			valueContainer->AddData("newValue",B_MESSAGE_TYPE,flat.Buffer(),flat.BufferLength());
 			changeMessage->AddMessage("valueContainer",valueContainer);
 			sentTo->SendMessage(changeMessage);
 			break;

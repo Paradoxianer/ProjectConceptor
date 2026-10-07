@@ -1,6 +1,8 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	3461046772
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	1649170796
 Delete	AttributeRenderer		Radera
+Triangle	GraphEditor		Triangel
 Group selected nodes	GraphEditor		Gruppera markerade noder
+Diamond	GraphEditor		Romb
 Connection	GraphEditor		Förbindelse
 Add text attribute	GraphEditor		Lägg till textattribut
 Grid	GraphEditor		Rutnät
@@ -8,24 +10,32 @@ Fill pattern for selected nodes	GraphEditor		Fyllnadsmönster för markerade nod
 Toggle grid	GraphEditor		Visa/dölj rutnät
 Input attribute name	GraphEditor		Ange attributets namn
 None	GraphEditor		Ingen
+Parallelogram	GraphEditor		Parallellogram
 Toggle smart alignment guides	GraphEditor		Slå på/av smarta justeringslinjer
+Ellipse	GraphEditor		Ellips
 Arrows	GraphEditor		Pilar
 Rounded	GraphEditor		Rundad
 Pen size	GraphEditor		Pennstorlek
 Add boolean attribute	GraphEditor		Lägg till booleskt attribut
+Note	GraphEditor		Anteckning
 OK	GraphEditor		OK
+Rounded rectangle	GraphEditor		Rundad rektangel
 Fill color for selected nodes	GraphEditor		Fyllnadsfärg för markerade noder
 Fill	GraphEditor		Fyll
 Both ends	GraphEditor		Båda ändar
+Rectangle	GraphEditor		Rektangel
 Pattern	GraphEditor		Mönster
 Scale	GraphEditor		Skala
 Guides	GraphEditor		Hjälplinjer
 Straight	GraphEditor		Rak
+Shape of the selected nodes	GraphEditor		Form på markerade noder
 Angular	GraphEditor		Vinklad
 At source	GraphEditor		Vid källan
 Attribute	GraphEditor		Attribut
 Name	GraphEditor		Namn
+Hexagon	GraphEditor		Hexagon
 At target	GraphEditor		Vid målet
+Shape	GraphEditor		Form
 Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder
 Untitled	GraphEditor		Namnlös
 Cancel	GraphEditor		Avbryt

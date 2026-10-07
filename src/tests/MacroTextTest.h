@@ -78,6 +78,8 @@ public:
 	void MoveCommandRefusesDroppingIntoOwnSubtree(void);
 	void MoveCommandReordersTopLevelSiblings(void);
 
+	void ShapeChangeSurvivesMacroText(void);
+
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
 	CPPUNIT_TEST(RoundTripsMoveWithFloats);
@@ -141,6 +143,7 @@ public:
 	CPPUNIT_TEST(MoveCommandPromotesToTopLevel);
 	CPPUNIT_TEST(MoveCommandRefusesDroppingIntoOwnSubtree);
 	CPPUNIT_TEST(MoveCommandReordersTopLevelSiblings);
+	CPPUNIT_TEST(ShapeChangeSurvivesMacroText);
 	CPPUNIT_TEST_SUITE_END();
 };
 

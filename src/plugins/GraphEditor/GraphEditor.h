@@ -48,6 +48,8 @@ const uint32			G_E_PEN_SIZE_CHANGED	= 'gePS';
 // current selection, same as the pen size/fill color controls
 const uint32			G_E_CONNECTION_STYLE	= 'geCS';
 const uint32			G_E_CONNECTION_ARROWS	= 'geCA';
+// "value": a NodeShape built-in name
+const uint32			G_E_NODE_SHAPE			= 'geSh';
 const uint32			G_E_ADD_ATTRIBUTE		= 'geAA';
 //*order to Insert and new a Node and to connect it to all current selected Nodes*/
 const uint32			G_E_INSERT_NODE 		= 'geIN';
@@ -232,6 +234,7 @@ protected:
 			FloatToolItem	*penSize;
 			ChoiceToolItem	*connectionStyle;
 			ChoiceToolItem	*connectionArrows;
+			ChoiceToolItem	*nodeShape;
 			ColorToolItem	*colorItem;
 			PatternToolItem	*patternItem;
 

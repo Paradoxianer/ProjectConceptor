@@ -12,14 +12,19 @@ through the main workflows using screenshots of a running instance.
 
 Left to right: file actions (New, Open, Save, Save As, Print), then
 Search, Delete, and font settings, then grid toggle, pen size, fill
-color, and on the right two icon choice fields:
+color, and on the right three icon choice fields:
 
+- **Node shape** - rounded rectangle, rectangle, ellipse, diamond,
+  triangle, hexagon, parallelogram, or note. Applies to the selected
+  nodes; name and attributes stay inside the shape, and connections
+  dock on its outline. Undo and macro recording work as for any other
+  change.
 - **Connection shape** - straight, rounded, or angular. Applies to
   whichever connections are currently selected.
 - **Arrow ends** - arrowhead at the target, at the source, at both
   ends, or none.
 
-Both show the currently picked shape as an icon; the pop-up menu also
+All three show the current pick as an icon; the pop-up menu also
 carries the name, in case the icon alone isn't clear enough.
 
 The **grid toggle** overlays an alignment grid and snaps node
@@ -78,7 +83,9 @@ clicked on.
 ## Connections
 
 Dragging from one of a node's four red connection points to another
-node creates a connection between them. Its shape and arrow ends can be
+node creates a connection between them; it can be dropped anywhere on
+the target node. The line docks where it meets the node's outline,
+also for shaped nodes. Its shape and arrow ends can be
 changed afterward via the toolbar icons above, as long as the
 connection is selected (works on several at once).
 

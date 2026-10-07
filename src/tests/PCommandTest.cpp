@@ -11,6 +11,7 @@
 #include "Find.h"
 #include "ForEach.h"
 #include "Group.h"
+#include "NodeShape.h"
 #include "If.h"
 #include "Insert.h"
 #include "Move.h"
@@ -108,6 +109,49 @@ void PCommandTest::ChangeValueDoUndo(void)
 	int32	restored	= 0;
 	CPPUNIT_ASSERT(node.FindInt32("TestValue",&restored) == B_OK);
 	CPPUNIT_ASSERT_EQUAL((int32)1,restored);
+}
+
+// what GraphEditor's shape toolbar sends: the whole Node::Shape message as
+// the new value
+void PCommandTest::ChangeValueReplacesNodeShape(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	node(P_C_CLASS_TYPE);
+	BMessage	rounded;
+	NodeShape::BuildBuiltIn("rounded",&rounded);
+	node.AddMessage(P_C_NODE_SHAPE,&rounded);
+
+	BMessage	diamond;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,NodeShape::BuildBuiltIn("diamond",&diamond));
+	BMallocIO	flat;
+	diamond.Flatten(&flat);
+	BMessage	valueContainer;
+	valueContainer.AddString("name",P_C_NODE_SHAPE);
+	valueContainer.AddInt32("type",(int32)B_MESSAGE_TYPE);
+	valueContainer.AddData("newValue",B_MESSAGE_TYPE,flat.Buffer(),flat.BufferLength());
+
+	BMessage	settings;
+	settings.AddPointer("node",&node);
+	settings.AddMessage("valueContainer",&valueContainer);
+
+	ChangeValue	command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	BMessage	shape;
+	const char	*name	= NULL;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,node.FindMessage(P_C_NODE_SHAPE,&shape));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,shape.FindString(P_C_SHAPE_NAME,&name));
+	CPPUNIT_ASSERT_EQUAL(BString("diamond"),BString(name));
+	NodeShape	geometry;
+	geometry.SetTo(&shape);
+	CPPUNIT_ASSERT(geometry.HasPath());
+
+	command.Undo(doc,result);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,node.FindMessage(P_C_NODE_SHAPE,&shape));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,shape.FindString(P_C_SHAPE_NAME,&name));
+	CPPUNIT_ASSERT_EQUAL(BString("rounded"),BString(name));
 }
 
 void PCommandTest::ChangeValueOnSelectionDoUndo(void)

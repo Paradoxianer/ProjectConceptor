@@ -1,6 +1,8 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	3461046772
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	1649170796
 Delete	AttributeRenderer		Borrar
+Triangle	GraphEditor		Triángulo
 Group selected nodes	GraphEditor		Agrupar los nodos seleccionados
+Diamond	GraphEditor		Rombo
 Connection	GraphEditor		Conexión
 Add text attribute	GraphEditor		Añadir atributo de texto
 Grid	GraphEditor		Grilla
@@ -8,24 +10,32 @@ Fill pattern for selected nodes	GraphEditor		Patrón de relleno de los nodos sel
 Toggle grid	GraphEditor		Mostrar/ocultar cuadrícula
 Input attribute name	GraphEditor		Introduzca el nombre del atributo
 None	GraphEditor		Ninguna
+Parallelogram	GraphEditor		Paralelogramo
 Toggle smart alignment guides	GraphEditor		Activar/desactivar guías de alineación inteligentes
+Ellipse	GraphEditor		Elipse
 Arrows	GraphEditor		Flechas
 Rounded	GraphEditor		Redondeada
 Pen size	GraphEditor		Tamaño de lápiz
 Add boolean attribute	GraphEditor		Añadir atributo booleano
+Note	GraphEditor		Nota
 OK	GraphEditor		Aceptar
+Rounded rectangle	GraphEditor		Rectángulo redondeado
 Fill color for selected nodes	GraphEditor		Color de relleno de los nodos seleccionados
 Fill	GraphEditor		Rellenar
 Both ends	GraphEditor		Ambos extremos
+Rectangle	GraphEditor		Rectángulo
 Pattern	GraphEditor		Patrón
 Scale	GraphEditor		Escala
 Guides	GraphEditor		Guías
 Straight	GraphEditor		Recta
+Shape of the selected nodes	GraphEditor		Forma de los nodos seleccionados
 Angular	GraphEditor		Angular
 At source	GraphEditor		En el origen
 Attribute	GraphEditor		Atributo
 Name	GraphEditor		Nombre
+Hexagon	GraphEditor		Hexágono
 At target	GraphEditor		En el destino
+Shape	GraphEditor		Forma
 Border pen size for selected nodes	GraphEditor		Grosor del borde de los nodos seleccionados
 Untitled	GraphEditor		Sin título
 Cancel	GraphEditor		Cancelar

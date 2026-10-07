@@ -1,6 +1,8 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	3461046772
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	1649170796
 Delete	AttributeRenderer		Izbriši
+Triangle	GraphEditor		Trokut
 Group selected nodes	GraphEditor		Grupiraj odabrane čvorove
+Diamond	GraphEditor		Romb
 Connection	GraphEditor		Veza
 Add text attribute	GraphEditor		Dodaj tekstualni atribut
 Grid	GraphEditor		Rešetka
@@ -8,24 +10,32 @@ Fill pattern for selected nodes	GraphEditor		Uzorak ispune za odabrane čvorove
 Toggle grid	GraphEditor		Uključi/isključi rešetku
 Input attribute name	GraphEditor		Unesite naziv atributa
 None	GraphEditor		Nijedna
+Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Uključi/isključi pametne vodilice za poravnanje
+Ellipse	GraphEditor		Elipsa
 Arrows	GraphEditor		Strelice
 Rounded	GraphEditor		Zaobljena
 Pen size	GraphEditor		Debljina olovke
 Add boolean attribute	GraphEditor		Dodaj logički atribut
+Note	GraphEditor		Bilješka
 OK	GraphEditor		U redu
+Rounded rectangle	GraphEditor		Zaobljeni pravokutnik
 Fill color for selected nodes	GraphEditor		Boja ispune za odabrane čvorove
 Fill	GraphEditor		Ispuni
 Both ends	GraphEditor		Oba kraja
+Rectangle	GraphEditor		Pravokutnik
 Pattern	GraphEditor		Uzorak
 Scale	GraphEditor		Mjerilo
 Guides	GraphEditor		Vodilice
 Straight	GraphEditor		Ravna
+Shape of the selected nodes	GraphEditor		Oblik odabranih čvorova
 Angular	GraphEditor		Kutna
 At source	GraphEditor		Na izvoru
 Attribute	GraphEditor		Atribut
 Name	GraphEditor		Ime
+Hexagon	GraphEditor		Šesterokut
 At target	GraphEditor		Na odredištu
+Shape	GraphEditor		Oblik
 Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove
 Untitled	GraphEditor		Bez naslova
 Cancel	GraphEditor		Otkaži

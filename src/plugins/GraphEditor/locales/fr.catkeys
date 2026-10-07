@@ -1,6 +1,8 @@
-1	French	application/x-vnd.ProjectConceptor-plugin	3461046772
+1	French	application/x-vnd.ProjectConceptor-plugin	1649170796
 Delete	AttributeRenderer		Effacer
+Triangle	GraphEditor		Triangle
 Group selected nodes	GraphEditor		Grouper les nœuds sélectionnés
+Diamond	GraphEditor		Losange
 Connection	GraphEditor		Connexion
 Add text attribute	GraphEditor		Ajouter un attribut texte
 Grid	GraphEditor		Grille
@@ -8,24 +10,32 @@ Fill pattern for selected nodes	GraphEditor		Motif de remplissage des nœuds sé
 Toggle grid	GraphEditor		Afficher/masquer la grille
 Input attribute name	GraphEditor		Saisissez le nom de l'attribut
 None	GraphEditor		Aucune
+Parallelogram	GraphEditor		Parallélogramme
 Toggle smart alignment guides	GraphEditor		Activer/désactiver les guides d'alignement intelligents
+Ellipse	GraphEditor		Ellipse
 Arrows	GraphEditor		Flèches
 Rounded	GraphEditor		Arrondie
 Pen size	GraphEditor		Taille du crayon
 Add boolean attribute	GraphEditor		Ajouter un attribut booléen
+Note	GraphEditor		Note
 OK	GraphEditor		OK
+Rounded rectangle	GraphEditor		Rectangle arrondi
 Fill color for selected nodes	GraphEditor		Couleur de remplissage des nœuds sélectionnés
 Fill	GraphEditor		Remplir
 Both ends	GraphEditor		Aux deux extrémités
+Rectangle	GraphEditor		Rectangle
 Pattern	GraphEditor		Motif
 Scale	GraphEditor		Échelle
 Guides	GraphEditor		Guides
 Straight	GraphEditor		Droite
+Shape of the selected nodes	GraphEditor		Forme des nœuds sélectionnés
 Angular	GraphEditor		Angulaire
 At source	GraphEditor		À la source
 Attribute	GraphEditor		Attribut
 Name	GraphEditor		Nom
+Hexagon	GraphEditor		Hexagone
 At target	GraphEditor		À la cible
+Shape	GraphEditor		Forme
 Border pen size for selected nodes	GraphEditor		Épaisseur de bordure des nœuds sélectionnés
 Untitled	GraphEditor		Sans titre
 Cancel	GraphEditor		Annuler

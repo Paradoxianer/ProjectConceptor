@@ -1,6 +1,8 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	3461046772
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	1649170796
 Delete	AttributeRenderer		Șterge
+Triangle	GraphEditor		Triunghi
 Group selected nodes	GraphEditor		Grupează nodurile selectate
+Diamond	GraphEditor		Romb
 Connection	GraphEditor		Conexiune
 Add text attribute	GraphEditor		Adaugă atribut text
 Grid	GraphEditor		Grilă
@@ -8,24 +10,32 @@ Fill pattern for selected nodes	GraphEditor		Model de umplere pentru nodurile se
 Toggle grid	GraphEditor		Comută grila
 Input attribute name	GraphEditor		Introduceți numele atributului
 None	GraphEditor		Niciuna
+Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Comută ghidajele inteligente de aliniere
+Ellipse	GraphEditor		Elipsă
 Arrows	GraphEditor		Săgeți
 Rounded	GraphEditor		Rotunjită
 Pen size	GraphEditor		Dimensiune stilou
 Add boolean attribute	GraphEditor		Adaugă atribut boolean
+Note	GraphEditor		Notă
 OK	GraphEditor		OK
+Rounded rectangle	GraphEditor		Dreptunghi rotunjit
 Fill color for selected nodes	GraphEditor		Culoare de umplere pentru nodurile selectate
 Fill	GraphEditor		Umplere
 Both ends	GraphEditor		Ambele capete
+Rectangle	GraphEditor		Dreptunghi
 Pattern	GraphEditor		Model
 Scale	GraphEditor		Scalare
 Guides	GraphEditor		Ghidaje
 Straight	GraphEditor		Dreaptă
+Shape of the selected nodes	GraphEditor		Forma nodurilor selectate
 Angular	GraphEditor		Unghiulară
 At source	GraphEditor		La sursă
 Attribute	GraphEditor		Atribut
 Name	GraphEditor		Nume
+Hexagon	GraphEditor		Hexagon
 At target	GraphEditor		La destinație
+Shape	GraphEditor		Formă
 Border pen size for selected nodes	GraphEditor		Grosimea marginii pentru nodurile selectate
 Untitled	GraphEditor		Fără titlu
 Cancel	GraphEditor		Anulează

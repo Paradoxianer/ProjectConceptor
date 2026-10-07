@@ -20,6 +20,7 @@
 #include "SelectConnected.h"
 #include "BasePlugin.h"
 #include "ChangeValue.h"
+#include "NodeShape.h"
 #include "Find.h"
 #include "Group.h"
 #include "Insert.h"
@@ -2382,4 +2383,55 @@ void MacroTextTest::ExpandAndCollapseAllSurviveRebuild(void)
 	CPPUNIT_ASSERT(open > 0);
 	CPPUNIT_ASSERT(closed > 0);
 	delete insert;
+}
+
+
+// what GraphEditor's shape toolbar sends, through the macro text format
+// (recorded macros are saved and edited as text) and played back
+void MacroTextTest::ShapeChangeSurvivesMacroText(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BMessage	*node	= AddTestNode(doc,"A");
+	BMessage	rounded;
+	NodeShape::BuildBuiltIn("rounded",&rounded);
+	node->AddMessage(P_C_NODE_SHAPE,&rounded);
+	SelectOnly(doc,node);
+
+	BMessage	diamond;
+	NodeShape::BuildBuiltIn("diamond",&diamond);
+	BMallocIO	flat;
+	diamond.Flatten(&flat);
+	BMessage	valueContainer;
+	valueContainer.AddString("name",P_C_NODE_SHAPE);
+	valueContainer.AddInt32("type",B_MESSAGE_TYPE);
+	valueContainer.AddData("newValue",B_MESSAGE_TYPE,flat.Buffer(),flat.BufferLength());
+	BMessage	changeValue;
+	changeValue.AddString("Command::Name","ChangeValue");
+	changeValue.AddBool(P_C_NODE_SELECTED,true);
+	changeValue.AddMessage("valueContainer",&valueContainer);
+
+	BList		commands;
+	commands.AddItem(&changeValue);
+	BString		text;
+	SerializeCommands(&commands,&text);
+	BList		parsed;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+
+	BMessage	macro(P_C_MACRO_TYPE);
+	for (int32 i = 0; i < parsed.CountItems(); i++)
+		macro.AddMessage("Macro::Commmand",(BMessage*)parsed.ItemAt(i));
+	doc->GetCommandManager()->PlayMacro(&macro);
+
+	BMessage	shape;
+	const char	*name	= NULL;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,node->FindMessage(P_C_NODE_SHAPE,&shape));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,shape.FindString(P_C_SHAPE_NAME,&name));
+	CPPUNIT_ASSERT_EQUAL(BString("diamond"),BString(name));
+	NodeShape	geometry;
+	geometry.SetTo(&shape);
+	geometry.Layout(BRect(0,0,50,50));
+	CPPUNIT_ASSERT(geometry.HasPath());
+	CPPUNIT_ASSERT(!geometry.Contains(BPoint(2,2)));
 }
