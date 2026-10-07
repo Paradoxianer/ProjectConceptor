@@ -74,7 +74,8 @@ LOCAL_INCLUDE_PATHS = \
 		../../app/Commands \
 		../../app/ToolBar \
 		../../app/Config \
-		../../app/Tools
+		../../app/Tools \
+		../../common
 
 # other languages: copy locales/en.catkeys to <lang>.catkeys, translate,
 # add the language here

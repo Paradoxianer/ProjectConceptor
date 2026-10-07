@@ -89,7 +89,8 @@ LOCAL_INCLUDE_PATHS = \
 		../../app/Commands \
 		../../app/ToolBar \
 		../../app/Config \
-		../../app/Tools
+		../../app/Tools \
+		../../common
 
 LOCALES = de en es fr fur hr ro sv
 

@@ -28,9 +28,8 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-FreeMindTranslator
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
 SRCS= 	FreeMindTranslator.cpp \
-		TranslatorMain.cpp \
-		SettingsManager.cpp \
-		ConfigView.cpp \
+		../common/TranslatorMain.cpp \
+		../common/ConfigView.cpp \
 		../../common/ProjectConceptorFields.cpp
 
 

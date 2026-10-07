@@ -51,8 +51,8 @@ SRCS= 	GenerateStressFixture.cpp \
 		../../app/Tools/Indexer.cpp \
 		../../app/Tools/InputRequestView.cpp \
 		../../app/Tools/InputRequest.cpp \
-		../../app/Tools/MessageXmlReader.cpp \
-		../../app/Tools/MessageXmlWriter.cpp \
+		../../common/MessageXmlReader.cpp \
+		../../common/MessageXmlWriter.cpp \
 		../../app/Tools/ShortCutFilter.cpp \
 		../../app/Tools/TextViewCompleter.cpp \
 		../../app/Tools/plugins/BasePlugin.cpp \
@@ -79,7 +79,8 @@ LOCAL_INCLUDE_PATHS =	. \
 						../../app/Document \
 						../../app/ToolBar \
 						../../app/About \
-						../../app/Tools
+						../../app/Tools \
+						../../common
 
 COMPILER_FLAGS =
 

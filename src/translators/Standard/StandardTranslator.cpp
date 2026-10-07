@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "StandardTranslator.h"
-#include "SettingsManager.h"
 #include "ConfigView.h"
 #include "MessageXmlReader.h"
 #include "MessageXmlWriter.h"
@@ -143,7 +142,7 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 status_t MakeConfig(BMessage * ioExtension,	BView * * outView, BRect * outExtent)
 {
 	status_t err	= B_OK;
-	*outView = new ConfigView();
+	*outView = new ConfigView(translatorName);
 	return err;
 }
 

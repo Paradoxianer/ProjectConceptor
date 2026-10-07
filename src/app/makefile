@@ -68,8 +68,8 @@ SRCS= 	About/AboutWindow.cpp \
 		Tools/Indexer.cpp \
 		Tools/InputRequestView.cpp \
  		Tools/InputRequest.cpp \
- 		Tools/MessageXmlReader.cpp \
-		Tools/MessageXmlWriter.cpp \
+ 		../common/MessageXmlReader.cpp \
+		../common/MessageXmlWriter.cpp \
 		Tools/ShortCutFilter.cpp \
 		Tools/TextViewCompleter.cpp \
 		Tools/plugins/BasePlugin.cpp \
@@ -128,7 +128,8 @@ LOCAL_INCLUDE_PATHS =	. \
 					ToolBar \
 					About \
 					Tools \
-					Tools/FontPanel
+					Tools/FontPanel \
+					../common
 
 LOCALES = de en es fr fur hr ro sv
 

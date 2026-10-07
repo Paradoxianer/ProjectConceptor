@@ -28,11 +28,10 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-Translator
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
 SRCS= 	StandardTranslator.cpp \
-		TranslatorMain.cpp \
-		SettingsManager.cpp \
-		ConfigView.cpp \
-		MessageXmlWriter.cpp \
-		MessageXmlReader.cpp \
+		../common/TranslatorMain.cpp \
+		../common/ConfigView.cpp \
+		../../common/MessageXmlWriter.cpp \
+		../../common/MessageXmlReader.cpp \
 		../../common/ProjectConceptorFields.cpp
 
 		
@@ -68,7 +67,7 @@ SYSTEM_INCLUDE_PATHS =
 #	additional paths to look for local headers
 #	thes use the form: #include "header"
 #	source file directories are automatically included
-LOCAL_INCLUDE_PATHS = ../../include ../../app/Tools
+LOCAL_INCLUDE_PATHS = ../../include ../../app/Tools ../../common ../common
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL

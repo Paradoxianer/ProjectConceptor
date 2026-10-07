@@ -75,7 +75,8 @@ LOCAL_INCLUDE_PATHS = \
 		../../app/Commands \
 		../../app/ToolBar \
 		../../app/Config \
-		../../app/Tools
+		../../app/Tools \
+		../../common
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL
