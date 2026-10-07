@@ -1,4 +1,4 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	3862227003
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	3461046772
 Delete	AttributeRenderer		Șterge
 Group selected nodes	GraphEditor		Grupează nodurile selectate
 Connection	GraphEditor		Conexiune
@@ -27,6 +27,7 @@ Attribute	GraphEditor		Atribut
 Name	GraphEditor		Nume
 At target	GraphEditor		La destinație
 Border pen size for selected nodes	GraphEditor		Grosimea marginii pentru nodurile selectate
+Untitled	GraphEditor		Fără titlu
 Cancel	GraphEditor		Anulează
 Which ends of the selected connections carry an arrow	GraphEditor		Care capete ale conexiunilor selectate au săgeată
 Shape of the selected connections	GraphEditor		Forma conexiunilor selectate

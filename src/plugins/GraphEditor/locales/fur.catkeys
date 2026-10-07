@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	3862227003
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	3461046772
 Delete	AttributeRenderer		Elimine
 Group selected nodes	GraphEditor		Grope i grops selezionâts
 Connection	GraphEditor		Conession
@@ -27,6 +27,7 @@ Attribute	GraphEditor		Atribût
 Name	GraphEditor		Non
 At target	GraphEditor		Te destinazion
 Border pen size for selected nodes	GraphEditor		Spessôr dal ôr pai grops selezionâts
+Untitled	GraphEditor		Cence titul
 Cancel	GraphEditor		Anule
 Which ends of the selected connections carry an arrow	GraphEditor		Cuai cjâfs des conessions selezionadis a àn une frece
 Shape of the selected connections	GraphEditor		Forme des conessions selezionadis

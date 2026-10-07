@@ -504,14 +504,14 @@ void PWindow::MessageReceived(BMessage *message)
 	{
 		case WINDOW_REGISTRY_ADDED:
 			{
-				char s[22];
 				BRect rect;
 				if (message->FindInt32("new_window_number", &window_id) == B_OK)
 				{
 					if (!savemessage)
 					{		// if it's untitled
-						sprintf(s, "Untitled %ld", (long)window_id);
-						SetTitle(s);
+						BString	title;
+						title.SetToFormat(B_TRANSLATE("Untitled %ld"), (long)window_id);
+						SetTitle(title.String());
 					}
 				}
 				if (message->FindRect("rect", &rect) == B_OK) {

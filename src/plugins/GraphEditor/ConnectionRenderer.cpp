@@ -2,9 +2,13 @@
 #include "ClassRenderer.h"
 #include "ProjectConceptorDefs.h"
 
+#include <Catalog.h>
 #include <interface/Window.h>
 #include <stdio.h>
 #include <math.h>
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "GraphEditor"
 
 
 ConnectionRenderer::ConnectionRenderer(GraphEditor *parentEditor, BMessage *forContainer):Renderer(parentEditor, forContainer) {
@@ -60,7 +64,7 @@ void ConnectionRenderer::Init() {
 			incoming->AddItem(container);
 	}
 	if (container->FindMessage(P_C_NODE_DATA,data) != B_OK) {
-		data->AddString(P_C_NODE_NAME,"Unbenannt");
+		data->AddString(P_C_NODE_NAME,B_TRANSLATE("Untitled"));
 		container->AddMessage(P_C_NODE_DATA,data);
 	}
 	container->FindPointer("ProjectConceptor::doc",(void **)&doc);

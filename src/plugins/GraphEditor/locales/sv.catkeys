@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	3862227003
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	3461046772
 Delete	AttributeRenderer		Radera
 Group selected nodes	GraphEditor		Gruppera markerade noder
 Connection	GraphEditor		Förbindelse
@@ -27,6 +27,7 @@ Attribute	GraphEditor		Attribut
 Name	GraphEditor		Namn
 At target	GraphEditor		Vid målet
 Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder
+Untitled	GraphEditor		Namnlös
 Cancel	GraphEditor		Avbryt
 Which ends of the selected connections carry an arrow	GraphEditor		Vilka ändar av de markerade förbindelserna som har en pil
 Shape of the selected connections	GraphEditor		Form på de markerade förbindelserna

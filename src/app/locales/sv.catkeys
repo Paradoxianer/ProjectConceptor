@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor	4038765573
+1	Swedish	application/x-vnd.ProjectConceptor	1230722656
 Macro shortcuts (double-click to change the key)	ShortCutView		Makrokortkommandon (dubbelklicka för att ändra tangenten)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tryck på tangentkombinationen för makrot ”%s” (Esc avbryter).
 About	MainWindow		Om
@@ -25,11 +25,13 @@ Save as	SavePanel		Spara som
 \"${%s}\" is not text or a number	CommandManager		”${%s}” är varken text eller ett tal
 Clear	MainWindow		Rensa
 Macro	MainWindow		Makro
+Could not save the document: %s	Document		Dokumentet kunde inte sparas: %s
 Undo	MainWindow		Ångra
-Macro	CommandManager		Makro
 File format	SavePanel		Filformat
+Macro	CommandManager		Makro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Filen sparades av en inkompatibel version av ProjectConceptor och kan inte öppnas.
 Save before close	Document		Spara före stängning
+Untitled %ld	MainWindow		Namnlös %ld
 Paste	MainWindow		Klistra in
 Help	MainWindow		Hjälp
 Remove	ShortCutView		Ta bort
@@ -75,6 +77,7 @@ Delete	MainWindow		Radera
 Save as	MainWindow		Spara som
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Det finns ingen e-postklient konfigurerad som standardprogram för att skicka och ta emot e-post.
 Web Browser Warning	AboutURLView		Webläsarvarning
+OK	Document		OK
 Window	MainWindow		Fönster
 \"${%s}\": no such variable	CommandManager		”${%s}”: ingen sådan variabel
 I had problems while setting up the Printer!	Document		Ett fel inträffade när skrivaren ställdes in!
@@ -91,6 +94,7 @@ Can't find plugins	PluginManager		Hittar inga insticksprogram
 Help	HelpWindow		Hjälp
 Find	MainWindow		Hitta
 OK	AboutURLView		OK
+Could not open the document: %s	Document		Dokumentet kunde inte öppnas: %s
 Duplicate	MainWindow		Duplicera
 Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Tryck på den nya tangentkombinationen för ”%s” (Esc avbryter).
 New…	ShortCutView		Ny…

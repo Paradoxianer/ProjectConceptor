@@ -1,4 +1,4 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	3862227003
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	3461046772
 Delete	AttributeRenderer		Borrar
 Group selected nodes	GraphEditor		Agrupar los nodos seleccionados
 Connection	GraphEditor		Conexión
@@ -27,6 +27,7 @@ Attribute	GraphEditor		Atributo
 Name	GraphEditor		Nombre
 At target	GraphEditor		En el destino
 Border pen size for selected nodes	GraphEditor		Grosor del borde de los nodos seleccionados
+Untitled	GraphEditor		Sin título
 Cancel	GraphEditor		Cancelar
 Which ends of the selected connections carry an arrow	GraphEditor		Qué extremos de las conexiones seleccionadas llevan flecha
 Shape of the selected connections	GraphEditor		Forma de las conexiones seleccionadas

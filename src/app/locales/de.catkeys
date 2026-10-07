@@ -1,4 +1,4 @@
-1	German	application/x-vnd.ProjectConceptor	4038765573
+1	German	application/x-vnd.ProjectConceptor	1230722656
 Macro shortcuts (double-click to change the key)	ShortCutView		Makro-Kürzel (Doppelklick ändert die Taste)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tastenkombination für das Makro \"%s\" drücken (Esc bricht ab).
 About	MainWindow		Über...
@@ -25,11 +25,13 @@ Save as	SavePanel		Speichern als
 \"${%s}\" is not text or a number	CommandManager		\"${%s}\" ist weder Text noch Zahl
 Clear	MainWindow		Leeren
 Macro	MainWindow		Makro
+Could not save the document: %s	Document		Das Dokument konnte nicht gespeichert werden: %s
 Undo	MainWindow		Rückgängig
-Macro	CommandManager		Makro
 File format	SavePanel		Dateiformat
+Macro	CommandManager		Makro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Diese Datei wurde mit einer inkompatiblen Version von ProjectConceptor gespeichert und kann nicht geöffnet werden.
 Save before close	Document		Vor dem Beenden speichern
+Untitled %ld	MainWindow		Unbenannt %ld
 Paste	MainWindow		Einfügen
 Help	MainWindow		Hilfe
 Remove	ShortCutView		Entfernen
@@ -75,6 +77,7 @@ Delete	MainWindow		Löschen
 Save as	MainWindow		Speichern als
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Es ist kein E-Mail-Programm als Standard-Anwendung zum Senden von E-Mails definiert.
 Web Browser Warning	AboutURLView		Web-Browser-Warnung
+OK	Document		OK
 Window	MainWindow		Fenster
 \"${%s}\": no such variable	CommandManager		\"${%s}\": unbekannte Variable
 I had problems while setting up the Printer!	Document		Es ist ein Fehler beim Einrichten des Druckers aufgetreten.
@@ -91,6 +94,7 @@ Can't find plugins	PluginManager		Keine Plugins gefunden
 Help	HelpWindow		Hilfe
 Find	MainWindow		Suchen
 OK	AboutURLView		OK
+Could not open the document: %s	Document		Das Dokument konnte nicht geöffnet werden: %s
 Duplicate	MainWindow		Duplizieren
 Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Neue Tastenkombination für \"%s\" drücken (Esc bricht ab).
 New…	ShortCutView		Neu…

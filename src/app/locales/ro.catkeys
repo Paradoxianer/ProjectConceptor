@@ -1,4 +1,4 @@
-1	Romanian	application/x-vnd.ProjectConceptor	4038765573
+1	Romanian	application/x-vnd.ProjectConceptor	1230722656
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtături pentru macrocomenzi (dublu clic pentru a schimba tasta)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Apăsați combinația de taste pentru macrocomanda „%s” (Esc pentru anulare).
 About	MainWindow		Despre
@@ -25,11 +25,13 @@ Save as	SavePanel		Salvare ca
 \"${%s}\" is not text or a number	CommandManager		„${%s}” nu este nici text, nici număr
 Clear	MainWindow		Eliberează
 Macro	MainWindow		Macro
+Could not save the document: %s	Document		Documentul nu a putut fi salvat: %s
 Undo	MainWindow		Reface
-Macro	CommandManager		Macro
 File format	SavePanel		Format fișier
+Macro	CommandManager		Macro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Acest fișier a fost salvat de o versiune incompatibilă de ProjectConceptor și nu poate fi deschis.
 Save before close	Document		Salvează înainte de închidere
+Untitled %ld	MainWindow		Fără titlu %ld
 Paste	MainWindow		Lipire
 Help	MainWindow		Ajutor
 Remove	ShortCutView		Elimină
@@ -75,6 +77,7 @@ Delete	MainWindow		Șterge
 Save as	MainWindow		Salvare ca
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nu există niciun program de email pe mașină care este configurat ca programul implicit pentru trimiterea de email.
 Web Browser Warning	AboutURLView		Avertisment browser web
+OK	Document		OK
 Window	MainWindow		Fereastră
 \"${%s}\": no such variable	CommandManager		„${%s}”: variabila nu există
 I had problems while setting up the Printer!	Document		Au fost probleme la configurarea imprimantei!
@@ -91,6 +94,7 @@ Can't find plugins	PluginManager		Nu se găsesc modulele
 Help	HelpWindow		Ajutor
 Find	MainWindow		Căutare
 OK	AboutURLView		OK
+Could not open the document: %s	Document		Documentul nu a putut fi deschis: %s
 Duplicate	MainWindow		Duplică
 Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Apăsați noua combinație de taste pentru „%s” (Esc pentru anulare).
 New…	ShortCutView		Nou…

@@ -1,4 +1,4 @@
-1	French	application/x-vnd.ProjectConceptor	4038765573
+1	French	application/x-vnd.ProjectConceptor	1230722656
 Macro shortcuts (double-click to change the key)	ShortCutView		Raccourcis des macros (double-clic pour changer la touche)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Appuyez sur la combinaison de touches pour la macro « %s » (Échap pour annuler).
 About	MainWindow		À propos de
@@ -25,11 +25,13 @@ Save as	SavePanel		Enregistrer sous
 \"${%s}\" is not text or a number	CommandManager		« ${%s} » n'est ni du texte ni un nombre
 Clear	MainWindow		Nettoyer
 Macro	MainWindow		Macro
+Could not save the document: %s	Document		Impossible d'enregistrer le document : %s
 Undo	MainWindow		Défaire
-Macro	CommandManager		Macro
 File format	SavePanel		Format de fichier
+Macro	CommandManager		Macro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Ce fichier a été enregistré par une version incompatible de ProjectConceptor et ne peut pas être ouvert.
 Save before close	Document		Sauvegarder avant de fermer
+Untitled %ld	MainWindow		Sans titre %ld
 Paste	MainWindow		Coller
 Help	MainWindow		Aide
 Remove	ShortCutView		Retirer
@@ -75,6 +77,7 @@ Delete	MainWindow		Effacer
 Save as	MainWindow		Enregistrer sous
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Il n'y a pas, sur votre machine,  de programme de courriel qui soit configuré comme le programme par défaut pour envoyer des courriels.
 Web Browser Warning	AboutURLView		Alerte par navigateur
+OK	Document		OK
 Window	MainWindow		Fenêtre
 \"${%s}\": no such variable	CommandManager		« ${%s} » : variable inexistante
 I had problems while setting up the Printer!	Document		J'ai eu des problèmes durant le paramétrage de l'imprimante !
@@ -91,6 +94,7 @@ Can't find plugins	PluginManager		Impossible de trouver les greffons
 Help	HelpWindow		Aide
 Find	MainWindow		Chercher
 OK	AboutURLView		OK
+Could not open the document: %s	Document		Impossible d'ouvrir le document : %s
 Duplicate	MainWindow		Dupliquer
 Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Appuyez sur la nouvelle combinaison de touches pour « %s » (Échap pour annuler).
 New…	ShortCutView		Nouveau…

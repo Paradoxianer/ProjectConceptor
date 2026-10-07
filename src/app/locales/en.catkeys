@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor	4038765573
+1	English	application/x-vnd.ProjectConceptor	1230722656
 Macro shortcuts (double-click to change the key)	ShortCutView		Macro shortcuts (double-click to change the key)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Press the key combination for the macro \"%s\" (Esc to cancel).
 About	MainWindow		About
@@ -25,11 +25,13 @@ Save as	SavePanel		Save as
 \"${%s}\" is not text or a number	CommandManager		\"${%s}\" is not text or a number
 Clear	MainWindow		Clear
 Macro	MainWindow		Macro
+Could not save the document: %s	Document		Could not save the document: %s
 Undo	MainWindow		Undo
-Macro	CommandManager		Macro
 File format	SavePanel		File format
+Macro	CommandManager		Macro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		This file was saved by an incompatible version of ProjectConceptor and cannot be opened.
 Save before close	Document		Save before close
+Untitled %ld	MainWindow		Untitled %ld
 Paste	MainWindow		Paste
 Help	MainWindow		Help
 Remove	ShortCutView		Remove
@@ -75,6 +77,7 @@ Delete	MainWindow		Delete
 Save as	MainWindow		Save as
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		There is no e-mail program on your machine that is configured as the default program to send e-mail.
 Web Browser Warning	AboutURLView		Web Browser Warning
+OK	Document		OK
 Window	MainWindow		Window
 \"${%s}\": no such variable	CommandManager		\"${%s}\": no such variable
 I had problems while setting up the Printer!	Document		I had problems while setting up the Printer!
@@ -91,6 +94,7 @@ Can't find plugins	PluginManager		Can't find plugins
 Help	HelpWindow		Help
 Find	MainWindow		Find
 OK	AboutURLView		OK
+Could not open the document: %s	Document		Could not open the document: %s
 Duplicate	MainWindow		Duplicate
 Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Press the new key combination for \"%s\" (Esc to cancel).
 New…	ShortCutView		New…

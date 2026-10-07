@@ -143,7 +143,7 @@ void GraphEditor::Init(void) {
 	font_style		style;
 
 	BMessage		*dataMessage	= new BMessage();
-	dataMessage->AddString(P_C_NODE_NAME,"Untitled");
+	dataMessage->AddString(P_C_NODE_NAME,B_TRANSLATE("Untitled"));
 	//preparing the standart ObjectMessage
 	nodeMessage	= new BMessage(P_C_CLASS_TYPE);
 	nodeMessage->AddMessage(P_C_NODE_DATA,dataMessage);
@@ -891,7 +891,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				if (foundRenderer)
 					from  = foundRenderer->GetMessage();
 			}
-			data->AddString(P_C_NODE_NAME,"Unbenannt");
+			data->AddString(P_C_NODE_NAME,B_TRANSLATE("Untitled"));
 			if (to != NULL && from!=NULL) {
 				connection->AddPointer(P_C_NODE_CONNECTION_FROM,from);
 				connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
@@ -1421,7 +1421,7 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 	BPoint      where;
 	
 
-    data->AddString(P_C_NODE_NAME,"Unbenannt");
+    data->AddString(P_C_NODE_NAME,B_TRANSLATE("Untitled"));
     //insert new Node here*/
 	newPattern->ReplaceInt32("FillColor",*(int32 *)&tmpColor);
 	newPattern->ReplaceFloat("PenSize",penSize->GetValue());

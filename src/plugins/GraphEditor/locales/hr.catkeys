@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	3862227003
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	3461046772
 Delete	AttributeRenderer		Izbriši
 Group selected nodes	GraphEditor		Grupiraj odabrane čvorove
 Connection	GraphEditor		Veza
@@ -27,6 +27,7 @@ Attribute	GraphEditor		Atribut
 Name	GraphEditor		Ime
 At target	GraphEditor		Na odredištu
 Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove
+Untitled	GraphEditor		Bez naslova
 Cancel	GraphEditor		Otkaži
 Which ends of the selected connections carry an arrow	GraphEditor		Koji krajevi odabranih veza imaju strelicu
 Shape of the selected connections	GraphEditor		Oblik odabranih veza

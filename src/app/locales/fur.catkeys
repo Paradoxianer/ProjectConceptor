@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor	4038765573
+1	Friulian	application/x-vnd.ProjectConceptor	1230722656
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtis des macros (dopli clic par cambiâ il tast)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Frache la combinazion di tascj pe macro “%s” (Esc par anulâ).
 About	MainWindow		Informazions
@@ -25,11 +25,13 @@ Save as	SavePanel		Salve come
 \"${%s}\" is not text or a number	CommandManager		“${%s}” nol è ni test ni numar
 Clear	MainWindow		Nete
 Macro	MainWindow		Macro
+Could not save the document: %s	Document		No si à podût salvâ il document: %s
 Undo	MainWindow		Disfe
-Macro	CommandManager		Macro
 File format	SavePanel		Formât dal file
+Macro	CommandManager		Macro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Chest file al è stât salvât di une version no compatibile di ProjectConceptor e nol pues jessi viert.
 Save before close	Document		Salve prime di sierâ
+Untitled %ld	MainWindow		Cence titul %ld
 Paste	MainWindow		Tache
 Help	MainWindow		Jutori
 Remove	ShortCutView		Gjave
@@ -75,6 +77,7 @@ Delete	MainWindow		Elimine
 Save as	MainWindow		Salve come
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nol è presint nissun program pes e-mail te machine che al sedi configurât come program predefinît par inviâ e-mail.
 Web Browser Warning	AboutURLView		Avertiment navigadôr web
+OK	Document		Va ben
 Window	MainWindow		Barcon
 \"${%s}\": no such variable	CommandManager		“${%s}”: variabile che no esist
 I had problems while setting up the Printer!	Document		I ai vût problemis intal configurâ la Stampadore!
@@ -91,6 +94,7 @@ Can't find plugins	PluginManager		No si cjate i plugins
 Help	HelpWindow		Jutori
 Find	MainWindow		Cjate
 OK	AboutURLView		Va ben
+Could not open the document: %s	Document		No si à podût vierzi il document: %s
 Duplicate	MainWindow		Dupliche
 Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Frache la gnove combinazion di tascj par “%s” (Esc par anulâ).
 New…	ShortCutView		Gnûf…

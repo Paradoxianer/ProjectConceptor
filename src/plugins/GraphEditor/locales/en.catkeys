@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	3862227003
+1	English	application/x-vnd.ProjectConceptor-plugin	3461046772
 Delete	AttributeRenderer		Delete
 Group selected nodes	GraphEditor		Group selected nodes
 Connection	GraphEditor		Connection
@@ -27,6 +27,7 @@ Attribute	GraphEditor		Attribute
 Name	GraphEditor		Name
 At target	GraphEditor		At target
 Border pen size for selected nodes	GraphEditor		Border pen size for selected nodes
+Untitled	GraphEditor		Untitled
 Cancel	GraphEditor		Cancel
 Which ends of the selected connections carry an arrow	GraphEditor		Which ends of the selected connections carry an arrow
 Shape of the selected connections	GraphEditor		Shape of the selected connections

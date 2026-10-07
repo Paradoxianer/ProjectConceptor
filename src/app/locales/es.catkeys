@@ -1,4 +1,4 @@
-1	Spanish	application/x-vnd.ProjectConceptor	4038765573
+1	Spanish	application/x-vnd.ProjectConceptor	1230722656
 Macro shortcuts (double-click to change the key)	ShortCutView		Atajos de macros (doble clic para cambiar la tecla)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Pulse la combinación de teclas para la macro «%s» (Esc para cancelar).
 About	MainWindow		Acerca de
@@ -25,11 +25,13 @@ Save as	SavePanel		Guardar como
 \"${%s}\" is not text or a number	CommandManager		«${%s}» no es texto ni un número
 Clear	MainWindow		Limpiar
 Macro	MainWindow		Macro
+Could not save the document: %s	Document		No se pudo guardar el documento: %s
 Undo	MainWindow		Deshacer
-Macro	CommandManager		Macro
 File format	SavePanel		Formato de archivo
+Macro	CommandManager		Macro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Este archivo se guardó con una versión incompatible de ProjectConceptor y no se puede abrir.
 Save before close	Document		Guardar antes de cerrar
+Untitled %ld	MainWindow		Sin título %ld
 Paste	MainWindow		Pegar
 Help	MainWindow		Ayuda
 Remove	ShortCutView		Quitar
@@ -75,6 +77,7 @@ Delete	MainWindow		Borrar
 Save as	MainWindow		Guardar como
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		No hay un programa de correo electrónico que esté configurado por defecto para enviar mensajes.
 Web Browser Warning	AboutURLView		Navegador Web - Advertencia
+OK	Document		Aceptar
 Window	MainWindow		Ventana
 \"${%s}\": no such variable	CommandManager		«${%s}»: no existe esa variable
 I had problems while setting up the Printer!	Document		Hubo un problema al configurar la impresora!
@@ -91,6 +94,7 @@ Can't find plugins	PluginManager		No se encuentran los complementos
 Help	HelpWindow		Ayuda
 Find	MainWindow		Buscar
 OK	AboutURLView		Aceptar
+Could not open the document: %s	Document		No se pudo abrir el documento: %s
 Duplicate	MainWindow		Duplicar
 Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Pulse la nueva combinación de teclas para «%s» (Esc para cancelar).
 New…	ShortCutView		Nuevo…

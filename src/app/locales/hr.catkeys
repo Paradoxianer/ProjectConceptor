@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor	4038765573
+1	Croatian	application/x-vnd.ProjectConceptor	1230722656
 Macro shortcuts (double-click to change the key)	ShortCutView		Prečaci makronaredbi (dvostruki klik za promjenu tipke)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Pritisnite kombinaciju tipki za makronaredbu „%s” (Esc za odustajanje).
 About	MainWindow		O programu
@@ -25,11 +25,13 @@ Save as	SavePanel		Spremi kao
 \"${%s}\" is not text or a number	CommandManager		„${%s}” nije tekst ni broj
 Clear	MainWindow		Očisti
 Macro	MainWindow		Makronaredba
+Could not save the document: %s	Document		Dokument nije moguće spremiti: %s
 Undo	MainWindow		Poništi
-Macro	CommandManager		Makronaredba
 File format	SavePanel		Format datoteke
+Macro	CommandManager		Makronaredba
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Ovu je datoteku spremila nekompatibilna inačica programa ProjectConceptor i ne može se otvoriti.
 Save before close	Document		Spremi prije zatvaranja
+Untitled %ld	MainWindow		Bez naslova %ld
 Paste	MainWindow		Zalijepi
 Help	MainWindow		Pomoć
 Remove	ShortCutView		Ukloni
@@ -75,6 +77,7 @@ Delete	MainWindow		Izbriši
 Save as	MainWindow		Spremi kao
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nema nijednog e-mail programa na vašem stroju koji je konfiguriran kao zadani program za slanje e-maila.
 Web Browser Warning	AboutURLView		Upozorenje preglednika
+OK	Document		U redu
 Window	MainWindow		Prozor
 \"${%s}\": no such variable	CommandManager		„${%s}”: ne postoji takva varijabla
 I had problems while setting up the Printer!	Document		Došlo je do problema pri postavljanju pisača!
@@ -91,6 +94,7 @@ Can't find plugins	PluginManager		Dodaci nisu pronađeni
 Help	HelpWindow		Pomoć
 Find	MainWindow		Nađi
 OK	AboutURLView		U redu
+Could not open the document: %s	Document		Dokument nije moguće otvoriti: %s
 Duplicate	MainWindow		Udvostruči
 Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Pritisnite novu kombinaciju tipki za „%s” (Esc za odustajanje).
 New…	ShortCutView		Novo…
