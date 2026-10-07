@@ -36,9 +36,9 @@ FloatToolItem::FloatToolItem(const char *name, float newValue,BMessage *msg)
 	tName 			= name;
 	BRect	textControlRect	= Bounds();
 			textControlRect.InsetBy(5,2);
-	char*	floatToText	= new char[24];
-	sprintf(floatToText,"%.2f",newValue);
-	textValue		= new LabelClickTextControl(textControlRect,name,name,"",new BMessage(*msg));
+	BString	floatToText;
+	floatToText.SetToFormat("%.2f",newValue);
+	textValue		= new LabelClickTextControl(textControlRect,name,name,floatToText.String(),new BMessage(*msg));
 	float moveToY=(Bounds().Height()-textValue->Bounds().Height())/2;
 	textValue->MoveTo(textValue->Frame().left,moveToY);
 	for (uint32 i = 0; i < 256; ++i)
@@ -144,18 +144,18 @@ void FloatToolItem::MessageReceived(BMessage *message)
 void FloatToolItem::SetValue(float newValue)
 {
 	value=newValue;
-	char*	floatToText	= new char[24];
-	sprintf(floatToText,"%.2f",newValue);
-	textValue->SetText(floatToText);
+	BString	floatToText;
+	floatToText.SetToFormat("%.2f",newValue);
+	textValue->SetText(floatToText.String());
 }
 
 float FloatToolItem::GetValue(void)
 {
-	float returnVal =atof(textValue->Text());
-	char*	floatToText	= new char[24];
-	sprintf(floatToText,"%.2f",returnVal);
-	textValue->SetText(floatToText);
-	return returnVal;
+	// an emptied field keeps the last value instead of reading as 0
+	if (textValue->Text()[0] != '\0')
+		value = atof(textValue->Text());
+	SetValue(value);
+	return value;
 }
 
 status_t FloatToolItem::SetTarget(BMessenger messenger)
