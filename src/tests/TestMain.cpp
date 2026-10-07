@@ -10,6 +10,7 @@
 #include "PCommandTest.h"
 #include "SmartGuidesTest.h"
 #include "TestDocument.h"
+#include "TranslatorTest.h"
 
 const char *TEST_APP_SIGNATURE = "application/x-vnd.ProjectConceptorTests";
 
@@ -28,6 +29,7 @@ int main(int argc, char **argv)
 	runner.addTest(MacroTextTest::suite());
 	runner.addTest(SmartGuidesTest::suite());
 	runner.addTest(MessageXmlWriterTest::suite());
+	runner.addTest(TranslatorTest::suite());
 	bool success = runner.run("", false);
 	// #117: every headless PDocument any test created is still running a
 	// real BLooper thread at this point - quit them before main() returns,

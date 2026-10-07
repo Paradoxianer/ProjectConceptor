@@ -5,15 +5,9 @@
 #include <TranslationKit.h>
 #include <app/Message.h>
 #include <List.h>
-//#if defined(__HAIKU__) && __GNUC__ > 3
 #include <map>
 #include <set>
-using namespace std;
-//#else
-//#include <cpp/set.h>
-//#include <cpp/map.h>
-//using namespace std;
-//#endif
+#include <String.h>
 #include "ProjectConceptorDefs.h"
 #include "tinyxml.h"
 
@@ -67,9 +61,11 @@ protected:
 	BPositionIO 	*in;
 	BMessage		*config;
 	BPositionIO		*out;
-	set<int32>		processedIDs;
-	map<int32,BMessage*>	nodes;
-	map<int32,BMessage*>	connections;
+	std::set<int32>		processedIDs;
+	std::map<int32,BMessage*>	nodes;
+	std::map<int32,BMessage*>	connections;
+	// FreeMind ids ("ID_123", "Freemind_Link_123") -> sequential node ids
+	std::map<BString,int32>	importIds;
 
 	BMessage		*allConnections;
 	BMessage		*allNodes;

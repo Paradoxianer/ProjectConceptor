@@ -21,6 +21,7 @@ SRCS= 	TestMain.cpp \
 		GroupBoundaryTest.cpp \
 		MacroTextTest.cpp \
 		SmartGuidesTest.cpp \
+		TranslatorTest.cpp \
 		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
 		../plugins/LayoutEditor/DotLayouter.cpp \

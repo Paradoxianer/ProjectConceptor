@@ -25,7 +25,7 @@
 status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	BMessage * ioExtension,	translator_info * outInfo, uint32 outType)
 {
 	status_t err	= B_OK;
-	char		*xmlString = new char[10];
+	char		xmlString[11];
 	if (outType == 0)
 		outType = P_C_FREEMIND_TYPE;
 	if (outType != P_C_FREEMIND_TYPE && outType != P_C_DOCUMENT_RAW_TYPE) {
@@ -41,7 +41,11 @@ status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	B
 	// kind of unbounded full-stream parse the fix for #73 removes from
 	// StandardTranslator's Identify() too. A file that's too short to
 	// contain "<map" isn't a FreeMind document either way.
-	if ((inSource->Read(xmlString, 10)==10) && (strstr(xmlString,"<map")!=NULL))
+	ssize_t	bytesRead	= inSource->Read(xmlString, 10);
+	if (bytesRead < 4)
+		return B_NO_TRANSLATOR;
+	xmlString[bytesRead]	= '\0';
+	if (strstr(xmlString,"<map")!=NULL)
 		outType = P_C_DOCUMENT_RAW_TYPE;
 	else
 		return B_NO_TRANSLATOR;
@@ -73,15 +77,13 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	status_t		err					= B_OK;
 	if ( (outType != P_C_DOCUMENT_RAW_TYPE) &&  (outType != P_C_FREEMIND_TYPE))
 		return B_NO_TRANSLATOR;
-	Converter	*converter	= new Converter(inSource,ioExtension,outDestination);
+	Converter	converter(inSource,ioExtension,outDestination);
 	if (outType == P_C_DOCUMENT_RAW_TYPE)
-		converter->ConvertFreeMind2PDoc();
+		err = converter.ConvertFreeMind2PDoc();
 	else
-		converter->ConvertPDoc2FreeMind();
+		err = converter.ConvertPDoc2FreeMind();
 	inSource->Seek(0, SEEK_SET);
 	outDestination->Seek(0, SEEK_SET);
-	inSource->Seek(0,SEEK_SET);
-	outDestination->Seek(0,SEEK_SET);
 	return err;
 }
 
@@ -147,7 +149,6 @@ status_t Converter::ConvertPDoc2FreeMind()
 			i++;
 		}
 
-		BMessage	*node= GuessStartNode();
 		TiXmlDocument	doc;
 		TiXmlElement	freeMap("map");
 		freeMap.SetAttribute("version","0.9.0");
@@ -173,37 +174,34 @@ status_t Converter::ConvertPDoc2FreeMind()
 
 status_t Converter::ConvertFreeMind2PDoc()
 {
-	BMessage	*document		= new BMessage();
-	BMessage	*allNodes		= new BMessage();
-	BMessage	*allConnections	= new BMessage();
-	char		*xmlString;
-	off_t		start,end;
+	BMessage	document;
+	BMessage	allNodes;
+	BMessage	allConnections;
 	middel.Set(400,400,600,550);
+	off_t		size	= in->Seek(0,SEEK_END);
 	in->Seek(0,SEEK_SET);
-	start = in->Position();
-	in->Seek(0,SEEK_END);
-	end = in->Position();
-	in->Seek(0,SEEK_SET);
-	size_t		size= end-start;
-	xmlString=new char[size+1];
-	in->Read(xmlString, size);
+	if (size <= 0)
+		return B_NO_TRANSLATOR;
+	char		*xmlString	= new char[size+1];
+	ssize_t		bytesRead	= in->Read(xmlString, size);
+	xmlString[bytesRead > 0 ? bytesRead : 0]	= '\0';
 	TiXmlDocument	doc;
 	doc.Parse(xmlString);
-	delete xmlString;
+	delete[] xmlString;
 	if (doc.Error())
 		return B_ERROR;
-	else
-	{
-		TiXmlNode*		node	= NULL;
-		TiXmlElement*	element	= NULL;
-		node = doc.FirstChild("map");
-		node = node->FirstChild("node");
-		element	= node->ToElement();
-		CreateNode(allNodes, allConnections,element,0,0);
-	}
-	document->AddMessage("PDocument::allConnections",allConnections);
-	document->AddMessage("PDocument::allNodes",allNodes);
-	status_t err= document->Flatten(out);
+	TiXmlNode	*map	= doc.FirstChild("map");
+	TiXmlNode	*root	= (map != NULL) ? map->FirstChild("node") : NULL;
+	if ((root == NULL) || (root->ToElement() == NULL))
+		return B_NO_TRANSLATOR;
+	status_t	err		= CreateNode(&allNodes, &allConnections, root->ToElement(), 0, 0);
+	if (err != B_OK)
+		return err;
+	// PDocument::Load() refuses documents without a format version
+	document.AddInt32(P_C_DOC_FORMAT_VERSION_FIELD,P_C_DOC_FORMAT_VERSION);
+	document.AddMessage("PDocument::allConnections",&allConnections);
+	document.AddMessage("PDocument::allNodes",&allNodes);
+	return document.Flatten(out);
 }
 
 
@@ -256,7 +254,7 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 		i++;
 	}
 	//find all outgoing connections
-	map<int32,BMessage*>::iterator iter;
+	std::map<int32,BMessage*>::iterator iter;
 	iter = connections.begin();
 	while (iter!=connections.end())
 	{
@@ -280,7 +278,7 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 			}
 			else
 			{
-				map<int32,BMessage*>::iterator	found;
+				std::map<int32,BMessage*>::iterator	found;
 				found = nodes.find(toNode);
 				if (found!=nodes.end())
 				{
@@ -316,8 +314,8 @@ BMessage* Converter::GuessStartNode(void)
 	int32		toNode		= 0;
 	int32		nodeID		= 0;
 	bool		found		= false;
-	set<int32>	visited;
-	map<int32,BMessage*>::iterator iter;
+	std::set<int32>	visited;
+	std::map<int32,BMessage*>::iterator iter;
 	if (connections.empty() || nodes.empty())
 		return nodes.empty() ? NULL : nodes.begin()->second;
 	iter = connections.begin();
@@ -362,23 +360,25 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 	BMessage		*data		= new BMessage();
 	BMessage		*pattern	= new BMessage();
 	int32			line		= 0;
-	for( node = parent->FirstChild("node"); node;)
+	for (node = parent->FirstChild("node"); node != NULL; node = node->NextSibling("node"))
 	{
-		CreateConnection(connectionS, parent,node->ToElement());
-		CreateNode(nodeS,connectionS, node->ToElement(),level+1, line);
+		status_t	err	= CreateConnection(connectionS, parent,node->ToElement());
+		if (err == B_OK)
+			err = CreateNode(nodeS,connectionS, node->ToElement(),level+1, line);
+		if (err != B_OK)
+			return err;
 		line++;
-		node = node->NextSibling();
 	}
 	if (parent->Attribute("TEXT"))
 		data->AddString(P_C_NODE_NAME,parent->Attribute("TEXT"));
 	else
 		data->AddString(P_C_NODE_NAME,"Unnamed");
-	if (parent->Attribute("ID"))
-	{
-		const char	*idString = parent->Attribute("ID");
-		int32	id	= GetID(idString);
-		pDocNode->AddInt32("this",id);
+	if (parent->Attribute("ID") == NULL) {
+		fprintf(stderr, "FreeMindTranslator: node \"%s\" has no ID\n",
+			parent->Attribute("TEXT") ? parent->Attribute("TEXT") : "");
+		return B_BAD_DATA;
 	}
+	pDocNode->AddInt32("this",GetID(parent->Attribute("ID")));
 	if (parent->Attribute("CREATED"))
 		pDocNode->AddInt32(P_C_NODE_CREATED,atoi(parent->Attribute("CREATED")));
 	if (parent->Attribute("MODIFIED"))
@@ -387,14 +387,19 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		pattern->AddInt32("FillColor",GetRGB(parent->Attribute("BACKGROUND_COLOR")));
 	if (parent->Attribute("COLOR"))
 		pattern->AddInt32("BorderColor",GetRGB(parent->Attribute("COLOR")));
-	//find all Attributes
-	for (node = parent->FirstChild("arrowlink"); node;)
+	for (node = parent->FirstChild("arrowlink"); node != NULL; node = node->NextSibling("arrowlink"))
 	{
-		CreateConnection(connectionS,parent,node->ToElement());
-		node = node->NextSibling();
+		status_t	err	= CreateConnection(connectionS,parent,node->ToElement());
+		if (err != B_OK)
+			return err;
 	}
 	pDocNode->AddMessage(P_C_NODE_DATA,data);
-	pDocNode->AddMessage(P_C_NODE_PATTERN,pattern);
+	// without colors the editor's default pattern applies; a partial
+	// pattern would leave PenSize at 0
+	if (!pattern->IsEmpty()) {
+		pattern->AddFloat("PenSize",1.0);
+		pDocNode->AddMessage(P_C_NODE_PATTERN,pattern);
+	}
 	BRect	*nodeRect	= new BRect(100,100,200,150);
 	if (pDocNode->FindRect(P_C_NODE_FRAME,nodeRect) !=  B_OK)
 	{
@@ -421,50 +426,60 @@ status_t Converter::CreateNode(BMessage *nodeS,BMessage *connectionS,TiXmlElemen
 		pDocNode->AddRect(P_C_NODE_FRAME,*nodeRect);
 	}
 	nodeS->AddMessage("node",pDocNode);
+	delete pDocNode;
+	delete data;
+	delete pattern;
+	delete nodeRect;
+	return B_OK;
 }
 
 status_t Converter::CreateConnection(BMessage *container,TiXmlElement *start,TiXmlElement *end)
 {
-	BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
-	BMessage	*data	= new BMessage();
-	char	*idFrom = (char*)start->Attribute("ID");
-	connection->AddInt32(P_C_NODE_CONNECTION_FROM,GetID(idFrom));
-	char	*idTo;
-	const char	*value= end->Value();
-	int32	found	= strcmp(end->Value(),"node");
-	if (found == 0)
-	{
-		idTo	=  (char*)end->Attribute("ID");
-		data->AddString(P_C_NODE_NAME,"Unnamed");
+	if ((start == NULL) || (end == NULL))
+		return B_BAD_DATA;
+	BMessage	connection(P_C_CONNECTION_TYPE);
+	BMessage	data;
+	const char	*idFrom	= start->Attribute("ID");
+	const char	*idTo;
+	if (strcmp(end->Value(),"node") == 0) {
+		idTo	= end->Attribute("ID");
+		data.AddString(P_C_NODE_NAME,"Unnamed");
+	} else {
+		idTo	= end->Attribute("DESTINATION");
+		data.AddString(P_C_NODE_NAME,
+			end->Attribute("TEXT") ? end->Attribute("TEXT") : "Unnamed");
 	}
-	else
-	{
-		idTo	= (char*)end->Attribute("DESTINATION");
-		if (end->Attribute("TEXT"))
-			data->AddString(P_C_NODE_NAME,end->Attribute("TEXT"));
-		else
-			data->AddString(P_C_NODE_NAME,"Unnamed");
+	if ((idFrom == NULL) || (idTo == NULL)) {
+		fprintf(stderr, "FreeMindTranslator: connection without node ID\n");
+		return B_BAD_DATA;
 	}
-	connection->AddInt32(P_C_NODE_CONNECTION_TO,GetID(idTo));
-	connection->AddMessage(P_C_NODE_DATA,data);
-	// PDocLoader::ReIndexConnections looks for the field "node" (singular) -
-	// this was "nodes", so every connection imported from a FreeMind file
-	// was silently invisible to the loader.
-	container->AddMessage("node", connection);
+	connection.AddInt32(P_C_NODE_CONNECTION_FROM,GetID(idFrom));
+	connection.AddInt32(P_C_NODE_CONNECTION_TO,GetID(idTo));
+	connection.AddMessage(P_C_NODE_DATA,&data);
+	// PDocLoader::ReIndexConnections looks for the field "node" (singular)
+	container->AddMessage("node", &connection);
+	return B_OK;
 }
 
 int32 Converter::GetID(const char *idString)
 {
-	int32	id	= 0;
-	if (strstr(idString,"Freemind")!=NULL)
-		sscanf(idString,"Freemind_Link_%d", &id);
-	else
-		sscanf(idString,"%d",&id);
+	// FreeMind ids are strings and may come before or after the node they
+	// name (arrow links), so map each one to a number on first sight
+	std::map<BString,int32>::iterator	found	= importIds.find(BString(idString));
+	if (found != importIds.end())
+		return found->second;
+	int32	id	= (int32)importIds.size() + 1;
+	importIds[BString(idString)]	= id;
 	return id;
 }
 
-int32 Converter::GetRGB(const char *rgbString){
-	rgb_color	rgb;
-	sscanf(rgbString,"#%x%x%x",rgb.red,rgb.green,rgb.blue);
-	return *((int32 *) &rgb);
+int32 Converter::GetRGB(const char *rgbString)
+{
+	unsigned int	red = 0, green = 0, blue = 0;
+	if (sscanf(rgbString,"#%2x%2x%2x",&red,&green,&blue) != 3)
+		fprintf(stderr, "FreeMindTranslator: bad color \"%s\"\n", rgbString);
+	rgb_color	rgb	= {(uint8)red, (uint8)green, (uint8)blue, 255};
+	int32		packed;
+	memcpy(&packed, &rgb, sizeof(packed));
+	return packed;
 }
