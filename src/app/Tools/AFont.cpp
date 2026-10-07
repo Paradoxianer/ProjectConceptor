@@ -55,17 +55,17 @@ status_t AFont::Archive(BMessage *archive, bool) const
 	archive->AddInt8("Font::Encoding",Encoding());
 	archive->AddInt16("Font::Face",Face());
 	archive->AddInt32("Font::Flags",Flags());
-	font_family	*family;
-	font_style	*style;
-	GetFamilyAndStyle(family, style);
-	archive->AddString("Font::Family",(const char*)family);
-	archive->AddString("Font::Style",(const char*)style);
+	font_family	family;
+	font_style	style;
+	GetFamilyAndStyle(&family, &style);
+	archive->AddString("Font::Family",family);
+	archive->AddString("Font::Style",style);
 	return err;
 }
 
 BArchivable *AFont::Instantiate(BMessage *archive)
 {
-	if ( !validate_instantiation(archive, "TheClass") )
+	if ( !validate_instantiation(archive, "Font") )
 		return NULL;
 	return new AFont(archive);
 }
