@@ -95,91 +95,48 @@ status_t Translate(BPositionIO * inSource,const translator_info *tInfo,	BMessage
 	if (!CanWrite(outType))
 		return B_NO_TRANSLATOR;
 
-	status_t		err					= B_OK;
-	BMessage		*allNodes			= new BMessage();
-	BMessage		*allConnections		= new BMessage();
-	BMessage		*selected			= new BMessage();
-	BMessage		*commandStuff		= new BMessage();
-	BMessage		*outCommand			= new BMessage();
-	BMessage		*inMessage			= NULL;
-	BMessage		*outMessage			= new BMessage();
-	BMessage		*tmpMessage			= new BMessage();
-	bool			saveUndo			= true;
-	bool			saveMacro			= true;
-	int32			undoLevel			= -1;
-	printf("StandartTranslator::Translate\n");
-	if (ioExtension != NULL)
-	{
-		ioExtension->FindBool("SaveUndo",&saveUndo);
-		ioExtension->FindBool("SaveMacro",&saveUndo);
-		ioExtension->FindInt32("UndoLevel",&undoLevel);
-	}
-	//necessary to avoid problems
 	outDestination->Seek(0, SEEK_SET);
 	inSource->Seek(0, SEEK_SET);
 
-	// tInfo->type reflects whatever Identify() determined the *input*
-	// stream actually is (native binary vs XML export) - read accordingly,
-	// regardless of what output format was requested.
+	// tInfo->type is what Identify() found the *input* to be (native binary
+	// or XML export), independent of the requested output format
+	BMessage	inMessage;
 	if ((tInfo != NULL) && (tInfo->type == P_C_DOCUMENT_TEXT_TYPE)) {
 		MessageXmlReader	xmlReader;
-		inMessage = xmlReader.ReadFrom(inSource);
-		if (inMessage == NULL)
+		BMessage			*parsed	= xmlReader.ReadFrom(inSource);
+		if (parsed == NULL)
 			return B_NO_TRANSLATOR;
+		inMessage = *parsed;
+		delete parsed;
 	} else {
-		inMessage = new BMessage();
-		err = inMessage->Unflatten(inSource);
+		status_t	err	= inMessage.Unflatten(inSource);
 		if (err != B_OK)
 			return err;
 	}
-	//translations Process
-	int32	formatVersion	= 0;
-	if (inMessage->FindInt32(P_C_DOC_FORMAT_VERSION_FIELD,&formatVersion) == B_OK)
-		outMessage->AddInt32(P_C_DOC_FORMAT_VERSION_FIELD,formatVersion);
-	BMessage	*documentSetting	= new BMessage();
-	inMessage->FindMessage("PDocument::documentSetting",documentSetting);
-	outMessage->AddMessage("PDocument::documentSetting",documentSetting);
-	inMessage->FindMessage("PDocument::allNodes",allNodes);
-	outMessage->AddMessage("PDocument::allNodes",allNodes);
-	inMessage->FindMessage("PDocument::allConnections",allConnections);
-	outMessage->AddMessage("PDocument::allConnections",allConnections);
-	inMessage->FindMessage("PDocument::selected",selected);
-	outMessage->AddMessage("PDocument::selected",selected);
 
-	inMessage->FindMessage("PDocument::commandManager",commandStuff);
-	if (saveUndo)
-	{
-		if (undoLevel>0)
-		{
-			type_code	typeFound;
-			int32		countFound;
-			int32		i			= 0;
-			commandStuff->GetInfo("undo",&typeFound,&countFound);
-			for (i =undoLevel;i< countFound;i++)
-			{
-				commandStuff->FindMessage("und",i,tmpMessage);
-				outCommand->AddMessage("undo",tmpMessage);
-			}
-		}
+	// only the document's own parts go out; a missing part is written empty
+	BMessage	outMessage;
+	int32		formatVersion	= 0;
+	if (inMessage.FindInt32(P_C_DOC_FORMAT_VERSION_FIELD,&formatVersion) == B_OK)
+		outMessage.AddInt32(P_C_DOC_FORMAT_VERSION_FIELD,formatVersion);
+	const char	*parts[]	= { "PDocument::documentSetting", "PDocument::allNodes",
+		"PDocument::allConnections", "PDocument::selected",
+		"PDocument::commandManager" };
+	for (size_t i = 0; i < sizeof(parts) / sizeof(parts[0]); i++) {
+		BMessage	part;
+		inMessage.FindMessage(parts[i],&part);
+		outMessage.AddMessage(parts[i],&part);
 	}
-	else
-		commandStuff->RemoveName("undo");
-	if (!saveMacro)
-		commandStuff->RemoveName("makro");
-	outMessage->AddMessage("PDocument::commandManager",commandStuff);
-	DEBUG_ONLY(outMessage->PrintToStream(););
 
+	status_t	err;
 	if (outType == P_C_DOCUMENT_TEXT_TYPE) {
 		MessageXmlWriter	xmlWriter;
-		err = xmlWriter.WriteTo(*outMessage,outDestination);
+		err = xmlWriter.WriteTo(outMessage,outDestination);
 	} else {
-		err = outMessage->Flatten(outDestination);
+		err = outMessage.Flatten(outDestination);
 	}
-	//necessary to avoid problems
 	inSource->Seek(0, SEEK_SET);
-	outDestination->Seek(0, SEEK_SET);	/* paranoia */
-
-	printf("StandartTranslator - Translate outMessage - %s\n", strerror(err));
+	outDestination->Seek(0, SEEK_SET);
 	return err;
 }
 
