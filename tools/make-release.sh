@@ -39,10 +39,13 @@ mkdir -p "$BUILD" "$MAIN" "$DEBUG/develop/debug" "$OUT"
 tar -C "$ROOT" --exclude='./.git' --exclude='./bin' --exclude='*/objects*' --exclude='./release' \
 	-cf - . | tar -C "$BUILD" -xf -
 cd "$BUILD/src"
-make > "$WORK/build.log" 2>&1 || true
-make bindcatalogs >> "$WORK/build.log" 2>&1 || true
+# optimized, without -DDEBUG (TRACE/PRINT output), but with -g: the debug
+# info goes into the _debuginfo package. Overrides src/makefile's exports.
+RELEASE_FLAGS="DEBUGGER= DEFINES= OPTIMIZER=-O2 DEBUG=-g"
+make $RELEASE_FLAGS > "$WORK/build.log" 2>&1 || true
+make $RELEASE_FLAGS bindcatalogs >> "$WORK/build.log" 2>&1 || true
 # the plugins copy their binary into bin/ on every make, the app too
-make >> "$WORK/build.log" 2>&1 || true
+make $RELEASE_FLAGS >> "$WORK/build.log" 2>&1 || true
 # makefile-engine doesn't pass exit codes through reliably
 if grep -qE '^\s*(make(\[[0-9]+\])?: )?\*\*\* |: error:|: fatal error:|undefined reference to|couldn.t write' "$WORK/build.log"; then
 	fail "build, see $WORK/build.log"
