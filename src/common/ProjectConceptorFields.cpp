@@ -33,6 +33,9 @@ const char*		P_C_NODE_FONT					= "Node::Font";
 const char*		P_C_NODE_FRAME					= "Node::Frame";
 
 const char*		P_C_NODE_PATTERN				= "Node::Pattern";
+const char*		P_C_NODE_SHAPE					= "Node::Shape";
+const char*		P_C_SHAPE_NAME					= "Shape::name";
+const char*		P_C_SHAPE_TEXT_RECT				= "Shape::textRect";
 const char*		P_C_NODE_SELECTED				= "Node::selected";
 const char*		P_C_NODE_X_RADIUS				= "Node::xRadius";
 const char*		P_C_NODE_Y_RADIUS				= "Node::yRadius";
