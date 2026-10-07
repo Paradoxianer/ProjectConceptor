@@ -726,110 +726,96 @@ void PDocument::SetEntry(entry_ref *saveEntry,const char *name)
 void PDocument::Save(void)
 {
 	TRACE();
-	//we ned to mkae this think blocking somehowe if quit is reuqw
-	if (entryRef == NULL)
+	if (entryRef == NULL) {
+		// the panel's B_SAVE_REQUESTED sets the entry and calls Save() again
 		SavePanel();
-	status_t err 				= B_OK;
-	BTranslatorRoster	*roster				= BTranslatorRoster::Default();
-	BMessage			*archived			= new BMessage();
-	BMessage			*saveSettings		= new BMessage();
-	char				*formatName			= NULL;
-	translator_info		*translatorInfo		= new translator_info;
-	int32				tmpInt				= 0;
-	int32				outType				= 0;
+		return;
+	}
+	BAutolock	autolock(this);
+	BMessage	archived;
+	Archive(&archived,true);
+	BFile		file(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
+	status_t	err	= file.InitCheck();
+	BMessage	saveSettings;
+	int32		translatorId	= 0;
+	if ((err == B_OK)
+		&& (documentSetting->FindMessage("saveSettings",&saveSettings) == B_OK)
+		&& (saveSettings.FindInt32("translator_id",&translatorId) == B_OK)) {
+		translator_info	translatorInfo;
+		const char		*formatName	= "";
+		int32			outType		= 0;
+		saveSettings.FindString("format::name",&formatName);
+		saveSettings.FindInt32("format::type",&outType);
+		translatorInfo.translator	= translatorId;
+		translatorInfo.type			= P_C_DOCUMENT_RAW_TYPE;
+		translatorInfo.group		= P_C_DOCUMENT_RAW_TYPE;
+		translatorInfo.quality		= 0.9;
+		translatorInfo.capability	= 0.9;
+		strlcpy(translatorInfo.name,formatName,sizeof(translatorInfo.name));
+		strlcpy(translatorInfo.MIME,P_C_DOCUMENT_MIMETYPE,sizeof(translatorInfo.MIME));
+		BMallocIO	input;
+		archived.Flatten(&input);
+		err = BTranslatorRoster::Default()->Translate(&input,&translatorInfo,NULL,&file,outType);
+	} else if (err == B_OK)
+		err = archived.Flatten(&file);
 
-	bool locked = Lock();
-	documentSetting->FindMessage("saveSettings",saveSettings);
-	if (saveSettings->FindInt32("translator_id",&tmpInt) == B_OK){
-		translatorInfo->translator	= tmpInt;
-		saveSettings->FindString("format::name",(const char**)&formatName);
-		//saveSettings->FindString("format::MIME",(const char**)&formatMIME);
-		strcpy((translatorInfo->name),formatName);
-		strcpy((translatorInfo->MIME),P_C_DOCUMENT_MIMETYPE);
-		saveSettings->FindInt32("format::type",(int32 *)&outType);
-		translatorInfo->type				= P_C_DOCUMENT_RAW_TYPE;
-//		saveSettings->FindInt32("format::group",(int32 *)&tmpInt);
-		translatorInfo->group				= P_C_DOCUMENT_RAW_TYPE;
-//		saveSettings->FindFloat("format::quality",(float *)&tmpFloat);
-		translatorInfo->quality				= 0.9;
-//		saveSettings->FindFloat("format::capability",(float *)&tmpFloat);
-		translatorInfo->capability			= 0.9;
-		Archive(archived,true);
-		BPositionIO		*input	= new BMallocIO();
-		BFile			*file	= new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
-		archived->Flatten(input);
-		err=	roster->Translate(input,translatorInfo,NULL,file,outType);
-		if (err == B_OK) {
-			BNodeInfo nodeInfo(file);
-			nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
-			nodeInfo.SetPreferredApp(APP_SIGNATURE);
-		}
+	if (err != B_OK) {
+		BString	text;
+		text.SetToFormat(B_TRANSLATE("Could not save the document: %s"),strerror(err));
+		(new BAlert(B_TRANSLATE("Error"),text.String(),B_TRANSLATE("OK"),
+			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go(NULL);
+		return;
 	}
-	else {
-		Archive(archived,true);
-		if (entryRef) {
-			BFile *file=	new BFile(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
-			err=file->InitCheck();
-			PRINT(("ERROR\tSave file error %s\n",strerror(err)));
-			err = archived->Flatten(file);
-			if (err == B_OK) {
-				BNodeInfo nodeInfo(file);
-				nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
-				nodeInfo.SetPreferredApp(APP_SIGNATURE);
-			}
-		}
-	}
-	if (err==B_OK) {
-			ResetModified();
-			window->SetTitle(Title());
-			be_roster->AddToRecentDocuments(entryRef,APP_SIGNATURE);
-	}
-	else
-		PRINT(("ERROR:\tPDocument -Save error %s\n",strerror(err)));
-	if (locked)
-		Unlock();
+	BNodeInfo	nodeInfo(&file);
+	nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
+	nodeInfo.SetPreferredApp(APP_SIGNATURE);
+	ResetModified();
+	window->SetTitle(Title());
+	be_roster->AddToRecentDocuments(entryRef,APP_SIGNATURE);
 }
 
 void PDocument::Load(void)
 {
 	TRACE();
-	status_t			err				= B_OK;
-	BFile				*file			= new BFile(entryRef,B_READ_ONLY);
-	BMessage			*node			= NULL;
-	BTranslatorRoster	*roster			= NULL;
-	BMallocIO			*output			= new BMallocIO();
-	BMessage			*loaded			= new BMessage();
-	int32				i				= 0;
-	translator_info		*indentifed		= new translator_info;
 	BAutolock			autolock(this);
-
-	if (file->InitCheck() == B_OK) {
-		roster	= BTranslatorRoster::Default();
-		roster->Identify(file,NULL,indentifed,P_C_DOCUMENT_RAW_TYPE );
-		err 	= roster->Translate(file,indentifed,NULL,output,P_C_DOCUMENT_RAW_TYPE);
-		//buffer = (void *)output->Buffer();
+	BMessage			*node			= NULL;
+	int32				i				= 0;
+	BMessage			loaded;
+	BFile				file(entryRef,B_READ_ONLY);
+	status_t			err				= file.InitCheck();
+	if (err == B_OK) {
+		BTranslatorRoster	*roster	= BTranslatorRoster::Default();
+		translator_info		identified;
+		BMallocIO			output;
+		err = roster->Identify(&file,NULL,&identified,P_C_DOCUMENT_RAW_TYPE);
+		if (err == B_OK)
+			err = roster->Translate(&file,&identified,NULL,&output,P_C_DOCUMENT_RAW_TYPE);
 		if (err == B_OK) {
-			err = loaded->Unflatten(output);
-			if (err != B_OK)
-				printf("Loading error: %s\n",strerror(err));
-			ResetModified();
+			output.Seek(0,SEEK_SET);
+			err = loaded.Unflatten(&output);
 		}
 	}
-	else
-	 //**error handling
-	;
+	if (err != B_OK) {
+		BString	text;
+		text.SetToFormat(B_TRANSLATE("Could not open the document: %s"),strerror(err));
+		(new BAlert(B_TRANSLATE("Error"),text.String(),B_TRANSLATE("OK"),
+			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go(NULL);
+		return;
+	}
+	ResetModified();
 
 	int32	fileVersion	= 0;
-	if ((loaded->FindInt32(P_C_DOC_FORMAT_VERSION_FIELD,&fileVersion) != B_OK)
+	if ((loaded.FindInt32(P_C_DOC_FORMAT_VERSION_FIELD,&fileVersion) != B_OK)
 		|| (fileVersion != P_C_DOC_FORMAT_VERSION)) {
 		(new BAlert(B_TRANSLATE("Error"),
 			B_TRANSLATE("This file was saved by an incompatible version of ProjectConceptor and cannot be opened."),
-			"Ohh"))->Go();
+			B_TRANSLATE("OK")))->Go();
 		return;
 	}
 
-	//docloader handles the Format and Stuff also the input translation
-	PDocLoader	*docLoader	= new PDocLoader(this,loaded);
+	// copies everything it hands out, so it can go when Load() returns
+	PDocLoader	loader(this,&loaded);
+	PDocLoader	*docLoader	= &loader;
 	delete printerSetting;
 	delete selected;
 
