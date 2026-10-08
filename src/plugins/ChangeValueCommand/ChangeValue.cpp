@@ -115,6 +115,16 @@ void ChangeValue::DetachedFromManager(void)
 }
 
 
+// Which entry of a repeated subgroup name level j means: "subgroupindex"
+// runs parallel to "subgroup"; missing means the first (older macros).
+static int32 SubgroupIndex(BMessage *valueContainer, int32 level)
+{
+	int32	index	= 0;
+	if (valueContainer->FindInt32("subgroupindex",level,&index) != B_OK)
+		return 0;
+	return index;
+}
+
 void ChangeValue::UndoChangeValue(BMessage *node,BMessage *valueContainer, type_code type,void *oldValue, ssize_t oldSize)
 {
 	status_t	err				= B_OK;
@@ -132,7 +142,7 @@ void ChangeValue::UndoChangeValue(BMessage *node,BMessage *valueContainer, type_
 	subGroup = node;
 	pathList->AddItem(subGroup);
 	while (valueContainer->FindString("subgroup",j,(const char**)&subGroupName) == B_OK) {
-		subGroup->FindMessage(subGroupName,tmpSubGroup);
+		subGroup->FindMessage(subGroupName,SubgroupIndex(valueContainer,j),tmpSubGroup);
 		pathList->AddItem(tmpSubGroup);
 		subGroup	= tmpSubGroup;
 		tmpSubGroup	= new BMessage();
@@ -145,7 +155,8 @@ void ChangeValue::UndoChangeValue(BMessage *node,BMessage *valueContainer, type_
 		tmpSubGroup = (BMessage *)pathList->ItemAt(j-1);
 		valueContainer->FindString("subgroup",j-1,(const char**)&subGroupName);
 		if (tmpSubGroup != NULL)
-			tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)pathList->ItemAt(j));
+			tmpSubGroup->ReplaceMessage(subGroupName,SubgroupIndex(valueContainer,j-1),
+				(BMessage *)pathList->ItemAt(j));
 	}
 }
 
@@ -178,7 +189,7 @@ void ChangeValue::DoChangeValue(BMessage *node,BMessage *valueContainer, BMessag
 	subGroup = node;
 	pathList->AddItem(subGroup);
 	while (valueContainer->FindString("subgroup",j,&subGroupName) == B_OK){	
-		subGroup->FindMessage(subGroupName,tmpSubGroup);
+		subGroup->FindMessage(subGroupName,SubgroupIndex(valueContainer,j),tmpSubGroup);
 		pathList->AddItem(tmpSubGroup);
 		subGroup	= tmpSubGroup;
 		tmpSubGroup	= new BMessage();
@@ -193,6 +204,7 @@ void ChangeValue::DoChangeValue(BMessage *node,BMessage *valueContainer, BMessag
 		tmpSubGroup = (BMessage *)pathList->ItemAt(j-1);
 		valueContainer->FindString("subgroup",j-1,(const char**)&subGroupName);
 		if (tmpSubGroup)
-			err=tmpSubGroup->ReplaceMessage(subGroupName,(BMessage *)pathList->ItemAt(j));
+			err=tmpSubGroup->ReplaceMessage(subGroupName,SubgroupIndex(valueContainer,j-1),
+				(BMessage *)pathList->ItemAt(j));
 	}
 }

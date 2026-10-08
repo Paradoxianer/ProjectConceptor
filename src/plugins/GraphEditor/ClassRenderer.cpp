@@ -485,9 +485,13 @@ void ClassRenderer::ValueChanged() {
 	//delete all "old" Attribs
 	attributes->erase(attributes->begin(),attributes->end());
 	//and add all attribs we found
+	// every entry of a name gets its own row - AddAttribute appends, so
+	// a name may hold several values (#138)
 	for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(char **) &attribName, &type, &count) == B_OK; i++) {
-		if (data->FindMessage(attribName,count-1,attribMessage) == B_OK)
-			InsertAttribute(attribName,attribMessage, count-1);
+		for (int32 entry = 0; entry < count; entry++) {
+			if (data->FindMessage(attribName,entry,attribMessage) == B_OK)
+				InsertAttribute(attribName,attribMessage, entry);
+		}
 	}
 	container->FindPointer(P_C_NODE_PARENT, (void **)&parentNode);
 	shape.Layout(frame);
@@ -676,6 +680,8 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	BMessage*	valueContainer	= new BMessage();
 	valueContainer->AddString("subgroup",P_C_NODE_DATA);
 	valueContainer->AddString("subgroup",attribName);
+	valueContainer->AddInt32("subgroupindex",0);
+	valueContainer->AddInt32("subgroupindex",count);
 	editMessage->AddMessage("valueContainer",valueContainer);
 	delete valueContainer;
 	BMessage*	removeAttribMessage		= new BMessage(P_C_EXECUTE_COMMAND);

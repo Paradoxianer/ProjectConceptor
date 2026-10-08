@@ -154,6 +154,60 @@ void PCommandTest::ChangeValueReplacesNodeShape(void)
 	CPPUNIT_ASSERT_EQUAL(BString("rounded"),BString(name));
 }
 
+// #138: two attributes with the same name; GraphEditor edits the one in
+// the row it shows, by subgroupindex
+void PCommandTest::ChangeValueEditsTheRightEntryOfARepeatedName(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+
+	BMessage	node(P_C_CLASS_TYPE);
+	BMessage	data;
+	for (int32 i = 0; i < 2; i++) {
+		BMessage	note(B_STRING_TYPE);
+		note.AddString("Name","Note");
+		note.AddString("Value",i == 0 ? "first" : "second");
+		data.AddMessage("Note",&note);
+	}
+	node.AddMessage(P_C_NODE_DATA,&data);
+
+	BMessage	valueContainer;
+	valueContainer.AddString("subgroup",P_C_NODE_DATA);
+	valueContainer.AddString("subgroup","Note");
+	valueContainer.AddInt32("subgroupindex",0);
+	valueContainer.AddInt32("subgroupindex",1);
+	valueContainer.AddString("name","Value");
+	valueContainer.AddInt32("type",(int32)B_STRING_TYPE);
+	valueContainer.AddData("newValue",B_STRING_TYPE,"changed",8);
+
+	BMessage	settings;
+	settings.AddPointer("node",&node);
+	settings.AddMessage("valueContainer",&valueContainer);
+
+	ChangeValue	command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	BMessage	changedData;
+	BMessage	entry;
+	const char	*value	= NULL;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,node.FindMessage(P_C_NODE_DATA,&changedData));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,changedData.FindMessage("Note",0,&entry));
+	entry.FindString("Value",&value);
+	CPPUNIT_ASSERT_EQUAL(BString("first"),BString(value));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,changedData.FindMessage("Note",1,&entry));
+	entry.FindString("Value",&value);
+	CPPUNIT_ASSERT_EQUAL(BString("changed"),BString(value));
+
+	command.Undo(doc,result);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,node.FindMessage(P_C_NODE_DATA,&changedData));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,changedData.FindMessage("Note",0,&entry));
+	entry.FindString("Value",&value);
+	CPPUNIT_ASSERT_EQUAL(BString("first"),BString(value));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,changedData.FindMessage("Note",1,&entry));
+	entry.FindString("Value",&value);
+	CPPUNIT_ASSERT_EQUAL(BString("second"),BString(value));
+}
+
 void PCommandTest::ChangeValueOnSelectionDoUndo(void)
 {
 	// regression check for issue #61: ChangeValue applied to "all selected
