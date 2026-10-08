@@ -5,6 +5,8 @@
 #include <Rect.h>
 #include <Shape.h>
 
+class BView;
+
 #include <vector>
 
 /** A node's outline. Node::Shape holds an archived BShape whose points are
@@ -35,6 +37,10 @@ public:
 			 * Contains()/Anchor() work in frame's coordinates. */
 			void			Layout(BRect frame);
 			BShape*			Shape(void) {return &fScaled;};
+			/** Fills/strokes the outline. Uses polygons rather than the
+			 * BShape: FillShape()/StrokeShape() ignore BView::SetScale(). */
+			void			Fill(BView *view, BPoint offset = BPoint(0, 0)) const;
+			void			Stroke(BView *view, BPoint offset = BPoint(0, 0)) const;
 			bool			Contains(BPoint where) const;
 			/** Where a ray from the frame's center toward toward leaves the
 			 * outline; toward itself if the shape has no path. */

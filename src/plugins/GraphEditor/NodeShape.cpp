@@ -1,6 +1,7 @@
 #include "NodeShape.h"
 
 #include <Catalog.h>
+#include <View.h>
 #include <string.h>
 
 #include "ProjectConceptorDefs.h"
@@ -287,6 +288,30 @@ BPoint NodeShape::Anchor(BPoint toward) const
 	if (best < 0)
 		return toward;
 	return BPoint(center.x + best * d.x, center.y + best * d.y);
+}
+
+
+void NodeShape::Fill(BView *view, BPoint offset) const
+{
+	for (size_t p = 0; p < fPolygons.size(); p++) {
+		std::vector<BPoint>	points(fPolygons[p]);
+		for (size_t i = 0; i < points.size(); i++)
+			points[i] += offset;
+		if (points.size() >= 3)
+			view->FillPolygon(&points[0], points.size());
+	}
+}
+
+
+void NodeShape::Stroke(BView *view, BPoint offset) const
+{
+	for (size_t p = 0; p < fPolygons.size(); p++) {
+		std::vector<BPoint>	points(fPolygons[p]);
+		for (size_t i = 0; i < points.size(); i++)
+			points[i] += offset;
+		if (points.size() >= 2)
+			view->StrokePolygon(&points[0], points.size(), true);
+	}
 }
 
 

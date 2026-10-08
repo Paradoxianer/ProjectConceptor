@@ -336,19 +336,17 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	drawOn->SetPenSize(penSize);
 	drawOn->SetHighColor(0,0,0,77);
 	// BView draws a shape at the current pen location
-	if (shape.HasPath()) {
-		drawOn->MovePenTo(shadowFrame.LeftTop());
-		drawOn->FillShape(shape.Shape());
-	} else
+	if (shape.HasPath())
+		shape.Fill(drawOn,shadowFrame.LeftTop()-frame.LeftTop());
+	else
 		drawOn->FillRoundRect(shadowFrame, xRadius, yRadius);
 	drawColor=hasPreviewFillColor ? previewFillColor : fillColor;
 	if (selected) {
 		drawOn->SetPenSize(5.0);
 		drawOn->SetHighColor(200,0,0,150);
-		if (shape.HasPath()) {
-			drawOn->MovePenTo(frame.LeftTop());
-			drawOn->StrokeShape(shape.Shape());
-		} else {
+		if (shape.HasPath())
+			shape.Stroke(drawOn);
+		else {
 			BRect selectFrame = frame;
 			selectFrame.InsetBy(-2,-2);
 			drawOn->StrokeRoundRect(selectFrame, xRadius, yRadius);
@@ -356,10 +354,9 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 		drawOn->SetHighColor(drawColor);
 	}
 	drawOn->SetHighColor(drawColor);
-	if (shape.HasPath()) {
-		drawOn->MovePenTo(frame.LeftTop());
-		drawOn->FillShape(shape.Shape());
-	} else
+	if (shape.HasPath())
+		shape.Fill(drawOn);
+	else
 		drawOn->FillRoundRect(frame, xRadius, yRadius);
 	
 	
@@ -373,10 +370,9 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 
 	drawOn->SetHighColor(borderColor);
 	drawOn->SetPenSize(penSize);
-	if (shape.HasPath()) {
-		drawOn->MovePenTo(frame.LeftTop());
-		drawOn->StrokeShape(shape.Shape());
-	} else
+	if (shape.HasPath())
+		shape.Stroke(drawOn);
+	else
 		drawOn->StrokeRoundRect(frame, xRadius, yRadius);
 	if (showConnecter) {
 		drawOn->SetHighColor(200,0,0,255);
