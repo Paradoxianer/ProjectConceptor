@@ -6,6 +6,7 @@
 #include <translation/TranslatorFormats.h>
 #include <storage/Resources.h>
 #include <support/DataIO.h>
+#include <math.h>
 
 #include "NodeShape.h"
 #include <string.h>
@@ -609,21 +610,15 @@ void GraphEditor::Draw(BRect updateRect) {
 	SetScale(scale);
 	PushState();
 	if (gridEnabled) {
-		int32		xcount		= (Frame().Width()/gridWidth)+1;
-		int32		ycount		= (Frame().Height()/gridWidth)+1;
-		float		x			= 0;
-		float		y			= 0;
-		rgb_color	gridColor	= tint_color(ViewColor(),1.1);
-		BeginLineArray(xcount+ycount);
-		for (int32 i=1;i<xcount;i++) {
-			AddLine(BPoint(x,Bounds().top),BPoint(x,Frame().Height()),gridColor);
-			x += gridWidth;
+		// a dot on every grid point, only where the update needs it
+		SetHighColor(style.gridDot);
+		float	dot		= 1.5f;
+		float	left	= floorf(updateRect.left / gridWidth) * gridWidth;
+		float	top		= floorf(updateRect.top / gridWidth) * gridWidth;
+		for (float x = left; x <= updateRect.right + gridWidth; x += gridWidth) {
+			for (float y = top; y <= updateRect.bottom + gridWidth; y += gridWidth)
+				FillRect(BRect(x - dot, y - dot, x + dot, y + dot));
 		}
-		for (int32 i=1;i<ycount;i++) {
-			AddLine(BPoint(Bounds().left,y),BPoint(Frame().Width(),y),gridColor);
-			y += gridWidth;
-		}
-		EndLineArray();
 	}
 	renderer->DoForEach(DrawRenderer,this);
 	if (hasActiveGuides) {
@@ -779,7 +774,8 @@ void GraphEditor::MouseUp(BPoint where) {
 
 void GraphEditor::AttachedToWindow(void) {
 	TRACE();
-	SetViewColor(230,230,230,255);
+	style	= GraphStyle::SystemCard();
+	SetViewColor(style.canvas);
 	PWindow 	*pWindow	= (PWindow *)Window();
 	BMenuBar	*menuBar	= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
 	menuBar->AddItem(scaleMenu);
@@ -898,6 +894,14 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			UpdateScrollBars();
 			break;
 		}
+		case B_COLORS_UPDATED:
+		case B_FONTS_UPDATED: {
+			style	= GraphStyle::SystemCard();
+			shadows.Clear();
+			SetViewColor(style.canvas);
+			Invalidate();
+			break;
+		}
 		case G_E_ANIMATION_TICK: {
 			bigtime_t	now	= system_time();
 			float		dt	= (now-animationLastTick)/1000000.0f;
@@ -963,7 +967,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				// same Pen size/Fill color controls once selected - this is
 				// only the starting point.
 				BMessage	*connectionPattern	= new BMessage();
-				rgb_color	defaultConnectionColor	= make_color(187,67,47,255);
+				rgb_color	defaultConnectionColor	= kDefaultConnectionColor;
 				connectionPattern->AddInt32("FillColor",*(int32 *)&defaultConnectionColor);
 				connectionPattern->AddFloat("PenSize",2.0f);
 				connection->AddMessage(P_C_NODE_PATTERN,connectionPattern);
@@ -1546,7 +1550,7 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 					// see the G_E_CONNECTED handler above for why this isn't
 					// the toolbar's current color/pen size
 					BMessage	*connectionPattern	= new BMessage();
-					rgb_color	defaultConnectionColor	= make_color(187,67,47,255);
+					rgb_color	defaultConnectionColor	= kDefaultConnectionColor;
 					connectionPattern->AddInt32("FillColor",*(int32 *)&defaultConnectionColor);
 					connectionPattern->AddFloat("PenSize",2.0f);
 					connection->AddMessage(P_C_NODE_PATTERN,connectionPattern);

@@ -448,41 +448,28 @@ void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
 			drawOn->PopState();
 		return;
 	}
-	hull	= RoundCorners(hull,xRadius);
+	const GraphStyle	&style	= editor->Style();
+	hull	= RoundCorners(hull,style.groupCornerRadius);
 
+	// a group lies behind its children: always a light tint, of the
+	// style's accent or of a color picked for this group
 	rgb_color	drawColor	= hasPreviewFillColor ? previewFillColor : fillColor;
-	// A group's fill lies behind every child across the whole enclosed
-	// area, so a solid one tints all of it and reads far heavier than the
-	// outline needs (issue #38) - by default it stays a faint tint. The
-	// drop shadow only makes sense under a fill solid enough to cast one;
-	// under the default tint it would be darker than the shape itself.
-	// Both go solid as soon as the group is given a real fill colour.
-	bool	filled	= (drawColor.alpha != 0);
-	bool	shadowed	= filled && (hasPreviewFillColor || !usesDefaultFill);
-
-	if (shadowed) {
-		vector<BPoint>	shadowHull(hull);
-		for (uint32 i=0; i<shadowHull.size(); i++)
-			shadowHull[i]	+= BPoint(3,3);
-		drawOn->SetHighColor(0,0,0,77);
-		drawOn->FillPolygon(&shadowHull[0],shadowHull.size());
-	}
+	bool		custom		= hasPreviewFillColor || !usesDefaultFill;
+	rgb_color	tint		= custom ? GraphColors::WithAlpha(drawColor,45) : style.groupFill;
+	rgb_color	edge		= custom ? GraphColors::WithAlpha(drawColor,130) : style.groupBorder;
 
 	if (selected) {
-		drawOn->SetPenSize(5.0);
-		drawOn->SetHighColor(200,0,0,150);
+		drawOn->SetPenSize(style.selectionWidth+style.selectionGap);
+		drawOn->SetHighColor(style.accent);
 		drawOn->StrokePolygon(&hull[0],hull.size());
-		drawOn->SetPenSize(penSize);
 	}
-
-	if (filled) {
-		drawOn->SetHighColor(drawColor);
-		drawOn->FillPolygon(&hull[0],hull.size());
-	}
-
-	drawOn->SetHighColor(borderColor);
+	drawOn->SetHighColor(tint);
+	drawOn->FillPolygon(&hull[0],hull.size());
+	drawOn->SetPenSize(1.0);
+	drawOn->SetHighColor(edge);
 	drawOn->StrokePolygon(&hull[0],hull.size());
 
+	name->SetColor(style.groupLabel);
 	name->Draw(drawOn,updateRect);
 	vector<Renderer *>::iterator	allAttributes	= attributes->begin();
 	while (allAttributes != attributes->end()) {

@@ -26,6 +26,7 @@ Addon pc_graph_editor :
 	SmartGuides.cpp
 	NodeShape.cpp
 	GraphStyle.cpp
+	ShadowCache.cpp
 	StringRenderer.cpp
 	TextEditorControl.cpp
         : be tracker translation libprojectconceptor.a

@@ -72,6 +72,11 @@ protected:
 	rgb_color			EffectiveFillColor(void) {
 		return hasPreviewFillColor ? previewFillColor : fillColor;
 	}
+	/** what the line is drawn in: the standard connection color means
+	 * "not set" and becomes the style's; selection uses the accent */
+			rgb_color	LineColor(const GraphStyle &style);
+			float		LineWidth(const GraphStyle &style);
+			void		DrawArrows(BView *drawOn);
 			void		Init();
 			void		CalcLine();
 			void		DrawStraight(BView *drawOn, BRect updateRect);

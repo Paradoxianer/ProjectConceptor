@@ -300,42 +300,17 @@ bool ConnectionRenderer::Caught(BPoint where){
 }
 
 void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
-		drawOn->SetPenSize(penSize);
-		BPoint	shadowFrom		= fromPoint;
-		BPoint	shadowTo		= toPoint;
-		BPoint	shadowfirst		= first;
-		BPoint	shadowsecond	= second;
-		BPoint	shadowthird		= third;
-		shadowFrom.y			+=3;
-		shadowTo.y				+=3;
-		shadowfirst.y			+=3;
-		shadowsecond.y			+=3;
-		shadowthird.y			+=3;
-
-		drawOn->SetHighColor(0,0,0,77);
-		drawOn->StrokeLine(	shadowFrom,shadowTo);
-		if (arrows & 1)
-			drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
-		if (arrows & 2)
-			drawOn->FillTriangle(BPoint(fromFirst.x,fromFirst.y+3),
-				BPoint(fromSecond.x,fromSecond.y+3),BPoint(fromThird.x,fromThird.y+3));
-		if (!selected)
-			drawOn->SetHighColor(EffectiveFillColor());
-		else
-			drawOn->SetHighColor(tint_color(EffectiveFillColor(),1.5));
+		const GraphStyle	&style	= editor->Style();
+		drawOn->SetPenSize(LineWidth(style));
+		drawOn->SetHighColor(LineColor(style));
 		drawOn->StrokeLine(	fromPoint,toPoint);
-		if (arrows & 1)
-			drawOn->FillTriangle(first,second,third);
-		if (arrows & 2)
-			drawOn->FillTriangle(fromFirst,fromSecond,fromThird);
+		DrawArrows(drawOn);
 }
 
 void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
-	drawOn->SetPenSize(penSize);
-	if (!selected)
-		drawOn->SetHighColor(EffectiveFillColor());
-	else
-		drawOn->SetHighColor(tint_color(EffectiveFillColor(),1.5));
+	const GraphStyle	&style	= editor->Style();
+	drawOn->SetPenSize(LineWidth(style));
+	drawOn->SetHighColor(LineColor(style));
 	bezier=BShape();
 	bezier.MoveTo(fromPoint);
 	BPoint	controlPoints[3];
@@ -358,50 +333,37 @@ void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
 		drawOn->StrokeLine(previous,current);
 		previous = current;
 	}
-	// This style used to draw no arrow head at all, unlike the straight and
-	// angled ones - so which ends carry an arrow had no effect on exactly
-	// the style new connections default to. Same triangles the others use;
-	// CalcLine() computes them regardless of style.
-	if (arrows & 1)
-		drawOn->FillTriangle(first,second,third);
-	if (arrows & 2)
-		drawOn->FillTriangle(fromFirst,fromSecond,fromThird);
+	DrawArrows(drawOn);
 }
 
 void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
-	drawOn->SetPenSize(penSize);
-	BPoint	shadowFrom		= fromPoint;
-	BPoint	shadowTo		= toPoint;
-	BPoint	shadowfirst		= first;
-	BPoint	shadowsecond	= second;
-	BPoint	shadowthird		= third;
-	BPoint	sFirstBend		= firstBend;
-	BPoint	sSecondBend		= secondBend;
-	shadowFrom.y			+=3;
-	shadowTo.y				+=3;
-	shadowfirst.y			+=3;
-	shadowsecond.y			+=3;
-	shadowthird.y			+=3;
-	sFirstBend.x			+=3;
-	sFirstBend.y			+=3;
-	sSecondBend.x			+=3;
-	sSecondBend.y			+=3;
-	drawOn->SetHighColor(0,0,0,77);
-	drawOn->StrokeLine(	shadowFrom,sFirstBend);
-	drawOn->StrokeLine(	sFirstBend,sSecondBend);
-	drawOn->StrokeLine(	sSecondBend,shadowTo);
-	if (arrows & 1)
-		drawOn->FillTriangle(shadowfirst,shadowsecond,shadowthird);
-	if (arrows & 2)
-		drawOn->FillTriangle(BPoint(fromFirst.x,fromFirst.y+3),
-			BPoint(fromSecond.x,fromSecond.y+3),BPoint(fromThird.x,fromThird.y+3));
-	if (!selected)
-		drawOn->SetHighColor(EffectiveFillColor());
-	else
-		drawOn->SetHighColor(tint_color(EffectiveFillColor(),1.5));
+	const GraphStyle	&style	= editor->Style();
+	drawOn->SetPenSize(LineWidth(style));
+	drawOn->SetHighColor(LineColor(style));
 	drawOn->StrokeLine(	fromPoint,firstBend);
 	drawOn->StrokeLine(	firstBend,secondBend);
 	drawOn->StrokeLine(	secondBend,toPoint);
+	DrawArrows(drawOn);
+}
+
+rgb_color ConnectionRenderer::LineColor(const GraphStyle &style) {
+	if (selected)
+		return style.accent;
+	rgb_color	color	= EffectiveFillColor();
+	if (!hasPreviewFillColor && (color.red == kDefaultConnectionColor.red)
+		&& (color.green == kDefaultConnectionColor.green)
+		&& (color.blue == kDefaultConnectionColor.blue))
+		return style.connection;
+	return color;
+}
+
+float ConnectionRenderer::LineWidth(const GraphStyle &style) {
+	// the standard pen size of 1 means "not set"
+	float	width	= (penSize <= 1.0f) ? style.connectionWidth : penSize;
+	return selected ? width + 0.75f : width;
+}
+
+void ConnectionRenderer::DrawArrows(BView *drawOn) {
 	if (arrows & 1)
 		drawOn->FillTriangle(first,second,third);
 	if (arrows & 2)

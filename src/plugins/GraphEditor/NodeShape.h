@@ -4,6 +4,7 @@
 #include <Message.h>
 #include <Rect.h>
 #include <Shape.h>
+#include <String.h>
 
 class BView;
 
@@ -31,6 +32,7 @@ public:
 			 * becomes the classic rounded rectangle. */
 			void			SetTo(const BMessage *archive);
 			bool			HasPath(void) const {return !fOps.empty();};
+			const char*		Name(void) const {return fName.String();};
 
 			/** Scales the shape to frame. Shape() is then relative to
 			 * frame.LeftTop() (BView draws shapes at the pen location),
@@ -62,6 +64,7 @@ private:
 	friend class ShapeCollector;
 
 			std::vector<Op>		fOps;
+			BString				fName;
 			BRect				fTextRect;
 			BRect				fFrame;
 			BShape				fScaled;

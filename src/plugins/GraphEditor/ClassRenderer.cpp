@@ -314,6 +314,40 @@ void ClassRenderer::MouseUp(BPoint where) {
 }
 
 
+// The node's color as a band across the top of a rounded card: the card's
+// own outline down to height, sampled along the corner arcs.
+static void FillStripe(BView *view, BRect frame, float radius, float height)
+{
+	if (height > radius)
+		height	= radius;
+	const int32		steps	= 6;
+	vector<BPoint>	points;
+	for (int32 i = 0; i <= steps; i++) {
+		float	y	= frame.top + height - height * i / steps;
+		float	dy	= radius - (y - frame.top);
+		float	dx	= sqrtf(radius * radius - dy * dy);
+		points.push_back(BPoint(frame.left + radius - dx, y));
+	}
+	for (int32 i = steps; i >= 0; i--) {
+		float	y	= frame.top + height - height * i / steps;
+		float	dy	= radius - (y - frame.top);
+		float	dx	= sqrtf(radius * radius - dy * dy);
+		points.push_back(BPoint(frame.right - radius + dx, y));
+	}
+	view->FillPolygon(&points[0], points.size());
+}
+
+rgb_color ClassRenderer::CardBorderColor(const GraphStyle &style) {
+	// the editor's standard border means "not set": then the style's,
+	// which also works in a dark color scheme
+	rgb_color	standard;
+	if ((editor->GetStandartPattern()->FindInt32("BorderColor",(int32 *)&standard) == B_OK)
+		&& (standard.red == borderColor.red) && (standard.green == borderColor.green)
+		&& (standard.blue == borderColor.blue))
+		return style.cardBorder;
+	return borderColor;
+}
+
 void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	// mid-slide: shift this node's whole draw (shape+name+attributes+
 	// connectors, all already positioned at the real/final frame) so it
@@ -328,69 +362,75 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 		drawOn->SetOrigin(priorOrigin+delta);
 	}
 
-	BRect		shadowFrame = frame;
-	bool		fitIn		= true;
+	const GraphStyle	&style		= editor->Style();
+	const float			radius		= style.cornerRadius;
+	rgb_color			nodeColor	= hasPreviewFillColor ? previewFillColor : fillColor;
+	bool				fitIn		= true;
 	drawOn->SetFont(font);
-	rgb_color	drawColor;
-	shadowFrame.OffsetBy(3,3);
-	drawOn->SetPenSize(penSize);
-	drawOn->SetHighColor(0,0,0,77);
-	// BView draws a shape at the current pen location
-	if (shape.HasPath())
-		shape.Fill(drawOn,shadowFrame.LeftTop()-frame.LeftTop());
-	else
-		drawOn->FillRoundRect(shadowFrame, xRadius, yRadius);
-	drawColor=hasPreviewFillColor ? previewFillColor : fillColor;
+
+	editor->Shadows().Draw(drawOn,shape,shape.Name(),frame,radius,
+		style.shadow,style.shadowBlur,style.shadowOffsetY);
+
 	if (selected) {
-		drawOn->SetPenSize(5.0);
-		drawOn->SetHighColor(200,0,0,150);
+		BRect	outline	= frame;
+		outline.InsetBy(-style.selectionGap,-style.selectionGap);
+		// the gap between ring and card shows the canvas, not the shadow
+		NodeShape	grown(shape);
+		grown.Layout(outline);
+		drawOn->SetHighColor(style.canvas);
 		if (shape.HasPath())
-			shape.Stroke(drawOn);
-		else {
-			BRect selectFrame = frame;
-			selectFrame.InsetBy(-2,-2);
-			drawOn->StrokeRoundRect(selectFrame, xRadius, yRadius);
-		}
-		drawOn->SetHighColor(drawColor);
+			grown.Fill(drawOn);
+		else
+			drawOn->FillRoundRect(outline,radius+style.selectionGap,radius+style.selectionGap);
+		drawOn->SetPenSize(style.selectionWidth);
+		drawOn->SetHighColor(style.accent);
+		if (shape.HasPath())
+			grown.Stroke(drawOn);
+		else
+			drawOn->StrokeRoundRect(outline,radius+style.selectionGap,radius+style.selectionGap);
 	}
-	drawOn->SetHighColor(drawColor);
+
+	drawOn->SetHighColor(style.cardFill);
 	if (shape.HasPath())
 		shape.Fill(drawOn);
 	else
-		drawOn->FillRoundRect(frame, xRadius, yRadius);
-	
-	
+		drawOn->FillRoundRect(frame,radius,radius);
+
+	if (shape.HasPath()) {
+		// no room for a stripe: the outline carries the node's color
+		drawOn->SetPenSize(1.5);
+		drawOn->SetHighColor(nodeColor);
+		shape.Stroke(drawOn);
+	} else {
+		drawOn->SetHighColor(nodeColor);
+		FillStripe(drawOn,frame,radius,style.stripeHeight);
+		drawOn->SetPenSize(1.0);
+		drawOn->SetHighColor(CardBorderColor(style));
+		drawOn->StrokeRoundRect(frame,radius,radius);
+	}
 
 	if (SupportsResize()) {
 		BPoint	corner	= ResizeCorner();
-		drawOn->SetHighColor(0,0,0,255);
+		drawOn->SetHighColor(style.mutedText);
 		drawOn->FillTriangle(BPoint(corner.x-(3*circleSize),corner.y),BPoint(corner.x,corner.y-(3*circleSize)),corner);
 	}
-	
 
-	drawOn->SetHighColor(borderColor);
-	drawOn->SetPenSize(penSize);
-	if (shape.HasPath())
-		shape.Stroke(drawOn);
-	else
-		drawOn->StrokeRoundRect(frame, xRadius, yRadius);
 	if (showConnecter) {
-		drawOn->SetHighColor(200,0,0,255);
-
+		drawOn->SetPenSize(1.0);
+		drawOn->SetHighColor(style.cardFill);
 		drawOn->FillEllipse(leftConnection);
 		drawOn->FillEllipse(topConnection);
 		drawOn->FillEllipse(rightConnection);
 		drawOn->FillEllipse(bottomConnection);
-		drawOn->SetHighColor(borderColor);
-
+		drawOn->SetHighColor(style.accent);
 		drawOn->StrokeEllipse(leftConnection);
 		drawOn->StrokeEllipse(topConnection);
 		drawOn->StrokeEllipse(rightConnection);
 		drawOn->StrokeEllipse(bottomConnection);
 	}
 
-
 	name->Draw(drawOn,updateRect);
+	drawOn->SetHighColor(style.text);
 	BRect	content	= ContentFrame();
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
 	while( allAttributes != attributes->end() ) {
@@ -400,8 +440,10 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 			fitIn=false;
 		allAttributes++;
 	}
-	if (!fitIn)
-		drawOn->DrawString("...",BPoint(content.left+circleSize+2,content.bottom-(yRadius/3)));
+	if (!fitIn) {
+		drawOn->SetHighColor(style.mutedText);
+		drawOn->DrawString("…",BPoint(content.left+style.paddingX,content.bottom-(style.paddingY/2)));
+	}
 
 	if (offsetForAnim)
 		drawOn->PopState();
@@ -474,8 +516,16 @@ void ClassRenderer::ValueChanged() {
 	shape.Layout(frame);
 	data->FindString(P_C_NODE_NAME,(const char **)&newName);
 	name->SetString(newName);
-	BRect	content	= ContentFrame();
-	name->SetFrame(BRect(content.left+(xRadius/3),content.top+(yRadius/3),content.right-(xRadius/3),content.top+12));
+	const GraphStyle	&style	= editor->Style();
+	BFont	nameFont(be_bold_font);
+	nameFont.SetSize(style.nameFontSize);
+	name->SetFont(nameFont);
+	name->SetColor(style.text);
+	BRect	content		= ContentFrame();
+	// a shape's text area already keeps clear of its outline
+	float	padding		= shape.HasPath() ? style.paddingX/3 : style.paddingX;
+	float	nameTop		= content.top+(shape.HasPath() ? 0 : style.stripeHeight)+(style.paddingY/2);
+	name->SetFrame(BRect(content.left+padding-2,nameTop,content.right-padding,nameTop+12));
 	
 	
 	//delete all "old" Attribs

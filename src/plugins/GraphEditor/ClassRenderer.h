@@ -83,6 +83,8 @@ protected:
 				BRect		ContentFrame(void) {return shape.TextFrame(frame);};
 				/** the four connection dots, on the shape's outline */
 				void		UpdateConnectors(void);
+				/** the card's border: a custom border color, else the style's */
+				rgb_color	CardBorderColor(const GraphStyle &style);
 				/** bottom-right end of the resize handle: the frame's corner,
 				 * or where the outline faces it */
 				BPoint		ResizeCorner(void) {return shape.Anchor(frame.RightBottom());};

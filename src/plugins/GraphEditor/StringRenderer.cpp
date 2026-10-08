@@ -21,6 +21,8 @@ StringRenderer::StringRenderer(GraphEditor *parentEditor,char *forString,BRect s
 	editor		= parentEditor;
 	shortString	= NULL;
 	editorFont	= new BFont();
+	hasOwnFont	= false;
+	hasColor	= false;
 	Init();
 	SetString(forString);
 	SetFrame(stringRect);
@@ -88,9 +90,34 @@ void StringRenderer::MouseDown(BPoint where,int32 buttons, int32 clicks,int32 mo
 	editor->SetActiveTextEditor(editer);
 }
 
+void StringRenderer::SetFont(const BFont &font)
+{
+	*editorFont	= font;
+	hasOwnFont	= true;
+	font_height	fHeight;
+	editorFont->GetHeight(&fHeight);
+	fontHeight	= fHeight.ascent+2;
+	SetFrame(frame);
+}
+
+void StringRenderer::SetColor(rgb_color newColor)
+{
+	color		= newColor;
+	hasColor	= true;
+}
+
 void StringRenderer::Draw(BView *drawOn, BRect updateRect)
-{	
+{
+	if (hasOwnFont || hasColor) {
+		drawOn->PushState();
+		if (hasOwnFont)
+			drawOn->SetFont(editorFont);
+		if (hasColor)
+			drawOn->SetHighColor(color);
+	}
 	drawOn->MovePenTo(frame.left+2,frame.top+fontHeight+1);
 	drawOn->DrawString(shortString->String());
+	if (hasOwnFont || hasColor)
+		drawOn->PopState();
 }
 

@@ -171,8 +171,12 @@ void NodeShape::SetTo(const BMessage *archive)
 	fPolygons.clear();
 	fScaled.Clear();
 	fTextRect.Set(0, 0, 1, 1);
+	fName	= "rounded";
 	if (archive == NULL)
 		return;
+	const char	*name	= NULL;
+	if (archive->FindString(P_C_SHAPE_NAME, &name) == B_OK)
+		fName	= name;
 	BMessage	copy(*archive);
 	BShape		shape(&copy);
 	ShapeCollector	collector(fOps);

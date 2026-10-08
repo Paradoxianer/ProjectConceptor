@@ -18,6 +18,8 @@
 #include "PDocument.h"
 #include "PluginManager.h"
 #include "SmartGuides.h"
+#include "GraphStyle.h"
+#include "ShadowCache.h"
 
 #include "PatternToolItem.h"
 #include "ColorToolItem.h"
@@ -68,6 +70,8 @@ const float		circleSize		= 3.0;
 // exactly the same spots (same circleSize, same edge midpoints), or they
 // are covered by them and the arrow settings have no visible effect.
 const float		arrowSize		= 7.0;
+// FillColor a new connection gets; drawn as the style's line color
+const rgb_color	kDefaultConnectionColor	= {187, 67, 47, 255};
 
 class Renderer;
 class BMessageRunner;
@@ -149,6 +153,9 @@ public:
 			void			SendToBack(Renderer *wichRenderer);
 
 			float			Scale(void){return scale;};
+			/** what renderers draw with; follows the system colors/fonts */
+	const	GraphStyle&		Style(void){return style;};
+			ShadowCache&	Shadows(void){return shadows;};
 			BList*			RenderList(void){return renderer;};
 			image_id		PluginID(void){return pluginID;};
 			char*			RenderString(void){return renderString;};
@@ -250,6 +257,8 @@ protected:
 			BMessage		*nodeMessage;
 			BMessage		*fontMessage;
 			BMessage		*patternMessage;
+			GraphStyle		style;
+			ShadowCache		shadows;
 			BMessage		*configMessage;
 			BMessage		*connectionMessage;
 			BMessage		*groupMessage;

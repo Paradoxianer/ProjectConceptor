@@ -37,7 +37,8 @@ SRCS=	AttributRenderer.cpp	\
 		GroupRenderer.cpp		\
 		SmartGuides.cpp \
 		NodeShape.cpp \
-		GraphStyle.cpp			\
+		GraphStyle.cpp \
+		ShadowCache.cpp			\
 		StringRenderer.cpp		\
 		TextEditorControl.cpp
 

@@ -29,6 +29,10 @@ public:
 			void			ValueChanged(void){};
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetString(char *newString);
+			/** font and color to draw with; without them it draws in the
+			 * view's current font and high color */
+			void			SetFont(const BFont &font);
+			void			SetColor(rgb_color color);
 	const	char*			GetString(void){return myString->String();};
 			void			MouseDown(BPoint where, int32 buttons =0,
 	                              	  int32 clicks =0, int32 modifiers =0);
@@ -52,6 +56,9 @@ protected:
 		BString				*shortString;
 		BFont				*editorFont;
 		float				fontHeight;
+		bool				hasOwnFont;
+		bool				hasColor;
+		rgb_color			color;
 private:
 };
 #endif
