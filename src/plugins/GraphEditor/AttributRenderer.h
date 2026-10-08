@@ -38,6 +38,8 @@ public:
 
 			void			MouseUp(BPoint where);
 			void			SetFrame(BRect newRect);
+			/** whether the delete icon shows - and reacts (#51) */
+			void			SetShowDelete(bool show){showDelete=show;};
 			BRect			Frame(void){return frame;};
 			void			MoveBy(float dx, float dy);
 			void			ResizeBy(float dx,float dy){frame.right+=dx;SetFrame(frame);};
@@ -57,8 +59,8 @@ protected:
 		Renderer			*value;
 		//Renderer			*deleter;
 		float				divider;
+		bool				showDelete;
 		BPopUpMenu			*kontextMenu;
-		BBitmap				*delBitmap;
 		
 private:
 };

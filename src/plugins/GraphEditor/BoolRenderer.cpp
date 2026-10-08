@@ -30,33 +30,12 @@ BoolRenderer::BoolRenderer(GraphEditor *parentEditor,
 
 BoolRenderer::~BoolRenderer()
 {
-	delete selected;
-	delete unselected;
 }
 
 void BoolRenderer::Init()
 {
 	TRACE();
-	image_info	*info 	= new image_info;
-	selected	= NULL;
-	unselected	= NULL;
 	value		= false;
-	size_t		size;
-	// look up the plugininfos
-	//** this should be done globaly to safe ressources
-	get_image_info(editor->PluginID(),info);
-	// init the ressource for the plugin files
-	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
-	// load the addBool icon
-	const void *data=res->LoadResource((type_code)'PNG ',"addBool",&size);
-	if (data)
-		//translate the icon because it was png but we ne a bmp 
-		selected	= BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-	data=res->LoadResource((type_code)'PNG ',"unselectedBool",&size);
-	if (data)
-		unselected	= BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-	delete res;
-	delete info;
 }
 
 void BoolRenderer::SetBool(bool newValue)
@@ -69,16 +48,9 @@ void BoolRenderer::SetFrame(BRect newRect)
 {
 	TRACE();
 	frame			= newRect;
-	if (selected)
-	{
-		frame.bottom	= frame.top + selected->Bounds().Height();
-		frame.right		= frame.left + selected->Bounds().Width();
-	}
-	else
-	{
-		frame.bottom	= frame.top+10;
-		frame.right		= frame.left+10;
-	}
+	float	size	= editor->Style().attributeFontSize;
+	frame.right		= frame.left + size;
+	frame.bottom	= frame.top + size + 2;
 }
 
 void BoolRenderer::MouseDown(BPoint where, int32 buttons,
@@ -103,9 +75,24 @@ void BoolRenderer::MouseUp(BPoint where)
 
 void BoolRenderer::Draw(BView *drawOn, BRect updateRect)
 {
-	if (value)	
-		drawOn->DrawBitmapAsync(selected,frame);
-	else
-		drawOn->DrawBitmapAsync(unselected,frame);
+	const GraphStyle	&style	= editor->Style();
+	BRect	box(frame.left, frame.top + 2, frame.right, frame.bottom);
+	drawOn->PushState();
+	drawOn->SetPenSize(1.0);
+	drawOn->SetHighColor(GraphColors::Mix(style.mutedText, style.cardFill, 0.4f));
+	drawOn->StrokeRoundRect(box, 2, 2);
+	if (value) {
+		// a check mark, drawn like everything else on the card
+		drawOn->SetPenSize(1.8);
+		drawOn->SetLineMode(B_ROUND_CAP, B_ROUND_JOIN);
+		drawOn->SetHighColor(style.accent);
+		float	w	= box.Width();
+		float	h	= box.Height();
+		drawOn->StrokeLine(BPoint(box.left + w * 0.2f, box.top + h * 0.55f),
+			BPoint(box.left + w * 0.42f, box.top + h * 0.78f));
+		drawOn->StrokeLine(BPoint(box.left + w * 0.42f, box.top + h * 0.78f),
+			BPoint(box.left + w * 0.82f, box.top + h * 0.25f));
+	}
+	drawOn->PopState();
 }
 

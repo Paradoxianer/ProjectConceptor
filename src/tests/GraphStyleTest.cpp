@@ -1,6 +1,9 @@
 #include "GraphStyleTest.h"
 
 #include "GraphStyle.h"
+#include "ShadowCache.h"
+
+#include <vector>
 
 using namespace GraphColors;
 
@@ -93,4 +96,32 @@ void GraphStyleTest::SizesFollowTheFont(void)
 	CPPUNIT_ASSERT(large.paddingX > normal.paddingX);
 	// line widths stay crisp, they don't scale
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(normal.selectionWidth, large.selectionWidth, 0.001);
+}
+
+
+void GraphStyleTest::ShadowBlurSpreadsAndKeepsItsMass(void)
+{
+	// a filled square in the middle of an empty mask, big enough to keep
+	// a fully dark core under a radius-3 blur
+	const int32		size	= 40;
+	std::vector<uint8>	mask(size * size, 0);
+	long			before	= 0;
+	for (int32 y = 10; y < 30; y++) {
+		for (int32 x = 10; x < 30; x++) {
+			mask[y * size + x]	= 255;
+			before += 255;
+		}
+	}
+	ShadowCache::BoxBlur(&mask[0], size, size, 3);
+	long	after	= 0;
+	for (int32 i = 0; i < size * size; i++)
+		after += mask[i];
+	// the core stays dark, the old edge is half-tone, pixels outside the
+	// square now carry some shadow, far away stays clear
+	CPPUNIT_ASSERT(mask[20 * size + 20] > 250);
+	CPPUNIT_ASSERT(mask[20 * size + 10] > 100 && mask[20 * size + 10] < 180);
+	CPPUNIT_ASSERT(mask[20 * size + 7] > 30);
+	CPPUNIT_ASSERT(mask[0] == 0);
+	// blurring moves the shadow around, it doesn't add or lose much of it
+	CPPUNIT_ASSERT(after > before * 0.9 && after < before * 1.02);
 }

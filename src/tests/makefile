@@ -100,7 +100,8 @@ SRCS= 	TestMain.cpp \
 		../plugins/GraphEditor/GroupBoundary.cpp \
 		../plugins/GraphEditor/SmartGuides.cpp \
 		../plugins/GraphEditor/NodeShape.cpp \
-		../plugins/GraphEditor/GraphStyle.cpp
+		../plugins/GraphEditor/GraphStyle.cpp \
+		../plugins/GraphEditor/ShadowCache.cpp
 
 RDEFS=
 

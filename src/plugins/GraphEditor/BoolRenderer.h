@@ -46,8 +46,6 @@ protected:
 		GraphEditor 		*editor;
 		BRect				frame;
 		bool				value;
-		BBitmap				*selected;
-		BBitmap				*unselected;
 private:
 };
 #endif

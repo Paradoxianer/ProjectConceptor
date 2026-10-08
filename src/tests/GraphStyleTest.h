@@ -14,6 +14,7 @@ public:
 	void TextStaysReadableInBothSchemes(void);
 	void GroupLabelStaysReadableWithALightAccent(void);
 	void SizesFollowTheFont(void);
+	void ShadowBlurSpreadsAndKeepsItsMass(void);
 
 	CPPUNIT_TEST_SUITE(GraphStyleTest);
 	CPPUNIT_TEST(MixReachesBothEnds);
@@ -23,6 +24,7 @@ public:
 	CPPUNIT_TEST(TextStaysReadableInBothSchemes);
 	CPPUNIT_TEST(GroupLabelStaysReadableWithALightAccent);
 	CPPUNIT_TEST(SizesFollowTheFont);
+	CPPUNIT_TEST(ShadowBlurSpreadsAndKeepsItsMass);
 	CPPUNIT_TEST_SUITE_END();
 };
 

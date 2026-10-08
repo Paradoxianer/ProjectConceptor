@@ -16,6 +16,7 @@
 #include "ProjectConceptorDefs.h"
 #include "PCommandManager.h"
 #include "BoolRenderer.h"
+#include "StringRenderer.h"
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "AttributeRenderer"
@@ -42,23 +43,11 @@ void AttributRenderer::Init()
 	TRACE();
 	name		= NULL;
 	value		= NULL;
-	image_info	*info 	= new image_info;
-	size_t		size;
-	delBitmap	= NULL;
+	showDelete	= false;
 	kontextMenu	= new BPopUpMenu("deleter");
 	BMenuItem	*delMenu = new BMenuItem(B_TRANSLATE("Delete"),deleteMessage);
 	kontextMenu->AddItem(delMenu);
 	kontextMenu->SetTargetForItems(editor->BelongTo());
-
-	// look up the plugininfos
-	get_image_info(editor->PluginID(),info);
-	// init the ressource for the plugin files
-	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
-	// load the addBool icon
-	const void *data=res->LoadResource((type_code)'PNG ',"delete",&size);
-	if (data)
-		//translate the icon because it was png but we ne a bmp 
-		delBitmap	= BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
 }
 
 void AttributRenderer::SetAttribute(BMessage *newAttribut)
@@ -108,6 +97,19 @@ void AttributRenderer::SetAttribute(BMessage *newAttribut)
 		}
 
 	}
+	const GraphStyle	&style	= editor->Style();
+	BFont	rowFont(be_plain_font);
+	rowFont.SetSize(style.attributeFontSize);
+	StringRenderer	*label	= dynamic_cast<StringRenderer*>(name);
+	if (label != NULL) {
+		label->SetFont(rowFont);
+		label->SetColor(style.mutedText);
+	}
+	StringRenderer	*text	= dynamic_cast<StringRenderer*>(value);
+	if (text != NULL) {
+		text->SetFont(rowFont);
+		text->SetColor(style.text);
+	}
 	SetFrame(frame);
 }
 	
@@ -115,7 +117,20 @@ void AttributRenderer::SetFrame(BRect newRect)
 {
 	TRACE();
 	frame			= newRect;
-	divider			= (frame.Width()-DELETER_WIDTH)/2;
+	// the label column is as wide as the label, within 30..45 % of the row
+	float	usable	= frame.Width()-DELETER_WIDTH;
+	divider			= usable*0.45f;
+	StringRenderer	*label	= dynamic_cast<StringRenderer*>(name);
+	if (dynamic_cast<BoolRenderer*>(value) != NULL) {
+		// a check mark needs no more room than itself
+		divider	= usable - editor->Style().attributeFontSize - 6;
+	} else if (label != NULL) {
+		BFont	rowFont(be_plain_font);
+		rowFont.SetSize(editor->Style().attributeFontSize);
+		float	wanted	= rowFont.StringWidth(label->GetString()) + 10;
+		if (wanted < divider)
+			divider	= (wanted > usable*0.3f) ? wanted : usable*0.3f;
+	}
 	float maxBottom	= frame.bottom;
 	if (name)
 		name->SetFrame(BRect(frame.left,frame.top,frame.left+divider-1,frame.bottom));
@@ -183,7 +198,7 @@ void AttributRenderer::MouseUp(BPoint where)
 			value->MouseUp(where);
 		else 
 		{
-			if (delRect.Contains(where)){
+			if (showDelete && delRect.Contains(where)){
 				//it was the deleter
 				BMessenger *sender	= new BMessenger(editor->BelongTo());
 				sender->SendMessage(deleteMessage); 
@@ -209,12 +224,18 @@ void AttributRenderer::Draw(BView *drawOn, BRect updateRect)
 		value->Draw(drawOn,updateRect);
 	/*if (deleter)
 		deleter->Draw(drawOn,updateRect);*/
-	if (delBitmap)
-		drawOn->DrawBitmapAsync(delBitmap,delRect);
-	rgb_color stored = drawOn->HighColor();
-	drawOn->SetHighColor(60,50,50,255);
-	drawOn->StrokeRect(frame);
-	drawOn->StrokeLine(BPoint(frame.left+divider,frame.top),BPoint(frame.left+divider,frame.bottom));
-	drawOn->SetHighColor(stored);
+	if (showDelete) {
+		// a quiet cross, not an alarm sign
+		const GraphStyle	&style	= editor->Style();
+		BPoint	center((delRect.left+delRect.right)/2,(delRect.top+delRect.bottom)/2);
+		float	arm		= 3.0f;
+		drawOn->PushState();
+		drawOn->SetPenSize(1.4);
+		drawOn->SetLineMode(B_ROUND_CAP,B_ROUND_JOIN);
+		drawOn->SetHighColor(style.mutedText);
+		drawOn->StrokeLine(center+BPoint(-arm,-arm),center+BPoint(arm,arm));
+		drawOn->StrokeLine(center+BPoint(-arm,arm),center+BPoint(arm,-arm));
+		drawOn->PopState();
+	}
 }
 
