@@ -1,6 +1,8 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	3461046772
+1	German	application/x-vnd.ProjectConceptor-plugin	1649170796
 Delete	AttributeRenderer		Löschen
+Triangle	GraphEditor		Dreieck
 Group selected nodes	GraphEditor		Ausgewählte Knoten gruppieren
+Diamond	GraphEditor		Raute
 Connection	GraphEditor		Verbindung
 Add text attribute	GraphEditor		Textattribut hinzufügen
 Grid	GraphEditor		Gitter
@@ -8,24 +10,32 @@ Fill pattern for selected nodes	GraphEditor		Füllmuster für ausgewählte Knote
 Toggle grid	GraphEditor		Raster ein/aus
 Input attribute name	GraphEditor		Attributnamen eingeben
 None	GraphEditor		Keine
+Parallelogram	GraphEditor		Parallelogramm
 Toggle smart alignment guides	GraphEditor		Intelligente Ausrichtungshilfen ein/aus
+Ellipse	GraphEditor		Ellipse
 Arrows	GraphEditor		Pfeile
 Rounded	GraphEditor		Abgerundet
 Pen size	GraphEditor		Stiftgröße
 Add boolean attribute	GraphEditor		Wahrheitswert-Attribut hinzufügen
+Note	GraphEditor		Notiz
 OK	GraphEditor		OK
+Rounded rectangle	GraphEditor		Abgerundetes Rechteck
 Fill color for selected nodes	GraphEditor		Füllfarbe für ausgewählte Knoten
 Fill	GraphEditor		Ausfüllen
 Both ends	GraphEditor		Beide Enden
+Rectangle	GraphEditor		Rechteck
 Pattern	GraphEditor		Muster
 Scale	GraphEditor		Skalieren
 Guides	GraphEditor		Hilfslinien
 Straight	GraphEditor		Gerade
+Shape of the selected nodes	GraphEditor		Form der ausgewählten Knoten
 Angular	GraphEditor		Eckig
 At source	GraphEditor		Am Anfang
 Attribute	GraphEditor		Attribut
 Name	GraphEditor		Name
+Hexagon	GraphEditor		Sechseck
 At target	GraphEditor		Am Ende
+Shape	GraphEditor		Form
 Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
 Untitled	GraphEditor		Unbenannt
 Cancel	GraphEditor		Abbrechen

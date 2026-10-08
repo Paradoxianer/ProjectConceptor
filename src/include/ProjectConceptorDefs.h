@@ -320,6 +320,10 @@ extern const char*		P_C_NODE_FRAME;		//				= "Node::Frame"
 
 
 extern const char*		P_C_NODE_PATTERN;	//				= "Node::Pattern"
+/** archived BShape in 0..1 of Node::Frame, see GraphEditor's NodeShape */
+extern const char*		P_C_NODE_SHAPE;		//				= "Node::Shape"
+extern const char*		P_C_SHAPE_NAME;		//				= "Shape::name"
+extern const char*		P_C_SHAPE_TEXT_RECT;	//			= "Shape::textRect"
 extern const char*		P_C_NODE_SELECTED;	//				= "Node::selected"
 extern const char*		P_C_NODE_X_RADIUS;	//				= "Node::xRadius"
 extern const char*		P_C_NODE_Y_RADIUS;	//				= "Node::yRadius"

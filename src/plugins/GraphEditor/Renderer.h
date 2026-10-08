@@ -27,6 +27,9 @@ public:
 
 	virtual bool		Selected(void)											= 0;
 	virtual bool		Caught(BPoint where)									= 0;
+	/** Where a connection docks for the frame point onFrame (a side's
+	 * midpoint); shaped nodes move it onto their outline. */
+	virtual	BPoint		Anchor(BPoint onFrame) {return onFrame;};
 
 	virtual	BMessage*	GetMessage(void){return container;};
 

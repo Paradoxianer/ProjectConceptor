@@ -14,6 +14,7 @@ public:
 	void ChangeValueDoUndo(void);
 	void ChangeValueOnSelectionDoUndo(void);
 	void ChangeValueOnConnectionPattern(void);
+	void ChangeValueReplacesNodeShape(void);
 	void GroupThenInsertChildRegistersInParentList(void);
 	void GroupUndoThenRedoKeepsChildren(void);
 	void WrapperUndoRestoresAllSubcommands(void);
@@ -41,6 +42,7 @@ public:
 	CPPUNIT_TEST(ChangeValueDoUndo);
 	CPPUNIT_TEST(ChangeValueOnSelectionDoUndo);
 	CPPUNIT_TEST(ChangeValueOnConnectionPattern);
+	CPPUNIT_TEST(ChangeValueReplacesNodeShape);
 	CPPUNIT_TEST(GroupThenInsertChildRegistersInParentList);
 	CPPUNIT_TEST(GroupUndoThenRedoKeepsChildren);
 	CPPUNIT_TEST(WrapperUndoRestoresAllSubcommands);

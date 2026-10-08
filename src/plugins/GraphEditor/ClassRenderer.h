@@ -18,6 +18,7 @@ using namespace std;
 #include "Renderer.h"
 #include "StringRenderer.h"
 #include "AFont.h"
+#include "NodeShape.h"
 
 
 /**
@@ -47,6 +48,7 @@ public:
 				void		ValueChanged(void);
 
 				bool		Caught(BPoint where);
+				BPoint		Anchor(BPoint onFrame) {return shape.Anchor(onFrame);};
 				BRect		Frame(void);
 				void		SetFrame(BRect newFrame);
 				void		MoveBy(float dx, float dy);
@@ -77,6 +79,13 @@ public:
 protected:
 				void		Init();
 				void		InsertAttribute(char *attribName, BMessage *attribute,int32 count);
+				/** where name and attributes go: the shape's text area */
+				BRect		ContentFrame(void) {return shape.TextFrame(frame);};
+				/** the four connection dots, on the shape's outline */
+				void		UpdateConnectors(void);
+				/** bottom-right end of the resize handle: the frame's corner,
+				 * or where the outline faces it */
+				BPoint		ResizeCorner(void) {return shape.Anchor(frame.RightBottom());};
 				void		AdjustParents(BMessage* theParent, BMessage *command);
 
 		virtual	bool		MoveAll(void *arg,float dx, float dy);
@@ -106,6 +115,7 @@ protected:
 		bool				initialized;
 		AFont				*font;
 		float				penSize;
+		NodeShape			shape;
 
 
 	//---------ClassSettings-----------
