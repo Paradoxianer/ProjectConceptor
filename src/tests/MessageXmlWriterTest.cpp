@@ -8,7 +8,9 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
+#include "MessageXmlReader.h"
 #include "MessageXmlWriter.h"
 #include "ProjectConceptorDefs.h"
 
@@ -16,10 +18,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(MessageXmlWriterTest);
 
 void MessageXmlWriterTest::ZeroLengthRawFieldDoesNotCrash(void)
 {
-	// default: branch's char *encoded = new char[(size*2)] is a zero-size
-	// allocation when size==0, immediately written to via encoded[len]='\0'
-	// - a heap overflow either way, and a candidate for the reported SIGFPE
-	// if encode_base64() itself divides by something size-derived.
+	// default: branch's char *encoded = new char[(size*2)] was a zero-size
+	// allocation when size==0, immediately written to via encoded[len]='\0'.
 	BMessage	message;
 	message.AddData("Empty",B_RAW_TYPE,"",0);
 
@@ -48,29 +48,38 @@ void MessageXmlWriterTest::InfinityDoubleFieldDoesNotCrash(void)
 	CPPUNIT_ASSERT(writer.WriteTo(message,&destination) == B_OK);
 }
 
-void MessageXmlWriterTest::RawFieldSizesZeroToThreeHundredDoNotCrash(void)
+void MessageXmlWriterTest::RawFieldsOfEverySizeRoundTrip(void)
 {
-	// broad fuzz across the default: branch's real dependency on size -
-	// encode_base64()'s own source isn't available locally to read, and
-	// #114's reported crash was a deterministic SIGFPE, so some specific
-	// size (or size range, e.g. a base64 line-wrap boundary -
-	// BASE64_LINELENGTH is 76 in the Haiku header) is the most likely
-	// trigger. fprintf+fflush before each attempt: if this does crash, the
-	// last printed size is the exact one, without needing to bisect again.
+	// sizes across several base64 line breaks, written and read back:
+	// a too small encode buffer (it was size*2, 3 bytes for a 1-byte field)
+	// corrupts the result long before it crashes
 	char	buffer[300];
 	for (int i=0; i<300; i++)
 		buffer[i]	= (char)(i & 0xFF);
 
-	for (ssize_t size=0; size<=300; size++) {
-		fprintf(stderr,"MessageXmlWriterTest: trying raw size %ld\n",(long)size);
-		fflush(stderr);
-
+	// from 1: BMessage doesn't keep a zero-size AddData() at all, see
+	// ZeroLengthRawFieldDoesNotCrash()
+	for (ssize_t size=1; size<=300; size++) {
 		BMessage	message;
 		message.AddData("Raw",B_RAW_TYPE,buffer,size);
 
 		MessageXmlWriter	writer;
 		BMallocIO			destination;
 		CPPUNIT_ASSERT(writer.WriteTo(message,&destination) == B_OK);
+
+		destination.Seek(0,SEEK_SET);
+		MessageXmlReader	reader;
+		BMessage			*restored	= reader.ReadFrom(&destination);
+		CPPUNIT_ASSERT(restored != NULL);
+		const void	*data	= NULL;
+		ssize_t		length	= -1;
+		BString		which;
+		which.SetToFormat("raw size %ld",(long)size);
+		CPPUNIT_ASSERT_EQUAL_MESSAGE(which.String(),(status_t)B_OK,
+			restored->FindData("Raw",B_RAW_TYPE,&data,&length));
+		CPPUNIT_ASSERT_EQUAL_MESSAGE(which.String(),size,length);
+		CPPUNIT_ASSERT_MESSAGE(which.String(),memcmp(data,buffer,size) == 0);
+		delete restored;
 	}
 }
 

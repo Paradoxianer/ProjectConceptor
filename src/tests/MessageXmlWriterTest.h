@@ -18,7 +18,7 @@ public:
 	void NaNFloatFieldDoesNotCrash(void);
 	void InfinityDoubleFieldDoesNotCrash(void);
 	void OrdinaryMessageRoundtrips(void);
-	void RawFieldSizesZeroToThreeHundredDoNotCrash(void);
+	void RawFieldsOfEverySizeRoundTrip(void);
 	void RealisticNestedNodeMessageDoesNotCrash(void);
 	void PatternFieldDoesNotCrash(void);
 	void RgbColorFieldsDoNotCrash(void);
@@ -29,7 +29,7 @@ public:
 	CPPUNIT_TEST(NaNFloatFieldDoesNotCrash);
 	CPPUNIT_TEST(InfinityDoubleFieldDoesNotCrash);
 	CPPUNIT_TEST(OrdinaryMessageRoundtrips);
-	CPPUNIT_TEST(RawFieldSizesZeroToThreeHundredDoNotCrash);
+	CPPUNIT_TEST(RawFieldsOfEverySizeRoundTrip);
 	CPPUNIT_TEST(RealisticNestedNodeMessageDoesNotCrash);
 	CPPUNIT_TEST(PatternFieldDoesNotCrash);
 	CPPUNIT_TEST(RgbColorFieldsDoNotCrash);
