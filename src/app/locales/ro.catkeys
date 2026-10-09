@@ -1,4 +1,4 @@
-1	Romanian	application/x-vnd.ProjectConceptor	258680107
+1	Romanian	application/x-vnd.ProjectConceptor	19311348
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtături pentru macrocomenzi (dublu clic pentru a schimba tasta)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Apăsați combinația de taste pentru macrocomanda „%s” (Esc pentru anulare).
 About	MainWindow		Despre
@@ -76,6 +76,7 @@ Title	MainWindow		Titlu
 Delete	MainWindow		Șterge
 Save as	MainWindow		Salvare ca
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nu există niciun program de email pe mașină care este configurat ca programul implicit pentru trimiterea de email.
+Standard	ColorPickerWindow		Implicit
 Untitled	Document		Fără titlu
 Web Browser Warning	AboutURLView		Avertisment browser web
 OK	Document		OK

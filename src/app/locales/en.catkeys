@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor	258680107
+1	English	application/x-vnd.ProjectConceptor	19311348
 Macro shortcuts (double-click to change the key)	ShortCutView		Macro shortcuts (double-click to change the key)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Press the key combination for the macro \"%s\" (Esc to cancel).
 About	MainWindow		About
@@ -76,6 +76,7 @@ Title	MainWindow		Title
 Delete	MainWindow		Delete
 Save as	MainWindow		Save as
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		There is no e-mail program on your machine that is configured as the default program to send e-mail.
+Standard	ColorPickerWindow		Standard
 Untitled	Document		Untitled
 Web Browser Warning	AboutURLView		Web Browser Warning
 OK	Document		OK

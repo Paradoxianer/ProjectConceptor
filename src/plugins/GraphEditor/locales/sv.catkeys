@@ -1,4 +1,5 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	2948063220
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	3534142443
+Line	GraphEditor		Linje
 Delete	AttributeRenderer		Radera
 Triangle	GraphEditor		Triangel
 Diamond	GraphEditor		Romb
@@ -7,6 +8,7 @@ Grid	GraphEditor		Rutnät
 Fit	GraphEditor		Anpassa
 Fill pattern for selected nodes	GraphEditor		Fyllnadsmönster för markerade noder
 Toggle grid	GraphEditor		Visa/dölj rutnät
+Text	GraphEditor		Text
 Input attribute name	GraphEditor		Ange attributets namn
 None	GraphEditor		Ingen
 Group	GraphEditor		Gruppera
@@ -24,6 +26,7 @@ Fill color for selected nodes	GraphEditor		Fyllnadsfärg för markerade noder
 Fill	GraphEditor		Fyll
 Both ends	GraphEditor		Båda ändar
 Rectangle	GraphEditor		Rektangel
+Border	GraphEditor		Kant
 Pattern	GraphEditor		Mönster
 + Text	GraphEditor		+ Text
 Guides	GraphEditor		Hjälplinjer

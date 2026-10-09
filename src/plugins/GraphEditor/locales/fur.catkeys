@@ -1,4 +1,5 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	2948063220
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	3534142443
+Line	GraphEditor		Linie
 Delete	AttributeRenderer		Elimine
 Triangle	GraphEditor		Triangul
 Diamond	GraphEditor		Rombo
@@ -7,6 +8,7 @@ Grid	GraphEditor		Grile
 Fit	GraphEditor		Adatâ
 Fill pattern for selected nodes	GraphEditor		Motîf di jemplament pai grops selezionâts
 Toggle grid	GraphEditor		Mostre/plate la grile
+Text	GraphEditor		Test
 Input attribute name	GraphEditor		Inserìs il non dal atribût
 None	GraphEditor		Nissune
 Group	GraphEditor		Ragrupâ
@@ -24,6 +26,7 @@ Fill color for selected nodes	GraphEditor		Colôr di jemplament pai grops selezi
 Fill	GraphEditor		Jemplament
 Both ends	GraphEditor		Ducj i doi i cjâfs
 Rectangle	GraphEditor		Retangul
+Border	GraphEditor		Ôr
 Pattern	GraphEditor		Motîf
 + Text	GraphEditor		+ Test
 Guides	GraphEditor		Guidis

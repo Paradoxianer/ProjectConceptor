@@ -1,4 +1,5 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	2948063220
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	3534142443
+Line	GraphEditor		Linie
 Delete	AttributeRenderer		Șterge
 Triangle	GraphEditor		Triunghi
 Diamond	GraphEditor		Romb
@@ -7,6 +8,7 @@ Grid	GraphEditor		Grilă
 Fit	GraphEditor		Potrivire
 Fill pattern for selected nodes	GraphEditor		Model de umplere pentru nodurile selectate
 Toggle grid	GraphEditor		Comută grila
+Text	GraphEditor		Text
 Input attribute name	GraphEditor		Introduceți numele atributului
 None	GraphEditor		Niciuna
 Group	GraphEditor		Grupare
@@ -24,6 +26,7 @@ Fill color for selected nodes	GraphEditor		Culoare de umplere pentru nodurile se
 Fill	GraphEditor		Umplere
 Both ends	GraphEditor		Ambele capete
 Rectangle	GraphEditor		Dreptunghi
+Border	GraphEditor		Contur
 Pattern	GraphEditor		Model
 + Text	GraphEditor		+ Text
 Guides	GraphEditor		Ghidaje

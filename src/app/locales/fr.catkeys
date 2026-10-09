@@ -1,4 +1,4 @@
-1	French	application/x-vnd.ProjectConceptor	258680107
+1	French	application/x-vnd.ProjectConceptor	19311348
 Macro shortcuts (double-click to change the key)	ShortCutView		Raccourcis des macros (double-clic pour changer la touche)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Appuyez sur la combinaison de touches pour la macro « %s » (Échap pour annuler).
 About	MainWindow		À propos de
@@ -11,7 +11,7 @@ Start recording	MainWindow		Démarrer l'enregistrement
 OK	CommandManager		OK
 OK	ShortCutView		OK
 \"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		« $%s » (pour « %s ») vaut « %s », pas un nombre
-New	MainWindow		Nouveau .
+New	MainWindow		Nouveau
 %ld problem(s) while playing, first: %s	CommandManager		%ld problème(s) pendant la lecture, le premier : %s
 This document has no macros yet. Record or create one first (Macro menu).	ShortCutView		Ce document n'a pas encore de macros. Enregistrez-en ou créez-en une d'abord (menu Macro).
 Edit	MainWindow		Éditer
@@ -76,6 +76,7 @@ Title	MainWindow		Titre
 Delete	MainWindow		Effacer
 Save as	MainWindow		Enregistrer sous
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Il n'y a pas, sur votre machine,  de programme de courriel qui soit configuré comme le programme par défaut pour envoyer des courriels.
+Standard	ColorPickerWindow		Par défaut
 Untitled	Document		Sans titre
 Web Browser Warning	AboutURLView		Alerte par navigateur
 OK	Document		OK

@@ -1,4 +1,5 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	2948063220
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	3534142443
+Line	GraphEditor		Línea
 Delete	AttributeRenderer		Borrar
 Triangle	GraphEditor		Triángulo
 Diamond	GraphEditor		Rombo
@@ -7,6 +8,7 @@ Grid	GraphEditor		Grilla
 Fit	GraphEditor		Ajustar
 Fill pattern for selected nodes	GraphEditor		Patrón de relleno de los nodos seleccionados
 Toggle grid	GraphEditor		Mostrar/ocultar cuadrícula
+Text	GraphEditor		Texto
 Input attribute name	GraphEditor		Introduzca el nombre del atributo
 None	GraphEditor		Ninguna
 Group	GraphEditor		Agrupar
@@ -24,6 +26,7 @@ Fill color for selected nodes	GraphEditor		Color de relleno de los nodos selecci
 Fill	GraphEditor		Rellenar
 Both ends	GraphEditor		Ambos extremos
 Rectangle	GraphEditor		Rectángulo
+Border	GraphEditor		Borde
 Pattern	GraphEditor		Patrón
 + Text	GraphEditor		+ Texto
 Guides	GraphEditor		Guías

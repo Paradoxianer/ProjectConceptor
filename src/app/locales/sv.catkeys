@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor	258680107
+1	Swedish	application/x-vnd.ProjectConceptor	19311348
 Macro shortcuts (double-click to change the key)	ShortCutView		Makrokortkommandon (dubbelklicka för att ändra tangenten)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tryck på tangentkombinationen för makrot ”%s” (Esc avbryter).
 About	MainWindow		Om
@@ -76,6 +76,7 @@ Title	MainWindow		Titel
 Delete	MainWindow		Radera
 Save as	MainWindow		Spara som
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Det finns ingen e-postklient konfigurerad som standardprogram för att skicka och ta emot e-post.
+Standard	ColorPickerWindow		Standard
 Untitled	Document		Namnlös
 Web Browser Warning	AboutURLView		Webläsarvarning
 OK	Document		OK

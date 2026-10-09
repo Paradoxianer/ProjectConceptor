@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor	258680107
+1	Friulian	application/x-vnd.ProjectConceptor	19311348
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtis des macros (dopli clic par cambiâ il tast)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Frache la combinazion di tascj pe macro “%s” (Esc par anulâ).
 About	MainWindow		Informazions
@@ -76,6 +76,7 @@ Title	MainWindow		Titul
 Delete	MainWindow		Elimine
 Save as	MainWindow		Salve come
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nol è presint nissun program pes e-mail te machine che al sedi configurât come program predefinît par inviâ e-mail.
+Standard	ColorPickerWindow		Predefinît
 Untitled	Document		Cence titul
 Web Browser Warning	AboutURLView		Avertiment navigadôr web
 OK	Document		Va ben

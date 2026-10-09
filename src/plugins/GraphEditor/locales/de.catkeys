@@ -1,4 +1,5 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	2948063220
+1	German	application/x-vnd.ProjectConceptor-plugin	3534142443
+Line	GraphEditor		Linie
 Delete	AttributeRenderer		Löschen
 Triangle	GraphEditor		Dreieck
 Diamond	GraphEditor		Raute
@@ -7,6 +8,7 @@ Grid	GraphEditor		Gitter
 Fit	GraphEditor		Einpassen
 Fill pattern for selected nodes	GraphEditor		Füllmuster für ausgewählte Knoten
 Toggle grid	GraphEditor		Raster ein/aus
+Text	GraphEditor		Text
 Input attribute name	GraphEditor		Attributnamen eingeben
 None	GraphEditor		Keine
 Group	GraphEditor		Gruppieren
@@ -24,6 +26,7 @@ Fill color for selected nodes	GraphEditor		Füllfarbe für ausgewählte Knoten
 Fill	GraphEditor		Ausfüllen
 Both ends	GraphEditor		Beide Enden
 Rectangle	GraphEditor		Rechteck
+Border	GraphEditor		Rand
 Pattern	GraphEditor		Muster
 + Text	GraphEditor		+ Text
 Guides	GraphEditor		Hilfslinien

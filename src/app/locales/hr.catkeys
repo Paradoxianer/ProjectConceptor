@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor	258680107
+1	Croatian	application/x-vnd.ProjectConceptor	19311348
 Macro shortcuts (double-click to change the key)	ShortCutView		Prečaci makronaredbi (dvostruki klik za promjenu tipke)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Pritisnite kombinaciju tipki za makronaredbu „%s” (Esc za odustajanje).
 About	MainWindow		O programu
@@ -76,6 +76,7 @@ Title	MainWindow		Naslov
 Delete	MainWindow		Izbriši
 Save as	MainWindow		Spremi kao
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nema nijednog e-mail programa na vašem stroju koji je konfiguriran kao zadani program za slanje e-maila.
+Standard	ColorPickerWindow		Zadano
 Untitled	Document		Bez naslova
 Web Browser Warning	AboutURLView		Upozorenje preglednika
 OK	Document		U redu
