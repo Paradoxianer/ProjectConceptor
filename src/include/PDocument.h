@@ -77,6 +77,9 @@ public:
 	 * returns the title of the Document.. this is generated from the FileName
 	 */
 	const	char*				Title(void);
+	/** shows Title() in the window's title bar; asynchronous, so it is
+	 * safe while this document is locked */
+			void				UpdateWindowTitle(void);
 
 	/**
 	 * Bounds returns the Bounds of the Document wicht enclose everey Node in the Document

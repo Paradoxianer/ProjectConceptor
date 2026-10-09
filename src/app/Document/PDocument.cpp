@@ -463,6 +463,7 @@ void PDocument::Init(){
 		delete frameConfig;
 	}
 	window			= new PWindow(windowRect,this);
+	UpdateWindowTitle();
 	ApplyAutoSaveSettings();
 	if (locked)
 		UnlockLooper();
@@ -486,17 +487,23 @@ void PDocument::Init(BMessage *archive)
 const char* PDocument::Title(void)
 {
 	TRACE();
-	if (Lock()) {
-		if (entryRef)
-			return entryRef->name;
-		else
-			return "Untitled";
-		Unlock();
-	}
-	else {
-		PRINT(("\tDEBUG:\tTitle() - Cant Lock()\n"));
+	BAutolock	autolock(this);
+	if (!autolock.IsLocked())
 		return NULL;
-	}
+	if (entryRef)
+		return entryRef->name;
+	return B_TRANSLATE("Untitled");
+}
+
+void PDocument::UpdateWindowTitle(void)
+{
+	const char	*title	= Title();
+	if ((window == NULL) || (title == NULL))
+		return;
+	BMessage	setTitle(B_SET_PROPERTY);
+	setTitle.AddSpecifier("Title");
+	setTitle.AddString("data",title);
+	BMessenger(window).SendMessage(&setTitle);
 }
 
 void PDocument::Resize(float toX,float toY)
@@ -806,7 +813,7 @@ void PDocument::Save(void)
 	nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
 	nodeInfo.SetPreferredApp(APP_SIGNATURE);
 	ResetModified();
-	window->SetTitle(Title());
+	UpdateWindowTitle();
 	be_roster->AddToRecentDocuments(entryRef,APP_SIGNATURE);
 }
 
@@ -839,6 +846,7 @@ void PDocument::Load(void)
 		return;
 	}
 	ResetModified();
+	UpdateWindowTitle();
 
 	int32	fileVersion	= 0;
 	if ((loaded.FindInt32(P_C_DOC_FORMAT_VERSION_FIELD,&fileVersion) != B_OK)
