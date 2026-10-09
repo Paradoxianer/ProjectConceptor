@@ -426,6 +426,8 @@ void GroupRenderer::PlaceLabel(void)
 
 bool GroupRenderer::Caught(BPoint where)
 {
+	if (hovered && (ConnectorAt(where) != 0))
+		return true;
 	if (!frame.Contains(where))
 		return false;
 	vector<BRect>	rects;
@@ -490,6 +492,14 @@ void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
 	while (allAttributes != attributes->end()) {
 		(*allAttributes)->Draw(drawOn,updateRect);
 		allAttributes++;
+	}
+	if (hovered) {
+		if (!selected) {
+			drawOn->SetPenSize(1.5);
+			drawOn->SetHighColor(GraphColors::WithAlpha(style.accent,160));
+			drawOn->StrokePolygon(&hull[0],hull.size());
+		}
+		DrawConnectors(drawOn,style);
 	}
 
 	if (offsetForAnim)

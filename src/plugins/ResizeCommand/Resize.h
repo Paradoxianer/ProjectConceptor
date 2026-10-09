@@ -1,5 +1,5 @@
-#ifndef INSERT_H
-#define INSERT_H
+#ifndef RESIZE_H
+#define RESIZE_H
 /*
  * @author Paradoxon powered by Jesus Christ
  */
@@ -18,9 +18,7 @@ public:
 	virtual	char*			Name(void){return "Resize";};
 	virtual	void			AttachedToManager(void);
 	virtual	void			DetachedFromManager(void);
-
-protected:
-			void			DoResize(PDocument *doc,BRect *rect,BMessage *settings);
+	virtual	const property_info	*PropertyInfo(int32 *count);
 	//----------------PCommand
 };
 #endif

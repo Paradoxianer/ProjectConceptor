@@ -8,6 +8,7 @@
 #include "LayoutEditorTest.h"
 #include "MacroTextTest.h"
 #include "MessageXmlWriterTest.h"
+#include "NodeHandlesTest.h"
 #include "NodeShapeTest.h"
 #include "PCommandTest.h"
 #include "SmartGuidesTest.h"
@@ -33,6 +34,7 @@ int main(int argc, char **argv)
 	runner.addTest(MessageXmlWriterTest::suite());
 	runner.addTest(TranslatorTest::suite());
 	runner.addTest(NodeShapeTest::suite());
+	runner.addTest(NodeHandlesTest::suite());
 	runner.addTest(GraphStyleTest::suite());
 	bool success = runner.run("", false);
 	// #117: every headless PDocument any test created is still running a

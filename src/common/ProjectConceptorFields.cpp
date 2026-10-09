@@ -39,6 +39,8 @@ const char*		P_C_SHAPE_TEXT_RECT				= "Shape::textRect";
 const char*		P_C_NODE_SELECTED				= "Node::selected";
 const char*		P_C_NODE_X_RADIUS				= "Node::xRadius";
 const char*		P_C_NODE_Y_RADIUS				= "Node::yRadius";
+const char*		P_C_RESIZE_LEFT					= "dleft";
+const char*		P_C_RESIZE_TOP					= "dtop";
 
 const char*		P_C_NODE_CONNECTION_FROM		= "Node::from";
 const char*		P_C_NODE_CONNECTION_TO			= "Node::to";

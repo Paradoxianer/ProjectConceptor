@@ -70,6 +70,11 @@ const float		circleSize		= 3.0;
 // exactly the same spots (same circleSize, same edge midpoints), or they
 // are covered by them and the arrow settings have no visible effect.
 const float		arrowSize		= 7.0;
+// drawn size of a resize handle and hit radius of handles and connection
+// dots, in screen pixels at any zoom
+const float		kHandleSize		= 7.0;
+const float		kMinNodeWidth	= 70;
+const float		kMinNodeHeight	= 30;
 // FillColor a new connection gets; drawn as the style's line color
 const rgb_color	kDefaultConnectionColor	= {187, 67, 47, 255};
 
@@ -145,6 +150,9 @@ public:
 			void			ClearActiveGuides(void){hasActiveGuides=false;};
 
 			Renderer*		FindRenderer(BPoint where);
+			/** the renderer under the mouse shows its connection dots;
+			 * NULL for none */
+			void			SetHovered(Renderer *renderer);
 			Renderer*		FindNodeRenderer(BPoint where);
 			Renderer*		FindConnectionRenderer(BPoint where);
 			Renderer*		FindRenderer(BMessage *container);
@@ -268,6 +276,7 @@ protected:
 			BRegion			*rendersensitv;
 			Renderer		*activRenderer;
 			Renderer		*mouseReciver;
+			Renderer		*hovered;
 			// "start editing this node's name once its renderer exists" is
 			// pure GUI intent for the next InsertRenderObject() to act on -
 			// keeping it as a GraphEditor-local pointer instead of a bool

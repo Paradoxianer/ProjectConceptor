@@ -56,6 +56,10 @@ public:
 	 */
 	virtual	bool		AnimationStep(float dt) {return false;};
 
+	/** the mouse is over this renderer, or a connection being drawn would
+	 * end on it - see GraphEditor::SetHovered() */
+	virtual	void		SetHovered(bool hover) {};
+
 protected:
 			BMessage	*container;
 			GraphEditor	*editor;

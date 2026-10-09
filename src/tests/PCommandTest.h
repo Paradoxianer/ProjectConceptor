@@ -39,6 +39,8 @@ public:
 	void SleepUndoDoesNothing(void);
 	void MenuSearchFindForwardsShadowFlagToRecording(void);
 
+	void ResizeMovesLeftAndTopEdgesAndUndoes(void);
+
 	CPPUNIT_TEST_SUITE(PCommandTest);
 	CPPUNIT_TEST(ChangeValueDoUndo);
 	CPPUNIT_TEST(ChangeValueOnSelectionDoUndo);
@@ -67,6 +69,7 @@ public:
 	CPPUNIT_TEST(SleepWithNoMillisecondsFieldIsANoOp);
 	CPPUNIT_TEST(SleepUndoDoesNothing);
 	CPPUNIT_TEST(MenuSearchFindForwardsShadowFlagToRecording);
+	CPPUNIT_TEST(ResizeMovesLeftAndTopEdgesAndUndoes);
 	CPPUNIT_TEST_SUITE_END();
 };
 

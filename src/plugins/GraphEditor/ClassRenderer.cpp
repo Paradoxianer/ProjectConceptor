@@ -13,6 +13,7 @@
 #include "AttributRenderer.h"
 #include "GroupRenderer.h"
 #include "SmartGuides.h"
+#include "NodeHandles.h"
 
 // #127: candidate frames for GuidesEnabled() to align against - every
 // unselected node renderer (the dragged node's own selected siblings are
@@ -63,10 +64,9 @@ void ClassRenderer::Init()
 {
 	TRACE();
 	status_t	err			 	= B_OK;
-	resizing					= false;
-	showConnecter				= true;
-	startMouseDown				= NULL;
-	oldPt						= NULL;
+	tracking					= false;
+	resizeHandle				= NodeHandles::NONE;
+	hovered						= false;
 	doc							= NULL;
 	parentNode					= NULL;
 
@@ -108,209 +108,167 @@ void ClassRenderer::Init()
 void ClassRenderer::MouseDown(BPoint where, int32 buttons,
 	                              int32 clicks,int32 modifiers)
 {
-	bool		found			= false;
-	Renderer*	tmpRenderer		= NULL;
-	if (name->Caught(where)) {
+	// handles take precedence over the name and attribute rows below them
+	int32	handle		= (selected && SupportsResize())
+		? NodeHandles::HandleAt(frame,where,HandleRadius()) : (int32)NodeHandles::NONE;
+	int32	connector	= hovered ? ConnectorAt(where) : 0;
+	bool	found		= (handle != NodeHandles::NONE) || (connector != 0);
+	if (!found && name->Caught(where)) {
 		name->MouseDown(where);
 		found	= true;
 	}
-	for (uint32 i = 0; (found == false) && (i < attributes->size());i++) {
-		tmpRenderer=(*attributes)[i];
-		if (tmpRenderer->Caught(where)) {
-			found = true;
-			tmpRenderer->MouseDown(where);
+	for (uint32 i = 0; (!found) && (i < attributes->size()); i++) {
+		Renderer	*row	= (*attributes)[i];
+		if (row->Caught(where)) {
+			found	= true;
+			row->MouseDown(where);
 		}
 	}
+	if (((handle == NodeHandles::NONE) && (connector == 0) && found) || tracking)
+		return;
 
-	if ((!found) && (startMouseDown == NULL)) {
-		uint32 buttons = 0;
-		uint32 modifiers = 0;
-		BMessage *currentMsg = editor->Window()->CurrentMessage();
-		currentMsg->FindInt32("buttons", (int32 *)&buttons);
-		currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
-		if (buttons & B_PRIMARY_MOUSE_BUTTON) {
-			editor->BringToFront(this);
-			startMouseDown	= new BPoint(where);
-			startFrame		= new BRect(frame);
-			editor->SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
-			if  (!selected) {
-				BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
-				if  ((modifiers & B_SHIFT_KEY) != 0)
-					selectMessage->AddBool("deselect",false);
-				selectMessage->AddPointer("node",container);
-				selectMessage->AddString("Command::Name","Select");
-				sentTo->SendMessage(selectMessage);
-			}
-			if (leftConnection.Contains(where))
-				connecting	= 1;
-			else if (topConnection.Contains(where))
-				connecting	= 2;
-			else if (rightConnection.Contains(where))
-				connecting	= 3;
-			else if (bottomConnection.Contains(where))
-				connecting	= 4;
-			else if (SupportsResize()
-					&& BRect(ResizeCorner()-BPoint(3*circleSize,3*circleSize),ResizeCorner()).Contains(where)) {
-				resizing = true;
-			}
+	if (buttons & B_PRIMARY_MOUSE_BUTTON) {
+		editor->BringToFront(this);
+		tracking		= true;
+		startMouseDown	= where;
+		oldPt			= where;
+		startFrame		= frame;
+		connecting		= connector;
+		resizeHandle	= handle;
+		editor->SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
+		if (!selected) {
+			BMessage *selectMessage=new BMessage(P_C_EXECUTE_COMMAND);
+			if  ((modifiers & B_SHIFT_KEY) != 0)
+				selectMessage->AddBool("deselect",false);
+			selectMessage->AddPointer("node",container);
+			selectMessage->AddString("Command::Name","Select");
+			sentTo->SendMessage(selectMessage);
 		}
-		else if (buttons & B_SECONDARY_MOUSE_BUTTON )
-			editor->SendToBack(this);
 	}
+	else if (buttons & B_SECONDARY_MOUSE_BUTTON)
+		editor->SendToBack(this);
 }
+
 void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
-	if (startMouseDown) {
-		if (connecting == 0) {
-			float dx	= 0;
-			float dy	= 0;
-			//resizedifferenze
-			float rdx	= 0;
-			float rdy	= 0;
-
-			if (!oldPt)
-				oldPt	= startMouseDown;
-			if (editor->GridEnabled()) {
-				float newPosX = startFrame->left + (pt.x-startMouseDown->x);
-				float newPosY = startFrame->top + (pt.y-startMouseDown->y);
-				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
-				newPosY = newPosY - fmod(newPosY,editor->GridWidth());
-				dx	= newPosX - frame.left;
-				dy	= newPosY - frame.top;
-
-				newPosX = startFrame->right + (pt.x-startMouseDown->x);
-				newPosY = startFrame->bottom + (pt.y-startMouseDown->y);
-				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
-				newPosY = newPosY - fmod(newPosY,editor->GridWidth());
-				rdx	= newPosX - frame.right;
-				rdy	= newPosY - frame.bottom;
-			}
-			else if (!resizing && editor->GuidesEnabled()) {
-				// Same absolute-from-drag-start shape as the grid branch
-				// above (not incremental from oldPt) - guide matches have
-				// to be recomputed against the true current candidate
-				// position every tick, not accumulated.
-				float	rawDx			= pt.x - startMouseDown->x;
-				float	rawDy			= pt.y - startMouseDown->y;
-				BList	*targets		= CollectGuideTargets(editor);
-				float	thresholdDoc	= kGuideScreenThreshold / editor->Scale();
-				GuideSnapResult	snap	= ComputeGuideSnap(*startFrame,rawDx,rawDy,targets,thresholdDoc);
-				DeleteGuideTargets(targets);
-				dx	= (startFrame->left + snap.dx) - frame.left;
-				dy	= (startFrame->top + snap.dy) - frame.top;
-				editor->SetActiveGuides(snap);
-			}
-			else {
-				dx = pt.x - oldPt->x;
-				dy = pt.y - oldPt->y;
-			}
-			oldPt	= new BPoint(pt);
-			if (!resizing) { 
-				BList *renderer	= editor->RenderList();
-				for (int32 i=0;i<renderer->CountItems();i++) {
-					MoveAll(renderer->ItemAt(i),dx,dy);
-				}
-				if (parentNode) {
-					GroupRenderer	*parent	= NULL;
-					if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
-						parent->RecalcFrame();
-				}
-				editor->Invalidate();
-			}
-			else {
-				BList *renderer	= editor->RenderList();
-				if (editor->GridEnabled())
-					for (int32 i=0;i<renderer->CountItems();i++) {
-						ResizeAll(renderer->ItemAt(i),rdx,rdy);
-					}
-				else
-					for (int32 i=0;i<renderer->CountItems();i++) {
-						ResizeAll(renderer->ItemAt(i),dx,dy);
-					}
-				if (parentNode) {
-					GroupRenderer	*parent	= NULL;
-					if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
-						parent->RecalcFrame();
-				}
-				editor->Invalidate();
-			}
+	if (!tracking)
+		return;
+	if (connecting != 0) {
+		BMessage	connecter(G_E_CONNECTING);
+		connecter.AddPoint(P_C_NODE_CONNECTION_FROM,startMouseDown);
+		connecter.AddPoint(P_C_NODE_CONNECTION_TO,pt);
+		BMessenger((BView *)editor).SendMessage(&connecter);
+		return;
+	}
+	if (resizeHandle != NodeHandles::NONE) {
+		BRect	target	= NodeHandles::Resized(startFrame,resizeHandle,
+			pt.x-startMouseDown.x,pt.y-startMouseDown.y,kMinNodeWidth,kMinNodeHeight);
+		if (editor->GridEnabled())
+			target	= NodeHandles::Snapped(target,resizeHandle,editor->GridWidth());
+		ResizeSelected(target.left-frame.left,target.top-frame.top,
+			target.right-frame.right,target.bottom-frame.bottom);
+	}
+	else {
+		float	dx	= 0;
+		float	dy	= 0;
+		if (editor->GridEnabled()) {
+			float newPosX = startFrame.left + (pt.x-startMouseDown.x);
+			float newPosY = startFrame.top + (pt.y-startMouseDown.y);
+			newPosX = newPosX - fmod(newPosX,editor->GridWidth());
+			newPosY = newPosY - fmod(newPosY,editor->GridWidth());
+			dx	= newPosX - frame.left;
+			dy	= newPosY - frame.top;
+		}
+		else if (editor->GuidesEnabled()) {
+			// absolute from the drag start, not incremental: guide matches
+			// are recomputed against the true candidate position each tick
+			float	rawDx			= pt.x - startMouseDown.x;
+			float	rawDy			= pt.y - startMouseDown.y;
+			BList	*targets		= CollectGuideTargets(editor);
+			float	thresholdDoc	= kGuideScreenThreshold / editor->Scale();
+			GuideSnapResult	snap	= ComputeGuideSnap(startFrame,rawDx,rawDy,targets,thresholdDoc);
+			DeleteGuideTargets(targets);
+			dx	= (startFrame.left + snap.dx) - frame.left;
+			dy	= (startFrame.top + snap.dy) - frame.top;
+			editor->SetActiveGuides(snap);
 		}
 		else {
-			// make connecting Stuff
-			BMessage *connecter=new BMessage(G_E_CONNECTING);
-			connecter->AddPoint(P_C_NODE_CONNECTION_FROM,*startMouseDown);
-			connecter->AddPoint(P_C_NODE_CONNECTION_TO,pt);
-			(new BMessenger((BView *)editor))->SendMessage(connecter);
+			dx = pt.x - oldPt.x;
+			dy = pt.y - oldPt.y;
 		}
+		BList *renderer	= editor->RenderList();
+		for (int32 i=0;i<renderer->CountItems();i++)
+			MoveAll(renderer->ItemAt(i),dx,dy);
 	}
+	oldPt	= pt;
+	if (parentNode) {
+		GroupRenderer	*parent	= NULL;
+		if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
+			parent->RecalcFrame();
+	}
+	editor->Invalidate();
 }
 
 
 void ClassRenderer::MouseUp(BPoint where) {
 	bool		found			= false;
-	Renderer*	tmpRenderer		= NULL;
-	for (uint32 i = 0; (found == false) && (i < attributes->size());i++) {
-		tmpRenderer=(*attributes)[i];
-		if (tmpRenderer->Caught(where)) {
+	for (uint32 i = 0; (!found) && (i < attributes->size());i++) {
+		Renderer	*row	= (*attributes)[i];
+		if (row->Caught(where)) {
 			found = true;
-			tmpRenderer->MouseUp(where);
+			row->MouseUp(where);
 		}
 	}
-	if ( (!found) && (startMouseDown) ) {
-		if (connecting == 0) {
-			float dx = where.x - startMouseDown->x;
-			float dy = where.y - startMouseDown->y;
-			if (editor->GridEnabled()) {
-				float newPosX = startFrame->left + dx;
-				float newPosY = startFrame->top + dy;
-				newPosX = newPosX - fmod(newPosX,editor->GridWidth());
-				newPosY = newPosY - fmod(newPosY,editor->GridWidth());
-				dx = newPosX-startFrame->left;
-				dy = newPosY-startFrame->top;
-			}
-			else if (!resizing && editor->GuidesEnabled()) {
-				// dx/dy above are already absolute-from-startFrame (same
-				// shape ComputeGuideSnap() expects/returns), unlike
-				// MouseMoved()'s incremental case - matches the last
-				// on-screen preview exactly.
-				BList	*targets		= CollectGuideTargets(editor);
-				float	thresholdDoc	= kGuideScreenThreshold / editor->Scale();
-				GuideSnapResult	snap	= ComputeGuideSnap(*startFrame,dx,dy,targets,thresholdDoc);
-				DeleteGuideTargets(targets);
-				dx	= snap.dx;
-				dy	= snap.dy;
-			}
-			if (!resizing) {
-				BMessage	*mover		= new BMessage(P_C_EXECUTE_COMMAND);
-				mover->AddString("Command::Name","Move");
-				mover->AddFloat("dx",dx);
-				mover->AddFloat("dy",dy);
-				AdjustParents(parentNode,mover);
-				sentTo->SendMessage(mover);
-			}
-			else {
-				BMessage	*resizer	= new BMessage(P_C_EXECUTE_COMMAND);
-				resizer->AddString("Command::Name","Resize");
-				resizer->AddFloat("dx",dx);
-				resizer->AddFloat("dy",dy);
-				AdjustParents(parentNode,resizer);
-				sentTo->SendMessage(resizer);
-			}
-			resizing		= false;
-		}
-		else {
-			BMessage *connecter=new BMessage(G_E_CONNECTED);
-			connecter->AddPointer(P_C_NODE_CONNECTION_FROM,container);
-			connecter->AddPoint(P_C_NODE_CONNECTION_TO,where);
-			(new BMessenger((BView *)editor))->SendMessage(connecter);
-		}
-		if (startMouseDown) delete startMouseDown;
-		if (oldPt) delete oldPt;
-		startMouseDown	= NULL;
-		oldPt			= NULL;
-		connecting		= 0;
-		editor->ClearActiveGuides();
-		editor->Invalidate();
+	if (found || !tracking)
+		return;
+	if (connecting != 0) {
+		BMessage	connecter(G_E_CONNECTED);
+		connecter.AddPointer(P_C_NODE_CONNECTION_FROM,container);
+		connecter.AddPoint(P_C_NODE_CONNECTION_TO,where);
+		BMessenger((BView *)editor).SendMessage(&connecter);
 	}
+	else if (resizeHandle != NodeHandles::NONE) {
+		// the live preview already is the result
+		BMessage	*resizer	= new BMessage(P_C_EXECUTE_COMMAND);
+		resizer->AddString("Command::Name","Resize");
+		resizer->AddFloat("dx",frame.right-startFrame.right);
+		resizer->AddFloat("dy",frame.bottom-startFrame.bottom);
+		resizer->AddFloat(P_C_RESIZE_LEFT,frame.left-startFrame.left);
+		resizer->AddFloat(P_C_RESIZE_TOP,frame.top-startFrame.top);
+		AdjustParents(parentNode,resizer);
+		sentTo->SendMessage(resizer);
+	}
+	else {
+		float dx = where.x - startMouseDown.x;
+		float dy = where.y - startMouseDown.y;
+		if (editor->GridEnabled()) {
+			float newPosX = startFrame.left + dx;
+			float newPosY = startFrame.top + dy;
+			newPosX = newPosX - fmod(newPosX,editor->GridWidth());
+			newPosY = newPosY - fmod(newPosY,editor->GridWidth());
+			dx = newPosX-startFrame.left;
+			dy = newPosY-startFrame.top;
+		}
+		else if (editor->GuidesEnabled()) {
+			// matches the last on-screen preview exactly
+			BList	*targets		= CollectGuideTargets(editor);
+			float	thresholdDoc	= kGuideScreenThreshold / editor->Scale();
+			GuideSnapResult	snap	= ComputeGuideSnap(startFrame,dx,dy,targets,thresholdDoc);
+			DeleteGuideTargets(targets);
+			dx	= snap.dx;
+			dy	= snap.dy;
+		}
+		BMessage	*mover		= new BMessage(P_C_EXECUTE_COMMAND);
+		mover->AddString("Command::Name","Move");
+		mover->AddFloat("dx",dx);
+		mover->AddFloat("dy",dy);
+		AdjustParents(parentNode,mover);
+		sentTo->SendMessage(mover);
+	}
+	tracking		= false;
+	connecting		= 0;
+	resizeHandle	= NodeHandles::NONE;
+	editor->ClearActiveGuides();
+	editor->Invalidate();
 }
 
 
@@ -384,24 +342,10 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 		drawOn->StrokePolygon(&outline[0],outline.size(),true);
 	}
 
-	if (SupportsResize()) {
-		BPoint	corner	= ResizeCorner();
-		drawOn->SetHighColor(style.mutedText);
-		drawOn->FillTriangle(BPoint(corner.x-(3*circleSize),corner.y),BPoint(corner.x,corner.y-(3*circleSize)),corner);
-	}
-
-	if (showConnecter) {
-		drawOn->SetPenSize(1.0);
-		drawOn->SetHighColor(style.cardFill);
-		drawOn->FillEllipse(leftConnection);
-		drawOn->FillEllipse(topConnection);
-		drawOn->FillEllipse(rightConnection);
-		drawOn->FillEllipse(bottomConnection);
-		drawOn->SetHighColor(style.accent);
-		drawOn->StrokeEllipse(leftConnection);
-		drawOn->StrokeEllipse(topConnection);
-		drawOn->StrokeEllipse(rightConnection);
-		drawOn->StrokeEllipse(bottomConnection);
+	if (hovered && !selected && (outline.size() >= 3)) {
+		drawOn->SetPenSize(1.5);
+		drawOn->SetHighColor(GraphColors::WithAlpha(style.accent,160));
+		drawOn->StrokePolygon(&outline[0],outline.size(),true);
 	}
 
 	name->Draw(drawOn,updateRect);
@@ -423,6 +367,10 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 		drawOn->SetHighColor(style.mutedText);
 		drawOn->DrawString("…",BPoint(content.left+style.paddingX,content.bottom-(style.paddingY/2)));
 	}
+	if (selected && SupportsResize())
+		DrawHandles(drawOn,style);
+	if (hovered)
+		DrawConnectors(drawOn,style);
 
 	if (offsetForAnim)
 		drawOn->PopState();
@@ -548,6 +496,48 @@ BRect ClassRenderer::Frame( void ) {
 	return frame;
 }
 
+float ClassRenderer::HandleRadius(void) {
+	return kHandleSize / editor->Scale();
+}
+
+int32 ClassRenderer::ConnectorAt(BPoint where) {
+	const BRect	dots[]	= { leftConnection, topConnection, rightConnection, bottomConnection };
+	float		grow	= HandleRadius() - circleSize;
+	if (grow < 0)
+		grow	= 0;
+	for (int32 i = 0; i < 4; i++) {
+		BRect	area	= dots[i];
+		area.InsetBy(-grow,-grow);
+		if (area.Contains(where))
+			return i + 1;
+	}
+	return 0;
+}
+
+void ClassRenderer::DrawConnectors(BView *drawOn, const GraphStyle &style) {
+	const BRect	dots[]	= { leftConnection, topConnection, rightConnection, bottomConnection };
+	drawOn->SetPenSize(1.5);
+	for (int32 i = 0; i < 4; i++) {
+		drawOn->SetHighColor(style.cardFill);
+		drawOn->FillEllipse(dots[i]);
+		drawOn->SetHighColor(style.accent);
+		drawOn->StrokeEllipse(dots[i]);
+	}
+}
+
+void ClassRenderer::DrawHandles(BView *drawOn, const GraphStyle &style) {
+	float	half	= kHandleSize / 2 / editor->Scale();
+	drawOn->SetPenSize(1.0);
+	for (int32 handle = 0; handle < NodeHandles::COUNT; handle++) {
+		BPoint	at		= NodeHandles::Position(frame,handle);
+		BRect	square(at.x-half,at.y-half,at.x+half,at.y+half);
+		drawOn->SetHighColor(style.cardFill);
+		drawOn->FillRect(square);
+		drawOn->SetHighColor(style.accent);
+		drawOn->StrokeRect(square);
+	}
+}
+
 void ClassRenderer::UpdateConnectors(void) {
 	float	yMiddle	= frame.top+(frame.Height()/2);
 	float	xMiddle	= frame.left+(frame.Width()/2);
@@ -562,24 +552,26 @@ void ClassRenderer::UpdateConnectors(void) {
 }
 
 bool  ClassRenderer::Caught(BPoint where) {
-	 bool contains	= shape.HasPath() ? shape.Contains(where) : frame.Contains(where);
-	 if (!contains && SupportsResize())
-		contains = BRect(ResizeCorner()-BPoint(3*circleSize,3*circleSize),ResizeCorner()).Contains(where);
-	 if (!contains) {
-	 	contains = leftConnection.Contains(where);
-	 	if (!contains) {
-		 	contains = topConnection.Contains(where);
-		 	if (!contains) {
-			 	contains = rightConnection.Contains(where);
-				if (!contains)
-	 				contains = bottomConnection.Contains(where);
-		 	}
-	 	}
-	 }
-	 return contains;
+	if (shape.HasPath() ? shape.Contains(where) : frame.Contains(where))
+		return true;
+	if (selected && SupportsResize()
+		&& (NodeHandles::HandleAt(frame,where,HandleRadius()) != NodeHandles::NONE))
+		return true;
+	return hovered && (ConnectorAt(where) != 0);
 }
-//**implement this
 void  ClassRenderer::SetFrame(BRect newFrame) {
+	MoveBy(newFrame.left-frame.left,newFrame.top-frame.top);
+	float	dWidth	= newFrame.Width()-frame.Width();
+	frame.right		= newFrame.right;
+	frame.bottom	= newFrame.bottom;
+	name->ResizeBy(dWidth,0);
+	vector<Renderer *>::iterator	allAttributes = attributes->begin();
+	while( allAttributes != attributes->end() ) {
+		(*allAttributes)->ResizeBy(dWidth,0);
+		allAttributes++;
+	}
+	shape.Layout(frame);
+	UpdateConnectors();
 }
 
 // see the identical guard in the Move command (Move.cpp): a group's own
@@ -608,11 +600,21 @@ bool  ClassRenderer::MoveAll(void *arg,float dx, float dy) {
 	return false;
 }
 
-bool  ClassRenderer::ResizeAll(void *arg,float dx, float dy) {
-	Renderer	*renderer	= (Renderer*)arg;
-	if (renderer->Selected())
-		renderer->ResizeBy(dx,dy);
-	return false;
+void ClassRenderer::ResizeSelected(float dLeft, float dTop, float dRight,
+	float dBottom) {
+	BList	*renderers	= editor->RenderList();
+	for (int32 i = 0; i < renderers->CountItems(); i++) {
+		ClassRenderer	*node	= dynamic_cast<ClassRenderer*>((Renderer*)renderers->ItemAt(i));
+		if ((node == NULL) || !node->Selected() || !node->SupportsResize())
+			continue;
+		BRect	resized	= node->Frame();
+		resized.left	+= dLeft;
+		resized.top		+= dTop;
+		resized.right	+= dRight;
+		resized.bottom	+= dBottom;
+		if ((resized.Width() >= kMinNodeWidth) && (resized.Height() >= kMinNodeHeight))
+			node->SetFrame(resized);
+	}
 }
 
 void ClassRenderer::MoveBy(float dx,float dy) {
@@ -628,18 +630,12 @@ void ClassRenderer::MoveBy(float dx,float dy) {
 }
 
 void ClassRenderer::ResizeBy(float dx,float dy) {
-	if ((frame.right+dx-frame.left) > 70)
-		frame.right		+= dx;
-	if  ((frame.bottom+dy-frame.top) > 30)
-		frame.bottom	+= dy;
-	name->ResizeBy(dy,dy);
-	vector<Renderer *>::iterator	allAttributes = attributes->begin();
-	while( allAttributes != attributes->end() ) {
-		(*allAttributes)->ResizeBy(dx,dy);
-		allAttributes++;
-	}
-	shape.Layout(frame);
-	UpdateConnectors();
+	BRect	resized	= frame;
+	if (resized.Width()+dx >= kMinNodeWidth)
+		resized.right	+= dx;
+	if (resized.Height()+dy >= kMinNodeHeight)
+		resized.bottom	+= dy;
+	SetFrame(resized);
 }
 
 void ClassRenderer::SetPreviewFillColor(rgb_color color) {

@@ -160,6 +160,7 @@ void GraphEditor::Init(void) {
 	startMouseDown	= NULL;
 	activRenderer	= NULL;
 	mouseReciver	= NULL;
+	hovered			= NULL;
 	pendingStartEditNode	= NULL;
 	activeTextEditor		= NULL;
 	rendersensitv	= new BRegion();
@@ -731,6 +732,31 @@ void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messa
 	else if (mouseReciver != NULL) {
 		mouseReciver->MouseMoved(scaledWhere,code,a_message);
 	}
+	else if (code == B_EXITED_VIEW)
+		SetHovered(NULL);
+	else {
+		Renderer	*under	= NULL;
+		for (int32 i = renderer->CountItems()-1; (under == NULL) && (i >= 0); i--) {
+			Renderer	*candidate	= (Renderer*)renderer->ItemAt(i);
+			if (candidate->Caught(scaledWhere))
+				under	= DrillIntoGroup(candidate,scaledWhere);
+		}
+		if ((under != NULL) && (under->GetMessage()->what == P_C_CONNECTION_TYPE))
+			under	= NULL;
+		SetHovered(under);
+	}
+}
+
+
+void GraphEditor::SetHovered(Renderer *newHovered) {
+	if (newHovered == hovered)
+		return;
+	if (hovered != NULL)
+		hovered->SetHovered(false);
+	hovered	= newHovered;
+	if (hovered != NULL)
+		hovered->SetHovered(true);
+	Invalidate();
 }
 
 void GraphEditor::MouseUp(BPoint where) {
@@ -923,11 +949,14 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				connecting = true;
 				message->FindPoint(P_C_NODE_CONNECTION_TO,toPoint);
 				message->FindPoint(P_C_NODE_CONNECTION_FROM,fromPoint);
+				// the node a connection would end on lights up
+				SetHovered(FindNodeRenderer(*toPoint));
 				Invalidate();
 			break;
 		}
 		case G_E_CONNECTED: {
 			connecting = false;
+			SetHovered(NULL);
 			Invalidate();
 			BMessage	*connection		= new BMessage(P_C_CONNECTION_TYPE);
 			BMessage	*commandMessage	= new BMessage(P_C_EXECUTE_COMMAND);
@@ -1299,6 +1328,8 @@ void GraphEditor::RemoveRenderer(Renderer *wichRenderer) {
 			activRenderer = NULL;
 		if (mouseReciver == wichRenderer)
 			mouseReciver = NULL;
+		if (hovered == wichRenderer)
+			hovered = NULL;
 		if (wichRenderer->GetMessage())
 			(wichRenderer->GetMessage())->RemoveName(renderString);
 		renderer->RemoveItem(wichRenderer);

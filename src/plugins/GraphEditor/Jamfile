@@ -25,6 +25,7 @@ Addon pc_graph_editor :
 	GroupRenderer.cpp
 	SmartGuides.cpp
 	NodeShape.cpp
+	NodeHandles.cpp
 	GraphStyle.cpp
 	ShadowCache.cpp
 	StringRenderer.cpp

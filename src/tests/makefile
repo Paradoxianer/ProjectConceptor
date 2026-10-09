@@ -23,6 +23,7 @@ SRCS= 	TestMain.cpp \
 		SmartGuidesTest.cpp \
 		TranslatorTest.cpp \
 		NodeShapeTest.cpp \
+		NodeHandlesTest.cpp \
 		GraphStyleTest.cpp \
 		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
@@ -84,6 +85,7 @@ SRCS= 	TestMain.cpp \
 		../plugins/InsertCommand/Insert.cpp \
 		../plugins/GroupCommand/Group.cpp \
 		../plugins/MoveCommand/Move.cpp \
+		../plugins/ResizeCommand/Resize.cpp \
 		../plugins/SelectCommand/Select.cpp \
 		../plugins/FindCommand/Find.cpp \
 		../plugins/FindCommand/FindWindow.cpp \
@@ -101,7 +103,8 @@ SRCS= 	TestMain.cpp \
 		../plugins/GraphEditor/SmartGuides.cpp \
 		../plugins/GraphEditor/NodeShape.cpp \
 		../plugins/GraphEditor/GraphStyle.cpp \
-		../plugins/GraphEditor/ShadowCache.cpp
+		../plugins/GraphEditor/ShadowCache.cpp \
+		../plugins/GraphEditor/NodeHandles.cpp
 
 RDEFS=
 
@@ -129,6 +132,7 @@ LOCAL_INCLUDE_PATHS =	. \
 						../plugins/ChangeValueCommand \
 						../plugins/InsertCommand \
 						../plugins/GroupCommand \
+						../plugins/ResizeCommand \
 						../plugins/LayoutEditor \
 						../plugins/MacroEditor \
 						../plugins/BatchCommand \

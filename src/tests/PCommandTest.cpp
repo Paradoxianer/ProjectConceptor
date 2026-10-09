@@ -17,6 +17,7 @@
 #include "Move.h"
 #include "Remember.h"
 #include "Repeat.h"
+#include "Resize.h"
 #include "Select.h"
 #include "Sleep.h"
 #include "PCommandManager.h"
@@ -1246,4 +1247,34 @@ void PCommandTest::MenuSearchFindForwardsShadowFlagToRecording(void)
 	snooze(200000);
 
 	CPPUNIT_ASSERT(recording->HasMessage("Macro::Commmand"));
+}
+
+
+void PCommandTest::ResizeMovesLeftAndTopEdgesAndUndoes(void)
+{
+	// a top-left handle drag: one command, one undo step
+	PDocument	*doc	= NewHeadlessTestDocument();
+	BMessage	node(P_C_CLASS_TYPE);
+	node.AddRect(P_C_NODE_FRAME,BRect(100,100,200,180));
+	doc->GetAllNodes()->AddItem(&node);
+	doc->GetSelected()->AddItem(&node);
+
+	BMessage	settings;
+	settings.AddFloat("dx",0);
+	settings.AddFloat("dy",0);
+	settings.AddFloat(P_C_RESIZE_LEFT,-20);
+	settings.AddFloat(P_C_RESIZE_TOP,-10);
+	Resize		command;
+	BMessage	*result	= command.Do(doc,&settings);
+	CPPUNIT_ASSERT(result != NULL);
+
+	BRect	frame;
+	CPPUNIT_ASSERT(node.FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+	CPPUNIT_ASSERT(frame == BRect(80,90,200,180));
+
+	command.Undo(doc,result);
+	CPPUNIT_ASSERT(node.FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+	CPPUNIT_ASSERT(frame == BRect(100,100,200,180));
+	doc->GetSelected()->MakeEmpty();
+	doc->GetAllNodes()->MakeEmpty();
 }

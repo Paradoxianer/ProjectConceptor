@@ -66,6 +66,7 @@ public:
 				void		ClearPreviewFillColor(void);
 
 				bool		AnimationStep(float dt);
+				void		SetHovered(bool hover) {hovered = hover;};
 
 				/** false hides the resize handle/hit-test entirely (issue
 				 * #38 - a group's box is auto-fit around its children, a
@@ -83,15 +84,21 @@ protected:
 				BRect		ContentFrame(void) {return shape.TextFrame(frame);};
 				/** the four connection dots, on the shape's outline */
 				void		UpdateConnectors(void);
+				/** 1..4 for the left, top, right, bottom connection dot
+				 * under where, 0 for none */
+				int32		ConnectorAt(BPoint where);
+				/** handle hit radius in document units */
+				float		HandleRadius(void);
+				void		DrawConnectors(BView *drawOn, const GraphStyle &style);
+				void		DrawHandles(BView *drawOn, const GraphStyle &style);
 				/** the card's border: a custom border color, else the style's */
 				rgb_color	CardBorderColor(const GraphStyle &style);
-				/** bottom-right end of the resize handle: the frame's corner,
-				 * or where the outline faces it */
-				BPoint		ResizeCorner(void) {return shape.Anchor(frame.RightBottom());};
 				void		AdjustParents(BMessage* theParent, BMessage *command);
 
 		virtual	bool		MoveAll(void *arg,float dx, float dy);
-		virtual	bool		ResizeAll(void *arg, float dx, float dy);
+				/** moves the edges of every selected, resizable node */
+				void		ResizeSelected(float dLeft, float dTop, float dRight,
+								float dBottom);
 
 	//++++++++++ClassSettings++++++++++
 		float				xRadius,yRadius;
@@ -123,14 +130,16 @@ protected:
 	//---------ClassSettings-----------
 		BMessage			*parentNode;
 
-		BPoint				*startMouseDown;
-		BRect				*startFrame;
-
-		BPoint				*oldPt;
+		/** a primary-button drag on this node is in progress */
+		bool				tracking;
+		BPoint				startMouseDown;
+		BRect				startFrame;
+		BPoint				oldPt;
 
 		int32				connecting;
-		bool				showConnecter;
-		bool				resizing;
+		/** NodeHandles::handle being dragged, NONE when not resizing */
+		int32				resizeHandle;
+		bool				hovered;
 
 		PDocument			*doc;
 		BMessenger			*sentTo;

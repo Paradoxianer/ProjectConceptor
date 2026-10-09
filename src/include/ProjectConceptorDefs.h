@@ -327,6 +327,9 @@ extern const char*		P_C_SHAPE_TEXT_RECT;	//			= "Shape::textRect"
 extern const char*		P_C_NODE_SELECTED;	//				= "Node::selected"
 extern const char*		P_C_NODE_X_RADIUS;	//				= "Node::xRadius"
 extern const char*		P_C_NODE_Y_RADIUS;	//				= "Node::yRadius"
+/** Resize: how far the left/top edges move, besides dx/dy for right/bottom */
+extern const char*		P_C_RESIZE_LEFT;	//				= "dleft"
+extern const char*		P_C_RESIZE_TOP;		//				= "dtop"
 
 extern const char*		P_C_NODE_CONNECTION_FROM;	//		= "Node::from"
 extern const char*		P_C_NODE_CONNECTION_TO;		//		= "Node::to"
