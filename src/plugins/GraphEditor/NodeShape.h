@@ -49,6 +49,16 @@ public:
 			BPoint			Anchor(BPoint toward) const;
 			/** The part of frame meant for name and attributes. */
 			BRect			TextFrame(BRect frame) const;
+			/** The laid-out outline as one polygon; without a path the
+			 * rounded rectangle with cornerRadius. */
+			void			Outline(float cornerRadius,
+								std::vector<BPoint> *points) const;
+
+			/** The part of outline within thickness of the shape's accent
+			 * edge - the top, or for shapes without a top edge (diamond,
+			 * triangle) the upper left one: the node's color band. */
+			void			AccentBand(const std::vector<BPoint> &outline,
+								float thickness, std::vector<BPoint> *band) const;
 
 private:
 	enum op_kind {
@@ -66,6 +76,9 @@ private:
 			std::vector<Op>		fOps;
 			BString				fName;
 			BRect				fTextRect;
+			bool				fHasAccent;
+			BPoint				fAccentFrom;
+			BPoint				fAccentTo;
 			BRect				fFrame;
 			BShape				fScaled;
 			// one closed polygon per subpath, beziers flattened, in frame

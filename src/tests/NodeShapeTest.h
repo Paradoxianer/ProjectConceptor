@@ -17,6 +17,9 @@ public:
 	void EllipseAnchorsOnTheCurve(void);
 	void TextFrameFollowsTheShape(void);
 	void UnknownNameIsRefused(void);
+	void RectangleBandRunsAlongTheTop(void);
+	void DiamondBandRunsAlongTheUpperLeftEdge(void);
+	void RoundedOutlineFillsTheFrame(void);
 
 	CPPUNIT_TEST_SUITE(NodeShapeTest);
 	CPPUNIT_TEST(RoundedHasNoPathAndUsesTheFrame);
@@ -27,6 +30,9 @@ public:
 	CPPUNIT_TEST(EllipseAnchorsOnTheCurve);
 	CPPUNIT_TEST(TextFrameFollowsTheShape);
 	CPPUNIT_TEST(UnknownNameIsRefused);
+	CPPUNIT_TEST(RectangleBandRunsAlongTheTop);
+	CPPUNIT_TEST(DiamondBandRunsAlongTheUpperLeftEdge);
+	CPPUNIT_TEST(RoundedOutlineFillsTheFrame);
 	CPPUNIT_TEST_SUITE_END();
 };
 

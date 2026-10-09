@@ -314,29 +314,6 @@ void ClassRenderer::MouseUp(BPoint where) {
 }
 
 
-// The node's color as a band across the top of a rounded card: the card's
-// own outline down to height, sampled along the corner arcs.
-static void FillStripe(BView *view, BRect frame, float radius, float height)
-{
-	if (height > radius)
-		height	= radius;
-	const int32		steps	= 6;
-	vector<BPoint>	points;
-	for (int32 i = 0; i <= steps; i++) {
-		float	y	= frame.top + height - height * i / steps;
-		float	dy	= radius - (y - frame.top);
-		float	dx	= sqrtf(radius * radius - dy * dy);
-		points.push_back(BPoint(frame.left + radius - dx, y));
-	}
-	for (int32 i = steps; i >= 0; i--) {
-		float	y	= frame.top + height - height * i / steps;
-		float	dy	= radius - (y - frame.top);
-		float	dx	= sqrtf(radius * radius - dy * dy);
-		points.push_back(BPoint(frame.right - radius + dx, y));
-	}
-	view->FillPolygon(&points[0], points.size());
-}
-
 rgb_color ClassRenderer::CardBorderColor(const GraphStyle &style) {
 	// the editor's standard border means "not set": then the style's,
 	// which also works in a dark color scheme
@@ -390,23 +367,21 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 			drawOn->StrokeRoundRect(outline,radius+style.selectionGap,radius+style.selectionGap);
 	}
 
-	drawOn->SetHighColor(style.cardFill);
-	if (shape.HasPath())
-		shape.Fill(drawOn);
-	else
-		drawOn->FillRoundRect(frame,radius,radius);
-
-	if (shape.HasPath()) {
-		// no room for a stripe: the outline carries the node's color
-		drawOn->SetPenSize(1.5);
-		drawOn->SetHighColor(nodeColor);
-		shape.Stroke(drawOn);
-	} else {
-		drawOn->SetHighColor(nodeColor);
-		FillStripe(drawOn,frame,radius,style.stripeHeight);
+	// the card, with the node's color as a band along one edge
+	vector<BPoint>	outline;
+	vector<BPoint>	band;
+	shape.Outline(radius,&outline);
+	shape.AccentBand(outline,style.stripeHeight,&band);
+	if (outline.size() >= 3) {
+		drawOn->SetHighColor(style.cardFill);
+		drawOn->FillPolygon(&outline[0],outline.size());
+		if (band.size() >= 3) {
+			drawOn->SetHighColor(nodeColor);
+			drawOn->FillPolygon(&band[0],band.size());
+		}
 		drawOn->SetPenSize(1.0);
 		drawOn->SetHighColor(CardBorderColor(style));
-		drawOn->StrokeRoundRect(frame,radius,radius);
+		drawOn->StrokePolygon(&outline[0],outline.size(),true);
 	}
 
 	if (SupportsResize()) {
@@ -528,7 +503,7 @@ void ClassRenderer::ValueChanged() {
 	BRect	content		= ContentFrame();
 	// a shape's text area already keeps clear of its outline
 	float	padding		= shape.HasPath() ? style.paddingX/3 : style.paddingX;
-	float	nameTop		= content.top+(shape.HasPath() ? 0 : style.stripeHeight)+(style.paddingY/2);
+	float	nameTop		= content.top+style.stripeHeight+(style.paddingY/2);
 	name->SetFrame(BRect(content.left+padding-2,nameTop,content.right-padding,nameTop+12));
 	
 	

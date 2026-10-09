@@ -4,6 +4,9 @@
 #include <math.h>
 #include <string.h>
 
+#include <algorithm>
+#include <vector>
+
 #include "NodeShape.h"
 #include "ProjectConceptorDefs.h"
 
@@ -115,4 +118,68 @@ void NodeShapeTest::UnknownNameIsRefused(void)
 {
 	BMessage	archive;
 	CPPUNIT_ASSERT(NodeShape::BuildBuiltIn("no such shape", &archive) != B_OK);
+}
+
+
+static BRect Bounds(const std::vector<BPoint> &points)
+{
+	BRect	bounds(points[0], points[0]);
+	for (size_t i = 1; i < points.size(); i++) {
+		bounds.left		= std::min(bounds.left, points[i].x);
+		bounds.top		= std::min(bounds.top, points[i].y);
+		bounds.right	= std::max(bounds.right, points[i].x);
+		bounds.bottom	= std::max(bounds.bottom, points[i].y);
+	}
+	return bounds;
+}
+
+
+void NodeShapeTest::RectangleBandRunsAlongTheTop(void)
+{
+	NodeShape	shape	= BuiltIn("rectangle");
+	std::vector<BPoint>	outline;
+	std::vector<BPoint>	band;
+	shape.Outline(0, &outline);
+	shape.AccentBand(outline, 4, &band);
+	BRect	bounds	= Bounds(band);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(100, bounds.left, 0.01);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(100, bounds.top, 0.01);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(300, bounds.right, 0.01);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(104, bounds.bottom, 0.01);
+}
+
+
+void NodeShapeTest::DiamondBandRunsAlongTheUpperLeftEdge(void)
+{
+	NodeShape	shape	= BuiltIn("diamond");
+	std::vector<BPoint>	outline;
+	std::vector<BPoint>	band;
+	shape.Outline(0, &outline);
+	shape.AccentBand(outline, 4, &band);
+	BRect	bounds	= Bounds(band);
+	// from the left tip to the top tip, nothing of the right half
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(100, bounds.left, 0.01);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(100, bounds.top, 0.01);
+	CPPUNIT_ASSERT(bounds.right < 210);
+	CPPUNIT_ASSERT(bounds.bottom < 160);
+	CPPUNIT_ASSERT(shape.Contains(BPoint(150, 127)));
+}
+
+
+void NodeShapeTest::RoundedOutlineFillsTheFrame(void)
+{
+	NodeShape	shape	= BuiltIn("rounded");
+	std::vector<BPoint>	outline;
+	std::vector<BPoint>	band;
+	shape.Outline(8, &outline);
+	BRect	bounds	= Bounds(outline);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(100, bounds.left, 0.01);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(100, bounds.top, 0.01);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(300, bounds.right, 0.01);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(200, bounds.bottom, 0.01);
+	shape.AccentBand(outline, 4, &band);
+	bounds	= Bounds(band);
+	// a flat bar: rounded on top, straight below
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(100, bounds.top, 0.01);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(104, bounds.bottom, 0.01);
 }

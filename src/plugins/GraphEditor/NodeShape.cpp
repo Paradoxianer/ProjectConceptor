@@ -2,6 +2,7 @@
 
 #include <Catalog.h>
 #include <View.h>
+#include <math.h>
 #include <string.h>
 
 #include "ProjectConceptorDefs.h"
@@ -13,20 +14,24 @@
 static const float	kKappa		= 0.5523f;
 static const int32	kBezierSteps	= 12;
 
+// accent: the edge (0..1) the node's color band runs along; none means
+// along the top
 struct BuiltInShape {
 	const char	*name;
 	const char	*label;
+	bool		hasAccent;
+	float		ax, ay, bx, by;
 };
 
 static const BuiltInShape	kBuiltIn[] = {
-	{ "rounded",		B_TRANSLATE_MARK("Rounded rectangle") },
-	{ "rectangle",		B_TRANSLATE_MARK("Rectangle") },
-	{ "ellipse",		B_TRANSLATE_MARK("Ellipse") },
-	{ "diamond",		B_TRANSLATE_MARK("Diamond") },
-	{ "triangle",		B_TRANSLATE_MARK("Triangle") },
-	{ "hexagon",		B_TRANSLATE_MARK("Hexagon") },
-	{ "parallelogram",	B_TRANSLATE_MARK("Parallelogram") },
-	{ "note",			B_TRANSLATE_MARK("Note") }
+	{ "rounded",		B_TRANSLATE_MARK("Rounded rectangle"),	false, 0, 0, 0, 0 },
+	{ "rectangle",		B_TRANSLATE_MARK("Rectangle"),			false, 0, 0, 0, 0 },
+	{ "ellipse",		B_TRANSLATE_MARK("Ellipse"),			false, 0, 0, 0, 0 },
+	{ "diamond",		B_TRANSLATE_MARK("Diamond"),			true, 0, 0.5, 0.5, 0 },
+	{ "triangle",		B_TRANSLATE_MARK("Triangle"),			true, 0, 1, 0.5, 0 },
+	{ "hexagon",		B_TRANSLATE_MARK("Hexagon"),			false, 0, 0, 0, 0 },
+	{ "parallelogram",	B_TRANSLATE_MARK("Parallelogram"),		false, 0, 0, 0, 0 },
+	{ "note",			B_TRANSLATE_MARK("Note"),				false, 0, 0, 0, 0 }
 };
 
 
@@ -160,7 +165,8 @@ private:
 
 NodeShape::NodeShape(void)
 	:
-	fTextRect(0, 0, 1, 1)
+	fTextRect(0, 0, 1, 1),
+	fHasAccent(false)
 {
 }
 
@@ -172,11 +178,19 @@ void NodeShape::SetTo(const BMessage *archive)
 	fScaled.Clear();
 	fTextRect.Set(0, 0, 1, 1);
 	fName	= "rounded";
+	fHasAccent	= false;
 	if (archive == NULL)
 		return;
 	const char	*name	= NULL;
 	if (archive->FindString(P_C_SHAPE_NAME, &name) == B_OK)
 		fName	= name;
+	for (int32 i = 0; i < CountBuiltIn(); i++) {
+		if ((fName == kBuiltIn[i].name) && kBuiltIn[i].hasAccent) {
+			fHasAccent	= true;
+			fAccentFrom	= BPoint(kBuiltIn[i].ax, kBuiltIn[i].ay);
+			fAccentTo	= BPoint(kBuiltIn[i].bx, kBuiltIn[i].by);
+		}
+	}
 	BMessage	copy(*archive);
 	BShape		shape(&copy);
 	ShapeCollector	collector(fOps);
@@ -327,4 +341,92 @@ BRect NodeShape::TextFrame(BRect frame) const
 		frame.top + fTextRect.top * frame.Height(),
 		frame.left + fTextRect.right * frame.Width(),
 		frame.top + fTextRect.bottom * frame.Height());
+}
+
+
+void NodeShape::Outline(float cornerRadius, std::vector<BPoint> *points) const
+{
+	points->clear();
+	if (HasPath()) {
+		if (!fPolygons.empty())
+			*points = fPolygons[0];
+		return;
+	}
+	if (!fFrame.IsValid())
+		return;
+	float	radius	= cornerRadius;
+	if (radius > fFrame.Width() / 2)
+		radius = fFrame.Width() / 2;
+	if (radius > fFrame.Height() / 2)
+		radius = fFrame.Height() / 2;
+	const int32	steps	= 8;
+	const BPoint	centers[] = {
+		BPoint(fFrame.right - radius, fFrame.top + radius),
+		BPoint(fFrame.right - radius, fFrame.bottom - radius),
+		BPoint(fFrame.left + radius, fFrame.bottom - radius),
+		BPoint(fFrame.left + radius, fFrame.top + radius) };
+	// clockwise on screen, starting at the top right corner's arc
+	for (int32 corner = 0; corner < 4; corner++) {
+		float	start	= -M_PI / 2 + corner * M_PI / 2;
+		for (int32 i = 0; i <= steps; i++) {
+			float	angle	= start + (M_PI / 2) * i / steps;
+			points->push_back(BPoint(centers[corner].x + radius * cosf(angle),
+				centers[corner].y + radius * sinf(angle)));
+		}
+	}
+}
+
+
+// keeps the part of polygon where (p - a) . normal + offset <= 0
+static void ClipHalfPlane(const std::vector<BPoint> &polygon, BPoint a,
+	BPoint normal, float offset, std::vector<BPoint> *out)
+{
+	out->clear();
+	size_t	count	= polygon.size();
+	for (size_t i = 0; i < count; i++) {
+		const BPoint	&p	= polygon[i];
+		const BPoint	&q	= polygon[(i + 1) % count];
+		float	dp	= (p.x - a.x) * normal.x + (p.y - a.y) * normal.y + offset;
+		float	dq	= (q.x - a.x) * normal.x + (q.y - a.y) * normal.y + offset;
+		if (dp <= 0)
+			out->push_back(p);
+		if ((dp < 0) != (dq < 0) && (dp != dq)) {
+			float	t	= dp / (dp - dq);
+			out->push_back(BPoint(p.x + t * (q.x - p.x), p.y + t * (q.y - p.y)));
+		}
+	}
+}
+
+
+void NodeShape::AccentBand(const std::vector<BPoint> &outline, float thickness,
+	std::vector<BPoint> *band) const
+{
+	band->clear();
+	if (outline.size() < 3)
+		return;
+	// a point on the edge and the direction into the shape
+	BPoint	onEdge;
+	BPoint	inward(0, 1);
+	if (fHasAccent) {
+		BPoint	a(fFrame.left + fAccentFrom.x * fFrame.Width(),
+			fFrame.top + fAccentFrom.y * fFrame.Height());
+		BPoint	b(fFrame.left + fAccentTo.x * fFrame.Width(),
+			fFrame.top + fAccentTo.y * fFrame.Height());
+		BPoint	edge	= b - a;
+		float	length	= sqrtf(edge.x * edge.x + edge.y * edge.y);
+		if (length < 1e-4)
+			return;
+		inward	= BPoint(-edge.y / length, edge.x / length);
+		BPoint	center((fFrame.left + fFrame.right) / 2, (fFrame.top + fFrame.bottom) / 2);
+		if ((center.x - a.x) * inward.x + (center.y - a.y) * inward.y < 0)
+			inward = BPoint(-inward.x, -inward.y);
+		onEdge	= a;
+	} else {
+		onEdge	= outline[0];
+		for (size_t i = 1; i < outline.size(); i++) {
+			if (outline[i].y < onEdge.y)
+				onEdge = outline[i];
+		}
+	}
+	ClipHalfPlane(outline, onEdge, inward, -thickness, band);
 }
