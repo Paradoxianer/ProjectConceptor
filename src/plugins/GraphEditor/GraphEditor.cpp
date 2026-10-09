@@ -1144,7 +1144,7 @@ void GraphEditor::InsertObject(BPoint where,bool deselect) {
 		where.y=where.y-fmod(where.y,GridWidth());
 	}
 
-	newObject->AddRect(P_C_NODE_FRAME,BRect(where,where+BPoint(100,40)));
+	newObject->AddRect(P_C_NODE_FRAME,BRect(where,where+BPoint(kNewNodeWidth,kNewNodeHeight)));
 	newObject->AddMessage(P_C_NODE_FONT,newFont);
 	newObject->AddMessage(P_C_NODE_PATTERN,newPattern);
 	if (newObject->what == P_C_CLASS_TYPE)
@@ -1524,10 +1524,15 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 	   				step++;
 				step=-step;
 			}
-			newNode->AddRect(P_C_NODE_FRAME,BRect(where,where+BPoint(100,80)));
 			commandMessage->AddMessage("PCommand::subPCommand",subCommandMessage);
 		}
-	//}
+		else {
+			// below whatever already sits at the default place
+			while (FindRenderer(where) != NULL)
+				where.y	+= 85;
+		}
+	// without a selection the node used to get no frame at all
+	newNode->AddRect(P_C_NODE_FRAME,BRect(where,where+BPoint(kNewNodeWidth,kNewNodeHeight)));
 	return commandMessage;
 }
 

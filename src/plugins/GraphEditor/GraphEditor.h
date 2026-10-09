@@ -78,6 +78,9 @@ const float		arrowSize		= 7.0;
 // dots, in screen pixels at any zoom
 const float		kHandleSize		= 7.0;
 const float		kMinNodeWidth	= 70;
+// a new node's size, by click as well as by the Insert key
+const float		kNewNodeWidth	= 100;
+const float		kNewNodeHeight	= 40;
 const float		kMinNodeHeight	= 30;
 // FillColor a new connection gets; drawn as the style's line color
 const rgb_color	kDefaultConnectionColor	= {187, 67, 47, 255};
