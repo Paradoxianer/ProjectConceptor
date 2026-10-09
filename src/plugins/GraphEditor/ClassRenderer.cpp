@@ -110,7 +110,7 @@ void ClassRenderer::MouseDown(BPoint where, int32 buttons,
 {
 	// handles take precedence over the name and attribute rows below them
 	int32	handle		= (selected && SupportsResize())
-		? NodeHandles::HandleAt(frame,where,HandleRadius()) : (int32)NodeHandles::NONE;
+		? NodeHandles::HandleAt(HandleFrame(),where,HandleRadius()) : (int32)NodeHandles::NONE;
 	int32	connector	= hovered ? ConnectorAt(where) : 0;
 	bool	found		= (handle != NodeHandles::NONE) || (connector != 0);
 	if (!found && name->Caught(where)) {
@@ -496,6 +496,13 @@ BRect ClassRenderer::Frame( void ) {
 	return frame;
 }
 
+BRect ClassRenderer::HandleFrame(void) {
+	const GraphStyle	&style	= editor->Style();
+	float	out	= style.selectionGap + style.selectionWidth/2;
+	return frame.InsetByCopy(-out,-out);
+}
+
+
 float ClassRenderer::HandleRadius(void) {
 	return kHandleSize / editor->Scale();
 }
@@ -529,7 +536,7 @@ void ClassRenderer::DrawHandles(BView *drawOn, const GraphStyle &style) {
 	float	half	= kHandleSize / 2 / editor->Scale();
 	drawOn->SetPenSize(1.0);
 	for (int32 handle = 0; handle < NodeHandles::COUNT; handle++) {
-		BPoint	at		= NodeHandles::Position(frame,handle);
+		BPoint	at		= NodeHandles::Position(HandleFrame(),handle);
 		BRect	square(at.x-half,at.y-half,at.x+half,at.y+half);
 		drawOn->SetHighColor(style.cardFill);
 		drawOn->FillRect(square);
@@ -555,7 +562,7 @@ bool  ClassRenderer::Caught(BPoint where) {
 	if (shape.HasPath() ? shape.Contains(where) : frame.Contains(where))
 		return true;
 	if (selected && SupportsResize()
-		&& (NodeHandles::HandleAt(frame,where,HandleRadius()) != NodeHandles::NONE))
+		&& (NodeHandles::HandleAt(HandleFrame(),where,HandleRadius()) != NodeHandles::NONE))
 		return true;
 	return hovered && (ConnectorAt(where) != 0);
 }

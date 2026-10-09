@@ -87,6 +87,8 @@ protected:
 				/** 1..4 for the left, top, right, bottom connection dot
 				 * under where, 0 for none */
 				int32		ConnectorAt(BPoint where);
+				/** the handles sit centered on the selection ring */
+				BRect		HandleFrame(void);
 				/** handle hit radius in document units */
 				float		HandleRadius(void);
 				void		DrawConnectors(BView *drawOn, const GraphStyle &style);
