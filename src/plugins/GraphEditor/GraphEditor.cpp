@@ -23,28 +23,10 @@
 #include "ConnectionRenderer.h"
 #include "GroupRenderer.h"
 #include "TextEditorControl.h"
+#include "VectorIcon.h"
 #include "Zoom.h"
 
 
-// same shape as LayoutEditor's own loader - the plugin's icons live as PNG
-// resources in its add-on image, and every caller wants a BBitmap
-static BBitmap*
-LoadPluginIcon(BResources *res, const char *name)
-{
-	size_t		size;
-	const void	*data	= (res != NULL)
-		? res->LoadResource((type_code)'PNG ',name,&size) : NULL;
-	if (data == NULL)
-		return NULL;
-	return BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-}
-
-// Drawn at runtime rather than shipped as a PNG resource - same reasoning
-// as NavigatorEditor's MakeSymbolIcon(): no existing icon fits "smart
-// guides" and this sidesteps hand-authoring a new .rdef resource. Two
-// small squares (nodes) aligned on a dashed guide line, in the same accent
-// color the live guide lines are drawn in (see Draw()), so the toolbar
-// icon and the feature it toggles read as the same thing.
 // Shape choices are previewed with the shape itself, so a custom or new
 // built-in shape needs no icon resource.
 static BBitmap*
@@ -84,41 +66,6 @@ MakeShapeIcon(const char *shapeName)
 	return bmp;
 }
 
-static BBitmap*
-MakeGuidesIcon(void)
-{
-	BRect	bounds(0,0,19,19);
-	BBitmap	*bmp	= new BBitmap(bounds,B_RGBA32,true);
-	BView	*view	= new BView(bounds,"guidesIcon",B_FOLLOW_NONE,B_WILL_DRAW);
-	bmp->AddChild(view);
-	bmp->Lock();
-	view->SetHighColor(0,0,0,0);
-	view->FillRect(bounds,B_SOLID_HIGH);
-	rgb_color	accent	= {30,144,255,255};
-	view->SetHighColor(accent);
-	view->SetDrawingMode(B_OP_ALPHA);
-	// Two small nodes with a dashed guide line strictly *between* them -
-	// the previous version's dashes ran the icon's full width, so they
-	// drew straight through both squares instead of only the gap,
-	// reading as a messy row of bars rather than "two things, aligned".
-	BRect	squareA(1,7,6,12);
-	BRect	squareB(13,7,18,12);
-	view->FillRoundRect(squareA,1,1);
-	view->FillRoundRect(squareB,1,1);
-	view->SetPenSize(2);
-	float	midY		= (squareA.top+squareA.bottom)/2.0f;
-	float	dashLen		= 2.0f;
-	float	gapLen		= 1.5f;
-	for (float x = squareA.right+2; x < squareB.left-1; x += dashLen+gapLen) {
-		float	xEnd	= x+dashLen;
-		if (xEnd > squareB.left-1)
-			xEnd	= squareB.left-1;
-		view->StrokeLine(BPoint(x,midY),BPoint(xEnd,midY));
-	}
-	view->Sync();
-	bmp->Unlock();
-	return bmp;
-}
 #include "PWindow.h"
 #include "PEditorManager.h"
 
@@ -235,11 +182,16 @@ void GraphEditor::Init(void) {
 	zoomInItem		= new BMenuItem("+",new BMessage(G_E_ZOOM_IN));
 	zoomFitItem		= new BMenuItem(B_TRANSLATE("Fit"),new BMessage(G_E_ZOOM_FIT));
 
-	grid		= new ToolItem(B_TRANSLATE("Grid"),BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
+	// this plugin's own resources: icons
+	image_info	*info 	= new image_info;
+	get_image_info(pluginID,info);
+	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
+
+	grid		= new ToolItem(B_TRANSLATE("Grid"),LoadVectorIcon(res,"grid",kToolIconSize),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
 	grid->BButton::SetToolTip(B_TRANSLATE("Toggle grid"));
 	// #127: an alternative to grid-snap, not layered on top of it - see
 	// the !GridEnabled() guard in ClassRenderer::MouseMoved()/MouseUp().
-	guides		= new ToolItem(B_TRANSLATE("Guides"),MakeGuidesIcon(),new BMessage(G_E_GUIDES_CHANGED),P_M_TWO_STATE_ITEM);
+	guides		= new ToolItem(B_TRANSLATE("Guides"),LoadVectorIcon(res,"guides",kToolIconSize),new BMessage(G_E_GUIDES_CHANGED),P_M_TWO_STATE_ITEM);
 	guides->BButton::SetToolTip(B_TRANSLATE("Toggle smart alignment guides"));
 	penSize		= new FloatToolItem(B_TRANSLATE("Pen size"),1.0,new BMessage(G_E_PEN_SIZE_CHANGED));
 	penSize->BButton::SetToolTip(B_TRANSLATE("Border pen size for selected nodes"));
@@ -248,14 +200,6 @@ void GraphEditor::Init(void) {
 	patternItem	= new PatternToolItem(B_TRANSLATE("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 	patternItem->BButton::SetToolTip(B_TRANSLATE("Fill pattern for selected nodes"));
 
-	//loading ressource_images from the PluginRessource
-	image_info	*info 	= new image_info;
-	BBitmap		*bmp	= NULL;
-	size_t		size;
-	// look up the plugininfos
-	get_image_info(pluginID,info);
-	// init the ressource for the plugin files
-	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
 	// adding attributes and grouping sit in the context bar above the
 	// selection
 	BMessage	*addTextMessage	= new BMessage(G_E_ADD_ATTRIBUTE);
@@ -269,19 +213,19 @@ void GraphEditor::Init(void) {
 	connectionStyle		= new ChoiceToolItem(B_TRANSLATE("Connection"),
 		new BMessage(G_E_CONNECTION_STYLE),ITEM_WIDTH*2);
 	connectionStyle->SetIconOnly(true);
-	connectionStyle->AddChoice(B_TRANSLATE("Straight"),"0",LoadPluginIcon(res,"linear"));
-	connectionStyle->AddChoice(B_TRANSLATE("Rounded"),"1",LoadPluginIcon(res,"bended"));
-	connectionStyle->AddChoice(B_TRANSLATE("Angular"),"2",LoadPluginIcon(res,"angeld"));
+	connectionStyle->AddChoice(B_TRANSLATE("Straight"),"0",LoadVectorIcon(res,"linear",kToolIconSize));
+	connectionStyle->AddChoice(B_TRANSLATE("Rounded"),"1",LoadVectorIcon(res,"bended",kToolIconSize));
+	connectionStyle->AddChoice(B_TRANSLATE("Angular"),"2",LoadVectorIcon(res,"angeld",kToolIconSize));
 	connectionStyle->SetValue("2");
 	connectionStyle->SetToolTip(B_TRANSLATE("Shape of the selected connections"));
 
 	connectionArrows	= new ChoiceToolItem(B_TRANSLATE("Arrows"),
 		new BMessage(G_E_CONNECTION_ARROWS),ITEM_WIDTH*2);
 	connectionArrows->SetIconOnly(true);
-	connectionArrows->AddChoice(B_TRANSLATE("At target"),"1",LoadPluginIcon(res,"arrow-target"));
-	connectionArrows->AddChoice(B_TRANSLATE("At source"),"2",LoadPluginIcon(res,"arrow-source"));
-	connectionArrows->AddChoice(B_TRANSLATE("Both ends"),"3",LoadPluginIcon(res,"arrow-both"));
-	connectionArrows->AddChoice(B_TRANSLATE("None"),"0",LoadPluginIcon(res,"arrow-none"));
+	connectionArrows->AddChoice(B_TRANSLATE("At target"),"1",LoadVectorIcon(res,"arrow-target",kToolIconSize));
+	connectionArrows->AddChoice(B_TRANSLATE("At source"),"2",LoadVectorIcon(res,"arrow-source",kToolIconSize));
+	connectionArrows->AddChoice(B_TRANSLATE("Both ends"),"3",LoadVectorIcon(res,"arrow-both",kToolIconSize));
+	connectionArrows->AddChoice(B_TRANSLATE("None"),"0",LoadVectorIcon(res,"arrow-none",kToolIconSize));
 	connectionArrows->SetValue("1");
 	connectionArrows->SetToolTip(B_TRANSLATE("Which ends of the selected connections carry an arrow"));
 
@@ -567,8 +511,7 @@ void GraphEditor::Draw(BRect updateRect) {
 	}
 	renderer->DoForEach(DrawRenderer,this);
 	if (hasActiveGuides) {
-		// Same accent color as the toolbar toggle's own icon (MakeGuidesIcon())
-		// so the button and the feature it drives read as one thing.
+		// same accent as the toolbar's guides icon
 		SetHighColor(30,144,255,255);
 		SetPenSize(1.0);
 		if (activeGuides.horizontal.active)

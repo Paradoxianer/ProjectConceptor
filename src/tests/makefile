@@ -68,6 +68,7 @@ SRCS= 	TestMain.cpp \
 		../app/ToolBar/FloatToolItem.cpp \
 		../app/ToolBar/ChoiceToolItem.cpp \
 		../app/ToolBar/IconMenuItem.cpp \
+		../app/ToolBar/VectorIcon.cpp \
 		../app/ToolBar/PatternToolItem.cpp \
 		../app/Tools/AFont.cpp \
 		../app/Tools/PCSavePanel.cpp \

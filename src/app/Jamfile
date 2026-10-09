@@ -103,6 +103,7 @@ PROJECT_CONCEPTOR_SOURCES =
 	PatternToolItem.cpp
 	ChoiceToolItem.cpp
 	IconMenuItem.cpp
+	VectorIcon.cpp
 
 	# Tools
 	AFont.cpp
@@ -127,7 +128,7 @@ PROJECT_CONCEPTOR_SOURCES =
 Application ProjectConceptor :
 	 $(PROJECT_CONCEPTOR_SOURCES)
 	: be root translation tracker $(TARGET_LIBSTDC++)
-	: ProjectConceptor.rsrc Tools/InputRequest.rsrc
+	: ProjectConceptor.rsrc Tools/InputRequest.rsrc Icons.rdef
 ;
 
 StaticLibrary libprojectconceptor.a :

@@ -9,7 +9,7 @@ SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app ToolB
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Tools ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src common ] ;
 
-AddResources pc_layout_editor : LayoutEditor.rdef ;
+AddResources pc_layout_editor : LayoutEditor.rdef Icons.rdef ;
 
 Addon pc_layout_editor :
 	DotLayouter.cpp

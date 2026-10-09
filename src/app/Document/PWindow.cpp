@@ -21,6 +21,7 @@
 #include "ToolItem.h"
 #include "ToolMenu.h"
 #include "MainView.h"
+#include "VectorIcon.h"
 //#include "FontPanel.h"
 
 
@@ -432,32 +433,6 @@ BMenuBar *PWindow::MakeStatusBar(void)
 }
 
 
-// Undo/redo have no PNG resource; a curved arrow drawn like the other
-// runtime icons, mirrored for redo.
-static BBitmap* MakeUndoIcon(bool redo)
-{
-	BRect	bounds(0,0,19,19);
-	BBitmap	*bmp	= new BBitmap(bounds,B_RGBA32,true);
-	BView	*view	= new BView(bounds,"undoIcon",B_FOLLOW_NONE,B_WILL_DRAW);
-	bmp->AddChild(view);
-	bmp->Lock();
-	view->SetHighColor(0,0,0,0);
-	view->FillRect(bounds);
-	view->SetDrawingMode(B_OP_ALPHA);
-	view->SetHighColor(60,68,82,255);
-	view->SetPenSize(1.6);
-	float	x0	= redo ? 16 : 3;
-	float	dir	= redo ? -1 : 1;
-	// hook: head on the left (undo), a curve back down to the right
-	view->StrokeLine(BPoint(x0,7),BPoint(x0+dir*9,7));
-	view->StrokeArc(BRect(redo ? 3 : 8,7,redo ? 11 : 16,15),redo ? 90 : 270,180);
-	view->StrokeLine(BPoint(x0+dir*9,15),BPoint(x0+dir*5,15));
-	view->FillTriangle(BPoint(x0-dir*1,7),BPoint(x0+dir*4,3),BPoint(x0+dir*4,11));
-	view->Sync();
-	bmp->Unlock();
-	return bmp;
-}
-
 void PWindow::MakeToolbars()
 {
 	TRACE();
@@ -467,53 +442,53 @@ void PWindow::MakeToolbars()
 	ToolBar		*tmpBar		= new ToolBar(statusFrame,P_M_STANDART_TOOL_BAR,B_ITEMS_IN_ROW);
 
 	// plugins add theirs to the node, connection and view groups
-	toolItem	= new ToolItem("new",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"new"),
+	toolItem	= new ToolItem("new",LoadAppVectorIcon("new",kToolIconSize),
 		new BMessage(MENU_FILE_NEW));
 	toolItem->SetTarget(be_app);
 	toolItem->BButton::SetToolTip(B_TRANSLATE("New"));
 	tmpBar->AddItem(toolItem,P_TOOL_GROUP_DOCUMENT);
 
-	toolItem	= new ToolItem("open",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"open"),
+	toolItem	= new ToolItem("open",LoadAppVectorIcon("open",kToolIconSize),
 		new BMessage(MENU_FILE_OPEN));
 	toolItem->SetTarget(be_app);
 	toolItem->BButton::SetToolTip(B_TRANSLATE("Open"));
 	tmpBar->AddItem(toolItem,P_TOOL_GROUP_DOCUMENT);
 
-	toolItem	= new ToolItem("save",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"save"),
+	toolItem	= new ToolItem("save",LoadAppVectorIcon("save",kToolIconSize),
 		new BMessage(MENU_FILE_SAVE));
 	toolItem->SetTarget(doc);
 	toolItem->BButton::SetToolTip(B_TRANSLATE("Save"));
 	tmpBar->AddItem(toolItem,P_TOOL_GROUP_DOCUMENT);
 
-	toolItem	= new ToolItem("save as",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"save as"),
+	toolItem	= new ToolItem("save as",LoadAppVectorIcon("save as",kToolIconSize),
 		new BMessage(MENU_FILE_SAVEAS));
 	toolItem->SetTarget(doc);
 	toolItem->BButton::SetToolTip(B_TRANSLATE("Save as"));
 	tmpBar->AddItem(toolItem,P_TOOL_GROUP_DOCUMENT);
 
-	toolItem	= new ToolItem("print",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"print"),
+	toolItem	= new ToolItem("print",LoadAppVectorIcon("print",kToolIconSize),
 		new BMessage(MENU_FILE_PRINT));
 	toolItem->SetTarget(doc);
 	toolItem->BButton::SetToolTip(B_TRANSLATE("Print"));
 	tmpBar->AddItem(toolItem,P_TOOL_GROUP_DOCUMENT);
 
-	toolItem	= new ToolItem("undo",MakeUndoIcon(false),new BMessage(B_UNDO));
+	toolItem	= new ToolItem("undo",LoadAppVectorIcon("undo",kToolIconSize),new BMessage(B_UNDO));
 	toolItem->SetTarget(doc);
 	toolItem->BButton::SetToolTip(B_TRANSLATE("Undo"));
 	tmpBar->AddItem(toolItem,P_TOOL_GROUP_EDIT);
 
-	toolItem	= new ToolItem("redo",MakeUndoIcon(true),new BMessage(B_REDO));
+	toolItem	= new ToolItem("redo",LoadAppVectorIcon("redo",kToolIconSize),new BMessage(B_REDO));
 	toolItem->SetTarget(doc);
 	toolItem->BButton::SetToolTip(B_TRANSLATE("Redo"));
 	tmpBar->AddItem(toolItem,P_TOOL_GROUP_EDIT);
 
-	toolItem	= new ToolItem("find",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"find"),
+	toolItem	= new ToolItem("find",LoadAppVectorIcon("find",kToolIconSize),
 		new BMessage(MENU_SEARCH_FIND));
 	toolItem->SetTarget(doc);
 	toolItem->BButton::SetToolTip(B_TRANSLATE("Find"));
 	tmpBar->AddItem(toolItem,P_TOOL_GROUP_EDIT);
 
-	toolItem	= new ToolItem("trash",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"trash"),
+	toolItem	= new ToolItem("trash",LoadAppVectorIcon("trash",kToolIconSize),
 		new BMessage(B_CLEAR));
 	toolItem->SetTarget(doc);
 	toolItem->BButton::SetToolTip(B_TRANSLATE("Delete"));

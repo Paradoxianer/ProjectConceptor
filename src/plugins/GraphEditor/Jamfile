@@ -12,7 +12,7 @@ SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app ToolB
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Tools ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src common ] ;
 
-AddResources pc_graph_editor : GraphEditor.rsrc ;
+AddResources pc_graph_editor : GraphEditor.rsrc Icons.rdef ;
 
 Addon pc_graph_editor :
 	AttributRenderer.cpp

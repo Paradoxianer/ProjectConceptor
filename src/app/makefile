@@ -63,6 +63,7 @@ SRCS= 	About/AboutWindow.cpp \
 		ToolBar/PatternToolItem.cpp \
 		ToolBar/ChoiceToolItem.cpp \
 		ToolBar/IconMenuItem.cpp \
+		ToolBar/VectorIcon.cpp \
 		Tools/AFont.cpp \
 		Tools/PCSavePanel.cpp \
 		Tools/Indexer.cpp \
@@ -82,7 +83,7 @@ SRCS= 	About/AboutWindow.cpp \
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
-RDEFS= ProjectConceptor.rdef Tools/InputRequest.rdef
+RDEFS= ProjectConceptor.rdef Tools/InputRequest.rdef Icons.rdef
 
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.

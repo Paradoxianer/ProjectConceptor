@@ -2,6 +2,8 @@
 
 #include <support/Autolock.h>
 
+#include "VectorIcon.h"
+
 #include <string.h>
 
 #include <Alert.h>
@@ -26,21 +28,6 @@
 #define B_TRANSLATION_CONTEXT "LayoutEditor"
 
 static const char	*L_E_TOOL_BAR	= "L_E_TOOL_BAR";
-
-/** Loads a 'PNG ' resource by name from res (see LayoutEditor.rdef); NULL
- * if missing - callers already treat a NULL icon as "no icon" (ToolItem's
- * own fallback, or a text-only AddChoice() entry).
- */
-static BBitmap*
-LoadIcon(BResources &res, const char *name)
-{
-	size_t		size;
-	const void	*data	= res.LoadResource((type_code)'PNG ',name,&size);
-	if (data == NULL)
-		return NULL;
-	return BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-}
-
 
 LayoutEditor::LayoutEditor(image_id newId):PEditor(),BHandler("LayoutEditor")
 {
@@ -95,7 +82,7 @@ void LayoutEditor::AttachedToManager(void)
 	bool		haveRes	= (pluginID >= 0) && (res.SetToImage(pluginID) == B_OK);
 
 	ToolItem	*apply	= new ToolItem(B_TRANSLATE("Auto-Layout"),
-		haveRes ? LoadIcon(res,"layout") : NULL,new BMessage(L_E_APPLY_LAYOUT));
+		haveRes ? LoadVectorIcon(&res,"layout",kToolIconSize) : NULL,new BMessage(L_E_APPLY_LAYOUT));
 	apply->BButton::SetToolTip(B_TRANSLATE("Automatically arrange the graph"));
 	toolBar->AddItem(apply,P_TOOL_GROUP_VIEW);
 	applyItem	= apply;
@@ -108,13 +95,13 @@ void LayoutEditor::AttachedToManager(void)
 		new BMessage(L_E_SET_DIRECTION),ITEM_WIDTH*2);
 	direction->SetIconOnly(true);
 	direction->AddChoice(B_TRANSLATE("Top " "\xE2\x86\x92" " Bottom"),"TB",
-		haveRes ? LoadIcon(res,"dir-tb") : NULL);
+		haveRes ? LoadVectorIcon(&res,"dir-tb",kToolIconSize) : NULL);
 	direction->AddChoice(B_TRANSLATE("Left " "\xE2\x86\x92" " Right"),"LR",
-		haveRes ? LoadIcon(res,"dir-lr") : NULL);
+		haveRes ? LoadVectorIcon(&res,"dir-lr",kToolIconSize) : NULL);
 	direction->AddChoice(B_TRANSLATE("Right " "\xE2\x86\x92" " Left"),"RL",
-		haveRes ? LoadIcon(res,"dir-rl") : NULL);
+		haveRes ? LoadVectorIcon(&res,"dir-rl",kToolIconSize) : NULL);
 	direction->AddChoice(B_TRANSLATE("Bottom " "\xE2\x86\x92" " Top"),"BT",
-		haveRes ? LoadIcon(res,"dir-bt") : NULL);
+		haveRes ? LoadVectorIcon(&res,"dir-bt",kToolIconSize) : NULL);
 	direction->SetToolTip(B_TRANSLATE("Layout direction"));
 	toolBar->AddItem(direction,P_TOOL_GROUP_VIEW);
 	directionItem	= direction;
@@ -124,17 +111,17 @@ void LayoutEditor::AttachedToManager(void)
 		new BMessage(L_E_SET_ENGINE),ITEM_WIDTH*2);
 	topology->SetIconOnly(true);
 	topology->AddChoice(B_TRANSLATE("Hierarchical"),"dot",
-		haveRes ? LoadIcon(res,"topo-dot") : NULL);
+		haveRes ? LoadVectorIcon(&res,"topo-dot",kToolIconSize) : NULL);
 	topology->AddChoice(B_TRANSLATE("Spring model"),"neato",
-		haveRes ? LoadIcon(res,"topo-neato") : NULL);
+		haveRes ? LoadVectorIcon(&res,"topo-neato",kToolIconSize) : NULL);
 	topology->AddChoice(B_TRANSLATE("Force-directed"),"fdp",
-		haveRes ? LoadIcon(res,"topo-fdp") : NULL);
+		haveRes ? LoadVectorIcon(&res,"topo-fdp",kToolIconSize) : NULL);
 	topology->AddChoice(B_TRANSLATE("Force (large graphs)"),"sfdp",
-		haveRes ? LoadIcon(res,"topo-sfdp") : NULL);
+		haveRes ? LoadVectorIcon(&res,"topo-sfdp",kToolIconSize) : NULL);
 	topology->AddChoice(B_TRANSLATE("Circular"),"circo",
-		haveRes ? LoadIcon(res,"topo-circo") : NULL);
+		haveRes ? LoadVectorIcon(&res,"topo-circo",kToolIconSize) : NULL);
 	topology->AddChoice(B_TRANSLATE("Radial"),"twopi",
-		haveRes ? LoadIcon(res,"topo-twopi") : NULL);
+		haveRes ? LoadVectorIcon(&res,"topo-twopi",kToolIconSize) : NULL);
 	topology->SetToolTip(B_TRANSLATE("Layout topology"));
 	toolBar->AddItem(topology,P_TOOL_GROUP_VIEW);
 	topologyItem	= topology;

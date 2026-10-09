@@ -47,7 +47,7 @@ SRCS=	AttributRenderer.cpp	\
 
 #	Specify the resource definition files to use. Full or relative paths can be
 #	used.
-RDEFS= GraphEditor.rdef
+RDEFS= GraphEditor.rdef Icons.rdef
 
 #	specify the resource files to use
 #	full path or a relative path to the resource file can be used.
