@@ -191,9 +191,11 @@ void ToolBar::AddItem(BaseItem *item, int32 group)
 void ToolBar::UpdateGroupSeparators(void)
 {
 	for (int32 i = 0; i < groupSeparators->CountItems(); i++) {
-		BaseItem	*separator	= (BaseItem *)groupSeparators->ItemAt(i);
+		// only ever ToolBarSeperators, see below; BaseItem has no virtual
+		// destructor
+		ToolBarSeperator	*separator	= (ToolBarSeperator *)groupSeparators->ItemAt(i);
 		separator->DetachedFromToolBar(this);
-		toolitems->RemoveItem(separator);
+		toolitems->RemoveItem((BaseItem *)separator);
 		delete separator;
 	}
 	groupSeparators->MakeEmpty();
