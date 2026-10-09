@@ -23,6 +23,7 @@
 #include "ConnectionRenderer.h"
 #include "GroupRenderer.h"
 #include "TextEditorControl.h"
+#include "Zoom.h"
 
 
 // same shape as LayoutEditor's own loader - the plugin's icons live as PNG
@@ -224,37 +225,16 @@ void GraphEditor::Init(void) {
 	patternMessage->AddInt32("LowColor",*(int32 *)&lowColor);
 	patternMessage->AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH),false);
 
-	scaleMenu		= new BMenu(B_TRANSLATE("Scale"));
-	BMessage	*newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.1);
-	scaleMenu->AddItem(new BMenuItem("10 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.25);
-	scaleMenu->AddItem(new BMenuItem("25 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.33);
-	scaleMenu->AddItem(new BMenuItem("33 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.5);
-	scaleMenu->AddItem(new BMenuItem("50 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",0.75);
-	scaleMenu->AddItem(new BMenuItem("75 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",1.00);
-	scaleMenu->AddItem(new BMenuItem("100 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
- 	newScale->AddFloat("scale",1.5);
-	scaleMenu->AddItem(new BMenuItem("150 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",2);
-	scaleMenu->AddItem(new BMenuItem("200 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",5);
-	scaleMenu->AddItem(new BMenuItem("500 %",newScale,0,0));
-	newScale	= new BMessage(G_E_NEW_SCALE);
-	newScale->AddFloat("scale",10);
-	scaleMenu->AddItem(new BMenuItem("1000 %",newScale,0,0));
+	// status bar: − [100 % ▾] + Fit
+	scaleMenu		= new BMenu(Zoom::Label(1.0).String());
+	for (int32 i = 0; i < Zoom::CountSteps(); i++) {
+		BMessage	*newScale	= new BMessage(G_E_NEW_SCALE);
+		newScale->AddFloat("scale",Zoom::StepAt(i));
+		scaleMenu->AddItem(new BMenuItem(Zoom::Label(Zoom::StepAt(i)).String(),newScale));
+	}
+	zoomOutItem		= new BMenuItem("−",new BMessage(G_E_ZOOM_OUT));
+	zoomInItem		= new BMenuItem("+",new BMessage(G_E_ZOOM_IN));
+	zoomFitItem		= new BMenuItem(B_TRANSLATE("Fit"),new BMessage(G_E_ZOOM_FIT));
 
 	grid		= new ToolItem(B_TRANSLATE("Grid"),BTranslationUtils::GetBitmap(B_PNG_FORMAT,"grid"),new BMessage(G_E_GRID_CHANGED),P_M_TWO_STATE_ITEM);
 	grid->BButton::SetToolTip(B_TRANSLATE("Toggle grid"));
@@ -801,8 +781,14 @@ void GraphEditor::AttachedToWindow(void) {
 	SetViewColor(style.canvas);
 	PWindow 	*pWindow	= (PWindow *)Window();
 	BMenuBar	*menuBar	= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
+	menuBar->AddItem(zoomOutItem);
 	menuBar->AddItem(scaleMenu);
+	menuBar->AddItem(zoomInItem);
+	menuBar->AddItem(zoomFitItem);
 	scaleMenu->SetTargetForItems(this);
+	zoomOutItem->SetTarget(this);
+	zoomInItem->SetTarget(this);
+	zoomFitItem->SetTarget(this);
 	if (doc)
 		InitAll();
 
@@ -877,8 +863,12 @@ void GraphEditor::DetachedFromWindow(void) {
 		// touches this editor's own state and stays safe either way.
 		if (!pWindow->IsClosing()) {
 			BMenuBar	*menuBar		= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
-			if (menuBar)
+			if (menuBar) {
+				menuBar->RemoveItem(zoomOutItem);
 				menuBar->RemoveItem(scaleMenu);
+				menuBar->RemoveItem(zoomInItem);
+				menuBar->RemoveItem(zoomFitItem);
+			}
 			pWindow->RemoveToolBar(G_E_TOOL_BAR	);
 			ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
 			if (configBar) {
@@ -1009,11 +999,20 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			break;
 		}
 		case G_E_NEW_SCALE: {
-			message->FindFloat("scale",&scale);
-			UpdateScrollBars();
-			Invalidate();
+			float	newScale;
+			if (message->FindFloat("scale",&newScale) == B_OK)
+				SetZoom(newScale);
 			break;
 		}
+		case G_E_ZOOM_IN:
+			SetZoom(Zoom::In(scale));
+			break;
+		case G_E_ZOOM_OUT:
+			SetZoom(Zoom::Out(scale));
+			break;
+		case G_E_ZOOM_FIT:
+			ZoomToFit();
+			break;
 		case G_E_GRID_CHANGED: {
 			gridEnabled =! gridEnabled;
 			// ToolItem's own two-state visual tracking is dead code
@@ -1765,4 +1764,37 @@ void GraphEditor::SetShortCutFilter(ShortCutFilter *_shortCutFilter)
 const char* GraphEditor::TabLabel(void)
 {
 	return B_TRANSLATE("Graph");
+}
+
+
+void GraphEditor::SetZoom(float newScale) {
+	if (newScale <= 0)
+		return;
+	scale	= newScale;
+	if (scaleMenu->Superitem() != NULL)
+		scaleMenu->Superitem()->SetLabel(Zoom::Label(scale).String());
+	UpdateScrollBars();
+	Invalidate();
+}
+
+void GraphEditor::ZoomToFit(void) {
+	BRect	content(0,0,-1,-1);
+	for (int32 i = 0; i < renderer->CountItems(); i++) {
+		Renderer	*item	= (Renderer*)renderer->ItemAt(i);
+		uint32		what	= item->GetMessage()->what;
+		if ((what != P_C_CLASS_TYPE) && (what != P_C_GROUP_TYPE))
+			continue;
+		content	= content.IsValid() ? (content | item->Frame()) : item->Frame();
+	}
+	if (!content.IsValid())
+		return;
+	// the scroll range follows the document's bounds, not the graph, so
+	// a scroll to the graph's corner can be clamped away: fit from the
+	// origin instead
+	if (content.left > 0)
+		content.left	= 0;
+	if (content.top > 0)
+		content.top		= 0;
+	SetZoom(Zoom::Fit(content,Bounds(),20));
+	ScrollTo(0,0);
 }

@@ -24,6 +24,7 @@ SRCS= 	TestMain.cpp \
 		TranslatorTest.cpp \
 		NodeShapeTest.cpp \
 		NodeHandlesTest.cpp \
+		ZoomTest.cpp \
 		GraphStyleTest.cpp \
 		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
@@ -104,7 +105,8 @@ SRCS= 	TestMain.cpp \
 		../plugins/GraphEditor/NodeShape.cpp \
 		../plugins/GraphEditor/GraphStyle.cpp \
 		../plugins/GraphEditor/ShadowCache.cpp \
-		../plugins/GraphEditor/NodeHandles.cpp
+		../plugins/GraphEditor/NodeHandles.cpp \
+		../plugins/GraphEditor/Zoom.cpp
 
 RDEFS=
 

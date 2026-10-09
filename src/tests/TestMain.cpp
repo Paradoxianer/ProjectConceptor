@@ -14,6 +14,7 @@
 #include "SmartGuidesTest.h"
 #include "TestDocument.h"
 #include "TranslatorTest.h"
+#include "ZoomTest.h"
 
 const char *TEST_APP_SIGNATURE = "application/x-vnd.ProjectConceptorTests";
 
@@ -35,6 +36,7 @@ int main(int argc, char **argv)
 	runner.addTest(TranslatorTest::suite());
 	runner.addTest(NodeShapeTest::suite());
 	runner.addTest(NodeHandlesTest::suite());
+	runner.addTest(ZoomTest::suite());
 	runner.addTest(GraphStyleTest::suite());
 	bool success = runner.run("", false);
 	// #117: every headless PDocument any test created is still running a

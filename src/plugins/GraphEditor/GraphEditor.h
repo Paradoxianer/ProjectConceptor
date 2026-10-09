@@ -33,6 +33,10 @@ const uint32			G_E_CONNECTED			= 'geCD';
 const uint32			G_E_GROUP				= 'geGR';
 
 const uint32			G_E_NEW_SCALE			= 'geNS';
+// one zoom step in / out, and the zoom that shows the whole graph
+const uint32			G_E_ZOOM_IN				= 'geZI';
+const uint32			G_E_ZOOM_OUT			= 'geZO';
+const uint32			G_E_ZOOM_FIT			= 'geZF';
 const uint32			G_E_INVALIDATE			= 'geIV';
 const uint32			G_E_GRID_CHANGED		= 'geGC';
 const uint32			G_E_GUIDES_CHANGED		= 'geGU';
@@ -154,6 +158,10 @@ public:
 			/** the renderer under the mouse shows its connection dots;
 			 * NULL for none */
 			void			SetHovered(Renderer *renderer);
+			/** zooms to newScale and shows it in the status bar */
+			void			SetZoom(float newScale);
+			/** zooms and scrolls so the whole graph is visible */
+			void			ZoomToFit(void);
 			Renderer*		FindNodeRenderer(BPoint where);
 			Renderer*		FindConnectionRenderer(BPoint where);
 			Renderer*		FindRenderer(BMessage *container);
@@ -238,6 +246,9 @@ protected:
 			int32			id;
 			char*			renderString;
 			BMenu			*scaleMenu;
+			BMenuItem		*zoomOutItem;
+			BMenuItem		*zoomInItem;
+			BMenuItem		*zoomFitItem;
 			ToolBar			*toolBar;
 			ToolItem		*grid;
 			ToolItem		*guides;
