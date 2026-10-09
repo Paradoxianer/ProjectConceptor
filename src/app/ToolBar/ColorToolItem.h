@@ -87,6 +87,8 @@ virtual		BString			*GetToolTip(void){return toolTip;};
 virtual		void			SetToolTip(BString *toolT){toolTip=toolT;};
 virtual		const char		*GetName(void){return tName;};
 			rgb_color		GetColor(void){return value;};
+			/** shows newColor (e.g. the selection's) without applying it */
+			void			ShowColor(rgb_color newColor);
 virtual		void			SetState(uint32 newState){state=newState;};
 virtual		uint32			GetState(void){return state;};
 virtual		void			SetBehavior(uint32 newBehavior){behavior=newBehavior;};

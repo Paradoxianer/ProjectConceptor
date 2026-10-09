@@ -158,6 +158,12 @@ float FloatToolItem::GetValue(void)
 	return value;
 }
 
+void FloatToolItem::SetEnabled(bool enabled)
+{
+	BButton::SetEnabled(enabled);
+	textValue->SetEnabled(enabled);
+}
+
 status_t FloatToolItem::SetTarget(BMessenger messenger)
 {
 	textValue->SetTarget(messenger);

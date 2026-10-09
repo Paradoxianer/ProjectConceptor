@@ -162,6 +162,10 @@ public:
 			void			SetZoom(float newScale);
 			/** zooms and scrolls so the whole graph is visible */
 			void			ZoomToFit(void);
+			/** node and connection formats are active only for a matching
+			 * selection and show the first selected one's values;
+			 * needs the document locked */
+			void			UpdateFormatItems(void);
 			Renderer*		FindNodeRenderer(BPoint where);
 			Renderer*		FindConnectionRenderer(BPoint where);
 			Renderer*		FindRenderer(BMessage *container);

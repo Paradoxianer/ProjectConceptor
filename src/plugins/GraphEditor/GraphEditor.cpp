@@ -574,6 +574,7 @@ void GraphEditor::DrainPendingChangedNodes(void) {
 			ProcessChangedNode(node,allNodes,allConnections);
 	}
 	pendingChangedNodes->MakeEmpty();
+	UpdateFormatItems();
 	doc->Unlock();
 }
 
@@ -789,8 +790,14 @@ void GraphEditor::AttachedToWindow(void) {
 	zoomOutItem->SetTarget(this);
 	zoomInItem->SetTarget(this);
 	zoomFitItem->SetTarget(this);
-	if (doc)
+	if (doc) {
 		InitAll();
+		// never block on the document here, see DrainPendingChangedNodes()
+		if (doc->LockWithTimeout(0) == B_OK) {
+			UpdateFormatItems();
+			doc->Unlock();
+		}
+	}
 
 	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
 	pWindow->AddToolBar(toolBar);
@@ -1782,4 +1789,50 @@ void GraphEditor::ZoomToFit(void) {
 		content.top		= 0;
 	SetZoom(Zoom::Fit(content,Bounds(),20));
 	ScrollTo(0,0);
+}
+
+
+void GraphEditor::UpdateFormatItems(void) {
+	BMessage	*node		= NULL;
+	BMessage	*connection	= NULL;
+	BList		*selection	= doc->GetSelected();
+	for (int32 i = 0; i < selection->CountItems(); i++) {
+		BMessage	*item	= (BMessage*)selection->ItemAt(i);
+		if ((item->what == P_C_CONNECTION_TYPE) && (connection == NULL))
+			connection	= item;
+		else if (((item->what == P_C_CLASS_TYPE) || (item->what == P_C_GROUP_TYPE))
+				&& (node == NULL))
+			node	= item;
+	}
+	colorItem->SetEnabled((node != NULL) || (connection != NULL));
+	penSize->SetEnabled(node != NULL);
+	nodeShape->SetEnabled(node != NULL);
+	connectionStyle->SetEnabled(connection != NULL);
+	connectionArrows->SetEnabled(connection != NULL);
+
+	BMessage	*shown	= (node != NULL) ? node : connection;
+	BMessage	pattern;
+	if ((shown != NULL) && (shown->FindMessage(P_C_NODE_PATTERN,&pattern) == B_OK)) {
+		rgb_color	fill;
+		if (pattern.FindInt32("FillColor",(int32 *)&fill) == B_OK)
+			colorItem->ShowColor(fill);
+		float	pen;
+		if ((node != NULL) && (pattern.FindFloat("PenSize",&pen) == B_OK))
+			penSize->SetValue(pen);
+	}
+	BMessage	shapeArchive;
+	const char	*shapeName	= NULL;
+	if ((node != NULL) && (node->FindMessage(P_C_NODE_SHAPE,&shapeArchive) == B_OK)
+			&& (shapeArchive.FindString(P_C_SHAPE_NAME,&shapeName) == B_OK))
+		nodeShape->SetValue(shapeName);
+	int8	value;
+	BString	text;
+	if ((connection != NULL) && (connection->FindInt8(P_C_NODE_CONNECTION_TYPE,&value) == B_OK)) {
+		text.SetToFormat("%d",(int)value);
+		connectionStyle->SetValue(text.String());
+	}
+	if ((connection != NULL) && (connection->FindInt8(P_C_NODE_CONNECTION_ARROWS,&value) == B_OK)) {
+		text.SetToFormat("%d",(int)value);
+		connectionArrows->SetValue(text.String());
+	}
 }

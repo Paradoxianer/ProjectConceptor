@@ -232,6 +232,13 @@ void ColorToolItem::SetColor(rgb_color newColor)
 	Invoke();
 }
 
+void ColorToolItem::ShowColor(rgb_color newColor)
+{
+	value		= newColor;
+	hasPreview	= false;
+	Invalidate();
+}
+
 void ColorToolItem::PreviewColor(rgb_color newColor)
 {
 	// Live preview only - value/GetColor() (the committed color

@@ -48,6 +48,8 @@ virtual		void			SetToolTip(BString *toolT){toolTip=toolT;};
 virtual	const	char		*GetName(void){return tName;};
 virtual		float			GetValue(void);
 			void			SetValue(float);
+	/** the text field follows the button */
+	virtual	void			SetEnabled(bool enabled);
 
 virtual		void			Draw(BRect updateRect);
 
