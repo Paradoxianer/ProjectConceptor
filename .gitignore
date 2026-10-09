@@ -31,4 +31,4 @@
 
 # lokale Dev-Helfer, kein Repo-Inhalt
 dev.sh
-CLAUDE.md
+CLAUDE.md__pycache__/
