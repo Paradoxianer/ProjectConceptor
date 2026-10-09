@@ -137,3 +137,18 @@ void GroupBoundaryTest::ExistingFixtureShapeIsUnchanged(void)
 		CPPUNIT_ASSERT_DOUBLES_EQUAL(expected[i].y,poly[i].y,0.01);
 	}
 }
+
+
+// a short child on the left, a tall one on the right: below the short
+// one the bounding box is empty and a click there must miss the group
+void GroupBoundaryTest::EmptyNotchIsNotInside(void)
+{
+	std::vector<BRect>	rects;
+	rects.push_back(BRect(0, 0, 100, 50));
+	rects.push_back(BRect(150, 0, 250, 300));
+	std::vector<BPoint>	outline	= ComputeGroupBoundary(rects, 20);
+	CPPUNIT_ASSERT(PolygonContains(outline, BPoint(50, 25)));
+	CPPUNIT_ASSERT(PolygonContains(outline, BPoint(200, 250)));
+	CPPUNIT_ASSERT(PolygonContains(outline, BPoint(50, -10)));
+	CPPUNIT_ASSERT(!PolygonContains(outline, BPoint(50, 250)));
+}

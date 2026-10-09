@@ -41,9 +41,7 @@ public:
 			 * taller one sits in a neighbouring column. Gaps with no
 			 * child at all just hold the last height, keeping the shape
 			 * one connected piece (issue #38). frame/P_C_NODE_FRAME
-			 * (RecalcFrame()) stay a plain bounding rect regardless -
-			 * only Draw()'s own shape changes, hit-testing/serialization
-			 * are unaffected.
+			 * (RecalcFrame()) stay a plain bounding rect regardless.
 			 */
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			LanguageChanged();
@@ -51,8 +49,9 @@ public:
 
 			void			ValueChanged(void);
 
-/*			bool			Caught(BPoint where);
-			BRect			Frame(void);
+			/** inside the drawn outline, not just its bounding frame */
+			bool			Caught(BPoint where);
+/*			BRect			Frame(void);
 			void			SetFrame(BRect newFrame);*/
 			void			MoveBy(float dx, float dy);
 			void			ResizeBy(float dx,float dy);

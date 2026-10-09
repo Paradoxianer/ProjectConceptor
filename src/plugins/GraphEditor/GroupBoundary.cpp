@@ -186,3 +186,20 @@ vector<BPoint> ComputeGroupBoundary(const vector<BRect> &rects, float labelSpace
 
 	return polygon;
 }
+
+
+bool PolygonContains(const std::vector<BPoint> &polygon, BPoint where)
+{
+	bool	inside	= false;
+	size_t	count	= polygon.size();
+	if (count < 3)
+		return false;
+	for (size_t i = 0, j = count - 1; i < count; j = i++) {
+		const BPoint	&a	= polygon[i];
+		const BPoint	&b	= polygon[j];
+		if (((a.y > where.y) != (b.y > where.y))
+			&& (where.x < (b.x - a.x) * (where.y - a.y) / (b.y - a.y) + a.x))
+			inside = !inside;
+	}
+	return inside;
+}

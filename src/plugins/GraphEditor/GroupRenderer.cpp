@@ -299,6 +299,9 @@ void GroupRenderer::RecalcFrame(bool toFit) {
 		// path (an old macro replay, say) gets corrected back to fit the
 		// next time this runs, same as an oversized one would.
 		frame = groupFrame;
+		// hit test and connection dots follow the new box
+		shape.Layout(frame);
+		UpdateConnectors();
 		// without this, the next ValueChanged() on this renderer (any later
 		// change anywhere - changedNodes never clears - will trigger one)
 		// re-reads P_C_NODE_FRAME from container via ClassRenderer's own
@@ -418,6 +421,18 @@ void GroupRenderer::PlaceLabel(void)
 		(*attribute)->SetFrame(BRect(targetLeft,row.top+dy,targetRight,row.bottom+dy));
 		attribute++;
 	}
+}
+
+
+bool GroupRenderer::Caught(BPoint where)
+{
+	if (!frame.Contains(where))
+		return false;
+	vector<BRect>	rects;
+	CollectChildRects(rects);
+	if (rects.empty())
+		return false;
+	return PolygonContains(ComputeGroupBoundary(rects,LabelSpace()),where);
 }
 
 

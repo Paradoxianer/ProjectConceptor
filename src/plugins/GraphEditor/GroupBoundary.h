@@ -13,5 +13,7 @@
 #include <vector>
 
 std::vector<BPoint>	ComputeGroupBoundary(const std::vector<BRect> &rects, float labelSpace);
+/** even-odd point in polygon test */
+bool				PolygonContains(const std::vector<BPoint> &polygon, BPoint where);
 
 #endif

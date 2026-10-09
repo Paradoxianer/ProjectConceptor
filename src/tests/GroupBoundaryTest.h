@@ -14,12 +14,14 @@ public:
 	void NonOverlappingChildrenGetACorridorNotABowtie(void);
 	void ChainOfNonOverlappingChildrenAllGetCorridors(void);
 	void ExistingFixtureShapeIsUnchanged(void);
+	void EmptyNotchIsNotInside(void);
 
 	CPPUNIT_TEST_SUITE(GroupBoundaryTest);
 	CPPUNIT_TEST(OverlappingChildrenProduceNoSelfIntersection);
 	CPPUNIT_TEST(NonOverlappingChildrenGetACorridorNotABowtie);
 	CPPUNIT_TEST(ChainOfNonOverlappingChildrenAllGetCorridors);
 	CPPUNIT_TEST(ExistingFixtureShapeIsUnchanged);
+	CPPUNIT_TEST(EmptyNotchIsNotInside);
 	CPPUNIT_TEST_SUITE_END();
 };
 
