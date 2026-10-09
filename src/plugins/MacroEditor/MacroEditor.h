@@ -50,6 +50,7 @@ public:
 	virtual void			PreprocessAfterLoad(BMessage *container) {};
 
 	virtual	BView*			GetView(void) {return this;};
+	virtual	const char*		TabLabel(void);
 	virtual BHandler*		GetHandler(void) {return this;};
 
 	virtual	BMessage*		GetConfiguration(void) {return configMessage;};

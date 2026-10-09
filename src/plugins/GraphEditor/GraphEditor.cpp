@@ -1769,3 +1769,9 @@ void GraphEditor::SetShortCutFilter(ShortCutFilter *_shortCutFilter)
 			UnlockLooper();
 	}
 }
+
+
+const char* GraphEditor::TabLabel(void)
+{
+	return B_TRANSLATE("Graph");
+}

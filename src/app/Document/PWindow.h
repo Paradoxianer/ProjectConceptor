@@ -58,14 +58,15 @@ public:
 	/**Removes the current selected Edtior
 	 */
 	virtual	void			RemoveEditor(void);
-	/**Selects the editor tab with the given label, attaching its view
+	/**Selects the editor tab whose view is named viewName (the labels are
+	 * translated), attaching its view
 	 * (a non-selected tab's view has no Looper - see AddEditor()/
 	 * CreatEditorList()'s own comment on this) - so a caller wanting to
 	 * message a specific editor's handler needs this first, or the
-	 * message has nowhere valid to go. No-op (false) if no tab has that
-	 * label.
+	 * message has nowhere valid to go. No-op (false) if no tab has such
+	 * a view.
 	 */
-	virtual	bool			SelectEditorTab(const char *label);
+	virtual	bool			SelectEditorTab(const char *viewName);
 
 
 	//++++++++++++++++++++++PMenuAcces

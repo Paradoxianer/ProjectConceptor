@@ -121,38 +121,38 @@ void PWindow::ReloadMacroShortcuts(void)
 	AddCommonFilter(shortcutFilter);
 }
 
+static int ComparePluginNames(const void *first, const void *second)
+{
+	return strcmp((*(BasePlugin **)first)->GetName(),(*(BasePlugin **)second)->GetName());
+}
+
 void PWindow::CreatEditorList(void)
 {
 	PluginManager	*pluginManager	= (doc->BelongTo())->GetPluginManager();
 	BList 			*editorPlugins	= pluginManager->GetPluginsByType(P_C_EDITOR_PLUGIN_TYPE);
 	BasePlugin		*editorPlg			= NULL;
+	int32			graphEditorTab		= -1;
 	if (editorPlugins != NULL)
 	{
-		for (int32 i = 0; i<editorPlugins->CountItems(); i++)
+		// the directory lists plugins in no fixed order (BFS and packagefs
+		// differ): sorted by name the tabs read Graph, Macros, Data
+		BList	sorted(*editorPlugins);
+		sorted.SortItems(ComparePluginNames);
+		for (int32 i = 0; i<sorted.CountItems(); i++)
 		{
-			editorPlg	= (BasePlugin*)editorPlugins->ItemAt(i);
+			editorPlg	= (BasePlugin*)sorted.ItemAt(i);
+			int32	tabsBefore	= mainView->CountTabs();
 			AddEditor(editorPlg->GetName(),(PEditor *)editorPlg->GetNewObject(NULL));
-//			subMenu->AddItem(new BMenuItem(B_TRANSLATE(editorPlg->GetName()),editorAdd));
+			if ((strcmp(editorPlg->GetName(),"GraphEditor") == 0)
+				&& (mainView->CountTabs() > tabsBefore))
+				graphEditorTab	= tabsBefore;
 		}
 	}
 	// AddEditor() above selects each tab as it's added, purely to attach
 	// its view safely - whichever one was added last ends up selected as
 	// a side effect. Show GraphEditor instead, now that every tab's view
-	// is attached. GetPluginsByType() hands plugins back in directory
-	// listing order, not alphabetically - it happened to put GraphEditor
-	// first on a BFS dev build, which is what "just select tab 0" here
-	// used to rely on, but packagefs (an installed .hpkg) lists the same
-	// directory in a different order, so tab 0 ended up being
-	// NavigatorEditor instead. Find the tab by its actual label.
+	// is attached; its label is translated, so it is found by plugin name.
 	bool locked = LockLooper();
-	int32	graphEditorTab	= -1;
-	for (int32 i = 0; i < mainView->CountTabs(); i++) {
-		BTab	*tab	= mainView->TabAt(i);
-		if ((tab != NULL) && (tab->Label() != NULL) && (strcmp(tab->Label(),"GraphEditor") == 0)) {
-			graphEditorTab	= i;
-			break;
-		}
-	}
 	if (graphEditorTab >= 0)
 		mainView->Select(graphEditorTab);
 	else if (mainView->CountTabs() > 0)
@@ -588,7 +588,7 @@ void PWindow::AddEditor(const char *name,PEditor *editor)
 		rect.InsetBy(5,5);
 		rect.bottom -= mainView->TabHeight();
 		mainView->AddTab(editorView, tab);
-		tab->SetLabel(name);
+		tab->SetLabel(editor->TabLabel() != NULL ? editor->TabLabel() : name);
 		// MainView doesn't use BLayout, so BTab::Select() is what actually
 		// AddChild()s a tab's view the first time - it never happens from
 		// AddTab() alone. Selecting every tab here keeps that first attach
@@ -628,15 +628,16 @@ void PWindow::RemoveEditor(void)
 	}
 }
 
-bool PWindow::SelectEditorTab(const char *label)
+bool PWindow::SelectEditorTab(const char *viewName)
 {
-	if (label == NULL)
+	if (viewName == NULL)
 		return false;
 	bool	locked	= LockLooper();
 	int32	found	= -1;
 	for (int32 i = 0; i < mainView->CountTabs(); i++) {
 		BTab	*tab	= mainView->TabAt(i);
-		if ((tab != NULL) && (tab->Label() != NULL) && (strcmp(tab->Label(),label) == 0)) {
+		BView	*view	= (tab != NULL) ? tab->View() : NULL;
+		if ((view != NULL) && (view->Name() != NULL) && (strcmp(view->Name(),viewName) == 0)) {
 			found	= i;
 			break;
 		}

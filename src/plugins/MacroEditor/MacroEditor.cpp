@@ -932,3 +932,9 @@ void MacroEditor::MessageReceived(BMessage *message)
 			break;
 	}
 }
+
+
+const char* MacroEditor::TabLabel(void)
+{
+	return B_TRANSLATE("Macros");
+}

@@ -49,6 +49,7 @@ public:
 	// previously let the *columns themselves* scroll into view once
 	// drilling down made this view wider than the tab.
 	virtual	BView*			GetView(void);
+	virtual	const char*		TabLabel(void);
 	virtual BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
 

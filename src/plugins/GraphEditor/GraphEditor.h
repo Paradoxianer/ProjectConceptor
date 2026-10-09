@@ -93,6 +93,7 @@ public:
 	virtual	void			DetachedFromManager(void);
 
 	virtual	BView*			GetView(void);
+	virtual	const char*		TabLabel(void);
 	virtual BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
 

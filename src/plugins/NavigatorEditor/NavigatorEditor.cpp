@@ -406,3 +406,9 @@ void NavigatorEditor::DeleteRenderObject(BMessage *node)
 	TRACE();
 }
 
+
+
+const char* NavigatorEditor::TabLabel(void)
+{
+	return B_TRANSLATE("Data");
+}

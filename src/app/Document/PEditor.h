@@ -95,6 +95,12 @@ public:
 	virtual BView*			GetView(void) 					= 0;
 
 	/**
+	 * the label of the editor's tab, translated by the editor's own
+	 * catalog; NULL shows the plugin's name
+	 */
+	virtual	const char*		TabLabel(void) {return NULL;};
+
+	/**
 	 * if the View wich should be printet is different than the View 
 	 * return by GetView you shoudl overwrite this Method and return the
 	 * View wich should be printed.
