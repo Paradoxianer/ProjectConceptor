@@ -604,12 +604,9 @@ void GraphEditor::SetDirty(BRegion *region) {
 
 
 void GraphEditor::Draw(BRect updateRect) {
-	SetHighColor(230,230,230,255);
-	SetScale((1.0/scale));
-	PushState();
-	BView::Draw(updateRect);
+	// BView wraps every Draw() in one PushState()/PopState() pair, so the
+	// zoom is set on that state only and never piles up
 	SetScale(scale);
-	PushState();
 	if (gridEnabled) {
 		// a dot on every grid point, only where the update needs it
 		SetHighColor(style.gridDot);
@@ -1012,13 +1009,7 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			break;
 		}
 		case G_E_NEW_SCALE: {
-			//reset to our 100%
-			SetScale((1.0/scale));
 			message->FindFloat("scale",&scale);
-			//now we can set the new scale
-			SetScale(scale);
-			PushState();
-			//FrameResized(0,0);
 			UpdateScrollBars();
 			Invalidate();
 			break;
