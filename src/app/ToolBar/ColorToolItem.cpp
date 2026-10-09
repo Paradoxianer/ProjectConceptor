@@ -185,7 +185,6 @@ BArchivable* ColorToolItem::Instantiate(BMessage *archive)
 void ColorToolItem::Draw(BRect updateRect)
 {
 	BButton::Draw(updateRect);
-	SetDrawingMode(B_OP_OVER);
 	rgb_color	drawColor	= hasPreview ? previewValue : value;
 	BRect	swatchFrame=BRect(0,0,17,17);
 	if (Value() != B_CONTROL_ON)
@@ -198,20 +197,13 @@ void ColorToolItem::Draw(BRect updateRect)
 		swatchFrame.bottom -=2;
 		swatchFrame.right -=2;
 	}
+	// flat: the color and a rim in its own darker shade
+	SetDrawingMode(B_OP_ALPHA);
 	SetHighColor(drawColor);
 	FillRoundRect(swatchFrame,4,4);
-	SetHighColor(tint_color(drawColor,0));
-	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+1),BPoint(swatchFrame.right,swatchFrame.top+1));
-	SetHighColor(tint_color(drawColor,0.2));
-	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+2),BPoint(swatchFrame.right,swatchFrame.top+2));
-	SetHighColor(tint_color(drawColor,0.4));
-	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+3),BPoint(swatchFrame.right,swatchFrame.top+3));
-	SetHighColor(tint_color(drawColor,0.6));
-	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+4),BPoint(swatchFrame.right,swatchFrame.top+4));
-	SetHighColor(tint_color(drawColor,0.8));
-	StrokeLine(BPoint(swatchFrame.left,swatchFrame.top+5),BPoint(swatchFrame.right,swatchFrame.top+5));
-
-	SetHighColor(ui_color(B_KEYBOARD_NAVIGATION_COLOR));
+	rgb_color	rim	= tint_color(drawColor,B_DARKEN_2_TINT);
+	rim.alpha	= 255;
+	SetHighColor(rim);
 	StrokeRoundRect(swatchFrame,4,4);
 }
 
