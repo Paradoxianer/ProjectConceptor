@@ -798,20 +798,13 @@ void GraphEditor::AttachedToWindow(void) {
 	addBool->SetTarget(this);
 	addText->SetTarget(this);
 	ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddSeperator();
-	configBar->AddItem(grid);
-	configBar->AddItem(guides);
-	configBar->AddSeperator();
-	configBar->AddItem(penSize);
-	configBar->AddItem(colorItem);
-	configBar->AddSeperator();
-	configBar->AddItem(nodeShape);
-	configBar->AddItem(connectionStyle);
-	configBar->AddItem(connectionArrows);
+	configBar->AddItem(colorItem,P_TOOL_GROUP_NODE);
+	configBar->AddItem(penSize,P_TOOL_GROUP_NODE);
+	configBar->AddItem(nodeShape,P_TOOL_GROUP_NODE);
+	configBar->AddItem(connectionStyle,P_TOOL_GROUP_CONNECTION);
+	configBar->AddItem(connectionArrows,P_TOOL_GROUP_CONNECTION);
+	configBar->AddItem(grid,P_TOOL_GROUP_VIEW);
+	configBar->AddItem(guides,P_TOOL_GROUP_VIEW);
 
 	grid->SetTarget(this);
 	guides->SetTarget(this);
@@ -877,16 +870,8 @@ void GraphEditor::DetachedFromWindow(void) {
 				configBar->RemoveItem(connectionStyle);
 				configBar->RemoveItem(connectionArrows);
 				configBar->RemoveItem(nodeShape);
-				configBar->RemoveSeperator();
-				configBar->RemoveItem(patternItem);
-				configBar->RemoveSeperator();
 				configBar->RemoveItem(grid);
 				configBar->RemoveItem(guides);
-				configBar->RemoveSeperator();
-				configBar->RemoveSeperator();
-				configBar->RemoveSeperator();
-				configBar->RemoveSeperator();
-				configBar->RemoveSeperator();
 			}
 		}
 		Renderer	*nodeRenderer	= NULL;

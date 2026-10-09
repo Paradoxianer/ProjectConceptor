@@ -9,6 +9,8 @@
 #include <interface/Control.h>
 #include <support/List.h>
 
+#include <map>
+
 //#include "Mover.h"
 //#include "ToolItem.h"
 // For gcc4 we need to put this one into the cpp to not
@@ -56,6 +58,10 @@ public:
                          */
 
 			void			AddItem(BaseItem *item);
+			/** Adds item to group (a tool_group): items stay sorted by
+			 * group, in the order they were added within one, and the
+			 * toolbar puts a separator between groups itself. */
+			void			AddItem(BaseItem *item, int32 group);
                         /**
                          *Adds a seperator after the last insert Item
                          */
@@ -71,6 +77,8 @@ public:
 
 			void			RemoveItem(BaseItem *item);
 			void			ReorderItems(void);
+			/** places every item one after the other (row or column) */
+			void			LayoutItems(void);
 
 	virtual	void			Draw(BRect updateRect);
 	virtual	void			DrawAfterChildren(BRect updateRect);
@@ -112,6 +120,11 @@ protected:
 			Mover			*vorward_mover;
 			Mover			*backward_mover;
 			BList			*toolitems;
+			/** the group of every item added with one */
+			std::map<BaseItem*, int32>	itemGroups;
+			/** separators the toolbar put between groups itself */
+			BList			*groupSeparators;
+			void			UpdateGroupSeparators(void);
 			menu_layout		tool_bar_menu_layout;
 			float			left_margin,right_margin,top_margin,bottom_margin;
 			bool			mouseTrace;

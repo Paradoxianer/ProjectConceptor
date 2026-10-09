@@ -1,5 +1,7 @@
 #include "LayoutEditor.h"
 
+#include <support/Autolock.h>
+
 #include <string.h>
 
 #include <Alert.h>
@@ -45,6 +47,9 @@ LayoutEditor::LayoutEditor(image_id newId):PEditor(),BHandler("LayoutEditor")
 	configMessage		= new BMessage();
 	layouter			= NULL;
 	toolBar				= NULL;
+	applyItem			= NULL;
+	directionItem		= NULL;
+	topologyItem		= NULL;
 	applyingLayout		= false;
 	pluginID			= newId;
 }
@@ -74,7 +79,14 @@ void LayoutEditor::AttachedToManager(void)
 	if (pWindow == NULL)
 		return;
 
-	toolBar	= new ToolBar(BRect(0,0,50,ITEM_HEIGHT+4),L_E_TOOL_BAR,B_ITEMS_IN_ROW);
+	// in the window's toolbar, view group; not called from the window's
+	// thread
+	BAutolock	windowLock(pWindow);
+	if (!windowLock.IsLocked())
+		return;
+	toolBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
+	if (toolBar == NULL)
+		return;
 
 	// icons from this plugin's own resources (see LayoutEditor.rdef);
 	// ToolItem/AddChoice() both fall back gracefully to a plain
@@ -82,61 +94,70 @@ void LayoutEditor::AttachedToManager(void)
 	BResources	res;
 	bool		haveRes	= (pluginID >= 0) && (res.SetToImage(pluginID) == B_OK);
 
-	ToolItem	*applyItem	= new ToolItem(B_TRANSLATE("Auto-Layout"),
+	ToolItem	*apply	= new ToolItem(B_TRANSLATE("Auto-Layout"),
 		haveRes ? LoadIcon(res,"layout") : NULL,new BMessage(L_E_APPLY_LAYOUT));
-	applyItem->BButton::SetToolTip(B_TRANSLATE("Automatically arrange the graph"));
-	toolBar->AddItem(applyItem);
+	apply->BButton::SetToolTip(B_TRANSLATE("Automatically arrange the graph"));
+	toolBar->AddItem(apply,P_TOOL_GROUP_VIEW);
+	applyItem	= apply;
 	// BMessenger(this) resolves via GetHandler()'s own Looper() (doc's,
 	// already set by RegisterPEditor()) - plain SetTarget(this) would
 	// default to the button's own looper (pWindow) instead.
-	applyItem->SetTarget(BMessenger(this));
+	apply->SetTarget(BMessenger(this));
 
-	ChoiceToolItem	*directionItem	= new ChoiceToolItem(B_TRANSLATE("Direction"),
+	ChoiceToolItem	*direction	= new ChoiceToolItem(B_TRANSLATE("Direction"),
 		new BMessage(L_E_SET_DIRECTION),ITEM_WIDTH*2);
-	directionItem->SetIconOnly(true);
-	directionItem->AddChoice(B_TRANSLATE("Top " "\xE2\x86\x92" " Bottom"),"TB",
+	direction->SetIconOnly(true);
+	direction->AddChoice(B_TRANSLATE("Top " "\xE2\x86\x92" " Bottom"),"TB",
 		haveRes ? LoadIcon(res,"dir-tb") : NULL);
-	directionItem->AddChoice(B_TRANSLATE("Left " "\xE2\x86\x92" " Right"),"LR",
+	direction->AddChoice(B_TRANSLATE("Left " "\xE2\x86\x92" " Right"),"LR",
 		haveRes ? LoadIcon(res,"dir-lr") : NULL);
-	directionItem->AddChoice(B_TRANSLATE("Right " "\xE2\x86\x92" " Left"),"RL",
+	direction->AddChoice(B_TRANSLATE("Right " "\xE2\x86\x92" " Left"),"RL",
 		haveRes ? LoadIcon(res,"dir-rl") : NULL);
-	directionItem->AddChoice(B_TRANSLATE("Bottom " "\xE2\x86\x92" " Top"),"BT",
+	direction->AddChoice(B_TRANSLATE("Bottom " "\xE2\x86\x92" " Top"),"BT",
 		haveRes ? LoadIcon(res,"dir-bt") : NULL);
-	directionItem->SetToolTip(B_TRANSLATE("Layout direction"));
-	toolBar->AddItem(directionItem);
-	directionItem->SetTarget(BMessenger(this));
+	direction->SetToolTip(B_TRANSLATE("Layout direction"));
+	toolBar->AddItem(direction,P_TOOL_GROUP_VIEW);
+	directionItem	= direction;
+	direction->SetTarget(BMessenger(this));
 
-	ChoiceToolItem	*topologyItem	= new ChoiceToolItem(B_TRANSLATE("Topology"),
+	ChoiceToolItem	*topology	= new ChoiceToolItem(B_TRANSLATE("Topology"),
 		new BMessage(L_E_SET_ENGINE),ITEM_WIDTH*2);
-	topologyItem->SetIconOnly(true);
-	topologyItem->AddChoice(B_TRANSLATE("Hierarchical"),"dot",
+	topology->SetIconOnly(true);
+	topology->AddChoice(B_TRANSLATE("Hierarchical"),"dot",
 		haveRes ? LoadIcon(res,"topo-dot") : NULL);
-	topologyItem->AddChoice(B_TRANSLATE("Spring model"),"neato",
+	topology->AddChoice(B_TRANSLATE("Spring model"),"neato",
 		haveRes ? LoadIcon(res,"topo-neato") : NULL);
-	topologyItem->AddChoice(B_TRANSLATE("Force-directed"),"fdp",
+	topology->AddChoice(B_TRANSLATE("Force-directed"),"fdp",
 		haveRes ? LoadIcon(res,"topo-fdp") : NULL);
-	topologyItem->AddChoice(B_TRANSLATE("Force (large graphs)"),"sfdp",
+	topology->AddChoice(B_TRANSLATE("Force (large graphs)"),"sfdp",
 		haveRes ? LoadIcon(res,"topo-sfdp") : NULL);
-	topologyItem->AddChoice(B_TRANSLATE("Circular"),"circo",
+	topology->AddChoice(B_TRANSLATE("Circular"),"circo",
 		haveRes ? LoadIcon(res,"topo-circo") : NULL);
-	topologyItem->AddChoice(B_TRANSLATE("Radial"),"twopi",
+	topology->AddChoice(B_TRANSLATE("Radial"),"twopi",
 		haveRes ? LoadIcon(res,"topo-twopi") : NULL);
-	topologyItem->SetToolTip(B_TRANSLATE("Layout topology"));
-	toolBar->AddItem(topologyItem);
-	topologyItem->SetTarget(BMessenger(this));
-
-	pWindow->AddToolBar(toolBar);
+	topology->SetToolTip(B_TRANSLATE("Layout topology"));
+	toolBar->AddItem(topology,P_TOOL_GROUP_VIEW);
+	topologyItem	= topology;
+	topology->SetTarget(BMessenger(this));
 }
 
 
 void LayoutEditor::DetachedFromManager(void)
 {
-	if (toolBar != NULL) {
-		PWindow	*pWindow	= (doc != NULL) ? doc->GetWindow() : NULL;
-		if (pWindow != NULL)
-			pWindow->RemoveToolBar(L_E_TOOL_BAR);
-		toolBar	= NULL;
+	if (toolBar == NULL)
+		return;
+	// while the window closes, its toolbar is torn down with it
+	PWindow	*pWindow	= (doc != NULL) ? doc->GetWindow() : NULL;
+	if ((pWindow != NULL) && !pWindow->IsClosing() && pWindow->Lock()) {
+		toolBar->RemoveItem(applyItem);
+		toolBar->RemoveItem(directionItem);
+		toolBar->RemoveItem(topologyItem);
+		pWindow->Unlock();
 	}
+	toolBar			= NULL;
+	applyItem		= NULL;
+	directionItem	= NULL;
+	topologyItem	= NULL;
 }
 
 

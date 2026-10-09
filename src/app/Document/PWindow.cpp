@@ -1,6 +1,7 @@
 #include <app/Roster.h>
 #include <interface/MenuItem.h>
 #include <interface/ScrollBar.h>
+#include <interface/Bitmap.h>
 #include <interface/ScrollView.h>
 #include <storage/Entry.h>
 #include <support/Autolock.h>
@@ -431,59 +432,92 @@ BMenuBar *PWindow::MakeStatusBar(void)
 }
 
 
+// Undo/redo have no PNG resource; a curved arrow drawn like the other
+// runtime icons, mirrored for redo.
+static BBitmap* MakeUndoIcon(bool redo)
+{
+	BRect	bounds(0,0,19,19);
+	BBitmap	*bmp	= new BBitmap(bounds,B_RGBA32,true);
+	BView	*view	= new BView(bounds,"undoIcon",B_FOLLOW_NONE,B_WILL_DRAW);
+	bmp->AddChild(view);
+	bmp->Lock();
+	view->SetHighColor(0,0,0,0);
+	view->FillRect(bounds);
+	view->SetDrawingMode(B_OP_ALPHA);
+	view->SetHighColor(60,68,82,255);
+	view->SetPenSize(1.6);
+	float	x0	= redo ? 16 : 3;
+	float	dir	= redo ? -1 : 1;
+	// hook: head on the left (undo), a curve back down to the right
+	view->StrokeLine(BPoint(x0,7),BPoint(x0+dir*9,7));
+	view->StrokeArc(BRect(redo ? 3 : 8,7,redo ? 11 : 16,15),redo ? 90 : 270,180);
+	view->StrokeLine(BPoint(x0+dir*9,15),BPoint(x0+dir*5,15));
+	view->FillTriangle(BPoint(x0-dir*1,7),BPoint(x0+dir*4,3),BPoint(x0+dir*4,11));
+	view->Sync();
+	bmp->Unlock();
+	return bmp;
+}
+
 void PWindow::MakeToolbars()
 {
 	TRACE();
 	ToolItem	*toolItem	= NULL;
-	ToolBar		*tmpBar		= NULL;
-	BBitmap		*tmpBitmap	= NULL;
-	BRect statusFrame=Bounds();
+	BRect		statusFrame	= Bounds();
 	statusFrame.right=20;
+	ToolBar		*tmpBar		= new ToolBar(statusFrame,P_M_STANDART_TOOL_BAR,B_ITEMS_IN_ROW);
 
-
-	tmpBar		=new ToolBar(statusFrame,P_M_STANDART_TOOL_BAR,B_ITEMS_IN_ROW);
-
-	tmpBitmap	= BTranslationUtils::GetBitmap(B_PNG_FORMAT,"new");
-
-	toolItem	= new ToolItem("new",tmpBitmap,new BMessage(MENU_FILE_NEW));
+	// plugins add theirs to the node, connection and view groups
+	toolItem	= new ToolItem("new",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"new"),
+		new BMessage(MENU_FILE_NEW));
 	toolItem->SetTarget(be_app);
-	tmpBar->AddItem(toolItem);
-	tmpBar->AddSeperator();
+	toolItem->BButton::SetToolTip(B_TRANSLATE("New"));
+	tmpBar->AddItem(toolItem,P_TOOL_GROUP_DOCUMENT);
 
-	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"open");
-	toolItem = new ToolItem("open",tmpBitmap,new BMessage(MENU_FILE_OPEN));
+	toolItem	= new ToolItem("open",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"open"),
+		new BMessage(MENU_FILE_OPEN));
 	toolItem->SetTarget(be_app);
-	tmpBar->AddItem(toolItem);
+	toolItem->BButton::SetToolTip(B_TRANSLATE("Open"));
+	tmpBar->AddItem(toolItem,P_TOOL_GROUP_DOCUMENT);
 
-	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"save");
-	toolItem = new ToolItem("save",tmpBitmap,new BMessage(MENU_FILE_SAVE));
-	tmpBar->AddItem(toolItem);
+	toolItem	= new ToolItem("save",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"save"),
+		new BMessage(MENU_FILE_SAVE));
 	toolItem->SetTarget(doc);
-	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"save as");
-	toolItem = new ToolItem("save as",tmpBitmap,new BMessage(MENU_FILE_SAVE));
-	tmpBar->AddItem(toolItem);
+	toolItem->BButton::SetToolTip(B_TRANSLATE("Save"));
+	tmpBar->AddItem(toolItem,P_TOOL_GROUP_DOCUMENT);
+
+	toolItem	= new ToolItem("save as",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"save as"),
+		new BMessage(MENU_FILE_SAVEAS));
 	toolItem->SetTarget(doc);
+	toolItem->BButton::SetToolTip(B_TRANSLATE("Save as"));
+	tmpBar->AddItem(toolItem,P_TOOL_GROUP_DOCUMENT);
 
-	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"print");
-	toolItem = new ToolItem("print",tmpBitmap,new BMessage(MENU_FILE_PRINT));
+	toolItem	= new ToolItem("print",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"print"),
+		new BMessage(MENU_FILE_PRINT));
 	toolItem->SetTarget(doc);
-	tmpBar->AddItem(toolItem);
+	toolItem->BButton::SetToolTip(B_TRANSLATE("Print"));
+	tmpBar->AddItem(toolItem,P_TOOL_GROUP_DOCUMENT);
 
-
-	tmpBar->AddSeperator();
-	tmpBar->AddSeperator();
-	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"find");
-	toolItem = new ToolItem("find",tmpBitmap,new BMessage(MENU_SEARCH_FIND));
+	toolItem	= new ToolItem("undo",MakeUndoIcon(false),new BMessage(B_UNDO));
 	toolItem->SetTarget(doc);
+	toolItem->BButton::SetToolTip(B_TRANSLATE("Undo"));
+	tmpBar->AddItem(toolItem,P_TOOL_GROUP_EDIT);
 
-	tmpBar->AddItem(toolItem);
-	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"trash");
-	toolItem = new ToolItem("trash",tmpBitmap,new BMessage('del'));
-	tmpBar->AddItem(toolItem);
-	tmpBar->AddSeperator();
-	tmpBitmap=BTranslationUtils::GetBitmap(B_PNG_FORMAT,"font");
-	toolItem = new ToolItem("font",tmpBitmap,new BMessage('font'));
-	tmpBar->AddItem(toolItem);
+	toolItem	= new ToolItem("redo",MakeUndoIcon(true),new BMessage(B_REDO));
+	toolItem->SetTarget(doc);
+	toolItem->BButton::SetToolTip(B_TRANSLATE("Redo"));
+	tmpBar->AddItem(toolItem,P_TOOL_GROUP_EDIT);
+
+	toolItem	= new ToolItem("find",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"find"),
+		new BMessage(MENU_SEARCH_FIND));
+	toolItem->SetTarget(doc);
+	toolItem->BButton::SetToolTip(B_TRANSLATE("Find"));
+	tmpBar->AddItem(toolItem,P_TOOL_GROUP_EDIT);
+
+	toolItem	= new ToolItem("trash",BTranslationUtils::GetBitmap(B_PNG_FORMAT,"trash"),
+		new BMessage(B_CLEAR));
+	toolItem->SetTarget(doc);
+	toolItem->BButton::SetToolTip(B_TRANSLATE("Delete"));
+	tmpBar->AddItem(toolItem,P_TOOL_GROUP_EDIT);
 
 	AddToolBar(tmpBar);
 }
@@ -563,13 +597,6 @@ void PWindow::MessageReceived(BMessage *message)
 			RemoveEditor();
 		}
 		break;
-		case 'font':
-		{
-	/*		 FontPanel *fPanel = new FontPanel(FONT_PANEL,be_plain_font, new BString("Timon"),NULL,NULL, false, true, true);
-			 fPanel->SetHideWhenDone(false);
-//			 fPanel->setTarget(doc);
-			 fPanel->Show();*/
-		}
 		default:
 			BWindow::MessageReceived(message);
 			break;

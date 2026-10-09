@@ -203,6 +203,15 @@ extern const char*		P_M_STATUS_BAR;//					= "P_M_STATUS_BAR";
  *@see ToolBar
  */
 extern const char*		P_M_STANDART_TOOL_BAR;//			= "P_M_STANDART_TOOL_BAR";
+/** groups of the standard toolbar, in their order from left to right -
+ * see ToolBar::AddItem(BaseItem*, int32) */
+enum tool_group {
+	P_TOOL_GROUP_DOCUMENT	= 0,
+	P_TOOL_GROUP_EDIT,
+	P_TOOL_GROUP_NODE,
+	P_TOOL_GROUP_CONNECTION,
+	P_TOOL_GROUP_VIEW
+};
 /**string with wich you can find the correspondenting ToolBar for all formating stuff 
  *@see ToolBar
  */

@@ -12,6 +12,7 @@
 #include "PEditor.h"
 #include "PLayouter.h"
 
+class BaseItem;
 class ToolBar;
 
 const uint32	L_E_APPLY_LAYOUT	= 'lEAL';
@@ -96,7 +97,11 @@ protected:
 
 			BMessage		*configMessage;
 			PLayouter		*layouter;
+			/** the window's standard toolbar, holding the three items */
 			ToolBar			*toolBar;
+			BaseItem		*applyItem;
+			BaseItem		*directionItem;
+			BaseItem		*topologyItem;
 			/** guards against reacting to change notifications caused by
 			 * this editor's own command; not a concurrency lock. */
 			bool			applyingLayout;

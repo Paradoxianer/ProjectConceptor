@@ -18,6 +18,7 @@ ToolBar::ToolBar(BRect rect,  const char *name,menu_layout ori): BControl(rect, 
 	SetDrawingMode(B_OP_ALPHA);
 	right_margin			= top_margin=bottom_margin=left_margin=2;
 	toolitems				= new BList();
+	groupSeparators			= new BList();
 	tool_bar_menu_layout	= ori;
 	mouseTrace				= false;
 	klickedItem				= NULL;
@@ -70,6 +71,7 @@ ToolBar::ToolBar(BMessage *archive):BControl(archive)
 		}
 		i++;
 	}
+	groupSeparators	= new BList();
 	err = archive->FindInt32("ToolBar::tool_bar_menu_layout",(int32 *)&tool_bar_menu_layout);
 	err = archive->FindMessage("ToolBar::vorward_mover",&tmpArchive);
 	if (err == B_OK)
@@ -165,48 +167,90 @@ void ToolBar::AddItem(BaseItem *item)
 	}
 }
 
-void ToolBar::RemoveItem(BaseItem *item)
+void ToolBar::AddItem(BaseItem *item, int32 group)
 {
 	TRACE();
-	if (item != NULL)
-	{
-		item->DetachedFromToolBar(this);
-		toolitems->RemoveItem(item);	
-		if (tool_bar_menu_layout == B_ITEMS_IN_MATRIX)
-		{
-			countx=(uint32)ceil(sqrt(toolitems->CountItems())-0.5);
-			county=(uint32)ceil(sqrt(toolitems->CountItems()));
-			ReorderItems();
+	if (item == NULL)
+		return;
+	// after the last item of this group or an earlier one
+	int32	index	= 0;
+	for (int32 i = 0; i < toolitems->CountItems(); i++) {
+		std::map<BaseItem*, int32>::iterator	found
+			= itemGroups.find((BaseItem *)toolitems->ItemAt(i));
+		if ((found != itemGroups.end()) && (found->second <= group))
+			index	= i + 1;
+	}
+	itemGroups[item]	= group;
+	item->AttachedToToolBar(this);
+	toolitems->AddItem(item,index);
+	UpdateGroupSeparators();
+	LayoutItems();
+}
+
+
+void ToolBar::UpdateGroupSeparators(void)
+{
+	for (int32 i = 0; i < groupSeparators->CountItems(); i++) {
+		BaseItem	*separator	= (BaseItem *)groupSeparators->ItemAt(i);
+		separator->DetachedFromToolBar(this);
+		toolitems->RemoveItem(separator);
+		delete separator;
+	}
+	groupSeparators->MakeEmpty();
+	int32	lastGroup	= -1;
+	for (int32 i = 0; i < toolitems->CountItems(); i++) {
+		std::map<BaseItem*, int32>::iterator	found
+			= itemGroups.find((BaseItem *)toolitems->ItemAt(i));
+		if (found == itemGroups.end())
+			continue;
+		if ((lastGroup >= 0) && (found->second != lastGroup)) {
+			BaseItem	*separator	= new ToolBarSeperator(tool_bar_menu_layout);
+			separator->AttachedToToolBar(this);
+			toolitems->AddItem(separator,i);
+			groupSeparators->AddItem(separator);
+			i++;
 		}
-		else
-		{
-			BaseItem *actItem	= NULL;
-			BaseItem *oldItem	= NULL;
-			for (int32 i = 0 ; i<toolitems->CountItems();i++)
-			{
-				actItem= (BaseItem *)toolitems->ItemAt(i);
-				if (oldItem)
-				{
-					if (tool_bar_menu_layout == B_ITEMS_IN_ROW)
-						item->MoveTo((oldItem->Frame()).right+right_margin+left_margin,top_margin);
-					else if (tool_bar_menu_layout == B_ITEMS_IN_COLUMN)
-						item->MoveTo(left_margin,(oldItem->Frame()).bottom+bottom_margin+top_margin);
-					rightIconBorder		= item->Frame().right+right_margin;
-					bottomIconBorder	= item->Frame().bottom+bottom_margin;
-				}
-				else
-				{
-					item->MoveTo(left_margin,top_margin);
-					rightIconBorder		= item->Frame().right+right_margin;
-					bottomIconBorder	= item->Frame().bottom+bottom_margin;
-				}
-				oldItem=actItem;	
-			}
-		}
-		
+		lastGroup	= found->second;
 	}
 }
 
+
+void ToolBar::LayoutItems(void)
+{
+	if (tool_bar_menu_layout == B_ITEMS_IN_MATRIX) {
+		countx=(uint32)ceil(sqrt(toolitems->CountItems())-0.5);
+		county=(uint32)ceil(sqrt(toolitems->CountItems()));
+		ReorderItems();
+		return;
+	}
+	BaseItem	*previous	= NULL;
+	for (int32 i = 0; i < toolitems->CountItems(); i++) {
+		BaseItem	*current	= (BaseItem *)toolitems->ItemAt(i);
+		if (previous == NULL)
+			current->MoveTo(left_margin,top_margin);
+		else if (tool_bar_menu_layout == B_ITEMS_IN_ROW)
+			current->MoveTo(previous->Frame().right+right_margin+left_margin,top_margin);
+		else
+			current->MoveTo(left_margin,previous->Frame().bottom+bottom_margin+top_margin);
+		rightIconBorder		= current->Frame().right+right_margin;
+		bottomIconBorder	= current->Frame().bottom+bottom_margin;
+		previous	= current;
+	}
+	Invalidate();
+}
+
+
+void ToolBar::RemoveItem(BaseItem *item)
+{
+	TRACE();
+	if (item == NULL)
+		return;
+	item->DetachedFromToolBar(this);
+	toolitems->RemoveItem(item);
+	if (itemGroups.erase(item) > 0)
+		UpdateGroupSeparators();
+	LayoutItems();
+}
 void ToolBar::AddSeperator(void)
 {
 	TRACE();
