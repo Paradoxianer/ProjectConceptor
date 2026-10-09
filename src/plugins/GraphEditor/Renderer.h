@@ -36,16 +36,13 @@ public:
 	/** Live-preview color while a picker is open, without touching the
 	 * underlying node data - mirrors how Move/Resize preview a drag by
 	 * only updating renderer geometry, committing a single real command
-	 * at the end (see docs/notes.md). Non-pure with an empty default so
-	 * only renderers that actually draw a fill color (ClassRenderer/
-	 * ConnectionRenderer) need to override it - everything else (labels,
-	 * attribute rows, ...) is unaffected. ClearPreviewFillColor() is
-	 * called automatically from within each overriding renderer's own
-	 * ValueChanged() once a real committed value arrives, so callers
-	 * never need to explicitly clear it themselves.
+	 * at the end (see docs/notes.md). field is the pattern field the
+	 * color is for ("FillColor", "BorderColor", "HighColor" for text);
+	 * renderers ignore fields they don't draw. Each renderer drops its
+	 * previews in ValueChanged(), once the committed value arrives.
 	 */
-	virtual	void		SetPreviewFillColor(rgb_color color) {};
-	virtual	void		ClearPreviewFillColor(void) {};
+	virtual	void		SetPreviewColor(const char *field, rgb_color color) {};
+	virtual	void		ClearPreviewColor(void) {};
 
 	/** Advances a renderer's own in-flight position animation (e.g. after
 	 * Auto-Layout) by dt seconds. Returns true while still animating -

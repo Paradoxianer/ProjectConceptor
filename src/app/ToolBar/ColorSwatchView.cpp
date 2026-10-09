@@ -39,7 +39,8 @@ ColorSwatchView::ColorSwatchView(const char *name, BMessage *message,
 	fColor(color),
 	fTrackingStart(-1.0, -1.0),
 	fClickMessage(message),
-	fTarget(target)
+	fTarget(target),
+	fMarked(false)
 {
 	SetViewColor(B_TRANSPARENT_32_BIT);
 	SetHighColor(fColor);
@@ -81,6 +82,23 @@ ColorSwatchView::Draw(BRect updateRect)
 		SetHighColor(fColor);
 		FillRect(r);
 	}
+	if (fMarked) {
+		// light or dark, whichever stands out on the color
+		int32	brightness	= (fColor.red * 3 + fColor.green * 6 + fColor.blue) / 10;
+		SetHighColor(brightness > 140 ? make_color(40,44,52) : make_color(255,255,255));
+		SetPenSize(1.5);
+		BPoint	center((r.left + r.right) / 2, (r.top + r.bottom) / 2);
+		StrokeEllipse(center, 4, 4);
+		SetPenSize(1.0);
+	}
+}
+
+
+void
+ColorSwatchView::SetMarked(bool marked)
+{
+	fMarked	= marked;
+	Invalidate();
 }
 
 

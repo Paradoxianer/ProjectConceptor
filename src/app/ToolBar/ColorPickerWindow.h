@@ -4,7 +4,9 @@
 #include <interface/Window.h>
 #include <app/Handler.h>
 #include <app/Message.h>
+#include <support/String.h>
 
+class BButton;
 class BColorControl;
 class BTextControl;
 class AlphaSlider;
@@ -15,56 +17,53 @@ class ColorSwatchView;
 // owner can drop its cached pointer to this (now-invalid) window
 // instead of needing to poll IsHidden()/Lock() to find out.
 const uint32 PW_CLOSED = 'pwCL';
+// Sent to the target when another target tab is chosen; "target" is its
+// index. The color shown from then on is that target's.
+const uint32 PW_TARGET_CHANGED = 'pwTC';
 
-// Number of algorithmically-generated palette swatches shown above the
-// custom color control - a hue sweep, not a hand-curated list, so this
-// widget doesn't need per-project color curation to be reusable.
-const int32 PW_PALETTE_SIZE = 8;
+// curated palette, after the "Standard" swatch
+const int32 PW_PALETTE_SIZE = 10;
 
-// Number of "recently used" custom-color swatches shown in a second row
-// below the palette, most-recently-used first. The caller (ColorToolItem)
-// owns the actual history; this window only displays up to this many of
-// what it's given - kept equal to PW_PALETTE_SIZE just so both rows are
-// the same width, not because the two need to match.
-const int32 PW_HISTORY_SIZE = 8;
+// Number of "recently used" custom-color swatches shown in a row below
+// the palette, most-recently-used first. The caller (ColorToolItem) owns
+// the actual history; this window only displays up to this many.
+const int32 PW_HISTORY_SIZE = 11;
+
+// what a color is picked for: a node's fill, border or text, a
+// connection's line
+const int32 PW_MAX_TARGETS = 3;
+
+struct ColorPickerTarget {
+	BString		label;
+	rgb_color	color;
+	// what "Standard" resets to
+	rgb_color	standard;
+};
 
 /**
  * @class ColorPickerWindow
  *
- * Popup window offering a row of quick-pick palette swatches plus a
- * stock BColorControl and an AlphaSlider for anything not in the
- * palette. Replaces ColorToolItem's old ad hoc colorWindow / custom
- * MouseDown-MouseUp popup-hide logic, which closed the popup on a normal
- * click before a color could even be picked. This window opens on a
- * normal click and stays open until explicitly dismissed - clicking
- * outside it (detected via WindowActivated()) or pressing Escape -
- * instead of being tied to the mouse button being held down.
+ * Popup window: a tab per target (fill, border, text) when there is more
+ * than one, a row of curated swatches led by the target's standard color,
+ * the recently used colors, a stock BColorControl and an AlphaSlider
+ * drawn like its ramps. The picked color shows live on the selection.
  *
- * Reports the picked rgb_color (RGB from the color control, alpha from
- * the slider) live: an explicit message is sent to the target each time
- * a palette swatch is clicked or either control changes, rather than
- * relying on a separate OK/commit step or on BButton's native
- * click-Invoke() semantics.
+ * It opens on a normal click and stays open until dismissed by clicking
+ * outside it (WindowActivated()) or Escape. Every change is reported
+ * live to the target (a copy of message with the color and "target"
+ * index); committing what was last reported is the target's business
+ * once PW_CLOSED arrives.
  *
- * The alpha row (AlphaSlider + fAlphaText) is laid out to match
- * BColorControl's own R/G/B rows exactly - fAlphaText's frame/divider are
- * copied from BColorControl's own "_red" BTextControl (found via the
- * public BView::FindView(), not private API) rather than recomputing the
- * label/field geometry independently, so the two can't drift apart.
- *
- * All real content lives inside a single full-window background BView
- * (added first, in the constructor) rather than as direct siblings of
- * this BWindow - nested parent/child views reliably route mouse events
- * to whichever child is actually under the pointer; a set of overlapping
- * *sibling* views added directly to a BWindow do not (the first-added
- * one - originally an earlier, sibling-based version of this background
- * fix - swallowed every click in the window, an actual regression fixed
- * before it shipped).
+ * All content lives inside one full-window background view rather than as
+ * direct siblings of this BWindow: overlapping sibling views added
+ * straight to a BWindow don't route mouse events to the right one.
  */
 class ColorPickerWindow : public BWindow {
 public:
-							ColorPickerWindow(BRect frame, rgb_color color,
+							ColorPickerWindow(BRect frame,
 								BMessage *message, BHandler *target,
+								const ColorPickerTarget *targets,
+								int32 targetCount, int32 currentTarget,
 								const rgb_color *history = NULL,
 								int32 historyCount = 0);
 	virtual					~ColorPickerWindow();
@@ -73,7 +72,6 @@ public:
 	virtual	void			WindowActivated(bool active);
 	virtual	bool			QuitRequested(void);
 
-			void			SetColor(rgb_color color);
 			rgb_color		Color(void) const;
 
 	// Marks this close as a cancel rather than a commit - called by the
@@ -83,13 +81,18 @@ public:
 
 private:
 			void			_ReportColor();
-			void			_ApplyColor(rgb_color color);
+			void			_ShowColor(rgb_color color);
+			void			_SelectTarget(int32 index);
+			void			_Post(BMessage *message);
 
 			BColorControl	*fColorControl;
 			AlphaSlider		*fAlphaSlider;
 			BTextControl	*fAlphaText;
-			ColorSwatchView	*fPaletteSwatch[PW_PALETTE_SIZE];
-			ColorSwatchView	*fHistorySwatch[PW_HISTORY_SIZE];
+			BButton			*fTargetButton[PW_MAX_TARGETS];
+			ColorSwatchView	*fStandardSwatch;
+			ColorPickerTarget	fTargets[PW_MAX_TARGETS];
+			int32			fTargetCount;
+			int32			fCurrentTarget;
 			BMessage		*fMessage;
 			BHandler		*fTarget;
 			bool			fCancelled;

@@ -6,6 +6,7 @@
 #include <interface/Window.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "GraphEditor"
@@ -167,12 +168,15 @@ void ConnectionRenderer::ValueChanged() {
 	hasPreviewFillColor	= false;
 }
 
-void ConnectionRenderer::SetPreviewFillColor(rgb_color color) {
+void ConnectionRenderer::SetPreviewColor(const char *field, rgb_color color) {
+	// a connection's line is its fill color
+	if (strcmp(field,"FillColor") != 0)
+		return;
 	hasPreviewFillColor	= true;
 	previewFillColor	= color;
 }
 
-void ConnectionRenderer::ClearPreviewFillColor(void) {
+void ConnectionRenderer::ClearPreviewColor(void) {
 	hasPreviewFillColor	= false;
 }
 

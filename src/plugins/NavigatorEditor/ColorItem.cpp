@@ -146,7 +146,11 @@ void ColorItem::OpenPicker(BHandler *target)
 	BRect	frame(startPoint.x,startPoint.y,startPoint.x+1,startPoint.y+1);
 	BMessage	*reportMessage	= new BMessage(COLOR_ITEM_REPORT);
 	reportMessage->AddPointer("item",this);
-	picker	= new ColorPickerWindow(frame,colorValue,reportMessage,target);
+	// one target; "Standard" is the value the picker opened with
+	ColorPickerTarget	only;
+	only.color		= colorValue;
+	only.standard	= colorValue;
+	picker	= new ColorPickerWindow(frame,reportMessage,target,&only,1,0);
 	picker->Lock();
 	BScreen	screen(B_MAIN_SCREEN_ID);
 	BRect	screenFrame	= screen.Frame();

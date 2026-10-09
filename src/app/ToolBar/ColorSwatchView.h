@@ -38,6 +38,8 @@ public:
 	virtual	void			MouseUp(BPoint where);
 
 			void			SetColor(rgb_color color);
+			/** a small ring in the middle: this swatch is the default */
+			void			SetMarked(bool marked);
 	inline	rgb_color		Color() const { return fColor; }
 
 			void			SetTarget(BHandler *target) { fTarget = target; }
@@ -49,6 +51,7 @@ private:
 			BPoint			fTrackingStart;
 			BMessage		*fClickMessage;
 			BHandler		*fTarget;
+			bool			fMarked;
 };
 
 #endif // COLOR_SWATCH_VIEW_H

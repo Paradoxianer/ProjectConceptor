@@ -239,3 +239,14 @@ void AttributRenderer::Draw(BView *drawOn, BRect updateRect)
 	}
 }
 
+
+
+void AttributRenderer::SetTextColors(rgb_color textColor, rgb_color muted)
+{
+	StringRenderer	*label	= dynamic_cast<StringRenderer*>(name);
+	if (label != NULL)
+		label->SetColor(muted);
+	StringRenderer	*text	= dynamic_cast<StringRenderer*>(value);
+	if (text != NULL)
+		text->SetColor(textColor);
+}

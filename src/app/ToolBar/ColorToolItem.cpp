@@ -119,6 +119,8 @@ ColorToolItem::ColorToolItem(BMessage *archive):BaseItem(""),BButton(archive)
 }
 void ColorToolItem::Init(void)
 {
+	targetCount		= 0;
+	currentTarget	= 0;
 	description			= NULL;
 	toolTip				= NULL;
 	state				= P_M_ITEM_UP;
@@ -219,9 +221,49 @@ void ColorToolItem::SetColor(rgb_color newColor)
 	// turned out to be the right fix, not adding the missing Lock().)
 	value		= newColor;
 	hasPreview	= false;
+	if (targetCount > 0)
+		targets[currentTarget].color	= newColor;
 	RecordColorInHistory(newColor);
 	Invalidate();
 	Invoke();
+}
+
+void ColorToolItem::ClearTargets(void)
+{
+	keepTarget		= TargetField();
+	targetCount		= 0;
+	currentTarget	= 0;
+}
+
+void ColorToolItem::AddTarget(const char *label, const char *field,
+	rgb_color color, rgb_color standard)
+{
+	if (targetCount >= PW_MAX_TARGETS)
+		return;
+	targets[targetCount].label		= label;
+	targets[targetCount].color		= color;
+	targets[targetCount].standard	= standard;
+	targetFields[targetCount]		= field;
+	if (keepTarget == field)
+		currentTarget	= targetCount;
+	targetCount++;
+	ShowColor(targets[currentTarget].color);
+}
+
+const char* ColorToolItem::TargetField(void) const
+{
+	if (targetCount == 0)
+		return "FillColor";
+	return targetFields[currentTarget].String();
+}
+
+rgb_color ColorToolItem::ColorFor(const char *field) const
+{
+	for (int32 i = 0; i < targetCount; i++) {
+		if (targetFields[i] == field)
+			return targets[i].color;
+	}
+	return value;
 }
 
 void ColorToolItem::ShowColor(rgb_color newColor)
@@ -243,6 +285,7 @@ void ColorToolItem::PreviewColor(rgb_color newColor)
 	if (previewMessage != NULL) {
 		BMessage	preview(*previewMessage);
 		AddColorToMessage(&preview,newColor);
+		preview.AddString("field",TargetField());
 		Invoke(&preview);
 	}
 }
@@ -306,8 +349,13 @@ void ColorToolItem::MessageReceived(BMessage *message)
 				startPoint.y++;
 
 				BRect	frame(startPoint.x,startPoint.y,startPoint.x+1,startPoint.y+1);
-				pickerWindow = new ColorPickerWindow(frame,value,
+				ColorPickerTarget	only[1];
+				only[0].color		= value;
+				only[0].standard	= value;
+				pickerWindow = new ColorPickerWindow(frame,
 					new BMessage(CTI_SWATCH_CLICKED),this,
+					targetCount > 0 ? targets : only,
+					targetCount > 0 ? targetCount : 1,currentTarget,
 					colorHistory,colorHistoryCount);
 
 				// keep the popup on-screen near the swatch that opened it,
@@ -332,6 +380,18 @@ void ColorToolItem::MessageReceived(BMessage *message)
 			pickerWindow->Show();
 			pickerWindow->Activate();
 			pickerWindow->Unlock();
+			break;
+		}
+		case PW_TARGET_CHANGED: {
+			// what was picked for the old target goes to it first
+			if (hasPreview)
+				SetColor(previewValue);
+			int32	index;
+			if ((message->FindInt32("target",&index) == B_OK)
+					&& (index >= 0) && (index < targetCount)) {
+				currentTarget	= index;
+				ShowColor(targets[index].color);
+			}
 			break;
 		}
 		case PW_CLOSED: {

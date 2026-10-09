@@ -26,6 +26,7 @@ SRCS= 	TestMain.cpp \
 		NodeHandlesTest.cpp \
 		ZoomTest.cpp \
 		ContextBarTest.cpp \
+		ColorToolItemTest.cpp \
 		GraphStyleTest.cpp \
 		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \

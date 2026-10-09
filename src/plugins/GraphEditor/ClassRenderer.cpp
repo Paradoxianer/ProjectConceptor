@@ -2,6 +2,7 @@
 #include "ProjectConceptorDefs.h"
 
 #include <math.h>
+#include <string.h>
 
 #include <interface/Font.h>
 #include <interface/View.h>
@@ -79,6 +80,8 @@ void ClassRenderer::Init()
 	penSize						= 1.0;
 	connecting					= 0;
 	hasPreviewFillColor			= false;
+	hasPreviewBorderColor		= false;
+	hasPreviewTextColor			= false;
 	animating					= false;
 	animPosX = animPosY		= 0;
 	animVelX = animVelY		= 0;
@@ -272,7 +275,21 @@ void ClassRenderer::MouseUp(BPoint where) {
 }
 
 
+rgb_color ClassRenderer::TextColor(const GraphStyle &style) {
+	if (hasPreviewTextColor)
+		return previewTextColor;
+	// like the border: the editor's standard means the style's
+	rgb_color	standard;
+	if ((editor->GetStandartPattern()->FindInt32("HighColor",(int32 *)&standard) == B_OK)
+		&& (standard.red == textColor.red) && (standard.green == textColor.green)
+		&& (standard.blue == textColor.blue))
+		return style.text;
+	return textColor;
+}
+
 rgb_color ClassRenderer::CardBorderColor(const GraphStyle &style) {
+	if (hasPreviewBorderColor)
+		return previewBorderColor;
 	// the editor's standard border means "not set": then the style's,
 	// which also works in a dark color scheme
 	rgb_color	standard;
@@ -348,15 +365,23 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 		drawOn->StrokePolygon(&outline[0],outline.size(),true);
 	}
 
+	rgb_color	text	= TextColor(style);
+	rgb_color	muted	= GraphColors::Mix(text,style.cardFill,0.35);
+	if ((text.red == style.text.red) && (text.green == style.text.green)
+			&& (text.blue == style.text.blue))
+		muted	= style.mutedText;
+	name->SetColor(text);
 	name->Draw(drawOn,updateRect);
-	drawOn->SetHighColor(style.text);
+	drawOn->SetHighColor(text);
 	BRect	content	= ContentFrame();
 	vector<Renderer *>::iterator	allAttributes = attributes->begin();
 	while( allAttributes != attributes->end() ) {
 		// #51: deleting an attribute is offered on the selected node only
 		AttributRenderer	*row	= dynamic_cast<AttributRenderer*>(*allAttributes);
-		if (row != NULL)
+		if (row != NULL) {
 			row->SetShowDelete(selected);
+			row->SetTextColors(text,muted);
+		}
 		if (content.Contains((*allAttributes)->Frame()))
 			(*allAttributes)->Draw(drawOn,updateRect);
 		else
@@ -426,12 +451,14 @@ void ClassRenderer::ValueChanged() {
 	container->FindMessage(P_C_NODE_DATA,data);
 	pattern->FindInt32("FillColor",(int32 *)&fillColor);
 	pattern->FindInt32("BorderColor",(int32 *)&borderColor);
+	if (pattern->FindInt32("HighColor",(int32 *)&textColor) != B_OK)
+		editor->GetStandartPattern()->FindInt32("HighColor",(int32 *)&textColor);
 	pattern->FindFloat("PenSize",&penSize);
 	// a real committed value just arrived (this is only ever called from
 	// a genuine P_C_VALUE_CHANGED, never from the preview path below) -
 	// any leftover preview from a picker session is now stale, drop it
 	// so Draw() goes back to the real fillColor just read above
-	hasPreviewFillColor			= false;
+	ClearPreviewColor();
 	// older documents have no shape yet; like the pattern above it is
 	// added so ChangeValue has a field to replace
 	BMessage	shapeMessage;
@@ -645,13 +672,23 @@ void ClassRenderer::ResizeBy(float dx,float dy) {
 	SetFrame(resized);
 }
 
-void ClassRenderer::SetPreviewFillColor(rgb_color color) {
-	hasPreviewFillColor	= true;
-	previewFillColor	= color;
+void ClassRenderer::SetPreviewColor(const char *field, rgb_color color) {
+	if (strcmp(field,"FillColor") == 0) {
+		hasPreviewFillColor		= true;
+		previewFillColor		= color;
+	} else if (strcmp(field,"BorderColor") == 0) {
+		hasPreviewBorderColor	= true;
+		previewBorderColor		= color;
+	} else if (strcmp(field,"HighColor") == 0) {
+		hasPreviewTextColor		= true;
+		previewTextColor		= color;
+	}
 }
 
-void ClassRenderer::ClearPreviewFillColor(void) {
-	hasPreviewFillColor	= false;
+void ClassRenderer::ClearPreviewColor(void) {
+	hasPreviewFillColor		= false;
+	hasPreviewBorderColor	= false;
+	hasPreviewTextColor		= false;
 }
 
 bool ClassRenderer::AnimationStep(float dt) {

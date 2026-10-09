@@ -40,6 +40,8 @@ public:
 			void			SetFrame(BRect newRect);
 			/** whether the delete icon shows - and reacts (#51) */
 			void			SetShowDelete(bool show){showDelete=show;};
+			/** label in muted, value in text */
+			void			SetTextColors(rgb_color text, rgb_color muted);
 			BRect			Frame(void){return frame;};
 			void			MoveBy(float dx, float dy);
 			void			ResizeBy(float dx,float dy){frame.right+=dx;SetFrame(frame);};

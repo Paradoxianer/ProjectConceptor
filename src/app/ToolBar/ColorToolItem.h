@@ -12,14 +12,15 @@
 #include <support/Archivable.h>
 #include <support/String.h>
 
+#include "ColorPickerWindow.h"
+
 class ToolBar;
-class ColorPickerWindow;
 
 // Number of "recently used" custom colors this item remembers,
 // most-recently-used first - shown as a second row in ColorPickerWindow
 // (see PW_HISTORY_SIZE there; kept equal so the whole history is always
 // visible at once).
-const int32 CTI_COLOR_HISTORY_SIZE = 8;
+const int32 CTI_COLOR_HISTORY_SIZE = PW_HISTORY_SIZE;
 
 /**
  * @class ColorToolItem
@@ -89,6 +90,18 @@ virtual		const char		*GetName(void){return tName;};
 			rgb_color		GetColor(void){return value;};
 			/** shows newColor (e.g. the selection's) without applying it */
 			void			ShowColor(rgb_color newColor);
+
+			/** What the picker colors: e.g. fill, border and text of a
+			 * node, each the data field it changes ("FillColor" in the
+			 * node's pattern), its current color and its standard. The
+			 * chosen target stays chosen across ClearTargets() by field. */
+			void			ClearTargets(void);
+			void			AddTarget(const char *label, const char *field,
+								rgb_color color, rgb_color standard);
+			/** the field a committed or previewed color is meant for */
+			const char*		TargetField(void) const;
+			/** the color shown for field, else the committed one */
+			rgb_color		ColorFor(const char *field) const;
 virtual		void			SetState(uint32 newState){state=newState;};
 virtual		uint32			GetState(void){return state;};
 virtual		void			SetBehavior(uint32 newBehavior){behavior=newBehavior;};
@@ -119,6 +132,12 @@ protected:
 			BMessage			*previewMessage;
 			rgb_color			previewValue;
 			bool				hasPreview;
+
+			ColorPickerTarget	targets[PW_MAX_TARGETS];
+			BString				targetFields[PW_MAX_TARGETS];
+			int32				targetCount;
+			int32				currentTarget;
+			BString				keepTarget;
 
 			rgb_color			colorHistory[CTI_COLOR_HISTORY_SIZE];
 			int32				colorHistoryCount;

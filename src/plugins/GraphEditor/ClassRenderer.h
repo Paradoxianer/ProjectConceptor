@@ -62,8 +62,8 @@ public:
 				 */
 				void		StartEditingName(void){name->MouseDown(BPoint(0,0));};
 
-				void		SetPreviewFillColor(rgb_color color);
-				void		ClearPreviewFillColor(void);
+				void		SetPreviewColor(const char *field, rgb_color color);
+				void		ClearPreviewColor(void);
 
 				bool		AnimationStep(float dt);
 				void		SetHovered(bool hover) {hovered = hover;};
@@ -95,6 +95,8 @@ protected:
 				void		DrawHandles(BView *drawOn, const GraphStyle &style);
 				/** the card's border: a custom border color, else the style's */
 				rgb_color	CardBorderColor(const GraphStyle &style);
+				/** a custom text color, else the style's */
+				rgb_color	TextColor(const GraphStyle &style);
 				void		AdjustParents(BMessage* theParent, BMessage *command);
 
 		virtual	bool		MoveAll(void *arg,float dx, float dy);
@@ -107,6 +109,11 @@ protected:
 		rgb_color			fillColor,borderColor;
 		bool				hasPreviewFillColor;
 		rgb_color			previewFillColor;
+		bool				hasPreviewBorderColor;
+		rgb_color			previewBorderColor;
+		bool				hasPreviewTextColor;
+		rgb_color			previewTextColor;
+		rgb_color			textColor;
 		BRect				frame;
 		bool				selected;
 

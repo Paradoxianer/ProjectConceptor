@@ -950,13 +950,13 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			break;
 		}
 		case G_E_COLOR_CHANGED: {
-			printf("G_E_COLOR_CHANGED");
-			rgb_color	tmpNewColor =	colorItem->GetColor();;
+			// fill, border or text - whatever the picker colors right now
+			rgb_color	tmpNewColor =	colorItem->GetColor();
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changeColorMessage->AddString("Command::Name","ChangeValue");
 			changeColorMessage->AddBool(P_C_NODE_SELECTED,true);
 			BMessage	*valueContainer	= new BMessage();
-			valueContainer->AddString("name","FillColor");
+			valueContainer->AddString("name",colorItem->TargetField());
 			valueContainer->AddString("subgroup",P_C_NODE_PATTERN);
 			valueContainer->AddInt32("type",B_INT32_TYPE);
 			valueContainer->AddInt32("newValue",*(int32 *)&tmpNewColor);
@@ -971,6 +971,8 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			// the comment on G_E_COLOR_PREVIEW's declaration).
 			bool		cancel	= false;
 			message->FindBool("cancel",&cancel);
+			const char	*field	= "FillColor";
+			message->FindString("field",&field);
 			rgb_color	previewColor;
 			BList		*selection	= doc->GetSelected();
 			for (int32 i=0; i<selection->CountItems(); i++) {
@@ -979,9 +981,9 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				if (painter == NULL)
 					continue;
 				if (cancel)
-					painter->ClearPreviewFillColor();
+					painter->ClearPreviewColor();
 				else if (ColorFromMessage(message,previewColor))
-					painter->SetPreviewFillColor(previewColor);
+					painter->SetPreviewColor(field,previewColor);
 			}
 			Invalidate();
 			break;
@@ -1121,7 +1123,7 @@ void GraphEditor::InsertObject(BPoint where,bool deselect) {
 	BMessage	*newObject		= new BMessage(*nodeMessage);
 	BMessage	*newFont		= new BMessage(*fontMessage);
 	BMessage	*newPattern		= new BMessage(*patternMessage);
-	rgb_color	tmpNewColor =	colorItem->GetColor();;
+	rgb_color	tmpNewColor =	colorItem->ColorFor("FillColor");
 
 	newPattern->ReplaceInt32("FillColor",*(int32 *)&tmpNewColor);
 	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
@@ -1435,7 +1437,7 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 	BMessage	*data		    	= new BMessage();
 	int32		i                   = 0;
 	status_t    err                 = B_OK;
-	rgb_color	tmpColor			=colorItem->GetColor();
+	rgb_color	tmpColor			=colorItem->ColorFor("FillColor");
 	BPoint      where;
 	
 
@@ -1738,9 +1740,27 @@ void GraphEditor::UpdateFormatItems(void) {
 	BMessage	*shown	= (node != NULL) ? node : connection;
 	BMessage	pattern;
 	if ((shown != NULL) && (shown->FindMessage(P_C_NODE_PATTERN,&pattern) == B_OK)) {
-		rgb_color	fill;
-		if (pattern.FindInt32("FillColor",(int32 *)&fill) == B_OK)
-			colorItem->ShowColor(fill);
+		// what the picker can color, each with its current and standard
+		// color; a field a node lacks shows the standard
+		BMessage	*standard	= GetStandartPattern();
+		colorItem->ClearTargets();
+		if (node != NULL) {
+			const char	*labels[]	= { B_TRANSLATE("Fill"), B_TRANSLATE("Border"),
+				B_TRANSLATE("Text") };
+			const char	*fields[]	= { "FillColor", "BorderColor", "HighColor" };
+			for (int32 i = 0; i < 3; i++) {
+				rgb_color	standardColor	= {0,0,0,255};
+				standard->FindInt32(fields[i],(int32 *)&standardColor);
+				rgb_color	current			= standardColor;
+				pattern.FindInt32(fields[i],(int32 *)&current);
+				colorItem->AddTarget(labels[i],fields[i],current,standardColor);
+			}
+		} else {
+			rgb_color	line	= kDefaultConnectionColor;
+			pattern.FindInt32("FillColor",(int32 *)&line);
+			colorItem->AddTarget(B_TRANSLATE("Line"),"FillColor",line,
+				kDefaultConnectionColor);
+		}
 		float	pen;
 		if ((node != NULL) && (pattern.FindFloat("PenSize",&pen) == B_OK))
 			penSize->SetValue(pen);

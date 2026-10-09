@@ -60,13 +60,13 @@ public:
 	// memory on the next redraw.
 	virtual	void		InvalidateEndpoint(Renderer *removed);
 
-	virtual	void		SetPreviewFillColor(rgb_color color);
-	virtual	void		ClearPreviewFillColor(void);
+	virtual	void		SetPreviewColor(const char *field, rgb_color color);
+	virtual	void		ClearPreviewColor(void);
 
 protected:
 	/** fillColor, or the live preview color while a picker is open and
 	 * hasn't committed yet - see the class comment on Renderer's own
-	 * SetPreviewFillColor() for why this exists. Draw*() below always
+	 * SetPreviewColor() for why this exists. Draw*() below always
 	 * goes through this instead of reading fillColor directly.
 	 */
 	rgb_color			EffectiveFillColor(void) {
