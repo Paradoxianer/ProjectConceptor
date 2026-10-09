@@ -1,47 +1,52 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	3534142443
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	4164727266
 Line	GraphEditor		Linje
 Delete	AttributeRenderer		Radera
 Triangle	GraphEditor		Triangel
-Diamond	GraphEditor		Romb
 Connection	GraphEditor		Förbindelse
-Grid	GraphEditor		Rutnät
 Fit	GraphEditor		Anpassa
 Fill pattern for selected nodes	GraphEditor		Fyllnadsmönster för markerade noder
-Toggle grid	GraphEditor		Visa/dölj rutnät
-Text	GraphEditor		Text
-Input attribute name	GraphEditor		Ange attributets namn
+{0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# koppling} other{# kopplingar}}
 None	GraphEditor		Ingen
+Arrows	GraphEditor		Pilar
+OK	GraphEditor		OK
+Rounded rectangle	GraphEditor		Rundad rektangel
+Fill	GraphEditor		Fyll
+Border	GraphEditor		Kant
++ Text	GraphEditor		+ Text
+Straight	GraphEditor		Rak
+Shape of the selected nodes	GraphEditor		Form på markerade noder
+Attribute	GraphEditor		Attribut
+Untitled	GraphEditor		Namnlös
+Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder
+Graph	GraphEditor		Graf
+Cancel	GraphEditor		Avbryt
+Diamond	GraphEditor		Romb
+Grid	GraphEditor		Rutnät
+Toggle grid	GraphEditor		Visa/dölj rutnät
+Input attribute name	GraphEditor		Ange attributets namn
+Text	GraphEditor		Text
+Position %d, %d · Size %d × %d	GraphEditor		Position %d, %d · Storlek %d × %d
 Group	GraphEditor		Gruppera
 Parallelogram	GraphEditor		Parallellogram
 Toggle smart alignment guides	GraphEditor		Slå på/av smarta justeringslinjer
 Ellipse	GraphEditor		Ellips
-Arrows	GraphEditor		Pilar
+No selection	GraphEditor		Inget markerat
 Rounded	GraphEditor		Rundad
 Pen size	GraphEditor		Pennstorlek
+Pointer %d, %d	GraphEditor		Pekare %d, %d
 + Yes/No	GraphEditor		+ Ja/Nej
 Note	GraphEditor		Anteckning
-OK	GraphEditor		OK
-Rounded rectangle	GraphEditor		Rundad rektangel
 Fill color for selected nodes	GraphEditor		Fyllnadsfärg för markerade noder
-Fill	GraphEditor		Fyll
 Both ends	GraphEditor		Båda ändar
 Rectangle	GraphEditor		Rektangel
-Border	GraphEditor		Kant
+{0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# nod} other{# noder}}
 Pattern	GraphEditor		Mönster
-+ Text	GraphEditor		+ Text
 Guides	GraphEditor		Hjälplinjer
-Straight	GraphEditor		Rak
-Shape of the selected nodes	GraphEditor		Form på markerade noder
-Angular	GraphEditor		Vinklad
 At source	GraphEditor		Vid källan
-Attribute	GraphEditor		Attribut
+Angular	GraphEditor		Vinklad
 Name	GraphEditor		Namn
 Hexagon	GraphEditor		Hexagon
 At target	GraphEditor		Vid målet
 Shape	GraphEditor		Form
-Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder
-Untitled	GraphEditor		Namnlös
-Graph	GraphEditor		Graf
-Cancel	GraphEditor		Avbryt
 Which ends of the selected connections carry an arrow	GraphEditor		Vilka ändar av de markerade förbindelserna som har en pil
 Shape of the selected connections	GraphEditor		Form på de markerade förbindelserna

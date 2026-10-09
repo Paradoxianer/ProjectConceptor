@@ -1,47 +1,52 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	3534142443
+1	English	application/x-vnd.ProjectConceptor-plugin	4164727266
 Line	GraphEditor		Line
 Delete	AttributeRenderer		Delete
 Triangle	GraphEditor		Triangle
-Diamond	GraphEditor		Diamond
 Connection	GraphEditor		Connection
-Grid	GraphEditor		Grid
 Fit	GraphEditor		Fit
 Fill pattern for selected nodes	GraphEditor		Fill pattern for selected nodes
-Toggle grid	GraphEditor		Toggle grid
-Text	GraphEditor		Text
-Input attribute name	GraphEditor		Input attribute name
+{0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# connection} other{# connections}}
 None	GraphEditor		None
+Arrows	GraphEditor		Arrows
+OK	GraphEditor		OK
+Rounded rectangle	GraphEditor		Rounded rectangle
+Fill	GraphEditor		Fill
+Border	GraphEditor		Border
++ Text	GraphEditor		+ Text
+Straight	GraphEditor		Straight
+Shape of the selected nodes	GraphEditor		Shape of the selected nodes
+Attribute	GraphEditor		Attribute
+Untitled	GraphEditor		Untitled
+Border pen size for selected nodes	GraphEditor		Border pen size for selected nodes
+Graph	GraphEditor		Graph
+Cancel	GraphEditor		Cancel
+Diamond	GraphEditor		Diamond
+Grid	GraphEditor		Grid
+Toggle grid	GraphEditor		Toggle grid
+Input attribute name	GraphEditor		Input attribute name
+Text	GraphEditor		Text
+Position %d, %d · Size %d × %d	GraphEditor		Position %d, %d · Size %d × %d
 Group	GraphEditor		Group
 Parallelogram	GraphEditor		Parallelogram
 Toggle smart alignment guides	GraphEditor		Toggle smart alignment guides
 Ellipse	GraphEditor		Ellipse
-Arrows	GraphEditor		Arrows
+No selection	GraphEditor		No selection
 Rounded	GraphEditor		Rounded
 Pen size	GraphEditor		Pen size
+Pointer %d, %d	GraphEditor		Pointer %d, %d
 + Yes/No	GraphEditor		+ Yes/No
 Note	GraphEditor		Note
-OK	GraphEditor		OK
-Rounded rectangle	GraphEditor		Rounded rectangle
 Fill color for selected nodes	GraphEditor		Fill color for selected nodes
-Fill	GraphEditor		Fill
 Both ends	GraphEditor		Both ends
 Rectangle	GraphEditor		Rectangle
-Border	GraphEditor		Border
+{0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# node} other{# nodes}}
 Pattern	GraphEditor		Pattern
-+ Text	GraphEditor		+ Text
 Guides	GraphEditor		Guides
-Straight	GraphEditor		Straight
-Shape of the selected nodes	GraphEditor		Shape of the selected nodes
-Angular	GraphEditor		Angular
 At source	GraphEditor		At source
-Attribute	GraphEditor		Attribute
+Angular	GraphEditor		Angular
 Name	GraphEditor		Name
 Hexagon	GraphEditor		Hexagon
 At target	GraphEditor		At target
 Shape	GraphEditor		Shape
-Border pen size for selected nodes	GraphEditor		Border pen size for selected nodes
-Untitled	GraphEditor		Untitled
-Graph	GraphEditor		Graph
-Cancel	GraphEditor		Cancel
 Which ends of the selected connections carry an arrow	GraphEditor		Which ends of the selected connections carry an arrow
 Shape of the selected connections	GraphEditor		Shape of the selected connections

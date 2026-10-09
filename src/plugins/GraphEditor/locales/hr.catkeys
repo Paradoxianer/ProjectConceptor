@@ -1,47 +1,52 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	3534142443
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	4164727266
 Line	GraphEditor		Linija
 Delete	AttributeRenderer		Izbriši
 Triangle	GraphEditor		Trokut
-Diamond	GraphEditor		Romb
 Connection	GraphEditor		Veza
-Grid	GraphEditor		Rešetka
 Fit	GraphEditor		Prilagodi
 Fill pattern for selected nodes	GraphEditor		Uzorak ispune za odabrane čvorove
-Toggle grid	GraphEditor		Uključi/isključi rešetku
-Text	GraphEditor		Tekst
-Input attribute name	GraphEditor		Unesite naziv atributa
+{0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# veza} few{# veze} other{# veza}}
 None	GraphEditor		Nijedna
+Arrows	GraphEditor		Strelice
+OK	GraphEditor		U redu
+Rounded rectangle	GraphEditor		Zaobljeni pravokutnik
+Fill	GraphEditor		Ispuni
+Border	GraphEditor		Obrub
++ Text	GraphEditor		+ Tekst
+Straight	GraphEditor		Ravna
+Shape of the selected nodes	GraphEditor		Oblik odabranih čvorova
+Attribute	GraphEditor		Atribut
+Untitled	GraphEditor		Bez naslova
+Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove
+Graph	GraphEditor		Graf
+Cancel	GraphEditor		Otkaži
+Diamond	GraphEditor		Romb
+Grid	GraphEditor		Rešetka
+Toggle grid	GraphEditor		Uključi/isključi rešetku
+Input attribute name	GraphEditor		Unesite naziv atributa
+Text	GraphEditor		Tekst
+Position %d, %d · Size %d × %d	GraphEditor		Položaj %d, %d · Veličina %d × %d
 Group	GraphEditor		Grupiraj
 Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Uključi/isključi pametne vodilice za poravnanje
 Ellipse	GraphEditor		Elipsa
-Arrows	GraphEditor		Strelice
+No selection	GraphEditor		Ništa nije odabrano
 Rounded	GraphEditor		Zaobljena
 Pen size	GraphEditor		Debljina olovke
+Pointer %d, %d	GraphEditor		Pokazivač %d, %d
 + Yes/No	GraphEditor		+ Da/Ne
 Note	GraphEditor		Bilješka
-OK	GraphEditor		U redu
-Rounded rectangle	GraphEditor		Zaobljeni pravokutnik
 Fill color for selected nodes	GraphEditor		Boja ispune za odabrane čvorove
-Fill	GraphEditor		Ispuni
 Both ends	GraphEditor		Oba kraja
 Rectangle	GraphEditor		Pravokutnik
-Border	GraphEditor		Obrub
+{0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# čvor} few{# čvora} other{# čvorova}}
 Pattern	GraphEditor		Uzorak
-+ Text	GraphEditor		+ Tekst
 Guides	GraphEditor		Vodilice
-Straight	GraphEditor		Ravna
-Shape of the selected nodes	GraphEditor		Oblik odabranih čvorova
-Angular	GraphEditor		Kutna
 At source	GraphEditor		Na izvoru
-Attribute	GraphEditor		Atribut
+Angular	GraphEditor		Kutna
 Name	GraphEditor		Ime
 Hexagon	GraphEditor		Šesterokut
 At target	GraphEditor		Na odredištu
 Shape	GraphEditor		Oblik
-Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove
-Untitled	GraphEditor		Bez naslova
-Graph	GraphEditor		Graf
-Cancel	GraphEditor		Otkaži
 Which ends of the selected connections carry an arrow	GraphEditor		Koji krajevi odabranih veza imaju strelicu
 Shape of the selected connections	GraphEditor		Oblik odabranih veza

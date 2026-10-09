@@ -1,47 +1,52 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	3534142443
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	4164727266
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Elimine
 Triangle	GraphEditor		Triangul
-Diamond	GraphEditor		Rombo
 Connection	GraphEditor		Conession
-Grid	GraphEditor		Grile
 Fit	GraphEditor		Adatâ
 Fill pattern for selected nodes	GraphEditor		Motîf di jemplament pai grops selezionâts
-Toggle grid	GraphEditor		Mostre/plate la grile
-Text	GraphEditor		Test
-Input attribute name	GraphEditor		Inserìs il non dal atribût
+{0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conession} other{# conessions}}
 None	GraphEditor		Nissune
+Arrows	GraphEditor		Frecis
+OK	GraphEditor		Va ben
+Rounded rectangle	GraphEditor		Retangul taront
+Fill	GraphEditor		Jemplament
+Border	GraphEditor		Ôr
++ Text	GraphEditor		+ Test
+Straight	GraphEditor		Drete
+Shape of the selected nodes	GraphEditor		Forme dai grops selezionâts
+Attribute	GraphEditor		Atribût
+Untitled	GraphEditor		Cence titul
+Border pen size for selected nodes	GraphEditor		Spessôr dal ôr pai grops selezionâts
+Graph	GraphEditor		Grafic
+Cancel	GraphEditor		Anule
+Diamond	GraphEditor		Rombo
+Grid	GraphEditor		Grile
+Toggle grid	GraphEditor		Mostre/plate la grile
+Input attribute name	GraphEditor		Inserìs il non dal atribût
+Text	GraphEditor		Test
+Position %d, %d · Size %d × %d	GraphEditor		Posizion %d, %d · Dimension %d × %d
 Group	GraphEditor		Ragrupâ
 Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Ative/disative lis guidis di aliniament inteligjentis
 Ellipse	GraphEditor		Elìs
-Arrows	GraphEditor		Frecis
+No selection	GraphEditor		Nissune selezion
 Rounded	GraphEditor		Taronde
 Pen size	GraphEditor		Spessôr dal pinel
+Pointer %d, %d	GraphEditor		Pontador %d, %d
 + Yes/No	GraphEditor		+ Sì/No
 Note	GraphEditor		Note
-OK	GraphEditor		Va ben
-Rounded rectangle	GraphEditor		Retangul taront
 Fill color for selected nodes	GraphEditor		Colôr di jemplament pai grops selezionâts
-Fill	GraphEditor		Jemplament
 Both ends	GraphEditor		Ducj i doi i cjâfs
 Rectangle	GraphEditor		Retangul
-Border	GraphEditor		Ôr
+{0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# grop} other{# grops}}
 Pattern	GraphEditor		Motîf
-+ Text	GraphEditor		+ Test
 Guides	GraphEditor		Guidis
-Straight	GraphEditor		Drete
-Shape of the selected nodes	GraphEditor		Forme dai grops selezionâts
-Angular	GraphEditor		Angolâr
 At source	GraphEditor		Te origjin
-Attribute	GraphEditor		Atribût
+Angular	GraphEditor		Angolâr
 Name	GraphEditor		Non
 Hexagon	GraphEditor		Esagon
 At target	GraphEditor		Te destinazion
 Shape	GraphEditor		Forme
-Border pen size for selected nodes	GraphEditor		Spessôr dal ôr pai grops selezionâts
-Untitled	GraphEditor		Cence titul
-Graph	GraphEditor		Grafic
-Cancel	GraphEditor		Anule
 Which ends of the selected connections carry an arrow	GraphEditor		Cuai cjâfs des conessions selezionadis a àn une frece
 Shape of the selected connections	GraphEditor		Forme des conessions selezionadis

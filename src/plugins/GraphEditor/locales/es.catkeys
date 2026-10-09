@@ -1,47 +1,52 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	3534142443
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	4164727266
 Line	GraphEditor		Línea
 Delete	AttributeRenderer		Borrar
 Triangle	GraphEditor		Triángulo
-Diamond	GraphEditor		Rombo
 Connection	GraphEditor		Conexión
-Grid	GraphEditor		Grilla
 Fit	GraphEditor		Ajustar
 Fill pattern for selected nodes	GraphEditor		Patrón de relleno de los nodos seleccionados
-Toggle grid	GraphEditor		Mostrar/ocultar cuadrícula
-Text	GraphEditor		Texto
-Input attribute name	GraphEditor		Introduzca el nombre del atributo
+{0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conexión} other{# conexiones}}
 None	GraphEditor		Ninguna
+Arrows	GraphEditor		Flechas
+OK	GraphEditor		Aceptar
+Rounded rectangle	GraphEditor		Rectángulo redondeado
+Fill	GraphEditor		Rellenar
+Border	GraphEditor		Borde
++ Text	GraphEditor		+ Texto
+Straight	GraphEditor		Recta
+Shape of the selected nodes	GraphEditor		Forma de los nodos seleccionados
+Attribute	GraphEditor		Atributo
+Untitled	GraphEditor		Sin título
+Border pen size for selected nodes	GraphEditor		Grosor del borde de los nodos seleccionados
+Graph	GraphEditor		Grafo
+Cancel	GraphEditor		Cancelar
+Diamond	GraphEditor		Rombo
+Grid	GraphEditor		Grilla
+Toggle grid	GraphEditor		Mostrar/ocultar cuadrícula
+Input attribute name	GraphEditor		Introduzca el nombre del atributo
+Text	GraphEditor		Texto
+Position %d, %d · Size %d × %d	GraphEditor		Posición %d, %d · Tamaño %d × %d
 Group	GraphEditor		Agrupar
 Parallelogram	GraphEditor		Paralelogramo
 Toggle smart alignment guides	GraphEditor		Activar/desactivar guías de alineación inteligentes
 Ellipse	GraphEditor		Elipse
-Arrows	GraphEditor		Flechas
+No selection	GraphEditor		Sin selección
 Rounded	GraphEditor		Redondeada
 Pen size	GraphEditor		Tamaño de lápiz
+Pointer %d, %d	GraphEditor		Puntero %d, %d
 + Yes/No	GraphEditor		+ Sí/No
 Note	GraphEditor		Nota
-OK	GraphEditor		Aceptar
-Rounded rectangle	GraphEditor		Rectángulo redondeado
 Fill color for selected nodes	GraphEditor		Color de relleno de los nodos seleccionados
-Fill	GraphEditor		Rellenar
 Both ends	GraphEditor		Ambos extremos
 Rectangle	GraphEditor		Rectángulo
-Border	GraphEditor		Borde
+{0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# nodo} other{# nodos}}
 Pattern	GraphEditor		Patrón
-+ Text	GraphEditor		+ Texto
 Guides	GraphEditor		Guías
-Straight	GraphEditor		Recta
-Shape of the selected nodes	GraphEditor		Forma de los nodos seleccionados
-Angular	GraphEditor		Angular
 At source	GraphEditor		En el origen
-Attribute	GraphEditor		Atributo
+Angular	GraphEditor		Angular
 Name	GraphEditor		Nombre
 Hexagon	GraphEditor		Hexágono
 At target	GraphEditor		En el destino
 Shape	GraphEditor		Forma
-Border pen size for selected nodes	GraphEditor		Grosor del borde de los nodos seleccionados
-Untitled	GraphEditor		Sin título
-Graph	GraphEditor		Grafo
-Cancel	GraphEditor		Cancelar
 Which ends of the selected connections carry an arrow	GraphEditor		Qué extremos de las conexiones seleccionadas llevan flecha
 Shape of the selected connections	GraphEditor		Forma de las conexiones seleccionadas

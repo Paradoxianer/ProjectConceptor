@@ -1,47 +1,52 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	3534142443
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	4164727266
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Șterge
 Triangle	GraphEditor		Triunghi
-Diamond	GraphEditor		Romb
 Connection	GraphEditor		Conexiune
-Grid	GraphEditor		Grilă
 Fit	GraphEditor		Potrivire
 Fill pattern for selected nodes	GraphEditor		Model de umplere pentru nodurile selectate
-Toggle grid	GraphEditor		Comută grila
-Text	GraphEditor		Text
-Input attribute name	GraphEditor		Introduceți numele atributului
+{0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conexiune} few{# conexiuni} other{# de conexiuni}}
 None	GraphEditor		Niciuna
+Arrows	GraphEditor		Săgeți
+OK	GraphEditor		OK
+Rounded rectangle	GraphEditor		Dreptunghi rotunjit
+Fill	GraphEditor		Umplere
+Border	GraphEditor		Contur
++ Text	GraphEditor		+ Text
+Straight	GraphEditor		Dreaptă
+Shape of the selected nodes	GraphEditor		Forma nodurilor selectate
+Attribute	GraphEditor		Atribut
+Untitled	GraphEditor		Fără titlu
+Border pen size for selected nodes	GraphEditor		Grosimea marginii pentru nodurile selectate
+Graph	GraphEditor		Graf
+Cancel	GraphEditor		Anulează
+Diamond	GraphEditor		Romb
+Grid	GraphEditor		Grilă
+Toggle grid	GraphEditor		Comută grila
+Input attribute name	GraphEditor		Introduceți numele atributului
+Text	GraphEditor		Text
+Position %d, %d · Size %d × %d	GraphEditor		Poziție %d, %d · Mărime %d × %d
 Group	GraphEditor		Grupare
 Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Comută ghidajele inteligente de aliniere
 Ellipse	GraphEditor		Elipsă
-Arrows	GraphEditor		Săgeți
+No selection	GraphEditor		Nicio selecție
 Rounded	GraphEditor		Rotunjită
 Pen size	GraphEditor		Dimensiune stilou
+Pointer %d, %d	GraphEditor		Indicator %d, %d
 + Yes/No	GraphEditor		+ Da/Nu
 Note	GraphEditor		Notă
-OK	GraphEditor		OK
-Rounded rectangle	GraphEditor		Dreptunghi rotunjit
 Fill color for selected nodes	GraphEditor		Culoare de umplere pentru nodurile selectate
-Fill	GraphEditor		Umplere
 Both ends	GraphEditor		Ambele capete
 Rectangle	GraphEditor		Dreptunghi
-Border	GraphEditor		Contur
+{0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# nod} few{# noduri} other{# de noduri}}
 Pattern	GraphEditor		Model
-+ Text	GraphEditor		+ Text
 Guides	GraphEditor		Ghidaje
-Straight	GraphEditor		Dreaptă
-Shape of the selected nodes	GraphEditor		Forma nodurilor selectate
-Angular	GraphEditor		Unghiulară
 At source	GraphEditor		La sursă
-Attribute	GraphEditor		Atribut
+Angular	GraphEditor		Unghiulară
 Name	GraphEditor		Nume
 Hexagon	GraphEditor		Hexagon
 At target	GraphEditor		La destinație
 Shape	GraphEditor		Formă
-Border pen size for selected nodes	GraphEditor		Grosimea marginii pentru nodurile selectate
-Untitled	GraphEditor		Fără titlu
-Graph	GraphEditor		Graf
-Cancel	GraphEditor		Anulează
 Which ends of the selected connections carry an arrow	GraphEditor		Care capete ale conexiunilor selectate au săgeată
 Shape of the selected connections	GraphEditor		Forma conexiunilor selectate
