@@ -1,4 +1,4 @@
-1	Romanian	application/x-vnd.ProjectConceptor	1230722656
+1	Romanian	application/x-vnd.ProjectConceptor	258680107
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtături pentru macrocomenzi (dublu clic pentru a schimba tasta)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Apăsați combinația de taste pentru macrocomanda „%s” (Esc pentru anulare).
 About	MainWindow		Despre
@@ -35,8 +35,8 @@ Untitled %ld	MainWindow		Fără titlu %ld
 Paste	MainWindow		Lipire
 Help	MainWindow		Ajutor
 Remove	ShortCutView		Elimină
-Problems while trying to save the file	Document		Probleme în timpul încercării de a salva fișierul
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Noua asociere se aplică documentelor deschise de acum înainte – ferestrele deja deschise își păstrează scurtăturile inițiale.
+Problems while trying to save the file	Document		Probleme în timpul încercării de a salva fișierul
 Select all	MainWindow		Selectează tot
 No document	ShortCutView		Niciun document
 Alpha:	ColorPickerWindow		Alfa:
@@ -76,6 +76,7 @@ Title	MainWindow		Titlu
 Delete	MainWindow		Șterge
 Save as	MainWindow		Salvare ca
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nu există niciun program de email pe mașină care este configurat ca programul implicit pentru trimiterea de email.
+Untitled	Document		Fără titlu
 Web Browser Warning	AboutURLView		Avertisment browser web
 OK	Document		OK
 Window	MainWindow		Fereastră

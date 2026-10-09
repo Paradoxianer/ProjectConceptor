@@ -1,4 +1,4 @@
-1	German	application/x-vnd.ProjectConceptor	1230722656
+1	German	application/x-vnd.ProjectConceptor	258680107
 Macro shortcuts (double-click to change the key)	ShortCutView		Makro-Kürzel (Doppelklick ändert die Taste)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tastenkombination für das Makro \"%s\" drücken (Esc bricht ab).
 About	MainWindow		Über...
@@ -35,8 +35,8 @@ Untitled %ld	MainWindow		Unbenannt %ld
 Paste	MainWindow		Einfügen
 Help	MainWindow		Hilfe
 Remove	ShortCutView		Entfernen
-Problems while trying to save the file	Document		Es gab ein Problem beim Speichern der Datei
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Die neue Belegung gilt für ab jetzt geöffnete Dokumente – bereits offene Fenster behalten ihre bisherigen Tastenkürzel.
+Problems while trying to save the file	Document		Es gab ein Problem beim Speichern der Datei
 Select all	MainWindow		Alles auswählen
 No document	ShortCutView		Kein Dokument
 Alpha:	ColorPickerWindow		Alpha:
@@ -76,6 +76,7 @@ Title	MainWindow		Titel
 Delete	MainWindow		Löschen
 Save as	MainWindow		Speichern als
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Es ist kein E-Mail-Programm als Standard-Anwendung zum Senden von E-Mails definiert.
+Untitled	Document		Unbenannt
 Web Browser Warning	AboutURLView		Web-Browser-Warnung
 OK	Document		OK
 Window	MainWindow		Fenster

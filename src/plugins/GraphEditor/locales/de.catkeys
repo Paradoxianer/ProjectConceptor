@@ -1,22 +1,22 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	1649170796
+1	German	application/x-vnd.ProjectConceptor-plugin	2948063220
 Delete	AttributeRenderer		Löschen
 Triangle	GraphEditor		Dreieck
-Group selected nodes	GraphEditor		Ausgewählte Knoten gruppieren
 Diamond	GraphEditor		Raute
 Connection	GraphEditor		Verbindung
-Add text attribute	GraphEditor		Textattribut hinzufügen
 Grid	GraphEditor		Gitter
+Fit	GraphEditor		Einpassen
 Fill pattern for selected nodes	GraphEditor		Füllmuster für ausgewählte Knoten
 Toggle grid	GraphEditor		Raster ein/aus
 Input attribute name	GraphEditor		Attributnamen eingeben
 None	GraphEditor		Keine
+Group	GraphEditor		Gruppieren
 Parallelogram	GraphEditor		Parallelogramm
 Toggle smart alignment guides	GraphEditor		Intelligente Ausrichtungshilfen ein/aus
 Ellipse	GraphEditor		Ellipse
 Arrows	GraphEditor		Pfeile
 Rounded	GraphEditor		Abgerundet
 Pen size	GraphEditor		Stiftgröße
-Add boolean attribute	GraphEditor		Wahrheitswert-Attribut hinzufügen
++ Yes/No	GraphEditor		+ Ja/Nein
 Note	GraphEditor		Notiz
 OK	GraphEditor		OK
 Rounded rectangle	GraphEditor		Abgerundetes Rechteck
@@ -25,7 +25,7 @@ Fill	GraphEditor		Ausfüllen
 Both ends	GraphEditor		Beide Enden
 Rectangle	GraphEditor		Rechteck
 Pattern	GraphEditor		Muster
-Scale	GraphEditor		Skalieren
++ Text	GraphEditor		+ Text
 Guides	GraphEditor		Hilfslinien
 Straight	GraphEditor		Gerade
 Shape of the selected nodes	GraphEditor		Form der ausgewählten Knoten
@@ -38,6 +38,7 @@ At target	GraphEditor		Am Ende
 Shape	GraphEditor		Form
 Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
 Untitled	GraphEditor		Unbenannt
+Graph	GraphEditor		Graph
 Cancel	GraphEditor		Abbrechen
 Which ends of the selected connections carry an arrow	GraphEditor		An welchen Enden die ausgewählten Verbindungen einen Pfeil tragen
 Shape of the selected connections	GraphEditor		Form der ausgewählten Verbindungen

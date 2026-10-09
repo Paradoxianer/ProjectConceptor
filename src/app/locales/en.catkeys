@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor	1230722656
+1	English	application/x-vnd.ProjectConceptor	258680107
 Macro shortcuts (double-click to change the key)	ShortCutView		Macro shortcuts (double-click to change the key)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Press the key combination for the macro \"%s\" (Esc to cancel).
 About	MainWindow		About
@@ -35,8 +35,8 @@ Untitled %ld	MainWindow		Untitled %ld
 Paste	MainWindow		Paste
 Help	MainWindow		Help
 Remove	ShortCutView		Remove
-Problems while trying to save the file	Document		Problems while trying to save the file
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.
+Problems while trying to save the file	Document		Problems while trying to save the file
 Select all	MainWindow		Select all
 No document	ShortCutView		No document
 Alpha:	ColorPickerWindow		Alpha:
@@ -76,6 +76,7 @@ Title	MainWindow		Title
 Delete	MainWindow		Delete
 Save as	MainWindow		Save as
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		There is no e-mail program on your machine that is configured as the default program to send e-mail.
+Untitled	Document		Untitled
 Web Browser Warning	AboutURLView		Web Browser Warning
 OK	Document		OK
 Window	MainWindow		Window

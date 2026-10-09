@@ -1,22 +1,22 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	1649170796
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	2948063220
 Delete	AttributeRenderer		Izbriši
 Triangle	GraphEditor		Trokut
-Group selected nodes	GraphEditor		Grupiraj odabrane čvorove
 Diamond	GraphEditor		Romb
 Connection	GraphEditor		Veza
-Add text attribute	GraphEditor		Dodaj tekstualni atribut
 Grid	GraphEditor		Rešetka
+Fit	GraphEditor		Prilagodi
 Fill pattern for selected nodes	GraphEditor		Uzorak ispune za odabrane čvorove
 Toggle grid	GraphEditor		Uključi/isključi rešetku
 Input attribute name	GraphEditor		Unesite naziv atributa
 None	GraphEditor		Nijedna
+Group	GraphEditor		Grupiraj
 Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Uključi/isključi pametne vodilice za poravnanje
 Ellipse	GraphEditor		Elipsa
 Arrows	GraphEditor		Strelice
 Rounded	GraphEditor		Zaobljena
 Pen size	GraphEditor		Debljina olovke
-Add boolean attribute	GraphEditor		Dodaj logički atribut
++ Yes/No	GraphEditor		+ Da/Ne
 Note	GraphEditor		Bilješka
 OK	GraphEditor		U redu
 Rounded rectangle	GraphEditor		Zaobljeni pravokutnik
@@ -25,7 +25,7 @@ Fill	GraphEditor		Ispuni
 Both ends	GraphEditor		Oba kraja
 Rectangle	GraphEditor		Pravokutnik
 Pattern	GraphEditor		Uzorak
-Scale	GraphEditor		Mjerilo
++ Text	GraphEditor		+ Tekst
 Guides	GraphEditor		Vodilice
 Straight	GraphEditor		Ravna
 Shape of the selected nodes	GraphEditor		Oblik odabranih čvorova
@@ -38,6 +38,7 @@ At target	GraphEditor		Na odredištu
 Shape	GraphEditor		Oblik
 Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove
 Untitled	GraphEditor		Bez naslova
+Graph	GraphEditor		Graf
 Cancel	GraphEditor		Otkaži
 Which ends of the selected connections carry an arrow	GraphEditor		Koji krajevi odabranih veza imaju strelicu
 Shape of the selected connections	GraphEditor		Oblik odabranih veza

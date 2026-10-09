@@ -1,4 +1,4 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	1110037994
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	1988532959
 New macro	MacroEditor		Nueva macro
 Move Up	MacroEditor		Subir
 Export Macro	MacroEditor		Exportar macro
@@ -23,6 +23,7 @@ Collapse All	MacroEditor		Contraer todo
 Expand All	MacroEditor		Expandir todo
 Delete the macro \"%s\"? This cannot be undone.	MacroEditor		¿Eliminar la macro «%s»? No se puede deshacer.
 New macro created - drag commands in from the list on the right.	MacroEditor		Macro nueva creada: arrastre comandos desde la lista de la derecha.
+Macros	MacroEditor		Macros
 No macro selected.	MacroEditor		Ninguna macro seleccionada.
 No macro selected - select one in the MacroEditor tab first.	MacroEditor		Ninguna macro seleccionada; seleccione una primero en la pestaña MacroEditor.
 OK	MacroEditor		Aceptar

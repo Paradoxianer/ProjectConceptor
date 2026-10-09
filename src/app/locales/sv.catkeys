@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor	1230722656
+1	Swedish	application/x-vnd.ProjectConceptor	258680107
 Macro shortcuts (double-click to change the key)	ShortCutView		Makrokortkommandon (dubbelklicka för att ändra tangenten)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tryck på tangentkombinationen för makrot ”%s” (Esc avbryter).
 About	MainWindow		Om
@@ -35,8 +35,8 @@ Untitled %ld	MainWindow		Namnlös %ld
 Paste	MainWindow		Klistra in
 Help	MainWindow		Hjälp
 Remove	ShortCutView		Ta bort
-Problems while trying to save the file	Document		Ett fel inträffade när filen skulle sparas
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Den nya kopplingen gäller dokument som öppnas från och med nu – redan öppna fönster behåller sina ursprungliga kortkommandon.
+Problems while trying to save the file	Document		Ett fel inträffade när filen skulle sparas
 Select all	MainWindow		Välj alla
 No document	ShortCutView		Inget dokument
 Alpha:	ColorPickerWindow		Alfa:
@@ -76,6 +76,7 @@ Title	MainWindow		Titel
 Delete	MainWindow		Radera
 Save as	MainWindow		Spara som
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Det finns ingen e-postklient konfigurerad som standardprogram för att skicka och ta emot e-post.
+Untitled	Document		Namnlös
 Web Browser Warning	AboutURLView		Webläsarvarning
 OK	Document		OK
 Window	MainWindow		Fönster

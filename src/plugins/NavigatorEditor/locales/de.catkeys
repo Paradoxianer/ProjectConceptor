@@ -1,4 +1,4 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	2502389885
+1	German	application/x-vnd.ProjectConceptor-plugin	1724990872
 Untitled	NavigatorCommands		Unbenannt
 Integer (8-bit)	NavigatorCommands		Ganzzahl (8 Bit)
 Field name	NavigatorCommands		Feldname
@@ -14,6 +14,7 @@ Delete the selected node or field	NavigatorEditor		Ausgewählten Knoten oder Fel
 false	BoolItem		falsch
 Add node	NavigatorCommands		Knoten hinzufügen
 Point	NavigatorCommands		Punkt
+Data	NavigatorEditor		Daten
 Integer (16-bit)	NavigatorCommands		Ganzzahl (16 Bit)
 left	RectItem		links
 Name	NavigatorCommands		Name

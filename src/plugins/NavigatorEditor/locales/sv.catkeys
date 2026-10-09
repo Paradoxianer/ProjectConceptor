@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	2502389885
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	1724990872
 Untitled	NavigatorCommands		Namnlös
 Integer (8-bit)	NavigatorCommands		Heltal (8 bitar)
 Field name	NavigatorCommands		Fältnamn
@@ -14,6 +14,7 @@ Delete the selected node or field	NavigatorEditor		Ta bort markerad nod eller f�
 false	BoolItem		falskt
 Add node	NavigatorCommands		Lägg till nod
 Point	NavigatorCommands		Punkt
+Data	NavigatorEditor		Data
 Integer (16-bit)	NavigatorCommands		Heltal (16 bitar)
 left	RectItem		vänster
 Name	NavigatorCommands		Namn

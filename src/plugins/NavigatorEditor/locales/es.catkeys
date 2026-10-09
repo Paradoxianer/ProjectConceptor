@@ -1,4 +1,4 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	2502389885
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	1724990872
 Untitled	NavigatorCommands		Sin título
 Integer (8-bit)	NavigatorCommands		Entero (8 bits)
 Field name	NavigatorCommands		Nombre del campo
@@ -14,6 +14,7 @@ Delete the selected node or field	NavigatorEditor		Eliminar el nodo o campo sele
 false	BoolItem		falso
 Add node	NavigatorCommands		Añadir nodo
 Point	NavigatorCommands		Punto
+Data	NavigatorEditor		Datos
 Integer (16-bit)	NavigatorCommands		Entero (16 bits)
 left	RectItem		izquierda
 Name	NavigatorCommands		Nombre

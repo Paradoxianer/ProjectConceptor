@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	1110037994
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	1988532959
 New macro	MacroEditor		Gnove macro
 Move Up	MacroEditor		Sposte in sù
 Export Macro	MacroEditor		Espuarte macro
@@ -23,6 +23,7 @@ Collapse All	MacroEditor		Siere dut
 Expand All	MacroEditor		Vierç dut
 Delete the macro \"%s\"? This cannot be undone.	MacroEditor		Eliminâ la macro “%s”? No si pues tornâ indaûr.
 New macro created - drag commands in from the list on the right.	MacroEditor		Creade une gnove macro – strissine dentri i comants de liste a diestre.
+Macros	MacroEditor		Macros
 No macro selected.	MacroEditor		Nissune macro selezionade.
 No macro selected - select one in the MacroEditor tab first.	MacroEditor		Nissune macro selezionade – selezione prime une te schede MacroEditor.
 OK	MacroEditor		Va ben

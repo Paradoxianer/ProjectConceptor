@@ -1,22 +1,22 @@
-1	French	application/x-vnd.ProjectConceptor-plugin	1649170796
+1	French	application/x-vnd.ProjectConceptor-plugin	2948063220
 Delete	AttributeRenderer		Effacer
 Triangle	GraphEditor		Triangle
-Group selected nodes	GraphEditor		Grouper les nœuds sélectionnés
 Diamond	GraphEditor		Losange
 Connection	GraphEditor		Connexion
-Add text attribute	GraphEditor		Ajouter un attribut texte
 Grid	GraphEditor		Grille
+Fit	GraphEditor		Ajuster
 Fill pattern for selected nodes	GraphEditor		Motif de remplissage des nœuds sélectionnés
 Toggle grid	GraphEditor		Afficher/masquer la grille
 Input attribute name	GraphEditor		Saisissez le nom de l'attribut
 None	GraphEditor		Aucune
+Group	GraphEditor		Grouper
 Parallelogram	GraphEditor		Parallélogramme
 Toggle smart alignment guides	GraphEditor		Activer/désactiver les guides d'alignement intelligents
 Ellipse	GraphEditor		Ellipse
 Arrows	GraphEditor		Flèches
 Rounded	GraphEditor		Arrondie
 Pen size	GraphEditor		Taille du crayon
-Add boolean attribute	GraphEditor		Ajouter un attribut booléen
++ Yes/No	GraphEditor		+ Oui/Non
 Note	GraphEditor		Note
 OK	GraphEditor		OK
 Rounded rectangle	GraphEditor		Rectangle arrondi
@@ -25,7 +25,7 @@ Fill	GraphEditor		Remplir
 Both ends	GraphEditor		Aux deux extrémités
 Rectangle	GraphEditor		Rectangle
 Pattern	GraphEditor		Motif
-Scale	GraphEditor		Échelle
++ Text	GraphEditor		+ Texte
 Guides	GraphEditor		Guides
 Straight	GraphEditor		Droite
 Shape of the selected nodes	GraphEditor		Forme des nœuds sélectionnés
@@ -38,6 +38,7 @@ At target	GraphEditor		À la cible
 Shape	GraphEditor		Forme
 Border pen size for selected nodes	GraphEditor		Épaisseur de bordure des nœuds sélectionnés
 Untitled	GraphEditor		Sans titre
+Graph	GraphEditor		Graphe
 Cancel	GraphEditor		Annuler
 Which ends of the selected connections carry an arrow	GraphEditor		Extrémités des connexions sélectionnées qui portent une flèche
 Shape of the selected connections	GraphEditor		Forme des connexions sélectionnées

@@ -1,22 +1,22 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	1649170796
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	2948063220
 Delete	AttributeRenderer		Radera
 Triangle	GraphEditor		Triangel
-Group selected nodes	GraphEditor		Gruppera markerade noder
 Diamond	GraphEditor		Romb
 Connection	GraphEditor		Förbindelse
-Add text attribute	GraphEditor		Lägg till textattribut
 Grid	GraphEditor		Rutnät
+Fit	GraphEditor		Anpassa
 Fill pattern for selected nodes	GraphEditor		Fyllnadsmönster för markerade noder
 Toggle grid	GraphEditor		Visa/dölj rutnät
 Input attribute name	GraphEditor		Ange attributets namn
 None	GraphEditor		Ingen
+Group	GraphEditor		Gruppera
 Parallelogram	GraphEditor		Parallellogram
 Toggle smart alignment guides	GraphEditor		Slå på/av smarta justeringslinjer
 Ellipse	GraphEditor		Ellips
 Arrows	GraphEditor		Pilar
 Rounded	GraphEditor		Rundad
 Pen size	GraphEditor		Pennstorlek
-Add boolean attribute	GraphEditor		Lägg till booleskt attribut
++ Yes/No	GraphEditor		+ Ja/Nej
 Note	GraphEditor		Anteckning
 OK	GraphEditor		OK
 Rounded rectangle	GraphEditor		Rundad rektangel
@@ -25,7 +25,7 @@ Fill	GraphEditor		Fyll
 Both ends	GraphEditor		Båda ändar
 Rectangle	GraphEditor		Rektangel
 Pattern	GraphEditor		Mönster
-Scale	GraphEditor		Skala
++ Text	GraphEditor		+ Text
 Guides	GraphEditor		Hjälplinjer
 Straight	GraphEditor		Rak
 Shape of the selected nodes	GraphEditor		Form på markerade noder
@@ -38,6 +38,7 @@ At target	GraphEditor		Vid målet
 Shape	GraphEditor		Form
 Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder
 Untitled	GraphEditor		Namnlös
+Graph	GraphEditor		Graf
 Cancel	GraphEditor		Avbryt
 Which ends of the selected connections carry an arrow	GraphEditor		Vilka ändar av de markerade förbindelserna som har en pil
 Shape of the selected connections	GraphEditor		Form på de markerade förbindelserna

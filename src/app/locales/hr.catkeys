@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor	1230722656
+1	Croatian	application/x-vnd.ProjectConceptor	258680107
 Macro shortcuts (double-click to change the key)	ShortCutView		Prečaci makronaredbi (dvostruki klik za promjenu tipke)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Pritisnite kombinaciju tipki za makronaredbu „%s” (Esc za odustajanje).
 About	MainWindow		O programu
@@ -35,8 +35,8 @@ Untitled %ld	MainWindow		Bez naslova %ld
 Paste	MainWindow		Zalijepi
 Help	MainWindow		Pomoć
 Remove	ShortCutView		Ukloni
-Problems while trying to save the file	Document		Problemi pri pokušaju spremanja datoteke
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Nova dodjela vrijedi za dokumente otvorene od sada – već otvoreni prozori zadržavaju svoje dosadašnje prečace.
+Problems while trying to save the file	Document		Problemi pri pokušaju spremanja datoteke
 Select all	MainWindow		Odaberi sve
 No document	ShortCutView		Nema dokumenta
 Alpha:	ColorPickerWindow		Alfa:
@@ -76,6 +76,7 @@ Title	MainWindow		Naslov
 Delete	MainWindow		Izbriši
 Save as	MainWindow		Spremi kao
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Nema nijednog e-mail programa na vašem stroju koji je konfiguriran kao zadani program za slanje e-maila.
+Untitled	Document		Bez naslova
 Web Browser Warning	AboutURLView		Upozorenje preglednika
 OK	Document		U redu
 Window	MainWindow		Prozor

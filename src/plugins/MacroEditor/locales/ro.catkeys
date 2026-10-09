@@ -1,4 +1,4 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	1110037994
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	1988532959
 New macro	MacroEditor		Macrocomandă nouă
 Move Up	MacroEditor		Mută în sus
 Export Macro	MacroEditor		Exportă macrocomanda
@@ -23,6 +23,7 @@ Collapse All	MacroEditor		Restrânge tot
 Expand All	MacroEditor		Extinde tot
 Delete the macro \"%s\"? This cannot be undone.	MacroEditor		Ștergeți macrocomanda „%s”? Acțiunea nu poate fi anulată.
 New macro created - drag commands in from the list on the right.	MacroEditor		Macrocomandă nouă creată – trageți comenzi din lista din dreapta.
+Macros	MacroEditor		Macrocomenzi
 No macro selected.	MacroEditor		Nicio macrocomandă selectată.
 No macro selected - select one in the MacroEditor tab first.	MacroEditor		Nicio macrocomandă selectată – selectați mai întâi una în fila MacroEditor.
 OK	MacroEditor		OK

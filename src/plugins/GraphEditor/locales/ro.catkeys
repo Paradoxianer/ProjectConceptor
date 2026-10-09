@@ -1,22 +1,22 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	1649170796
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	2948063220
 Delete	AttributeRenderer		Șterge
 Triangle	GraphEditor		Triunghi
-Group selected nodes	GraphEditor		Grupează nodurile selectate
 Diamond	GraphEditor		Romb
 Connection	GraphEditor		Conexiune
-Add text attribute	GraphEditor		Adaugă atribut text
 Grid	GraphEditor		Grilă
+Fit	GraphEditor		Potrivire
 Fill pattern for selected nodes	GraphEditor		Model de umplere pentru nodurile selectate
 Toggle grid	GraphEditor		Comută grila
 Input attribute name	GraphEditor		Introduceți numele atributului
 None	GraphEditor		Niciuna
+Group	GraphEditor		Grupare
 Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Comută ghidajele inteligente de aliniere
 Ellipse	GraphEditor		Elipsă
 Arrows	GraphEditor		Săgeți
 Rounded	GraphEditor		Rotunjită
 Pen size	GraphEditor		Dimensiune stilou
-Add boolean attribute	GraphEditor		Adaugă atribut boolean
++ Yes/No	GraphEditor		+ Da/Nu
 Note	GraphEditor		Notă
 OK	GraphEditor		OK
 Rounded rectangle	GraphEditor		Dreptunghi rotunjit
@@ -25,7 +25,7 @@ Fill	GraphEditor		Umplere
 Both ends	GraphEditor		Ambele capete
 Rectangle	GraphEditor		Dreptunghi
 Pattern	GraphEditor		Model
-Scale	GraphEditor		Scalare
++ Text	GraphEditor		+ Text
 Guides	GraphEditor		Ghidaje
 Straight	GraphEditor		Dreaptă
 Shape of the selected nodes	GraphEditor		Forma nodurilor selectate
@@ -38,6 +38,7 @@ At target	GraphEditor		La destinație
 Shape	GraphEditor		Formă
 Border pen size for selected nodes	GraphEditor		Grosimea marginii pentru nodurile selectate
 Untitled	GraphEditor		Fără titlu
+Graph	GraphEditor		Graf
 Cancel	GraphEditor		Anulează
 Which ends of the selected connections carry an arrow	GraphEditor		Care capete ale conexiunilor selectate au săgeată
 Shape of the selected connections	GraphEditor		Forma conexiunilor selectate

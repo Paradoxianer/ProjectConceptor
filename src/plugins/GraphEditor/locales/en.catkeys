@@ -1,22 +1,22 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	1649170796
+1	English	application/x-vnd.ProjectConceptor-plugin	2948063220
 Delete	AttributeRenderer		Delete
 Triangle	GraphEditor		Triangle
-Group selected nodes	GraphEditor		Group selected nodes
 Diamond	GraphEditor		Diamond
 Connection	GraphEditor		Connection
-Add text attribute	GraphEditor		Add text attribute
 Grid	GraphEditor		Grid
+Fit	GraphEditor		Fit
 Fill pattern for selected nodes	GraphEditor		Fill pattern for selected nodes
 Toggle grid	GraphEditor		Toggle grid
 Input attribute name	GraphEditor		Input attribute name
 None	GraphEditor		None
+Group	GraphEditor		Group
 Parallelogram	GraphEditor		Parallelogram
 Toggle smart alignment guides	GraphEditor		Toggle smart alignment guides
 Ellipse	GraphEditor		Ellipse
 Arrows	GraphEditor		Arrows
 Rounded	GraphEditor		Rounded
 Pen size	GraphEditor		Pen size
-Add boolean attribute	GraphEditor		Add boolean attribute
++ Yes/No	GraphEditor		+ Yes/No
 Note	GraphEditor		Note
 OK	GraphEditor		OK
 Rounded rectangle	GraphEditor		Rounded rectangle
@@ -25,7 +25,7 @@ Fill	GraphEditor		Fill
 Both ends	GraphEditor		Both ends
 Rectangle	GraphEditor		Rectangle
 Pattern	GraphEditor		Pattern
-Scale	GraphEditor		Scale
++ Text	GraphEditor		+ Text
 Guides	GraphEditor		Guides
 Straight	GraphEditor		Straight
 Shape of the selected nodes	GraphEditor		Shape of the selected nodes
@@ -38,6 +38,7 @@ At target	GraphEditor		At target
 Shape	GraphEditor		Shape
 Border pen size for selected nodes	GraphEditor		Border pen size for selected nodes
 Untitled	GraphEditor		Untitled
+Graph	GraphEditor		Graph
 Cancel	GraphEditor		Cancel
 Which ends of the selected connections carry an arrow	GraphEditor		Which ends of the selected connections carry an arrow
 Shape of the selected connections	GraphEditor		Shape of the selected connections

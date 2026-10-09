@@ -1,4 +1,4 @@
-1	French	application/x-vnd.ProjectConceptor	1230722656
+1	French	application/x-vnd.ProjectConceptor	258680107
 Macro shortcuts (double-click to change the key)	ShortCutView		Raccourcis des macros (double-clic pour changer la touche)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Appuyez sur la combinaison de touches pour la macro « %s » (Échap pour annuler).
 About	MainWindow		À propos de
@@ -35,8 +35,8 @@ Untitled %ld	MainWindow		Sans titre %ld
 Paste	MainWindow		Coller
 Help	MainWindow		Aide
 Remove	ShortCutView		Retirer
-Problems while trying to save the file	Document		Problèmes en essayant de sauvegarder le fichier
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		La nouvelle association s'applique aux documents ouverts à partir de maintenant ; les fenêtres déjà ouvertes conservent leurs raccourcis d'origine.
+Problems while trying to save the file	Document		Problèmes en essayant de sauvegarder le fichier
 Select all	MainWindow		Sélectionner tout
 No document	ShortCutView		Aucun document
 Alpha:	ColorPickerWindow		Alpha :
@@ -76,6 +76,7 @@ Title	MainWindow		Titre
 Delete	MainWindow		Effacer
 Save as	MainWindow		Enregistrer sous
 There is no e-mail program on your machine that is configured as the default program to send e-mail.	AboutURLView		Il n'y a pas, sur votre machine,  de programme de courriel qui soit configuré comme le programme par défaut pour envoyer des courriels.
+Untitled	Document		Sans titre
 Web Browser Warning	AboutURLView		Alerte par navigateur
 OK	Document		OK
 Window	MainWindow		Fenêtre
