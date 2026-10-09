@@ -27,6 +27,7 @@ SRCS= 	TestMain.cpp \
 		ZoomTest.cpp \
 		ContextBarTest.cpp \
 		ColorToolItemTest.cpp \
+		StatusTextsTest.cpp \
 		GraphStyleTest.cpp \
 		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
@@ -54,6 +55,7 @@ SRCS= 	TestMain.cpp \
 		../app/Document/PEditor.cpp \
 		../app/Document/PEditorManager.cpp \
 		../app/Document/PWindow.cpp \
+		../app/Document/StatusBar.cpp \
 		../app/Document/HelpManager.cpp \
 		../app/MainView.cpp \
 		../app/ToolBar/BaseItem.cpp \
@@ -110,7 +112,8 @@ SRCS= 	TestMain.cpp \
 		../plugins/GraphEditor/ShadowCache.cpp \
 		../plugins/GraphEditor/NodeHandles.cpp \
 		../plugins/GraphEditor/Zoom.cpp \
-		../plugins/GraphEditor/ContextBar.cpp
+		../plugins/GraphEditor/ContextBar.cpp \
+		../plugins/GraphEditor/StatusTexts.cpp
 
 RDEFS=
 

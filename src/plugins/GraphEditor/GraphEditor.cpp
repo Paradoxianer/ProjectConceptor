@@ -24,6 +24,7 @@
 #include "GroupRenderer.h"
 #include "TextEditorControl.h"
 #include "VectorIcon.h"
+#include "StatusTexts.h"
 #include "Zoom.h"
 
 
@@ -181,6 +182,13 @@ void GraphEditor::Init(void) {
 	zoomOutItem		= new BMenuItem("−",new BMessage(G_E_ZOOM_OUT));
 	zoomInItem		= new BMenuItem("+",new BMessage(G_E_ZOOM_IN));
 	zoomFitItem		= new BMenuItem(B_TRANSLATE("Fit"),new BMessage(G_E_ZOOM_FIT));
+	zoomBar			= new BMenuBar(BRect(0,0,100,10),"GraphEditor::zoom",
+		B_FOLLOW_RIGHT | B_FOLLOW_TOP,B_ITEMS_IN_ROW,true);
+	zoomBar->SetBorder(B_BORDER_CONTENTS);
+	zoomBar->AddItem(zoomOutItem);
+	zoomBar->AddItem(scaleMenu);
+	zoomBar->AddItem(zoomInItem);
+	zoomBar->AddItem(zoomFitItem);
 
 	// this plugin's own resources: icons
 	image_info	*info 	= new image_info;
@@ -601,6 +609,10 @@ void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messa
 	BPoint		scaledWhere;
 	scaledWhere.x	= where.x / scale;
 	scaledWhere.y	= where.y / scale;
+	StatusBar	*statusBar	= GetStatusBar();
+	if (statusBar != NULL)
+		statusBar->SetText("pointer",(code == B_EXITED_VIEW) ? ""
+			: StatusTexts::Pointer(scaledWhere).String());
 	if (startMouseDown) {
 		//only if the user hase moved the Mouse we start to select...
 		float dx=scaledWhere.x - startMouseDown->x;
@@ -712,11 +724,9 @@ void GraphEditor::AttachedToWindow(void) {
 	style	= GraphStyle::SystemCard();
 	SetViewColor(style.canvas);
 	PWindow 	*pWindow	= (PWindow *)Window();
-	BMenuBar	*menuBar	= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
-	menuBar->AddItem(zoomOutItem);
-	menuBar->AddItem(scaleMenu);
-	menuBar->AddItem(zoomInItem);
-	menuBar->AddItem(zoomFitItem);
+	StatusBar	*statusBar	= pWindow->GetStatusBar();
+	if (statusBar != NULL)
+		statusBar->AddRightView(zoomBar);
 	scaleMenu->SetTargetForItems(this);
 	zoomOutItem->SetTarget(this);
 	zoomInItem->SetTarget(this);
@@ -788,12 +798,12 @@ void GraphEditor::DetachedFromWindow(void) {
 		// that case are those views, so skip it; RemoveRenderer() below only
 		// touches this editor's own state and stays safe either way.
 		if (!pWindow->IsClosing()) {
-			BMenuBar	*menuBar		= (BMenuBar *)pWindow->FindView(P_M_STATUS_BAR);
-			if (menuBar) {
-				menuBar->RemoveItem(zoomOutItem);
-				menuBar->RemoveItem(scaleMenu);
-				menuBar->RemoveItem(zoomInItem);
-				menuBar->RemoveItem(zoomFitItem);
+			StatusBar	*statusBar	= pWindow->GetStatusBar();
+			if (statusBar != NULL) {
+				statusBar->RemoveRightView(zoomBar);
+				statusBar->SetText("selection",NULL);
+				statusBar->SetText("geometry",NULL);
+				statusBar->SetText("pointer",NULL);
 			}
 			ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
 			if (configBar) {
@@ -1731,6 +1741,24 @@ void GraphEditor::UpdateFormatItems(void) {
 				&& (node == NULL))
 			node	= item;
 	}
+	StatusBar	*statusBar	= GetStatusBar();
+	if (statusBar != NULL) {
+		int32	nodes		= 0;
+		int32	connections	= 0;
+		for (int32 i = 0; i < selection->CountItems(); i++) {
+			uint32	what	= ((BMessage*)selection->ItemAt(i))->what;
+			if (what == P_C_CONNECTION_TYPE)
+				connections++;
+			else if ((what == P_C_CLASS_TYPE) || (what == P_C_GROUP_TYPE))
+				nodes++;
+		}
+		statusBar->SetText("selection",StatusTexts::Selection(nodes,connections).String());
+		BRect	frame;
+		if ((nodes == 1) && (node->FindRect(P_C_NODE_FRAME,&frame) == B_OK))
+			ShowGeometry(frame);
+		else
+			statusBar->SetText("geometry","");
+	}
 	colorItem->SetEnabled((node != NULL) || (connection != NULL));
 	penSize->SetEnabled(node != NULL);
 	nodeShape->SetEnabled(node != NULL);
@@ -1805,4 +1833,18 @@ void GraphEditor::UpdateContextBar(void) {
 	font_height	fh;
 	be_plain_font->GetHeight(&fh);
 	contextBar.Layout(anchor,Bounds(),widths,ceilf(fh.ascent+fh.descent));
+}
+
+
+StatusBar* GraphEditor::GetStatusBar(void) {
+	PWindow	*pWindow	= dynamic_cast<PWindow*>(Window());
+	if ((pWindow == NULL) || pWindow->IsClosing())
+		return NULL;
+	return pWindow->GetStatusBar();
+}
+
+void GraphEditor::ShowGeometry(BRect frame) {
+	StatusBar	*statusBar	= GetStatusBar();
+	if (statusBar != NULL)
+		statusBar->SetText("geometry",StatusTexts::Geometry(frame).String());
 }

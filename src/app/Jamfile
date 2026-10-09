@@ -85,6 +85,7 @@ PROJECT_CONCEPTOR_SOURCES =
 	PEditor.cpp
 	PEditorManager.cpp
 	PWindow.cpp
+	StatusBar.cpp
 	HelpManager.cpp
 
 	# plugins

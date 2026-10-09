@@ -83,6 +83,8 @@ const float		kMinNodeHeight	= 30;
 const rgb_color	kDefaultConnectionColor	= {187, 67, 47, 255};
 
 class Renderer;
+class StatusBar;
+class BMenuBar;
 class BMessageRunner;
 class TextEditorControl;
 
@@ -169,6 +171,11 @@ public:
 			/** places the context bar above the selected nodes, or hides
 			 * it when there are none or a drag is running */
 			void			UpdateContextBar(void);
+			/** the node's place and size in the status bar - live while
+			 * one is dragged or resized */
+			void			ShowGeometry(BRect frame);
+			/** the window's status bar, NULL while closing */
+			StatusBar*		GetStatusBar(void);
 			Renderer*		FindNodeRenderer(BPoint where);
 			Renderer*		FindConnectionRenderer(BPoint where);
 			Renderer*		FindRenderer(BMessage *container);
@@ -256,6 +263,8 @@ protected:
 			BMenuItem		*zoomOutItem;
 			BMenuItem		*zoomInItem;
 			BMenuItem		*zoomFitItem;
+			/** the zoom items, right in the window's status bar */
+			BMenuBar		*zoomBar;
 			ContextBar		contextBar;
 			ToolItem		*grid;
 			ToolItem		*guides;

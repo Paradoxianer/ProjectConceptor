@@ -203,6 +203,7 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
 			MoveAll(renderer->ItemAt(i),dx,dy);
 	}
 	oldPt	= pt;
+	editor->ShowGeometry(frame);
 	if (parentNode) {
 		GroupRenderer	*parent	= NULL;
 		if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)

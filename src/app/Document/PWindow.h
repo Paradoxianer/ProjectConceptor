@@ -8,6 +8,7 @@
 #include "PluginManager.h"
 #include "PMenuAccess.h"
 #include "ShortCutFilter.h"
+#include "StatusBar.h"
 
 
 #include <app/AppDefs.h>
@@ -74,6 +75,7 @@ public:
 	virtual	BMenuItem*		GetMenuItem(const char* signatur);
 
 	virtual	ToolBar*		GetToolBar(const char *signatur);
+			StatusBar*		GetStatusBar(void) {return statusBar;};
 	virtual	ToolMenu*		GetToolMenu(const char* toolbarSignature,const char *signature);
 	virtual	ToolItem*		GetToolItem(const char* toolbarSignature,const char *signature);
 
@@ -123,7 +125,7 @@ protected:
 			void			CreatEditorList(void);
 
 			BMenuBar *		MakeMenu(void);
-			BMenuBar *		MakeStatusBar(void);
+			StatusBar *		MakeStatusBar(void);
 			void			ChangeLanguage(void);
 			void			MakeToolbars(void);
 			void			ReCalcToolBars(menu_layout layout);
@@ -144,7 +146,7 @@ protected:
 	/*		ToolbarView		*verticalToolbars;
 			ToolbarView		*horizontalToolbars;*/
 
-			BMenuBar		*statusBar;
+			StatusBar		*statusBar;
 	//		ProjektTabView	*tabView;
 			BList			*verticalToolbars;
 			BList			*horizontalToolbars;

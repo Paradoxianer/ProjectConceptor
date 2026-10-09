@@ -30,6 +30,7 @@ SRCS= 	GenerateStressFixture.cpp \
 		../../app/Document/PEditor.cpp \
 		../../app/Document/PEditorManager.cpp \
 		../../app/Document/PWindow.cpp \
+		../../app/Document/StatusBar.cpp \
 		../../app/Document/HelpManager.cpp \
 		../../app/MainView.cpp \
 		../../app/ToolBar/BaseItem.cpp \

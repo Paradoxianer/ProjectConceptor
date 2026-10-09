@@ -40,6 +40,7 @@ SRCS=	AttributRenderer.cpp	\
 		NodeHandles.cpp \
 		Zoom.cpp \
 		ContextBar.cpp \
+		StatusTexts.cpp \
 		GraphStyle.cpp \
 		ShadowCache.cpp			\
 		StringRenderer.cpp		\

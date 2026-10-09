@@ -21,6 +21,7 @@
 #include "ToolItem.h"
 #include "ToolMenu.h"
 #include "MainView.h"
+#include "StatusBar.h"
 #include "VectorIcon.h"
 //#include "FontPanel.h"
 
@@ -408,28 +409,13 @@ BMenuBar *PWindow::MakeMenu(void)
 	return tmpBar;
 }
 
-BMenuBar *PWindow::MakeStatusBar(void)
+StatusBar *PWindow::MakeStatusBar(void)
 {
 	TRACE();
-	BRect statusFrame=Bounds();
-
-	BMenuBar *tmpBar=new BMenuBar(statusFrame,P_M_STATUS_BAR, B_FOLLOW_LEFT_RIGHT | B_FOLLOW_BOTTOM);
-	//use FontHigh;
-	BFont *font=new BFont();
-	tmpBar->GetFont(font);
-	font->SetSize(font->Size()-3);
-	tmpBar->SetFont(font);
-	font_height height;
-	font->GetHeight(&height);
-	float top		= 2;
-	float bottom	= 2;
-	statusFrame.top=statusFrame.bottom-(height.ascent+height.descent+height.leading+top+bottom);
-	tmpBar->ResizeTo(statusFrame.Width(),statusFrame.Height());
-	tmpBar->MoveTo(0,statusFrame.top);
-
-	tmpBar->SetBorder(B_BORDER_CONTENTS);
-	P_M_MAIN_VIEW_BOTTOM=statusFrame.top-1.0;
-	return tmpBar;
+	BRect	statusFrame	= Bounds();
+	statusFrame.top		= statusFrame.bottom - StatusBar::PreferredHeight();
+	P_M_MAIN_VIEW_BOTTOM	= statusFrame.top - 1.0;
+	return new StatusBar(statusFrame,P_M_STATUS_BAR);
 }
 
 
