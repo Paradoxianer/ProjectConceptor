@@ -18,12 +18,6 @@
  *   (An earlier version of this tried BSlider's rectangular "block
  *   thumb" via be_control_look->DrawSliderThumb() instead - visually the
  *   wrong shape for this context, replaced.)
- * - a small checkerboard-aware swatch "end cap" at the end of the
- *   gradient bar (see _EndCapRect()/_DrawEndCap() in the .cpp), showing
- *   the resulting color at the current alpha value - drawn with the same
- *   checkerboard style ColorSwatchView uses for the palette/history rows
- *   elsewhere in ColorPickerWindow, so this reads as the same "color
- *   swatch" visual language too.
  */
 
 #ifndef ALPHA_SLIDER_H
@@ -41,6 +35,7 @@ public:
 	virtual						~AlphaSlider();
 
 	// BControl interface
+	virtual	void				AttachedToWindow();
 	virtual	void				WindowActivated(bool active);
 	virtual	void				MakeFocus(bool focus);
 
@@ -71,8 +66,6 @@ private:
 			void				_AllocBitmap(int32 width, int32 height);
 			BRect				_BitmapRect() const;
 			void				_DrawThumb(BRect barRect, bool isFocus);
-			BRect				_EndCapRect() const;
-			void				_DrawEndCap();
 			int32				_ValueFor(BPoint where) const;
 
 private:

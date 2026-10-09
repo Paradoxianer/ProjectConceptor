@@ -25,13 +25,6 @@ static const rgb_color kBlack		= {   0,   0,   0, 255 };
 static const rgb_color kAlphaLow	= { 0xbb, 0xbb, 0xbb, 0xff };
 static const rgb_color kAlphaHigh	= { 0xe0, 0xe0, 0xe0, 0xff };
 
-// End-cap swatch (ProjectConceptor addition, see the class comment in the
-// header) - same checkerboard pattern and colors ColorSwatchView uses, so
-// the two read as one visual language.
-static const pattern	kDottedBig	= { { 0x0f, 0x0f, 0x0f, 0x0f, 0xf0, 0xf0, 0xf0, 0xf0 } };
-static const float		kEndCapSize	= 24.0;
-static const float		kEndCapGap	= 3.0;
-
 // Thumb (ProjectConceptor addition, replacing the original ported code's
 // plain white/black marker lines) - mirrors BColorControl's own round
 // selector knob exactly, same constants and the same two-stroke technique
@@ -42,6 +35,10 @@ static const float		kEndCapGap	= 3.0;
 // ColorPickerWindow instead of looking like a different kind of control.
 static const float		kSelectorSize		= 4.0;
 static const float		kSelectorPenSize	= 2.0;
+// BColorControl keeps the knob this far from either end of the ramp
+static const float		kSelectorHSpacing	= 2.0;
+static const float		kSelectorInset		= kSelectorHSpacing
+	+ kSelectorSize / 2 + kSelectorPenSize / 2;
 
 
 AlphaSlider::AlphaSlider(orientation dir, BMessage *message,
@@ -99,13 +96,10 @@ BSize
 AlphaSlider::MinSize()
 {
 	BSize	minSize;
-	// +kEndCapSize+kEndCapGap so the gradient itself still gets the full
-	// 255 pixels of 1:1 resolution the original design assumed, with the
-	// end cap occupying genuinely extra space rather than eating into it
 	if (fOrientation == B_HORIZONTAL)
-		minSize = BSize(255 + 4 + kEndCapSize + kEndCapGap, 7 + 4);
+		minSize = BSize(255 + 4, 7 + 4);
 	else
-		minSize = BSize(7 + 4, 255 + 4 + kEndCapSize + kEndCapGap);
+		minSize = BSize(7 + 4, 255 + 4);
 	return BLayoutUtils::ComposeSize(ExplicitMinSize(), minSize);
 }
 
@@ -214,7 +208,15 @@ AlphaSlider::Draw(BRect updateRect)
 	DrawBitmap(fBitmap, barRect.LeftTop());
 
 	_DrawThumb(barRect, isFocus);
-	_DrawEndCap();
+}
+
+
+void
+AlphaSlider::AttachedToWindow()
+{
+	BControl::AttachedToWindow();
+	// a size set before attaching never reached FrameResized()
+	FrameResized(Bounds().Width(), Bounds().Height());
 }
 
 
@@ -375,12 +377,6 @@ AlphaSlider::_BitmapRect() const
 	BRect	r = Bounds();
 	if (fBorderStyle == B_FANCY_BORDER)
 		r.InsetBy(2, 2);
-	// leave room for the end cap (_EndCapRect() below) at the far end,
-	// so the gradient bar doesn't draw underneath it
-	if (fOrientation == B_HORIZONTAL)
-		r.right		-= (kEndCapSize + kEndCapGap);
-	else
-		r.bottom	-= (kEndCapSize + kEndCapGap);
 	return r;
 }
 
@@ -390,11 +386,13 @@ AlphaSlider::_DrawThumb(BRect barRect, bool isFocus)
 {
 	BPoint	center;
 	if (fOrientation == B_HORIZONTAL) {
-		center.x	= floorf(barRect.left + Value() * barRect.Width() / 255.0 + 0.5);
-		center.y	= (barRect.top + barRect.bottom) / 2;
+		center.x	= barRect.left + kSelectorInset
+			+ Value() * (barRect.Width() - 2 * kSelectorInset) / 255.0;
+		center.y	= barRect.top + barRect.Height() / 2;
 	} else {
-		center.x	= (barRect.left + barRect.right) / 2;
-		center.y	= floorf(barRect.top + Value() * barRect.Height() / 255.0 + 0.5);
+		center.x	= barRect.left + barRect.Width() / 2;
+		center.y	= barRect.top + kSelectorInset
+			+ Value() * (barRect.Height() - 2 * kSelectorInset) / 255.0;
 	}
 
 	// exact technique/constants BColorControl::_DrawSelectors() uses -
@@ -414,66 +412,19 @@ AlphaSlider::_DrawThumb(BRect barRect, bool isFocus)
 }
 
 
-BRect
-AlphaSlider::_EndCapRect() const
-{
-	BRect	r = Bounds();
-	if (fBorderStyle == B_FANCY_BORDER)
-		r.InsetBy(2, 2);
-	if (fOrientation == B_HORIZONTAL)
-		r.left	= r.right - kEndCapSize + 1;
-	else
-		r.top	= r.bottom - kEndCapSize + 1;
-	return r;
-}
-
-
-static inline void
-blend_end_cap_color(rgb_color &a, const rgb_color &b, float alpha)
-{
-	// mirrors ColorSwatchView::blend_color() exactly - see the class
-	// comment in AlphaSlider.h for why
-	float alphaInv = 1.0 - alpha;
-	a.red	= (uint8)(b.red * alphaInv + a.red * alpha);
-	a.green	= (uint8)(b.green * alphaInv + a.green * alpha);
-	a.blue	= (uint8)(b.blue * alphaInv + a.blue * alpha);
-}
-
-
-void
-AlphaSlider::_DrawEndCap()
-{
-	rgb_color	color	= fColor;
-	color.alpha			= (uint8)Value();
-
-	BRect	r = _EndCapRect();
-	if (color.alpha < 255) {
-		float		alpha	= color.alpha / 255.0;
-		rgb_color	h		= color;
-		blend_end_cap_color(h, kAlphaHigh, alpha);
-		rgb_color	l		= color;
-		blend_end_cap_color(l, kAlphaLow, alpha);
-
-		SetHighColor(h);
-		SetLowColor(l);
-		FillRect(r, kDottedBig);
-	} else {
-		SetHighColor(color);
-		FillRect(r);
-	}
-}
-
-
 int32
 AlphaSlider::_ValueFor(BPoint where) const
 {
 	BRect	r = _BitmapRect();
 
 	int32	value;
+	// the inverse of _DrawThumb()'s position
 	if (fOrientation == B_HORIZONTAL)
-		value = (int32)(255 * (where.x - r.left) / r.Width() + 0.5);
+		value = (int32)(255 * (where.x - r.left - kSelectorInset)
+			/ (r.Width() - 2 * kSelectorInset) + 0.5);
 	else
-		value = (int32)(255 * (where.y - r.top) / r.Height() + 0.5);
+		value = (int32)(255 * (where.y - r.top - kSelectorInset)
+			/ (r.Height() - 2 * kSelectorInset) + 0.5);
 
 	value = max_c(0, value);
 	value = min_c(255, value);
