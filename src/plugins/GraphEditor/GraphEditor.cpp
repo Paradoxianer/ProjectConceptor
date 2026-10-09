@@ -132,7 +132,6 @@ MakeGuidesIcon(void)
 #define B_TRANSLATION_CONTEXT "GraphEditor"
 
 
-const char		*G_E_TOOL_BAR			= "G_E_TOOL_BAR";
 
 GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW | B_NAVIGABLE) {
 	TRACE();
@@ -249,7 +248,6 @@ void GraphEditor::Init(void) {
 	patternItem	= new PatternToolItem(B_TRANSLATE("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 	patternItem->BButton::SetToolTip(B_TRANSLATE("Fill pattern for selected nodes"));
 
-	toolBar				= new ToolBar(BRect(1,1,50,2800),G_E_TOOL_BAR,B_ITEMS_IN_COLUMN);
 	//loading ressource_images from the PluginRessource
 	image_info	*info 	= new image_info;
 	BBitmap		*bmp	= NULL;
@@ -258,36 +256,16 @@ void GraphEditor::Init(void) {
 	get_image_info(pluginID,info);
 	// init the ressource for the plugin files
 	BResources *res=new BResources(new BFile((const char*)info->name,B_READ_ONLY));
-	// load the addBool icon
-	const void *data=res->LoadResource((type_code)'PNG ',"group",&size);
-	if (data) {
-		//translate the icon because it was png but we ne a bmp
-		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-		if (bmp) {
-			BMessage	*groupMessage = new BMessage(G_E_GROUP);
-			addGroup	= new ToolItem("addGroup",bmp,groupMessage);
-			addGroup->BButton::SetToolTip(B_TRANSLATE("Group selected nodes"));
-			toolBar->AddItem(addGroup);
-		}
-	}
-	toolBar->AddSeperator();
-	data=res->LoadResource((type_code)'PNG ',"addBool",&size);
-	if (data) {
-		//translate the icon because it was png but we ne a bmp
-		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-		if (bmp) {
-			BMessage	*addBoolMessage = new BMessage(G_E_ADD_ATTRIBUTE);
-			addBoolMessage->AddInt32("type",B_BOOL_TYPE);
-			addBool		= new ToolItem("addBool",bmp,addBoolMessage);
-			addBool->BButton::SetToolTip(B_TRANSLATE("Add boolean attribute"));
-			toolBar->AddItem(addBool);
-		}
-	}
+	// adding attributes and grouping sit in the context bar above the
+	// selection
+	BMessage	*addTextMessage	= new BMessage(G_E_ADD_ATTRIBUTE);
+	addTextMessage->AddInt32("type",B_STRING_TYPE);
+	contextBar.AddButton(B_TRANSLATE("+ Text"),addTextMessage);
+	BMessage	*addBoolMessage	= new BMessage(G_E_ADD_ATTRIBUTE);
+	addBoolMessage->AddInt32("type",B_BOOL_TYPE);
+	contextBar.AddButton(B_TRANSLATE("+ Yes/No"),addBoolMessage);
+	contextBar.AddButton(B_TRANSLATE("Group"),new BMessage(G_E_GROUP));
 
-	// Icon fields rather than text ones: the toolbar row is short on
-	// width and the shape/arrow choices read faster as pictures. The
-	// popup still shows icon *and* label, so the wording stays available
-	// while choosing.
 	connectionStyle		= new ChoiceToolItem(B_TRANSLATE("Connection"),
 		new BMessage(G_E_CONNECTION_STYLE),ITEM_WIDTH*2);
 	connectionStyle->SetIconOnly(true);
@@ -316,18 +294,6 @@ void GraphEditor::Init(void) {
 	}
 	nodeShape->SetValue("rounded");
 	nodeShape->SetToolTip(B_TRANSLATE("Shape of the selected nodes"));
-
-	data=res->LoadResource((type_code)'PNG ',"addText",&size);
-	if (data) {
-		bmp = BTranslationUtils::GetBitmap(new BMemoryIO(data,size));
-		if (bmp) {
-			BMessage	*addTextMessage = new BMessage(G_E_ADD_ATTRIBUTE);
-			addTextMessage->AddInt32("type",B_STRING_TYPE);
-			addText		= new ToolItem("addText",bmp,addTextMessage);
-			addText->BButton::SetToolTip(B_TRANSLATE("Add text attribute"));
-			toolBar->AddItem(addText);
-		}
-	}
 }
 
 void GraphEditor::AttachedToManager(void) {
@@ -622,13 +588,26 @@ void GraphEditor::Draw(BRect updateRect) {
 		SetHighColor(50,50,50,255);
 		StrokeLine(*fromPoint,*toPoint);
 	}
-
+	UpdateContextBar();
+	if (contextBar.IsVisible()) {
+		// in view pixels: undo the zoom for this one state
+		PushState();
+		SetScale(1.0/scale);
+		SetFont(be_plain_font);
+		contextBar.Draw(this,style);
+		PopState();
+	}
 }
 
 void GraphEditor::MouseDown(BPoint where) {
 	BView::MouseDown(where);
 	BView::MakeFocus(true);
 	
+	int32	button	= contextBar.ButtonAt(where);
+	if (button >= 0) {
+		BMessenger(this).SendMessage(contextBar.MessageAt(button));
+		return;
+	}
 	BPoint		scaledWhere;
 	scaledWhere.x	= where.x / scale;
 	scaledWhere.y	= where.y / scale;
@@ -713,6 +692,15 @@ void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messa
 	else if (code == B_EXITED_VIEW)
 		SetHovered(NULL);
 	else {
+		int32	button	= contextBar.ButtonAt(where);
+		if (button != contextBar.Highlight()) {
+			contextBar.SetHighlight(button);
+			Invalidate();
+		}
+		if (button >= 0) {
+			SetHovered(NULL);
+			return;
+		}
 		Renderer	*under	= NULL;
 		for (int32 i = renderer->CountItems()-1; (under == NULL) && (i >= 0); i--) {
 			Renderer	*candidate	= (Renderer*)renderer->ItemAt(i);
@@ -799,11 +787,6 @@ void GraphEditor::AttachedToWindow(void) {
 		}
 	}
 
-	toolBar->ResizeTo(30,pWindow->P_M_MAIN_VIEW_BOTTOM-pWindow->P_M_MAIN_VIEW_TOP);
-	pWindow->AddToolBar(toolBar);
-	addGroup->SetTarget(this);
-	addBool->SetTarget(this);
-	addText->SetTarget(this);
 	ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
 	configBar->AddItem(colorItem,P_TOOL_GROUP_NODE);
 	configBar->AddItem(penSize,P_TOOL_GROUP_NODE);
@@ -869,7 +852,6 @@ void GraphEditor::DetachedFromWindow(void) {
 				menuBar->RemoveItem(zoomInItem);
 				menuBar->RemoveItem(zoomFitItem);
 			}
-			pWindow->RemoveToolBar(G_E_TOOL_BAR	);
 			ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
 			if (configBar) {
 				configBar->RemoveItem(penSize);
@@ -1835,4 +1817,29 @@ void GraphEditor::UpdateFormatItems(void) {
 		text.SetToFormat("%d",(int)value);
 		connectionArrows->SetValue(text.String());
 	}
+}
+
+
+void GraphEditor::UpdateContextBar(void) {
+	BRect	selection(0,0,-1,-1);
+	if (mouseReciver == NULL) {
+		for (int32 i = 0; i < renderer->CountItems(); i++) {
+			ClassRenderer	*node	= dynamic_cast<ClassRenderer*>((Renderer*)renderer->ItemAt(i));
+			if ((node == NULL) || !node->Selected())
+				continue;
+			selection	= selection.IsValid() ? (selection | node->Frame()) : node->Frame();
+		}
+	}
+	if (!selection.IsValid()) {
+		contextBar.Hide();
+		return;
+	}
+	BRect	anchor(selection.left*scale,selection.top*scale,
+		selection.right*scale,selection.bottom*scale);
+	std::vector<float>	widths;
+	for (int32 i = 0; i < contextBar.CountButtons(); i++)
+		widths.push_back(be_plain_font->StringWidth(contextBar.LabelAt(i)));
+	font_height	fh;
+	be_plain_font->GetHeight(&fh);
+	contextBar.Layout(anchor,Bounds(),widths,ceilf(fh.ascent+fh.descent));
 }

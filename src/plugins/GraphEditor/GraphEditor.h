@@ -25,6 +25,7 @@
 #include "ColorToolItem.h"
 #include "FloatToolItem.h"
 #include "ChoiceToolItem.h"
+#include "ContextBar.h"
 
 const float			 	max_entfernung			= 50.0;
 const uint32			G_E_RENDERER			= 'geRr';
@@ -65,7 +66,6 @@ const uint32            G_E_INSERT_SIBLING      = 'geIS';
 // see StartAnimating(); not sent by anything outside GraphEditor itself.
 const uint32			G_E_ANIMATION_TICK		= 'geAT';
 
-extern const char		*G_E_TOOL_BAR;		//	= "G_E_TOOL_BAR";
 
 const float		triangleHeight	= 7;
 const float		gridWidth		= 50;
@@ -166,6 +166,9 @@ public:
 			 * selection and show the first selected one's values;
 			 * needs the document locked */
 			void			UpdateFormatItems(void);
+			/** places the context bar above the selected nodes, or hides
+			 * it when there are none or a drag is running */
+			void			UpdateContextBar(void);
 			Renderer*		FindNodeRenderer(BPoint where);
 			Renderer*		FindConnectionRenderer(BPoint where);
 			Renderer*		FindRenderer(BMessage *container);
@@ -253,13 +256,10 @@ protected:
 			BMenuItem		*zoomOutItem;
 			BMenuItem		*zoomInItem;
 			BMenuItem		*zoomFitItem;
-			ToolBar			*toolBar;
+			ContextBar		contextBar;
 			ToolItem		*grid;
 			ToolItem		*guides;
 
-			ToolItem		*addGroup;
-			ToolItem		*addBool;
-			ToolItem		*addText;
 
 
 			FloatToolItem	*penSize;

@@ -27,6 +27,7 @@ Addon pc_graph_editor :
 	NodeShape.cpp
 	NodeHandles.cpp
 	Zoom.cpp
+	ContextBar.cpp
 	GraphStyle.cpp
 	ShadowCache.cpp
 	StringRenderer.cpp
