@@ -1,6 +1,8 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
+#include <app/Cursor.h>
+
 class GraphEditor;
 
 class Renderer
@@ -52,6 +54,11 @@ public:
 	 * it for now.
 	 */
 	virtual	bool		AnimationStep(float dt) {return false;};
+
+	/** The system cursor for where (document coordinates) over this
+	 * renderer, so the user sees what a click or drag there does: text
+	 * edits, handles resize, free body areas move. */
+	virtual	BCursorID	CursorAt(BPoint where) {return B_CURSOR_ID_SYSTEM_DEFAULT;};
 
 	/** the mouse is over this renderer, or a connection being drawn would
 	 * end on it - see GraphEditor::SetHovered() */

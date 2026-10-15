@@ -531,6 +531,61 @@ BRect ClassRenderer::HandleFrame(void) {
 }
 
 
+static BCursorID HandleCursor(int32 handle) {
+	switch (handle) {
+		case NodeHandles::TOP_LEFT:
+		case NodeHandles::BOTTOM_RIGHT:
+			return B_CURSOR_ID_RESIZE_NORTH_WEST_SOUTH_EAST;
+		case NodeHandles::TOP_RIGHT:
+		case NodeHandles::BOTTOM_LEFT:
+			return B_CURSOR_ID_RESIZE_NORTH_EAST_SOUTH_WEST;
+		case NodeHandles::TOP:
+		case NodeHandles::BOTTOM:
+			return B_CURSOR_ID_RESIZE_NORTH_SOUTH;
+		default:
+			return B_CURSOR_ID_RESIZE_EAST_WEST;
+	}
+}
+
+BCursorID ClassRenderer::CursorAt(BPoint where) {
+	// while a drag runs the cursor shows what is being dragged
+	if (tracking) {
+		if (connecting != 0)
+			return B_CURSOR_ID_CROSS_HAIR;
+		if (resizeHandle != NodeHandles::NONE)
+			return HandleCursor(resizeHandle);
+		return B_CURSOR_ID_GRABBING;
+	}
+	// the order MouseDown() decides by
+	if (selected && SupportsResize()) {
+		int32	handle	= NodeHandles::HandleAt(HandleFrame(),where,HandleRadius());
+		if (handle != NodeHandles::NONE)
+			return HandleCursor(handle);
+	}
+	if (hovered && (ConnectorAt(where) != 0))
+		return B_CURSOR_ID_CROSS_HAIR;
+	if (name->Caught(where))
+		return B_CURSOR_ID_I_BEAM;
+	for (uint32 i = 0; i < attributes->size(); i++) {
+		Renderer	*row	= (*attributes)[i];
+		if (row->Caught(where))
+			return row->CursorAt(where);
+	}
+	// what is left of the card moves it
+	return Caught(where) ? B_CURSOR_ID_GRAB : B_CURSOR_ID_SYSTEM_DEFAULT;
+}
+
+bool ClassRenderer::StartEditingAttribute(const char *key) {
+	for (int32 i = (int32)attributes->size() - 1; i >= 0; i--) {
+		AttributRenderer	*row	= dynamic_cast<AttributRenderer*>((*attributes)[i]);
+		if ((row != NULL) && (strcmp(row->Key(),key) == 0)) {
+			row->StartEditingName();
+			return true;
+		}
+	}
+	return false;
+}
+
 float ClassRenderer::HandleRadius(void) {
 	return kHandleSize / editor->Scale();
 }
@@ -770,7 +825,8 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	valueContainer->AddString("name",attribName);
 	valueContainer->AddInt32("index",count);
 	removeAttribMessage->AddMessage("valueContainer",valueContainer);
-	Renderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage,removeAttribMessage);
+	AttributRenderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage,removeAttribMessage);
+	testRenderer->SetKey(attribName);
 	attributes->push_back(testRenderer);
 }
 

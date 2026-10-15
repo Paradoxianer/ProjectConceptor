@@ -40,6 +40,12 @@ public:
 			void			SetFrame(BRect newRect);
 			/** whether the delete icon shows - and reacts (#51) */
 			void			SetShowDelete(bool show){showDelete=show;};
+			/** the data field this row shows an entry of */
+			void			SetKey(const char *newKey){key = newKey;};
+			const char*		Key(void) const {return key.String();};
+			/** opens the label for typing */
+			void			StartEditingName(void);
+			BCursorID		CursorAt(BPoint where);
 			/** label in muted, value in text */
 			void			SetTextColors(rgb_color text, rgb_color muted);
 			BRect			Frame(void){return frame;};
@@ -62,6 +68,7 @@ protected:
 		//Renderer			*deleter;
 		float				divider;
 		bool				showDelete;
+		BString				key;
 		BPopUpMenu			*kontextMenu;
 		
 private:

@@ -250,3 +250,23 @@ void AttributRenderer::SetTextColors(rgb_color textColor, rgb_color muted)
 	if (text != NULL)
 		text->SetColor(textColor);
 }
+
+
+void AttributRenderer::StartEditingName(void)
+{
+	if (name != NULL)
+		name->MouseDown(BPoint(0,0));
+}
+
+BCursorID AttributRenderer::CursorAt(BPoint where)
+{
+	if (showDelete && delRect.Contains(where))
+		return B_CURSOR_ID_FOLLOW_LINK;
+	if ((name != NULL) && name->Caught(where))
+		return B_CURSOR_ID_I_BEAM;
+	if ((value != NULL) && value->Caught(where)) {
+		return (dynamic_cast<BoolRenderer*>(value) != NULL)
+			? B_CURSOR_ID_FOLLOW_LINK : B_CURSOR_ID_I_BEAM;
+	}
+	return B_CURSOR_ID_SYSTEM_DEFAULT;
+}

@@ -67,6 +67,10 @@ public:
 
 				bool		AnimationStep(float dt);
 				void		SetHovered(bool hover) {hovered = hover;};
+				BCursorID	CursorAt(BPoint where);
+				/** opens the label of the newest entry of the attribute
+				 * field key for typing; false if there is none */
+				bool		StartEditingAttribute(const char *key);
 
 				/** false hides the resize handle/hit-test entirely (issue
 				 * #38 - a group's box is auto-fit around its children, a

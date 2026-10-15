@@ -25,6 +25,7 @@
 #include "ColorToolItem.h"
 #include "FloatToolItem.h"
 #include "ChoiceToolItem.h"
+#include <app/Cursor.h>
 #include "ContextBar.h"
 
 const float			 	max_entfernung			= 50.0;
@@ -174,6 +175,9 @@ public:
 			/** places the context bar above the selected nodes, or hides
 			 * it when there are none or a drag is running */
 			void			UpdateContextBar(void);
+			void			StartPendingAttributeEdit(void);
+			/** the view's cursor, e.g. an I-beam over text */
+			void			SetCursorId(BCursorID id);
 			/** the node's place and size in the status bar - live while
 			 * one is dragged or resized */
 			void			ShowGeometry(BRect frame);
@@ -305,6 +309,10 @@ protected:
 			Renderer		*activRenderer;
 			Renderer		*mouseReciver;
 			Renderer		*hovered;
+			BCursorID		currentCursor;
+			/** the field name of an attribute just added, whose label is
+			 * to open for typing */
+			BString			pendingEditAttribute;
 			// "start editing this node's name once its renderer exists" is
 			// pure GUI intent for the next InsertRenderObject() to act on -
 			// keeping it as a GraphEditor-local pointer instead of a bool

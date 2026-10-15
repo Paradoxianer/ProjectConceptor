@@ -73,7 +73,6 @@ MakeShapeIcon(const char *shapeName)
 
 #include "ToolBar.h"
 #include "ToolItem.h"
-#include "InputRequest.h"
 //just for the B_FONT_TYPE Definiton
 
 #undef B_TRANSLATION_CONTEXT
@@ -109,6 +108,7 @@ void GraphEditor::Init(void) {
 	activRenderer	= NULL;
 	mouseReciver	= NULL;
 	hovered			= NULL;
+	currentCursor	= B_CURSOR_ID_SYSTEM_DEFAULT;
 	pendingStartEditNode	= NULL;
 	activeTextEditor		= NULL;
 	rendersensitv	= new BRegion();
@@ -493,7 +493,23 @@ void GraphEditor::DrainPendingChangedNodes(void) {
 	}
 	pendingChangedNodes->MakeEmpty();
 	UpdateFormatItems();
+	StartPendingAttributeEdit();
 	doc->Unlock();
+}
+
+void GraphEditor::StartPendingAttributeEdit(void) {
+	if (pendingEditAttribute.Length() == 0)
+		return;
+	// one chance, right after the batch the new attribute arrived in
+	BString		key		= pendingEditAttribute;
+	pendingEditAttribute	= "";
+	BList		*selection	= doc->GetSelected();
+	for (int32 i = 0; i < selection->CountItems(); i++) {
+		ClassRenderer	*node	= dynamic_cast<ClassRenderer*>(
+			FindRenderer((BMessage*)selection->ItemAt(i)));
+		if ((node != NULL) && node->StartEditingAttribute(key.String()))
+			return;
+	}
 }
 
 void GraphEditor::SetDirty(BRegion *region) {
@@ -643,6 +659,7 @@ void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messa
 	}
 	else if (mouseReciver != NULL) {
 		mouseReciver->MouseMoved(scaledWhere,code,a_message);
+		SetCursorId(mouseReciver->CursorAt(scaledWhere));
 	}
 	else if (code == B_EXITED_VIEW)
 		SetHovered(NULL);
@@ -654,6 +671,7 @@ void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messa
 		}
 		if (button >= 0) {
 			SetHovered(NULL);
+			SetCursorId(B_CURSOR_ID_FOLLOW_LINK);
 			return;
 		}
 		Renderer	*under	= NULL;
@@ -665,7 +683,17 @@ void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messa
 		if ((under != NULL) && (under->GetMessage()->what == P_C_CONNECTION_TYPE))
 			under	= NULL;
 		SetHovered(under);
+		SetCursorId((under != NULL) ? under->CursorAt(scaledWhere)
+			: B_CURSOR_ID_SYSTEM_DEFAULT);
 	}
+}
+
+void GraphEditor::SetCursorId(BCursorID id) {
+	if (id == currentCursor)
+		return;
+	currentCursor	= id;
+	BCursor	cursor(id);
+	SetViewCursor(&cursor);
 }
 
 
@@ -1054,33 +1082,29 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			break;
 		}
 		case G_E_ADD_ATTRIBUTE: {
-			int32	type;
-			BString datadummy	= BString("   ");
+			// no question first: the attribute appears with a default name
+			// and its label opens for typing (StartPendingAttributeEdit())
+			int32	type	= B_STRING_TYPE;
 			message->FindInt32("type",&type);
-			InputRequest	*inputAlert = new InputRequest(B_TRANSLATE("Input attribute name"),B_TRANSLATE("Name"), B_TRANSLATE("Attribute"), B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
-			char			*input		= NULL;
-			char			*inputstr	= NULL;
-			if (inputAlert->Go(&input)<1) {
-				inputstr	= new char[strlen(input)+1];
-				strcpy(inputstr,input);
-				BMessage	*addMessage		= new BMessage(P_C_EXECUTE_COMMAND);
-				addMessage->AddString("Command::Name","AddAttribute");
-				addMessage->AddBool(P_C_NODE_SELECTED,true);
-				BMessage	*valueContainer	= new BMessage();
-
-				valueContainer->AddInt32("type",B_MESSAGE_TYPE);
-				valueContainer->AddString("name",inputstr);
-				valueContainer->AddString("subgroup",P_C_NODE_DATA);
-				BMessage	*newAttribute	= new BMessage(type);
-				newAttribute->AddString("Name",inputstr);
-				if (type == B_STRING_TYPE)
-					newAttribute->AddData("Value",type,datadummy.String(), datadummy.Length() + 1,false);
-				else if (type == B_BOOL_TYPE)
-					newAttribute->AddBool("Value",true);
-				valueContainer->AddMessage("newAttribute",newAttribute);
-				addMessage->AddMessage("valueContainer",valueContainer);
-				sentTo->SendMessage(addMessage);
-			}
+			const char	*attributeName	= B_TRANSLATE("Attribute");
+			BString		datadummy("   ");
+			BMessage	*addMessage		= new BMessage(P_C_EXECUTE_COMMAND);
+			addMessage->AddString("Command::Name","AddAttribute");
+			addMessage->AddBool(P_C_NODE_SELECTED,true);
+			BMessage	*valueContainer	= new BMessage();
+			valueContainer->AddInt32("type",B_MESSAGE_TYPE);
+			valueContainer->AddString("name",attributeName);
+			valueContainer->AddString("subgroup",P_C_NODE_DATA);
+			BMessage	*newAttribute	= new BMessage(type);
+			newAttribute->AddString("Name",attributeName);
+			if (type == B_STRING_TYPE)
+				newAttribute->AddData("Value",type,datadummy.String(),datadummy.Length() + 1,false);
+			else if (type == B_BOOL_TYPE)
+				newAttribute->AddBool("Value",true);
+			valueContainer->AddMessage("newAttribute",newAttribute);
+			addMessage->AddMessage("valueContainer",valueContainer);
+			pendingEditAttribute	= attributeName;
+			sentTo->SendMessage(addMessage);
 			break;
 		}
 		case G_E_INSERT_NODE: {
