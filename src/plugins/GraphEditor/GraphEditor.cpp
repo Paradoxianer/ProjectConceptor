@@ -1789,7 +1789,7 @@ void GraphEditor::UpdateFormatItems(void) {
 			statusBar->SetText("geometry","");
 	}
 	colorItem->SetEnabled((node != NULL) || (connection != NULL));
-	penSize->SetEnabled(node != NULL);
+	penSize->SetEnabled((node != NULL) || (connection != NULL));
 	nodeShape->SetEnabled(node != NULL);
 	connectionStyle->SetEnabled(connection != NULL);
 	connectionArrows->SetEnabled(connection != NULL);
@@ -1819,7 +1819,7 @@ void GraphEditor::UpdateFormatItems(void) {
 				kDefaultConnectionColor);
 		}
 		float	pen;
-		if ((node != NULL) && (pattern.FindFloat("PenSize",&pen) == B_OK))
+		if (pattern.FindFloat("PenSize",&pen) == B_OK)
 			penSize->SetValue(pen);
 	}
 	BMessage	shapeArchive;
