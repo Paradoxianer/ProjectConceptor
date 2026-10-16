@@ -208,15 +208,18 @@ void GraphEditor::Init(void) {
 	patternItem	= new PatternToolItem(B_TRANSLATE("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 	patternItem->BButton::SetToolTip(B_TRANSLATE("Fill pattern for selected nodes"));
 
-	// adding attributes and grouping sit in the context bar above the
-	// selection
-	BMessage	*addTextMessage	= new BMessage(G_E_ADD_ATTRIBUTE);
-	addTextMessage->AddInt32("type",B_STRING_TYPE);
-	contextBar.AddButton(B_TRANSLATE("+ Text"),addTextMessage);
-	BMessage	*addBoolMessage	= new BMessage(G_E_ADD_ATTRIBUTE);
-	addBoolMessage->AddInt32("type",B_BOOL_TYPE);
-	contextBar.AddButton(B_TRANSLATE("+ Yes/No"),addBoolMessage);
+	// grouping sits in the context bar above the selection
 	contextBar.AddButton(B_TRANSLATE("Group"),new BMessage(G_E_GROUP));
+
+	// one entry per attribute kind; new kinds (date, image, ...) go here
+	addAttribute	= new ChoiceToolItem(B_TRANSLATE("Attribute"),
+		new BMessage(G_E_ADD_ATTRIBUTE),ITEM_WIDTH*2);
+	addAttribute->SetActionIcon(LoadVectorIcon(res,"attribute",kToolIconSize));
+	addAttribute->AddChoice(B_TRANSLATE("Text"),"text",
+		LoadVectorIcon(res,"attribute-text",kToolIconSize));
+	addAttribute->AddChoice(B_TRANSLATE("Yes/No"),"bool",
+		LoadVectorIcon(res,"attribute-bool",kToolIconSize));
+	addAttribute->SetToolTip(B_TRANSLATE("Add an attribute to the selected nodes"));
 
 	connectionStyle		= new ChoiceToolItem(B_TRANSLATE("Connection"),
 		new BMessage(G_E_CONNECTION_STYLE),ITEM_WIDTH*2);
@@ -772,6 +775,7 @@ void GraphEditor::AttachedToWindow(void) {
 	configBar->AddItem(colorItem,P_TOOL_GROUP_NODE);
 	configBar->AddItem(penSize,P_TOOL_GROUP_NODE);
 	configBar->AddItem(nodeShape,P_TOOL_GROUP_NODE);
+	configBar->AddItem(addAttribute,P_TOOL_GROUP_NODE);
 	configBar->AddItem(connectionStyle,P_TOOL_GROUP_CONNECTION);
 	configBar->AddItem(connectionArrows,P_TOOL_GROUP_CONNECTION);
 	configBar->AddItem(grid,P_TOOL_GROUP_VIEW);
@@ -784,6 +788,7 @@ void GraphEditor::AttachedToWindow(void) {
 	connectionStyle->SetTarget(this);
 	connectionArrows->SetTarget(this);
 	nodeShape->SetTarget(this);
+	addAttribute->SetTarget(this);
 	sentToMe	= new BMessenger((BView *)this);
 	BView *parent = myScrollParent->Parent();
 	if (parent) {
@@ -840,6 +845,7 @@ void GraphEditor::DetachedFromWindow(void) {
 				configBar->RemoveItem(connectionStyle);
 				configBar->RemoveItem(connectionArrows);
 				configBar->RemoveItem(nodeShape);
+				configBar->RemoveItem(addAttribute);
 				configBar->RemoveItem(grid);
 				configBar->RemoveItem(guides);
 			}
@@ -1084,8 +1090,13 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		case G_E_ADD_ATTRIBUTE: {
 			// no question first: the attribute appears with a default name
 			// and its label opens for typing (StartPendingAttributeEdit())
-			int32	type	= B_STRING_TYPE;
-			message->FindInt32("type",&type);
+			int32		type	= B_STRING_TYPE;
+			const char	*kind	= NULL;
+			if (message->FindInt32("type",&type) != B_OK) {
+				if ((message->FindString("value",&kind) == B_OK)
+						&& (strcmp(kind,"bool") == 0))
+					type	= B_BOOL_TYPE;
+			}
 			const char	*attributeName	= B_TRANSLATE("Attribute");
 			BString		datadummy("   ");
 			BMessage	*addMessage		= new BMessage(P_C_EXECUTE_COMMAND);
@@ -1683,17 +1694,17 @@ void GraphEditor::UpdateScrollBars()
 
 	BRect		docRect		= doc->Bounds();
 	BRect		scrollRect	= myScrollParent->Bounds();
-	float heightDiff	= docRect.Height()-scrollRect.Height();
-	float widthDiff		= docRect.Width()-scrollRect.Width();
 	float docWidth		= docRect.Width()*scale;
 	float docHeight		= docRect.Height()*scale;
+	float heightDiff	= docHeight-scrollRect.Height();
+	float widthDiff		= docWidth-scrollRect.Width();
 	if (widthDiff<0)
 		widthDiff = 0;
 	if (heightDiff<0)
 			heightDiff = 0;
 	BScrollBar	*sb	= myScrollParent->ScrollBar(B_HORIZONTAL);
 	if (sb != NULL) {
-		sb->SetRange(docRect.left,widthDiff*scale);
+		sb->SetRange(docRect.left*scale,docRect.left*scale+widthDiff);
 		sb->SetProportion(scrollRect.Width()/docWidth);
 		// Steps are 1/8 visible window for small steps
 		//   and 1/2 visible window for large steps
@@ -1702,7 +1713,7 @@ void GraphEditor::UpdateScrollBars()
 
 	sb	= myScrollParent->ScrollBar(B_VERTICAL);
 	if (sb != NULL) {
-		sb->SetRange(docRect.top,heightDiff*scale);
+		sb->SetRange(docRect.top*scale,docRect.top*scale+heightDiff);
 		sb->SetProportion(scrollRect.Height()/docHeight);
 		sb->SetSteps(docHeight / 8.0, docHeight / 2.0);
 	}
@@ -1791,6 +1802,7 @@ void GraphEditor::UpdateFormatItems(void) {
 	colorItem->SetEnabled((node != NULL) || (connection != NULL));
 	penSize->SetEnabled((node != NULL) || (connection != NULL));
 	nodeShape->SetEnabled(node != NULL);
+	addAttribute->SetEnabled(node != NULL);
 	connectionStyle->SetEnabled(connection != NULL);
 	connectionArrows->SetEnabled(connection != NULL);
 

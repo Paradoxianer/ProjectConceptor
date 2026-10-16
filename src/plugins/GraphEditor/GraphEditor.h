@@ -282,6 +282,7 @@ protected:
 			ChoiceToolItem	*connectionStyle;
 			ChoiceToolItem	*connectionArrows;
 			ChoiceToolItem	*nodeShape;
+			ChoiceToolItem	*addAttribute;
 			ColorToolItem	*colorItem;
 			PatternToolItem	*patternItem;
 

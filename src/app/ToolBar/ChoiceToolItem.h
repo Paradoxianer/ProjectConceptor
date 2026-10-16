@@ -57,6 +57,13 @@ public:
 	 */
 			void			SetIconOnly(bool iconOnly);
 
+	/** Turns the field into a menu of actions: picking sends the message
+	 * but marks nothing, and the field always shows icon (not owned) -
+	 * for "add one of these" lists such as attribute types. Implies
+	 * icon-only; call it before adding choices.
+	 */
+			void			SetActionIcon(BBitmap *icon);
+
 	virtual	void			AttachedToToolBar(ToolBar *tb);
 	virtual	void			DetachedFromToolBar(ToolBar *tb);
 
@@ -79,5 +86,6 @@ protected:
 			BPopUpMenu		*menu;
 			BMessage		*baseMessage;
 			bool			iconOnly;
+			BBitmap			*actionIcon;
 };
 #endif

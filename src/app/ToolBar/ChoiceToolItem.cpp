@@ -18,6 +18,7 @@ ChoiceToolItem::ChoiceToolItem(const char *name, BMessage *msg, float width)
 {
 	baseMessage	= msg;
 	iconOnly	= false;
+	actionIcon	= NULL;
 	SetDivider(0);
 }
 
@@ -36,6 +37,14 @@ void ChoiceToolItem::SetIconOnly(bool _iconOnly)
 }
 
 
+void ChoiceToolItem::SetActionIcon(BBitmap *icon)
+{
+	actionIcon	= icon;
+	menu->SetRadioMode(false);
+	SetIconOnly(true);
+}
+
+
 void ChoiceToolItem::Draw(BRect updateRect)
 {
 	BMenuField::Draw(updateRect);
@@ -51,10 +60,13 @@ void ChoiceToolItem::DrawAfterChildren(BRect updateRect)
 	BMenuField::DrawAfterChildren(updateRect);
 	if (!iconOnly)
 		return;
-	IconMenuItem	*marked	= dynamic_cast<IconMenuItem *>(menu->FindMarked());
-	if (marked == NULL)
-		return;
-	BBitmap			*icon	= marked->Icon();
+	BBitmap			*icon	= actionIcon;
+	if (icon == NULL) {
+		IconMenuItem	*marked	= dynamic_cast<IconMenuItem *>(menu->FindMarked());
+		if (marked == NULL)
+			return;
+		icon	= marked->Icon();
+	}
 	if (icon == NULL)
 		return;
 	// left-align in the field's own box, clear of the pop-up marker
@@ -81,7 +93,7 @@ void ChoiceToolItem::AddChoice(const char *label, const char *value, BBitmap *ic
 	itemMessage->AddString("value",value);
 	IconMenuItem	*item	= new IconMenuItem(icon,label,itemMessage);
 	menu->AddItem(item);
-	if (menu->CountItems() == 1)
+	if ((menu->CountItems() == 1) && (actionIcon == NULL))
 		item->SetMarked(true);
 	if (iconOnly)
 		menu->Superitem()->SetLabel("");

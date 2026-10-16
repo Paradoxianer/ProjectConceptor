@@ -359,6 +359,38 @@ def icon_topo_twopi():
 
 
 # name -> (where the resource goes, builder)
+def attribute_rows(x0, y0, x1, y1):
+    """A card with a label and a value line per row."""
+    shapes = outlined(PAPER(y0, y1), rounded_rect(x0, y0, x1, y1, 5))
+    ink = Solid(rgba('5b6573'))
+    for y in (y0 + 13, y0 + 27):
+        shapes.append(Shape(ink, line((x0 + 8, y), (x0 + 20, y)),
+            stroke=(4.5, CAP_ROUND, JOIN_ROUND)))
+        shapes.append(Shape(Solid(rgba('aab3c0')), line((x0 + 27, y), (x1 - 8, y)),
+            stroke=(4.5, CAP_ROUND, JOIN_ROUND)))
+    return shapes
+
+
+def icon_attribute():
+    return attribute_rows(4, 8, 54, 46) + plus_badge(46, 46, 14)
+
+
+def icon_attribute_text():
+    shapes = outlined(PAPER(10, 54), rounded_rect(6, 10, 58, 54, 7))
+    ink = Solid(rgba('3b4452'))
+    for y, right in ((24, 50), (34, 50), (44, 36)):
+        shapes.append(Shape(ink, line((14, y), (right, y)),
+            stroke=(4.5, CAP_ROUND, JOIN_ROUND)))
+    return shapes
+
+
+def icon_attribute_bool():
+    shapes = outlined(PAPER(8, 56), rounded_rect(8, 8, 56, 56, 9))
+    shapes += stroked(GREEN(18, 46), line((18, 33), (28, 45), (46, 19)), 8,
+        outline=False)
+    return shapes
+
+
 ICONS = {
     'new':			('app', icon_new),
     'open':			('app', icon_open),
@@ -378,6 +410,9 @@ ICONS = {
     'arrow-source':	('GraphEditor', lambda: arrows_icon(True, False)),
     'arrow-both':	('GraphEditor', lambda: arrows_icon(True, True)),
     'arrow-none':	('GraphEditor', lambda: arrows_icon(False, False)),
+    'attribute':	('GraphEditor', icon_attribute),
+    'attribute-text':	('GraphEditor', icon_attribute_text),
+    'attribute-bool':	('GraphEditor', icon_attribute_bool),
     'layout':		('LayoutEditor', icon_auto_layout),
     'dir-tb':		('LayoutEditor', tree),
     'dir-lr':		('LayoutEditor', lambda: tree(3)),
