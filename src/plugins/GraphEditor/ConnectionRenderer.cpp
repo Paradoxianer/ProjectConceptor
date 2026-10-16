@@ -188,6 +188,9 @@ void ConnectionRenderer::InvalidateEndpoint(Renderer *removed) {
 }
 
 void ConnectionRenderer::CalcLine() {
+	// the head grows with the line, or a thick line outgrows it
+	const float	lineWidth	= (penSize <= 1.0f) ? editor->Style().connectionWidth : penSize;
+	const float	arrowSize	= fmax(::arrowSize,lineWidth*2.5f+2.0f);
 	if (from != NULL &&  to != NULL)
 	{
 		BRect	*fromRect	= new BRect(from->Frame());
@@ -306,6 +309,7 @@ bool ConnectionRenderer::Caught(BPoint where){
 void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
 		const GraphStyle	&style	= editor->Style();
 		drawOn->SetPenSize(LineWidth(style));
+		drawOn->SetLineMode(B_ROUND_CAP,B_ROUND_JOIN);
 		drawOn->SetHighColor(LineColor(style));
 		drawOn->StrokeLine(	fromPoint,toPoint);
 		DrawArrows(drawOn);
@@ -314,6 +318,7 @@ void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
 void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
 	const GraphStyle	&style	= editor->Style();
 	drawOn->SetPenSize(LineWidth(style));
+	drawOn->SetLineMode(B_ROUND_CAP,B_ROUND_JOIN);
 	drawOn->SetHighColor(LineColor(style));
 	bezier=BShape();
 	bezier.MoveTo(fromPoint);
@@ -343,6 +348,7 @@ void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
 void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
 	const GraphStyle	&style	= editor->Style();
 	drawOn->SetPenSize(LineWidth(style));
+	drawOn->SetLineMode(B_ROUND_CAP,B_ROUND_JOIN);
 	drawOn->SetHighColor(LineColor(style));
 	drawOn->StrokeLine(	fromPoint,firstBend);
 	drawOn->StrokeLine(	firstBend,secondBend);
