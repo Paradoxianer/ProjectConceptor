@@ -111,6 +111,11 @@ void GraphEditor::Init(void) {
 	currentCursor	= B_CURSOR_ID_SYSTEM_DEFAULT;
 	pendingStartEditNode	= NULL;
 	activeTextEditor		= NULL;
+	nodeColorTargets		= false;
+	fillStandardShown.red	= 255;
+	fillStandardShown.green	= 255;
+	fillStandardShown.blue	= 255;
+	fillStandardShown.alpha	= 255;
 	rendersensitv	= new BRegion();
 	renderString	= new char[30];
 	key_hold		= false;
@@ -162,6 +167,8 @@ void GraphEditor::Init(void) {
 	//standart Color
 	rgb_color	fillColor			= {152, 180, 190, 255};
 	patternMessage->AddInt32("FillColor",*(int32 *)&fillColor);
+	// the band on a node; the fill above stands for the style's card
+	patternMessage->AddInt32("HighlightColor",*(int32 *)&fillColor);
 	rgb_color	borderColor			= {0, 0, 0, 255};
 	patternMessage->AddInt32("BorderColor",*(int32 *)&borderColor);
 	patternMessage->AddFloat("PenSize",1.0);
@@ -996,6 +1003,11 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		case G_E_COLOR_CHANGED: {
 			// fill, border or text - whatever the picker colors right now
 			rgb_color	tmpNewColor =	colorItem->GetColor();
+			// the card's standard shown in the picker is stored as the
+			// standard fill, which follows the style (dark or light)
+			if (nodeColorTargets && (strcmp(colorItem->TargetField(),"FillColor") == 0)
+					&& (tmpNewColor == fillStandardShown))
+				GetStandartPattern()->FindInt32("FillColor",(int32 *)&tmpNewColor);
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changeColorMessage->AddString("Command::Name","ChangeValue");
 			changeColorMessage->AddBool(P_C_NODE_SELECTED,true);
@@ -1168,9 +1180,10 @@ void GraphEditor::InsertObject(BPoint where,bool deselect) {
 	BMessage	*newObject		= new BMessage(*nodeMessage);
 	BMessage	*newFont		= new BMessage(*fontMessage);
 	BMessage	*newPattern		= new BMessage(*patternMessage);
-	rgb_color	tmpNewColor =	colorItem->ColorFor("FillColor");
-
+	rgb_color	tmpNewColor	= NewNodeColor("FillColor");
 	newPattern->ReplaceInt32("FillColor",*(int32 *)&tmpNewColor);
+	tmpNewColor	= NewNodeColor("HighlightColor");
+	newPattern->ReplaceInt32("HighlightColor",*(int32 *)&tmpNewColor);
 	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
 
 	BMessage	*selectMessage	= new BMessage();
@@ -1482,13 +1495,15 @@ BMessage *GraphEditor::GenerateInsertCommand(uint32 newWhat, bool connected)
 	BMessage	*data		    	= new BMessage();
 	int32		i                   = 0;
 	status_t    err                 = B_OK;
-	rgb_color	tmpColor			=colorItem->ColorFor("FillColor");
+	rgb_color	tmpColor			= NewNodeColor("FillColor");
+	rgb_color	highlight			= NewNodeColor("HighlightColor");
 	BPoint      where;
 	
 
     data->AddString(P_C_NODE_NAME,B_TRANSLATE("Untitled"));
     //insert new Node here*/
 	newPattern->ReplaceInt32("FillColor",*(int32 *)&tmpColor);
+	newPattern->ReplaceInt32("HighlightColor",*(int32 *)&highlight);
 	newPattern->ReplaceFloat("PenSize",penSize->GetValue());
     //** we need a good algorithm to find the best rect for this new node we just put it at 100,100**/
 	where = BPoint(100,100);
@@ -1777,6 +1792,19 @@ void GraphEditor::ZoomToFit(void) {
 }
 
 
+rgb_color GraphEditor::NewNodeColor(const char *field) {
+	// the picker's color while it shows a node's, else the standard
+	rgb_color	color	= {0,0,0,255};
+	patternMessage->FindInt32(field,(int32 *)&color);
+	rgb_color	picked;
+	if (!nodeColorTargets || !colorItem->FindColor(field,&picked))
+		return color;
+	if ((strcmp(field,"FillColor") == 0) && (picked == fillStandardShown))
+		return color;
+	return picked;
+}
+
+
 void GraphEditor::UpdateFormatItems(void) {
 	BMessage	*node		= NULL;
 	BMessage	*connection	= NULL;
@@ -1821,11 +1849,25 @@ void GraphEditor::UpdateFormatItems(void) {
 		// color; a field a node lacks shows the standard
 		BMessage	*standard	= GetStandartPattern();
 		colorItem->ClearTargets();
+		nodeColorTargets	= (node != NULL);
 		if (node != NULL) {
-			const char	*labels[]	= { B_TRANSLATE("Fill"), B_TRANSLATE("Border"),
+			// the fill's standard is the style's card (or group area)
+			fillStandardShown	= (node->what == P_C_CLASS_TYPE)
+				? style.cardFill : style.groupFill;
+			rgb_color	standardFill	= {0,0,0,255};
+			standard->FindInt32("FillColor",(int32 *)&standardFill);
+			rgb_color	fill			= standardFill;
+			pattern.FindInt32("FillColor",(int32 *)&fill);
+			if ((fill.red == standardFill.red) && (fill.green == standardFill.green)
+					&& (fill.blue == standardFill.blue))
+				fill	= fillStandardShown;
+			colorItem->AddTarget(B_TRANSLATE("Fill"),"FillColor",fill,
+				fillStandardShown,true);
+			// groups have no band
+			const char	*labels[]	= { B_TRANSLATE("Highlight"), B_TRANSLATE("Border"),
 				B_TRANSLATE("Text") };
-			const char	*fields[]	= { "FillColor", "BorderColor", "HighColor" };
-			for (int32 i = 0; i < 3; i++) {
+			const char	*fields[]	= { "HighlightColor", "BorderColor", "HighColor" };
+			for (int32 i = (node->what == P_C_CLASS_TYPE) ? 0 : 1; i < 3; i++) {
 				rgb_color	standardColor	= {0,0,0,255};
 				standard->FindInt32(fields[i],(int32 *)&standardColor);
 				rgb_color	current			= standardColor;

@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	3788745119
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	3249386583
 Line	GraphEditor		Linija
 Delete	AttributeRenderer		Izbriši
 Triangle	GraphEditor		Trokut
@@ -39,6 +39,7 @@ At source	GraphEditor		Na izvoru
 Angular	GraphEditor		Kutna
 Attribute	GraphEditor		Atribut
 Hexagon	GraphEditor		Šesterokut
+Highlight	GraphEditor		Naglasak
 At target	GraphEditor		Na odredištu
 Shape	GraphEditor		Oblik
 Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove

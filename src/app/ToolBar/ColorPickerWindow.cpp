@@ -51,6 +51,21 @@ static const rgb_color kPalette[PW_PALETTE_SIZE] = {
 	{ 107, 114, 128, 255 }	// slate
 };
 
+// the same hues as soft tints: a card background that dark text still
+// reads on
+static const rgb_color kLightPalette[PW_PALETTE_SIZE] = {
+	{ 221, 233, 250, 255 },	// blue
+	{ 214, 240, 240, 255 },	// teal
+	{ 219, 240, 228, 255 },	// green
+	{ 234, 244, 214, 255 },	// lime
+	{ 252, 244, 214, 255 },	// yellow
+	{ 252, 234, 212, 255 },	// orange
+	{ 250, 222, 220, 255 },	// red
+	{ 250, 226, 237, 255 },	// pink
+	{ 233, 227, 248, 255 },	// purple
+	{ 230, 232, 236, 255 }	// slate
+};
+
 
 // Closes the window on Escape - installed as a common filter so it sees
 // the key before any child control's own KeyDown handling. Marks the
@@ -85,6 +100,7 @@ ColorPickerWindow::ColorPickerWindow(BRect frame,
 		B_NOT_ZOOMABLE | B_NOT_RESIZABLE | B_ASYNCHRONOUS_CONTROLS),
 	fTargetCount(targetCount < PW_MAX_TARGETS ? targetCount : PW_MAX_TARGETS),
 	fCurrentTarget(0),
+	fHistoryCount(0),
 	fMessage(message),
 	fTarget(target),
 	fCancelled(false)
@@ -152,27 +168,28 @@ ColorPickerWindow::ColorPickerWindow(BRect frame,
 	fStandardSwatch	= new ColorSwatchView("ColorPickerWindow::standard",
 		new BMessage(PW_PALETTE_CLICKED), this, fTargets[fCurrentTarget].standard,
 		swatchWidth - 1, kSwatchHeight);
-	fStandardSwatch->SetMarked(true);
 	fStandardSwatch->SetToolTip(B_TRANSLATE("Standard"));
 	fStandardSwatch->MoveTo(kMargin,y);
 	background->AddChild(fStandardSwatch);
 	for (int32 i = 0; i < PW_PALETTE_SIZE; i++) {
-		ColorSwatchView	*swatch	= new ColorSwatchView("ColorPickerWindow::palette",
+		fPaletteSwatch[i]	= new ColorSwatchView("ColorPickerWindow::palette",
 			new BMessage(PW_PALETTE_CLICKED), this, kPalette[i],
 			swatchWidth - 1, kSwatchHeight);
-		swatch->MoveTo(kMargin + (i+1)*swatchWidth,y);
-		background->AddChild(swatch);
+		fPaletteSwatch[i]->MoveTo(kMargin + (i+1)*swatchWidth,y);
+		background->AddChild(fPaletteSwatch[i]);
 	}
+	_ShowPalette();
 	y	+= kSwatchHeight + kMargin;
 
 	// recently used colors, only once there are any
 	int32	shown	= (historyCount < PW_HISTORY_SIZE) ? historyCount : PW_HISTORY_SIZE;
+	fHistoryCount	= shown;
 	for (int32 i = 0; i < shown; i++) {
-		ColorSwatchView	*swatch	= new ColorSwatchView("ColorPickerWindow::history",
+		fHistorySwatch[i]	= new ColorSwatchView("ColorPickerWindow::history",
 			new BMessage(PW_PALETTE_CLICKED), this, history[i],
 			swatchWidth - 1, kSwatchHeight);
-		swatch->MoveTo(kMargin + i*swatchWidth,y);
-		background->AddChild(swatch);
+		fHistorySwatch[i]->MoveTo(kMargin + i*swatchWidth,y);
+		background->AddChild(fHistorySwatch[i]);
 	}
 	if (shown > 0)
 		y	+= kSwatchHeight + kMargin;
@@ -182,12 +199,13 @@ ColorPickerWindow::ColorPickerWindow(BRect frame,
 	fColorControl->SetTarget(this);
 	background->AddChild(fColorControl);
 
-	// alpha: a fifth ramp right below BColorControl's four, its field in
-	// the R/G/B column
-	float	alphaTop		= y + blueText->Frame().top + rowHeight;
+	// alpha: a fifth ramp below BColorControl, its field in the R/G/B
+	// column. Not inside the control's frame: there the control gets the
+	// clicks and the slider can't be dragged.
 	float	alphaBarRight	= textFieldLeft - kTextFieldsHSpacing;
 	float	sliderHeight	= rampHeight + 2*kBevelSpacing;
-	float	sliderTop		= y + 4*rampHeight + 2*kBevelSpacing + kGap;
+	float	sliderTop		= y + height + kGap;
+	float	alphaTop		= sliderTop + (sliderHeight - textFieldHeight)/2;
 	fAlphaSlider = new AlphaSlider(B_HORIZONTAL, new BMessage(PW_ALPHA_CHANGED));
 	fAlphaSlider->ResizeTo(alphaBarRight - 1, sliderHeight);
 	fAlphaSlider->MoveTo(1, sliderTop);
@@ -213,7 +231,8 @@ ColorPickerWindow::ColorPickerWindow(BRect frame,
 	sprintf(string, "%d", color.alpha);
 	fAlphaText->SetText(string);
 	background->AddChild(fAlphaText);
-	y	= alphaTop + textFieldHeight + kGap;
+	y	= max_c(alphaTop + textFieldHeight, sliderTop + sliderHeight) + kGap;
+	_MarkSwatch(color);
 
 	background->ResizeTo(width,y);
 	ResizeTo(width,y);
@@ -317,6 +336,37 @@ ColorPickerWindow::_ShowColor(rgb_color color)
 	char	string[4];
 	sprintf(string, "%d", color.alpha);
 	fAlphaText->SetText(string);
+	_MarkSwatch(color);
+}
+
+
+void
+ColorPickerWindow::_ShowPalette(void)
+{
+	const rgb_color	*palette	= fTargets[fCurrentTarget].light
+		? kLightPalette : kPalette;
+	for (int32 i = 0; i < PW_PALETTE_SIZE; i++)
+		fPaletteSwatch[i]->SetColor(palette[i]);
+}
+
+
+// the ring sits on the swatch of the color shown, if there is one
+void
+ColorPickerWindow::_MarkSwatch(rgb_color color)
+{
+	bool	found	= false;
+	ColorSwatchView	*swatches[1 + PW_PALETTE_SIZE + PW_HISTORY_SIZE];
+	int32	count	= 0;
+	swatches[count++]	= fStandardSwatch;
+	for (int32 i = 0; i < PW_PALETTE_SIZE; i++)
+		swatches[count++]	= fPaletteSwatch[i];
+	for (int32 i = 0; i < fHistoryCount; i++)
+		swatches[count++]	= fHistorySwatch[i];
+	for (int32 i = 0; i < count; i++) {
+		bool	match	= !found && (swatches[i]->Color() == color);
+		swatches[i]->SetMarked(match);
+		found	= found || match;
+	}
 }
 
 
@@ -338,8 +388,9 @@ ColorPickerWindow::_SelectTarget(int32 index)
 	_Post(&changed);
 
 	rgb_color	color	= fTargets[index].color;
-	_ShowColor(color);
 	fStandardSwatch->SetColor(fTargets[index].standard);
+	_ShowPalette();
+	_ShowColor(color);
 }
 
 
@@ -347,6 +398,7 @@ void
 ColorPickerWindow::_ReportColor()
 {
 	rgb_color	color	= Color();
+	_MarkSwatch(color);
 	if (fMessage == NULL)
 		return;
 	BMessage	report(*fMessage);

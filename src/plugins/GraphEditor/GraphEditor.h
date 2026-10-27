@@ -172,6 +172,8 @@ public:
 			 * selection and show the first selected one's values;
 			 * needs the document locked */
 			void			UpdateFormatItems(void);
+			/** the color a new node gets for a pattern field */
+			rgb_color		NewNodeColor(const char *field);
 			/** places the context bar above the selected nodes, or hides
 			 * it when there are none or a drag is running */
 			void			UpdateContextBar(void);
@@ -283,6 +285,10 @@ protected:
 			ChoiceToolItem	*connectionArrows;
 			ChoiceToolItem	*nodeShape;
 			ChoiceToolItem	*addAttribute;
+			// the color picker shows a node's colors, not a connection's
+			bool			nodeColorTargets;
+			// what the picker shows as the fill's standard
+			rgb_color		fillStandardShown;
 			ColorToolItem	*colorItem;
 			PatternToolItem	*patternItem;
 

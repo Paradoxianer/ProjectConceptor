@@ -97,9 +97,12 @@ virtual		const char		*GetName(void){return tName;};
 			 * chosen target stays chosen across ClearTargets() by field. */
 			void			ClearTargets(void);
 			void			AddTarget(const char *label, const char *field,
-								rgb_color color, rgb_color standard);
+								rgb_color color, rgb_color standard,
+								bool light = false);
 			/** the field a committed or previewed color is meant for */
 			const char*		TargetField(void) const;
+			/** the color of the target for field, if there is one */
+			bool			FindColor(const char *field, rgb_color *color) const;
 			/** the color shown for field, else the committed one */
 			rgb_color		ColorFor(const char *field) const;
 virtual		void			SetState(uint32 newState){state=newState;};

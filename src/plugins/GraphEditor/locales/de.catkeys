@@ -1,4 +1,4 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	3788745119
+1	German	application/x-vnd.ProjectConceptor-plugin	3249386583
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Löschen
 Triangle	GraphEditor		Dreieck
@@ -39,6 +39,7 @@ At source	GraphEditor		Am Anfang
 Angular	GraphEditor		Eckig
 Attribute	GraphEditor		Attribut
 Hexagon	GraphEditor		Sechseck
+Highlight	GraphEditor		Akzent
 At target	GraphEditor		Am Ende
 Shape	GraphEditor		Form
 Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten

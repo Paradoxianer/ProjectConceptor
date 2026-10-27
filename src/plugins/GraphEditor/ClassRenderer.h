@@ -99,6 +99,7 @@ protected:
 				void		DrawHandles(BView *drawOn, const GraphStyle &style);
 				/** the card's border: a custom border color, else the style's */
 				rgb_color	CardBorderColor(const GraphStyle &style);
+				rgb_color	CardFillColor(const GraphStyle &style);
 				/** a custom text color, else the style's */
 				rgb_color	TextColor(const GraphStyle &style);
 				void		AdjustParents(BMessage* theParent, BMessage *command);
@@ -111,6 +112,10 @@ protected:
 	//++++++++++ClassSettings++++++++++
 		float				xRadius,yRadius;
 		rgb_color			fillColor,borderColor;
+		// the band along one edge; fillColor is the card itself
+		rgb_color			highlightColor;
+		bool				hasPreviewHighlightColor;
+		rgb_color			previewHighlightColor;
 		bool				hasPreviewFillColor;
 		rgb_color			previewFillColor;
 		bool				hasPreviewBorderColor;

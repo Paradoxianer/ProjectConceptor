@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	3788745119
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	3249386583
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Elimine
 Triangle	GraphEditor		Triangul
@@ -39,6 +39,7 @@ At source	GraphEditor		Te origjin
 Angular	GraphEditor		Angolâr
 Attribute	GraphEditor		Atribût
 Hexagon	GraphEditor		Esagon
+Highlight	GraphEditor		Acent
 At target	GraphEditor		Te destinazion
 Shape	GraphEditor		Forme
 Border pen size for selected nodes	GraphEditor		Spessôr dal ôr pai grops selezionâts

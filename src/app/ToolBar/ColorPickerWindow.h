@@ -29,21 +29,23 @@ const int32 PW_PALETTE_SIZE = 10;
 // the actual history; this window only displays up to this many.
 const int32 PW_HISTORY_SIZE = 11;
 
-// what a color is picked for: a node's fill, border or text, a
-// connection's line
-const int32 PW_MAX_TARGETS = 3;
+// what a color is picked for: a node's fill, highlight, border or text,
+// a connection's line
+const int32 PW_MAX_TARGETS = 4;
 
 struct ColorPickerTarget {
 	BString		label;
 	rgb_color	color;
 	// what "Standard" resets to
 	rgb_color	standard;
+	// soft tints instead of the strong palette, for backgrounds
+	bool		light;
 };
 
 /**
  * @class ColorPickerWindow
  *
- * Popup window: a tab per target (fill, border, text) when there is more
+ * Popup window: a tab per target (fill, highlight, border, text) when there is more
  * than one, a row of curated swatches led by the target's standard color,
  * the recently used colors, a stock BColorControl and an AlphaSlider
  * drawn like its ramps. The picked color shows live on the selection.
@@ -84,12 +86,17 @@ private:
 			void			_ShowColor(rgb_color color);
 			void			_SelectTarget(int32 index);
 			void			_Post(BMessage *message);
+			void			_ShowPalette(void);
+			void			_MarkSwatch(rgb_color color);
 
 			BColorControl	*fColorControl;
 			AlphaSlider		*fAlphaSlider;
 			BTextControl	*fAlphaText;
 			BButton			*fTargetButton[PW_MAX_TARGETS];
 			ColorSwatchView	*fStandardSwatch;
+			ColorSwatchView	*fPaletteSwatch[PW_PALETTE_SIZE];
+			ColorSwatchView	*fHistorySwatch[PW_HISTORY_SIZE];
+			int32			fHistoryCount;
 			ColorPickerTarget	fTargets[PW_MAX_TARGETS];
 			int32			fTargetCount;
 			int32			fCurrentTarget;

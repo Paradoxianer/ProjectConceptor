@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	3788745119
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	3249386583
 Line	GraphEditor		Linje
 Delete	AttributeRenderer		Radera
 Triangle	GraphEditor		Triangel
@@ -39,6 +39,7 @@ At source	GraphEditor		Vid källan
 Angular	GraphEditor		Vinklad
 Attribute	GraphEditor		Attribut
 Hexagon	GraphEditor		Hexagon
+Highlight	GraphEditor		Accent
 At target	GraphEditor		Vid målet
 Shape	GraphEditor		Form
 Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder

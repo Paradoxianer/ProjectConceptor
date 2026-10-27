@@ -80,6 +80,7 @@ void ClassRenderer::Init()
 	penSize						= 1.0;
 	connecting					= 0;
 	hasPreviewFillColor			= false;
+	hasPreviewHighlightColor	= false;
 	hasPreviewBorderColor		= false;
 	hasPreviewTextColor			= false;
 	animating					= false;
@@ -288,6 +289,18 @@ rgb_color ClassRenderer::TextColor(const GraphStyle &style) {
 	return textColor;
 }
 
+rgb_color ClassRenderer::CardFillColor(const GraphStyle &style) {
+	if (hasPreviewFillColor)
+		return previewFillColor;
+	// like the border: the standard fill means the style's card
+	rgb_color	standard;
+	if ((editor->GetStandartPattern()->FindInt32("FillColor",(int32 *)&standard) == B_OK)
+		&& (standard.red == fillColor.red) && (standard.green == fillColor.green)
+		&& (standard.blue == fillColor.blue))
+		return style.cardFill;
+	return fillColor;
+}
+
 rgb_color ClassRenderer::CardBorderColor(const GraphStyle &style) {
 	if (hasPreviewBorderColor)
 		return previewBorderColor;
@@ -317,7 +330,8 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 
 	const GraphStyle	&style		= editor->Style();
 	const float			radius		= style.cornerRadius;
-	rgb_color			nodeColor	= hasPreviewFillColor ? previewFillColor : fillColor;
+	rgb_color			bandColor	= hasPreviewHighlightColor ? previewHighlightColor : highlightColor;
+	rgb_color			cardColor	= CardFillColor(style);
 	bool				fitIn		= true;
 	drawOn->SetFont(font);
 
@@ -349,13 +363,14 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	shape.Outline(radius,&outline);
 	shape.AccentBand(outline,style.stripeHeight,&band);
 	if (outline.size() >= 3) {
-		drawOn->SetHighColor(style.cardFill);
+		drawOn->SetHighColor(cardColor);
 		drawOn->FillPolygon(&outline[0],outline.size());
 		if (band.size() >= 3) {
-			drawOn->SetHighColor(nodeColor);
+			drawOn->SetHighColor(bandColor);
 			drawOn->FillPolygon(&band[0],band.size());
 		}
-		drawOn->SetPenSize(1.0);
+		// older documents carry a pen size of 0
+		drawOn->SetPenSize(penSize < 1.0f ? 1.0f : penSize);
 		drawOn->SetHighColor(CardBorderColor(style));
 		drawOn->StrokePolygon(&outline[0],outline.size(),true);
 	}
@@ -367,7 +382,7 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	}
 
 	rgb_color	text	= TextColor(style);
-	rgb_color	muted	= GraphColors::Mix(text,style.cardFill,0.35);
+	rgb_color	muted	= GraphColors::Mix(text,cardColor,0.35);
 	if ((text.red == style.text.red) && (text.green == style.text.green)
 			&& (text.blue == style.text.blue))
 		muted	= style.mutedText;
@@ -451,6 +466,17 @@ void ClassRenderer::ValueChanged() {
 	}
 	container->FindMessage(P_C_NODE_DATA,data);
 	pattern->FindInt32("FillColor",(int32 *)&fillColor);
+	if ((container->what == P_C_CLASS_TYPE)
+			&& (pattern->FindInt32("HighlightColor",(int32 *)&highlightColor) != B_OK)) {
+		// before HighlightColor the fill color was the band and the card
+		// was always the style's: keep that look, and give ChangeValue
+		// a field to replace
+		highlightColor	= fillColor;
+		editor->GetStandartPattern()->FindInt32("FillColor",(int32 *)&fillColor);
+		pattern->AddInt32("HighlightColor",*(int32 *)&highlightColor);
+		pattern->ReplaceInt32("FillColor",*(int32 *)&fillColor);
+		container->ReplaceMessage(P_C_NODE_PATTERN,pattern);
+	}
 	pattern->FindInt32("BorderColor",(int32 *)&borderColor);
 	if (pattern->FindInt32("HighColor",(int32 *)&textColor) != B_OK)
 		editor->GetStandartPattern()->FindInt32("HighColor",(int32 *)&textColor);
@@ -732,6 +758,9 @@ void ClassRenderer::SetPreviewColor(const char *field, rgb_color color) {
 	if (strcmp(field,"FillColor") == 0) {
 		hasPreviewFillColor		= true;
 		previewFillColor		= color;
+	} else if (strcmp(field,"HighlightColor") == 0) {
+		hasPreviewHighlightColor	= true;
+		previewHighlightColor		= color;
 	} else if (strcmp(field,"BorderColor") == 0) {
 		hasPreviewBorderColor	= true;
 		previewBorderColor		= color;
@@ -743,6 +772,7 @@ void ClassRenderer::SetPreviewColor(const char *field, rgb_color color) {
 
 void ClassRenderer::ClearPreviewColor(void) {
 	hasPreviewFillColor		= false;
+	hasPreviewHighlightColor	= false;
 	hasPreviewBorderColor	= false;
 	hasPreviewTextColor		= false;
 }

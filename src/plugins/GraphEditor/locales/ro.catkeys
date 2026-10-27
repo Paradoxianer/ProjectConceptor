@@ -1,4 +1,4 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	3788745119
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	3249386583
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Șterge
 Triangle	GraphEditor		Triunghi
@@ -39,6 +39,7 @@ At source	GraphEditor		La sursă
 Angular	GraphEditor		Unghiulară
 Attribute	GraphEditor		Atribut
 Hexagon	GraphEditor		Hexagon
+Highlight	GraphEditor		Accent
 At target	GraphEditor		La destinație
 Shape	GraphEditor		Formă
 Border pen size for selected nodes	GraphEditor		Grosimea marginii pentru nodurile selectate

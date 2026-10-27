@@ -236,13 +236,14 @@ void ColorToolItem::ClearTargets(void)
 }
 
 void ColorToolItem::AddTarget(const char *label, const char *field,
-	rgb_color color, rgb_color standard)
+	rgb_color color, rgb_color standard, bool light)
 {
 	if (targetCount >= PW_MAX_TARGETS)
 		return;
 	targets[targetCount].label		= label;
 	targets[targetCount].color		= color;
 	targets[targetCount].standard	= standard;
+	targets[targetCount].light		= light;
 	targetFields[targetCount]		= field;
 	if (keepTarget == field)
 		currentTarget	= targetCount;
@@ -264,6 +265,17 @@ rgb_color ColorToolItem::ColorFor(const char *field) const
 			return targets[i].color;
 	}
 	return value;
+}
+
+bool ColorToolItem::FindColor(const char *field, rgb_color *color) const
+{
+	for (int32 i = 0; i < targetCount; i++) {
+		if (targetFields[i] == field) {
+			*color	= targets[i].color;
+			return true;
+		}
+	}
+	return false;
 }
 
 void ColorToolItem::ShowColor(rgb_color newColor)
@@ -352,6 +364,7 @@ void ColorToolItem::MessageReceived(BMessage *message)
 				ColorPickerTarget	only[1];
 				only[0].color		= value;
 				only[0].standard	= value;
+				only[0].light		= false;
 				pickerWindow = new ColorPickerWindow(frame,
 					new BMessage(CTI_SWATCH_CLICKED),this,
 					targetCount > 0 ? targets : only,
