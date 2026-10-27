@@ -82,7 +82,11 @@ void StringRenderer::MouseDown(BPoint where,int32 buttons, int32 clicks,int32 mo
 	// completely unrelated redraw with no obvious link back to renaming.
 	TextEditorControl	*editer	= new TextEditorControl(textRect,"StringEditor",new BMessage(*changeMessage),B_FOLLOW_LEFT|B_FOLLOW_TOP);
 	editer->SetTarget(editor->BelongTo());
-	editer->SetScale(editor->Scale());
+	// the control is not scaled itself: BTextView invalidates and caches
+	// in unscaled coordinates, which left ghost cursors and clipped text
+	BFont	zoomed	= *editorFont;
+	zoomed.SetSize(zoomed.Size()*editor->Scale());
+	editer->SetFontAndColor(&zoomed);
 	editor->AddChild(editer);
 	editer->SetText(*myString);
 	editer->MakeFocus(true);

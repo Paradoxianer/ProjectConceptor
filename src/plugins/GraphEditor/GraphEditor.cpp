@@ -1739,10 +1739,18 @@ const char* GraphEditor::TabLabel(void)
 void GraphEditor::SetZoom(float newScale) {
 	if (newScale <= 0)
 		return;
+	// an open edit box is placed for the old zoom
+	if (activeTextEditor != NULL)
+		activeTextEditor->Invoke();
+	// the document point in the middle of the view stays in the middle
+	BRect	visible		= Bounds();
+	BPoint	center((visible.left+visible.Width()/2)/scale,
+		(visible.top+visible.Height()/2)/scale);
 	scale	= newScale;
 	if (scaleMenu->Superitem() != NULL)
 		scaleMenu->Superitem()->SetLabel(Zoom::Label(scale).String());
 	UpdateScrollBars();
+	ScrollTo(center.x*scale-visible.Width()/2,center.y*scale-visible.Height()/2);
 	Invalidate();
 }
 
