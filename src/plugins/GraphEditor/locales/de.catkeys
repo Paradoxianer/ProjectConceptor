@@ -1,52 +1,48 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	4164727266
+1	German	application/x-vnd.ProjectConceptor-plugin	3788745119
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Löschen
 Triangle	GraphEditor		Dreieck
+Diamond	GraphEditor		Raute
 Connection	GraphEditor		Verbindung
+Grid	GraphEditor		Gitter
 Fit	GraphEditor		Einpassen
 Fill pattern for selected nodes	GraphEditor		Füllmuster für ausgewählte Knoten
-{0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# Verbindung} other{# Verbindungen}}
-None	GraphEditor		Keine
-Arrows	GraphEditor		Pfeile
-OK	GraphEditor		OK
-Rounded rectangle	GraphEditor		Abgerundetes Rechteck
-Fill	GraphEditor		Ausfüllen
-Border	GraphEditor		Rand
-+ Text	GraphEditor		+ Text
-Straight	GraphEditor		Gerade
-Shape of the selected nodes	GraphEditor		Form der ausgewählten Knoten
-Attribute	GraphEditor		Attribut
-Untitled	GraphEditor		Unbenannt
-Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
-Graph	GraphEditor		Graph
-Cancel	GraphEditor		Abbrechen
-Diamond	GraphEditor		Raute
-Grid	GraphEditor		Gitter
 Toggle grid	GraphEditor		Raster ein/aus
-Input attribute name	GraphEditor		Attributnamen eingeben
+{0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# Verbindung} other{# Verbindungen}}
 Text	GraphEditor		Text
+Add an attribute to the selected nodes	GraphEditor		Attribut zu den ausgewählten Knoten hinzufügen
 Position %d, %d · Size %d × %d	GraphEditor		Position %d, %d · Größe %d × %d
+None	GraphEditor		Keine
 Group	GraphEditor		Gruppieren
 Parallelogram	GraphEditor		Parallelogramm
 Toggle smart alignment guides	GraphEditor		Intelligente Ausrichtungshilfen ein/aus
+Yes/No	GraphEditor		Ja/Nein
 Ellipse	GraphEditor		Ellipse
+Arrows	GraphEditor		Pfeile
 No selection	GraphEditor		Keine Auswahl
 Rounded	GraphEditor		Abgerundet
 Pen size	GraphEditor		Stiftgröße
 Pointer %d, %d	GraphEditor		Zeiger %d, %d
-+ Yes/No	GraphEditor		+ Ja/Nein
 Note	GraphEditor		Notiz
+Rounded rectangle	GraphEditor		Abgerundetes Rechteck
 Fill color for selected nodes	GraphEditor		Füllfarbe für ausgewählte Knoten
 Both ends	GraphEditor		Beide Enden
-Rectangle	GraphEditor		Rechteck
+Fill	GraphEditor		Ausfüllen
 {0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# Knoten} other{# Knoten}}
+Rectangle	GraphEditor		Rechteck
+Border	GraphEditor		Rand
 Pattern	GraphEditor		Muster
 Guides	GraphEditor		Hilfslinien
+Straight	GraphEditor		Gerade
+Shape of the selected nodes	GraphEditor		Form der ausgewählten Knoten
 At source	GraphEditor		Am Anfang
 Angular	GraphEditor		Eckig
-Name	GraphEditor		Name
+Attribute	GraphEditor		Attribut
 Hexagon	GraphEditor		Sechseck
 At target	GraphEditor		Am Ende
 Shape	GraphEditor		Form
+Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
+Untitled	GraphEditor		Unbenannt
+Graph	GraphEditor		Graph
 Which ends of the selected connections carry an arrow	GraphEditor		An welchen Enden die ausgewählten Verbindungen einen Pfeil tragen
 Shape of the selected connections	GraphEditor		Form der ausgewählten Verbindungen
