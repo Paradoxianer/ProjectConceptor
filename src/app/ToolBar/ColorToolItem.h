@@ -142,7 +142,5 @@ protected:
 			int32				currentTarget;
 			BString				keepTarget;
 
-			rgb_color			colorHistory[CTI_COLOR_HISTORY_SIZE];
-			int32				colorHistoryCount;
 };
 #endif

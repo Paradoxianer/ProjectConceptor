@@ -331,24 +331,30 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	const GraphStyle	&style		= editor->Style();
 	const float			radius		= style.cornerRadius;
 	rgb_color			bandColor	= hasPreviewHighlightColor ? previewHighlightColor : highlightColor;
-	rgb_color			cardColor	= CardFillColor(style);
 	bool				fitIn		= true;
 	drawOn->SetFont(font);
 
-	editor->Shadows().Draw(drawOn,shape,shape.Name(),frame,radius,
-		style.shadow,style.shadowBlur,style.shadowOffsetY);
+	rgb_color			cardColor	= CardFillColor(style);
+	// a see-through card shows what lies below, not its own shadow
+	bool				opaque		= (cardColor.alpha == 255);
+	if (opaque)
+		editor->Shadows().Draw(drawOn,shape,shape.Name(),frame,radius,
+			style.shadow,style.shadowBlur,style.shadowOffsetY);
 
 	if (selected) {
 		BRect	outline	= frame;
 		outline.InsetBy(-style.selectionGap,-style.selectionGap);
-		// the gap between ring and card shows the canvas, not the shadow
 		NodeShape	grown(shape);
 		grown.Layout(outline);
-		drawOn->SetHighColor(style.canvas);
-		if (shape.HasPath())
-			grown.Fill(drawOn);
-		else
-			drawOn->FillRoundRect(outline,radius+style.selectionGap,radius+style.selectionGap);
+		// the gap between ring and card shows the canvas, not the shadow;
+		// under a see-through card that would hide what lies below
+		if (opaque) {
+			drawOn->SetHighColor(style.canvas);
+			if (shape.HasPath())
+				grown.Fill(drawOn);
+			else
+				drawOn->FillRoundRect(outline,radius+style.selectionGap,radius+style.selectionGap);
+		}
 		drawOn->SetPenSize(style.selectionWidth);
 		drawOn->SetHighColor(style.accent);
 		if (shape.HasPath())

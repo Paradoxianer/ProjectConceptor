@@ -112,10 +112,7 @@ void GraphEditor::Init(void) {
 	pendingStartEditNode	= NULL;
 	activeTextEditor		= NULL;
 	nodeColorTargets		= false;
-	fillStandardShown.red	= 255;
-	fillStandardShown.green	= 255;
-	fillStandardShown.blue	= 255;
-	fillStandardShown.alpha	= 255;
+	colorTargetsWhat		= P_C_CLASS_TYPE;
 	rendersensitv	= new BRegion();
 	renderString	= new char[30];
 	key_hold		= false;
@@ -1005,9 +1002,11 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			rgb_color	tmpNewColor =	colorItem->GetColor();
 			// the card's standard shown in the picker is stored as the
 			// standard fill, which follows the style (dark or light)
-			if (nodeColorTargets && (strcmp(colorItem->TargetField(),"FillColor") == 0)
-					&& (tmpNewColor == fillStandardShown))
-				GetStandartPattern()->FindInt32("FillColor",(int32 *)&tmpNewColor);
+			rgb_color	styleColor;
+			if (nodeColorTargets
+					&& StyleStandard(colorItem->TargetField(),colorTargetsWhat,&styleColor)
+					&& (tmpNewColor == styleColor))
+				GetStandartPattern()->FindInt32(colorItem->TargetField(),(int32 *)&tmpNewColor);
 			BMessage	*changeColorMessage	= new BMessage(P_C_EXECUTE_COMMAND);
 			changeColorMessage->AddString("Command::Name","ChangeValue");
 			changeColorMessage->AddBool(P_C_NODE_SELECTED,true);
@@ -1792,6 +1791,26 @@ void GraphEditor::ZoomToFit(void) {
 }
 
 
+static bool SameRGB(rgb_color a, rgb_color b) {
+	return (a.red == b.red) && (a.green == b.green) && (a.blue == b.blue);
+}
+
+
+bool GraphEditor::StyleStandard(const char *field, uint32 what, rgb_color *color) {
+	// the renderers draw these style colors where a field holds the
+	// standard pattern's value
+	if (strcmp(field,"FillColor") == 0)
+		*color	= (what == P_C_CLASS_TYPE) ? style.cardFill : style.groupFill;
+	else if (strcmp(field,"BorderColor") == 0)
+		*color	= style.cardBorder;
+	else if (strcmp(field,"HighColor") == 0)
+		*color	= style.text;
+	else
+		return false;
+	return true;
+}
+
+
 rgb_color GraphEditor::NewNodeColor(const char *field) {
 	// the picker's color while it shows a node's, else the standard
 	rgb_color	color	= {0,0,0,255};
@@ -1799,7 +1818,8 @@ rgb_color GraphEditor::NewNodeColor(const char *field) {
 	rgb_color	picked;
 	if (!nodeColorTargets || !colorItem->FindColor(field,&picked))
 		return color;
-	if ((strcmp(field,"FillColor") == 0) && (picked == fillStandardShown))
+	rgb_color	styleColor;
+	if (StyleStandard(field,P_C_CLASS_TYPE,&styleColor) && (picked == styleColor))
 		return color;
 	return picked;
 }
@@ -1851,28 +1871,27 @@ void GraphEditor::UpdateFormatItems(void) {
 		colorItem->ClearTargets();
 		nodeColorTargets	= (node != NULL);
 		if (node != NULL) {
-			// the fill's standard is the style's card (or group area)
-			fillStandardShown	= (node->what == P_C_CLASS_TYPE)
-				? style.cardFill : style.groupFill;
-			rgb_color	standardFill	= {0,0,0,255};
-			standard->FindInt32("FillColor",(int32 *)&standardFill);
-			rgb_color	fill			= standardFill;
-			pattern.FindInt32("FillColor",(int32 *)&fill);
-			if ((fill.red == standardFill.red) && (fill.green == standardFill.green)
-					&& (fill.blue == standardFill.blue))
-				fill	= fillStandardShown;
-			colorItem->AddTarget(B_TRANSLATE("Fill"),"FillColor",fill,
-				fillStandardShown,true);
-			// groups have no band
-			const char	*labels[]	= { B_TRANSLATE("Highlight"), B_TRANSLATE("Border"),
-				B_TRANSLATE("Text") };
-			const char	*fields[]	= { "HighlightColor", "BorderColor", "HighColor" };
-			for (int32 i = (node->what == P_C_CLASS_TYPE) ? 0 : 1; i < 3; i++) {
+			colorTargetsWhat	= node->what;
+			const char	*labels[]	= { B_TRANSLATE("Fill"), B_TRANSLATE("Highlight"),
+				B_TRANSLATE("Border"), B_TRANSLATE("Text") };
+			const char	*fields[]	= { "FillColor", "HighlightColor", "BorderColor",
+				"HighColor" };
+			for (int32 i = 0; i < 4; i++) {
+				// groups have no band
+				if ((i == 1) && (node->what != P_C_CLASS_TYPE))
+					continue;
 				rgb_color	standardColor	= {0,0,0,255};
 				standard->FindInt32(fields[i],(int32 *)&standardColor);
 				rgb_color	current			= standardColor;
 				pattern.FindInt32(fields[i],(int32 *)&current);
-				colorItem->AddTarget(labels[i],fields[i],current,standardColor);
+				// the standard stands for the style's color: show that one
+				rgb_color	styleColor;
+				if (StyleStandard(fields[i],node->what,&styleColor)) {
+					if (SameRGB(current,standardColor))
+						current	= styleColor;
+					standardColor	= styleColor;
+				}
+				colorItem->AddTarget(labels[i],fields[i],current,standardColor,i == 0);
 			}
 		} else {
 			rgb_color	line	= kDefaultConnectionColor;

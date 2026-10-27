@@ -33,6 +33,9 @@ const int32 PW_HISTORY_SIZE = 11;
 // a connection's line
 const int32 PW_MAX_TARGETS = 4;
 
+// one of the picker's palette colors (strong or soft)
+bool IsPaletteColor(rgb_color color);
+
 struct ColorPickerTarget {
 	BString		label;
 	rgb_color	color;

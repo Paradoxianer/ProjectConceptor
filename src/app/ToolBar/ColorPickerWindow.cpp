@@ -67,6 +67,17 @@ static const rgb_color kLightPalette[PW_PALETTE_SIZE] = {
 };
 
 
+bool
+IsPaletteColor(rgb_color color)
+{
+	for (int32 i = 0; i < PW_PALETTE_SIZE; i++) {
+		if ((kPalette[i] == color) || (kLightPalette[i] == color))
+			return true;
+	}
+	return false;
+}
+
+
 // Closes the window on Escape - installed as a common filter so it sees
 // the key before any child control's own KeyDown handling. Marks the
 // close as cancelled first, so QuitRequested() tells the target to

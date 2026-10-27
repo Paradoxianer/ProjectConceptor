@@ -174,6 +174,9 @@ public:
 			void			UpdateFormatItems(void);
 			/** the color a new node gets for a pattern field */
 			rgb_color		NewNodeColor(const char *field);
+			/** the style color a field's standard value stands for */
+			bool			StyleStandard(const char *field, uint32 what,
+								rgb_color *color);
 			/** places the context bar above the selected nodes, or hides
 			 * it when there are none or a drag is running */
 			void			UpdateContextBar(void);
@@ -287,8 +290,8 @@ protected:
 			ChoiceToolItem	*addAttribute;
 			// the color picker shows a node's colors, not a connection's
 			bool			nodeColorTargets;
-			// what the picker shows as the fill's standard
-			rgb_color		fillStandardShown;
+			// the node type the picker shows the colors of
+			uint32			colorTargetsWhat;
 			ColorToolItem	*colorItem;
 			PatternToolItem	*patternItem;
 

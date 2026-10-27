@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <interface/Point.h>
 #include <interface/Screen.h>
 #include <interface/View.h>
@@ -8,6 +9,14 @@
 #include "ColorPickerWindow.h"
 #include "ToolBar.h"
 
+#include <app/Message.h>
+#include <storage/Directory.h>
+#include <storage/File.h>
+#include <storage/FindDirectory.h>
+#include <storage/Path.h>
+#include <support/Autolock.h>
+#include <support/Locker.h>
+
 enum {
 	// from the picker window - apply this color
 	CTI_SWATCH_CLICKED	= 'ctSC',
@@ -16,6 +25,64 @@ enum {
 };
 
 static const float kArrowWidth	= 10.0;
+
+// the custom colors used last, shared by every color item and kept
+// across sessions
+static BLocker		sHistoryLock("ColorToolItem history");
+static rgb_color	sHistory[CTI_COLOR_HISTORY_SIZE];
+static int32		sHistoryCount	= 0;
+static bool			sHistoryLoaded	= false;
+static const char	*kHistoryField	= "color";
+
+
+static status_t
+HistoryPath(BPath *path)
+{
+	status_t	status	= find_directory(B_USER_SETTINGS_DIRECTORY,path);
+	if (status == B_OK)
+		status	= path->Append("ProjectConceptor/ColorHistory");
+	return status;
+}
+
+
+// sHistoryLock must be held
+static void
+LoadHistory(void)
+{
+	if (sHistoryLoaded)
+		return;
+	sHistoryLoaded	= true;
+	BPath	path;
+	if (HistoryPath(&path) != B_OK)
+		return;
+	BFile	file(path.Path(),B_READ_ONLY);
+	BMessage	archive;
+	if ((file.InitCheck() != B_OK) || (archive.Unflatten(&file) != B_OK))
+		return;
+	int32	packed;
+	for (int32 i = 0; (sHistoryCount < CTI_COLOR_HISTORY_SIZE)
+			&& (archive.FindInt32(kHistoryField,i,&packed) == B_OK); i++)
+		sHistory[sHistoryCount++]	= *(rgb_color *)&packed;
+}
+
+
+// sHistoryLock must be held
+static void
+SaveHistory(void)
+{
+	BPath	path;
+	if (HistoryPath(&path) != B_OK)
+		return;
+	BPath	parent;
+	if (path.GetParent(&parent) == B_OK)
+		create_directory(parent.Path(),0755);
+	BMessage	archive;
+	for (int32 i = 0; i < sHistoryCount; i++)
+		archive.AddInt32(kHistoryField,*(int32 *)&sHistory[i]);
+	BFile	file(path.Path(),B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+	if ((file.InitCheck() != B_OK) || (archive.Flatten(&file) != B_OK))
+		fprintf(stderr,"ColorToolItem: could not save %s\n",path.Path());
+}
 
 
 // Narrow strip on the right edge of ColorToolItem that opens the full
@@ -127,7 +194,6 @@ void ColorToolItem::Init(void)
 	pickerWindow		= NULL;
 	previewMessage		= NULL;
 	hasPreview			= false;
-	colorHistoryCount	= 0;
 }
 
 void ColorToolItem::BuildChildren(rgb_color initialColor)
@@ -320,25 +386,28 @@ void ColorToolItem::CancelPreview(void)
 
 void ColorToolItem::RecordColorInHistory(rgb_color color)
 {
-	// MRU: drop any existing occurrence of this exact color first, then
-	// prepend it - re-using a color bumps it to the front instead of
-	// piling up duplicate entries.
+	// palette and standard colors are one click away already
+	if (IsPaletteColor(color)
+			|| ((targetCount > 0) && (targets[currentTarget].standard == color)))
+		return;
+	BAutolock	lock(sHistoryLock);
+	LoadHistory();
+	// MRU: re-using a color moves it to the front instead of adding it twice
 	int32	existing	= -1;
-	for (int32 i = 0; i < colorHistoryCount; i++) {
-		if ((colorHistory[i].red == color.red)
-			&& (colorHistory[i].green == color.green)
-			&& (colorHistory[i].blue == color.blue)
-			&& (colorHistory[i].alpha == color.alpha)) {
-			existing = i;
+	for (int32 i = 0; i < sHistoryCount; i++) {
+		if (sHistory[i] == color) {
+			existing	= i;
 			break;
 		}
 	}
-	int32	last	= (existing >= 0) ? existing : (CTI_COLOR_HISTORY_SIZE - 1);
+	int32	last	= (existing >= 0) ? existing
+		: ((sHistoryCount < CTI_COLOR_HISTORY_SIZE) ? sHistoryCount : CTI_COLOR_HISTORY_SIZE - 1);
 	for (int32 i = last; i > 0; i--)
-		colorHistory[i] = colorHistory[i-1];
-	colorHistory[0]	= color;
-	if (colorHistoryCount < CTI_COLOR_HISTORY_SIZE)
-		colorHistoryCount++;
+		sHistory[i]	= sHistory[i-1];
+	sHistory[0]	= color;
+	if ((existing < 0) && (sHistoryCount < CTI_COLOR_HISTORY_SIZE))
+		sHistoryCount++;
+	SaveHistory();
 }
 
 void ColorToolItem::MessageReceived(BMessage *message)
@@ -365,11 +434,20 @@ void ColorToolItem::MessageReceived(BMessage *message)
 				only[0].color		= value;
 				only[0].standard	= value;
 				only[0].light		= false;
+				rgb_color	history[CTI_COLOR_HISTORY_SIZE];
+				int32		historyCount;
+				{
+					BAutolock	lock(sHistoryLock);
+					LoadHistory();
+					historyCount	= sHistoryCount;
+					for (int32 i = 0; i < historyCount; i++)
+						history[i]	= sHistory[i];
+				}
 				pickerWindow = new ColorPickerWindow(frame,
 					new BMessage(CTI_SWATCH_CLICKED),this,
 					targetCount > 0 ? targets : only,
 					targetCount > 0 ? targetCount : 1,currentTarget,
-					colorHistory,colorHistoryCount);
+					history,historyCount);
 
 				// keep the popup on-screen near the swatch that opened it,
 				// same edge-avoidance idea the old inline popup used -
