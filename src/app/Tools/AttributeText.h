@@ -2,6 +2,7 @@
 #define ATTRIBUTE_TEXT_H
 
 #include <app/Message.h>
+#include <interface/GraphicsDefs.h>
 #include <support/String.h>
 
 /** The value of an attribute block {Name, Value, ...} in Node::Data as
@@ -19,5 +20,19 @@ BString		NumberText(float number);
  * alone always is; spaces and apostrophes group digits. B_BAD_VALUE if
  * the text doesn't start with a number. */
 status_t	ParseNumberWithUnit(const char *text, float *number, BString *unit);
+
+/** the word for an attribute kind (its what) in macros and icon names:
+ * "text", "bool", "note", "number", "choice", "date", "color", "link",
+ * "file", "image"; NULL for a what that is no attribute kind */
+const char*	AttributeKindName(uint32 what);
+
+/** the what of a kind word; false for an unknown one */
+bool		AttributeKindFromName(const char *name, uint32 *what);
+
+/** adds the value a new attribute of attribute->what starts with: a color
+ * gets accent, a choice list the lines of choices and the first of them
+ * as its value, a date today */
+void		AddAttributeDefaultValue(BMessage *attribute, rgb_color accent,
+				const char *choices);
 
 #endif

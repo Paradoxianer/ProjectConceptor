@@ -5,8 +5,87 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <support/DateTime.h>
 
 #include "ProjectConceptorDefs.h"
+
+
+static const struct { const char *name; uint32 what; } kKinds[] = {
+	{ "text",	B_STRING_TYPE },
+	{ "bool",	B_BOOL_TYPE },
+	{ "note",	P_C_ATTRIBUTE_NOTE },
+	{ "number",	P_C_ATTRIBUTE_NUMBER },
+	{ "choice",	P_C_ATTRIBUTE_CHOICE },
+	{ "date",	P_C_ATTRIBUTE_DATE },
+	{ "color",	P_C_ATTRIBUTE_COLOR },
+	{ "link",	P_C_ATTRIBUTE_LINK },
+	{ "file",	P_C_ATTRIBUTE_FILE },
+	{ "image",	P_C_ATTRIBUTE_IMAGE },
+};
+
+
+const char* AttributeKindName(uint32 what)
+{
+	for (size_t i = 0; i < sizeof(kKinds)/sizeof(kKinds[0]); i++) {
+		if (kKinds[i].what == what)
+			return kKinds[i].name;
+	}
+	return NULL;
+}
+
+
+bool AttributeKindFromName(const char *name, uint32 *what)
+{
+	for (size_t i = 0; i < sizeof(kKinds)/sizeof(kKinds[0]); i++) {
+		if (strcmp(kKinds[i].name,name) == 0) {
+			*what	= kKinds[i].what;
+			return true;
+		}
+	}
+	return false;
+}
+
+
+void AddAttributeDefaultValue(BMessage *attribute, rgb_color accent,
+	const char *choices)
+{
+	switch (attribute->what) {
+		case B_BOOL_TYPE:
+			attribute->AddBool(P_C_ATTRIBUTE_VALUE,true);
+			break;
+		case B_STRING_TYPE:
+			// a few spaces give the new row something to click on
+			attribute->AddString(P_C_ATTRIBUTE_VALUE,"   ");
+			break;
+		case P_C_ATTRIBUTE_NUMBER:
+			attribute->AddFloat(P_C_ATTRIBUTE_VALUE,0);
+			attribute->AddString(P_C_ATTRIBUTE_UNIT,"");
+			break;
+		case P_C_ATTRIBUTE_CHOICE: {
+			BString	first(choices);
+			if (first.FindFirst('\n') >= 0)
+				first.Truncate(first.FindFirst('\n'));
+			attribute->AddString(P_C_ATTRIBUTE_VALUE,first);
+			attribute->AddString(P_C_ATTRIBUTE_CHOICES,choices);
+			break;
+		}
+		case P_C_ATTRIBUTE_COLOR:
+			attribute->AddData(P_C_ATTRIBUTE_VALUE,B_RGB_COLOR_TYPE,&accent,
+				sizeof(rgb_color));
+			break;
+		case P_C_ATTRIBUTE_DATE: {
+			BDate	today	= BDate::CurrentDate(B_LOCAL_TIME);
+			BString	iso;
+			iso.SetToFormat("%04d-%02d-%02d",(int)today.Year(),
+				(int)today.Month(),(int)today.Day());
+			attribute->AddString(P_C_ATTRIBUTE_VALUE,iso);
+			break;
+		}
+		default:
+			// note, link, file, image: empty until written or chosen
+			attribute->AddString(P_C_ATTRIBUTE_VALUE,"");
+	}
+}
 
 
 BString NumberText(float number)

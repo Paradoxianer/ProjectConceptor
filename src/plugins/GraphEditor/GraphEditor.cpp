@@ -84,74 +84,29 @@ MakeShapeIcon(const char *shapeName)
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "GraphEditor"
 
-/** the entries of the toolbar's Attribute menu: its value (the icon is
- * "attribute-<value>"), the attribute's what, the menu label and the name
- * a new attribute gets */
+/** the entries of the toolbar's Attribute menu: the attribute's what (its
+ * AttributeKindName() is the choice's value, the icon "attribute-<name>"),
+ * the menu label and the name a new attribute gets */
 struct AttributeKind {
-	const char	*value;
 	uint32		type;
 	const char	*label;
 	const char	*name;
 };
 
 static const AttributeKind kAttributeKinds[] = {
-	{ "text",	B_STRING_TYPE,			B_TRANSLATE_MARK("Text"),		B_TRANSLATE_MARK("Attribute") },
-	{ "bool",	B_BOOL_TYPE,			B_TRANSLATE_MARK("Yes/No"),		B_TRANSLATE_MARK("Attribute") },
-	{ "note",	P_C_ATTRIBUTE_NOTE,		B_TRANSLATE_MARK("Note"),		B_TRANSLATE_MARK("Note") },
-	{ "number",	P_C_ATTRIBUTE_NUMBER,	B_TRANSLATE_MARK("Number"),		B_TRANSLATE_MARK("Number") },
-	{ "choice",	P_C_ATTRIBUTE_CHOICE,	B_TRANSLATE_MARK("Choice list"),	B_TRANSLATE_MARK("Status") },
-	{ "date",	P_C_ATTRIBUTE_DATE,		B_TRANSLATE_MARK("Date"),		B_TRANSLATE_MARK("Date") },
-	{ "color",	P_C_ATTRIBUTE_COLOR,	B_TRANSLATE_MARK("Color"),		B_TRANSLATE_MARK("Color") },
-	{ "link",	P_C_ATTRIBUTE_LINK,		B_TRANSLATE_MARK("Link"),		B_TRANSLATE_MARK("Link") },
-	{ "file",	P_C_ATTRIBUTE_FILE,		B_TRANSLATE_MARK("File"),		B_TRANSLATE_MARK("File") },
-	{ "image",	P_C_ATTRIBUTE_IMAGE,	B_TRANSLATE_MARK("Image"),		B_TRANSLATE_MARK("Image") },
+	{ B_STRING_TYPE,			B_TRANSLATE_MARK("Text"),		B_TRANSLATE_MARK("Attribute") },
+	{ B_BOOL_TYPE,			B_TRANSLATE_MARK("Yes/No"),		B_TRANSLATE_MARK("Attribute") },
+	{ P_C_ATTRIBUTE_NOTE,		B_TRANSLATE_MARK("Note"),		B_TRANSLATE_MARK("Note") },
+	{ P_C_ATTRIBUTE_NUMBER,	B_TRANSLATE_MARK("Number"),		B_TRANSLATE_MARK("Number") },
+	{ P_C_ATTRIBUTE_CHOICE,	B_TRANSLATE_MARK("Choice list"),	B_TRANSLATE_MARK("Status") },
+	{ P_C_ATTRIBUTE_DATE,		B_TRANSLATE_MARK("Date"),		B_TRANSLATE_MARK("Date") },
+	{ P_C_ATTRIBUTE_COLOR,	B_TRANSLATE_MARK("Color"),		B_TRANSLATE_MARK("Color") },
+	{ P_C_ATTRIBUTE_LINK,		B_TRANSLATE_MARK("Link"),		B_TRANSLATE_MARK("Link") },
+	{ P_C_ATTRIBUTE_FILE,		B_TRANSLATE_MARK("File"),		B_TRANSLATE_MARK("File") },
+	{ P_C_ATTRIBUTE_IMAGE,	B_TRANSLATE_MARK("Image"),		B_TRANSLATE_MARK("Image") },
 };
 
 static const int32	kAttributeKindCount	= sizeof(kAttributeKinds) / sizeof(kAttributeKinds[0]);
-
-
-/** the value a new attribute of attribute->what starts with */
-static void AddDefaultValue(BMessage *attribute, rgb_color accent)
-{
-	switch (attribute->what) {
-		case B_BOOL_TYPE:
-			attribute->AddBool(P_C_ATTRIBUTE_VALUE,true);
-			break;
-		case B_STRING_TYPE:
-			// a few spaces give the new row something to click on
-			attribute->AddString(P_C_ATTRIBUTE_VALUE,"   ");
-			break;
-		case P_C_ATTRIBUTE_NUMBER:
-			attribute->AddFloat(P_C_ATTRIBUTE_VALUE,0);
-			attribute->AddString(P_C_ATTRIBUTE_UNIT,"");
-			break;
-		case P_C_ATTRIBUTE_CHOICE: {
-			BString	choices(B_TRANSLATE("Open\nIn progress\nDone"));
-			BString	first(choices);
-			if (first.FindFirst('\n') >= 0)
-				first.Truncate(first.FindFirst('\n'));
-			attribute->AddString(P_C_ATTRIBUTE_VALUE,first);
-			attribute->AddString(P_C_ATTRIBUTE_CHOICES,choices);
-			break;
-		}
-		case P_C_ATTRIBUTE_COLOR:
-			attribute->AddData(P_C_ATTRIBUTE_VALUE,B_RGB_COLOR_TYPE,&accent,
-				sizeof(rgb_color));
-			break;
-		case P_C_ATTRIBUTE_DATE: {
-			BDate	today	= BDate::CurrentDate(B_LOCAL_TIME);
-			BString	iso;
-			iso.SetToFormat("%04" B_PRId32 "-%02" B_PRId32 "-%02" B_PRId32,
-				today.Year(),today.Month(),today.Day());
-			attribute->AddString(P_C_ATTRIBUTE_VALUE,iso);
-			break;
-		}
-		default:
-			// note, link, file, image: empty until written or chosen
-			attribute->AddString(P_C_ATTRIBUTE_VALUE,"");
-	}
-}
-
 
 
 GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW | B_NAVIGABLE) {
@@ -298,9 +253,10 @@ void GraphEditor::Init(void) {
 	addAttribute->SetActionIcon(LoadVectorIcon(res,"attribute",kToolIconSize));
 	for (int32 i = 0; i < kAttributeKindCount; i++) {
 		BString	icon("attribute-");
-		icon << kAttributeKinds[i].value;
+		const char	*value	= AttributeKindName(kAttributeKinds[i].type);
+		icon << value;
 		addAttribute->AddChoice(B_TRANSLATE_NOCOLLECT(kAttributeKinds[i].label),
-			kAttributeKinds[i].value,LoadVectorIcon(res,icon.String(),kToolIconSize));
+			value,LoadVectorIcon(res,icon.String(),kToolIconSize));
 	}
 	addAttribute->SetToolTip(B_TRANSLATE("Add an attribute to the selected nodes"));
 
@@ -1198,10 +1154,9 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			if (message->FindInt32("type",&requested) == B_OK)
 				type	= requested;
 			else if (message->FindString("value",&kind) == B_OK) {
-				for (int32 i = 0; i < kAttributeKindCount; i++) {
-					if (strcmp(kind,kAttributeKinds[i].value) == 0)
-						type	= kAttributeKinds[i].type;
-				}
+				uint32	what;
+				if (AttributeKindFromName(kind,&what))
+					type	= what;
 			}
 			const char	*attributeName	= B_TRANSLATE("Attribute");
 			for (int32 i = 0; i < kAttributeKindCount; i++) {
@@ -1217,7 +1172,8 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			valueContainer->AddString("subgroup",P_C_NODE_DATA);
 			BMessage	*newAttribute	= new BMessage(type);
 			newAttribute->AddString(P_C_ATTRIBUTE_NAME,attributeName);
-			AddDefaultValue(newAttribute,Style().accent);
+			AddAttributeDefaultValue(newAttribute,Style().accent,
+				B_TRANSLATE("Open\nIn progress\nDone"));
 			valueContainer->AddMessage("newAttribute",newAttribute);
 			addMessage->AddMessage("valueContainer",valueContainer);
 			pendingEditAttribute	= attributeName;
