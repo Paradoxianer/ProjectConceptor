@@ -101,6 +101,13 @@ protected:
 				rgb_color	CardBorderColor(const GraphStyle &style);
 				rgb_color	CardFillColor(const GraphStyle &style);
 				float		BorderWidth() const;
+				/** gives all attribute rows one name column (#162): the
+				 * stored width, else as wide as the longest name */
+				void		LayoutAttributeColumn(void);
+				/** the border between name and value column is under where */
+				bool		ColumnBorderAt(BPoint where);
+				/** stores the name column width in the node, 0 = fit */
+				void		SendColumnWidth(float width);
 				/** a custom text color, else the style's */
 				rgb_color	TextColor(const GraphStyle &style);
 				void		AdjustParents(BMessage* theParent, BMessage *command);
@@ -158,6 +165,11 @@ protected:
 		int32				connecting;
 		/** NodeHandles::handle being dragged, NONE when not resizing */
 		int32				resizeHandle;
+		/** the name column border is being dragged */
+		bool				columnDrag;
+		float				startColumn;
+		/** stored name column width, 0 = fit to the names */
+		float				attributeColumn;
 		bool				hovered;
 
 		PDocument			*doc;

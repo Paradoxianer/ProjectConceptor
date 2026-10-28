@@ -67,6 +67,9 @@ void ClassRenderer::Init()
 	status_t	err			 	= B_OK;
 	tracking					= false;
 	resizeHandle				= NodeHandles::NONE;
+	columnDrag					= false;
+	startColumn					= 0;
+	attributeColumn				= 0;
 	hovered						= false;
 	doc							= NULL;
 	parentNode					= NULL;
@@ -104,6 +107,9 @@ void ClassRenderer::Init()
 		container->AddFloat(P_C_NODE_X_RADIUS,7.0);
 	if (container->FindFloat(P_C_NODE_Y_RADIUS,&yRadius) != B_OK)
 		container->AddFloat(P_C_NODE_Y_RADIUS,7.0);
+	// like the radii: ChangeValue needs a field to replace
+	if (container->FindFloat(P_C_NODE_ATTRIBUTE_COLUMN,&attributeColumn) != B_OK)
+		container->AddFloat(P_C_NODE_ATTRIBUTE_COLUMN,0.0f);
 	container->FindPointer(P_C_NODE_PARENT, (void **)&parentNode);
 
 }
@@ -117,6 +123,20 @@ void ClassRenderer::MouseDown(BPoint where, int32 buttons,
 		? NodeHandles::HandleAt(HandleFrame(),where,HandleRadius()) : (int32)NodeHandles::NONE;
 	int32	connector	= hovered ? ConnectorAt(where) : 0;
 	bool	found		= (handle != NodeHandles::NONE) || (connector != 0);
+	if (!found && !tracking && selected && (buttons & B_PRIMARY_MOUSE_BUTTON)
+			&& ColumnBorderAt(where)) {
+		if (clicks >= 2) {
+			// back to fitting the names
+			SendColumnWidth(0);
+			return;
+		}
+		tracking		= true;
+		columnDrag		= true;
+		startMouseDown	= where;
+		startColumn		= ((AttributRenderer*)(*attributes)[0])->ColumnWidth();
+		editor->SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
+		return;
+	}
 	if (!found && name->Caught(where)) {
 		name->MouseDown(where);
 		found	= true;
@@ -156,6 +176,12 @@ void ClassRenderer::MouseDown(BPoint where, int32 buttons,
 void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
 	if (!tracking)
 		return;
+	if (columnDrag) {
+		attributeColumn	= startColumn + (pt.x-startMouseDown.x);
+		LayoutAttributeColumn();
+		editor->Invalidate();
+		return;
+	}
 	if (connecting != 0) {
 		BMessage	connecter(G_E_CONNECTING);
 		connecter.AddPoint(P_C_NODE_CONNECTION_FROM,startMouseDown);
@@ -215,6 +241,15 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
 
 
 void ClassRenderer::MouseUp(BPoint where) {
+	if (columnDrag) {
+		tracking	= false;
+		columnDrag	= false;
+		float	width	= ((AttributRenderer*)(*attributes)[0])->ColumnWidth();
+		if (width != startColumn)
+			SendColumnWidth(width);
+		editor->Invalidate();
+		return;
+	}
 	bool		found			= false;
 	for (uint32 i = 0; (!found) && (i < attributes->size());i++) {
 		Renderer	*row	= (*attributes)[i];
@@ -464,6 +499,7 @@ void ClassRenderer::ValueChanged() {
 	container->FindBool(P_C_NODE_SELECTED,&selected);
 	container->FindFloat(P_C_NODE_X_RADIUS,&xRadius);
 	container->FindFloat(P_C_NODE_Y_RADIUS,&yRadius);
+	container->FindFloat(P_C_NODE_ATTRIBUTE_COLUMN,&attributeColumn);
 	if (container->FindMessage(P_C_NODE_PATTERN,pattern) != B_OK) {
 		container->AddMessage(P_C_NODE_PATTERN,editor->GetStandartPattern());
 		pattern = editor->GetStandartPattern();
@@ -528,6 +564,7 @@ void ClassRenderer::ValueChanged() {
 				InsertAttribute(attribName,attribMessage, entry);
 		}
 	}
+	LayoutAttributeColumn();
 	container->FindPointer(P_C_NODE_PARENT, (void **)&parentNode);
 	// a card is as tall as its content: the stored height is the minimum.
 	// Not for shapes, whose text area itself depends on the height.
@@ -584,6 +621,8 @@ static BCursorID HandleCursor(int32 handle) {
 BCursorID ClassRenderer::CursorAt(BPoint where) {
 	// while a drag runs the cursor shows what is being dragged
 	if (tracking) {
+		if (columnDrag)
+			return B_CURSOR_ID_RESIZE_EAST_WEST;
 		if (connecting != 0)
 			return B_CURSOR_ID_CROSS_HAIR;
 		if (resizeHandle != NodeHandles::NONE)
@@ -598,6 +637,8 @@ BCursorID ClassRenderer::CursorAt(BPoint where) {
 	}
 	if (hovered && (ConnectorAt(where) != 0))
 		return B_CURSOR_ID_CROSS_HAIR;
+	if (selected && ColumnBorderAt(where))
+		return B_CURSOR_ID_RESIZE_EAST_WEST;
 	if (name->Caught(where))
 		return B_CURSOR_ID_I_BEAM;
 	for (uint32 i = 0; i < attributes->size(); i++) {
@@ -694,6 +735,7 @@ void  ClassRenderer::SetFrame(BRect newFrame) {
 		(*allAttributes)->ResizeBy(dWidth,0);
 		allAttributes++;
 	}
+	LayoutAttributeColumn();
 	shape.Layout(frame);
 	UpdateConnectors();
 }
@@ -901,4 +943,66 @@ ClassRenderer::BorderWidth() const
 {
 	// older documents carry a pen size of 0
 	return penSize < 1.0f ? 1.0f : penSize;
+}
+
+
+void
+ClassRenderer::LayoutAttributeColumn(void)
+{
+	if (attributes->empty())
+		return;
+	float	usable	= (*attributes)[0]->Frame().Width() - DELETER_WIDTH;
+	float	width	= attributeColumn;
+	if (width <= 0) {
+		for (uint32 i = 0; i < attributes->size(); i++) {
+			AttributRenderer	*row	= dynamic_cast<AttributRenderer*>((*attributes)[i]);
+			if ((row != NULL) && (row->LabelWidth() > width))
+				width	= row->LabelWidth();
+		}
+		if (width > usable*0.5f)
+			width	= usable*0.5f;
+	}
+	// a stored width still leaves room for the value; names are cut short
+	const float	kMinColumn	= 12.0f;
+	const float	kMinValue	= 40.0f;
+	if (width > usable - kMinValue)
+		width	= usable - kMinValue;
+	if (width < kMinColumn)
+		width	= kMinColumn;
+	for (uint32 i = 0; i < attributes->size(); i++) {
+		AttributRenderer	*row	= dynamic_cast<AttributRenderer*>((*attributes)[i]);
+		if (row != NULL)
+			row->SetColumnWidth(width);
+	}
+}
+
+
+bool
+ClassRenderer::ColumnBorderAt(BPoint where)
+{
+	if (attributes->empty())
+		return false;
+	AttributRenderer	*first	= dynamic_cast<AttributRenderer*>(attributes->front());
+	AttributRenderer	*last	= dynamic_cast<AttributRenderer*>(attributes->back());
+	if ((first == NULL) || (last == NULL))
+		return false;
+	float	border	= first->Frame().left + first->ColumnWidth();
+	return (fabs(where.x - border) <= 3.0f / editor->Scale())
+		&& (where.y >= first->Frame().top) && (where.y <= last->Frame().bottom)
+		&& ContentFrame().Contains(where);
+}
+
+
+void
+ClassRenderer::SendColumnWidth(float width)
+{
+	BMessage	change(P_C_EXECUTE_COMMAND);
+	change.AddString("Command::Name","ChangeValue");
+	change.AddPointer("node",container);
+	BMessage	valueContainer;
+	valueContainer.AddString("name",P_C_NODE_ATTRIBUTE_COLUMN);
+	valueContainer.AddInt32("type",B_FLOAT_TYPE);
+	valueContainer.AddFloat("newValue",width);
+	change.AddMessage("valueContainer",&valueContainer);
+	sentTo->SendMessage(&change);
 }

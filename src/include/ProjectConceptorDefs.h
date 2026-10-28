@@ -336,6 +336,8 @@ extern const char*		P_C_SHAPE_TEXT_RECT;	//			= "Shape::textRect"
 extern const char*		P_C_NODE_SELECTED;	//				= "Node::selected"
 extern const char*		P_C_NODE_X_RADIUS;	//				= "Node::xRadius"
 extern const char*		P_C_NODE_Y_RADIUS;	//				= "Node::yRadius"
+/** width of the attribute name column, 0 = fit to the names */
+extern const char*		P_C_NODE_ATTRIBUTE_COLUMN;	//		= "Node::attributeColumn"
 /** Resize: how far the left/top edges move, besides dx/dy for right/bottom */
 extern const char*		P_C_RESIZE_LEFT;	//				= "dleft"
 extern const char*		P_C_RESIZE_TOP;		//				= "dtop"

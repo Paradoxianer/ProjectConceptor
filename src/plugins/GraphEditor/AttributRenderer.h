@@ -38,6 +38,11 @@ public:
 
 			void			MouseUp(BPoint where);
 			void			SetFrame(BRect newRect);
+			/** width of the name column; the value starts right after it */
+			void			SetColumnWidth(float width);
+			float			ColumnWidth(void){return divider;};
+			/** room the name needs in the name column */
+			float			LabelWidth(void);
 			/** whether the delete icon shows - and reacts (#51) */
 			void			SetShowDelete(bool show){showDelete=show;};
 			/** the data field this row shows an entry of */
@@ -67,6 +72,7 @@ protected:
 		Renderer			*value;
 		//Renderer			*deleter;
 		float				divider;
+		float				columnWidth;
 		bool				showDelete;
 		BString				key;
 		BPopUpMenu			*kontextMenu;

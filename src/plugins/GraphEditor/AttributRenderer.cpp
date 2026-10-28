@@ -44,6 +44,7 @@ void AttributRenderer::Init()
 	name		= NULL;
 	value		= NULL;
 	showDelete	= false;
+	columnWidth	= (frame.Width()-DELETER_WIDTH)*0.4f;
 	kontextMenu	= new BPopUpMenu("deleter");
 	BMenuItem	*delMenu = new BMenuItem(B_TRANSLATE("Delete"),deleteMessage);
 	kontextMenu->AddItem(delMenu);
@@ -117,20 +118,9 @@ void AttributRenderer::SetFrame(BRect newRect)
 {
 	TRACE();
 	frame			= newRect;
-	// the label column is as wide as the label, within 30..45 % of the row
+	// the node sets one column for all its rows (#162)
 	float	usable	= frame.Width()-DELETER_WIDTH;
-	divider			= usable*0.45f;
-	StringRenderer	*label	= dynamic_cast<StringRenderer*>(name);
-	if (dynamic_cast<BoolRenderer*>(value) != NULL) {
-		// a check mark needs no more room than itself
-		divider	= usable - editor->Style().attributeFontSize - 6;
-	} else if (label != NULL) {
-		BFont	rowFont(be_plain_font);
-		rowFont.SetSize(editor->Style().attributeFontSize);
-		float	wanted	= rowFont.StringWidth(label->GetString()) + 10;
-		if (wanted < divider)
-			divider	= (wanted > usable*0.3f) ? wanted : usable*0.3f;
-	}
+	divider			= (columnWidth < usable) ? columnWidth : usable;
 	float maxBottom	= frame.bottom;
 	if (name)
 		name->SetFrame(BRect(frame.left,frame.top,frame.left+divider-1,frame.bottom));
@@ -153,7 +143,22 @@ void AttributRenderer::SetFrame(BRect newRect)
 	}
 	delRect.Set(frame.right-DELETER_WIDTH,frame.top,frame.right,maxBottom);
 	delRect.InsetBy(2,2);
-	frame.bottom	= maxBottom;	
+	frame.bottom	= maxBottom;
+}
+
+void AttributRenderer::SetColumnWidth(float width)
+{
+	columnWidth	= width;
+	SetFrame(frame);
+}
+
+float AttributRenderer::LabelWidth(void)
+{
+	if (name == NULL)
+		return 0;
+	BFont	rowFont(be_plain_font);
+	rowFont.SetSize(editor->Style().attributeFontSize);
+	return rowFont.StringWidth(name->GetString()) + 10;
 }
 
 void AttributRenderer::MouseDown(BPoint where,
