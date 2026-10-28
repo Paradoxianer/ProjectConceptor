@@ -4,6 +4,7 @@
 #include <interface/Button.h>
 #include <interface/LayoutBuilder.h>
 #include <interface/StringView.h>
+#include <locale/DateFormat.h>
 #include <support/DateTime.h>
 
 #include <CalendarView.h>
@@ -36,6 +37,10 @@ DatePopup::DatePopup(BPoint where, const BString &isoDate,
 	document(forDocument)
 {
 	calendar	= new BCalendarView("calendar");
+	// BCalendarView starts weeks on Monday whatever the locale says
+	BWeekday	startOfWeek;
+	if (BDateFormat().GetStartOfWeek(&startOfWeek) == B_OK)
+		calendar->SetStartOfWeek(startOfWeek);
 	calendar->SetSelectionMessage(new BMessage(kDayPicked));
 	calendar->SetInvocationMessage(new BMessage(kDayPicked));
 	int32	year = 0, month = 0, day = 0;
