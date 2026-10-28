@@ -1,29 +1,43 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	1988532959
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	2777686912
 New macro	MacroEditor		Gnove macro
 Move Up	MacroEditor		Sposte in sù
-Export Macro	MacroEditor		Espuarte macro
+Open\nIn progress\nDone	MacroEditor		Viert\nIn vore\nFat
 + Add field	MacroEditor		+ Zonte cjamp
+Export Macro	MacroEditor		Espuarte macro
 Delete %ld rows	MacroEditor		Elimine %ld riis
 Delete macro	MacroEditor		Elimine macro
+Attribute	MacroEditor		Atribût
 Name	MacroEditor		Non
 Deleted.	MacroEditor		Eliminade.
+Link	MacroEditor		Leam
 Rename macro	MacroEditor		Cambie non ae macro
 Move Down	MacroEditor		Sposte in jù
+Choice list	MacroEditor		Liste di sieltis
 Delete	MacroEditor		Elimine
 Duplicated.	MacroEditor		Duplicade.
 Exported.	MacroEditor		Espuartade.
 Cancel	MacroEditor		Anule
 Add field	MacroEditor		Zonte cjamp
+Number	MacroEditor		Numar
 Connection	MacroEditor		Conession
+Add attribute	MacroEditor		Zonte atribût
+File	MacroEditor		File
 Imported as macro \"%s\" (%ld command(s)).	MacroEditor		Impuartade come macro “%s” (%ld comant(s)).
 %s copy	MacroEditor	name of a duplicated macro	Copie di %s
+Text	MacroEditor		Test
 Renamed.	MacroEditor		Cambiât non.
 Collapse All	MacroEditor		Siere dut
 %ld command(s).	MacroEditor		%ld comant(s).
 Expand All	MacroEditor		Vierç dut
+Yes/No	MacroEditor		Sì/No
 Delete the macro \"%s\"? This cannot be undone.	MacroEditor		Eliminâ la macro “%s”? No si pues tornâ indaûr.
 New macro created - drag commands in from the list on the right.	MacroEditor		Creade une gnove macro – strissine dentri i comants de liste a diestre.
 Macros	MacroEditor		Macros
 No macro selected.	MacroEditor		Nissune macro selezionade.
 No macro selected - select one in the MacroEditor tab first.	MacroEditor		Nissune macro selezionade – selezione prime une te schede MacroEditor.
+Attribute kind	MacroEditor		Gjenar di atribût
+Date	MacroEditor		Date
 OK	MacroEditor		Va ben
+Note	MacroEditor		Note
+Color	MacroEditor		Colôr
+Image	MacroEditor		Imagjin

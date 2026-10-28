@@ -1,29 +1,43 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	1988532959
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	2777686912
 New macro	MacroEditor		Nytt makro
 Move Up	MacroEditor		Flytta upp
-Export Macro	MacroEditor		Exportera makro
+Open\nIn progress\nDone	MacroEditor		Öppen\nPågår\nKlar
 + Add field	MacroEditor		+ Lägg till fält
+Export Macro	MacroEditor		Exportera makro
 Delete %ld rows	MacroEditor		Ta bort %ld rader
 Delete macro	MacroEditor		Ta bort makro
+Attribute	MacroEditor		Attribut
 Name	MacroEditor		Namn
 Deleted.	MacroEditor		Borttaget.
+Link	MacroEditor		Länk
 Rename macro	MacroEditor		Byt namn på makro
 Move Down	MacroEditor		Flytta ned
+Choice list	MacroEditor		Vallista
 Delete	MacroEditor		Radera
 Duplicated.	MacroEditor		Duplicerat.
 Exported.	MacroEditor		Exporterat.
 Cancel	MacroEditor		Avbryt
 Add field	MacroEditor		Lägg till fält
+Number	MacroEditor		Tal
 Connection	MacroEditor		Förbindelse
+Add attribute	MacroEditor		Lägg till attribut
+File	MacroEditor		Fil
 Imported as macro \"%s\" (%ld command(s)).	MacroEditor		Importerat som makrot ”%s” (%ld kommando(n)).
 %s copy	MacroEditor	name of a duplicated macro	%s kopia
+Text	MacroEditor		Text
 Renamed.	MacroEditor		Namnet ändrat.
 Collapse All	MacroEditor		Fäll ihop alla
 %ld command(s).	MacroEditor		%ld kommando(n).
 Expand All	MacroEditor		Fäll ut alla
+Yes/No	MacroEditor		Ja/Nej
 Delete the macro \"%s\"? This cannot be undone.	MacroEditor		Ta bort makrot ”%s”? Det går inte att ångra.
 New macro created - drag commands in from the list on the right.	MacroEditor		Nytt makro skapat – dra in kommandon från listan till höger.
 Macros	MacroEditor		Makron
 No macro selected.	MacroEditor		Inget makro markerat.
 No macro selected - select one in the MacroEditor tab first.	MacroEditor		Inget makro markerat – markera ett i fliken MacroEditor först.
+Attribute kind	MacroEditor		Attributtyp
+Date	MacroEditor		Datum
 OK	MacroEditor		OK
+Note	MacroEditor		Anteckning
+Color	MacroEditor		Färg
+Image	MacroEditor		Bild

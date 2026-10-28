@@ -12,6 +12,7 @@
 #include <interface/Point.h>
 #include <interface/Rect.h>
 
+#include "AttributeText.h"
 #include "PCommand.h"
 #include "PCommandManager.h"
 
@@ -299,6 +300,8 @@ static BString WhatToText(uint32 what)
 		text	= "group";
 	else if (what == P_C_CONNECTION_TYPE)
 		text	= "connection";
+	else if (AttributeKindName(what) != NULL)
+		text	= AttributeKindName(what);
 	else
 		text << (unsigned long)what;
 	return text;
@@ -313,6 +316,8 @@ static bool TextToWhat(const BString &text, uint32 *outWhat)
 		*outWhat	= P_C_GROUP_TYPE;
 	else if (text == "connection")
 		*outWhat	= P_C_CONNECTION_TYPE;
+	else if (AttributeKindFromName(text.String(),outWhat))
+		return true;
 	else {
 		if (text.Length() == 0)
 			return false;
@@ -983,7 +988,7 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 				uint32	what	= 0;
 				if (!TextToWhat(valueText,&what)) {
 					errorOut->SetTo("");
-					*errorOut	<< "line " << lineNo << ": what= needs class, group, connection or a number";
+					*errorOut	<< "line " << lineNo << ": what= needs class, group, connection, an attribute kind (text, number, date, ...) or a number";
 					CleanupFrames(stack,&built);
 					return B_BAD_VALUE;
 				}
@@ -1068,7 +1073,9 @@ const char* CommandExampleText(const char *commandName)
 		{ "AddAttribute",
 			"AddAttribute\n  Node::selected=true\n  ~valueContainer\n"
 			"    name=\"Priority\"\n    subgroup=\"Node::Data\"\n"
-			"    type=int32\n    newAttribute=1" },
+			"    type=message\n    ~newAttribute\n      what=number\n"
+			"      Name=\"Priority\"\n      Value=1.0\n      Unit=\"\"\n"
+			"# what: text bool note number choice date color link file image" },
 		{ "Ask",
 			"Ask\n  variable=\"term\"\n  prompt=\"Search for?\"\n"
 			"  default=\"Test\"\n# a later command's string field can use the "

@@ -1,29 +1,43 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	1988532959
+1	English	application/x-vnd.ProjectConceptor-plugin	2777686912
 New macro	MacroEditor		New macro
 Move Up	MacroEditor		Move Up
-Export Macro	MacroEditor		Export Macro
+Open\nIn progress\nDone	MacroEditor		Open\nIn progress\nDone
 + Add field	MacroEditor		+ Add field
+Export Macro	MacroEditor		Export Macro
 Delete %ld rows	MacroEditor		Delete %ld rows
 Delete macro	MacroEditor		Delete macro
+Attribute	MacroEditor		Attribute
 Name	MacroEditor		Name
 Deleted.	MacroEditor		Deleted.
+Link	MacroEditor		Link
 Rename macro	MacroEditor		Rename macro
 Move Down	MacroEditor		Move Down
+Choice list	MacroEditor		Choice list
 Delete	MacroEditor		Delete
 Duplicated.	MacroEditor		Duplicated.
 Exported.	MacroEditor		Exported.
 Cancel	MacroEditor		Cancel
 Add field	MacroEditor		Add field
+Number	MacroEditor		Number
 Connection	MacroEditor		Connection
+Add attribute	MacroEditor		Add attribute
+File	MacroEditor		File
 Imported as macro \"%s\" (%ld command(s)).	MacroEditor		Imported as macro \"%s\" (%ld command(s)).
 %s copy	MacroEditor	name of a duplicated macro	%s copy
+Text	MacroEditor		Text
 Renamed.	MacroEditor		Renamed.
 Collapse All	MacroEditor		Collapse All
 %ld command(s).	MacroEditor		%ld command(s).
 Expand All	MacroEditor		Expand All
+Yes/No	MacroEditor		Yes/No
 Delete the macro \"%s\"? This cannot be undone.	MacroEditor		Delete the macro \"%s\"? This cannot be undone.
 New macro created - drag commands in from the list on the right.	MacroEditor		New macro created - drag commands in from the list on the right.
 Macros	MacroEditor		Macros
 No macro selected.	MacroEditor		No macro selected.
 No macro selected - select one in the MacroEditor tab first.	MacroEditor		No macro selected - select one in the MacroEditor tab first.
+Attribute kind	MacroEditor		Attribute kind
+Date	MacroEditor		Date
 OK	MacroEditor		OK
+Note	MacroEditor		Note
+Color	MacroEditor		Color
+Image	MacroEditor		Image

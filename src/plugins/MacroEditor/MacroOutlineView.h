@@ -183,6 +183,14 @@ private:
 			 * items and the freeform 'mvFT' flow's typed-in name. */
 			void			AddNamedField(int32 topLevel, const MacroPath &path,
 								const char *field, type_code type);
+			/** Adds an attribute block {Name, Value, ...} of `kind` named
+			 * `name` to the container at `topLevel`/`path` - a node's data -
+			 * or, `asValueContainer`, the valueContainer AddAttribute adds
+			 * it with. */
+			void			AddAttributeBlock(int32 topLevel, const MacroPath &path,
+								uint32 kind, const char *name, bool asValueContainer);
+			/** sets the what of the block at rowIndex: an attribute's kind */
+			void			SetBlockKind(int32 rowIndex, uint32 kind);
 			/** Adds a new "node"=@nodeId reference field to the command at
 			 * `topLevel`/`selfPath` (its own SelfPath() - empty for a
 			 * top-level command) - a data chip dragged onto that command

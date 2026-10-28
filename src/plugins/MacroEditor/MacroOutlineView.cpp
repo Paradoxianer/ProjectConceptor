@@ -4,7 +4,9 @@
 #include <app/PropertyInfo.h>
 #include <interface/Font.h>
 #include <interface/GraphicsDefs.h>
+#include <interface/InterfaceDefs.h>
 #include <interface/ListItem.h>
+#include <interface/Menu.h>
 #include <interface/MenuItem.h>
 #include <interface/PopUpMenu.h>
 #include <interface/Window.h>
@@ -16,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "AttributeText.h"
 #include "InputRequest.h"
 #include "MacroEditor.h"
 #include "MacroText.h"
@@ -268,9 +271,46 @@ static void AddZeroValue(BMessage *msg, const char *field, type_code type)
 		case B_POINT_TYPE:		msg->AddPoint(field,BPoint(0,0)); break;
 		case B_RECT_TYPE:		msg->AddRect(field,BRect(0,0,0,0)); break;
 		case B_POINTER_TYPE:	msg->AddInt32(field,0); break;
+		case B_MESSAGE_TYPE: {
+			BMessage	empty;
+			msg->AddMessage(field,&empty);
+			break;
+		}
 		case B_STRING_TYPE:
 		default:				msg->AddString(field,""); break;
 	}
+}
+
+
+/** the attribute kinds offered, in the toolbar's order */
+static const struct { uint32 what; const char *label; } kAttributeKinds[] = {
+	{ B_STRING_TYPE,			B_TRANSLATE_MARK("Text") },
+	{ B_BOOL_TYPE,			B_TRANSLATE_MARK("Yes/No") },
+	{ P_C_ATTRIBUTE_NOTE,		B_TRANSLATE_MARK("Note") },
+	{ P_C_ATTRIBUTE_NUMBER,	B_TRANSLATE_MARK("Number") },
+	{ P_C_ATTRIBUTE_CHOICE,	B_TRANSLATE_MARK("Choice list") },
+	{ P_C_ATTRIBUTE_DATE,		B_TRANSLATE_MARK("Date") },
+	{ P_C_ATTRIBUTE_COLOR,	B_TRANSLATE_MARK("Color") },
+	{ P_C_ATTRIBUTE_LINK,		B_TRANSLATE_MARK("Link") },
+	{ P_C_ATTRIBUTE_FILE,		B_TRANSLATE_MARK("File") },
+	{ P_C_ATTRIBUTE_IMAGE,	B_TRANSLATE_MARK("Image") },
+};
+
+
+/** a submenu with one item per attribute kind, each a copy of templ with
+ * the kind added as "kind" */
+static BMenu* AttributeKindMenu(const char *label, const BMessage &templ,
+	int32 checkedKind)
+{
+	BMenu	*menu	= new BMenu(label);
+	for (size_t i = 0; i < sizeof(kAttributeKinds)/sizeof(kAttributeKinds[0]); i++) {
+		BMessage	*msg	= new BMessage(templ);
+		msg->AddInt32("kind",(int32)kAttributeKinds[i].what);
+		BMenuItem	*item	= new BMenuItem(B_TRANSLATE_NOCOLLECT(kAttributeKinds[i].label),msg);
+		item->SetMarked((int32)kAttributeKinds[i].what == checkedKind);
+		menu->AddItem(item);
+	}
+	return menu;
 }
 
 
@@ -602,8 +642,13 @@ void MacroOutlineView::BuildChildren(BMessage *container, int32 topLevelIndex,
 				BString	label;
 				if (isChip)
 					ChipLabel(child,&label);
-				else
+				else {
 					label	= fieldName;
+					// an attribute's kind is the block's what
+					const char	*kind	= AttributeKindName(child.what);
+					if (kind != NULL)
+						label << "  (" << kind << ")";
+				}
 				bool	expandThis	= expandedKeys.find(PathKey(topLevelIndex,childPath)) != expandedKeys.end();
 				MacroRowItem	*row	= new MacroRowItem(label.String(),level,expandThis,
 					isChip ? kRowChip : kRowBlock,topLevelIndex,containerPath,fieldName,j,
@@ -801,6 +846,50 @@ void MacroOutlineView::AddNamedField(int32 topLevel, const MacroPath &path,
 }
 
 
+void MacroOutlineView::AddAttributeBlock(int32 topLevel, const MacroPath &path,
+	uint32 kind, const char *name, bool asValueContainer)
+{
+	BMessage	attribute(kind);
+	attribute.AddString(P_C_ATTRIBUTE_NAME,name);
+	AddAttributeDefaultValue(&attribute,ui_color(B_CONTROL_HIGHLIGHT_COLOR),
+		B_TRANSLATE("Open\nIn progress\nDone"));
+	BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,topLevel,path);
+	if (asValueContainer) {
+		// the shape AddAttribute::Do() reads
+		BMessage	valueContainer;
+		valueContainer.AddString("name",name);
+		valueContainer.AddString("subgroup",P_C_NODE_DATA);
+		valueContainer.AddInt32("type",B_MESSAGE_TYPE);
+		valueContainer.AddMessage("newAttribute",&attribute);
+		owner.AddMessage("valueContainer",&valueContainer);
+	} else
+		owner.AddMessage(name,&attribute);
+	WriteContainer(&fCommands,topLevel,path,owner);
+	RebuildAllRows();
+	if (fEditor != NULL)
+		fEditor->CommitOutlineChange();
+}
+
+
+void MacroOutlineView::SetBlockKind(int32 rowIndex, uint32 kind)
+{
+	MacroRowItem	*item	= (MacroRowItem*)ItemAt(rowIndex);
+	if ((item == NULL) || (item->Kind() != kRowBlock))
+		return;
+	BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,item->TopLevelIndex(),item->ContainerPath());
+	std::vector<BMessage>	entries;
+	ExtractMessageEntries(&owner,item->FieldName().String(),&entries);
+	if (item->FieldIndex() >= (int32)entries.size())
+		return;
+	entries[item->FieldIndex()].what	= kind;
+	ReplaceMessageEntries(&owner,item->FieldName().String(),entries);
+	WriteContainer(&fCommands,item->TopLevelIndex(),item->ContainerPath(),owner);
+	RebuildAllRows();
+	if (fEditor != NULL)
+		fEditor->CommitOutlineChange();
+}
+
+
 void MacroOutlineView::AddNodeReference(int32 topLevel, const MacroPath &selfPath, int32 nodeId)
 {
 	BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,topLevel,selfPath);
@@ -857,22 +946,22 @@ void MacroOutlineView::ShowAddFieldMenu(BPoint screenWhere, int32 topLevelIndex,
 				if (fieldName == NULL)
 					continue;
 				type_code	type	= props[p].ctypes[c].pairs[f].type;
-				// no safe generic zero value for an arbitrary nested block
-				// (no schema for its own content - see MacroText.h). Every
-				// command with a "node" field declares "included_node" too
-				// (Indexer bookkeeping - it carries the referenced node's
-				// data so its @id resolves at replay time, never read by
-				// the command's own Do() - see Insert.h's kInsertProperties
-				// comment), but "Insert" is the one command actually meant
-				// to introduce a new node by hand (user report/single
-				// source of truth) - offering it here on e.g. AddAttribute
-				// or Select would let a macro claim to "insert" a node
-				// nobody would ever expect it to.
-				if (type == B_MESSAGE_TYPE) {
-					bool	isInsertNode	= (strcmp(fieldName,"included_node") == 0)
-						&& (strcmp(command->Name(),"Insert") == 0);
-					if (!isInsertNode)
-						continue;
+				// every command with a "node" field declares "included_node"
+				// too (Indexer bookkeeping, never read by its Do()), but only
+				// Insert is meant to introduce a node by hand. Any other
+				// block starts empty.
+				if ((strcmp(fieldName,"included_node") == 0)
+						&& (strcmp(command->Name(),"Insert") != 0))
+					continue;
+				// what AddAttribute adds is an attribute block - the
+				// valueContainer around it is built to match
+				if ((type == B_MESSAGE_TYPE) && (strcmp(command->Name(),"AddAttribute") == 0)
+						&& (strcmp(fieldName,"valueContainer") == 0)) {
+					BMessage	templ('mvKA');
+					templ.AddBool("valueContainer",true);
+					AddFieldTargetFields(&templ,topLevelIndex,path);
+					menu->AddItem(AttributeKindMenu(B_TRANSLATE("Attribute"),templ,-1));
+					continue;
 				}
 				BString	label(fieldName);
 				label	<< " (" << TypeDisplayName(type) << ")";
@@ -905,8 +994,16 @@ void MacroOutlineView::ShowFreeformAddFieldMenu(BPoint screenWhere, int32 topLev
 		{ "int32", B_INT32_TYPE }, { "int64", B_INT64_TYPE }, { "float", B_FLOAT_TYPE },
 		{ "double", B_DOUBLE_TYPE }, { "string", B_STRING_TYPE },
 		{ "point", B_POINT_TYPE }, { "rect", B_RECT_TYPE },
+		{ "block", B_MESSAGE_TYPE },
 	};
 	BPopUpMenu	*menu	= new BPopUpMenu("addFreeformField",false,false);
+	// a node's data holds its attributes: offer those first
+	if (!path.empty() && (path.back().field == P_C_NODE_DATA)) {
+		BMessage	templ('mvKA');
+		AddFieldTargetFields(&templ,topLevelIndex,path);
+		menu->AddItem(AttributeKindMenu(B_TRANSLATE("Attribute"),templ,-1));
+		menu->AddSeparatorItem();
+	}
 	for (size_t i = 0; i < sizeof(kTypes)/sizeof(kTypes[0]); i++) {
 		BMessage	*msg	= new BMessage('mvFT');
 		msg->AddInt32("type",(int32)kTypes[i].type);
@@ -1483,6 +1580,15 @@ void MacroOutlineView::MouseDown(BPoint where)
 		down->SetEnabled((selectedCount <= 1) && (i < count-1));
 		menu->AddItem(up);
 		menu->AddItem(down);
+		if ((item->Kind() == kRowBlock) && (selectedCount <= 1)) {
+			BMessage	owner	= MacroOutlineView_ResolveContainer(&fCommands,item->TopLevelIndex(),item->ContainerPath());
+			BMessage	block;
+			owner.FindMessage(item->FieldName().String(),item->FieldIndex(),&block);
+			BMessage	templ('mvKC');
+			templ.AddInt32("row",index);
+			menu->AddSeparatorItem();
+			menu->AddItem(AttributeKindMenu(B_TRANSLATE("Attribute kind"),templ,(int32)block.what));
+		}
 		menu->AddSeparatorItem();
 		menu->AddItem(new BMenuItem(deleteLabel.String(),new BMessage('mvDl')));
 		menu->AddSeparatorItem();
@@ -1646,6 +1752,39 @@ void MacroOutlineView::MessageReceived(BMessage *message)
 			int32		topLevel	= ReadFieldTargetMessage(message,&path);
 			if (message->FindString("field",&field) == B_OK)
 				AddNamedField(topLevel,path,field,(type_code)type);
+			return;
+		}
+		case 'mvKA': {
+			// an attribute block of the picked kind, its name typed in
+			int32		kind	= 0;
+			MacroPath	path;
+			int32		topLevel	= ReadFieldTargetMessage(message,&path);
+			if (message->FindInt32("kind",&kind) != B_OK)
+				return;
+			const char	*label	= B_TRANSLATE("Attribute");
+			for (size_t i = 0; i < sizeof(kAttributeKinds)/sizeof(kAttributeKinds[0]); i++) {
+				if ((int32)kAttributeKinds[i].what == kind)
+					label	= B_TRANSLATE_NOCOLLECT(kAttributeKinds[i].label);
+			}
+			InputRequest	*request	= new InputRequest(B_TRANSLATE("Add attribute"),
+				B_TRANSLATE("Name"),label,B_TRANSLATE("OK"),B_TRANSLATE("Cancel"));
+			char	*input		= NULL;
+			bool	accepted	= (request->Go(&input) < 1) && (input != NULL) && (input[0] != '\0');
+			BString	name(accepted ? input : "");
+			delete[] input;
+			request->Lock();
+			request->Quit();
+			if (accepted)
+				AddAttributeBlock(topLevel,path,(uint32)kind,name.String(),
+					message->GetBool("valueContainer",false));
+			return;
+		}
+		case 'mvKC': {
+			int32	row		= -1;
+			int32	kind	= 0;
+			if ((message->FindInt32("row",&row) == B_OK)
+					&& (message->FindInt32("kind",&kind) == B_OK))
+				SetBlockKind(row,(uint32)kind);
 			return;
 		}
 		case 'mvFT': {

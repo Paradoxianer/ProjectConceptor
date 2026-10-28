@@ -71,7 +71,15 @@ status line says so and the old value stays.
 **Adding a field:** click **+ Add field** below a command; the menu
 lists that command's fields. Fields that can repeat (like Select's
 `node`) stay in the menu after you've added them once. Inside nested
-data you can add a field of any type under a name of your choice.
+data you can add a field of any type, or an empty block, under a name of
+your choice.
+
+**Attributes:** a node's attributes are blocks too, and their kind (text,
+number, date, …) shows in brackets after the name. AddAttribute's
+`valueContainer` and a node's `Node::Data` offer **Attribute** in the
+**+ Add field** menu: pick the kind, type the name, and the block comes
+with a value to start from. Right-click a block to change its kind with
+**Attribute kind**; its value stays as it is, so change that to match.
 
 **Adding a command:** drag it from the reference on the right into the
 tree. Drop it on the upper or lower half of a row to place it before or
@@ -192,7 +200,7 @@ Fields marked *optional* can be left out.
 
 | Command | Fields | What it does |
 |---|---|---|
-| AddAttribute | `node` or `Node::selected=true`; `valueContainer` (`name`, `subgroup`, `type`, `newAttribute`) | Adds an attribute to the node(s). |
+| AddAttribute | `node` or `Node::selected=true`; `valueContainer` (`name`, `subgroup="Node::Data"`, `type=message`, `~newAttribute` with `what`, `Name`, `Value`) | Adds an attribute to the node(s); `name` and `Name` are the same. |
 | Ask | `variable`; *optional* `prompt`, `default` | Shows a dialog and stores the answer as text. |
 | Batch | - | Runs its steps as one undo step. |
 | Calculate | `left`, `operator`, `right`, `resultVariable` | `+ - * / mod min max` combine `left` and `right`; `round floor ceil abs` use only `left`. |
@@ -325,7 +333,9 @@ the one in the examples above:
   `$name` (a variable).
 - `~name` starts nested data; its fields follow one level deeper.
   Inside it, `what=class`, `what=group` or `what=connection` says what
-  kind of object it is.
+  kind of object it is; for an attribute it's the kind: `what=text`,
+  `bool`, `note`, `number`, `choice`, `date`, `color`, `link`, `file` or
+  `image`. A name with spaces is written in quotes: `~"Due date"`.
 - Lines starting with `#` are comments.
 - `raw:...` values preserve data that has no readable form; they're not
   meant to be written by hand.

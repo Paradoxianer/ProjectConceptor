@@ -2595,6 +2595,39 @@ void MacroTextTest::FindComparesTypedAttributes(void)
 }
 
 
+
+void MacroTextTest::AddAttributeExampleAddsAnAttributeBlock(void)
+{
+	// the example adds what the graph shows: a block of a kind, named
+	// like its key, the kind written as a word
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BMessage	*a		= AddTestNode(doc,"A");
+	SelectOnly(doc,a);
+	BList		parsed;
+	BString		error;
+	BString		text(CommandExampleText("AddAttribute"));
+	text << "\n";
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+	PCommand	*command	= doc->GetCommandManager()->GetPCommand((char*)"AddAttribute");
+	command->Do(doc,(BMessage*)parsed.ItemAt(0));
+
+	BMessage	data,attribute;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,a->FindMessage(P_C_NODE_DATA,&data));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,data.FindMessage("Priority",&attribute));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NUMBER,attribute.what);
+	CPPUNIT_ASSERT(BString("Priority") == attribute.GetString(P_C_ATTRIBUTE_NAME,""));
+	CPPUNIT_ASSERT_EQUAL(1.0f,attribute.GetFloat(P_C_ATTRIBUTE_VALUE,0));
+
+	BList		commands;
+	commands.AddItem(parsed.ItemAt(0));
+	BString		written;
+	SerializeCommands(&commands,&written);
+	CPPUNIT_ASSERT_MESSAGE(written.String(),written.FindFirst("what=number") >= 0);
+	for (int32 i = 0; i < parsed.CountItems(); i++)
+		delete (BMessage*)parsed.ItemAt(i);
+}
+
 void MacroTextTest::FindRefusesUnknownOperator(void)
 {
 	PDocument	*doc	= NewRegisteredTestDocument();

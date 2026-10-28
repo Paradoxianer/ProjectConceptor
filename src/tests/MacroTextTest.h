@@ -83,6 +83,7 @@ public:
 	void FieldNamesWithSpacesSurviveMacroText(void);
 	void FindComparesTypedAttributes(void);
 	void FindRefusesUnknownOperator(void);
+	void AddAttributeExampleAddsAnAttributeBlock(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -152,6 +153,7 @@ public:
 	CPPUNIT_TEST(FieldNamesWithSpacesSurviveMacroText);
 	CPPUNIT_TEST(FindComparesTypedAttributes);
 	CPPUNIT_TEST(FindRefusesUnknownOperator);
+	CPPUNIT_TEST(AddAttributeExampleAddsAnAttributeBlock);
 	CPPUNIT_TEST_SUITE_END();
 };
 

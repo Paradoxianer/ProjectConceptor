@@ -53,6 +53,20 @@ static void AppendDefaultValueFor(type_code type, BString *out)
 static void AppendValueContainerSnippet(const char *commandName, BString *out)
 {
 	*out << "  ~valueContainer\n";
+	if (strcmp(commandName,"AddAttribute") == 0) {
+		// a node's attributes are blocks {Name, Value, ...}, their what
+		// the kind - a bare value would be data the graph never shows
+		*out << "    name=\"Attribute\"\n";
+		*out << "    subgroup=\"Node::Data\"\n";
+		*out << "    type=message\n";
+		*out << "    ~newAttribute\n";
+		*out << "      # what: text bool note number choice date color "
+			"link file image\n";
+		*out << "      what=text\n";
+		*out << "      Name=\"Attribute\"\n";
+		*out << "      Value=\"\"\n";
+		return;
+	}
 	*out << "    name=\"\"\n";
 	if (strcmp(commandName,"RemoveAttribute") == 0) {
 		*out << "    index=0\n";
@@ -60,9 +74,7 @@ static void AppendValueContainerSnippet(const char *commandName, BString *out)
 		*out << "    # type: bool int8 int16 int32 int64 float double "
 			"string point rect message (or the raw number)\n";
 		*out << "    type=string\n";
-		const char	*valueField	= (strcmp(commandName,"AddAttribute") == 0)
-			? "newAttribute" : "newValue";
-		*out << "    " << valueField << "=\"\"\n";
+		*out << "    newValue=\"\"\n";
 	}
 	*out << "    # subgroup (optional, repeatable): nests into a sub-"
 		"BMessage first, e.g. subgroup=\"Node::Data\"\n";
