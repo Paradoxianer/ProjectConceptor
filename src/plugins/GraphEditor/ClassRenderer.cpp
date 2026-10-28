@@ -61,6 +61,23 @@ ClassRenderer::ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer):
 	ValueChanged();
 	initialized	= true;
 }
+
+ClassRenderer::~ClassRenderer()
+{
+	DeleteAttributes();
+	delete attributes;
+	delete name;
+	delete font;
+	delete sentTo;
+}
+
+void ClassRenderer::DeleteAttributes(void)
+{
+	for (uint32 i = 0; i < attributes->size(); i++)
+		delete (*attributes)[i];
+	attributes->clear();
+}
+
 void ClassRenderer::Init()
 {
 	TRACE();
@@ -95,11 +112,11 @@ void ClassRenderer::Init()
 	editMessage->AddPointer("node",container);
 
 	editMessage->AddString("Command::Name","ChangeValue");
-	BMessage	*valueContainer	= new BMessage();
-	valueContainer->AddString("name",P_C_NODE_NAME);
-	valueContainer->AddString("subgroup",P_C_NODE_DATA);
-	valueContainer->AddInt32("type",B_STRING_TYPE);
-	editMessage->AddMessage("valueContainer",valueContainer);
+	BMessage	valueContainer;
+	valueContainer.AddString("name",P_C_NODE_NAME);
+	valueContainer.AddString("subgroup",P_C_NODE_DATA);
+	valueContainer.AddInt32("type",B_STRING_TYPE);
+	editMessage->AddMessage("valueContainer",&valueContainer);
 	name						= new StringRenderer(editor,"",BRect(0,0,100,100), editMessage);
 	err 						= container->FindPointer("ProjectConceptor::doc",(void **)&doc);
 	sentTo						= new BMessenger(NULL,doc);
@@ -471,13 +488,13 @@ void ClassRenderer::MessageReceived(BMessage *message) {
 
 void ClassRenderer::ValueChanged() {
 	TRACE();
-	BMessage	*pattern		= new BMessage();
-	BMessage	*messageFont	= new BMessage();
-	BMessage	*data			= new BMessage();
+	BMessage	pattern;
+	BMessage	messageFont;
+	BMessage	data;
 	char		*newName		= NULL;
 
 	char		*attribName		= NULL;
-	BMessage	*attribMessage	= new BMessage();
+	BMessage	attribMessage;
 	uint32		type			= B_ANY_TYPE;
 	int32		count			= 0;
 
@@ -502,33 +519,33 @@ void ClassRenderer::ValueChanged() {
 	xRadius			= container->GetFloat(P_C_NODE_X_RADIUS,xRadius);
 	yRadius			= container->GetFloat(P_C_NODE_Y_RADIUS,yRadius);
 	attributeColumn	= container->GetFloat(P_C_NODE_ATTRIBUTE_COLUMN,attributeColumn);
-	if (container->FindMessage(P_C_NODE_PATTERN,pattern) != B_OK) {
-		container->AddMessage(P_C_NODE_PATTERN,editor->GetStandartPattern());
-		pattern = editor->GetStandartPattern();
+	if (container->FindMessage(P_C_NODE_PATTERN,&pattern) != B_OK) {
+		pattern	= *editor->GetStandartPattern();
+		container->AddMessage(P_C_NODE_PATTERN,&pattern);
 	}
-	if (container->FindMessage(P_C_NODE_FONT,messageFont) == B_OK) {
+	if (container->FindMessage(P_C_NODE_FONT,&messageFont) == B_OK) {
 		delete font;
-		font	= new AFont(messageFont);
+		font	= new AFont(&messageFont);
 	}
-	container->FindMessage(P_C_NODE_DATA,data);
-	pattern->FindInt32("FillColor",(int32 *)&fillColor);
+	container->FindMessage(P_C_NODE_DATA,&data);
+	pattern.FindInt32("FillColor",(int32 *)&fillColor);
 	if ((container->what == P_C_CLASS_TYPE)
-			&& (pattern->FindInt32("HighlightColor",(int32 *)&highlightColor) != B_OK)) {
+			&& (pattern.FindInt32("HighlightColor",(int32 *)&highlightColor) != B_OK)) {
 		// before HighlightColor the fill color was the band and the card
 		// was always the style's: keep that look, and give ChangeValue
 		// a field to replace
 		highlightColor	= fillColor;
 		editor->GetStandartPattern()->FindInt32("FillColor",(int32 *)&fillColor);
-		pattern->AddInt32("HighlightColor",*(int32 *)&highlightColor);
-		pattern->ReplaceInt32("FillColor",*(int32 *)&fillColor);
-		container->ReplaceMessage(P_C_NODE_PATTERN,pattern);
+		pattern.AddInt32("HighlightColor",*(int32 *)&highlightColor);
+		pattern.ReplaceInt32("FillColor",*(int32 *)&fillColor);
+		container->ReplaceMessage(P_C_NODE_PATTERN,&pattern);
 	}
 	rgb_color	color;
-	if (pattern->FindInt32("BorderColor",(int32 *)&color) == B_OK)
+	if (pattern.FindInt32("BorderColor",(int32 *)&color) == B_OK)
 		borderColor	= color;
-	if (pattern->FindInt32("HighColor",(int32 *)&textColor) != B_OK)
+	if (pattern.FindInt32("HighColor",(int32 *)&textColor) != B_OK)
 		editor->GetStandartPattern()->FindInt32("HighColor",(int32 *)&textColor);
-	penSize	= pattern->GetFloat("PenSize",penSize);
+	penSize	= pattern.GetFloat("PenSize",penSize);
 	// a real committed value just arrived (this is only ever called from
 	// a genuine P_C_VALUE_CHANGED, never from the preview path below) -
 	// any leftover preview from a picker session is now stale, drop it
@@ -543,7 +560,7 @@ void ClassRenderer::ValueChanged() {
 	}
 	shape.SetTo(&shapeMessage);
 	shape.Layout(frame);
-	data->FindString(P_C_NODE_NAME,(const char **)&newName);
+	data.FindString(P_C_NODE_NAME,(const char **)&newName);
 	name->SetString(newName);
 	const GraphStyle	&style	= editor->Style();
 	BFont	nameFont(be_bold_font);
@@ -557,15 +574,14 @@ void ClassRenderer::ValueChanged() {
 	name->SetFrame(BRect(content.left+padding-2,nameTop,content.right-padding,nameTop+12));
 	
 	
-	//delete all "old" Attribs
-	attributes->erase(attributes->begin(),attributes->end());
+	DeleteAttributes();
 	//and add all attribs we found
 	// every entry of a name gets its own row - AddAttribute appends, so
 	// a name may hold several values (#138)
-	for (int32 i = 0; data->GetInfo(B_MESSAGE_TYPE, i,(char **) &attribName, &type, &count) == B_OK; i++) {
+	for (int32 i = 0; data.GetInfo(B_MESSAGE_TYPE, i,(char **) &attribName, &type, &count) == B_OK; i++) {
 		for (int32 entry = 0; entry < count; entry++) {
-			if (data->FindMessage(attribName,entry,attribMessage) == B_OK)
-				InsertAttribute(attribName,attribMessage, entry);
+			if (data.FindMessage(attribName,entry,&attribMessage) == B_OK)
+				InsertAttribute(attribName,&attribMessage, entry);
 		}
 	}
 	container->FindPointer(P_C_NODE_PARENT, (void **)&parentNode);
@@ -896,11 +912,11 @@ void ClassRenderer::InsertAttribute(char *attribName,BMessage *attribute,int32 c
 	BMessage*	removeAttribMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 	removeAttribMessage->AddPointer("node",container);
 	removeAttribMessage->AddString("Command::Name","RemoveAttribute");
-	valueContainer	= new BMessage();
-	valueContainer->AddString("subgroup",P_C_NODE_DATA);
-	valueContainer->AddString("name",attribName);
-	valueContainer->AddInt32("index",count);
-	removeAttribMessage->AddMessage("valueContainer",valueContainer);
+	BMessage	removeContainer;
+	removeContainer.AddString("subgroup",P_C_NODE_DATA);
+	removeContainer.AddString("name",attribName);
+	removeContainer.AddInt32("index",count);
+	removeAttribMessage->AddMessage("valueContainer",&removeContainer);
 	AttributRenderer	*testRenderer	= new AttributRenderer(editor,attribute,attributeRect, editMessage,removeAttribMessage);
 	testRenderer->SetKey(attribName);
 	attributes->push_back(testRenderer);

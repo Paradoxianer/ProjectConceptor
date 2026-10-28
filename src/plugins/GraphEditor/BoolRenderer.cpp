@@ -30,6 +30,7 @@ BoolRenderer::BoolRenderer(GraphEditor *parentEditor,
 
 BoolRenderer::~BoolRenderer()
 {
+	delete changeMessage;
 }
 
 void BoolRenderer::Init()

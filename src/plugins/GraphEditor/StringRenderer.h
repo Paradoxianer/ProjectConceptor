@@ -26,6 +26,7 @@ class StringRenderer: public Renderer
 
 public:
 							StringRenderer(GraphEditor *parentEditor,char *forString,BRect stringRect,BMessage *message=NULL);
+	virtual					~StringRenderer();
 			void			ValueChanged(void){};
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetString(char *newString);

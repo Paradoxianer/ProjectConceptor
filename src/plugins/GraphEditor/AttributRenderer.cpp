@@ -41,11 +41,22 @@ AttributRenderer::AttributRenderer(GraphEditor *parentEditor,
 	SetAttribute(forAttribut);
 	
 }
+
+AttributRenderer::~AttributRenderer()
+{
+	delete name;
+	delete value;
+	delete attribut;
+	delete changeMessage;
+	delete deleteMessage;
+}
+
 void AttributRenderer::Init()
 {
 	TRACE();
 	name		= NULL;
 	value		= NULL;
+	attribut	= NULL;
 	showDelete	= false;
 	showName	= true;
 	columnWidth	= (frame.Width()-DELETER_WIDTH)*0.4f;
@@ -55,17 +66,21 @@ void AttributRenderer::SetAttribute(BMessage *newAttribut)
 {
 	TRACE();
 	char		*attribName	= NULL;
-	attribut = newAttribut;
+	// a copy: the caller reuses its message for the next row
+	delete attribut;
+	attribut	= new BMessage(*newAttribut);
+	delete name;
+	name		= NULL;
+	delete value;
+	value		= NULL;
 	if ( attribut->FindString("Name",(const char **)&attribName) == B_OK )
 	{	
-		if (name)
-			delete name;
 		BMessage	*nameChange		= new BMessage(*changeMessage);
-		BMessage	*valueContainer	= new BMessage();
-		nameChange->FindMessage("valueContainer",valueContainer);
-		valueContainer->AddString("name","Name");
-		valueContainer->AddInt32("type",B_STRING_TYPE);
-		nameChange->ReplaceMessage("valueContainer",valueContainer);
+		BMessage	valueContainer;
+		nameChange->FindMessage("valueContainer",&valueContainer);
+		valueContainer.AddString("name","Name");
+		valueContainer.AddInt32("type",B_STRING_TYPE);
+		nameChange->ReplaceMessage("valueContainer",&valueContainer);
 		name = new StringRenderer(editor, attribName, frame,nameChange);
 	}
 	switch(attribut->what) 
@@ -75,11 +90,11 @@ void AttributRenderer::SetAttribute(BMessage *newAttribut)
 			char	*attribValue	= NULL;
 			attribut->FindString("Value",(const char **)&attribValue);
 			BMessage	*valueChange	= new BMessage(*changeMessage);
-			BMessage	*valueContainer	= new BMessage();
-			valueChange->FindMessage("valueContainer",valueContainer);
-			valueContainer->AddString("name","Value");
-			valueContainer->AddInt32("type",B_STRING_TYPE);
-			valueChange->ReplaceMessage("valueContainer",valueContainer);
+			BMessage	valueContainer;
+			valueChange->FindMessage("valueContainer",&valueContainer);
+			valueContainer.AddString("name","Value");
+			valueContainer.AddInt32("type",B_STRING_TYPE);
+			valueChange->ReplaceMessage("valueContainer",&valueContainer);
 			value	= new StringRenderer(editor,attribValue,frame,valueChange);
 			break;
 		}
@@ -88,11 +103,11 @@ void AttributRenderer::SetAttribute(BMessage *newAttribut)
 			bool	attribValue	= false;
 			attribut->FindBool("Value",&attribValue);
 			BMessage	*valueChange	= new BMessage(*changeMessage);
-			BMessage	*valueContainer	= new BMessage();
-			valueChange->FindMessage("valueContainer",valueContainer);
-			valueContainer->AddString("name","Value");
-			valueContainer->AddInt32("type",B_BOOL_TYPE);
-			valueChange->ReplaceMessage("valueContainer",valueContainer);
+			BMessage	valueContainer;
+			valueChange->FindMessage("valueContainer",&valueContainer);
+			valueContainer.AddString("name","Value");
+			valueContainer.AddInt32("type",B_BOOL_TYPE);
+			valueChange->ReplaceMessage("valueContainer",&valueContainer);
 			value	= new BoolRenderer(editor,attribValue,frame,valueChange);	
 			break;
 		}
@@ -272,8 +287,7 @@ void AttributRenderer::MouseUp(BPoint where)
 		{
 			if (showDelete && delRect.Contains(where)){
 				//it was the deleter
-				BMessenger *sender	= new BMessenger(editor->BelongTo());
-				sender->SendMessage(deleteMessage); 
+				BMessenger(editor->BelongTo()).SendMessage(deleteMessage);
 			}
 		}
 	}

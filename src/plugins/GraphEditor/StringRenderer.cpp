@@ -27,6 +27,15 @@ StringRenderer::StringRenderer(GraphEditor *parentEditor,char *forString,BRect s
 	SetString(forString);
 	SetFrame(stringRect);
 }
+
+StringRenderer::~StringRenderer()
+{
+	delete changeMessage;
+	delete myString;
+	delete shortString;
+	delete editorFont;
+}
+
 void StringRenderer::Init()
 {
 	TRACE();
@@ -41,7 +50,7 @@ void StringRenderer::Init()
 void StringRenderer::SetString(char *newString)
 {
 	TRACE();
-	myString = new BString(newString);
+	myString->SetTo(newString);
 	if (shortString)	
 		delete shortString;
 	shortString	= new BString(*myString);

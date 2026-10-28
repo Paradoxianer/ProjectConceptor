@@ -37,6 +37,7 @@ class ClassRenderer: public Renderer
 
 public:
 							ClassRenderer(GraphEditor *parentEditor, BMessage *forContainer);
+	virtual					~ClassRenderer();
 				void		Draw(BView *drawOn, BRect updateRect);
 				void		MouseDown(BPoint where, int32 buttons =0,
 	                              int32 clicks =0,int32 modifiers =0);
@@ -84,6 +85,8 @@ public:
 protected:
 				void		Init();
 				void		InsertAttribute(char *attribName, BMessage *attribute,int32 count);
+				/** the rows are rebuilt on every change: drop the old ones */
+				void		DeleteAttributes(void);
 				/** where name and attributes go: the shape's text area */
 				BRect		ContentFrame(void) {return shape.TextFrame(frame);};
 				/** the four connection dots, on the shape's outline */

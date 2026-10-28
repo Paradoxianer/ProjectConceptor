@@ -28,6 +28,7 @@ class AttributRenderer: public Renderer
 
 public:
 							AttributRenderer(GraphEditor *parentEditor,BMessage *forAttribut,BRect attribRect,BMessage *chgMessage=NULL, BMessage *delMessage=NULL);
+	virtual					~AttributRenderer();
 			void			ValueChanged(void){};
 			void			Draw(BView *drawOn, BRect updateRect);
 			void			SetAttribute(BMessage *newAttribut);
