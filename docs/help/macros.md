@@ -171,8 +171,8 @@ Calculate
 - **Repeat** runs its steps `count` times.
 - **ForEach** runs its steps once for every node that is selected when
   it starts.
-- **If** runs its steps only if a search for `searchString` finds
-  something - the same search as Find, but it doesn't change the
+- **If** runs its steps only if a search finds something - the same
+  search as Find, text or comparison, but it doesn't change the
   selection.
 - **Batch** groups its steps into one undo step.
 - **Sleep** pauses for `milliseconds` - useful to watch a long macro.
@@ -197,11 +197,11 @@ Fields marked *optional* can be left out.
 | Batch | - | Runs its steps as one undo step. |
 | Calculate | `left`, `operator`, `right`, `resultVariable` | `+ - * / mod min max` combine `left` and `right`; `round floor ceil abs` use only `left`. |
 | ChangeValue | `node` or `Node::selected=true`; `valueContainer` (`name`, `subgroup`, `type`, `newValue`) | Changes one field of the node(s). |
-| Find | `searchString`; *optional* `scope` (`nodes`, `connections`, `both`), `setOperation` (`replace`, `add`, `subtract`, `intersect`) | Selects what contains the text, combined with the current selection as set by `setOperation`. |
+| Find | `searchString`, or `attribute`, `operator`, `value`; *optional* `scope` (`nodes`, `connections`, `both`), `setOperation` (`replace`, `add`, `subtract`, `intersect`) | Selects what contains the text - or whose attribute compares with `value` by `operator` (`==`, `!=`, `<`, `<=`, `>`, `>=`, `contains`; `attribute` empty: any, `name`: the node's name) - combined with the current selection as set by `setOperation`. |
 | ForEach | *optional* `nodeVariable` | Runs its steps once per selected node. |
 | GetValue | `node`, `valueContainer` (`name`, `subgroup`), `resultVariable`; *optional* `default` | Reads an attribute of the node into a variable. Missing attribute: `default` if given, otherwise an error. |
 | Group | `node`; *optional* `deselect` | Groups the selection under the given group node. |
-| If | `searchString`; *optional* `scope` | Runs its steps only if the search finds something. |
+| If | `searchString`, or `attribute`, `operator`, `value`; *optional* `scope` | Runs its steps only if the search finds something. |
 | Insert | `node` (with the node's data); *optional* `resultVariable` | Inserts nodes and connections. |
 | Layout | *optional* `direction` (`TB`, `LR`, ...), `engine` (`dot`, `neato`, `fdp`, `sfdp`, `circo`, `twopi`) | Automatic layout of the whole graph. |
 | Move | `dx`, `dy` | Moves the selection. |
@@ -254,6 +254,25 @@ Move pushes pass number `i` by `i` x 130 pixels to the right.
 A node written by hand like this needs only a name and a frame; it gets
 the default font and colors. Recorded and dragged-in Inserts bring
 their complete look.
+
+**Select everything over budget, and ask if some of it isn't done:**
+
+```
+Find
+  attribute="Budget"
+  operator=">"
+  value="1000"
+If
+  attribute="Status"
+  operator="!="
+  value="Done"
+  Ask
+    variable="answer"
+    prompt="Some nodes over budget aren't done yet."
+```
+
+Find selects every node whose number attribute "Budget" is over 1000,
+whatever its unit; If asks only when one of the nodes isn't done.
 
 **Add up "Costs" over everything connected to the selected node** -
 select a node first:

@@ -1,6 +1,10 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	3312933411
-Advanced Search	FindWindow		Căutare avansată
-Search	FindWindow		Căutare
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	1234331255
+Or compare an attribute	FindWindow		Sau compară un atribut
+Find: unknown operator \"%s\"	Find		Caută: operator necunoscut \"%s\"
+contains	FindWindow		conține
 Find	FindWindow		Căutare
 Cancel	FindWindow		Anulează
 OK	FindWindow		OK
+Node name	FindWindow		Numele nodului
+Search	FindWindow		Căutare
+Any attribute	FindWindow		Orice atribut

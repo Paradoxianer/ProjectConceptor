@@ -2468,3 +2468,96 @@ void MacroTextTest::MultiLineStringSurvivesMacroText(void)
 	for (int32 i = 0; i < parsed.CountItems(); i++)
 		delete (BMessage*)parsed.ItemAt(i);
 }
+
+
+static void AddTestAttribute(BMessage *node, const char *name, BMessage *attribute)
+{
+	BMessage	data;
+	node->FindMessage(P_C_NODE_DATA,&data);
+	attribute->AddString(P_C_ATTRIBUTE_NAME,name);
+	data.AddMessage(name,attribute);
+	node->ReplaceMessage(P_C_NODE_DATA,&data);
+}
+
+
+static void AddBudget(BMessage *node, float budget, const char *status,
+	const char *due, bool approved)
+{
+	BMessage	number(P_C_ATTRIBUTE_NUMBER);
+	number.AddFloat(P_C_ATTRIBUTE_VALUE,budget);
+	number.AddString(P_C_ATTRIBUTE_UNIT,"€");
+	AddTestAttribute(node,"Budget",&number);
+	BMessage	choice(P_C_ATTRIBUTE_CHOICE);
+	choice.AddString(P_C_ATTRIBUTE_VALUE,status);
+	choice.AddString(P_C_ATTRIBUTE_CHOICES,"Open\nDone");
+	AddTestAttribute(node,"Status",&choice);
+	BMessage	date(P_C_ATTRIBUTE_DATE);
+	date.AddString(P_C_ATTRIBUTE_VALUE,due);
+	AddTestAttribute(node,"Due",&date);
+	BMessage	yes(B_BOOL_TYPE);
+	yes.AddBool(P_C_ATTRIBUTE_VALUE,approved);
+	AddTestAttribute(node,"Approved",&yes);
+}
+
+
+void MacroTextTest::FindComparesTypedAttributes(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	AddBudget(AddTestNode(doc,"A"),1200,"Done","2026-11-15",true);
+	AddBudget(AddTestNode(doc,"B"),800,"Open","2026-10-01",false);
+	AddTestNode(doc,"C budget plan");
+	PCommand	*command	= doc->GetCommandManager()->GetPCommand((char*)"Find");
+	CPPUNIT_ASSERT(command != NULL);
+
+	struct { const char *attribute; const char *op; const char *value; const char *expected; } cases[] = {
+		{ "Budget",		">",		"1000",			"A" },
+		{ "budget",		"<=",		"800",			"B" },
+		{ "Budget",		"==",		"1200 €",		"A" },
+		{ "Status",		"==",		"done",			"A" },
+		{ "Status",		"!=",		"done",			"B" },
+		{ "Due",		"<",		"2026-11-01",	"B" },
+		{ "Approved",	"==",		"yes",			"A" },
+		{ "Approved",	"==",		"maybe",		"" },
+		{ "name",		"contains",	"PLAN",			"C budget plan" },
+		{ "",			"contains",	"budget",		"C budget plan" },
+		{ "",			"contains",	"€",			"AB" },
+		{ "Missing",	"==",		"x",			"" },
+	};
+	for (size_t i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+		doc->GetSelected()->MakeEmpty();
+		BMessage	settings;
+		settings.AddString("Command::Name","Find");
+		settings.AddString(P_C_FIND_ATTRIBUTE,cases[i].attribute);
+		settings.AddString(P_C_FIND_OPERATOR,cases[i].op);
+		settings.AddString(P_C_FIND_VALUE,cases[i].value);
+		command->Do(doc,&settings);
+		BString	which;
+		which << cases[i].attribute << " " << cases[i].op << " " << cases[i].value;
+		CPPUNIT_ASSERT_EQUAL_MESSAGE(which.String(),
+			std::string(cases[i].expected),std::string(SelectedNames(doc).String()));
+	}
+
+	// the plain text search finds values that aren't text too
+	doc->GetSelected()->MakeEmpty();
+	BMessage	settings;
+	settings.AddString("Command::Name","Find");
+	settings.AddString("searchString","1200");
+	command->Do(doc,&settings);
+	CPPUNIT_ASSERT(SelectedNames(doc) == "A");
+}
+
+
+void MacroTextTest::FindRefusesUnknownOperator(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	BMessage	*a		= AddTestNode(doc,"A");
+	SelectOnly(doc,a);
+	PCommand	*command	= doc->GetCommandManager()->GetPCommand((char*)"Find");
+	BMessage	settings;
+	settings.AddString("Command::Name","Find");
+	settings.AddString(P_C_FIND_OPERATOR,"~");
+	settings.AddString(P_C_FIND_VALUE,"A");
+	CPPUNIT_ASSERT(command->Do(doc,&settings) == NULL);
+	// the selection stays as it was
+	CPPUNIT_ASSERT(SelectedNames(doc) == "A");
+}

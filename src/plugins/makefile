@@ -61,6 +61,7 @@ bindcatalogs:
 	$(MAKE) -C AskCommand bindcatalogs
 	$(MAKE) -C FindCommand bindcatalogs
 	$(MAKE) -C GetValueCommand bindcatalogs
+	$(MAKE) -C IfCommand bindcatalogs
 	$(MAKE) -C GraphEditor bindcatalogs
 	$(MAKE) -C LayoutEditor bindcatalogs
 	$(MAKE) -C MacroEditor bindcatalogs

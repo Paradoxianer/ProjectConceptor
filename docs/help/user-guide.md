@@ -127,9 +127,17 @@ A note shows a little Markdown; the text itself stays plain:
 ## Search and bulk edits
 
 **Search &rarr; Find** looks for a string across every node's name and
-attribute text and selects every node that matches (replacing whatever
+attribute values and selects every node that matches (replacing whatever
 was selected before) - a quick way to gather up all the nodes that
 share something in common instead of clicking them one by one.
+
+Below it, **Or compare an attribute** picks nodes by one attribute:
+choose the attribute (or *Any attribute*, or *Node name*), how to
+compare - *contains*, =, ≠, <, ≤, >, ≥ - and type the value. Numbers
+compare as numbers (`Budget > 1000`), dates in time
+(`Due < 2026-12-01`), yes/no as `yes` or `no`, anything else as text
+without regard to upper and lower case. The selection follows as you
+type; **OK** keeps it.
 
 That selection then doubles as a bulk edit: with several nodes
 selected, changing an attribute's value on one of them applies the

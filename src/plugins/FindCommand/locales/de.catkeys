@@ -1,6 +1,10 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	3312933411
-Advanced Search	FindWindow		Erweiterte Suche
-Search	FindWindow		Suchen
+1	German	application/x-vnd.ProjectConceptor-plugin	1234331255
+Or compare an attribute	FindWindow		Oder ein Attribut vergleichen
+Find: unknown operator \"%s\"	Find		Suchen: unbekannter Operator \"%s\"
+contains	FindWindow		enthält
 Find	FindWindow		Suchen
 Cancel	FindWindow		Abbrechen
 OK	FindWindow		OK
+Node name	FindWindow		Knotenname
+Search	FindWindow		Suchen
+Any attribute	FindWindow		Beliebiges Attribut

@@ -5,6 +5,7 @@
  */
 #include "PCommand.h"
 #include "PDocument.h"
+#include "NodeSearch.h"
 
 class Find : public PCommand
 {
@@ -23,10 +24,11 @@ public:
 
 protected:
 	/** `scope` is one of "nodes" (default), "connections", "both" - see
-	 * kFindScopeNodes/Connections/Both in Find.cpp. The actual per-node
-	 * string search itself is NodeSearch.h's NodeMatchesSearch(), shared
+	 * kFindScopeNodes/Connections/Both in Find.cpp. With a criterion the
+	 * typed search, else the text search - both in NodeSearch.h, shared
 	 * with the If command (#135) via libProjectConceptor.so. */
-	virtual	BList*			FindNodes(PDocument *doc,BString *searchTerm,const BString &scope);
+	virtual	BList*			FindNodes(PDocument *doc,const BString &searchTerm,
+								const SearchCriterion *criterion,const BString &scope);
 
 	/*virtual	void			DoFind(PDocument *doc ,BRect *rect);
 	virtual	void			DoFind(PDocument *doc ,BMessage *container);

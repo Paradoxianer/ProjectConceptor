@@ -1,6 +1,10 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	3312933411
-Advanced Search	FindWindow		Napredno pretraživanje
-Search	FindWindow		Traži
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	1234331255
+Or compare an attribute	FindWindow		Ili usporedi atribut
+Find: unknown operator \"%s\"	Find		Traži: nepoznati operator \"%s\"
+contains	FindWindow		sadrži
 Find	FindWindow		Nađi
 Cancel	FindWindow		Otkaži
 OK	FindWindow		U redu
+Node name	FindWindow		Naziv čvora
+Search	FindWindow		Traži
+Any attribute	FindWindow		Bilo koji atribut

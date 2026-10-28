@@ -1,7 +1,12 @@
+#include <Catalog.h>
+
 #include "If.h"
 #include "NodeSearch.h"
 #include "PCommandManager.h"
 #include "ProjectConceptorDefs.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "If"
 
 
 If::If():PCommand()
@@ -14,10 +19,13 @@ static const char* const kIfScopeBoth			= "both";
 
 static const property_info kIfProperties[] = {
 	{ "If", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
-		"Runs its subPCommand children only if searchString is found - "
+		"Runs its subPCommand children only if searchString is found, or "
+		"something matches attribute/operator/value - "
 		"scope: nodes/connections/both (default nodes), same semantics as "
 		"Find. Never changes the selection itself, unlike Find.", 0, {0},
-		{ { { {"searchString", B_STRING_TYPE}, {"scope", B_STRING_TYPE} } } } },
+		{ { { {"searchString", B_STRING_TYPE}, {"attribute", B_STRING_TYPE},
+			  {"operator", B_STRING_TYPE}, {"value", B_STRING_TYPE},
+			  {"scope", B_STRING_TYPE} } } } },
 };
 
 const property_info* If::PropertyInfo(int32 *count)
@@ -37,16 +45,31 @@ BMessage* If::Do(PDocument *doc, BMessage *settings)
 	if (settings->FindString("scope",&scope) != B_OK)
 		scope	= kIfScopeNodes;
 
+	SearchCriterion	criterion;
+	status_t		typed	= ReadSearchCriterion(*settings,&criterion);
+	if (typed == B_BAD_VALUE) {
+		BString	error;
+		error.SetToFormat(B_TRANSLATE("If: unknown operator \"%s\""),
+			criterion.op.String());
+		manager->AddPlaybackError(error);
+	}
+
 	bool	matched	= false;
-	if (searchString.Length() > 0) {
-		if ((scope == kIfScopeNodes) || (scope == kIfScopeBoth)) {
-			BList	*matches	= FindMatchingNodes(doc->GetAllNodes(),searchString);
-			matched	= matched || (matches->CountItems() > 0);
-			delete matches;
-		}
-		if (!matched && ((scope == kIfScopeConnections) || (scope == kIfScopeBoth))) {
-			BList	*matches	= FindMatchingNodes(doc->GetAllConnections(),searchString);
-			matched	= matched || (matches->CountItems() > 0);
+	BList	*lists[2]	= { NULL, NULL };
+	if ((scope == kIfScopeNodes) || (scope == kIfScopeBoth))
+		lists[0]	= doc->GetAllNodes();
+	if ((scope == kIfScopeConnections) || (scope == kIfScopeBoth))
+		lists[1]	= doc->GetAllConnections();
+	for (int32 l = 0; (l < 2) && !matched; l++) {
+		if (lists[l] == NULL)
+			continue;
+		BList	*matches	= NULL;
+		if (typed == B_OK)
+			matches	= FindNodesMatchingCriterion(lists[l],criterion);
+		else if ((typed == B_NAME_NOT_FOUND) && (searchString.Length() > 0))
+			matches	= FindMatchingNodes(lists[l],searchString);
+		if (matches != NULL) {
+			matched	= (matches->CountItems() > 0);
 			delete matches;
 		}
 	}

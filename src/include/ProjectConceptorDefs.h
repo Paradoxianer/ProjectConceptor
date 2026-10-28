@@ -354,6 +354,10 @@ extern const char*		P_C_ATTRIBUTE_NAME;		//			= "Name"
 extern const char*		P_C_ATTRIBUTE_VALUE;	//			= "Value"
 extern const char*		P_C_ATTRIBUTE_UNIT;		//			= "Unit"
 extern const char*		P_C_ATTRIBUTE_CHOICES;	//			= "Choices"
+/** a typed search criterion of Find and If (#134), see NodeSearch.h */
+extern const char*		P_C_FIND_ATTRIBUTE;		//			= "attribute"
+extern const char*		P_C_FIND_OPERATOR;		//			= "operator"
+extern const char*		P_C_FIND_VALUE;			//			= "value"
 /** Resize: how far the left/top edges move, besides dx/dy for right/bottom */
 extern const char*		P_C_RESIZE_LEFT;	//				= "dleft"
 extern const char*		P_C_RESIZE_TOP;		//				= "dtop"

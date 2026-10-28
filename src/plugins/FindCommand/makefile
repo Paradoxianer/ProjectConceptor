@@ -65,6 +65,7 @@ SYSTEM_INCLUDE_PATHS = /boot/home/develop/haiku/headers/private/interface
 LOCAL_INCLUDE_PATHS = \
 		../../include \
 		../../include/plugins \
+		../../app/Commands \
 		../../app/Tools
 
 #	specify the level of optimization that you desire

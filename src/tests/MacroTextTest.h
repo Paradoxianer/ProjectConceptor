@@ -80,6 +80,8 @@ public:
 
 	void ShapeChangeSurvivesMacroText(void);
 	void MultiLineStringSurvivesMacroText(void);
+	void FindComparesTypedAttributes(void);
+	void FindRefusesUnknownOperator(void);
 
 	CPPUNIT_TEST_SUITE(MacroTextTest);
 	CPPUNIT_TEST(RoundTripsInsertWithNodeRef);
@@ -146,6 +148,8 @@ public:
 	CPPUNIT_TEST(MoveCommandReordersTopLevelSiblings);
 	CPPUNIT_TEST(ShapeChangeSurvivesMacroText);
 	CPPUNIT_TEST(MultiLineStringSurvivesMacroText);
+	CPPUNIT_TEST(FindComparesTypedAttributes);
+	CPPUNIT_TEST(FindRefusesUnknownOperator);
 	CPPUNIT_TEST_SUITE_END();
 };
 

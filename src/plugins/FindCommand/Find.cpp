@@ -1,9 +1,14 @@
 #include <String.h>
 
+#include <Catalog.h>
+
 #include "Find.h"
 #include "FindWindow.h"
-#include "NodeSearch.h"
+#include "PCommandManager.h"
 #include "ProjectConceptorDefs.h"
+
+#undef B_TRANSLATION_CONTEXT
+#define B_TRANSLATION_CONTEXT "Find"
 
 
 Find::Find():PCommand()
@@ -29,12 +34,18 @@ static const char* const kFindOpIntersect			= "intersect";
 
 static const property_info kFindProperties[] = {
 	{ "Find", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
-		"Selects nodes/connections containing searchString in a string "
-		"field. scope: nodes/connections/both (default nodes). "
+		"Selects nodes/connections containing searchString in any value. "
+		"Or, with operator (== != < <= > >= contains), those whose "
+		"attribute (a name, \"name\" for the node's, empty for any) "
+		"compares so with value - numbers as numbers, dates in time. "
+		"scope: nodes/connections/both (default nodes). "
 		"setOperation: replace/add/subtract/intersect against the current "
 		"selection (default replace).", 0, {0},
+		// at most five fields per compound type
 		{ { { {"searchString", B_STRING_TYPE}, {"scope", B_STRING_TYPE},
-			  {"setOperation", B_STRING_TYPE} } } } },
+			  {"setOperation", B_STRING_TYPE} } },
+		  { { {"attribute", B_STRING_TYPE}, {"operator", B_STRING_TYPE},
+			  {"value", B_STRING_TYPE} } } } },
 };
 
 const property_info* Find::PropertyInfo(int32 *count)
@@ -89,8 +100,17 @@ BMessage* Find::Do(PDocument *doc, BMessage *settings)
 	set<BMessage*>	*changed			= doc->GetChangedNodes();
 	BMessage		*undoMessage		= new BMessage();
 
+	SearchCriterion	criterion;
+	status_t		typed	= ReadSearchCriterion(*settings,&criterion);
+	if (typed == B_BAD_VALUE) {
+		BString	error;
+		error.SetToFormat(B_TRANSLATE("Find: unknown operator \"%s\""),
+			criterion.op.String());
+		manager->AddPlaybackError(error);
+		return NULL;
+	}
 	//if there is no findString we will show a window wich will generate a proper "searchString command on its own :)
-	if (settings->FindString("searchString",&findString) != B_OK) {
+	if ((typed != B_OK) && (settings->FindString("searchString",&findString) != B_OK)) {
 		FindWindow *findWindow = new FindWindow(doc);
 		findWindow->Show();
 		return NULL;
@@ -121,7 +141,7 @@ BMessage* Find::Do(PDocument *doc, BMessage *settings)
 	for (int32 i=0;i<selected->CountItems();i++)
 		previouslySelected.insert((BMessage*)selected->ItemAt(i));
 
-	BList	*foundList	= FindNodes(doc,&findString,scope);
+	BList	*foundList	= FindNodes(doc,findString,(typed == B_OK) ? &criterion : NULL,scope);
 	set<BMessage*>	found;
 	for (int32 i=0;i<foundList->CountItems();i++)
 		found.insert((BMessage*)foundList->ItemAt(i));
@@ -179,19 +199,22 @@ void Find::DetachedFromManager(void)
 {
 }
 
-BList* Find::FindNodes(PDocument *doc,BString *search,const BString &scope)
+BList* Find::FindNodes(PDocument *doc,const BString &search,
+	const SearchCriterion *criterion,const BString &scope)
 {
 	BList	*nodesFound	= new BList();
-	if ((scope == kFindScopeNodes) || (scope == kFindScopeBoth)) {
-		BList	*matches	= FindMatchingNodes(doc->GetAllNodes(),*search);
-		for (int32 i=0;i<matches->CountItems();i++)
-			nodesFound->AddItem(matches->ItemAt(i));
-		delete matches;
-	}
-	if ((scope == kFindScopeConnections) || (scope == kFindScopeBoth)) {
-		BList	*matches	= FindMatchingNodes(doc->GetAllConnections(),*search);
-		for (int32 i=0;i<matches->CountItems();i++)
-			nodesFound->AddItem(matches->ItemAt(i));
+	BList	*lists[2]	= { NULL, NULL };
+	if ((scope == kFindScopeNodes) || (scope == kFindScopeBoth))
+		lists[0]	= doc->GetAllNodes();
+	if ((scope == kFindScopeConnections) || (scope == kFindScopeBoth))
+		lists[1]	= doc->GetAllConnections();
+	for (int32 l = 0; l < 2; l++) {
+		if (lists[l] == NULL)
+			continue;
+		BList	*matches	= (criterion != NULL)
+			? FindNodesMatchingCriterion(lists[l],*criterion)
+			: FindMatchingNodes(lists[l],search);
+		nodesFound->AddList(matches);
 		delete matches;
 	}
 	return nodesFound;

@@ -364,6 +364,14 @@ void PDocument::MessageReceived(BMessage* message) {
 			searchMessage->AddString("Command::Name","Find");
 			if (message->FindString("searchString",searchString)==B_OK)
 				searchMessage->AddString("searchString",*searchString);
+			// FindWindow's attribute comparison (#134)
+			const char	*criterionFields[]	= { P_C_FIND_ATTRIBUTE,
+				P_C_FIND_OPERATOR, P_C_FIND_VALUE };
+			for (int32 i = 0; i < 3; i++) {
+				const char	*field	= NULL;
+				if (message->FindString(criterionFields[i],&field) == B_OK)
+					searchMessage->AddString(criterionFields[i],field);
+			}
 			// forwarded, not hardcoded - this handler serves both
 			// FindWindow's 'live' case (shadow=true, one per keystroke -
 			// must never land in a recording) and its 'ok' case (no

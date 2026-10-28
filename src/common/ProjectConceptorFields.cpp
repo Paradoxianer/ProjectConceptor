@@ -44,6 +44,9 @@ const char*		P_C_ATTRIBUTE_NAME				= "Name";
 const char*		P_C_ATTRIBUTE_VALUE				= "Value";
 const char*		P_C_ATTRIBUTE_UNIT				= "Unit";
 const char*		P_C_ATTRIBUTE_CHOICES			= "Choices";
+const char*		P_C_FIND_ATTRIBUTE				= "attribute";
+const char*		P_C_FIND_OPERATOR				= "operator";
+const char*		P_C_FIND_VALUE					= "value";
 const char*		P_C_RESIZE_LEFT					= "dleft";
 const char*		P_C_RESIZE_TOP					= "dtop";
 

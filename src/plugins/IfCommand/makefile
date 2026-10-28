@@ -11,7 +11,7 @@ SRCS= 	If.cpp \
 
 RSRCS=
 
-LIBS= be ../../../$(APP_DIR)/libProjectConceptor.so
+LIBS= be localestub ../../../$(APP_DIR)/libProjectConceptor.so
 
 LIBPATHS=
 
@@ -22,6 +22,8 @@ LOCAL_INCLUDE_PATHS = \
 		../../include/plugins \
 		../../app/Commands \
 		../../app/Tools
+
+LOCALES = de en es fr fur hr ro sv
 
 COMPILER_FLAGS =
 

@@ -1,6 +1,10 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	3312933411
-Advanced Search	FindWindow		Ricercje avanzade
-Search	FindWindow		Cîr
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	1234331255
+Or compare an attribute	FindWindow		O confronte un atribût
+Find: unknown operator \"%s\"	Find		Cîr: operadôr no cognossût \"%s\"
+contains	FindWindow		al ten
 Find	FindWindow		Cjate
 Cancel	FindWindow		Anule
 OK	FindWindow		Va ben
+Node name	FindWindow		Non dal grop
+Search	FindWindow		Cîr
+Any attribute	FindWindow		Cualsisei atribût

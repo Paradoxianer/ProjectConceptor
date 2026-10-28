@@ -22,4 +22,26 @@ bool NodeMatchesSearch(BMessage *node, const BString &search);
  * Find::FindNodes()). */
 BList* FindMatchingNodes(BList *all, const BString &search);
 
+/** A typed search (#134): an attribute of a node compared to a value.
+ * attribute is an attribute's name, "name" for the node's own name, or
+ * empty for any of them; case doesn't matter. op is one of ==, !=, <,
+ * <=, >, >= or "contains". Numbers - a number attribute, or text that is a
+ * number on both sides - compare as numbers, yes/no as true/false (also
+ * yes/no/1/0), everything else as text without regard to case, so dates
+ * (YYYY-MM-DD) compare in time. "contains" looks for value in the text. */
+struct SearchCriterion {
+	BString		attribute;
+	BString		op;
+	BString		value;
+};
+
+/** the criterion in a Find or If command's settings; B_NAME_NOT_FOUND
+ * without an operator, B_BAD_VALUE for an unknown one */
+status_t	ReadSearchCriterion(const BMessage &settings, SearchCriterion *criterion);
+
+bool		NodeMatchesCriterion(BMessage *node, const SearchCriterion &criterion);
+
+/** like FindMatchingNodes(), for a criterion */
+BList*		FindNodesMatchingCriterion(BList *all, const SearchCriterion &criterion);
+
 #endif
