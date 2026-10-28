@@ -367,7 +367,10 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 	vector<BPoint>	outline;
 	vector<BPoint>	band;
 	shape.Outline(radius,&outline);
-	shape.AccentBand(outline,style.stripeHeight,&band);
+	// the border is stroked centered on the outline; half of it lies on
+	// the band, so the band grows by that much to stay visible
+	float	borderWidth	= BorderWidth();
+	shape.AccentBand(outline,style.stripeHeight + borderWidth/2,&band);
 	if (outline.size() >= 3) {
 		drawOn->SetHighColor(cardColor);
 		drawOn->FillPolygon(&outline[0],outline.size());
@@ -375,8 +378,7 @@ void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
 			drawOn->SetHighColor(bandColor);
 			drawOn->FillPolygon(&band[0],band.size());
 		}
-		// older documents carry a pen size of 0
-		drawOn->SetPenSize(penSize < 1.0f ? 1.0f : penSize);
+		drawOn->SetPenSize(borderWidth);
 		drawOn->SetHighColor(CardBorderColor(style));
 		drawOn->StrokePolygon(&outline[0],outline.size(),true);
 	}
@@ -511,7 +513,7 @@ void ClassRenderer::ValueChanged() {
 	BRect	content		= ContentFrame();
 	// a shape's text area already keeps clear of its outline
 	float	padding		= shape.HasPath() ? style.paddingX/3 : style.paddingX;
-	float	nameTop		= content.top+style.stripeHeight+(style.paddingY/2);
+	float	nameTop		= content.top+style.stripeHeight+BorderWidth()/2+(style.paddingY/2);
 	name->SetFrame(BRect(content.left+padding-2,nameTop,content.right-padding,nameTop+12));
 	
 	
@@ -891,4 +893,12 @@ void ClassRenderer::AdjustParents(BMessage* theParent, BMessage *command) {
 			tmpParent->FindPointer(P_C_NODE_PARENT, (void **)&tmpParent);
 		}
 	}
+}
+
+
+float
+ClassRenderer::BorderWidth() const
+{
+	// older documents carry a pen size of 0
+	return penSize < 1.0f ? 1.0f : penSize;
 }

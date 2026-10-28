@@ -100,6 +100,7 @@ protected:
 				/** the card's border: a custom border color, else the style's */
 				rgb_color	CardBorderColor(const GraphStyle &style);
 				rgb_color	CardFillColor(const GraphStyle &style);
+				float		BorderWidth() const;
 				/** a custom text color, else the style's */
 				rgb_color	TextColor(const GraphStyle &style);
 				void		AdjustParents(BMessage* theParent, BMessage *command);
