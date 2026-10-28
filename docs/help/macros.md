@@ -3,15 +3,15 @@
 A macro is a list of commands - insert nodes, select, move, change an
 attribute, lay out the graph, ... - that ProjectConceptor plays back on
 the current document. Macros can be recorded while you work, built and
-edited in the **MacroEditor** tab, and use loops, conditions and
+edited in the **Macros** tab, and use loops, conditions and
 variables. They are saved with the document and can be exported to a
 text file.
 
-![The MacroEditor tab](screenshots/10-macro-editor.png)
+![The Macros tab](screenshots/10-macro-editor.png)
 
 - [Quick start](#quick-start)
 - [The Macro menu](#the-macro-menu)
-- [The MacroEditor tab](#the-macroeditor-tab)
+- [The Macros tab](#the-macros-tab)
 - [Recording](#recording)
 - [Playing](#playing)
 - [Variables](#variables)
@@ -29,7 +29,7 @@ text file.
 the graph, choose **Macro > Stop recording** and give the macro a name.
 It now appears under **Macro > Play**.
 
-**Build one:** choose **Macro > New**, switch to the **MacroEditor**
+**Build one:** choose **Macro > New**, switch to the **Macros**
 tab and drag commands from the list on the right into the tree in the
 middle. Click a value to change it. Play it with **Macro > Play**.
 
@@ -39,15 +39,15 @@ middle. Click a value to change it. Play it with **Macro > Play**.
 |---|---|
 | Start recording / Stop recording | Records every edit in between as a new macro; you're asked for a name when you stop. |
 | Play | Lists this document's macros - choose one to play it. |
-| New | Creates an empty macro to build in the MacroEditor tab. |
+| New | Creates an empty macro to build in the Macros tab. |
 | Open | Imports a macro from a text file (see [Macro files](#macro-files)). A macro with the same name is replaced. |
-| Save | Exports the macro selected in the MacroEditor tab to a text file. |
-| Rename / Duplicate / Delete | Act on the macro selected in the MacroEditor tab. Delete asks first and can't be undone. |
+| Save | Exports the macro selected in the Macros tab to a text file. |
+| Rename / Duplicate / Delete | Act on the macro selected in the Macros tab. Delete asks first and can't be undone. |
 
 Macros belong to the document: they are saved with it and are there
 again when you open it.
 
-## The MacroEditor tab
+## The Macros tab
 
 The tab has three parts: the document's **macros** on the left, the
 selected macro as a **tree** in the middle, and a **reference of all
@@ -108,7 +108,7 @@ complete node, so playing the macro creates it again.
 
 Choose the macro under **Macro > Play**, or press its shortcut (see
 below). The graph updates after each step. When the macro has finished,
-the status line in the MacroEditor tab reports the result, for example
+the status line in the Macros tab reports the result, for example
 "Played 6 command(s).".
 
 If something didn't work, an alert says what - the first problem and

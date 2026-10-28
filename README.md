@@ -8,8 +8,10 @@ thing out automatically.
 
 ## Features
 
-**Nodes with custom attributes** - give any node its own boolean or
-text attribute rows, each with an inline toggle or edit field.
+**Nodes with custom attributes** - give any node its own yes/no or
+text attribute rows, each with an inline toggle or edit field. Nodes
+are drawn as cards with a colored highlight band; fill, highlight,
+border and text colors, border width and shape are set per node.
 
 ![Node with attributes](docs/help/screenshots/04-node-with-attributes.png)
 
@@ -31,12 +33,12 @@ a direction (top-to-bottom, left-to-right, ...) and a layout algorithm
 ![Auto-Layout toolbar](docs/help/screenshots/06-autolayout-toolbar.png)
 
 **Macros** - record edits and play them back, or build macros in the
-MacroEditor tab: a tree of commands with loops, conditions, variables
+**Macros** tab: a tree of commands with loops, conditions, variables
 and text placeholders, e.g. to number new nodes or add up an attribute
 over everything connected to a node. See the
 [macro guide](docs/help/macros.md).
 
-![The MacroEditor tab](docs/help/screenshots/10-macro-editor.png)
+![The Macros tab](docs/help/screenshots/10-macro-editor.png)
 
 **Plugin architecture** - editors, commands and file-format
 translators are all plugins, so the app can be extended without
@@ -46,16 +48,16 @@ import/export and a plain-text export are included.
 **Full undo/redo** - every change, from creating a node to grouping,
 moving, or drawing a connection, can be undone and redone.
 
-**Navigator editor** - a second view of the same document: a plain
+**Data view** - a second view of the same document (the **Data** tab): a plain
 list of every node, drilling into any of them shows its raw BMessage
 fields directly - boolean, integer, float, text, point, rectangle,
 color, or nested sub-messages, each with its own inline editor - not
 just what the graph view happens to render.
 
-![Navigator editor](docs/help/screenshots/08-navigator-editor.png)
+![Data view](docs/help/screenshots/08-navigator-editor.png)
 
-**Scales to large graphs** - a generated 2200-node/1000+-connection
-test document, grouped and laid out, stays responsive.
+**Scales to large graphs** - a generated test document with 2200 nodes
+and as many connections stays responsive.
 
 ![A large generated graph](docs/help/screenshots/09-large-graph.png)
 

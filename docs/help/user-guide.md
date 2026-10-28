@@ -11,31 +11,33 @@ through the main workflows using screenshots of a running instance.
 ![Toolbar](screenshots/03-toolbar.png)
 
 Left to right: file actions (New, Open, Save, Save As, Print), then
-Search, Delete, and font settings, then grid toggle, pen size, fill
-color, and on the right three icon choice fields:
+Undo, Redo, Find and Delete. The groups after that act on the selection
+and are shown while the **Graph** tab is active:
 
+- **Color** - opens the color picker. For nodes it has four tabs:
+  **Fill** (the card's background), **Highlight** (the band along the
+  top), **Border** and **Text**; for connections it sets the line
+  color. Each tab offers the theme's standard color, a palette, the
+  custom colors you used recently, and an alpha slider for see-through
+  colors. The color shows live on the selection.
+- **Pen size** - the border width of the selected nodes, or the line
+  width of the selected connections (arrowheads grow with it).
 - **Node shape** - rounded rectangle, rectangle, ellipse, diamond,
-  triangle, hexagon, parallelogram, or note. Applies to the selected
-  nodes; name and attributes stay inside the shape, and connections
-  dock on its outline. Undo and macro recording work as for any other
-  change.
-- **Connection shape** - straight, rounded, or angular. Applies to
-  whichever connections are currently selected.
+  triangle, hexagon, parallelogram, or note. Name and attributes stay
+  inside the shape, and connections dock on its outline.
+- **Attribute** - adds a text or a yes/no attribute to the selected
+  nodes (see below).
+- **Connection shape** - straight, rounded, or angular.
 - **Arrow ends** - arrowhead at the target, at the source, at both
   ends, or none.
 
-All three show the current pick as an icon; the pop-up menu also
-carries the name, in case the icon alone isn't clear enough.
+The choice fields show the current pick as an icon; the pop-up menu
+also carries the name. Undo and macro recording work as for any other
+change.
 
-The **grid toggle** overlays an alignment grid and snaps node
-positions to it as you create or drag them - a quick way to line
-several nodes up into neat rows or columns without hand-nudging each
-one.
+Then the automatic layout:
 
-Below that, a second toolbar row, visible while the GraphEditor tab is
-active:
-
-![Auto-Layout toolbar](screenshots/06-autolayout-toolbar.png)
+![Auto-Layout tools](screenshots/06-autolayout-toolbar.png)
 
 - **Leftmost icon** - applies the automatic layout.
 - **Direction** - which way the graph grows (top-to-bottom,
@@ -43,30 +45,40 @@ active:
 - **Topology** - the layout algorithm (hierarchical, circular,
   force-directed, ...).
 
+The last two icons toggle the **grid**, which snaps node positions as
+you create or drag them, and the **smart alignment guides**, which
+show when a dragged node lines up with its neighbours.
+
+The status bar at the bottom shows the selection, its position and
+size, and the zoom; **-**, **+** and **Fit** change the zoom, which
+keeps the middle of the view in place.
+
 ## Creating a node
 
-Double-clicking an empty spot in the GraphEditor creates a new node and
-immediately puts its name into edit mode:
+Double-clicking an empty spot in the **Graph** tab creates a new node
+and immediately puts its name into edit mode:
 
 ![New node](screenshots/01-insert-node.png)
 
 Type a name, done. Double-clicking *inside* an existing group instead
 adds the new node as a child of that group directly.
 
-The narrow toolbar down the left edge (visible in the screenshot
-above) carries the GraphEditor's own node tools: group the current
-selection, add a boolean attribute, and add a text attribute.
+Hovering over a node shows its resize handles and connection points; a
+selected node keeps its handles on all sides and corners. The mouse
+pointer shows what a click would do - edit text, toggle, resize, or
+start a connection.
 
 ## Attributes
 
-Any node can carry its own attribute rows - added to the selected node
-via the "add boolean attribute" / "add text attribute" icons on that
-left-edge toolbar:
+Any node can carry its own attribute rows - added to the selected
+nodes via the toolbar's **Attribute** menu (Text or Yes/No). The new
+row's name opens for typing right away:
 
 ![Node with attributes](screenshots/04-node-with-attributes.png)
 
-Each row has a checkmark icon (toggle the value) and a red cross
-(remove the row).
+Click a name or a text value to edit it, click a yes/no box to toggle
+it. A selected node shows a small cross at the end of each row to
+remove it.
 
 ## Search and bulk edits
 
@@ -82,7 +94,7 @@ clicked on.
 
 ## Connections
 
-Dragging from one of a node's four red connection points to another
+Dragging from one of a node's four connection points to another
 node creates a connection between them; it can be dropped anywhere on
 the target node. The line docks where it meets the node's outline,
 also for shaped nodes. Its shape and arrow ends can be
@@ -91,8 +103,8 @@ connection is selected (works on several at once).
 
 ## Grouping
 
-Select several nodes, then click the group icon in the toolbar. The
-group draws itself as one connected shape that hugs its children
+Select several nodes, then click **Group** in the small bar that
+appears above the selection. The group draws itself as one connected shape that hugs its children
 tightly - even when they're different sizes or don't line up at the
 same height:
 
@@ -103,9 +115,8 @@ and shrinks back just as readily when a child is removed. Double-
 clicking the group's own area adds a new child node to it directly (see
 above).
 
-A freshly created group defaults to just a faint tint with no drop
-shadow - like any node, its fill color can be set to something solid
-via the toolbar's fill color control.
+A freshly created group is drawn as a faint tint behind its children;
+the color picker's **Fill** tab gives it a color of its own.
 
 If two children don't overlap vertically at all - one sitting entirely
 above the other - the group connects them with a short, fixed-width
@@ -115,7 +126,7 @@ corridor instead of stretching a single shape across the gap:
 
 ## Automatic layout
 
-The leftmost icon of the second toolbar row (see above) rearranges the
+The automatic layout icon in the toolbar (see above) rearranges the
 whole graph - useful after inserting many nodes by hand, which tend to
 overlap. Direction and topology can be set first via the two fields
 next to it.
@@ -123,13 +134,13 @@ next to it.
 ## Macros
 
 The **Macro** menu records a sequence of actions and plays it back
-later. The **MacroEditor** tab shows a macro as a tree you can edit -
+later. The **Macros** tab shows a macro as a tree you can edit -
 change values, add and move commands - and builds new macros from a
 list of all commands. Macros can repeat steps, run them per selected
 node or only when a search finds something, pass values along in
 variables and put them into text, and are saved with the document.
 
-![The MacroEditor tab](screenshots/10-macro-editor.png)
+![The Macros tab](screenshots/10-macro-editor.png)
 
 See [Macros](macros.md) for the full guide and the command reference.
 
