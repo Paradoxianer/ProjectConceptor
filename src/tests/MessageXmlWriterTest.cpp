@@ -232,3 +232,23 @@ void MessageXmlWriterTest::OrdinaryMessageRoundtrips(void)
 	CPPUNIT_ASSERT(writer.WriteTo(message,&destination) == B_OK);
 	CPPUNIT_ASSERT(destination.BufferLength() > 0);
 }
+
+
+void MessageXmlWriterTest::MultiLineStringRoundtrips(void)
+{
+	// a note attribute (#157) keeps its line breaks through a save
+	const char	*note	= "first line\nsecond <b> & \"x\"\n\n\tlast";
+	BMessage	message;
+	message.AddString("Value",note);
+	MessageXmlWriter	writer;
+	BMallocIO			destination;
+	CPPUNIT_ASSERT(writer.WriteTo(message,&destination) == B_OK);
+	destination.Seek(0,SEEK_SET);
+	MessageXmlReader	reader;
+	BMessage			*restored	= reader.ReadFrom(&destination);
+	CPPUNIT_ASSERT(restored != NULL);
+	const char	*value	= NULL;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,restored->FindString("Value",&value));
+	CPPUNIT_ASSERT_EQUAL(BString(note),BString(value));
+	delete restored;
+}

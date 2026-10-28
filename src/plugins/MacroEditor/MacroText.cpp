@@ -105,6 +105,11 @@ static void AppendEscapedString(const char *value, BString *out)
 {
 	*out << "\"";
 	for (const char *p = value; *p != '\0'; p++) {
+		// one command field per line: a note's line breaks stay escaped
+		if (*p == '\n') {
+			*out << "\\n";
+			continue;
+		}
 		if ((*p == '"') || (*p == '\\'))
 			*out << "\\";
 		out->Append(*p,1);
@@ -495,7 +500,10 @@ static bool UnescapeQuoted(const BString &token, BString *outValue)
 	outValue->SetTo("");
 	for (int32 i = 1; i < len-1; i++) {
 		if ((s[i] == '\\') && (i+1 < len-1)) {
-			outValue->Append(s[i+1],1);
+			if (s[i+1] == 'n')
+				outValue->Append('\n',1);
+			else
+				outValue->Append(s[i+1],1);
 			i++;
 		} else
 			outValue->Append(s[i],1);

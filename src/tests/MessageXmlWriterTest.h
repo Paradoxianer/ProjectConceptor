@@ -23,6 +23,7 @@ public:
 	void PatternFieldDoesNotCrash(void);
 	void RgbColorFieldsDoNotCrash(void);
 	void FullRealisticNodeWithPatternFieldDoesNotCrash(void);
+	void MultiLineStringRoundtrips(void);
 
 	CPPUNIT_TEST_SUITE(MessageXmlWriterTest);
 	CPPUNIT_TEST(ZeroLengthRawFieldDoesNotCrash);
@@ -34,6 +35,7 @@ public:
 	CPPUNIT_TEST(PatternFieldDoesNotCrash);
 	CPPUNIT_TEST(RgbColorFieldsDoNotCrash);
 	CPPUNIT_TEST(FullRealisticNodeWithPatternFieldDoesNotCrash);
+	CPPUNIT_TEST(MultiLineStringRoundtrips);
 	CPPUNIT_TEST_SUITE_END();
 };
 

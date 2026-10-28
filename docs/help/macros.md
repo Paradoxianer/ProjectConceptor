@@ -148,6 +148,10 @@ replaced by the variable's value: `"Row ${row}, column ${col}"`. Whole
 numbers appear without decimals (`3`, not `3.000000`). Write `$${` for
 a literal `${`.
 
+**Special characters in text:** `\"` is a quote, `\\` a backslash and
+`\n` a line break - a note's lines are written this way, since every
+field of a macro stands on one line.
+
 **Numbers and text:** text in a number field is converted - `12.5` and
 `12,5` both work. Text that isn't a number is an error, not 0. `1.000,5`
 (dot and comma together) is an error too, because it's ambiguous.

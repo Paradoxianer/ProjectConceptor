@@ -2435,3 +2435,36 @@ void MacroTextTest::ShapeChangeSurvivesMacroText(void)
 	CPPUNIT_ASSERT(geometry.HasPath());
 	CPPUNIT_ASSERT(!geometry.Contains(BPoint(2,2)));
 }
+
+
+void MacroTextTest::MultiLineStringSurvivesMacroText(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	const char	*note	= "first line\nsecond \"quoted\" \\ line\n\n- item";
+	BMessage	valueContainer;
+	valueContainer.AddString("name","Value");
+	valueContainer.AddInt32("type",B_STRING_TYPE);
+	valueContainer.AddString("newValue",note);
+	BMessage	changeValue;
+	changeValue.AddString("Command::Name","ChangeValue");
+	changeValue.AddBool(P_C_NODE_SELECTED,true);
+	changeValue.AddMessage("valueContainer",&valueContainer);
+
+	BList		commands;
+	commands.AddItem(&changeValue);
+	BString		text;
+	SerializeCommands(&commands,&text);
+	BList		parsed;
+	BString		error;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,
+		ParseCommands(text,&parsed,doc->GetCommandManager(),&error));
+	CPPUNIT_ASSERT_EQUAL((int32)1,parsed.CountItems());
+	BMessage	restored;
+	const char	*value	= NULL;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		((BMessage*)parsed.ItemAt(0))->FindMessage("valueContainer",&restored));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,restored.FindString("newValue",&value));
+	CPPUNIT_ASSERT(strcmp(value,note) == 0);
+	for (int32 i = 0; i < parsed.CountItems(); i++)
+		delete (BMessage*)parsed.ItemAt(i);
+}
