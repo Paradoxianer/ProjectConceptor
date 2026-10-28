@@ -80,6 +80,11 @@ Click a name or a text value to edit it, click a yes/no box to toggle
 it. A selected node shows a small cross at the end of each row to
 remove it.
 
+The names form one column, so the values line up. It is as wide as
+the longest name; on a selected node, drag the border between names and
+values to set the width for that node, and double-click the border to
+fit the names again. Names that don't fit are shortened with "…".
+
 ## Search and bulk edits
 
 **Search &rarr; Find** looks for a string across every node's name and
