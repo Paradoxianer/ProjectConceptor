@@ -1,9 +1,10 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	3249386583
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	3941132444
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Șterge
 Triangle	GraphEditor		Triunghi
 Diamond	GraphEditor		Romb
 Connection	GraphEditor		Conexiune
+Empty note	NoteRenderer		Notă goală
 Grid	GraphEditor		Grilă
 Fit	GraphEditor		Potrivire
 Fill pattern for selected nodes	GraphEditor		Model de umplere pentru nodurile selectate

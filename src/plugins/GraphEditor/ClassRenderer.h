@@ -104,6 +104,8 @@ protected:
 				/** gives all attribute rows one name column (#162): the
 				 * stored width, else as wide as the longest name */
 				void		LayoutAttributeColumn(void);
+				/** puts the rows under each other and grows a card to hold them */
+				void		StackAttributes(void);
 				/** the border between name and value column is under where */
 				bool		ColumnBorderAt(BPoint where);
 				/** stores the name column width in the node, 0 = fit */

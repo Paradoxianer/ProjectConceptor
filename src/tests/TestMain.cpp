@@ -18,6 +18,7 @@
 #include "ContextBarTest.h"
 #include "ColorToolItemTest.h"
 #include "StatusTextsTest.h"
+#include "NoteLayoutTest.h"
 
 const char *TEST_APP_SIGNATURE = "application/x-vnd.ProjectConceptorTests";
 
@@ -44,6 +45,7 @@ int main(int argc, char **argv)
 	runner.addTest(ColorToolItemTest::suite());
 	runner.addTest(StatusTextsTest::suite());
 	runner.addTest(GraphStyleTest::suite());
+	runner.addTest(NoteLayoutTest::suite());
 	bool success = runner.run("", false);
 	// #117: every headless PDocument any test created is still running a
 	// real BLooper thread at this point - quit them before main() returns,

@@ -223,6 +223,8 @@ void GraphEditor::Init(void) {
 		LoadVectorIcon(res,"attribute-text",kToolIconSize));
 	addAttribute->AddChoice(B_TRANSLATE("Yes/No"),"bool",
 		LoadVectorIcon(res,"attribute-bool",kToolIconSize));
+	addAttribute->AddChoice(B_TRANSLATE("Note"),"note",
+		LoadVectorIcon(res,"attribute-note",kToolIconSize));
 	addAttribute->SetToolTip(B_TRANSLATE("Add an attribute to the selected nodes"));
 
 	connectionStyle		= new ChoiceToolItem(B_TRANSLATE("Connection"),
@@ -1110,12 +1112,15 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			// and its label opens for typing (StartPendingAttributeEdit())
 			int32		type	= B_STRING_TYPE;
 			const char	*kind	= NULL;
-			if (message->FindInt32("type",&type) != B_OK) {
-				if ((message->FindString("value",&kind) == B_OK)
-						&& (strcmp(kind,"bool") == 0))
+			if ((message->FindInt32("type",&type) != B_OK)
+					&& (message->FindString("value",&kind) == B_OK)) {
+				if (strcmp(kind,"bool") == 0)
 					type	= B_BOOL_TYPE;
+				else if (strcmp(kind,"note") == 0)
+					type	= P_C_ATTRIBUTE_NOTE;
 			}
-			const char	*attributeName	= B_TRANSLATE("Attribute");
+			const char	*attributeName	= (type == P_C_ATTRIBUTE_NOTE)
+				? B_TRANSLATE("Note") : B_TRANSLATE("Attribute");
 			BString		datadummy("   ");
 			BMessage	*addMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 			addMessage->AddString("Command::Name","AddAttribute");
@@ -1130,6 +1135,8 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				newAttribute->AddData("Value",type,datadummy.String(),datadummy.Length() + 1,false);
 			else if (type == B_BOOL_TYPE)
 				newAttribute->AddBool("Value",true);
+			else if (type == P_C_ATTRIBUTE_NOTE)
+				newAttribute->AddString("Value","");
 			valueContainer->AddMessage("newAttribute",newAttribute);
 			addMessage->AddMessage("valueContainer",valueContainer);
 			pendingEditAttribute	= attributeName;

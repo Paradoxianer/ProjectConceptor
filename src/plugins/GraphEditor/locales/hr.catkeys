@@ -1,9 +1,10 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	3249386583
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	3941132444
 Line	GraphEditor		Linija
 Delete	AttributeRenderer		Izbriši
 Triangle	GraphEditor		Trokut
 Diamond	GraphEditor		Romb
 Connection	GraphEditor		Veza
+Empty note	NoteRenderer		Prazna bilješka
 Grid	GraphEditor		Rešetka
 Fit	GraphEditor		Prilagodi
 Fill pattern for selected nodes	GraphEditor		Uzorak ispune za odabrane čvorove

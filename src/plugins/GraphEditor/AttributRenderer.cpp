@@ -16,6 +16,7 @@
 #include "ProjectConceptorDefs.h"
 #include "PCommandManager.h"
 #include "BoolRenderer.h"
+#include "NoteRenderer.h"
 #include "StringRenderer.h"
 
 #undef B_TRANSLATION_CONTEXT
@@ -44,6 +45,7 @@ void AttributRenderer::Init()
 	name		= NULL;
 	value		= NULL;
 	showDelete	= false;
+	showName	= true;
 	columnWidth	= (frame.Width()-DELETER_WIDTH)*0.4f;
 	kontextMenu	= new BPopUpMenu("deleter");
 	BMenuItem	*delMenu = new BMenuItem(B_TRANSLATE("Delete"),deleteMessage);
@@ -96,6 +98,21 @@ void AttributRenderer::SetAttribute(BMessage *newAttribut)
 			value	= new BoolRenderer(editor,attribValue,frame,valueChange);	
 			break;
 		}
+		case P_C_ATTRIBUTE_NOTE:
+		{
+			const char	*attribValue	= NULL;
+			attribut->FindString("Value",&attribValue);
+			BMessage	*valueChange	= new BMessage(*changeMessage);
+			BMessage	valueContainer;
+			valueChange->FindMessage("valueContainer",&valueContainer);
+			valueContainer.AddString("name","Value");
+			valueContainer.AddInt32("type",B_STRING_TYPE);
+			valueChange->ReplaceMessage("valueContainer",&valueContainer);
+			value		= new NoteRenderer(editor,attribValue,frame,valueChange);
+			// a note speaks for itself, the name only tells it apart in data
+			showName	= false;
+			break;
+		}
 
 	}
 	const GraphStyle	&style	= editor->Style();
@@ -121,12 +138,15 @@ void AttributRenderer::SetFrame(BRect newRect)
 	// the node sets one column for all its rows (#162)
 	float	usable	= frame.Width()-DELETER_WIDTH;
 	divider			= (columnWidth < usable) ? columnWidth : usable;
+	float	valueLeft	= showName ? frame.left+divider+1 : frame.left;
 	float maxBottom	= frame.bottom;
 	if (name)
 		name->SetFrame(BRect(frame.left,frame.top,frame.left+divider-1,frame.bottom));
 	if (value)
-		value->SetFrame(BRect(frame.left+divider+1,frame.top,frame.right-DELETER_WIDTH,frame.bottom));
-	if ( (name) && (value) )
+		value->SetFrame(BRect(valueLeft,frame.top,frame.right-DELETER_WIDTH,frame.bottom));
+	if (!showName && value)
+		maxBottom	= value->Frame().bottom;
+	else if ( (name) && (value) )
 	{
 		if (name->Frame().bottom>value->Frame().bottom)
 			maxBottom = name->Frame().bottom;
@@ -154,7 +174,7 @@ void AttributRenderer::SetColumnWidth(float width)
 
 float AttributRenderer::LabelWidth(void)
 {
-	if (name == NULL)
+	if ((name == NULL) || !showName)
 		return 0;
 	BFont	rowFont(be_plain_font);
 	rowFont.SetSize(editor->Style().attributeFontSize);
@@ -176,7 +196,7 @@ void AttributRenderer::MouseDown(BPoint where,
 	}
 	else
 	{
-		if ( (name) && (name->Caught(where)) )
+		if ( showName && (name) && (name->Caught(where)) )
 			name->MouseDown(where);
 		else if ((value) && (value->Caught(where)) )
 				value->MouseDown(where);
@@ -197,7 +217,7 @@ void AttributRenderer::MouseUp(BPoint where)
 	currentMsg->FindInt32("modifiers", (int32 *)&modifiers);
 	if (!(buttons & B_SECONDARY_MOUSE_BUTTON))
 	{
-		if ( (name) && (name->Caught(where)) )
+		if ( showName && (name) && (name->Caught(where)) )
 			name->MouseUp(where);
 		else if ((value) && (value->Caught(where)) )
 			value->MouseUp(where);
@@ -223,7 +243,7 @@ void AttributRenderer::MoveBy(float dx, float dy)
 
 void AttributRenderer::Draw(BView *drawOn, BRect updateRect)
 {	
-	if (name)
+	if (showName && name)
 		name->Draw(drawOn,updateRect);
 	if (value)
 		value->Draw(drawOn,updateRect);
@@ -254,12 +274,18 @@ void AttributRenderer::SetTextColors(rgb_color textColor, rgb_color muted)
 	StringRenderer	*text	= dynamic_cast<StringRenderer*>(value);
 	if (text != NULL)
 		text->SetColor(textColor);
+	NoteRenderer	*note	= dynamic_cast<NoteRenderer*>(value);
+	if (note != NULL)
+		note->SetColors(textColor,muted);
 }
 
 
 void AttributRenderer::StartEditingName(void)
 {
-	if (name != NULL)
+	NoteRenderer	*note	= dynamic_cast<NoteRenderer*>(value);
+	if (note != NULL)
+		note->StartEditing();
+	else if (name != NULL)
 		name->MouseDown(BPoint(0,0));
 }
 
@@ -267,9 +293,12 @@ BCursorID AttributRenderer::CursorAt(BPoint where)
 {
 	if (showDelete && delRect.Contains(where))
 		return B_CURSOR_ID_FOLLOW_LINK;
-	if ((name != NULL) && name->Caught(where))
+	if (showName && (name != NULL) && name->Caught(where))
 		return B_CURSOR_ID_I_BEAM;
 	if ((value != NULL) && value->Caught(where)) {
+		NoteRenderer	*note	= dynamic_cast<NoteRenderer*>(value);
+		if (note != NULL)
+			return note->CursorAt(where);
 		return (dynamic_cast<BoolRenderer*>(value) != NULL)
 			? B_CURSOR_ID_FOLLOW_LINK : B_CURSOR_ID_I_BEAM;
 	}

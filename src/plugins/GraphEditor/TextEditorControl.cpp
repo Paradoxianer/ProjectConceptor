@@ -67,6 +67,10 @@ void TextEditorControl::KeyDown(const char *bytes, int32 numBytes)
 	if ((singleLine)&&(bytes[0] == B_ENTER)) {
 		Invoke();
 	}
+	else if ((!singleLine) && (bytes[0] == B_ESCAPE)) {
+		// a long note is not thrown away by one key
+		Invoke();
+	}
 	else if (bytes[0] == B_ESCAPE) {
 		commit=false;
 //		Parent()->MakeFocus(true);

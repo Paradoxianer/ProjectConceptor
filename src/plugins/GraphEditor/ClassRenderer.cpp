@@ -564,16 +564,8 @@ void ClassRenderer::ValueChanged() {
 				InsertAttribute(attribName,attribMessage, entry);
 		}
 	}
-	LayoutAttributeColumn();
 	container->FindPointer(P_C_NODE_PARENT, (void **)&parentNode);
-	// a card is as tall as its content: the stored height is the minimum.
-	// Not for shapes, whose text area itself depends on the height.
-	if (SupportsResize() && !shape.HasPath() && !attributes->empty()) {
-		float	needed	= (*attributes)[attributes->size()-1]->Frame().bottom
-			+ style.paddingY - frame.top;
-		if (needed > frame.Height())
-			frame.bottom	= frame.top + needed;
-	}
+	LayoutAttributeColumn();
 	shape.Layout(frame);
 	UpdateConnectors();
 
@@ -974,22 +966,51 @@ ClassRenderer::LayoutAttributeColumn(void)
 		if (row != NULL)
 			row->SetColumnWidth(width);
 	}
+	StackAttributes();
+}
+
+
+void
+ClassRenderer::StackAttributes(void)
+{
+	// a note's height follows its width, the rows below move with it
+	const GraphStyle	&style	= editor->Style();
+	float	top	= name->Frame().bottom + style.rowSpacing;
+	for (uint32 i = 0; i < attributes->size(); i++) {
+		Renderer	*row	= (*attributes)[i];
+		row->MoveBy(0,top - row->Frame().top);
+		top	= row->Frame().bottom + style.rowSpacing/2;
+	}
+	// a card is as tall as its content: the stored height is the minimum.
+	// Not for shapes, whose text area itself depends on the height.
+	if (SupportsResize() && !shape.HasPath() && !attributes->empty()) {
+		float	needed	= attributes->back()->Frame().bottom
+			+ style.paddingY - frame.top;
+		if (needed > frame.Height()) {
+			frame.bottom	= frame.top + needed;
+			shape.Layout(frame);
+			UpdateConnectors();
+		}
+	}
 }
 
 
 bool
 ClassRenderer::ColumnBorderAt(BPoint where)
 {
-	if (attributes->empty())
+	if (!ContentFrame().Contains(where))
 		return false;
-	AttributRenderer	*first	= dynamic_cast<AttributRenderer*>(attributes->front());
-	AttributRenderer	*last	= dynamic_cast<AttributRenderer*>(attributes->back());
-	if ((first == NULL) || (last == NULL))
-		return false;
-	float	border	= first->Frame().left + first->ColumnWidth();
-	return (fabs(where.x - border) <= 3.0f / editor->Scale())
-		&& (where.y >= first->Frame().top) && (where.y <= last->Frame().bottom)
-		&& ContentFrame().Contains(where);
+	for (uint32 i = 0; i < attributes->size(); i++) {
+		AttributRenderer	*row	= dynamic_cast<AttributRenderer*>((*attributes)[i]);
+		if ((row == NULL) || !row->ShowsName())
+			continue;
+		BRect	rowFrame	= row->Frame();
+		float	border		= rowFrame.left + row->ColumnWidth();
+		if ((where.y >= rowFrame.top) && (where.y <= rowFrame.bottom)
+				&& (fabs(where.x - border) <= 3.0f / editor->Scale()))
+			return true;
+	}
+	return false;
 }
 
 

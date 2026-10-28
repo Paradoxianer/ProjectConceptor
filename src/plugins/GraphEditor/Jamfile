@@ -32,6 +32,8 @@ Addon pc_graph_editor :
 	GraphStyle.cpp
 	ShadowCache.cpp
 	StringRenderer.cpp
+	NoteLayout.cpp
+	NoteRenderer.cpp
 	TextEditorControl.cpp
         : be tracker translation libprojectconceptor.a
 ;

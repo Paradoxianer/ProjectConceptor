@@ -391,6 +391,15 @@ def icon_attribute_bool():
     return shapes
 
 
+def icon_attribute_note():
+    shapes = page_with_fold(10, 4, 54, 60, 14)
+    ink = Solid(rgba('3b4452'))
+    for y, right in ((22, 36), (32, 46), (42, 46), (52, 32)):
+        shapes.append(Shape(ink, line((18, y), (right, y)),
+            stroke=(4.5, CAP_ROUND, JOIN_ROUND)))
+    return shapes
+
+
 ICONS = {
     'new':			('app', icon_new),
     'open':			('app', icon_open),
@@ -413,6 +422,7 @@ ICONS = {
     'attribute':	('GraphEditor', icon_attribute),
     'attribute-text':	('GraphEditor', icon_attribute_text),
     'attribute-bool':	('GraphEditor', icon_attribute_bool),
+    'attribute-note':	('GraphEditor', icon_attribute_note),
     'layout':		('LayoutEditor', icon_auto_layout),
     'dir-tb':		('LayoutEditor', tree),
     'dir-lr':		('LayoutEditor', lambda: tree(3)),

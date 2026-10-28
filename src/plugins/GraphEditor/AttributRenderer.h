@@ -43,6 +43,7 @@ public:
 			float			ColumnWidth(void){return divider;};
 			/** room the name needs in the name column */
 			float			LabelWidth(void);
+			bool			ShowsName(void){return showName;};
 			/** whether the delete icon shows - and reacts (#51) */
 			void			SetShowDelete(bool show){showDelete=show;};
 			/** the data field this row shows an entry of */
@@ -74,6 +75,8 @@ protected:
 		float				divider;
 		float				columnWidth;
 		bool				showDelete;
+		/** false for a note: its text uses the whole row */
+		bool				showName;
 		BString				key;
 		BPopUpMenu			*kontextMenu;
 		

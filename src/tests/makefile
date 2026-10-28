@@ -28,6 +28,7 @@ SRCS= 	TestMain.cpp \
 		ContextBarTest.cpp \
 		ColorToolItemTest.cpp \
 		StatusTextsTest.cpp \
+		NoteLayoutTest.cpp \
 		GraphStyleTest.cpp \
 		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
@@ -113,6 +114,7 @@ SRCS= 	TestMain.cpp \
 		../plugins/GraphEditor/NodeHandles.cpp \
 		../plugins/GraphEditor/Zoom.cpp \
 		../plugins/GraphEditor/ContextBar.cpp \
+		../plugins/GraphEditor/NoteLayout.cpp \
 		../plugins/GraphEditor/StatusTexts.cpp
 
 RDEFS=

@@ -24,6 +24,8 @@ public:
 	virtual	void		MouseDown(BPoint point);
 	virtual void		KeyDown(const char *bytes, int32 numBytes);
 	virtual status_t	Invoke(BMessage *message = NULL);
+			/** several lines: Enter breaks the line, Escape finishes */
+			void		SetSingleLine(bool single){singleLine = single;};
 protected:
 			bool		singleLine;
 			bool		changed;

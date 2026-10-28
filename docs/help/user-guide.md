@@ -25,8 +25,8 @@ and are shown while the **Graph** tab is active:
 - **Node shape** - rounded rectangle, rectangle, ellipse, diamond,
   triangle, hexagon, parallelogram, or note. Name and attributes stay
   inside the shape, and connections dock on its outline.
-- **Attribute** - adds a text or a yes/no attribute to the selected
-  nodes (see below).
+- **Attribute** - adds a text, yes/no or note attribute to the
+  selected nodes (see below).
 - **Connection shape** - straight, rounded, or angular.
 - **Arrow ends** - arrowhead at the target, at the source, at both
   ends, or none.
@@ -71,8 +71,8 @@ start a connection.
 ## Attributes
 
 Any node can carry its own attribute rows - added to the selected
-nodes via the toolbar's **Attribute** menu (Text or Yes/No). The new
-row's name opens for typing right away:
+nodes via the toolbar's **Attribute** menu (Text, Yes/No or Note). The
+new row's name opens for typing right away:
 
 ![Node with attributes](screenshots/04-node-with-attributes.png)
 
@@ -84,6 +84,24 @@ The names form one column, so the values line up. It is as wide as
 the longest name; on a selected node, drag the border between names and
 values to set the width for that node, and double-click the border to
 fit the names again. Names that don't fit are shortened with "…".
+
+### Notes
+
+A **Note** is text over several lines, for descriptions, minutes or
+to-dos. It uses the whole width of the node, without a name, and the
+node grows with it (up to twelve lines; more is cut with "…"). A new
+note opens for typing at once; click it to edit it again. **Enter**
+starts a new line, **Esc** or a click outside finishes.
+
+A note shows a little Markdown; the text itself stays plain:
+
+| You write | You see |
+|---|---|
+| `**bold**`, `*italic*` | **bold**, *italic* |
+| `# Heading` | a bold line |
+| `- item`, `* item`, `1. item` | a list item; longer items wrap under their text |
+| `[text](https://...)`, `https://...` | a link - a click opens it in the browser |
+| `\*` | a plain `*` |
 
 ## Search and bulk edits
 

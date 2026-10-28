@@ -44,6 +44,10 @@ const uint32	P_C_GROUP_TYPE					= 'pcGT';
 const uint32	P_C_CONNECTION_TYPE				= 'pcCT';
 const uint32	P_C_MACRO_TYPE					= 'pcTM';
 
+/** what of an attribute block {Name, Value} in Node::Data, besides
+ * B_STRING_TYPE and B_BOOL_TYPE; Value keeps a plain BMessage type */
+const uint32	P_C_ATTRIBUTE_NOTE				= 'paNO';	// Value: string, several lines
+
 const uint32	P_C_INSERT_EDITOR				= 'pcIE';
 const uint32	P_C_REMOVE_EDITOR				= 'pcRE';
 

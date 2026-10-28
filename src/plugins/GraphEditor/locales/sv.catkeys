@@ -1,9 +1,10 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	3249386583
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	3941132444
 Line	GraphEditor		Linje
 Delete	AttributeRenderer		Radera
 Triangle	GraphEditor		Triangel
 Diamond	GraphEditor		Romb
 Connection	GraphEditor		Förbindelse
+Empty note	NoteRenderer		Tom anteckning
 Grid	GraphEditor		Rutnät
 Fit	GraphEditor		Anpassa
 Fill pattern for selected nodes	GraphEditor		Fyllnadsmönster för markerade noder

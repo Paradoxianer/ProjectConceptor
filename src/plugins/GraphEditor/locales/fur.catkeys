@@ -1,9 +1,10 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	3249386583
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	3941132444
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Elimine
 Triangle	GraphEditor		Triangul
 Diamond	GraphEditor		Rombo
 Connection	GraphEditor		Conession
+Empty note	NoteRenderer		Note vueide
 Grid	GraphEditor		Grile
 Fit	GraphEditor		Adatâ
 Fill pattern for selected nodes	GraphEditor		Motîf di jemplament pai grops selezionâts

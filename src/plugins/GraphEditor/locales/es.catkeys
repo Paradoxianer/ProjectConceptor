@@ -1,9 +1,10 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	3249386583
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	3941132444
 Line	GraphEditor		Línea
 Delete	AttributeRenderer		Borrar
 Triangle	GraphEditor		Triángulo
 Diamond	GraphEditor		Rombo
 Connection	GraphEditor		Conexión
+Empty note	NoteRenderer		Nota vacía
 Grid	GraphEditor		Grilla
 Fit	GraphEditor		Ajustar
 Fill pattern for selected nodes	GraphEditor		Patrón de relleno de los nodos seleccionados

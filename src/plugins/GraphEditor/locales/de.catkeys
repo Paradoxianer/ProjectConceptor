@@ -1,9 +1,10 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	3249386583
+1	German	application/x-vnd.ProjectConceptor-plugin	3941132444
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Löschen
 Triangle	GraphEditor		Dreieck
 Diamond	GraphEditor		Raute
 Connection	GraphEditor		Verbindung
+Empty note	NoteRenderer		Leere Notiz
 Grid	GraphEditor		Gitter
 Fit	GraphEditor		Einpassen
 Fill pattern for selected nodes	GraphEditor		Füllmuster für ausgewählte Knoten
