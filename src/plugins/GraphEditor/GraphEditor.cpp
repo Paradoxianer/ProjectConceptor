@@ -1907,8 +1907,14 @@ void GraphEditor::UpdateFormatItems(void) {
 				kDefaultConnectionColor);
 		}
 		float	pen;
-		if (pattern.FindFloat("PenSize",&pen) == B_OK)
+		if (pattern.FindFloat("PenSize",&pen) == B_OK) {
+			// show the width the renderers actually draw
+			if (node != NULL)
+				pen	= (pen < 1.0f) ? 1.0f : pen;
+			else if (pen <= 1.0f)
+				pen	= Style().connectionWidth;
 			penSize->SetValue(pen);
+		}
 	}
 	BMessage	shapeArchive;
 	const char	*shapeName	= NULL;
