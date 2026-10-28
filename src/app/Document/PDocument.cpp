@@ -980,7 +980,8 @@ bool PDocument::QuitRequested(void)
 		BMessage		*existingConfig		= configManager->GetConfigMessage(P_C_CONFIG_WINDOW_FRAME_FIELD);
 		bool			rememberEnabled		= true;
 		if (existingConfig != NULL) {
-			existingConfig->FindBool(P_C_WINDOW_FRAME_REMEMBER_FIELD,&rememberEnabled);
+			if (existingConfig->FindBool(P_C_WINDOW_FRAME_REMEMBER_FIELD,&rememberEnabled) != B_OK)
+				rememberEnabled = true;
 			delete existingConfig;
 		}
 		// a disabled toggle just stops updating the remembered frame - it
@@ -1161,8 +1162,10 @@ void PDocument::ApplyAutoSaveSettings(void)
 	TRACE();
 	bool	enabled		= true;
 	int32	seconds		= 300;
-	documentSetting->FindBool(P_C_DOC_AUTOSAVE_ENABLED,&enabled);
-	documentSetting->FindInt32(P_C_DOC_AUTOSAVE_INTERVAL,&seconds);
+	if (documentSetting->FindBool(P_C_DOC_AUTOSAVE_ENABLED,&enabled) != B_OK)
+		enabled = true;
+	if (documentSetting->FindInt32(P_C_DOC_AUTOSAVE_INTERVAL,&seconds) != B_OK)
+		seconds = 300;
 	if (seconds <= 0)
 		seconds = 300;
 	autoSaveIntervall	= (bigtime_t)seconds * 1000000;

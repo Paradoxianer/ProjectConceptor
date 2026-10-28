@@ -75,7 +75,8 @@ void ConfigView::ValueChanged(void){
 	BMessage		*frameConfig		= configManager->GetConfigMessage(P_C_CONFIG_WINDOW_FRAME_FIELD);
 	bool			rememberEnabled		= true;
 	if (frameConfig != NULL) {
-		frameConfig->FindBool(P_C_WINDOW_FRAME_REMEMBER_FIELD,&rememberEnabled);
+		if (frameConfig->FindBool(P_C_WINDOW_FRAME_REMEMBER_FIELD,&rememberEnabled) != B_OK)
+			rememberEnabled = true;
 		delete frameConfig;
 	}
 	rememberWindowFrameCheckBox->SetValue(rememberEnabled ? B_CONTROL_ON : B_CONTROL_OFF);
@@ -84,8 +85,10 @@ void ConfigView::ValueChanged(void){
 		return;
 	bool	enabled		= true;
 	int32	interval	= 300;
-	configMessage->FindBool(P_C_DOC_AUTOSAVE_ENABLED,&enabled);
-	configMessage->FindInt32(P_C_DOC_AUTOSAVE_INTERVAL,&interval);
+	if (configMessage->FindBool(P_C_DOC_AUTOSAVE_ENABLED,&enabled) != B_OK)
+		enabled = true;
+	if (configMessage->FindInt32(P_C_DOC_AUTOSAVE_INTERVAL,&interval) != B_OK)
+		interval = 300;
 	autoSaveCheckBox->SetValue(enabled ? B_CONTROL_ON : B_CONTROL_OFF);
 	autoSaveIntervalControl->SetEnabled(enabled);
 	BString intervalText;

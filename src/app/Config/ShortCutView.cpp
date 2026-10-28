@@ -174,8 +174,10 @@ void ShortCutView::_LoadActionShortcuts(void)
 		int32		modifiers	= defaultModifiers[i];
 		BMessage	binding;
 		if ((shortcuts != NULL) && (shortcuts->FindMessage(actions[i],&binding) == B_OK)) {
-			binding.FindInt32(P_C_SHORTCUT_KEY_FIELD,&key);
-			binding.FindInt32(P_C_SHORTCUT_MODIFIERS_FIELD,&modifiers);
+			if (binding.FindInt32(P_C_SHORTCUT_KEY_FIELD,&key) != B_OK)
+				key = defaultKeys[i];
+			if (binding.FindInt32(P_C_SHORTCUT_MODIFIERS_FIELD,&modifiers) != B_OK)
+				modifiers = defaultModifiers[i];
 		}
 		fActionList->AddItem(new ActionShortcutItem(actions[i],key,modifiers));
 	}

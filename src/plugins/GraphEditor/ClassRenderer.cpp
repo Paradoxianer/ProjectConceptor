@@ -496,10 +496,12 @@ void ClassRenderer::ValueChanged() {
 		animating	= true;
 		editor->StartAnimating(this);
 	}
-	container->FindBool(P_C_NODE_SELECTED,&selected);
-	container->FindFloat(P_C_NODE_X_RADIUS,&xRadius);
-	container->FindFloat(P_C_NODE_Y_RADIUS,&yRadius);
-	container->FindFloat(P_C_NODE_ATTRIBUTE_COLUMN,&attributeColumn);
+	// Get*() keeps the current value when a field is missing (a node a
+	// macro inserted may have none), Find*() would zero it
+	selected		= container->GetBool(P_C_NODE_SELECTED,false);
+	xRadius			= container->GetFloat(P_C_NODE_X_RADIUS,xRadius);
+	yRadius			= container->GetFloat(P_C_NODE_Y_RADIUS,yRadius);
+	attributeColumn	= container->GetFloat(P_C_NODE_ATTRIBUTE_COLUMN,attributeColumn);
 	if (container->FindMessage(P_C_NODE_PATTERN,pattern) != B_OK) {
 		container->AddMessage(P_C_NODE_PATTERN,editor->GetStandartPattern());
 		pattern = editor->GetStandartPattern();
@@ -521,10 +523,12 @@ void ClassRenderer::ValueChanged() {
 		pattern->ReplaceInt32("FillColor",*(int32 *)&fillColor);
 		container->ReplaceMessage(P_C_NODE_PATTERN,pattern);
 	}
-	pattern->FindInt32("BorderColor",(int32 *)&borderColor);
+	rgb_color	color;
+	if (pattern->FindInt32("BorderColor",(int32 *)&color) == B_OK)
+		borderColor	= color;
 	if (pattern->FindInt32("HighColor",(int32 *)&textColor) != B_OK)
 		editor->GetStandartPattern()->FindInt32("HighColor",(int32 *)&textColor);
-	pattern->FindFloat("PenSize",&penSize);
+	penSize	= pattern->GetFloat("PenSize",penSize);
 	// a real committed value just arrived (this is only ever called from
 	// a genuine P_C_VALUE_CHANGED, never from the preview path below) -
 	// any leftover preview from a picker session is now stale, drop it

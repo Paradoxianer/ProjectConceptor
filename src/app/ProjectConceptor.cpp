@@ -73,8 +73,9 @@ BHandler* ProjektConceptor::ResolveSpecifier(BMessage *message, int32 index,
 	if (propertyInfo.FindMatch(message,index,specifier,what,property) >= 0) {
 		if (strcmp(property,"Document") == 0) {
 			int32	docIndex	= -1;
-			if (what == B_INDEX_SPECIFIER)
-				specifier->FindInt32("index",&docIndex);
+			if ((what == B_INDEX_SPECIFIER)
+					&& (specifier->FindInt32("index",&docIndex) != B_OK))
+				docIndex = -1;
 			if ((docIndex >= 0) && (docIndex < documentManager->CountPDocuments())) {
 				// PDocument runs on its own BLooper thread, not be_app's -
 				// returning its pointer here the way BWindow returns

@@ -144,8 +144,8 @@ void ConnectionRenderer::ValueChanged() {
 		tmpNode->FindPointer(editor->RenderString(),(void **)&from);
 	if (container->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&tmpNode) == B_OK)
 		tmpNode->FindPointer(editor->RenderString(),(void **)&to);
-	container->FindBool(P_C_NODE_SELECTED,&selected);
-	container->FindInt8(P_C_NODE_CONNECTION_TYPE, (int8 *)&connectionType);
+	selected		= container->GetBool(P_C_NODE_SELECTED,false);
+	connectionType	= container->GetInt8(P_C_NODE_CONNECTION_TYPE,connectionType);
 	// connections saved before arrow ends were selectable have no such
 	// field - give them the target-only default, which is exactly how they
 	// used to draw. Added rather than only defaulted locally so the
@@ -160,8 +160,10 @@ void ConnectionRenderer::ValueChanged() {
 	// fields there, regardless of node type
 	BMessage	pattern;
 	if (container->FindMessage(P_C_NODE_PATTERN,&pattern) == B_OK) {
-		pattern.FindFloat("PenSize",&penSize);
-		pattern.FindInt32("FillColor",(int32 *)&fillColor);
+		penSize	= pattern.GetFloat("PenSize",penSize);
+		rgb_color	color;
+		if (pattern.FindInt32("FillColor",(int32 *)&color) == B_OK)
+			fillColor	= color;
 	}
 	// a real committed value just arrived - drop any leftover preview
 	// from a picker session, same reasoning as ClassRenderer::ValueChanged()

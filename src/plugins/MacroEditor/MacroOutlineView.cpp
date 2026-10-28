@@ -1615,14 +1615,16 @@ void MacroOutlineView::MessageReceived(BMessage *message)
 			return;
 		case 'mvUp': {
 			int32	row	= -1;
-			message->FindInt32("row",&row);
+			if (message->FindInt32("row",&row) != B_OK)
+				row = -1;
 			if (row >= 0)
 				MoveRow(row,-1);
 			return;
 		}
 		case 'mvDn': {
 			int32	row	= -1;
-			message->FindInt32("row",&row);
+			if (message->FindInt32("row",&row) != B_OK)
+				row = -1;
 			if (row >= 0)
 				MoveRow(row,1);
 			return;

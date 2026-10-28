@@ -396,8 +396,11 @@ void GraphEditor::ReadShortcutBinding(const char *action,int32 *key,int32 *modif
 		return;
 	BMessage	binding;
 	if (shortcutsConfig->FindMessage(action,&binding) == B_OK) {
-		binding.FindInt32(P_C_SHORTCUT_KEY_FIELD,key);
-		binding.FindInt32(P_C_SHORTCUT_MODIFIERS_FIELD,modifiers);
+		int32	value;
+		if (binding.FindInt32(P_C_SHORTCUT_KEY_FIELD,&value) == B_OK)
+			*key = value;
+		if (binding.FindInt32(P_C_SHORTCUT_MODIFIERS_FIELD,&value) == B_OK)
+			*modifiers = value;
 	}
 	delete shortcutsConfig;
 }
@@ -1113,7 +1116,8 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			bool		cancel	= false;
 			message->FindBool("cancel",&cancel);
 			const char	*field	= "FillColor";
-			message->FindString("field",&field);
+			if (message->FindString("field",&field) != B_OK)
+				field = "FillColor";
 			rgb_color	previewColor;
 			BList		*selection	= doc->GetSelected();
 			for (int32 i=0; i<selection->CountItems(); i++) {
@@ -1970,7 +1974,8 @@ bool GraphEditor::StyleStandard(const char *field, uint32 what, rgb_color *color
 rgb_color GraphEditor::NewNodeColor(const char *field) {
 	// the picker's color while it shows a node's, else the standard
 	rgb_color	color	= {0,0,0,255};
-	patternMessage->FindInt32(field,(int32 *)&color);
+	if (patternMessage->FindInt32(field,(int32 *)&color) != B_OK)
+		color = make_color(0,0,0,255);
 	rgb_color	picked;
 	if (!nodeColorTargets || !colorItem->FindColor(field,&picked))
 		return color;
@@ -2037,9 +2042,11 @@ void GraphEditor::UpdateFormatItems(void) {
 				if ((i == 1) && (node->what != P_C_CLASS_TYPE))
 					continue;
 				rgb_color	standardColor	= {0,0,0,255};
-				standard->FindInt32(fields[i],(int32 *)&standardColor);
-				rgb_color	current			= standardColor;
-				pattern.FindInt32(fields[i],(int32 *)&current);
+				if (standard->FindInt32(fields[i],(int32 *)&standardColor) != B_OK)
+					standardColor = make_color(0,0,0,255);
+				rgb_color	current;
+				if (pattern.FindInt32(fields[i],(int32 *)&current) != B_OK)
+					current = standardColor;
 				// the standard stands for the style's color: show that one
 				rgb_color	styleColor;
 				if (StyleStandard(fields[i],node->what,&styleColor)) {
@@ -2051,7 +2058,8 @@ void GraphEditor::UpdateFormatItems(void) {
 			}
 		} else {
 			rgb_color	line	= kDefaultConnectionColor;
-			pattern.FindInt32("FillColor",(int32 *)&line);
+			if (pattern.FindInt32("FillColor",(int32 *)&line) != B_OK)
+				line = kDefaultConnectionColor;
 			colorItem->AddTarget(B_TRANSLATE("Line"),"FillColor",line,
 				kDefaultConnectionColor);
 		}

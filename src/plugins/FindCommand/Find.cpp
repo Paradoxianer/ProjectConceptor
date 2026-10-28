@@ -116,15 +116,8 @@ BMessage* Find::Do(PDocument *doc, BMessage *settings)
 		return NULL;
 	}
 
-	// BMessage::FindString(name,BString*) clobbers its output to "" on
-	// failure too (confirmed against Haiku's own Message.cpp - "Find*()
-	// clobbers the object even on failure"), unlike FindBool()/FindInt32();
-	// pre-setting these to their default and letting a failed Find leave
-	// them alone (the pattern every other optional field in this codebase
-	// uses) silently threw the default away and left scope/setOperation
-	// empty - matching neither this nor any of the real option strings, so
-	// a settings message with no "scope" field ended up searching nothing
-	// at all rather than defaulting to nodes.
+	// every BMessage::Find*() clobbers its output on failure (Haiku's
+	// Message.cpp), so a pre-set default has to be set again
 	BString	scope(kFindScopeNodes);
 	if (settings->FindString("scope",&scope) != B_OK)
 		scope = kFindScopeNodes;
