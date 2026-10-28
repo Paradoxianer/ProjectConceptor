@@ -29,6 +29,7 @@ SRCS= 	TestMain.cpp \
 		ColorToolItemTest.cpp \
 		StatusTextsTest.cpp \
 		NoteLayoutTest.cpp \
+		AttributeTextTest.cpp \
 		GraphStyleTest.cpp \
 		MessageXmlWriterTest.cpp \
 		../plugins/LayoutEditor/LayoutEditor.cpp \
@@ -84,6 +85,7 @@ SRCS= 	TestMain.cpp \
 		../app/Tools/ShortCutFilter.cpp \
 		../app/Tools/TextViewCompleter.cpp \
 		../app/Tools/NodeSearch.cpp \
+		../app/Tools/AttributeText.cpp \
 		../app/Tools/plugins/BasePlugin.cpp \
 		../app/Tools/plugins/PluginManager.cpp \
 		../plugins/ChangeValueCommand/ChangeValue.cpp \

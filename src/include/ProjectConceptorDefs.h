@@ -47,6 +47,13 @@ const uint32	P_C_MACRO_TYPE					= 'pcTM';
 /** what of an attribute block {Name, Value} in Node::Data, besides
  * B_STRING_TYPE and B_BOOL_TYPE; Value keeps a plain BMessage type */
 const uint32	P_C_ATTRIBUTE_NOTE				= 'paNO';	// Value: string, several lines
+const uint32	P_C_ATTRIBUTE_LINK				= 'paLI';	// Value: string, an address
+const uint32	P_C_ATTRIBUTE_FILE				= 'paFI';	// Value: string, a path
+const uint32	P_C_ATTRIBUTE_IMAGE				= 'paIM';	// Value: string, a path
+const uint32	P_C_ATTRIBUTE_NUMBER			= 'paNU';	// Value: float, Unit: string
+const uint32	P_C_ATTRIBUTE_CHOICE			= 'paCH';	// Value: string, Choices: string, one per line
+const uint32	P_C_ATTRIBUTE_COLOR				= 'paCO';	// Value: rgb_color
+const uint32	P_C_ATTRIBUTE_DATE				= 'paDA';	// Value: string, YYYY-MM-DD
 
 const uint32	P_C_INSERT_EDITOR				= 'pcIE';
 const uint32	P_C_REMOVE_EDITOR				= 'pcRE';
@@ -342,6 +349,11 @@ extern const char*		P_C_NODE_X_RADIUS;	//				= "Node::xRadius"
 extern const char*		P_C_NODE_Y_RADIUS;	//				= "Node::yRadius"
 /** width of the attribute name column, 0 = fit to the names */
 extern const char*		P_C_NODE_ATTRIBUTE_COLUMN;	//		= "Node::attributeColumn"
+/** fields of an attribute block in Node::Data */
+extern const char*		P_C_ATTRIBUTE_NAME;		//			= "Name"
+extern const char*		P_C_ATTRIBUTE_VALUE;	//			= "Value"
+extern const char*		P_C_ATTRIBUTE_UNIT;		//			= "Unit"
+extern const char*		P_C_ATTRIBUTE_CHOICES;	//			= "Choices"
 /** Resize: how far the left/top edges move, besides dx/dy for right/bottom */
 extern const char*		P_C_RESIZE_LEFT;	//				= "dleft"
 extern const char*		P_C_RESIZE_TOP;		//				= "dtop"

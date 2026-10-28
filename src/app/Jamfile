@@ -118,6 +118,7 @@ PROJECT_CONCEPTOR_SOURCES =
 	ShortCutFilter.cpp
 	TextViewCompleter.cpp
 	NodeSearch.cpp
+	AttributeText.cpp
 
 	# Tools/tinyxml
 

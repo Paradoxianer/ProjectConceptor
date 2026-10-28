@@ -30,7 +30,8 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-FreeMindTranslator
 SRCS= 	FreeMindTranslator.cpp \
 		../common/TranslatorMain.cpp \
 		../common/ConfigView.cpp \
-		../../common/ProjectConceptorFields.cpp
+		../../common/ProjectConceptorFields.cpp \
+		../../app/Tools/AttributeText.cpp
 
 
 		
@@ -67,6 +68,7 @@ SYSTEM_INCLUDE_PATHS =
 #	thes use the form: #include "header"
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS =	../../include  \
+						../../app/Tools \
 
 #	specify the level of optimization that you desire
 #	NONE, SOME, FULL

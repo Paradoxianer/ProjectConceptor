@@ -23,7 +23,8 @@ TYPE= SHARED
 SRCS=	../ProjectConceptorDefs.cpp \
 		../../common/ProjectConceptorFields.cpp \
 		../Commands/PCommand.cpp \
-		../Tools/NodeSearch.cpp
+		../Tools/NodeSearch.cpp \
+		../Tools/AttributeText.cpp
 
 RDEFS=
 

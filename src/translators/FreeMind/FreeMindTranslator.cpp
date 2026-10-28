@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include "FreeMindTranslator.h"
 #include "ConfigView.h"
+#include "AttributeText.h"
 
 status_t Identify(BPositionIO * inSource, const translation_format * inFormat,	BMessage * ioExtension,	translator_info * outInfo, uint32 outType)
 {
@@ -240,14 +241,13 @@ TiXmlElement Converter::ProcessNode(BMessage *node)
 		if ( (data->FindMessage(name,count-1,attrib) == B_OK) && (attrib) )
 		{
 			char *attribName	= NULL;
-			char *value			= NULL;
-			attrib->FindString("Name",(const char **)&attribName);
-			attrib->FindString("Value",(const char **)&value);
-			//**need to hanlde bool
+			BString	value;
+			attrib->FindString(P_C_ATTRIBUTE_NAME,(const char **)&attribName);
 			TiXmlElement	xmlAttrib("attribute");
 			xmlAttrib.SetAttribute("NAME",attribName);
-			if(value)
-				xmlAttrib.SetAttribute("VALUE",value);
+			// every kind as text: yes/no, numbers with unit, colors, dates
+			if (AttributeValueText(*attrib,&value) == B_OK)
+				xmlAttrib.SetAttribute("VALUE",value.String());
 			xmlNode.InsertEndChild(xmlAttrib);
 		}
 		i++;

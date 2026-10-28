@@ -40,6 +40,10 @@ const char*		P_C_NODE_SELECTED				= "Node::selected";
 const char*		P_C_NODE_X_RADIUS				= "Node::xRadius";
 const char*		P_C_NODE_Y_RADIUS				= "Node::yRadius";
 const char*		P_C_NODE_ATTRIBUTE_COLUMN		= "Node::attributeColumn";
+const char*		P_C_ATTRIBUTE_NAME				= "Name";
+const char*		P_C_ATTRIBUTE_VALUE				= "Value";
+const char*		P_C_ATTRIBUTE_UNIT				= "Unit";
+const char*		P_C_ATTRIBUTE_CHOICES			= "Choices";
 const char*		P_C_RESIZE_LEFT					= "dleft";
 const char*		P_C_RESIZE_TOP					= "dtop";
 
