@@ -61,6 +61,9 @@ public:
 			void			AddRenderer(Renderer* newRenderer);
 			void			RemoveRenderer(Renderer* wichRenderer);
 			Renderer*		FindRenderer(BMessage *container);
+			/** registers the renderers its children already have, e.g.
+			 * after the editor rebuilt all renderers */
+			void			AdoptChildren(void);
 
 
 

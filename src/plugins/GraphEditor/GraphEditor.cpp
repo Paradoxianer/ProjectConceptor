@@ -374,6 +374,13 @@ void GraphEditor::InitAll() {
 		if (node->FindPointer(renderString,&renderer) != B_OK)
 			InsertRenderObject(node);
 	}
+	// a group only takes up children that are pending changes; after a
+	// reattach (tab switch) none are, so hand them over explicitly
+	for (int32 i=0;i<allNodes->CountItems();i++) {
+		node = (BMessage *)allNodes->ItemAt(i);
+		if ((node->what == P_C_GROUP_TYPE) && (node->FindPointer(renderString,&renderer) == B_OK))
+			((GroupRenderer *)renderer)->AdoptChildren();
+	}
 }
 
 void GraphEditor::PreprocessBeforSave(BMessage *container) {

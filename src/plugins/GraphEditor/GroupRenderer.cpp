@@ -250,6 +250,19 @@ void GroupRenderer::RemoveRenderer(Renderer *wichRenderer) {
 }
 
 
+void GroupRenderer::AdoptChildren(void) {
+	Renderer	*child	= NULL;
+	for (int32 i = 0; i < allNodes->CountItems(); i++) {
+		BMessage	*node	= (BMessage *)allNodes->ItemAt(i);
+		if ((node->FindPointer(editor->RenderString(),(void **)&child) == B_OK)
+				&& (child != NULL))
+			AddRenderer(child);
+	}
+	RecalcFrame(true);
+	PlaceLabel();
+}
+
+
 Renderer* GroupRenderer::FindRenderer(BMessage *container) {
 	Renderer	*currentRenderer	= NULL;
 	if ( (container->FindPointer(editor->RenderString(),(void **) &currentRenderer) == B_OK) 
