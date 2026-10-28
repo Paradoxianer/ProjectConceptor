@@ -192,7 +192,7 @@ ColorPickerWindow::ColorPickerWindow(BRect frame,
 	_ShowPalette();
 	y	+= kSwatchHeight + kMargin;
 
-	// recently used colors, only once there are any
+	// recently used colors; the row is always there, unused slots empty
 	int32	shown	= (historyCount < PW_HISTORY_SIZE) ? historyCount : PW_HISTORY_SIZE;
 	fHistoryCount	= shown;
 	for (int32 i = 0; i < shown; i++) {
@@ -202,9 +202,16 @@ ColorPickerWindow::ColorPickerWindow(BRect frame,
 		fHistorySwatch[i]->MoveTo(kMargin + i*swatchWidth,y);
 		background->AddChild(fHistorySwatch[i]);
 	}
-	if (shown > 0)
-		y	+= kSwatchHeight + kMargin;
-	y	+= kGap - kMargin;
+	rgb_color	emptySlot	= tint_color(ui_color(B_PANEL_BACKGROUND_COLOR),
+		B_DARKEN_1_TINT);
+	for (int32 i = shown; i < PW_HISTORY_SIZE; i++) {
+		BView	*slot	= new BView(BRect(0,0,swatchWidth - 1,kSwatchHeight),
+			"ColorPickerWindow::emptyHistory", B_FOLLOW_NONE, 0);
+		slot->SetViewColor(emptySlot);
+		slot->MoveTo(kMargin + i*swatchWidth,y);
+		background->AddChild(slot);
+	}
+	y	+= kSwatchHeight + kGap;
 
 	fColorControl->MoveTo(1,y);
 	fColorControl->SetTarget(this);
