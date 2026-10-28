@@ -145,7 +145,7 @@ void ClassRenderer::MouseDown(BPoint where, int32 buttons,
 		Renderer	*row	= (*attributes)[i];
 		if (row->Caught(where)) {
 			found	= true;
-			row->MouseDown(where);
+			row->MouseDown(where,buttons,clicks,modifiers);
 		}
 	}
 	if (((handle == NodeHandles::NONE) && (connector == 0) && found) || tracking)

@@ -1,50 +1,72 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	3941132444
+1	German	application/x-vnd.ProjectConceptor-plugin	252096661
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Löschen
 Triangle	GraphEditor		Dreieck
-Diamond	GraphEditor		Raute
+Date	DatePopup		Datum
 Connection	GraphEditor		Verbindung
-Empty note	NoteRenderer		Leere Notiz
-Grid	GraphEditor		Gitter
+Today	DatePopup		Heute
 Fit	GraphEditor		Einpassen
 Fill pattern for selected nodes	GraphEditor		Füllmuster für ausgewählte Knoten
-Toggle grid	GraphEditor		Raster ein/aus
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# Verbindung} other{# Verbindungen}}
+None	GraphEditor		Keine
+Yes/No	GraphEditor		Ja/Nein
+Arrows	GraphEditor		Pfeile
+Choose file…	ValueRenderer		Datei wählen…
+Choose image…	ImageRenderer		Bild wählen…
+Date	GraphEditor		Datum
+Rounded rectangle	GraphEditor		Abgerundetes Rechteck
+Fill	GraphEditor		Ausfüllen
+Open\nIn progress\nDone	GraphEditor		Offen\nIn Arbeit\nErledigt
+Status	GraphEditor		Status
+Border	GraphEditor		Rand
+Straight	GraphEditor		Gerade
+Shape of the selected nodes	GraphEditor		Form der ausgewählten Knoten
+Attribute	GraphEditor		Attribut
+Highlight	GraphEditor		Akzent
+Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
+Untitled	GraphEditor		Unbenannt
+Graph	GraphEditor		Graph
+Choice list	GraphEditor		Auswahlliste
+Choose a file	GraphEditor		Datei wählen
+Change…	AttributeRenderer		Ändern…
+Number	GraphEditor		Zahl
+Diamond	GraphEditor		Raute
+Empty note	NoteRenderer		Leere Notiz
+Grid	GraphEditor		Gitter
+File	GraphEditor		Datei
+Add address	ValueRenderer		Adresse eingeben
+No date	DatePopup		Kein Datum
+Toggle grid	GraphEditor		Raster ein/aus
 Text	GraphEditor		Text
 Add an attribute to the selected nodes	GraphEditor		Attribut zu den ausgewählten Knoten hinzufügen
 Position %d, %d · Size %d × %d	GraphEditor		Position %d, %d · Größe %d × %d
-None	GraphEditor		Keine
 Group	GraphEditor		Gruppieren
 Parallelogram	GraphEditor		Parallelogramm
 Toggle smart alignment guides	GraphEditor		Intelligente Ausrichtungshilfen ein/aus
-Yes/No	GraphEditor		Ja/Nein
 Ellipse	GraphEditor		Ellipse
-Arrows	GraphEditor		Pfeile
 No selection	GraphEditor		Keine Auswahl
 Rounded	GraphEditor		Abgerundet
 Pen size	GraphEditor		Stiftgröße
 Pointer %d, %d	GraphEditor		Zeiger %d, %d
 Note	GraphEditor		Notiz
-Rounded rectangle	GraphEditor		Abgerundetes Rechteck
+Color	GraphEditor		Farbe
 Fill color for selected nodes	GraphEditor		Füllfarbe für ausgewählte Knoten
+Image	GraphEditor		Bild
+Image not found	ImageRenderer		Bild nicht gefunden
 Both ends	GraphEditor		Beide Enden
-Fill	GraphEditor		Ausfüllen
 {0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# Knoten} other{# Knoten}}
 Rectangle	GraphEditor		Rechteck
-Border	GraphEditor		Rand
+Choose date…	ValueRenderer		Datum wählen…
 Pattern	GraphEditor		Muster
 Guides	GraphEditor		Hilfslinien
-Straight	GraphEditor		Gerade
-Shape of the selected nodes	GraphEditor		Form der ausgewählten Knoten
-At source	GraphEditor		Am Anfang
 Angular	GraphEditor		Eckig
-Attribute	GraphEditor		Attribut
+At source	GraphEditor		Am Anfang
 Hexagon	GraphEditor		Sechseck
-Highlight	GraphEditor		Akzent
+Link	GraphEditor		Link
+Choose an image	GraphEditor		Bild wählen
+Choose…	ValueRenderer		Wählen…
 At target	GraphEditor		Am Ende
 Shape	GraphEditor		Form
-Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
-Untitled	GraphEditor		Unbenannt
-Graph	GraphEditor		Graph
+Edit choices…	ValueRenderer		Auswahl bearbeiten…
 Which ends of the selected connections carry an arrow	GraphEditor		An welchen Enden die ausgewählten Verbindungen einen Pfeil tragen
 Shape of the selected connections	GraphEditor		Form der ausgewählten Verbindungen

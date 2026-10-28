@@ -25,8 +25,9 @@ and are shown while the **Graph** tab is active:
 - **Node shape** - rounded rectangle, rectangle, ellipse, diamond,
   triangle, hexagon, parallelogram, or note. Name and attributes stay
   inside the shape, and connections dock on its outline.
-- **Attribute** - adds a text, yes/no or note attribute to the
-  selected nodes (see below).
+- **Attribute** - adds an attribute to the selected nodes: text,
+  yes/no, note, number, choice list, date, color, link, file or image
+  (see below).
 - **Connection shape** - straight, rounded, or angular.
 - **Arrow ends** - arrowhead at the target, at the source, at both
   ends, or none.
@@ -71,14 +72,34 @@ start a connection.
 ## Attributes
 
 Any node can carry its own attribute rows - added to the selected
-nodes via the toolbar's **Attribute** menu (Text, Yes/No or Note). The
-new row's name opens for typing right away:
+nodes via the toolbar's **Attribute** menu. The new row's name opens for
+typing right away:
 
 ![Node with attributes](screenshots/04-node-with-attributes.png)
 
 Click a name or a text value to edit it, click a yes/no box to toggle
 it. A selected node shows a small cross at the end of each row to
-remove it.
+remove it; a right click on a row offers **Delete**, and **Change…**
+where a click does something else (see below).
+
+| Kind | Shows | A click |
+|---|---|---|
+| Text | the text | edits it |
+| Yes/No | a check box | toggles it |
+| Note | text over several lines | edits it (see *Notes*) |
+| Number | the number with its unit, e.g. `1.234,5 €` | edits it: type the number and the unit after it (`25,5 €`, `3 h`); `,` or `.` both work as the decimal point |
+| Choice list | the current choice with a small arrow | shows the list; **Edit choices…** at its end edits the list, one choice per line |
+| Date | the date in your language's format | opens a calendar; **Today** and **No date** below it |
+| Color | a color field and its code | opens the color picker |
+| Link | the address | opens it in the browser; a click behind it, or **Change…**, edits it |
+| File | the file's name | opens it with its preferred application; a click behind it, or **Change…**, chooses another |
+| Image | the picture, as wide as the node | opens it; **Change…** chooses another |
+
+A document keeps the path of a file or image, not the file itself:
+moved or renamed, it can't be found any more.
+
+Macros read numbers with **GetValue** like any other number; the unit
+stays out of the calculation.
 
 The names form one column, so the values line up. It is as wide as
 the longest name; on a selected node, drag the border between names and

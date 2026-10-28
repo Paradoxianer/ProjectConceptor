@@ -1,50 +1,72 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	3941132444
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	252096661
 Line	GraphEditor		Linje
 Delete	AttributeRenderer		Radera
 Triangle	GraphEditor		Triangel
-Diamond	GraphEditor		Romb
+Date	DatePopup		Datum
 Connection	GraphEditor		Förbindelse
-Empty note	NoteRenderer		Tom anteckning
-Grid	GraphEditor		Rutnät
+Today	DatePopup		Idag
 Fit	GraphEditor		Anpassa
 Fill pattern for selected nodes	GraphEditor		Fyllnadsmönster för markerade noder
-Toggle grid	GraphEditor		Visa/dölj rutnät
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# koppling} other{# kopplingar}}
+None	GraphEditor		Ingen
+Yes/No	GraphEditor		Ja/Nej
+Arrows	GraphEditor		Pilar
+Choose file…	ValueRenderer		Välj fil…
+Choose image…	ImageRenderer		Välj bild…
+Date	GraphEditor		Datum
+Rounded rectangle	GraphEditor		Rundad rektangel
+Fill	GraphEditor		Fyll
+Open\nIn progress\nDone	GraphEditor		Öppen\nPågår\nKlar
+Status	GraphEditor		Status
+Border	GraphEditor		Kant
+Straight	GraphEditor		Rak
+Shape of the selected nodes	GraphEditor		Form på markerade noder
+Attribute	GraphEditor		Attribut
+Highlight	GraphEditor		Accent
+Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder
+Untitled	GraphEditor		Namnlös
+Graph	GraphEditor		Graf
+Choice list	GraphEditor		Vallista
+Choose a file	GraphEditor		Välj en fil
+Change…	AttributeRenderer		Ändra…
+Number	GraphEditor		Tal
+Diamond	GraphEditor		Romb
+Empty note	NoteRenderer		Tom anteckning
+Grid	GraphEditor		Rutnät
+File	GraphEditor		Fil
+Add address	ValueRenderer		Lägg till adress
+No date	DatePopup		Inget datum
+Toggle grid	GraphEditor		Visa/dölj rutnät
 Text	GraphEditor		Text
 Add an attribute to the selected nodes	GraphEditor		Lägg till ett attribut på markerade noder
 Position %d, %d · Size %d × %d	GraphEditor		Position %d, %d · Storlek %d × %d
-None	GraphEditor		Ingen
 Group	GraphEditor		Gruppera
 Parallelogram	GraphEditor		Parallellogram
 Toggle smart alignment guides	GraphEditor		Slå på/av smarta justeringslinjer
-Yes/No	GraphEditor		Ja/Nej
 Ellipse	GraphEditor		Ellips
-Arrows	GraphEditor		Pilar
 No selection	GraphEditor		Inget markerat
 Rounded	GraphEditor		Rundad
 Pen size	GraphEditor		Pennstorlek
 Pointer %d, %d	GraphEditor		Pekare %d, %d
 Note	GraphEditor		Anteckning
-Rounded rectangle	GraphEditor		Rundad rektangel
+Color	GraphEditor		Färg
 Fill color for selected nodes	GraphEditor		Fyllnadsfärg för markerade noder
+Image	GraphEditor		Bild
+Image not found	ImageRenderer		Bilden hittades inte
 Both ends	GraphEditor		Båda ändar
-Fill	GraphEditor		Fyll
 {0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# nod} other{# noder}}
 Rectangle	GraphEditor		Rektangel
-Border	GraphEditor		Kant
+Choose date…	ValueRenderer		Välj datum…
 Pattern	GraphEditor		Mönster
 Guides	GraphEditor		Hjälplinjer
-Straight	GraphEditor		Rak
-Shape of the selected nodes	GraphEditor		Form på markerade noder
-At source	GraphEditor		Vid källan
 Angular	GraphEditor		Vinklad
-Attribute	GraphEditor		Attribut
+At source	GraphEditor		Vid källan
 Hexagon	GraphEditor		Hexagon
-Highlight	GraphEditor		Accent
+Link	GraphEditor		Länk
+Choose an image	GraphEditor		Välj en bild
+Choose…	ValueRenderer		Välj…
 At target	GraphEditor		Vid målet
 Shape	GraphEditor		Form
-Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder
-Untitled	GraphEditor		Namnlös
-Graph	GraphEditor		Graf
+Edit choices…	ValueRenderer		Redigera val…
 Which ends of the selected connections carry an arrow	GraphEditor		Vilka ändar av de markerade förbindelserna som har en pil
 Shape of the selected connections	GraphEditor		Form på de markerade förbindelserna

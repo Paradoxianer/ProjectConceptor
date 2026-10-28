@@ -12,6 +12,8 @@ SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app ToolB
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src app Tools ] ;
 SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src common ] ;
 
+UsePrivateHeaders shared ;
+
 AddResources pc_graph_editor : GraphEditor.rsrc Icons.rdef ;
 
 Addon pc_graph_editor :
@@ -34,7 +36,10 @@ Addon pc_graph_editor :
 	StringRenderer.cpp
 	NoteLayout.cpp
 	NoteRenderer.cpp
+	ValueRenderer.cpp
+	ImageRenderer.cpp
+	DatePopup.cpp
 	TextEditorControl.cpp
-        : be tracker translation libprojectconceptor.a
+        : be tracker translation libshared.a libprojectconceptor.a
 ;
 

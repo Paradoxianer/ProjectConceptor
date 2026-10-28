@@ -46,6 +46,9 @@ SRCS=	AttributRenderer.cpp	\
 		StringRenderer.cpp		\
 		NoteLayout.cpp			\
 		NoteRenderer.cpp		\
+		ValueRenderer.cpp		\
+		ImageRenderer.cpp		\
+		DatePopup.cpp			\
 		TextEditorControl.cpp
 
 #	Specify the resource definition files to use. Full or relative paths can be
@@ -66,7 +69,7 @@ RSRCS=
 #		naming scheme you need to specify the path to the library
 #		and it's name
 #		library: my_lib.a entry: my_lib.a or path/my_lib.a
-LIBS= be  localestub ../../../$(APP_DIR)/libProjectConceptor.so
+LIBS= be localestub translation shared ../../../$(APP_DIR)/libProjectConceptor.so
 		
 #	specify additional paths to directories following the standard
 #	libXXX.so or libXXX.a naming scheme.  You can specify full paths
@@ -79,7 +82,7 @@ LIBPATHS=
 #	additional paths to look for system headers
 #	thes use the form: #include <header>
 #	source file directories are NOT auto-included here
-SYSTEM_INCLUDE_PATHS = 
+SYSTEM_INCLUDE_PATHS = /boot/system/develop/headers/private/shared
 
 #	additional paths to look for local headers
 #	thes use the form: #include "header"

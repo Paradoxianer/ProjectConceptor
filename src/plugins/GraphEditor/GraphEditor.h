@@ -8,6 +8,7 @@
  * in him shall not perish but have eternal life.
  * Joh. 3, 16
  */
+#include <storage/FilePanel.h>
 #include <app/Message.h>
 #include <interface/View.h>
 #include <interface/ScrollView.h>
@@ -59,6 +60,13 @@ const uint32			G_E_CONNECTION_ARROWS	= 'geCA';
 // "value": a NodeShape built-in name
 const uint32			G_E_NODE_SHAPE			= 'geSh';
 const uint32			G_E_ADD_ATTRIBUTE		= 'geAA';
+// a number attribute's text was typed: "change" the ChangeValue template,
+// valueContainer/newValue the text, split into Value and Unit (#146)
+const uint32			G_E_ATTRIBUTE_NUMBER	= 'geAN';
+// a file or image was chosen for an attribute: "change" and "refs"
+const uint32			G_E_ATTRIBUTE_FILE		= 'geAF';
+// the color picker of a color attribute reports a color
+const uint32			G_E_ATTRIBUTE_COLOR		= 'geAC';
 //*order to Insert and new a Node and to connect it to all current selected Nodes*/
 const uint32			G_E_INSERT_NODE 		= 'geIN';
 //*order to Insert and new a Node directly as a sibling to the last selected Node*/
@@ -148,6 +156,13 @@ public:
 			/** TextEditorControl calls this on itself once it's done (Enter
 			 * or click-away) so a stale pointer here never outlives it. */
 			void			ClearActiveTextEditor(TextEditorControl *e){if (activeTextEditor==e) activeTextEditor=NULL;};
+
+			/** a file panel whose choice goes into the attribute change
+			 * is the ChangeValue template of (#146) */
+			void			ChooseAttributeFile(const BMessage &change, bool image);
+			/** the color picker at where, for a color attribute */
+			void			PickAttributeColor(const BMessage &change, rgb_color color,
+								BPoint where);
 
 			bool			GridEnabled(void){return gridEnabled;};
 			float			GridWidth(void){return gridWidth;};
@@ -339,6 +354,12 @@ protected:
 			// the node never risked in the first place, just differently.
 			BMessage		*pendingStartEditNode;
 			TextEditorControl	*activeTextEditor;
+			/** chooses files for file and image attributes, made on first use */
+			BFilePanel		*attributePanel;
+			/** the last color the picker of a color attribute reported, with
+			 * its "change"; committed once the picker closes */
+			BMessage		pickedAttributeColor;
+			bool			attributeColorPicker;
 			BList			*renderer;
 			float			scale;
 

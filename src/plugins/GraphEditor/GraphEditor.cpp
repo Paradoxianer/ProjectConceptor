@@ -12,9 +12,15 @@
 #include <string.h>
 #include <Catalog.h>
 #include <MessageRunner.h>
+#include <storage/Path.h>
+#include <support/Beep.h>
+#include <support/DateTime.h>
 
 #include "GraphEditor.h"
 #include "ColorSwatchView.h"
+#include "ColorPickerWindow.h"
+#include "AttributeText.h"
+#include "ValueRenderer.h"
 #include "ConfigManager.h"
 #include "PCommandManager.h"
 #include "ProjectConceptor.h"
@@ -78,6 +84,74 @@ MakeShapeIcon(const char *shapeName)
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "GraphEditor"
 
+/** the entries of the toolbar's Attribute menu: its value (the icon is
+ * "attribute-<value>"), the attribute's what, the menu label and the name
+ * a new attribute gets */
+struct AttributeKind {
+	const char	*value;
+	uint32		type;
+	const char	*label;
+	const char	*name;
+};
+
+static const AttributeKind kAttributeKinds[] = {
+	{ "text",	B_STRING_TYPE,			B_TRANSLATE_MARK("Text"),		B_TRANSLATE_MARK("Attribute") },
+	{ "bool",	B_BOOL_TYPE,			B_TRANSLATE_MARK("Yes/No"),		B_TRANSLATE_MARK("Attribute") },
+	{ "note",	P_C_ATTRIBUTE_NOTE,		B_TRANSLATE_MARK("Note"),		B_TRANSLATE_MARK("Note") },
+	{ "number",	P_C_ATTRIBUTE_NUMBER,	B_TRANSLATE_MARK("Number"),		B_TRANSLATE_MARK("Number") },
+	{ "choice",	P_C_ATTRIBUTE_CHOICE,	B_TRANSLATE_MARK("Choice list"),	B_TRANSLATE_MARK("Status") },
+	{ "date",	P_C_ATTRIBUTE_DATE,		B_TRANSLATE_MARK("Date"),		B_TRANSLATE_MARK("Date") },
+	{ "color",	P_C_ATTRIBUTE_COLOR,	B_TRANSLATE_MARK("Color"),		B_TRANSLATE_MARK("Color") },
+	{ "link",	P_C_ATTRIBUTE_LINK,		B_TRANSLATE_MARK("Link"),		B_TRANSLATE_MARK("Link") },
+	{ "file",	P_C_ATTRIBUTE_FILE,		B_TRANSLATE_MARK("File"),		B_TRANSLATE_MARK("File") },
+	{ "image",	P_C_ATTRIBUTE_IMAGE,	B_TRANSLATE_MARK("Image"),		B_TRANSLATE_MARK("Image") },
+};
+
+static const int32	kAttributeKindCount	= sizeof(kAttributeKinds) / sizeof(kAttributeKinds[0]);
+
+
+/** the value a new attribute of attribute->what starts with */
+static void AddDefaultValue(BMessage *attribute, rgb_color accent)
+{
+	switch (attribute->what) {
+		case B_BOOL_TYPE:
+			attribute->AddBool(P_C_ATTRIBUTE_VALUE,true);
+			break;
+		case B_STRING_TYPE:
+			// a few spaces give the new row something to click on
+			attribute->AddString(P_C_ATTRIBUTE_VALUE,"   ");
+			break;
+		case P_C_ATTRIBUTE_NUMBER:
+			attribute->AddFloat(P_C_ATTRIBUTE_VALUE,0);
+			attribute->AddString(P_C_ATTRIBUTE_UNIT,"");
+			break;
+		case P_C_ATTRIBUTE_CHOICE: {
+			BString	choices(B_TRANSLATE("Open\nIn progress\nDone"));
+			BString	first(choices);
+			if (first.FindFirst('\n') >= 0)
+				first.Truncate(first.FindFirst('\n'));
+			attribute->AddString(P_C_ATTRIBUTE_VALUE,first);
+			attribute->AddString(P_C_ATTRIBUTE_CHOICES,choices);
+			break;
+		}
+		case P_C_ATTRIBUTE_COLOR:
+			attribute->AddData(P_C_ATTRIBUTE_VALUE,B_RGB_COLOR_TYPE,&accent,
+				sizeof(rgb_color));
+			break;
+		case P_C_ATTRIBUTE_DATE: {
+			BDate	today	= BDate::CurrentDate(B_LOCAL_TIME);
+			BString	iso;
+			iso.SetToFormat("%04" B_PRId32 "-%02" B_PRId32 "-%02" B_PRId32,
+				today.Year(),today.Month(),today.Day());
+			attribute->AddString(P_C_ATTRIBUTE_VALUE,iso);
+			break;
+		}
+		default:
+			// note, link, file, image: empty until written or chosen
+			attribute->AddString(P_C_ATTRIBUTE_VALUE,"");
+	}
+}
+
 
 
 GraphEditor::GraphEditor(image_id newId):PEditor(),BView(BRect(0,0,400,400),"GraphEditor",B_FOLLOW_ALL_SIDES,B_WILL_DRAW | B_NAVIGABLE) {
@@ -98,6 +172,7 @@ GraphEditor::~GraphEditor(void) {
 	// still in flight (e.g. right after Auto-Layout) when the window
 	// closes, and dispatches to freed memory next tick.
 	delete animationRunner;
+	delete attributePanel;
 }
 
 void GraphEditor::Init(void) {
@@ -111,6 +186,8 @@ void GraphEditor::Init(void) {
 	currentCursor	= B_CURSOR_ID_SYSTEM_DEFAULT;
 	pendingStartEditNode	= NULL;
 	activeTextEditor		= NULL;
+	attributePanel			= NULL;
+	attributeColorPicker	= false;
 	nodeColorTargets		= false;
 	colorTargetsWhat		= P_C_CLASS_TYPE;
 	rendersensitv	= new BRegion();
@@ -219,12 +296,12 @@ void GraphEditor::Init(void) {
 	addAttribute	= new ChoiceToolItem(B_TRANSLATE("Attribute"),
 		new BMessage(G_E_ADD_ATTRIBUTE),ITEM_WIDTH*2);
 	addAttribute->SetActionIcon(LoadVectorIcon(res,"attribute",kToolIconSize));
-	addAttribute->AddChoice(B_TRANSLATE("Text"),"text",
-		LoadVectorIcon(res,"attribute-text",kToolIconSize));
-	addAttribute->AddChoice(B_TRANSLATE("Yes/No"),"bool",
-		LoadVectorIcon(res,"attribute-bool",kToolIconSize));
-	addAttribute->AddChoice(B_TRANSLATE("Note"),"note",
-		LoadVectorIcon(res,"attribute-note",kToolIconSize));
+	for (int32 i = 0; i < kAttributeKindCount; i++) {
+		BString	icon("attribute-");
+		icon << kAttributeKinds[i].value;
+		addAttribute->AddChoice(B_TRANSLATE_NOCOLLECT(kAttributeKinds[i].label),
+			kAttributeKinds[i].value,LoadVectorIcon(res,icon.String(),kToolIconSize));
+	}
 	addAttribute->SetToolTip(B_TRANSLATE("Add an attribute to the selected nodes"));
 
 	connectionStyle		= new ChoiceToolItem(B_TRANSLATE("Connection"),
@@ -1110,18 +1187,23 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		case G_E_ADD_ATTRIBUTE: {
 			// no question first: the attribute appears with a default name
 			// and its label opens for typing (StartPendingAttributeEdit())
-			int32		type	= B_STRING_TYPE;
-			const char	*kind	= NULL;
-			if ((message->FindInt32("type",&type) != B_OK)
-					&& (message->FindString("value",&kind) == B_OK)) {
-				if (strcmp(kind,"bool") == 0)
-					type	= B_BOOL_TYPE;
-				else if (strcmp(kind,"note") == 0)
-					type	= P_C_ATTRIBUTE_NOTE;
+			// FindInt32() sets 0 when the field is missing, hence requested
+			int32		type		= B_STRING_TYPE;
+			int32		requested	= 0;
+			const char	*kind		= NULL;
+			if (message->FindInt32("type",&requested) == B_OK)
+				type	= requested;
+			else if (message->FindString("value",&kind) == B_OK) {
+				for (int32 i = 0; i < kAttributeKindCount; i++) {
+					if (strcmp(kind,kAttributeKinds[i].value) == 0)
+						type	= kAttributeKinds[i].type;
+				}
 			}
-			const char	*attributeName	= (type == P_C_ATTRIBUTE_NOTE)
-				? B_TRANSLATE("Note") : B_TRANSLATE("Attribute");
-			BString		datadummy("   ");
+			const char	*attributeName	= B_TRANSLATE("Attribute");
+			for (int32 i = 0; i < kAttributeKindCount; i++) {
+				if (kAttributeKinds[i].type == (uint32)type)
+					attributeName	= B_TRANSLATE_NOCOLLECT(kAttributeKinds[i].name);
+			}
 			BMessage	*addMessage		= new BMessage(P_C_EXECUTE_COMMAND);
 			addMessage->AddString("Command::Name","AddAttribute");
 			addMessage->AddBool(P_C_NODE_SELECTED,true);
@@ -1130,13 +1212,8 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			valueContainer->AddString("name",attributeName);
 			valueContainer->AddString("subgroup",P_C_NODE_DATA);
 			BMessage	*newAttribute	= new BMessage(type);
-			newAttribute->AddString("Name",attributeName);
-			if (type == B_STRING_TYPE)
-				newAttribute->AddData("Value",type,datadummy.String(),datadummy.Length() + 1,false);
-			else if (type == B_BOOL_TYPE)
-				newAttribute->AddBool("Value",true);
-			else if (type == P_C_ATTRIBUTE_NOTE)
-				newAttribute->AddString("Value","");
+			newAttribute->AddString(P_C_ATTRIBUTE_NAME,attributeName);
+			AddDefaultValue(newAttribute,Style().accent);
 			valueContainer->AddMessage("newAttribute",newAttribute);
 			addMessage->AddMessage("valueContainer",valueContainer);
 			pendingEditAttribute	= attributeName;
@@ -1173,6 +1250,71 @@ void GraphEditor::MessageReceived(BMessage *message) {
 				commandMessage->ReplaceString("Command::Name","Group");
 				sentTo->SendMessage(commandMessage);
 			}
+			break;
+		}
+		case G_E_ATTRIBUTE_NUMBER: {
+			BMessage	change;
+			BMessage	valueContainer;
+			const char	*text	= NULL;
+			float		number	= 0;
+			BString		unit;
+			if ((message->FindMessage("change",&change) != B_OK)
+					|| (message->FindMessage("valueContainer",&valueContainer) != B_OK)
+					|| (valueContainer.FindString("newValue",&text) != B_OK))
+				break;
+			if (ParseNumberWithUnit(text,&number,&unit) != B_OK) {
+				// not a number: nothing is changed
+				beep();
+				break;
+			}
+			// number and unit change as one step
+			BMessage	batch(P_C_EXECUTE_COMMAND);
+			batch.AddString("Command::Name","Batch");
+			BMessage	*valueChange	= ValueRenderer::ChangeOf(change,P_C_ATTRIBUTE_VALUE,
+				B_FLOAT_TYPE,&number,sizeof(number));
+			BMessage	*unitChange		= ValueRenderer::ChangeOf(change,P_C_ATTRIBUTE_UNIT,
+				B_STRING_TYPE,unit.String(),unit.Length() + 1);
+			batch.AddMessage("PCommand::subPCommand",valueChange);
+			batch.AddMessage("PCommand::subPCommand",unitChange);
+			delete valueChange;
+			delete unitChange;
+			sentTo->SendMessage(&batch);
+			break;
+		}
+		case G_E_ATTRIBUTE_FILE: {
+			BMessage	change;
+			entry_ref	ref;
+			BPath		path;
+			if ((message->FindMessage("change",&change) != B_OK)
+					|| (message->FindRef("refs",&ref) != B_OK)
+					|| (path.SetTo(&ref) != B_OK))
+				break;
+			BMessage	*command	= ValueRenderer::ChangeOf(change,P_C_ATTRIBUTE_VALUE,
+				B_STRING_TYPE,path.Path(),strlen(path.Path()) + 1);
+			sentTo->SendMessage(command);
+			delete command;
+			break;
+		}
+		case G_E_ATTRIBUTE_COLOR:
+			// the picker reports every change; the last one counts
+			pickedAttributeColor	= *message;
+			break;
+		case PW_CLOSED: {
+			if (!attributeColorPicker)
+				break;
+			attributeColorPicker	= false;
+			bool		cancel	= false;
+			rgb_color	color;
+			BMessage	change;
+			message->FindBool("cancel",&cancel);
+			if (!cancel && ColorFromMessage(&pickedAttributeColor,color)
+					&& (pickedAttributeColor.FindMessage("change",&change) == B_OK)) {
+				BMessage	*command	= ValueRenderer::ChangeOf(change,P_C_ATTRIBUTE_VALUE,
+					B_RGB_COLOR_TYPE,&color,sizeof(color));
+				sentTo->SendMessage(command);
+				delete command;
+			}
+			pickedAttributeColor.MakeEmpty();
 			break;
 		}
 		default:
@@ -1977,4 +2119,39 @@ void GraphEditor::ShowGeometry(BRect frame) {
 	StatusBar	*statusBar	= GetStatusBar();
 	if (statusBar != NULL)
 		statusBar->SetText("geometry",StatusTexts::Geometry(frame).String());
+}
+
+
+void GraphEditor::ChooseAttributeFile(const BMessage &change, bool image)
+{
+	BMessage	chosen(G_E_ATTRIBUTE_FILE);
+	chosen.AddMessage("change",&change);
+	if (attributePanel == NULL) {
+		BMessenger	target(this);
+		attributePanel	= new BFilePanel(B_OPEN_PANEL,&target,NULL,B_FILE_NODE,false);
+	}
+	attributePanel->SetMessage(&chosen);
+	attributePanel->Window()->SetTitle(image ? B_TRANSLATE("Choose an image")
+		: B_TRANSLATE("Choose a file"));
+	attributePanel->Show();
+}
+
+
+void GraphEditor::PickAttributeColor(const BMessage &change, rgb_color color,
+	BPoint where)
+{
+	if (attributeColorPicker)
+		return;
+	BMessage	*report	= new BMessage(G_E_ATTRIBUTE_COLOR);
+	report->AddMessage("change",&change);
+	ColorPickerTarget	target;
+	target.label	= B_TRANSLATE("Color");
+	target.color	= color;
+	target.standard	= color;
+	target.light	= false;
+	pickedAttributeColor.MakeEmpty();
+	attributeColorPicker	= true;
+	ColorPickerWindow	*picker	= new ColorPickerWindow(BRect(where,where + BPoint(1,1)),
+		report,this,&target,1,0);
+	picker->Show();
 }

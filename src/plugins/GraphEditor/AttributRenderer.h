@@ -49,9 +49,14 @@ public:
 			/** the data field this row shows an entry of */
 			void			SetKey(const char *newKey){key = newKey;};
 			const char*		Key(void) const {return key.String();};
-			/** opens the label for typing */
+			/** opens the label for typing - a note's text, an image's
+			 * file panel, since they show no label */
 			void			StartEditingName(void);
 			BCursorID		CursorAt(BPoint where);
+			/** the value has a change besides a click: an address, a file,
+			 * an image, the choices of a list */
+			bool			CanEditValue(void);
+			void			EditValue(void);
 			/** label in muted, value in text */
 			void			SetTextColors(rgb_color text, rgb_color muted);
 			BRect			Frame(void){return frame;};
@@ -63,6 +68,8 @@ public:
 
 protected:
 			void			Init();
+			/** "Change…" and "Delete" at where */
+			void			ShowContextMenu(BPoint where);
 		BMessage			*changeMessage;
 		BMessage			*attribut;
 		BMessage			*deleteMessage;
@@ -78,7 +85,6 @@ protected:
 		/** false for a note: its text uses the whole row */
 		bool				showName;
 		BString				key;
-		BPopUpMenu			*kontextMenu;
 		
 private:
 };

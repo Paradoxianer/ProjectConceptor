@@ -1,50 +1,72 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	3941132444
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	252096661
 Line	GraphEditor		Línea
 Delete	AttributeRenderer		Borrar
 Triangle	GraphEditor		Triángulo
-Diamond	GraphEditor		Rombo
+Date	DatePopup		Fecha
 Connection	GraphEditor		Conexión
-Empty note	NoteRenderer		Nota vacía
-Grid	GraphEditor		Grilla
+Today	DatePopup		Hoy
 Fit	GraphEditor		Ajustar
 Fill pattern for selected nodes	GraphEditor		Patrón de relleno de los nodos seleccionados
-Toggle grid	GraphEditor		Mostrar/ocultar cuadrícula
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conexión} other{# conexiones}}
+None	GraphEditor		Ninguna
+Yes/No	GraphEditor		Sí/No
+Arrows	GraphEditor		Flechas
+Choose file…	ValueRenderer		Elegir archivo…
+Choose image…	ImageRenderer		Elegir imagen…
+Date	GraphEditor		Fecha
+Rounded rectangle	GraphEditor		Rectángulo redondeado
+Fill	GraphEditor		Rellenar
+Open\nIn progress\nDone	GraphEditor		Abierto\nEn curso\nHecho
+Status	GraphEditor		Estado
+Border	GraphEditor		Borde
+Straight	GraphEditor		Recta
+Shape of the selected nodes	GraphEditor		Forma de los nodos seleccionados
+Attribute	GraphEditor		Atributo
+Highlight	GraphEditor		Acento
+Border pen size for selected nodes	GraphEditor		Grosor del borde de los nodos seleccionados
+Untitled	GraphEditor		Sin título
+Graph	GraphEditor		Grafo
+Choice list	GraphEditor		Lista de opciones
+Choose a file	GraphEditor		Elegir un archivo
+Change…	AttributeRenderer		Cambiar…
+Number	GraphEditor		Número
+Diamond	GraphEditor		Rombo
+Empty note	NoteRenderer		Nota vacía
+Grid	GraphEditor		Grilla
+File	GraphEditor		Archivo
+Add address	ValueRenderer		Añadir dirección
+No date	DatePopup		Sin fecha
+Toggle grid	GraphEditor		Mostrar/ocultar cuadrícula
 Text	GraphEditor		Texto
 Add an attribute to the selected nodes	GraphEditor		Añadir un atributo a los nodos seleccionados
 Position %d, %d · Size %d × %d	GraphEditor		Posición %d, %d · Tamaño %d × %d
-None	GraphEditor		Ninguna
 Group	GraphEditor		Agrupar
 Parallelogram	GraphEditor		Paralelogramo
 Toggle smart alignment guides	GraphEditor		Activar/desactivar guías de alineación inteligentes
-Yes/No	GraphEditor		Sí/No
 Ellipse	GraphEditor		Elipse
-Arrows	GraphEditor		Flechas
 No selection	GraphEditor		Sin selección
 Rounded	GraphEditor		Redondeada
 Pen size	GraphEditor		Tamaño de lápiz
 Pointer %d, %d	GraphEditor		Puntero %d, %d
 Note	GraphEditor		Nota
-Rounded rectangle	GraphEditor		Rectángulo redondeado
+Color	GraphEditor		Color
 Fill color for selected nodes	GraphEditor		Color de relleno de los nodos seleccionados
+Image	GraphEditor		Imagen
+Image not found	ImageRenderer		Imagen no encontrada
 Both ends	GraphEditor		Ambos extremos
-Fill	GraphEditor		Rellenar
 {0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# nodo} other{# nodos}}
 Rectangle	GraphEditor		Rectángulo
-Border	GraphEditor		Borde
+Choose date…	ValueRenderer		Elegir fecha…
 Pattern	GraphEditor		Patrón
 Guides	GraphEditor		Guías
-Straight	GraphEditor		Recta
-Shape of the selected nodes	GraphEditor		Forma de los nodos seleccionados
-At source	GraphEditor		En el origen
 Angular	GraphEditor		Angular
-Attribute	GraphEditor		Atributo
+At source	GraphEditor		En el origen
 Hexagon	GraphEditor		Hexágono
-Highlight	GraphEditor		Acento
+Link	GraphEditor		Enlace
+Choose an image	GraphEditor		Elegir una imagen
+Choose…	ValueRenderer		Elegir…
 At target	GraphEditor		En el destino
 Shape	GraphEditor		Forma
-Border pen size for selected nodes	GraphEditor		Grosor del borde de los nodos seleccionados
-Untitled	GraphEditor		Sin título
-Graph	GraphEditor		Grafo
+Edit choices…	ValueRenderer		Editar opciones…
 Which ends of the selected connections carry an arrow	GraphEditor		Qué extremos de las conexiones seleccionadas llevan flecha
 Shape of the selected connections	GraphEditor		Forma de las conexiones seleccionadas

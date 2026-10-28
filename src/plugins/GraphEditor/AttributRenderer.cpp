@@ -16,7 +16,9 @@
 #include "ProjectConceptorDefs.h"
 #include "PCommandManager.h"
 #include "BoolRenderer.h"
+#include "ImageRenderer.h"
 #include "NoteRenderer.h"
+#include "ValueRenderer.h"
 #include "StringRenderer.h"
 
 #undef B_TRANSLATION_CONTEXT
@@ -47,10 +49,6 @@ void AttributRenderer::Init()
 	showDelete	= false;
 	showName	= true;
 	columnWidth	= (frame.Width()-DELETER_WIDTH)*0.4f;
-	kontextMenu	= new BPopUpMenu("deleter");
-	BMenuItem	*delMenu = new BMenuItem(B_TRANSLATE("Delete"),deleteMessage);
-	kontextMenu->AddItem(delMenu);
-	kontextMenu->SetTargetForItems(editor->BelongTo());
 }
 
 void AttributRenderer::SetAttribute(BMessage *newAttribut)
@@ -110,6 +108,23 @@ void AttributRenderer::SetAttribute(BMessage *newAttribut)
 			valueChange->ReplaceMessage("valueContainer",&valueContainer);
 			value		= new NoteRenderer(editor,attribValue,frame,valueChange);
 			// a note speaks for itself, the name only tells it apart in data
+			showName	= false;
+			break;
+		}
+		case P_C_ATTRIBUTE_LINK:
+		case P_C_ATTRIBUTE_FILE:
+		case P_C_ATTRIBUTE_NUMBER:
+		case P_C_ATTRIBUTE_CHOICE:
+		case P_C_ATTRIBUTE_COLOR:
+		case P_C_ATTRIBUTE_DATE:
+			value	= new ValueRenderer(editor,*attribut,frame,new BMessage(*changeMessage));
+			break;
+		case P_C_ATTRIBUTE_IMAGE:
+		{
+			const char	*path	= "";
+			attribut->FindString(P_C_ATTRIBUTE_VALUE,&path);
+			value		= new ImageRenderer(editor,path,frame,new BMessage(*changeMessage));
+			// like a note: the picture takes the whole row
 			showName	= false;
 			break;
 		}
@@ -186,14 +201,7 @@ void AttributRenderer::MouseDown(BPoint where,
 {
 	TRACE();
 	if (buttons & B_SECONDARY_MOUSE_BUTTON)
- 	{
- 		BMenuItem *selected;
- 		editor->ConvertToScreen(&where);
-		selected = kontextMenu->Go(where); 
-		// ### We're not allowed to call it as it is protected.
-		// Needs some review.
-		// selected->Invoke();
-	}
+		ShowContextMenu(where);
 	else
 	{
 		if ( showName && (name) && (name->Caught(where)) )
@@ -206,6 +214,45 @@ void AttributRenderer::MouseDown(BPoint where,
 		}
 	}
 }
+
+void AttributRenderer::ShowContextMenu(BPoint where)
+{
+	BPopUpMenu	menu("attribute",false,false);
+	BMenuItem	*changeItem	= NULL;
+	if (CanEditValue()) {
+		changeItem	= new BMenuItem(B_TRANSLATE("Change…"),NULL);
+		menu.AddItem(changeItem);
+	}
+	BMenuItem	*deleteItem	= new BMenuItem(B_TRANSLATE("Delete"),NULL);
+	menu.AddItem(deleteItem);
+	BPoint	screen(where.x*editor->Scale(),where.y*editor->Scale());
+	editor->ConvertToScreen(&screen);
+	BMenuItem	*picked	= menu.Go(screen,false,true);
+	if ((picked != NULL) && (picked == changeItem))
+		EditValue();
+	else if ((picked != NULL) && (picked == deleteItem))
+		BMessenger(NULL,editor->BelongTo()).SendMessage(deleteMessage);
+}
+
+
+bool AttributRenderer::CanEditValue(void)
+{
+	ValueRenderer	*kind	= dynamic_cast<ValueRenderer*>(value);
+	return ((kind != NULL) && kind->HasEdit())
+		|| (dynamic_cast<ImageRenderer*>(value) != NULL);
+}
+
+
+void AttributRenderer::EditValue(void)
+{
+	ValueRenderer	*kind	= dynamic_cast<ValueRenderer*>(value);
+	ImageRenderer	*image	= dynamic_cast<ImageRenderer*>(value);
+	if (kind != NULL)
+		kind->Edit();
+	else if (image != NULL)
+		image->Edit();
+}
+
 
 void AttributRenderer::MouseUp(BPoint where)
 {
@@ -236,8 +283,11 @@ void AttributRenderer::MouseUp(BPoint where)
 void AttributRenderer::MoveBy(float dx, float dy)
 {
 	frame.OffsetBy(dx,dy);
-	name->MoveBy(dx,dy);
-	value->MoveBy(dx,dy);
+	// a kind this version doesn't know has no value renderer
+	if (name != NULL)
+		name->MoveBy(dx,dy);
+	if (value != NULL)
+		value->MoveBy(dx,dy);
 	delRect.OffsetBy(dx,dy);
 }
 
@@ -277,14 +327,23 @@ void AttributRenderer::SetTextColors(rgb_color textColor, rgb_color muted)
 	NoteRenderer	*note	= dynamic_cast<NoteRenderer*>(value);
 	if (note != NULL)
 		note->SetColors(textColor,muted);
+	ValueRenderer	*kind	= dynamic_cast<ValueRenderer*>(value);
+	if (kind != NULL)
+		kind->SetColors(textColor,muted);
+	ImageRenderer	*image	= dynamic_cast<ImageRenderer*>(value);
+	if (image != NULL)
+		image->SetColors(textColor,muted);
 }
 
 
 void AttributRenderer::StartEditingName(void)
 {
 	NoteRenderer	*note	= dynamic_cast<NoteRenderer*>(value);
+	ImageRenderer	*image	= dynamic_cast<ImageRenderer*>(value);
 	if (note != NULL)
 		note->StartEditing();
+	else if (image != NULL)
+		image->Edit();
 	else if (name != NULL)
 		name->MouseDown(BPoint(0,0));
 }
@@ -299,6 +358,9 @@ BCursorID AttributRenderer::CursorAt(BPoint where)
 		NoteRenderer	*note	= dynamic_cast<NoteRenderer*>(value);
 		if (note != NULL)
 			return note->CursorAt(where);
+		if ((dynamic_cast<ValueRenderer*>(value) != NULL)
+				|| (dynamic_cast<ImageRenderer*>(value) != NULL))
+			return value->CursorAt(where);
 		return (dynamic_cast<BoolRenderer*>(value) != NULL)
 			? B_CURSOR_ID_FOLLOW_LINK : B_CURSOR_ID_I_BEAM;
 	}

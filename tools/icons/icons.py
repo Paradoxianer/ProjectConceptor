@@ -400,6 +400,61 @@ def icon_attribute_note():
     return shapes
 
 
+def icon_attribute_link():
+    shapes = []
+    for cx in (22, 42):
+        ring = rounded_rect(cx - 16, 22, cx + 16, 42, 10)
+        shapes.append(Shape(Solid(OUTLINE), ring, stroke=(10, CAP_ROUND, JOIN_ROUND)))
+        shapes.append(Shape(BLUE(22, 42), ring, stroke=(5, CAP_ROUND, JOIN_ROUND)))
+    return shapes
+
+
+def icon_attribute_file():
+    shapes = page_with_fold(12, 4, 52, 60, 14)
+    shapes += outlined(BLUE(34, 54), rounded_rect(20, 34, 44, 52, 4))
+    return shapes
+
+
+def icon_attribute_image():
+    shapes = outlined(PAPER(10, 54), rounded_rect(4, 10, 60, 54, 6))
+    shapes += outlined(GREEN(26, 48), polygon((10, 48), (26, 26), (36, 40), (44, 32), (54, 48)))
+    shapes += outlined(YELLOW_FRONT(14, 26), ellipse(46, 20, 6, 6), 2.6)
+    return shapes
+
+
+def icon_attribute_number():
+    shapes = []
+    for path in (line((26, 8), (20, 56)), line((44, 8), (38, 56)),
+            line((10, 24), (56, 24)), line((8, 40), (54, 40))):
+        shapes += stroked(vertical(8, 56, '7fb0f0', '2f63b8'), path, 6)
+    return shapes
+
+
+def icon_attribute_choice():
+    shapes = outlined(PAPER(16, 48), rounded_rect(4, 16, 60, 48, 6))
+    shapes.append(Shape(Solid(rgba('3b4452')), line((12, 32), (34, 32)),
+        stroke=(4.5, CAP_ROUND, JOIN_ROUND)))
+    shapes += outlined(BLUE(26, 40), polygon((40, 27), (54, 27), (47, 38)), 2.6)
+    return shapes
+
+
+def icon_attribute_color():
+    shapes = outlined(RED(8, 36), ellipse(32, 22, 14, 14))
+    shapes += outlined(GREEN(28, 56), ellipse(20, 42, 14, 14))
+    shapes += outlined(BLUE(28, 56), ellipse(44, 42, 14, 14))
+    return shapes
+
+
+def icon_attribute_date():
+    shapes = outlined(PAPER(8, 58), rounded_rect(6, 8, 58, 58, 6))
+    shapes += outlined(RED(8, 22), rounded_rect(6, 8, 58, 22, 6))
+    dot = Solid(rgba('5b6573'))
+    for y in (32, 44):
+        for x in (18, 32, 46):
+            shapes.append(Shape(dot, rect(x - 3, y - 3, x + 3, y + 3)))
+    return shapes
+
+
 ICONS = {
     'new':			('app', icon_new),
     'open':			('app', icon_open),
@@ -423,6 +478,13 @@ ICONS = {
     'attribute-text':	('GraphEditor', icon_attribute_text),
     'attribute-bool':	('GraphEditor', icon_attribute_bool),
     'attribute-note':	('GraphEditor', icon_attribute_note),
+    'attribute-link':	('GraphEditor', icon_attribute_link),
+    'attribute-file':	('GraphEditor', icon_attribute_file),
+    'attribute-image':	('GraphEditor', icon_attribute_image),
+    'attribute-number':	('GraphEditor', icon_attribute_number),
+    'attribute-choice':	('GraphEditor', icon_attribute_choice),
+    'attribute-color':	('GraphEditor', icon_attribute_color),
+    'attribute-date':	('GraphEditor', icon_attribute_date),
     'layout':		('LayoutEditor', icon_auto_layout),
     'dir-tb':		('LayoutEditor', tree),
     'dir-lr':		('LayoutEditor', lambda: tree(3)),
