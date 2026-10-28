@@ -118,6 +118,22 @@ static void AppendEscapedString(const char *value, BString *out)
 }
 
 
+/** a field name, quoted when it would not read back bare - an attribute's
+ * name is the user's, "Due date" has a space */
+static void AppendFieldName(const char *name, BString *out)
+{
+	bool	bare	= (name[0] != '\0') && (name[0] != '~') && (name[0] != '"');
+	for (const char *p = name; bare && (*p != '\0'); p++) {
+		if (isspace((unsigned char)*p) || (*p == '=') || (*p == '"') || (*p == '\\'))
+			bare	= false;
+	}
+	if (bare)
+		*out << name;
+	else
+		AppendEscapedString(name,out);
+}
+
+
 // ------------------------------------------------------------- serialize --
 
 static void SerializeValue(BMessage *msg, const char *fieldName, type_code type,
@@ -345,7 +361,9 @@ static void SerializeFieldLines(BMessage *msg, int depth, const char *skipName1,
 		while (bindings.GetInfo(B_STRING_TYPE,bi,&bindFieldName,&bindType,&bindCount) == B_OK) {
 			const char	*variableName	= NULL;
 			if (bindings.FindString(bindFieldName,&variableName) == B_OK)
-				*out << indent << bindFieldName << "=$" << variableName << "\n";
+				*out << indent;
+				AppendFieldName(bindFieldName,out);
+				*out << "=$" << variableName << "\n";
 			bi++;
 		}
 	}
@@ -376,7 +394,9 @@ static void SerializeFieldLines(BMessage *msg, int depth, const char *skipName1,
 			for (int32 j = 0; j < count; j++) {
 				BMessage	child;
 				if (msg->FindMessage(fieldName,j,&child) == B_OK) {
-					*out << indent << "~" << fieldName << "\n";
+					*out << indent << "~";
+					AppendFieldName(fieldName,out);
+					*out << "\n";
 					// the block's own BMessage type (an embedded node's is
 					// what GraphEditor picks its renderer by) isn't a field
 					if (child.what != 0)
@@ -388,7 +408,9 @@ static void SerializeFieldLines(BMessage *msg, int depth, const char *skipName1,
 			continue;
 		}
 		for (int32 j = 0; j < count; j++) {
-			*out << indent << fieldName << "=";
+			*out << indent;
+			AppendFieldName(fieldName,out);
+			*out << "=";
 			FormatFieldValue(msg,fieldName,type,j,out);
 			*out << "\n";
 		}
@@ -509,6 +531,35 @@ static bool UnescapeQuoted(const BString &token, BString *outValue)
 			outValue->Append(s[i],1);
 	}
 	return true;
+}
+
+
+/** where the name of a name=value token ends: behind a quoted name, else
+ * at the first '='; -1 without one */
+static int32 FieldNameEnd(const BString &token)
+{
+	if (token.ByteAt(0) != '"')
+		return token.FindFirst('=');
+	for (int32 i = 1; i < token.Length(); i++) {
+		if (token[i] == '\\') {
+			i++;
+			continue;
+		}
+		if (token[i] == '"')
+			return ((i+1 < token.Length()) && (token[i+1] == '=')) ? i+1 : -1;
+	}
+	return -1;
+}
+
+
+/** a field name as AppendFieldName() wrote it */
+static bool ReadFieldName(const BString &text, BString *name)
+{
+	if (text.ByteAt(0) != '"') {
+		*name	= text;
+		return true;
+	}
+	return UnescapeQuoted(text,name) && (name->Length() > 0);
 }
 
 
@@ -862,7 +913,7 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 		// frame is open at the matching depth - it never opens a frame of
 		// its own, since a scalar value cannot have children.
 		bool	isFieldBlock	= (token.Length() > 0) && (token.ByteAt(0) == '~');
-		int32	eq				= isFieldBlock ? -1 : token.FindFirst('=');
+		int32	eq				= isFieldBlock ? -1 : FieldNameEnd(token);
 		bool	isScalarField	= (!isFieldBlock) && (eq >= 0);
 
 		// pop frames back to (and including) the first one whose depth is
@@ -873,11 +924,11 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 			PopOneFrame(stack,&built);
 
 		if (isFieldBlock) {
-			BString	fieldName;
-			token.CopyInto(fieldName,1,token.Length()-1);
-			if (fieldName.Length() == 0) {
+			BString	written,fieldName;
+			token.CopyInto(written,1,token.Length()-1);
+			if (!ReadFieldName(written,&fieldName) || (fieldName.Length() == 0)) {
 				errorOut->SetTo("");
-				*errorOut	<< "line " << lineNo << ": empty field name after \"~\"";
+				*errorOut	<< "line " << lineNo << ": no field name after \"~\"";
 				CleanupFrames(stack,&built);
 				return B_BAD_VALUE;
 			}
@@ -903,9 +954,15 @@ status_t ParseCommands(const BString &text, BList *outCommands, PCommandManager 
 			newFrame.pending	= new BList();
 			stack.push_back(newFrame);
 		} else if (isScalarField) {
-			BString	fieldName,valueText;
-			token.CopyInto(fieldName,0,eq);
+			BString	written,fieldName,valueText;
+			token.CopyInto(written,0,eq);
 			token.CopyInto(valueText,eq+1,token.Length()-eq-1);
+			if (!ReadFieldName(written,&fieldName)) {
+				errorOut->SetTo("");
+				*errorOut	<< "line " << lineNo << ": bad field name " << written;
+				CleanupFrames(stack,&built);
+				return B_BAD_VALUE;
+			}
 			if (stack.empty()) {
 				errorOut->SetTo("");
 				*errorOut	<< "line " << lineNo << ": \"" << fieldName << "\" has no enclosing command to attach to";

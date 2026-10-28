@@ -2470,6 +2470,49 @@ void MacroTextTest::MultiLineStringSurvivesMacroText(void)
 }
 
 
+void MacroTextTest::FieldNamesWithSpacesSurviveMacroText(void)
+{
+	PDocument	*doc	= NewRegisteredTestDocument();
+	// an embedded node's attribute keys are the user's names
+	const char	*names[]	= { "Due date", "a=b", "say \"hi\"", "~tilde", "plain" };
+	BMessage	data;
+	for (int32 i = 0; i < 5; i++) {
+		BMessage	attribute(B_STRING_TYPE);
+		attribute.AddString(P_C_ATTRIBUTE_NAME,names[i]);
+		attribute.AddString(P_C_ATTRIBUTE_VALUE,names[i]);
+		data.AddMessage(names[i],&attribute);
+	}
+	data.AddFloat("odd key",1.5);
+	BMessage	node(P_C_CLASS_TYPE);
+	node.AddMessage(P_C_NODE_DATA,&data);
+	BMessage	insert;
+	insert.AddString("Command::Name","Insert");
+	insert.AddMessage("included_node",&node);
+
+	BList		commands;
+	commands.AddItem(&insert);
+	BString		text;
+	SerializeCommands(&commands,&text);
+	BList		parsed;
+	BString		error;
+	status_t	status	= ParseCommands(text,&parsed,doc->GetCommandManager(),&error);
+	error << "\n" << text;
+	CPPUNIT_ASSERT_EQUAL_MESSAGE(error.String(),(status_t)B_OK,status);
+	CPPUNIT_ASSERT_EQUAL((int32)1,parsed.CountItems());
+	BMessage	restoredNode,restoredData;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		((BMessage*)parsed.ItemAt(0))->FindMessage("included_node",&restoredNode));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,restoredNode.FindMessage(P_C_NODE_DATA,&restoredData));
+	for (int32 i = 0; i < 5; i++) {
+		BMessage	attribute;
+		CPPUNIT_ASSERT_MESSAGE(names[i],restoredData.FindMessage(names[i],&attribute) == B_OK);
+		CPPUNIT_ASSERT(BString(names[i]) == attribute.GetString(P_C_ATTRIBUTE_VALUE,""));
+	}
+	CPPUNIT_ASSERT_EQUAL(1.5f,restoredData.GetFloat("odd key",0));
+	for (int32 i = 0; i < parsed.CountItems(); i++)
+		delete (BMessage*)parsed.ItemAt(i);
+}
+
 static void AddTestAttribute(BMessage *node, const char *name, BMessage *attribute)
 {
 	BMessage	data;
@@ -2544,6 +2587,11 @@ void MacroTextTest::FindComparesTypedAttributes(void)
 	settings.AddString("searchString","1200");
 	command->Do(doc,&settings);
 	CPPUNIT_ASSERT(SelectedNames(doc) == "A");
+	// a node without a selected flag gets one, or it isn't drawn selected
+	bool	flag	= false;
+	CPPUNIT_ASSERT(((BMessage*)doc->GetSelected()->ItemAt(0))
+		->FindBool(P_C_NODE_SELECTED,&flag) == B_OK);
+	CPPUNIT_ASSERT(flag);
 }
 
 
@@ -2560,9 +2608,4 @@ void MacroTextTest::FindRefusesUnknownOperator(void)
 	CPPUNIT_ASSERT(command->Do(doc,&settings) == NULL);
 	// the selection stays as it was
 	CPPUNIT_ASSERT(SelectedNames(doc) == "A");
-	// a node without a selected flag gets one, or it isn't drawn selected
-	bool	flag	= false;
-	CPPUNIT_ASSERT(((BMessage*)doc->GetSelected()->ItemAt(0))
-		->FindBool(P_C_NODE_SELECTED,&flag) == B_OK);
-	CPPUNIT_ASSERT(flag);
 }
