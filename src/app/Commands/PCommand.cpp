@@ -23,6 +23,12 @@ void PCommand::Init(void)
 //	subPCommands		= new BList();
 }
 
+void PCommand::SetNodeSelected(BMessage *node, bool selected)
+{
+	if (node->ReplaceBool(P_C_NODE_SELECTED,0,selected) != B_OK)
+		node->AddBool(P_C_NODE_SELECTED,selected);
+}
+
 BMessage* PCommand::RunSubCommandsOnce(PDocument *doc, BMessage *settings)
 {
 	TRACE();

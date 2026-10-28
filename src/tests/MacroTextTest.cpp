@@ -2560,4 +2560,9 @@ void MacroTextTest::FindRefusesUnknownOperator(void)
 	CPPUNIT_ASSERT(command->Do(doc,&settings) == NULL);
 	// the selection stays as it was
 	CPPUNIT_ASSERT(SelectedNames(doc) == "A");
+	// a node without a selected flag gets one, or it isn't drawn selected
+	bool	flag	= false;
+	CPPUNIT_ASSERT(((BMessage*)doc->GetSelected()->ItemAt(0))
+		->FindBool(P_C_NODE_SELECTED,&flag) == B_OK);
+	CPPUNIT_ASSERT(flag);
 }

@@ -78,13 +78,13 @@ void Find::Undo(PDocument *doc,BMessage *undo)
 	while (selected->CountItems()>0) {
 		currentContainer	= (BMessage *)selected->RemoveItem((int32)0);
 		if (currentContainer != NULL) {
-			currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,false);
+			SetNodeSelected(currentContainer,false);
 			changed->insert(currentContainer);
 		}
 	}
 	while (undoMessage.FindPointer("node",i,(void **)&currentContainer) == B_OK) {
 		if (currentContainer != NULL) {
-			currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,true);
+			SetNodeSelected(currentContainer,true);
 			selected->AddItem(currentContainer);
 			changed->insert(currentContainer);
 		}
@@ -173,13 +173,13 @@ BMessage* Find::Do(PDocument *doc, BMessage *settings)
 		BMessage	*node	= *it;
 		if (previouslySelected.find(node) == previouslySelected.end())
 			changed->insert(node);
-		node->ReplaceBool(P_C_NODE_SELECTED,0,true);
+		SetNodeSelected(node,true);
 		selected->AddItem(node);
 	}
 	for (set<BMessage*>::iterator it=previouslySelected.begin();it!=previouslySelected.end();it++) {
 		BMessage	*node	= *it;
 		if (newSelection.find(node) == newSelection.end()) {
-			node->ReplaceBool(P_C_NODE_SELECTED,0,false);
+			SetNodeSelected(node,false);
 			changed->insert(node);
 		}
 	}
@@ -237,7 +237,7 @@ void Find::DoFind(PDocument *doc,BRect *rect)
 		currentContainer->FindRect(P_C_NODE_FRAME,0,frame);
 		if (rect->Contains(*frame))
 		{
-			currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,true);
+			SetNodeSelected(currentContainer,true);
 			selected->AddItem(currentContainer);
 			changed->insert(currentContainer);
 		}
@@ -249,13 +249,7 @@ void Find::DoFind(PDocument *doc,BMessage *container)
 {
 	BList			*selected			= doc->GetSelected();
 	set<BMessage*>		*changed			= doc->GetChangedNodes();
-	bool			selectTester		= false;
-	status_t		err					= B_OK;
-	err= container->FindBool(P_C_NODE_SELECTED,&selectTester);
-	if (err == B_OK)
-		err = container->ReplaceBool(P_C_NODE_SELECTED,0,true);
-	else
-		err = container->AddBool(P_C_NODE_SELECTED,true);
+	SetNodeSelected(container,true);
 	selected->AddItem(container);
 	changed->insert(container);
 	//container->(new BoolContainer(true));
@@ -272,7 +266,7 @@ void Find::DoFindAll(PDocument *doc)
 	for (i=0;i<all->CountItems();i++)
 	{
 		currentContainer =(BMessage *) all->ItemAt(i);
-		currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,false);
+		SetNodeSelected(currentContainer,false);
 		selected->AddItem(currentContainer);
 		changed->insert(currentContainer);
 	}

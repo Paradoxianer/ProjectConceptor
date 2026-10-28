@@ -32,14 +32,14 @@ void Select::Undo(PDocument *doc,BMessage *undo) {
 	undo->FindMessage("Select::Undo" ,undoMessage);
 	while (selected->CountItems()>0) {
 		currentContainer	= (BMessage *)selected->RemoveItem((int32)0);
-		currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,false);
+		SetNodeSelected(currentContainer,false);
 		changed->insert(currentContainer);
 	}
 	i = 0;
 	while (	undoMessage->FindPointer("node",i,(void **)&currentContainer) == B_OK) {
 		i++;
 		if (currentContainer)
-			currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,true);
+			SetNodeSelected(currentContainer,true);
 		changed->insert(currentContainer);
 		selected->AddItem(currentContainer);
 	}
@@ -63,7 +63,7 @@ BMessage* Select::Do(PDocument *doc, BMessage *settings) {
 			if (node != NULL) {
 				changed->insert(node);
 				undoMessage->AddPointer("node",node);
-				node->ReplaceBool(P_C_NODE_SELECTED,0,false);
+				SetNodeSelected(node,false);
 			}
 		}
 	}
@@ -106,7 +106,7 @@ void Select::DoSelect(PDocument *doc,BRect *rect) {
 		currentContainer =(BMessage *) all->ItemAt(i);
 		currentContainer->FindRect(P_C_NODE_FRAME,0,frame);
 		if (rect->Contains(*frame)) {
-			currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,true);
+			SetNodeSelected(currentContainer,true);
 			selected->AddItem(currentContainer);
 			changed->insert(currentContainer);
 		}
@@ -117,13 +117,7 @@ void Select::DoSelect(PDocument *doc,BRect *rect) {
 void Select::DoSelect(PDocument *doc,BMessage *container) {
 	BList			*selected			= doc->GetSelected();
 	set<BMessage*>		*changed			= doc->GetChangedNodes();
-	bool			selectTester		= false;
-	status_t		err					= B_OK;
-	err= container->FindBool(P_C_NODE_SELECTED,&selectTester);
-	if (err == B_OK)
-		err = container->ReplaceBool(P_C_NODE_SELECTED,0,true);
-	else
-		err = container->AddBool(P_C_NODE_SELECTED,true);
+	SetNodeSelected(container,true);
 	selected->AddItem(container);
 	changed->insert(container);
 	//container->(new BoolContainer(true));
@@ -154,8 +148,7 @@ void Select::SelectList(PDocument *doc,BList *all) {
 		// renderer still drew, and every command still tested, as
 		// unselected. DoSelect() has always written true for the single
 		// node case; this is the same thing for all of them.
-		if (currentContainer->ReplaceBool(P_C_NODE_SELECTED,0,true) != B_OK)
-			currentContainer->AddBool(P_C_NODE_SELECTED,true);
+		SetNodeSelected(currentContainer,true);
 		if (!selected->HasItem(currentContainer))
 			selected->AddItem(currentContainer);
 		changed->insert(currentContainer);

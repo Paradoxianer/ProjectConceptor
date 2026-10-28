@@ -88,6 +88,9 @@ protected:
 	 * (#135) calls it once, conditionally.
 	 */
 			BMessage*			RunSubCommandsOnce(PDocument *doc, BMessage *settings);
+	/** sets the node's selected flag, adding it when missing - a node
+	 * inserted by a macro has none, so ReplaceBool() alone fails */
+	static	void				SetNodeSelected(BMessage *node, bool selected);
 
 			PCommandManager*	manager;
 //			BList*				subPCommands;
