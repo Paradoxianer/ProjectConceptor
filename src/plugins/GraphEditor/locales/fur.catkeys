@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	252096661
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	831908927
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Elimine
 Triangle	GraphEditor		Triangul
@@ -8,23 +8,26 @@ Today	DatePopup		Vuê
 Fit	GraphEditor		Adatâ
 Fill pattern for selected nodes	GraphEditor		Motîf di jemplament pai grops selezionâts
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conession} other{# conessions}}
+Zoom in	GraphEditor		Ingrandìs
 None	GraphEditor		Nissune
+Fit the whole graph into the window	GraphEditor		Adatâ dut il grafic al barcon
 Yes/No	GraphEditor		Sì/No
 Arrows	GraphEditor		Frecis
 Choose file…	ValueRenderer		Sielç un file…
 Choose image…	ImageRenderer		Sielç une imagjin…
 Date	GraphEditor		Date
+Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Retangul taront
 Fill	GraphEditor		Jemplament
-Open\nIn progress\nDone	GraphEditor		Viert\nIn vore\nFat
 Status	GraphEditor		Stât
+Open\nIn progress\nDone	GraphEditor		Viert\nIn vore\nFat
 Border	GraphEditor		Ôr
 Straight	GraphEditor		Drete
 Shape of the selected nodes	GraphEditor		Forme dai grops selezionâts
 Attribute	GraphEditor		Atribût
 Highlight	GraphEditor		Acent
-Border pen size for selected nodes	GraphEditor		Spessôr dal ôr pai grops selezionâts
 Untitled	GraphEditor		Cence titul
+Border pen size for selected nodes	GraphEditor		Spessôr dal ôr pai grops selezionâts
 Graph	GraphEditor		Grafic
 Choice list	GraphEditor		Liste di sieltis
 Choose a file	GraphEditor		Sielç un file
@@ -50,9 +53,10 @@ Pen size	GraphEditor		Spessôr dal pinel
 Pointer %d, %d	GraphEditor		Pontador %d, %d
 Note	GraphEditor		Note
 Color	GraphEditor		Colôr
-Fill color for selected nodes	GraphEditor		Colôr di jemplament pai grops selezionâts
 Image	GraphEditor		Imagjin
+Fill color for selected nodes	GraphEditor		Colôr di jemplament pai grops selezionâts
 Image not found	ImageRenderer		Imagjin no cjatade
+Zoom out	GraphEditor		Impiçulìs
 Both ends	GraphEditor		Ducj i doi i cjâfs
 {0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# grop} other{# grops}}
 Rectangle	GraphEditor		Retangul

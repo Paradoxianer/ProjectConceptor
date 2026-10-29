@@ -1,4 +1,4 @@
-1	French	application/x-vnd.ProjectConceptor-plugin	252096661
+1	French	application/x-vnd.ProjectConceptor-plugin	831908927
 Line	GraphEditor		Ligne
 Delete	AttributeRenderer		Effacer
 Triangle	GraphEditor		Triangle
@@ -8,23 +8,26 @@ Today	DatePopup		Aujourd'hui
 Fit	GraphEditor		Ajuster
 Fill pattern for selected nodes	GraphEditor		Motif de remplissage des nœuds sélectionnés
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# connexion} other{# connexions}}
+Zoom in	GraphEditor		Zoom avant
 None	GraphEditor		Aucune
+Fit the whole graph into the window	GraphEditor		Ajuster tout le graphe à la fenêtre
 Yes/No	GraphEditor		Oui/Non
 Arrows	GraphEditor		Flèches
 Choose file…	ValueRenderer		Choisir un fichier…
 Choose image…	ImageRenderer		Choisir une image…
 Date	GraphEditor		Date
+Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Rectangle arrondi
 Fill	GraphEditor		Remplir
-Open\nIn progress\nDone	GraphEditor		Ouvert\nEn cours\nTerminé
 Status	GraphEditor		Statut
+Open\nIn progress\nDone	GraphEditor		Ouvert\nEn cours\nTerminé
 Border	GraphEditor		Bordure
 Straight	GraphEditor		Droite
 Shape of the selected nodes	GraphEditor		Forme des nœuds sélectionnés
 Attribute	GraphEditor		Attribut
 Highlight	GraphEditor		Accent
-Border pen size for selected nodes	GraphEditor		Épaisseur de bordure des nœuds sélectionnés
 Untitled	GraphEditor		Sans titre
+Border pen size for selected nodes	GraphEditor		Épaisseur de bordure des nœuds sélectionnés
 Graph	GraphEditor		Graphe
 Choice list	GraphEditor		Liste de choix
 Choose a file	GraphEditor		Choisir un fichier
@@ -50,9 +53,10 @@ Pen size	GraphEditor		Taille du crayon
 Pointer %d, %d	GraphEditor		Pointeur %d, %d
 Note	GraphEditor		Note
 Color	GraphEditor		Couleur
-Fill color for selected nodes	GraphEditor		Couleur de remplissage des nœuds sélectionnés
 Image	GraphEditor		Image
+Fill color for selected nodes	GraphEditor		Couleur de remplissage des nœuds sélectionnés
 Image not found	ImageRenderer		Image introuvable
+Zoom out	GraphEditor		Zoom arrière
 Both ends	GraphEditor		Aux deux extrémités
 {0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# nœud} other{# nœuds}}
 Rectangle	GraphEditor		Rectangle

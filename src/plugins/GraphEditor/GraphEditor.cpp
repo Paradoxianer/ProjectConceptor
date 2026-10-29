@@ -1,5 +1,7 @@
 #include <support/List.h>
 #include <interface/Font.h>
+#include <interface/MenuItem.h>
+#include <interface/PopUpMenu.h>
 #include <interface/ScrollView.h>
 #include <interface/GraphicsDefs.h>
 #include <translation/TranslationUtils.h>
@@ -30,6 +32,7 @@
 #include "GroupRenderer.h"
 #include "TextEditorControl.h"
 #include "VectorIcon.h"
+#include "StatusButton.h"
 #include "StatusTexts.h"
 #include "Zoom.h"
 
@@ -209,22 +212,27 @@ void GraphEditor::Init(void) {
 	patternMessage->AddData("Pattern",B_PATTERN_TYPE,(const void *)&B_SOLID_HIGH,sizeof(B_SOLID_HIGH),false);
 
 	// status bar: − [100 % ▾] + Fit
-	scaleMenu		= new BMenu(Zoom::Label(1.0).String());
+	BPopUpMenu	*scaleMenu	= new BPopUpMenu("scale",false,false);
+	BString		widest;
 	for (int32 i = 0; i < Zoom::CountSteps(); i++) {
+		BString		label	= Zoom::Label(Zoom::StepAt(i));
 		BMessage	*newScale	= new BMessage(G_E_NEW_SCALE);
 		newScale->AddFloat("scale",Zoom::StepAt(i));
-		scaleMenu->AddItem(new BMenuItem(Zoom::Label(Zoom::StepAt(i)).String(),newScale));
+		scaleMenu->AddItem(new BMenuItem(label.String(),newScale));
+		if (label.Length() > widest.Length())
+			widest	= label;
 	}
-	zoomOutItem		= new BMenuItem("−",new BMessage(G_E_ZOOM_OUT));
-	zoomInItem		= new BMenuItem("+",new BMessage(G_E_ZOOM_IN));
-	zoomFitItem		= new BMenuItem(B_TRANSLATE("Fit"),new BMessage(G_E_ZOOM_FIT));
-	zoomBar			= new BMenuBar(BRect(0,0,100,10),"GraphEditor::zoom",
-		B_FOLLOW_RIGHT | B_FOLLOW_TOP,B_ITEMS_IN_ROW,true);
-	zoomBar->SetBorder(B_BORDER_CONTENTS);
-	zoomBar->AddItem(zoomOutItem);
-	zoomBar->AddItem(scaleMenu);
-	zoomBar->AddItem(zoomInItem);
-	zoomBar->AddItem(zoomFitItem);
+	zoomLabel		= new StatusButton("GraphEditor::scale",Zoom::Label(1.0).String(),NULL);
+	zoomLabel->SetMenu(scaleMenu);
+	zoomLabel->SetWidestLabel(widest.String());
+	zoomLabel->SetToolTip(B_TRANSLATE("Zoom"));
+	zoomButtons[0]	= new StatusButton("GraphEditor::zoomOut","−",new BMessage(G_E_ZOOM_OUT));
+	zoomButtons[0]->SetToolTip(B_TRANSLATE("Zoom out"));
+	zoomButtons[1]	= zoomLabel;
+	zoomButtons[2]	= new StatusButton("GraphEditor::zoomIn","+",new BMessage(G_E_ZOOM_IN));
+	zoomButtons[2]->SetToolTip(B_TRANSLATE("Zoom in"));
+	zoomButtons[3]	= new StatusButton("GraphEditor::zoomFit",B_TRANSLATE("Fit"),new BMessage(G_E_ZOOM_FIT));
+	zoomButtons[3]->SetToolTip(B_TRANSLATE("Fit the whole graph into the window"));
 
 	// this plugin's own resources: icons
 	image_info	*info 	= new image_info;
@@ -805,12 +813,12 @@ void GraphEditor::AttachedToWindow(void) {
 	SetViewColor(style.canvas);
 	PWindow 	*pWindow	= (PWindow *)Window();
 	StatusBar	*statusBar	= pWindow->GetStatusBar();
-	if (statusBar != NULL)
-		statusBar->AddRightView(zoomBar);
-	scaleMenu->SetTargetForItems(this);
-	zoomOutItem->SetTarget(this);
-	zoomInItem->SetTarget(this);
-	zoomFitItem->SetTarget(this);
+	for (int32 i = 0; i < 4; i++) {
+		if (statusBar != NULL)
+			statusBar->AddRightView(zoomButtons[i]);
+		zoomButtons[i]->SetTarget(this);
+	}
+	zoomLabel->Menu()->SetTargetForItems(this);
 	if (doc) {
 		InitAll();
 		// never block on the document here, see DrainPendingChangedNodes()
@@ -882,7 +890,8 @@ void GraphEditor::DetachedFromWindow(void) {
 		if (!pWindow->IsClosing()) {
 			StatusBar	*statusBar	= pWindow->GetStatusBar();
 			if (statusBar != NULL) {
-				statusBar->RemoveRightView(zoomBar);
+				for (int32 i = 0; i < 4; i++)
+					statusBar->RemoveRightView(zoomButtons[i]);
 				statusBar->SetText("selection",NULL);
 				statusBar->SetText("geometry",NULL);
 				statusBar->SetText("pointer",NULL);
@@ -1877,8 +1886,7 @@ void GraphEditor::SetZoom(float newScale) {
 	BPoint	center((visible.left+visible.Width()/2)/scale,
 		(visible.top+visible.Height()/2)/scale);
 	scale	= newScale;
-	if (scaleMenu->Superitem() != NULL)
-		scaleMenu->Superitem()->SetLabel(Zoom::Label(scale).String());
+	zoomLabel->SetLabel(Zoom::Label(scale).String());
 	UpdateScrollBars();
 	ScrollTo(center.x*scale-visible.Width()/2,center.y*scale-visible.Height()/2);
 	Invalidate();

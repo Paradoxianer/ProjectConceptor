@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	252096661
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	831908927
 Line	GraphEditor		Linija
 Delete	AttributeRenderer		Izbriši
 Triangle	GraphEditor		Trokut
@@ -8,23 +8,26 @@ Today	DatePopup		Danas
 Fit	GraphEditor		Prilagodi
 Fill pattern for selected nodes	GraphEditor		Uzorak ispune za odabrane čvorove
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# veza} few{# veze} other{# veza}}
+Zoom in	GraphEditor		Povećaj
 None	GraphEditor		Nijedna
+Fit the whole graph into the window	GraphEditor		Prilagodi cijeli graf prozoru
 Yes/No	GraphEditor		Da/Ne
 Arrows	GraphEditor		Strelice
 Choose file…	ValueRenderer		Odaberi datoteku…
 Choose image…	ImageRenderer		Odaberi sliku…
 Date	GraphEditor		Datum
+Zoom	GraphEditor		Zumiranje
 Rounded rectangle	GraphEditor		Zaobljeni pravokutnik
 Fill	GraphEditor		Ispuni
-Open\nIn progress\nDone	GraphEditor		Otvoreno\nU tijeku\nGotovo
 Status	GraphEditor		Status
+Open\nIn progress\nDone	GraphEditor		Otvoreno\nU tijeku\nGotovo
 Border	GraphEditor		Obrub
 Straight	GraphEditor		Ravna
 Shape of the selected nodes	GraphEditor		Oblik odabranih čvorova
 Attribute	GraphEditor		Atribut
 Highlight	GraphEditor		Naglasak
-Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove
 Untitled	GraphEditor		Bez naslova
+Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove
 Graph	GraphEditor		Graf
 Choice list	GraphEditor		Popis izbora
 Choose a file	GraphEditor		Odaberi datoteku
@@ -50,9 +53,10 @@ Pen size	GraphEditor		Debljina olovke
 Pointer %d, %d	GraphEditor		Pokazivač %d, %d
 Note	GraphEditor		Bilješka
 Color	GraphEditor		Boja
-Fill color for selected nodes	GraphEditor		Boja ispune za odabrane čvorove
 Image	GraphEditor		Slika
+Fill color for selected nodes	GraphEditor		Boja ispune za odabrane čvorove
 Image not found	ImageRenderer		Slika nije pronađena
+Zoom out	GraphEditor		Smanji
 Both ends	GraphEditor		Oba kraja
 {0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# čvor} few{# čvora} other{# čvorova}}
 Rectangle	GraphEditor		Pravokutnik

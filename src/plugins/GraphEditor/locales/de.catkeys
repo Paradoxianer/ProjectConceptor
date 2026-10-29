@@ -1,4 +1,4 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	252096661
+1	German	application/x-vnd.ProjectConceptor-plugin	831908927
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Löschen
 Triangle	GraphEditor		Dreieck
@@ -8,23 +8,26 @@ Today	DatePopup		Heute
 Fit	GraphEditor		Einpassen
 Fill pattern for selected nodes	GraphEditor		Füllmuster für ausgewählte Knoten
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# Verbindung} other{# Verbindungen}}
+Zoom in	GraphEditor		Vergrößern
 None	GraphEditor		Keine
+Fit the whole graph into the window	GraphEditor		Den ganzen Graphen ins Fenster einpassen
 Yes/No	GraphEditor		Ja/Nein
 Arrows	GraphEditor		Pfeile
 Choose file…	ValueRenderer		Datei wählen…
 Choose image…	ImageRenderer		Bild wählen…
 Date	GraphEditor		Datum
+Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Abgerundetes Rechteck
 Fill	GraphEditor		Ausfüllen
-Open\nIn progress\nDone	GraphEditor		Offen\nIn Arbeit\nErledigt
 Status	GraphEditor		Status
+Open\nIn progress\nDone	GraphEditor		Offen\nIn Arbeit\nErledigt
 Border	GraphEditor		Rand
 Straight	GraphEditor		Gerade
 Shape of the selected nodes	GraphEditor		Form der ausgewählten Knoten
 Attribute	GraphEditor		Attribut
 Highlight	GraphEditor		Akzent
-Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
 Untitled	GraphEditor		Unbenannt
+Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
 Graph	GraphEditor		Graph
 Choice list	GraphEditor		Auswahlliste
 Choose a file	GraphEditor		Datei wählen
@@ -50,9 +53,10 @@ Pen size	GraphEditor		Stiftgröße
 Pointer %d, %d	GraphEditor		Zeiger %d, %d
 Note	GraphEditor		Notiz
 Color	GraphEditor		Farbe
-Fill color for selected nodes	GraphEditor		Füllfarbe für ausgewählte Knoten
 Image	GraphEditor		Bild
+Fill color for selected nodes	GraphEditor		Füllfarbe für ausgewählte Knoten
 Image not found	ImageRenderer		Bild nicht gefunden
+Zoom out	GraphEditor		Verkleinern
 Both ends	GraphEditor		Beide Enden
 {0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# Knoten} other{# Knoten}}
 Rectangle	GraphEditor		Rechteck

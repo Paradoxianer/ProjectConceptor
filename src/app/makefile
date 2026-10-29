@@ -49,6 +49,7 @@ SRCS= 	About/AboutWindow.cpp \
 		Document/PEditorManager.cpp \
 		Document/PWindow.cpp \
 		Document/StatusBar.cpp \
+		Document/StatusButton.cpp \
 		Document/HelpManager.cpp \
 		ToolBar/BaseItem.cpp \
 		ToolBar/Mover.cpp \

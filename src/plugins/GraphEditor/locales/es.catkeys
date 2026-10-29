@@ -1,4 +1,4 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	252096661
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	831908927
 Line	GraphEditor		Línea
 Delete	AttributeRenderer		Borrar
 Triangle	GraphEditor		Triángulo
@@ -8,23 +8,26 @@ Today	DatePopup		Hoy
 Fit	GraphEditor		Ajustar
 Fill pattern for selected nodes	GraphEditor		Patrón de relleno de los nodos seleccionados
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conexión} other{# conexiones}}
+Zoom in	GraphEditor		Acercar
 None	GraphEditor		Ninguna
+Fit the whole graph into the window	GraphEditor		Ajustar todo el grafo a la ventana
 Yes/No	GraphEditor		Sí/No
 Arrows	GraphEditor		Flechas
 Choose file…	ValueRenderer		Elegir archivo…
 Choose image…	ImageRenderer		Elegir imagen…
 Date	GraphEditor		Fecha
+Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Rectángulo redondeado
 Fill	GraphEditor		Rellenar
-Open\nIn progress\nDone	GraphEditor		Abierto\nEn curso\nHecho
 Status	GraphEditor		Estado
+Open\nIn progress\nDone	GraphEditor		Abierto\nEn curso\nHecho
 Border	GraphEditor		Borde
 Straight	GraphEditor		Recta
 Shape of the selected nodes	GraphEditor		Forma de los nodos seleccionados
 Attribute	GraphEditor		Atributo
 Highlight	GraphEditor		Acento
-Border pen size for selected nodes	GraphEditor		Grosor del borde de los nodos seleccionados
 Untitled	GraphEditor		Sin título
+Border pen size for selected nodes	GraphEditor		Grosor del borde de los nodos seleccionados
 Graph	GraphEditor		Grafo
 Choice list	GraphEditor		Lista de opciones
 Choose a file	GraphEditor		Elegir un archivo
@@ -50,9 +53,10 @@ Pen size	GraphEditor		Tamaño de lápiz
 Pointer %d, %d	GraphEditor		Puntero %d, %d
 Note	GraphEditor		Nota
 Color	GraphEditor		Color
-Fill color for selected nodes	GraphEditor		Color de relleno de los nodos seleccionados
 Image	GraphEditor		Imagen
+Fill color for selected nodes	GraphEditor		Color de relleno de los nodos seleccionados
 Image not found	ImageRenderer		Imagen no encontrada
+Zoom out	GraphEditor		Alejar
 Both ends	GraphEditor		Ambos extremos
 {0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# nodo} other{# nodos}}
 Rectangle	GraphEditor		Rectángulo

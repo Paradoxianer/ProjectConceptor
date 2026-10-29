@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	252096661
+1	English	application/x-vnd.ProjectConceptor-plugin	831908927
 Line	GraphEditor		Line
 Delete	AttributeRenderer		Delete
 Triangle	GraphEditor		Triangle
@@ -8,23 +8,26 @@ Today	DatePopup		Today
 Fit	GraphEditor		Fit
 Fill pattern for selected nodes	GraphEditor		Fill pattern for selected nodes
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# connection} other{# connections}}
+Zoom in	GraphEditor		Zoom in
 None	GraphEditor		None
+Fit the whole graph into the window	GraphEditor		Fit the whole graph into the window
 Yes/No	GraphEditor		Yes/No
 Arrows	GraphEditor		Arrows
 Choose file…	ValueRenderer		Choose file…
 Choose image…	ImageRenderer		Choose image…
 Date	GraphEditor		Date
+Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Rounded rectangle
 Fill	GraphEditor		Fill
-Open\nIn progress\nDone	GraphEditor		Open\nIn progress\nDone
 Status	GraphEditor		Status
+Open\nIn progress\nDone	GraphEditor		Open\nIn progress\nDone
 Border	GraphEditor		Border
 Straight	GraphEditor		Straight
 Shape of the selected nodes	GraphEditor		Shape of the selected nodes
 Attribute	GraphEditor		Attribute
 Highlight	GraphEditor		Highlight
-Border pen size for selected nodes	GraphEditor		Border pen size for selected nodes
 Untitled	GraphEditor		Untitled
+Border pen size for selected nodes	GraphEditor		Border pen size for selected nodes
 Graph	GraphEditor		Graph
 Choice list	GraphEditor		Choice list
 Choose a file	GraphEditor		Choose a file
@@ -50,9 +53,10 @@ Pen size	GraphEditor		Pen size
 Pointer %d, %d	GraphEditor		Pointer %d, %d
 Note	GraphEditor		Note
 Color	GraphEditor		Color
-Fill color for selected nodes	GraphEditor		Fill color for selected nodes
 Image	GraphEditor		Image
+Fill color for selected nodes	GraphEditor		Fill color for selected nodes
 Image not found	ImageRenderer		Image not found
+Zoom out	GraphEditor		Zoom out
 Both ends	GraphEditor		Both ends
 {0, plural, one{# node} other{# nodes}}	GraphEditor		{0, plural, one{# node} other{# nodes}}
 Rectangle	GraphEditor		Rectangle

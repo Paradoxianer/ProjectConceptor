@@ -96,7 +96,7 @@ const rgb_color	kDefaultConnectionColor	= {187, 67, 47, 255};
 
 class Renderer;
 class StatusBar;
-class BMenuBar;
+class StatusButton;
 class BMessageRunner;
 class TextEditorControl;
 
@@ -286,12 +286,10 @@ protected:
 
 			int32			id;
 			char*			renderString;
-			BMenu			*scaleMenu;
-			BMenuItem		*zoomOutItem;
-			BMenuItem		*zoomInItem;
-			BMenuItem		*zoomFitItem;
-			/** the zoom items, right in the window's status bar */
-			BMenuBar		*zoomBar;
+			/** the zoom buttons, right in the window's status bar:
+			 * − [100 % ▾] + Fit */
+			StatusButton	*zoomButtons[4];
+			StatusButton	*zoomLabel;
 			ContextBar		contextBar;
 			ToolItem		*grid;
 			ToolItem		*guides;
