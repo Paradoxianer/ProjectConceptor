@@ -82,6 +82,7 @@ public:
 	void MultiLineStringSurvivesMacroText(void);
 	void FieldNamesWithSpacesSurviveMacroText(void);
 	void FindComparesTypedAttributes(void);
+	void TodayVariableFindsOverdueDates(void);
 	void FindRefusesUnknownOperator(void);
 	void AddAttributeExampleAddsAnAttributeBlock(void);
 
@@ -152,6 +153,7 @@ public:
 	CPPUNIT_TEST(MultiLineStringSurvivesMacroText);
 	CPPUNIT_TEST(FieldNamesWithSpacesSurviveMacroText);
 	CPPUNIT_TEST(FindComparesTypedAttributes);
+	CPPUNIT_TEST(TodayVariableFindsOverdueDates);
 	CPPUNIT_TEST(FindRefusesUnknownOperator);
 	CPPUNIT_TEST(AddAttributeExampleAddsAnAttributeBlock);
 	CPPUNIT_TEST_SUITE_END();

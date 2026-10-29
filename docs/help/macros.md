@@ -143,6 +143,9 @@ These commands put a value into a variable:
 | GetValue | `resultVariable` | an attribute of a node |
 | Ask | `variable` | the text you typed into a dialog |
 
+Every playback starts with `today`: today's date as `2026-10-29`, the
+way date attributes store it.
+
 There are two ways to use a variable:
 
 **A whole field: `$name`.** Write `$` and the variable's name as the

@@ -181,6 +181,9 @@ protected:
 							const BString &failedCommand, int32 unresolvedCount,
 							BString *report);
 			bool		InterpolateText(const BString &text, BString *result);
+			/** a playback's fresh value context, with the built-in
+			 * variables (P_C_VARIABLE_TODAY) */
+			BMessage*	NewValueContext(void);
 			bool		FormatVariable(const char *name, BString *text, BString *error);
 			/** see AddPlaybackError() - reset when a playback starts,
 			 * reported by FinishMacroPlayback() */

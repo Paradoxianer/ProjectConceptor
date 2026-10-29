@@ -9,6 +9,7 @@
 #include <interface/MenuItem.h>
 #include <interface/TextView.h>
 #include <support/ClassInfo.h>
+#include <support/DateTime.h>
 #include <Catalog.h>
 
 #include "PCommandManager.h"
@@ -244,7 +245,7 @@ status_t PCommandManager::PlayMacro(BMessage *makro, BString *report) {
 	// prematurely-torn-down one.
 	bool	ownsValueContext	= (valueContext == NULL);
 	if (ownsValueContext) {
-		valueContext	= new BMessage();
+		valueContext	= NewValueContext();
 		playbackErrors	= 0;
 		firstPlaybackError.SetTo("");
 	}
@@ -319,7 +320,7 @@ void PCommandManager::PlayMacroInteractive(BMessage *makro) {
 	// see PlayMacro()'s own comment on ownsValueContext - interactive play
 	// is only ever started fresh from outside any command's own Do(), so
 	// there is no nested-call case to guard against here
-	valueContext	= new BMessage();
+	valueContext	= NewValueContext();
 	playbackErrors	= 0;
 	firstPlaybackError.SetTo("");
 	replayIndexer	= playingIndexer;
@@ -365,6 +366,16 @@ void PCommandManager::PlayMacroStep(void) {
 	playingIndexer	= NULL;
 	delete playingMacro;
 	playingMacro	= NULL;
+}
+
+BMessage* PCommandManager::NewValueContext(void) {
+	BMessage	*context	= new BMessage();
+	BDate		today		= BDate::CurrentDate(B_LOCAL_TIME);
+	BString		iso;
+	iso.SetToFormat("%04d-%02d-%02d",(int)today.Year(),(int)today.Month(),
+		(int)today.Day());
+	context->AddString(P_C_VARIABLE_TODAY,iso);
+	return context;
 }
 
 // #132: the same logical edit is recorded two different, incompatible ways

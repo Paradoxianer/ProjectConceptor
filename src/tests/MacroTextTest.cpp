@@ -2595,6 +2595,26 @@ void MacroTextTest::FindComparesTypedAttributes(void)
 }
 
 
+void MacroTextTest::TodayVariableFindsOverdueDates(void)
+{
+	// every playback knows ${today}, as a date attribute stores it
+	PDocument	*doc	= NewRegisteredTestDocument();
+	AddBudget(AddTestNode(doc,"Past"),1,"Open","2001-01-01",false);
+	AddBudget(AddTestNode(doc,"Future"),1,"Open","2999-01-01",false);
+
+	BMessage	find;
+	find.AddString("Command::Name","Find");
+	find.AddString(P_C_FIND_ATTRIBUTE,"Due");
+	find.AddString(P_C_FIND_OPERATOR,"<");
+	find.AddString(P_C_FIND_VALUE,"${today}");
+	BMessage	macro(P_C_MACRO_TYPE);
+	macro.AddMessage("Macro::Commmand",&find);
+	BString		report;
+	CPPUNIT_ASSERT(doc->GetCommandManager()->PlayMacro(&macro,&report) == B_OK);
+	CPPUNIT_ASSERT_EQUAL(std::string("Past"),std::string(SelectedNames(doc).String()));
+}
+
+
 
 void MacroTextTest::AddAttributeExampleAddsAnAttributeBlock(void)
 {

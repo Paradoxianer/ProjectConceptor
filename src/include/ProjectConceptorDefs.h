@@ -367,6 +367,9 @@ extern const char*		P_C_RESIZE_HEIGHT;	//				= "height"
 /** Move: the new left/top, instead of moving by dx/dy */
 extern const char*		P_C_MOVE_LEFT;		//				= "left"
 extern const char*		P_C_MOVE_TOP;		//				= "top"
+/** the variable every playback starts with: today as YYYY-MM-DD, the way
+ * date attributes store it */
+extern const char*		P_C_VARIABLE_TODAY;	//				= "today"
 
 extern const char*		P_C_NODE_CONNECTION_FROM;	//		= "Node::from"
 extern const char*		P_C_NODE_CONNECTION_TO;		//		= "Node::to"
