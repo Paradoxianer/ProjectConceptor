@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	831908927
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	2153277546
 Line	GraphEditor		Linje
 Delete	AttributeRenderer		Radera
 Triangle	GraphEditor		Triangel
@@ -10,6 +10,7 @@ Fill pattern for selected nodes	GraphEditor		Fyllnadsmönster för markerade nod
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# koppling} other{# kopplingar}}
 Zoom in	GraphEditor		Zooma in
 None	GraphEditor		Ingen
+H	GraphEditor	status bar: a node's height	H
 Fit the whole graph into the window	GraphEditor		Anpassa hela grafen till fönstret
 Yes/No	GraphEditor		Ja/Nej
 Arrows	GraphEditor		Pilar
@@ -18,6 +19,7 @@ Choose image…	ImageRenderer		Välj bild…
 Date	GraphEditor		Datum
 Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Rundad rektangel
+Width of the selected nodes	GraphEditor		Bredd för markerade noder
 Fill	GraphEditor		Fyll
 Status	GraphEditor		Status
 Open\nIn progress\nDone	GraphEditor		Öppen\nPågår\nKlar
@@ -25,24 +27,28 @@ Border	GraphEditor		Kant
 Straight	GraphEditor		Rak
 Shape of the selected nodes	GraphEditor		Form på markerade noder
 Attribute	GraphEditor		Attribut
+X	GraphEditor	status bar: a node's left edge	X
 Highlight	GraphEditor		Accent
 Untitled	GraphEditor		Namnlös
 Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder
 Graph	GraphEditor		Graf
 Choice list	GraphEditor		Vallista
 Choose a file	GraphEditor		Välj en fil
+W	GraphEditor	status bar: a node's width	B
+Top edge of the selected nodes	GraphEditor		Överkant för markerade noder
 Change…	AttributeRenderer		Ändra…
 Number	GraphEditor		Tal
 Diamond	GraphEditor		Romb
 Empty note	NoteRenderer		Tom anteckning
+Height of the selected nodes	GraphEditor		Höjd för markerade noder
 Grid	GraphEditor		Rutnät
 File	GraphEditor		Fil
 Add address	ValueRenderer		Lägg till adress
 No date	DatePopup		Inget datum
+Left edge of the selected nodes	GraphEditor		Vänsterkant för markerade noder
 Toggle grid	GraphEditor		Visa/dölj rutnät
 Text	GraphEditor		Text
 Add an attribute to the selected nodes	GraphEditor		Lägg till ett attribut på markerade noder
-Position %d, %d · Size %d × %d	GraphEditor		Position %d, %d · Storlek %d × %d
 Group	GraphEditor		Gruppera
 Parallelogram	GraphEditor		Parallellogram
 Toggle smart alignment guides	GraphEditor		Slå på/av smarta justeringslinjer
@@ -72,5 +78,6 @@ Choose…	ValueRenderer		Välj…
 At target	GraphEditor		Vid målet
 Shape	GraphEditor		Form
 Edit choices…	ValueRenderer		Redigera val…
+Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Vilka ändar av de markerade förbindelserna som har en pil
 Shape of the selected connections	GraphEditor		Form på de markerade förbindelserna

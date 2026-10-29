@@ -34,13 +34,19 @@ void StatusBar::SetText(const char *slot, const char *text)
 	for (size_t i = 0; i < fSlots.size(); i++) {
 		if (fSlots[i].name != slot)
 			continue;
-		if (remove)
+		if (remove) {
+			if (fSlots[i].view != NULL)
+				RemoveChild(fSlots[i].view);
 			fSlots.erase(fSlots.begin() + i);
-		else if (fSlots[i].text == text)
+		} else if ((fSlots[i].text == text) && (fSlots[i].view == NULL))
 			return;
-		else
+		else {
+			if (fSlots[i].view != NULL)
+				RemoveChild(fSlots[i].view);
+			fSlots[i].view	= NULL;
 			fSlots[i].text	= text;
-		Invalidate();
+		}
+		_LayoutSlots();
 		return;
 	}
 	if (remove)
@@ -48,7 +54,68 @@ void StatusBar::SetText(const char *slot, const char *text)
 	Slot	added;
 	added.name	= slot;
 	added.text	= text;
+	added.view	= NULL;
+	added.x		= 0;
 	fSlots.push_back(added);
+	_LayoutSlots();
+}
+
+
+void StatusBar::SetView(const char *slot, BView *view)
+{
+	if (view == NULL) {
+		SetText(slot, NULL);
+		return;
+	}
+	for (size_t i = 0; i < fSlots.size(); i++) {
+		if (fSlots[i].name != slot)
+			continue;
+		if (fSlots[i].view == view)
+			return;
+		if (fSlots[i].view != NULL)
+			RemoveChild(fSlots[i].view);
+		fSlots[i].view	= view;
+		fSlots[i].text	= "";
+		AddChild(view);
+		_LayoutSlots();
+		return;
+	}
+	Slot	added;
+	added.name	= slot;
+	added.view	= view;
+	added.x		= 0;
+	fSlots.push_back(added);
+	AddChild(view);
+	_LayoutSlots();
+}
+
+
+bool StatusBar::_Shown(const Slot &slot) const
+{
+	return (slot.view != NULL) || (slot.text.Length() > 0);
+}
+
+
+void StatusBar::_LayoutSlots(void)
+{
+	float	x	= kPadding;
+	for (size_t i = 0; i < fSlots.size(); i++) {
+		Slot	&slot	= fSlots[i];
+		if (!_Shown(slot))
+			continue;
+		slot.x	= x;
+		float	width;
+		if (slot.view != NULL) {
+			float	height;
+			slot.view->GetPreferredSize(&width, &height);
+			if (height > Bounds().Height())
+				height	= Bounds().Height();
+			slot.view->ResizeTo(width, height);
+			slot.view->MoveTo(x, floorf((Bounds().Height() - height) / 2) + 1);
+		} else
+			width	= StringWidth(slot.text.String());
+		x	+= width + kSlotGap;
+	}
 	Invalidate();
 }
 
@@ -91,6 +158,7 @@ void StatusBar::_LayoutRightViews(void)
 
 void StatusBar::FrameResized(float width, float height)
 {
+	_LayoutSlots();
 	_LayoutRightViews();
 }
 
@@ -105,21 +173,21 @@ void StatusBar::Draw(BRect updateRect)
 	font_height	fh;
 	GetFontHeight(&fh);
 	float	baseline	= floorf((bounds.Height() + fh.ascent - fh.descent) / 2) + 1;
-	float	x			= kPadding;
 	rgb_color	text	= ui_color(B_PANEL_TEXT_COLOR);
 	bool	first	= true;
 	for (size_t i = 0; i < fSlots.size(); i++) {
-		if (fSlots[i].text.Length() == 0)
+		if (!_Shown(fSlots[i]))
 			continue;
 		if (!first) {
-			// a quiet divider between texts
+			// a quiet divider between slots
 			SetHighColor(tint_color(base, B_DARKEN_1_TINT));
-			float	middle	= x - kSlotGap / 2;
+			float	middle	= fSlots[i].x - kSlotGap / 2;
 			StrokeLine(BPoint(middle, bounds.top + 5), BPoint(middle, bounds.bottom - 4));
 		}
-		SetHighColor(text);
-		DrawString(fSlots[i].text.String(), BPoint(x, baseline));
-		x	+= StringWidth(fSlots[i].text.String()) + kSlotGap;
 		first	= false;
+		if (fSlots[i].view != NULL)
+			continue;
+		SetHighColor(text);
+		DrawString(fSlots[i].text.String(), BPoint(fSlots[i].x, baseline));
 	}
 }

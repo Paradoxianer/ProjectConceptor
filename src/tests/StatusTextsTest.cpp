@@ -20,9 +20,7 @@ void StatusTextsTest::CountsUseSingularAndPlural(void)
 }
 
 
-void StatusTextsTest::GeometryAndPointerAreRounded(void)
+void StatusTextsTest::PointerIsRounded(void)
 {
-	CPPUNIT_ASSERT(StatusTexts::Geometry(BRect(10.4, 20.6, 110.4, 70.6))
-		== "Position 10, 21 · Size 100 × 50");
 	CPPUNIT_ASSERT(StatusTexts::Pointer(BPoint(-3.6, 7.5)) == "Pointer -4, 8");
 }

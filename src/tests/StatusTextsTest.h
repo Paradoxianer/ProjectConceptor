@@ -10,12 +10,12 @@ class StatusTextsTest : public CppUnit::TestFixture
 public:
 	void NothingSelected(void);
 	void CountsUseSingularAndPlural(void);
-	void GeometryAndPointerAreRounded(void);
+	void PointerIsRounded(void);
 
 	CPPUNIT_TEST_SUITE(StatusTextsTest);
 	CPPUNIT_TEST(NothingSelected);
 	CPPUNIT_TEST(CountsUseSingularAndPlural);
-	CPPUNIT_TEST(GeometryAndPointerAreRounded);
+	CPPUNIT_TEST(PointerIsRounded);
 	CPPUNIT_TEST_SUITE_END();
 };
 

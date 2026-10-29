@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	831908927
+1	English	application/x-vnd.ProjectConceptor-plugin	2153277546
 Line	GraphEditor		Line
 Delete	AttributeRenderer		Delete
 Triangle	GraphEditor		Triangle
@@ -10,6 +10,7 @@ Fill pattern for selected nodes	GraphEditor		Fill pattern for selected nodes
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# connection} other{# connections}}
 Zoom in	GraphEditor		Zoom in
 None	GraphEditor		None
+H	GraphEditor	status bar: a node's height	H
 Fit the whole graph into the window	GraphEditor		Fit the whole graph into the window
 Yes/No	GraphEditor		Yes/No
 Arrows	GraphEditor		Arrows
@@ -18,6 +19,7 @@ Choose image…	ImageRenderer		Choose image…
 Date	GraphEditor		Date
 Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Rounded rectangle
+Width of the selected nodes	GraphEditor		Width of the selected nodes
 Fill	GraphEditor		Fill
 Status	GraphEditor		Status
 Open\nIn progress\nDone	GraphEditor		Open\nIn progress\nDone
@@ -25,24 +27,28 @@ Border	GraphEditor		Border
 Straight	GraphEditor		Straight
 Shape of the selected nodes	GraphEditor		Shape of the selected nodes
 Attribute	GraphEditor		Attribute
+X	GraphEditor	status bar: a node's left edge	X
 Highlight	GraphEditor		Highlight
 Untitled	GraphEditor		Untitled
 Border pen size for selected nodes	GraphEditor		Border pen size for selected nodes
 Graph	GraphEditor		Graph
 Choice list	GraphEditor		Choice list
 Choose a file	GraphEditor		Choose a file
+W	GraphEditor	status bar: a node's width	W
+Top edge of the selected nodes	GraphEditor		Top edge of the selected nodes
 Change…	AttributeRenderer		Change…
 Number	GraphEditor		Number
 Diamond	GraphEditor		Diamond
 Empty note	NoteRenderer		Empty note
+Height of the selected nodes	GraphEditor		Height of the selected nodes
 Grid	GraphEditor		Grid
 File	GraphEditor		File
 Add address	ValueRenderer		Add address
 No date	DatePopup		No date
+Left edge of the selected nodes	GraphEditor		Left edge of the selected nodes
 Toggle grid	GraphEditor		Toggle grid
 Text	GraphEditor		Text
 Add an attribute to the selected nodes	GraphEditor		Add an attribute to the selected nodes
-Position %d, %d · Size %d × %d	GraphEditor		Position %d, %d · Size %d × %d
 Group	GraphEditor		Group
 Parallelogram	GraphEditor		Parallelogram
 Toggle smart alignment guides	GraphEditor		Toggle smart alignment guides
@@ -72,5 +78,6 @@ Choose…	ValueRenderer		Choose…
 At target	GraphEditor		At target
 Shape	GraphEditor		Shape
 Edit choices…	ValueRenderer		Edit choices…
+Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Which ends of the selected connections carry an arrow
 Shape of the selected connections	GraphEditor		Shape of the selected connections

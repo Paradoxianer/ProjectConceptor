@@ -40,6 +40,8 @@ const uint32			G_E_NEW_SCALE			= 'geNS';
 const uint32			G_E_ZOOM_IN				= 'geZI';
 const uint32			G_E_ZOOM_OUT			= 'geZO';
 const uint32			G_E_ZOOM_FIT			= 'geZF';
+// from the status bar's fields: int32 "field" (GeometryFields::Field), float "value"
+const uint32			G_E_SET_GEOMETRY		= 'geSG';
 const uint32			G_E_INVALIDATE			= 'geIV';
 const uint32			G_E_GRID_CHANGED		= 'geGC';
 const uint32			G_E_GUIDES_CHANGED		= 'geGU';
@@ -97,6 +99,7 @@ const rgb_color	kDefaultConnectionColor	= {187, 67, 47, 255};
 class Renderer;
 class StatusBar;
 class StatusButton;
+class GeometryFields;
 class BMessageRunner;
 class TextEditorControl;
 
@@ -198,9 +201,10 @@ public:
 			void			StartPendingAttributeEdit(void);
 			/** the view's cursor, e.g. an I-beam over text */
 			void			SetCursorId(BCursorID id);
-			/** the node's place and size in the status bar - live while
-			 * one is dragged or resized */
+			/** a node's place and size in the status bar - live while
+			 * it is dragged or resized as the only selected node */
 			void			ShowGeometry(BRect frame);
+			void			SetGeometry(int32 field, float value);
 			/** the window's status bar, NULL while closing */
 			StatusBar*		GetStatusBar(void);
 			Renderer*		FindNodeRenderer(BPoint where);
@@ -290,6 +294,8 @@ protected:
 			 * − [100 % ▾] + Fit */
 			StatusButton	*zoomButtons[4];
 			StatusButton	*zoomLabel;
+			/** the selected nodes' X, Y, W, H, left in the status bar */
+			GeometryFields	*geometry;
 			ContextBar		contextBar;
 			ToolItem		*grid;
 			ToolItem		*guides;

@@ -87,6 +87,7 @@ PROJECT_CONCEPTOR_SOURCES =
 	PWindow.cpp
 	StatusBar.cpp
 	StatusButton.cpp
+	StatusField.cpp
 	HelpManager.cpp
 
 	# plugins

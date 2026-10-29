@@ -1,4 +1,4 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	831908927
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	2153277546
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Șterge
 Triangle	GraphEditor		Triunghi
@@ -10,6 +10,7 @@ Fill pattern for selected nodes	GraphEditor		Model de umplere pentru nodurile se
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conexiune} few{# conexiuni} other{# de conexiuni}}
 Zoom in	GraphEditor		Mărește
 None	GraphEditor		Niciuna
+H	GraphEditor	status bar: a node's height	Î
 Fit the whole graph into the window	GraphEditor		Potrivește tot graful în fereastră
 Yes/No	GraphEditor		Da/Nu
 Arrows	GraphEditor		Săgeți
@@ -18,6 +19,7 @@ Choose image…	ImageRenderer		Alege imaginea…
 Date	GraphEditor		Dată
 Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Dreptunghi rotunjit
+Width of the selected nodes	GraphEditor		Lățimea nodurilor selectate
 Fill	GraphEditor		Umplere
 Status	GraphEditor		Stare
 Open\nIn progress\nDone	GraphEditor		Deschis\nÎn lucru\nGata
@@ -25,24 +27,28 @@ Border	GraphEditor		Contur
 Straight	GraphEditor		Dreaptă
 Shape of the selected nodes	GraphEditor		Forma nodurilor selectate
 Attribute	GraphEditor		Atribut
+X	GraphEditor	status bar: a node's left edge	X
 Highlight	GraphEditor		Accent
 Untitled	GraphEditor		Fără titlu
 Border pen size for selected nodes	GraphEditor		Grosimea marginii pentru nodurile selectate
 Graph	GraphEditor		Graf
 Choice list	GraphEditor		Listă de opțiuni
 Choose a file	GraphEditor		Alege un fișier
+W	GraphEditor	status bar: a node's width	L
+Top edge of the selected nodes	GraphEditor		Marginea de sus a nodurilor selectate
 Change…	AttributeRenderer		Schimbă…
 Number	GraphEditor		Număr
 Diamond	GraphEditor		Romb
 Empty note	NoteRenderer		Notă goală
+Height of the selected nodes	GraphEditor		Înălțimea nodurilor selectate
 Grid	GraphEditor		Grilă
 File	GraphEditor		Fișier
 Add address	ValueRenderer		Adaugă adresa
 No date	DatePopup		Fără dată
+Left edge of the selected nodes	GraphEditor		Marginea din stânga a nodurilor selectate
 Toggle grid	GraphEditor		Comută grila
 Text	GraphEditor		Text
 Add an attribute to the selected nodes	GraphEditor		Adaugă un atribut la nodurile selectate
-Position %d, %d · Size %d × %d	GraphEditor		Poziție %d, %d · Mărime %d × %d
 Group	GraphEditor		Grupare
 Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Comută ghidajele inteligente de aliniere
@@ -72,5 +78,6 @@ Choose…	ValueRenderer		Alege…
 At target	GraphEditor		La destinație
 Shape	GraphEditor		Formă
 Edit choices…	ValueRenderer		Editează opțiunile…
+Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Care capete ale conexiunilor selectate au săgeată
 Shape of the selected connections	GraphEditor		Forma conexiunilor selectate

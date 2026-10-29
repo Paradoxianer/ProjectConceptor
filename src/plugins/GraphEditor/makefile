@@ -41,6 +41,7 @@ SRCS=	AttributRenderer.cpp	\
 		Zoom.cpp \
 		ContextBar.cpp \
 		StatusTexts.cpp \
+		GeometryFields.cpp \
 		GraphStyle.cpp \
 		ShadowCache.cpp			\
 		StringRenderer.cpp		\

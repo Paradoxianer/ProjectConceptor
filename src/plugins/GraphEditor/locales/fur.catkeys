@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	831908927
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	2153277546
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Elimine
 Triangle	GraphEditor		Triangul
@@ -10,6 +10,7 @@ Fill pattern for selected nodes	GraphEditor		Motîf di jemplament pai grops sele
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conession} other{# conessions}}
 Zoom in	GraphEditor		Ingrandìs
 None	GraphEditor		Nissune
+H	GraphEditor	status bar: a node's height	A
 Fit the whole graph into the window	GraphEditor		Adatâ dut il grafic al barcon
 Yes/No	GraphEditor		Sì/No
 Arrows	GraphEditor		Frecis
@@ -18,6 +19,7 @@ Choose image…	ImageRenderer		Sielç une imagjin…
 Date	GraphEditor		Date
 Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Retangul taront
+Width of the selected nodes	GraphEditor		Largjece dai grops selezionâts
 Fill	GraphEditor		Jemplament
 Status	GraphEditor		Stât
 Open\nIn progress\nDone	GraphEditor		Viert\nIn vore\nFat
@@ -25,24 +27,28 @@ Border	GraphEditor		Ôr
 Straight	GraphEditor		Drete
 Shape of the selected nodes	GraphEditor		Forme dai grops selezionâts
 Attribute	GraphEditor		Atribût
+X	GraphEditor	status bar: a node's left edge	X
 Highlight	GraphEditor		Acent
 Untitled	GraphEditor		Cence titul
 Border pen size for selected nodes	GraphEditor		Spessôr dal ôr pai grops selezionâts
 Graph	GraphEditor		Grafic
 Choice list	GraphEditor		Liste di sieltis
 Choose a file	GraphEditor		Sielç un file
+W	GraphEditor	status bar: a node's width	L
+Top edge of the selected nodes	GraphEditor		Ôr parsore dai grops selezionâts
 Change…	AttributeRenderer		Cambie…
 Number	GraphEditor		Numar
 Diamond	GraphEditor		Rombo
 Empty note	NoteRenderer		Note vueide
+Height of the selected nodes	GraphEditor		Altece dai grops selezionâts
 Grid	GraphEditor		Grile
 File	GraphEditor		File
 Add address	ValueRenderer		Zonte une direzion
 No date	DatePopup		Cence date
+Left edge of the selected nodes	GraphEditor		Ôr di çampe dai grops selezionâts
 Toggle grid	GraphEditor		Mostre/plate la grile
 Text	GraphEditor		Test
 Add an attribute to the selected nodes	GraphEditor		Zonte un atribût ai grops selezionâts
-Position %d, %d · Size %d × %d	GraphEditor		Posizion %d, %d · Dimension %d × %d
 Group	GraphEditor		Ragrupâ
 Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Ative/disative lis guidis di aliniament inteligjentis
@@ -72,5 +78,6 @@ Choose…	ValueRenderer		Sielç…
 At target	GraphEditor		Te destinazion
 Shape	GraphEditor		Forme
 Edit choices…	ValueRenderer		Modifiche lis sieltis…
+Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Cuai cjâfs des conessions selezionadis a àn une frece
 Shape of the selected connections	GraphEditor		Forme des conessions selezionadis

@@ -32,6 +32,7 @@
 #include "GroupRenderer.h"
 #include "TextEditorControl.h"
 #include "VectorIcon.h"
+#include "GeometryFields.h"
 #include "StatusButton.h"
 #include "StatusTexts.h"
 #include "Zoom.h"
@@ -233,6 +234,7 @@ void GraphEditor::Init(void) {
 	zoomButtons[2]->SetToolTip(B_TRANSLATE("Zoom in"));
 	zoomButtons[3]	= new StatusButton("GraphEditor::zoomFit",B_TRANSLATE("Fit"),new BMessage(G_E_ZOOM_FIT));
 	zoomButtons[3]->SetToolTip(B_TRANSLATE("Fit the whole graph into the window"));
+	geometry		= new GeometryFields("GraphEditor::geometry");
 
 	// this plugin's own resources: icons
 	image_info	*info 	= new image_info;
@@ -819,6 +821,7 @@ void GraphEditor::AttachedToWindow(void) {
 		zoomButtons[i]->SetTarget(this);
 	}
 	zoomLabel->Menu()->SetTargetForItems(this);
+	geometry->SetTarget(this);
 	if (doc) {
 		InitAll();
 		// never block on the document here, see DrainPendingChangedNodes()
@@ -893,7 +896,7 @@ void GraphEditor::DetachedFromWindow(void) {
 				for (int32 i = 0; i < 4; i++)
 					statusBar->RemoveRightView(zoomButtons[i]);
 				statusBar->SetText("selection",NULL);
-				statusBar->SetText("geometry",NULL);
+				statusBar->SetView("geometry",NULL);
 				statusBar->SetText("pointer",NULL);
 			}
 			ToolBar		*configBar	= (ToolBar *)pWindow->FindView(P_M_STANDART_TOOL_BAR);
@@ -1032,6 +1035,14 @@ void GraphEditor::MessageReceived(BMessage *message) {
 		case G_E_ZOOM_FIT:
 			ZoomToFit();
 			break;
+		case G_E_SET_GEOMETRY: {
+			int32	field	= 0;
+			float	value	= 0;
+			if ((message->FindInt32("field",&field) == B_OK)
+				&& (message->FindFloat("value",&value) == B_OK))
+				SetGeometry(field,value);
+			break;
+		}
 		case G_E_GRID_CHANGED: {
 			gridEnabled =! gridEnabled;
 			// ToolItem's own two-state visual tracking is dead code
@@ -1974,10 +1985,20 @@ void GraphEditor::UpdateFormatItems(void) {
 				nodes++;
 		}
 		statusBar->SetText("selection",StatusTexts::Selection(nodes,connections).String());
-		BRect	frame;
-		if ((nodes == 1) && (node->FindRect(P_C_NODE_FRAME,&frame) == B_OK))
-			ShowGeometry(frame);
-		else
+		if (nodes > 0) {
+			// as drawn: a card grows beyond its stored height with its content
+			std::vector<BRect>	frames;
+			for (int32 i = 0; i < selection->CountItems(); i++) {
+				BMessage	*item		= (BMessage*)selection->ItemAt(i);
+				Renderer	*renderer	= NULL;
+				if (((item->what == P_C_CLASS_TYPE) || (item->what == P_C_GROUP_TYPE))
+					&& (item->FindPointer(renderString,(void **)&renderer) == B_OK)
+					&& (renderer != NULL))
+					frames.push_back(renderer->Frame());
+			}
+			geometry->ShowFrames(frames);
+			statusBar->SetView("geometry",geometry);
+		} else
 			statusBar->SetText("geometry","");
 	}
 	colorItem->SetEnabled((node != NULL) || (connection != NULL));
@@ -2088,9 +2109,41 @@ StatusBar* GraphEditor::GetStatusBar(void) {
 }
 
 void GraphEditor::ShowGeometry(BRect frame) {
-	StatusBar	*statusBar	= GetStatusBar();
-	if (statusBar != NULL)
-		statusBar->SetText("geometry",StatusTexts::Geometry(frame).String());
+	// several nodes: the fields show what they have in common
+	int32	nodes		= 0;
+	BList	*selection	= doc->GetSelected();
+	for (int32 i = 0; i < selection->CountItems(); i++) {
+		uint32	what	= ((BMessage*)selection->ItemAt(i))->what;
+		if ((what == P_C_CLASS_TYPE) || (what == P_C_GROUP_TYPE))
+			nodes++;
+	}
+	if (nodes == 1)
+		geometry->ShowFrame(frame);
+}
+
+void GraphEditor::SetGeometry(int32 field, float value) {
+	BMessage	command(P_C_EXECUTE_COMMAND);
+	switch (field) {
+		case GeometryFields::LEFT:
+			command.AddString("Command::Name","Move");
+			command.AddFloat(P_C_MOVE_LEFT,value);
+			break;
+		case GeometryFields::TOP:
+			command.AddString("Command::Name","Move");
+			command.AddFloat(P_C_MOVE_TOP,value);
+			break;
+		case GeometryFields::WIDTH:
+			command.AddString("Command::Name","Resize");
+			command.AddFloat(P_C_RESIZE_WIDTH,value);
+			break;
+		case GeometryFields::HEIGHT:
+			command.AddString("Command::Name","Resize");
+			command.AddFloat(P_C_RESIZE_HEIGHT,value);
+			break;
+		default:
+			return;
+	}
+	sentTo->SendMessage(&command);
 }
 
 

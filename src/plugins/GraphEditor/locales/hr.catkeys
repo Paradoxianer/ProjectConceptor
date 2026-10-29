@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	831908927
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	2153277546
 Line	GraphEditor		Linija
 Delete	AttributeRenderer		Izbriši
 Triangle	GraphEditor		Trokut
@@ -10,6 +10,7 @@ Fill pattern for selected nodes	GraphEditor		Uzorak ispune za odabrane čvorove
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# veza} few{# veze} other{# veza}}
 Zoom in	GraphEditor		Povećaj
 None	GraphEditor		Nijedna
+H	GraphEditor	status bar: a node's height	V
 Fit the whole graph into the window	GraphEditor		Prilagodi cijeli graf prozoru
 Yes/No	GraphEditor		Da/Ne
 Arrows	GraphEditor		Strelice
@@ -18,6 +19,7 @@ Choose image…	ImageRenderer		Odaberi sliku…
 Date	GraphEditor		Datum
 Zoom	GraphEditor		Zumiranje
 Rounded rectangle	GraphEditor		Zaobljeni pravokutnik
+Width of the selected nodes	GraphEditor		Širina odabranih čvorova
 Fill	GraphEditor		Ispuni
 Status	GraphEditor		Status
 Open\nIn progress\nDone	GraphEditor		Otvoreno\nU tijeku\nGotovo
@@ -25,24 +27,28 @@ Border	GraphEditor		Obrub
 Straight	GraphEditor		Ravna
 Shape of the selected nodes	GraphEditor		Oblik odabranih čvorova
 Attribute	GraphEditor		Atribut
+X	GraphEditor	status bar: a node's left edge	X
 Highlight	GraphEditor		Naglasak
 Untitled	GraphEditor		Bez naslova
 Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove
 Graph	GraphEditor		Graf
 Choice list	GraphEditor		Popis izbora
 Choose a file	GraphEditor		Odaberi datoteku
+W	GraphEditor	status bar: a node's width	Š
+Top edge of the selected nodes	GraphEditor		Gornji rub odabranih čvorova
 Change…	AttributeRenderer		Promijeni…
 Number	GraphEditor		Broj
 Diamond	GraphEditor		Romb
 Empty note	NoteRenderer		Prazna bilješka
+Height of the selected nodes	GraphEditor		Visina odabranih čvorova
 Grid	GraphEditor		Rešetka
 File	GraphEditor		Datoteka
 Add address	ValueRenderer		Dodaj adresu
 No date	DatePopup		Bez datuma
+Left edge of the selected nodes	GraphEditor		Lijevi rub odabranih čvorova
 Toggle grid	GraphEditor		Uključi/isključi rešetku
 Text	GraphEditor		Tekst
 Add an attribute to the selected nodes	GraphEditor		Dodaj atribut odabranim čvorovima
-Position %d, %d · Size %d × %d	GraphEditor		Položaj %d, %d · Veličina %d × %d
 Group	GraphEditor		Grupiraj
 Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Uključi/isključi pametne vodilice za poravnanje
@@ -72,5 +78,6 @@ Choose…	ValueRenderer		Odaberi…
 At target	GraphEditor		Na odredištu
 Shape	GraphEditor		Oblik
 Edit choices…	ValueRenderer		Uredi izbore…
+Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Koji krajevi odabranih veza imaju strelicu
 Shape of the selected connections	GraphEditor		Oblik odabranih veza

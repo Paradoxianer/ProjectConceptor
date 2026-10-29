@@ -52,7 +52,12 @@ show when a dragged node lines up with its neighbours.
 
 The status bar at the bottom shows the selection, its position and
 size, and the zoom; **-**, **+** and **Fit** change the zoom, which
-keeps the middle of the view in place.
+keeps the middle of the view in place. Clicking **X**, **Y**, **W** or
+**H** lets you type the selected nodes' left edge, top edge, width or
+height; Enter applies it, Escape keeps the old value. With several nodes
+selected, a field stays empty where they differ, and a typed value sets
+it for all of them - e.g. the same width. A card is never smaller than
+its content.
 
 ## Creating a node
 

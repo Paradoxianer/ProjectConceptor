@@ -38,16 +38,6 @@ BString Selection(int32 nodes, int32 connections)
 }
 
 
-BString Geometry(BRect frame)
-{
-	BString	text;
-	text.SetToFormat(B_TRANSLATE("Position %d, %d · Size %d × %d"),
-		(int)floorf(frame.left + 0.5f), (int)floorf(frame.top + 0.5f),
-		(int)floorf(frame.Width() + 0.5f), (int)floorf(frame.Height() + 0.5f));
-	return text;
-}
-
-
 BString Pointer(BPoint where)
 {
 	BString	text;

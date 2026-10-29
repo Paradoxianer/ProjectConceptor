@@ -50,6 +50,7 @@ SRCS= 	About/AboutWindow.cpp \
 		Document/PWindow.cpp \
 		Document/StatusBar.cpp \
 		Document/StatusButton.cpp \
+		Document/StatusField.cpp \
 		Document/HelpManager.cpp \
 		ToolBar/BaseItem.cpp \
 		ToolBar/Mover.cpp \

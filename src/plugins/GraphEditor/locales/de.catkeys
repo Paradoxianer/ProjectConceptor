@@ -1,4 +1,4 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	831908927
+1	German	application/x-vnd.ProjectConceptor-plugin	2153277546
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Löschen
 Triangle	GraphEditor		Dreieck
@@ -10,6 +10,7 @@ Fill pattern for selected nodes	GraphEditor		Füllmuster für ausgewählte Knote
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# Verbindung} other{# Verbindungen}}
 Zoom in	GraphEditor		Vergrößern
 None	GraphEditor		Keine
+H	GraphEditor	status bar: a node's height	H
 Fit the whole graph into the window	GraphEditor		Den ganzen Graphen ins Fenster einpassen
 Yes/No	GraphEditor		Ja/Nein
 Arrows	GraphEditor		Pfeile
@@ -18,6 +19,7 @@ Choose image…	ImageRenderer		Bild wählen…
 Date	GraphEditor		Datum
 Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Abgerundetes Rechteck
+Width of the selected nodes	GraphEditor		Breite der ausgewählten Knoten
 Fill	GraphEditor		Ausfüllen
 Status	GraphEditor		Status
 Open\nIn progress\nDone	GraphEditor		Offen\nIn Arbeit\nErledigt
@@ -25,24 +27,28 @@ Border	GraphEditor		Rand
 Straight	GraphEditor		Gerade
 Shape of the selected nodes	GraphEditor		Form der ausgewählten Knoten
 Attribute	GraphEditor		Attribut
+X	GraphEditor	status bar: a node's left edge	X
 Highlight	GraphEditor		Akzent
 Untitled	GraphEditor		Unbenannt
 Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
 Graph	GraphEditor		Graph
 Choice list	GraphEditor		Auswahlliste
 Choose a file	GraphEditor		Datei wählen
+W	GraphEditor	status bar: a node's width	B
+Top edge of the selected nodes	GraphEditor		Oberer Rand der ausgewählten Knoten
 Change…	AttributeRenderer		Ändern…
 Number	GraphEditor		Zahl
 Diamond	GraphEditor		Raute
 Empty note	NoteRenderer		Leere Notiz
+Height of the selected nodes	GraphEditor		Höhe der ausgewählten Knoten
 Grid	GraphEditor		Gitter
 File	GraphEditor		Datei
 Add address	ValueRenderer		Adresse eingeben
 No date	DatePopup		Kein Datum
+Left edge of the selected nodes	GraphEditor		Linker Rand der ausgewählten Knoten
 Toggle grid	GraphEditor		Raster ein/aus
 Text	GraphEditor		Text
 Add an attribute to the selected nodes	GraphEditor		Attribut zu den ausgewählten Knoten hinzufügen
-Position %d, %d · Size %d × %d	GraphEditor		Position %d, %d · Größe %d × %d
 Group	GraphEditor		Gruppieren
 Parallelogram	GraphEditor		Parallelogramm
 Toggle smart alignment guides	GraphEditor		Intelligente Ausrichtungshilfen ein/aus
@@ -72,5 +78,6 @@ Choose…	ValueRenderer		Wählen…
 At target	GraphEditor		Am Ende
 Shape	GraphEditor		Form
 Edit choices…	ValueRenderer		Auswahl bearbeiten…
+Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		An welchen Enden die ausgewählten Verbindungen einen Pfeil tragen
 Shape of the selected connections	GraphEditor		Form der ausgewählten Verbindungen
