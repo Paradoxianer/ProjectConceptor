@@ -128,6 +128,7 @@ const char*		P_MENU_MACRO_DUPLICATE			= B_TRANSLATE("Duplicate");
 const char*		P_MENU_MACRO_DELETE				= B_TRANSLATE("Delete");
 const char*		P_MENU_MACRO_OPEN				= B_TRANSLATE("Open");
 const char*		P_MENU_MACRO_SAVE				= B_TRANSLATE("Save Macro");
+const char*		P_MENU_MACRO_RUN_ON_OPEN		= B_TRANSLATE("Run when opening the document");
 
 const char*		P_MENU_HELP						= B_TRANSLATE("Help");
 const char*		P_MENU_HELP_ABOUT				= B_TRANSLATE("About");

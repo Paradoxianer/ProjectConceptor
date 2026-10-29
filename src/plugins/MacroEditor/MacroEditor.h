@@ -107,6 +107,10 @@ protected:
 			 * the Macro > Play submenu in step with the macro list. */
 			void			RenameSelectedMacro(void);
 			void			DuplicateSelectedMacro(void);
+			void			ToggleRunOnOpen(void);
+			/** marks the Macro menu's "Run when opening" for the
+			 * selected macro */
+			void			UpdateRunOnOpenItem(void);
 			void			DeleteSelectedMacro(void);
 			/** the Play submenu's entry for `macro` (its menu message is the
 			 * macro itself), NULL if there is none */

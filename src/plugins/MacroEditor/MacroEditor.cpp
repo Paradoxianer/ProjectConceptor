@@ -526,7 +526,11 @@ void MacroEditor::RefreshMacroList(bool reloadText)
 		BMessage	*macro	= (BMessage*)macroList->ItemAt(i);
 		const char	*name	= NULL;
 		macro->FindString("Name",&name);
-		fMacroList->AddItem(new BStringItem(name ? name : ""));
+		BString	label(name ? name : "");
+		if (macro->GetBool(P_C_MACRO_RUN_ON_OPEN,false))
+			label.SetToFormat(B_TRANSLATE_COMMENT("%s (on open)",
+				"a macro that plays when its document is opened"),label.String());
+		fMacroList->AddItem(new BStringItem(label.String()));
 		if ((name != NULL) && (previouslySelected == name))
 			reselectIndex	= i;
 	}
@@ -637,6 +641,34 @@ void MacroEditor::RenameSelectedMacro(void)
 }
 
 
+void MacroEditor::ToggleRunOnOpen(void)
+{
+	if ((doc == NULL) || (fSelectedMacro == NULL)) {
+		SetStatus(B_TRANSLATE("No macro selected."),true);
+		return;
+	}
+	bool	runOnOpen	= !fSelectedMacro->GetBool(P_C_MACRO_RUN_ON_OPEN,false);
+	fSelectedMacro->RemoveName(P_C_MACRO_RUN_ON_OPEN);
+	if (runOnOpen)
+		fSelectedMacro->AddBool(P_C_MACRO_RUN_ON_OPEN,true);
+	doc->SetModified();
+	RefreshMacroList(false);
+	UpdateRunOnOpenItem();
+	SetStatus(runOnOpen ? B_TRANSLATE("Plays when the document is opened.")
+		: B_TRANSLATE("No longer plays when the document is opened."),false);
+}
+
+
+void MacroEditor::UpdateRunOnOpenItem(void)
+{
+	BMenuItem	*item	= (doc != NULL) ? doc->GetMenuItem(P_MENU_MACRO_RUN_ON_OPEN) : NULL;
+	if (item == NULL)
+		return;
+	item->SetMarked((fSelectedMacro != NULL)
+		&& fSelectedMacro->GetBool(P_C_MACRO_RUN_ON_OPEN,false));
+}
+
+
 void MacroEditor::DuplicateSelectedMacro(void)
 {
 	if ((doc == NULL) || (fSelectedMacro == NULL)) {
@@ -648,6 +680,8 @@ void MacroEditor::DuplicateSelectedMacro(void)
 	BString	copyName;
 	copyName.SetToFormat(B_TRANSLATE_COMMENT("%s copy","name of a duplicated macro"),name.String());
 	fSelectedMacro	= AddNewMacro(copyName,fSelectedMacro);
+	// one macro per document that runs on its own is the expected case
+	fSelectedMacro->RemoveName(P_C_MACRO_RUN_ON_OPEN);
 	RefreshMacroList();
 	SetStatus(B_TRANSLATE("Duplicated."),false);
 }
@@ -705,12 +739,14 @@ void MacroEditor::ShowSelectedMacro(void)
 	BList	*macroList	= doc->GetCommandManager()->GetMacroList();
 	if ((index < 0) || (index >= macroList->CountItems())) {
 		fSelectedMacro	= NULL;
+		UpdateRunOnOpenItem();
 		fOutlineView->SetCommands(NULL);
 		SetStatus("",false);
 		return;
 	}
 
 	fSelectedMacro	= (BMessage*)macroList->ItemAt(index);
+	UpdateRunOnOpenItem();
 
 	BList	commands;
 	BMessage	entry;
@@ -882,6 +918,10 @@ void MacroEditor::MessageReceived(BMessage *message)
 		}
 		case MENU_MACRO_DELETE: {
 			DeleteSelectedMacro();
+			break;
+		}
+		case MENU_MACRO_RUN_ON_OPEN: {
+			ToggleRunOnOpen();
 			break;
 		}
 		case MENU_MACRO_NEW: {

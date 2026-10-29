@@ -53,6 +53,7 @@ const char*		P_C_RESIZE_WIDTH				= "width";
 const char*		P_C_RESIZE_HEIGHT				= "height";
 const char*		P_C_MOVE_LEFT					= "left";
 const char*		P_C_MOVE_TOP					= "top";
+const char*		P_C_MACRO_RUN_ON_OPEN			= "Macro::runOnOpen";
 const char*		P_C_VARIABLE_TODAY				= "today";
 
 const char*		P_C_NODE_CONNECTION_FROM		= "Node::from";

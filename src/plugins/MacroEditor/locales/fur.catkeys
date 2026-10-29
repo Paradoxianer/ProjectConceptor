@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	2777686912
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	2004648585
 New macro	MacroEditor		Gnove macro
 Move Up	MacroEditor		Sposte in sù
 Open\nIn progress\nDone	MacroEditor		Viert\nIn vore\nFat
@@ -22,8 +22,10 @@ Number	MacroEditor		Numar
 Connection	MacroEditor		Conession
 Add attribute	MacroEditor		Zonte atribût
 File	MacroEditor		File
+%s (on open)	MacroEditor	a macro that plays when its document is opened	%s (al vierzi)
 Imported as macro \"%s\" (%ld command(s)).	MacroEditor		Impuartade come macro “%s” (%ld comant(s)).
 %s copy	MacroEditor	name of a duplicated macro	Copie di %s
+No longer plays when the document is opened.	MacroEditor		Nol ven plui eseguît cuant che si vierç il document.
 Text	MacroEditor		Test
 Renamed.	MacroEditor		Cambiât non.
 Collapse All	MacroEditor		Siere dut
@@ -37,7 +39,8 @@ No macro selected.	MacroEditor		Nissune macro selezionade.
 No macro selected - select one in the MacroEditor tab first.	MacroEditor		Nissune macro selezionade – selezione prime une te schede MacroEditor.
 Attribute kind	MacroEditor		Gjenar di atribût
 Date	MacroEditor		Date
-OK	MacroEditor		Va ben
 Note	MacroEditor		Note
+OK	MacroEditor		Va ben
 Color	MacroEditor		Colôr
+Plays when the document is opened.	MacroEditor		Al ven eseguît cuant che si vierç il document.
 Image	MacroEditor		Imagjin

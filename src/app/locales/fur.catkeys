@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor	19311348
+1	Friulian	application/x-vnd.ProjectConceptor	14280131
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtis des macros (dopli clic par cambiâ il tast)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Frache la combinazion di tascj pe macro “%s” (Esc par anulâ).
 About	MainWindow		Informazions
@@ -79,6 +79,7 @@ There is no e-mail program on your machine that is configured as the default pro
 Standard	ColorPickerWindow		Predefinît
 Untitled	Document		Cence titul
 Web Browser Warning	AboutURLView		Avertiment navigadôr web
+Run when opening the document	MainWindow		Eseguìs cuant che si vierç il document
 OK	Document		Va ben
 Window	MainWindow		Barcon
 \"${%s}\": no such variable	CommandManager		“${%s}”: variabile che no esist

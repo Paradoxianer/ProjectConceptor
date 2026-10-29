@@ -1,4 +1,4 @@
-1	German	application/x-vnd.ProjectConceptor	19311348
+1	German	application/x-vnd.ProjectConceptor	14280131
 Macro shortcuts (double-click to change the key)	ShortCutView		Makro-Kürzel (Doppelklick ändert die Taste)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tastenkombination für das Makro \"%s\" drücken (Esc bricht ab).
 About	MainWindow		Über...
@@ -79,6 +79,7 @@ There is no e-mail program on your machine that is configured as the default pro
 Standard	ColorPickerWindow		Standard
 Untitled	Document		Unbenannt
 Web Browser Warning	AboutURLView		Web-Browser-Warnung
+Run when opening the document	MainWindow		Beim Öffnen des Dokuments ausführen
 OK	Document		OK
 Window	MainWindow		Fenster
 \"${%s}\": no such variable	CommandManager		\"${%s}\": unbekannte Variable

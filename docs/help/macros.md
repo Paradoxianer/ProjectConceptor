@@ -43,6 +43,7 @@ middle. Click a value to change it. Play it with **Macro > Play**.
 | Open | Imports a macro from a text file (see [Macro files](#macro-files)). A macro with the same name is replaced. |
 | Save | Exports the macro selected in the Macros tab to a text file. |
 | Rename / Duplicate / Delete | Act on the macro selected in the Macros tab. Delete asks first and can't be undone. |
+| Run when opening the document | Switches on or off whether the selected macro plays by itself each time the document is opened. Such a macro shows "(on open)" in the Macros tab. |
 
 Macros belong to the document: they are saved with it and are there
 again when you open it.
@@ -166,6 +167,16 @@ field of a macro stands on one line.
 **Numbers and text:** text in a number field is converted - `12.5` and
 `12,5` both work. Text that isn't a number is an error, not 0. `1.000,5`
 (dot and comma together) is an error too, because it's ambiguous.
+
+With `today` and **Run when opening the document**, a macro can mark
+everything overdue whenever the document is opened:
+
+```
+Find
+  attribute="Due"
+  operator="<"
+  value="${today}"
+```
 
 Loop counters start at 0. For a count starting at 1, add a step before:
 

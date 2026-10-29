@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	2777686912
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	2004648585
 New macro	MacroEditor		Nova makronaredba
 Move Up	MacroEditor		Pomakni gore
 Open\nIn progress\nDone	MacroEditor		Otvoreno\nU tijeku\nGotovo
@@ -22,8 +22,10 @@ Number	MacroEditor		Broj
 Connection	MacroEditor		Veza
 Add attribute	MacroEditor		Dodaj atribut
 File	MacroEditor		Datoteka
+%s (on open)	MacroEditor	a macro that plays when its document is opened	%s (pri otvaranju)
 Imported as macro \"%s\" (%ld command(s)).	MacroEditor		Uvezeno kao makronaredba „%s” (naredbi: %ld).
 %s copy	MacroEditor	name of a duplicated macro	%s (kopija)
+No longer plays when the document is opened.	MacroEditor		Više se ne pokreće pri otvaranju dokumenta.
 Text	MacroEditor		Tekst
 Renamed.	MacroEditor		Preimenovano.
 Collapse All	MacroEditor		Sažmi sve
@@ -37,7 +39,8 @@ No macro selected.	MacroEditor		Nije odabrana makronaredba.
 No macro selected - select one in the MacroEditor tab first.	MacroEditor		Nije odabrana makronaredba – najprije je odaberite na kartici MacroEditor.
 Attribute kind	MacroEditor		Vrsta atributa
 Date	MacroEditor		Datum
-OK	MacroEditor		U redu
 Note	MacroEditor		Bilješka
+OK	MacroEditor		U redu
 Color	MacroEditor		Boja
+Plays when the document is opened.	MacroEditor		Pokreće se pri otvaranju dokumenta.
 Image	MacroEditor		Slika

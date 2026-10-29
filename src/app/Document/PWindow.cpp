@@ -388,6 +388,11 @@ BMenuBar *PWindow::MakeMenu(void)
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_DELETE);
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Run when opening the document"),
+		new BMessage(MENU_MACRO_RUN_ON_OPEN)));
+	item->SetTarget(doc);
+	localizeMenuItems->AddPointer("item",(void *) item);
+	localizeMenuItems->AddPointer("itemstring",P_MENU_MACRO_RUN_ON_OPEN);
 
 	tmpBar->AddItem(menu);
 	localizeMenuItems->AddPointer("item",(void *) menu->Superitem());

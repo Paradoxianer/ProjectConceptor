@@ -366,6 +366,24 @@ void PCommandManager::PlayMacroStep(void) {
 	playingIndexer	= NULL;
 	delete playingMacro;
 	playingMacro	= NULL;
+	if (!pendingOnOpen.empty()) {
+		BMessage	next(pendingOnOpen.front());
+		pendingOnOpen.pop_front();
+		PlayMacroInteractive(&next);
+	}
+}
+
+void PCommandManager::PlayMacrosOnOpen(void) {
+	for (int32 i = 0; i < macroList->CountItems(); i++) {
+		BMessage	*macro	= (BMessage *)macroList->ItemAt(i);
+		if (macro->GetBool(P_C_MACRO_RUN_ON_OPEN,false))
+			pendingOnOpen.push_back(*macro);
+	}
+	if (pendingOnOpen.empty() || (playingMacro != NULL))
+		return;
+	BMessage	first(pendingOnOpen.front());
+	pendingOnOpen.pop_front();
+	PlayMacroInteractive(&first);
 }
 
 BMessage* PCommandManager::NewValueContext(void) {

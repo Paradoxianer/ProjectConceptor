@@ -170,6 +170,7 @@ const uint32	MENU_MACRO_DUPLICATE			= 'MMdp';
 const uint32	MENU_MACRO_DELETE				= 'MMdl';
 const uint32	MENU_MACRO_OPEN					= 'MMop';
 const uint32	MENU_MACRO_SAVE					= 'MMsv';
+const uint32	MENU_MACRO_RUN_ON_OPEN			= 'MMro';
 
 const uint32	MENU_HELP_ABOUT					= 'MHab';
 
@@ -326,6 +327,7 @@ extern const char*		P_MENU_MACRO_DUPLICATE;
 extern const char*		P_MENU_MACRO_DELETE;
 extern const char*		P_MENU_MACRO_OPEN;//				= "Open";
 extern const char*		P_MENU_MACRO_SAVE;//				= "Save";
+extern const char*		P_MENU_MACRO_RUN_ON_OPEN;
 
 extern const char*		P_MENU_HELP;//						= "Help";
 extern const char*		P_MENU_HELP_ABOUT;//				= "About";
@@ -367,6 +369,8 @@ extern const char*		P_C_RESIZE_HEIGHT;	//				= "height"
 /** Move: the new left/top, instead of moving by dx/dy */
 extern const char*		P_C_MOVE_LEFT;		//				= "left"
 extern const char*		P_C_MOVE_TOP;		//				= "top"
+/** a macro's bool: it plays by itself after its document was opened */
+extern const char*		P_C_MACRO_RUN_ON_OPEN;	//			= "Macro::runOnOpen"
 /** the variable every playback starts with: today as YYYY-MM-DD, the way
  * date attributes store it */
 extern const char*		P_C_VARIABLE_TODAY;	//				= "today"

@@ -1,4 +1,4 @@
-1	Spanish	application/x-vnd.ProjectConceptor	19311348
+1	Spanish	application/x-vnd.ProjectConceptor	14280131
 Macro shortcuts (double-click to change the key)	ShortCutView		Atajos de macros (doble clic para cambiar la tecla)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Pulse la combinación de teclas para la macro «%s» (Esc para cancelar).
 About	MainWindow		Acerca de
@@ -79,6 +79,7 @@ There is no e-mail program on your machine that is configured as the default pro
 Standard	ColorPickerWindow		Predeterminado
 Untitled	Document		Sin título
 Web Browser Warning	AboutURLView		Navegador Web - Advertencia
+Run when opening the document	MainWindow		Ejecutar al abrir el documento
 OK	Document		Aceptar
 Window	MainWindow		Ventana
 \"${%s}\": no such variable	CommandManager		«${%s}»: no existe esa variable

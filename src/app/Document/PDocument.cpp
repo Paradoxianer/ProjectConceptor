@@ -199,6 +199,7 @@ void PDocument::MessageReceived(BMessage* message) {
 		case MENU_MACRO_RENAME:
 		case MENU_MACRO_DUPLICATE:
 		case MENU_MACRO_DELETE:
+		case MENU_MACRO_RUN_ON_OPEN:
 		case MENU_MACRO_OPEN: {
 			if ((window != NULL) && (editorManager != NULL)) {
 				window->SelectEditorTab("MacroEditor");
@@ -923,6 +924,7 @@ void PDocument::Load(void)
 	// PCommandManager's three call sites
 	if (editorManager != NULL)
 		editorManager->BroadCast(BuildChangedNodesMessage());
+	commandManager->PlayMacrosOnOpen();
 }
 
 

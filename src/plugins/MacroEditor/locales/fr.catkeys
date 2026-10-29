@@ -1,4 +1,4 @@
-1	French	application/x-vnd.ProjectConceptor-plugin	2777686912
+1	French	application/x-vnd.ProjectConceptor-plugin	2004648585
 New macro	MacroEditor		Nouvelle macro
 Move Up	MacroEditor		Monter
 Open\nIn progress\nDone	MacroEditor		Ouvert\nEn cours\nTerminé
@@ -22,8 +22,10 @@ Number	MacroEditor		Nombre
 Connection	MacroEditor		Connexion
 Add attribute	MacroEditor		Ajouter un attribut
 File	MacroEditor		Fichier
+%s (on open)	MacroEditor	a macro that plays when its document is opened	%s (à l'ouverture)
 Imported as macro \"%s\" (%ld command(s)).	MacroEditor		Importée comme macro « %s » (%ld commande(s)).
 %s copy	MacroEditor	name of a duplicated macro	Copie de %s
+No longer plays when the document is opened.	MacroEditor		Ne s'exécute plus à l'ouverture du document.
 Text	MacroEditor		Texte
 Renamed.	MacroEditor		Renommée.
 Collapse All	MacroEditor		Tout replier
@@ -37,7 +39,8 @@ No macro selected.	MacroEditor		Aucune macro sélectionnée.
 No macro selected - select one in the MacroEditor tab first.	MacroEditor		Aucune macro sélectionnée ; sélectionnez-en d'abord une dans l'onglet MacroEditor.
 Attribute kind	MacroEditor		Type d'attribut
 Date	MacroEditor		Date
-OK	MacroEditor		OK
 Note	MacroEditor		Note
+OK	MacroEditor		OK
 Color	MacroEditor		Couleur
+Plays when the document is opened.	MacroEditor		S'exécute à l'ouverture du document.
 Image	MacroEditor		Image

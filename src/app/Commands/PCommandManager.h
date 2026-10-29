@@ -10,6 +10,7 @@
 #include <support/List.h>
 #include <support/String.h>
 
+#include <deque>
 #include <map>
 using namespace std;
 
@@ -86,6 +87,10 @@ public:
 			 * P_C_MACRO_PLAY_STEP handler - not meant to be called directly
 			 * from anywhere else. */
 			void		PlayMacroStep(void);
+			/** plays, one after the other and interactively, every macro
+			 * marked with P_C_MACRO_RUN_ON_OPEN - after a document was
+			 * opened */
+			void		PlayMacrosOnOpen(void);
 	virtual	status_t	RegisterPCommand(BasePlugin *commandPlugin);
 	virtual	void		UnregisterPCommand(char *name);
 
@@ -232,6 +237,8 @@ protected:
 			Indexer		*playingIndexer;
 			status_t	playingErr;
 			BString		playingFailedCommand;
+			/** PlayMacrosOnOpen()'s macros still to play, copies */
+			std::deque<BMessage>	pendingOnOpen;
 private:
 
 };
