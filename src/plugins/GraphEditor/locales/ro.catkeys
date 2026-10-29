@@ -1,16 +1,16 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	2153277546
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	3074511775
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Șterge
 Triangle	GraphEditor		Triunghi
 Date	DatePopup		Dată
 Connection	GraphEditor		Conexiune
+Position	GraphEditor	status bar: before a node's x, y	Poziție
 Today	DatePopup		Azi
 Fit	GraphEditor		Potrivire
 Fill pattern for selected nodes	GraphEditor		Model de umplere pentru nodurile selectate
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conexiune} few{# conexiuni} other{# de conexiuni}}
 Zoom in	GraphEditor		Mărește
 None	GraphEditor		Niciuna
-H	GraphEditor	status bar: a node's height	Î
 Fit the whole graph into the window	GraphEditor		Potrivește tot graful în fereastră
 Yes/No	GraphEditor		Da/Nu
 Arrows	GraphEditor		Săgeți
@@ -27,14 +27,13 @@ Border	GraphEditor		Contur
 Straight	GraphEditor		Dreaptă
 Shape of the selected nodes	GraphEditor		Forma nodurilor selectate
 Attribute	GraphEditor		Atribut
-X	GraphEditor	status bar: a node's left edge	X
+Size	GraphEditor	status bar: before a node's width × height	Mărime
 Highlight	GraphEditor		Accent
 Untitled	GraphEditor		Fără titlu
 Border pen size for selected nodes	GraphEditor		Grosimea marginii pentru nodurile selectate
 Graph	GraphEditor		Graf
 Choice list	GraphEditor		Listă de opțiuni
 Choose a file	GraphEditor		Alege un fișier
-W	GraphEditor	status bar: a node's width	L
 Top edge of the selected nodes	GraphEditor		Marginea de sus a nodurilor selectate
 Change…	AttributeRenderer		Schimbă…
 Number	GraphEditor		Număr
@@ -78,6 +77,5 @@ Choose…	ValueRenderer		Alege…
 At target	GraphEditor		La destinație
 Shape	GraphEditor		Formă
 Edit choices…	ValueRenderer		Editează opțiunile…
-Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Care capete ale conexiunilor selectate au săgeată
 Shape of the selected connections	GraphEditor		Forma conexiunilor selectate

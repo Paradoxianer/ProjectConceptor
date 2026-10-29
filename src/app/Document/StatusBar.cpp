@@ -46,7 +46,7 @@ void StatusBar::SetText(const char *slot, const char *text)
 			fSlots[i].view	= NULL;
 			fSlots[i].text	= text;
 		}
-		_LayoutSlots();
+		LayoutSlots();
 		return;
 	}
 	if (remove)
@@ -57,7 +57,7 @@ void StatusBar::SetText(const char *slot, const char *text)
 	added.view	= NULL;
 	added.x		= 0;
 	fSlots.push_back(added);
-	_LayoutSlots();
+	LayoutSlots();
 }
 
 
@@ -77,7 +77,7 @@ void StatusBar::SetView(const char *slot, BView *view)
 		fSlots[i].view	= view;
 		fSlots[i].text	= "";
 		AddChild(view);
-		_LayoutSlots();
+		LayoutSlots();
 		return;
 	}
 	Slot	added;
@@ -86,7 +86,7 @@ void StatusBar::SetView(const char *slot, BView *view)
 	added.x		= 0;
 	fSlots.push_back(added);
 	AddChild(view);
-	_LayoutSlots();
+	LayoutSlots();
 }
 
 
@@ -96,7 +96,7 @@ bool StatusBar::_Shown(const Slot &slot) const
 }
 
 
-void StatusBar::_LayoutSlots(void)
+void StatusBar::LayoutSlots(void)
 {
 	float	x	= kPadding;
 	for (size_t i = 0; i < fSlots.size(); i++) {
@@ -158,7 +158,7 @@ void StatusBar::_LayoutRightViews(void)
 
 void StatusBar::FrameResized(float width, float height)
 {
-	_LayoutSlots();
+	LayoutSlots();
 	_LayoutRightViews();
 }
 

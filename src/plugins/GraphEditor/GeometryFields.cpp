@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include "GraphEditor.h"
+#include "StatusBar.h"
 #include "StatusField.h"
 
 #undef B_TRANSLATION_CONTEXT
@@ -12,7 +13,8 @@
 
 static const int32	kDigits		= 5;
 static const float	kLabelGap	= 3;
-static const float	kFieldGap	= 8;
+// between the position and the size
+static const float	kGroupGap	= 14;
 
 
 GeometryFields::GeometryFields(const char *name)
@@ -23,11 +25,12 @@ GeometryFields::GeometryFields(const char *name)
 	SetViewUIColor(B_PANEL_BACKGROUND_COLOR);
 	SetLowUIColor(B_PANEL_BACKGROUND_COLOR);
 	SetFont(be_plain_font);
-	// short: the status bar has little room
-	fLabels[LEFT]	= B_TRANSLATE_COMMENT("X", "status bar: a node's left edge");
-	fLabels[TOP]	= B_TRANSLATE_COMMENT("Y", "status bar: a node's top edge");
-	fLabels[WIDTH]	= B_TRANSLATE_COMMENT("W", "status bar: a node's width");
-	fLabels[HEIGHT]	= B_TRANSLATE_COMMENT("H", "status bar: a node's height");
+	// the text before each field: "Position [x], [y]  Size [w] × [h]"
+	fLabels[LEFT]	= B_TRANSLATE_COMMENT("Position", "status bar: before a node's x, y");
+	fLabels[TOP]	= ",";
+	fLabels[WIDTH]	= B_TRANSLATE_COMMENT("Size", "status bar: before a node's width × height");
+	fLabels[HEIGHT]	= "×";
+	const char	*names[FIELD_COUNT]	= { "left", "top", "width", "height" };
 	const char	*tips[FIELD_COUNT]	= {
 		B_TRANSLATE("Left edge of the selected nodes"),
 		B_TRANSLATE("Top edge of the selected nodes"),
@@ -37,7 +40,7 @@ GeometryFields::GeometryFields(const char *name)
 	for (int32 i = 0; i < FIELD_COUNT; i++) {
 		BMessage	*message	= new BMessage(G_E_SET_GEOMETRY);
 		message->AddInt32("field", i);
-		fFields[i]	= new StatusField(fLabels[i], message, kDigits);
+		fFields[i]	= new StatusField(names[i], message, kDigits);
 		fFields[i]->SetToolTip(tips[i]);
 		AddChild(fFields[i]);
 	}
@@ -87,12 +90,13 @@ void GeometryFields::ShowFrames(const std::vector<BRect> &frames)
 
 void GeometryFields::GetPreferredSize(float *width, float *height)
 {
-	float	fieldWidth, fieldHeight;
-	fFields[0]->GetPreferredSize(&fieldWidth, &fieldHeight);
-	float	total	= 0;
-	for (int32 i = 0; i < FIELD_COUNT; i++)
-		total	+= ceilf(StringWidth(fLabels[i])) + kLabelGap + fieldWidth;
-	total	+= kFieldGap * (FIELD_COUNT - 1);
+	float	total		= 0;
+	float	fieldHeight	= 0;
+	for (int32 i = 0; i < FIELD_COUNT; i++) {
+		float	fieldWidth;
+		fFields[i]->GetPreferredSize(&fieldWidth, &fieldHeight);
+		total	+= _GapBefore(i) + ceilf(StringWidth(fLabels[i])) + kLabelGap + fieldWidth;
+	}
 	if (width != NULL)
 		*width	= total;
 	if (height != NULL)
@@ -106,18 +110,35 @@ void GeometryFields::FrameResized(float width, float height)
 }
 
 
+float GeometryFields::_GapBefore(int32 field) const
+{
+	switch (field) {
+		case TOP:		return 0;	// the comma right after the number
+		case WIDTH:		return kGroupGap;
+		case HEIGHT:	return 4;
+	}
+	return 0;
+}
+
+
 void GeometryFields::_Layout(void)
 {
-	float	fieldWidth, fieldHeight;
-	fFields[0]->GetPreferredSize(&fieldWidth, &fieldHeight);
 	float	x	= 0;
 	for (int32 i = 0; i < FIELD_COUNT; i++) {
-		x	+= ceilf(StringWidth(fLabels[i])) + kLabelGap;
+		float	fieldWidth;
+		fFields[i]->GetPreferredSize(&fieldWidth, NULL);
+		x	+= _GapBefore(i) + ceilf(StringWidth(fLabels[i])) + kLabelGap;
 		fFields[i]->MoveTo(x, 0);
 		fFields[i]->ResizeTo(fieldWidth, Bounds().Height());
-		x	+= fieldWidth + kFieldGap;
+		x	+= fieldWidth;
 	}
 	Invalidate();
+	// a field grew or shrank: the slots after this one move along
+	float	width;
+	GetPreferredSize(&width, NULL);
+	StatusBar	*bar	= dynamic_cast<StatusBar*>(Parent());
+	if ((bar != NULL) && (width != Bounds().Width()))
+		bar->LayoutSlots();
 }
 
 
@@ -125,12 +146,10 @@ void GeometryFields::Draw(BRect updateRect)
 {
 	font_height	fh;
 	GetFontHeight(&fh);
-	float	baseline	= floorf((Bounds().Height() + fh.ascent - fh.descent) / 2);
-	// dimmed: halfway between text and background
-	rgb_color	text		= ui_color(B_PANEL_TEXT_COLOR);
-	rgb_color	background	= ViewColor();
-	SetHighColor((text.red + background.red) / 2, (text.green + background.green) / 2,
-		(text.blue + background.blue) / 2);
+	// on the fields' baseline (StatusField::FrameResized())
+	float	textHeight	= ceilf(fh.ascent + fh.descent);
+	float	baseline	= floorf((Bounds().Height() - textHeight) / 2) + fh.ascent;
+	SetHighColor(ui_color(B_PANEL_TEXT_COLOR));
 	for (int32 i = 0; i < FIELD_COUNT; i++) {
 		float	x	= fFields[i]->Frame().left - kLabelGap
 			- ceilf(StringWidth(fLabels[i]));

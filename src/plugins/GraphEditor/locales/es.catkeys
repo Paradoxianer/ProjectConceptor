@@ -1,16 +1,16 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	2153277546
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	3074511775
 Line	GraphEditor		Línea
 Delete	AttributeRenderer		Borrar
 Triangle	GraphEditor		Triángulo
 Date	DatePopup		Fecha
 Connection	GraphEditor		Conexión
+Position	GraphEditor	status bar: before a node's x, y	Posición
 Today	DatePopup		Hoy
 Fit	GraphEditor		Ajustar
 Fill pattern for selected nodes	GraphEditor		Patrón de relleno de los nodos seleccionados
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conexión} other{# conexiones}}
 Zoom in	GraphEditor		Acercar
 None	GraphEditor		Ninguna
-H	GraphEditor	status bar: a node's height	Al
 Fit the whole graph into the window	GraphEditor		Ajustar todo el grafo a la ventana
 Yes/No	GraphEditor		Sí/No
 Arrows	GraphEditor		Flechas
@@ -27,14 +27,13 @@ Border	GraphEditor		Borde
 Straight	GraphEditor		Recta
 Shape of the selected nodes	GraphEditor		Forma de los nodos seleccionados
 Attribute	GraphEditor		Atributo
-X	GraphEditor	status bar: a node's left edge	X
+Size	GraphEditor	status bar: before a node's width × height	Tamaño
 Highlight	GraphEditor		Acento
 Untitled	GraphEditor		Sin título
 Border pen size for selected nodes	GraphEditor		Grosor del borde de los nodos seleccionados
 Graph	GraphEditor		Grafo
 Choice list	GraphEditor		Lista de opciones
 Choose a file	GraphEditor		Elegir un archivo
-W	GraphEditor	status bar: a node's width	An
 Top edge of the selected nodes	GraphEditor		Borde superior de los nodos seleccionados
 Change…	AttributeRenderer		Cambiar…
 Number	GraphEditor		Número
@@ -78,6 +77,5 @@ Choose…	ValueRenderer		Elegir…
 At target	GraphEditor		En el destino
 Shape	GraphEditor		Forma
 Edit choices…	ValueRenderer		Editar opciones…
-Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Qué extremos de las conexiones seleccionadas llevan flecha
 Shape of the selected connections	GraphEditor		Forma de las conexiones seleccionadas

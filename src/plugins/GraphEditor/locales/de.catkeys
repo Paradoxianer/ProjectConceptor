@@ -1,16 +1,16 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	2153277546
+1	German	application/x-vnd.ProjectConceptor-plugin	3074511775
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Löschen
 Triangle	GraphEditor		Dreieck
 Date	DatePopup		Datum
 Connection	GraphEditor		Verbindung
+Position	GraphEditor	status bar: before a node's x, y	Position
 Today	DatePopup		Heute
 Fit	GraphEditor		Einpassen
 Fill pattern for selected nodes	GraphEditor		Füllmuster für ausgewählte Knoten
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# Verbindung} other{# Verbindungen}}
 Zoom in	GraphEditor		Vergrößern
 None	GraphEditor		Keine
-H	GraphEditor	status bar: a node's height	H
 Fit the whole graph into the window	GraphEditor		Den ganzen Graphen ins Fenster einpassen
 Yes/No	GraphEditor		Ja/Nein
 Arrows	GraphEditor		Pfeile
@@ -27,14 +27,13 @@ Border	GraphEditor		Rand
 Straight	GraphEditor		Gerade
 Shape of the selected nodes	GraphEditor		Form der ausgewählten Knoten
 Attribute	GraphEditor		Attribut
-X	GraphEditor	status bar: a node's left edge	X
+Size	GraphEditor	status bar: before a node's width × height	Größe
 Highlight	GraphEditor		Akzent
 Untitled	GraphEditor		Unbenannt
 Border pen size for selected nodes	GraphEditor		Rahmenstärke für ausgewählte Knoten
 Graph	GraphEditor		Graph
 Choice list	GraphEditor		Auswahlliste
 Choose a file	GraphEditor		Datei wählen
-W	GraphEditor	status bar: a node's width	B
 Top edge of the selected nodes	GraphEditor		Oberer Rand der ausgewählten Knoten
 Change…	AttributeRenderer		Ändern…
 Number	GraphEditor		Zahl
@@ -78,6 +77,5 @@ Choose…	ValueRenderer		Wählen…
 At target	GraphEditor		Am Ende
 Shape	GraphEditor		Form
 Edit choices…	ValueRenderer		Auswahl bearbeiten…
-Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		An welchen Enden die ausgewählten Verbindungen einen Pfeil tragen
 Shape of the selected connections	GraphEditor		Form der ausgewählten Verbindungen

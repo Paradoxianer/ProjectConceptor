@@ -1,16 +1,16 @@
-1	French	application/x-vnd.ProjectConceptor-plugin	2153277546
+1	French	application/x-vnd.ProjectConceptor-plugin	3074511775
 Line	GraphEditor		Ligne
 Delete	AttributeRenderer		Effacer
 Triangle	GraphEditor		Triangle
 Date	DatePopup		Date
 Connection	GraphEditor		Connexion
+Position	GraphEditor	status bar: before a node's x, y	Position
 Today	DatePopup		Aujourd'hui
 Fit	GraphEditor		Ajuster
 Fill pattern for selected nodes	GraphEditor		Motif de remplissage des nœuds sélectionnés
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# connexion} other{# connexions}}
 Zoom in	GraphEditor		Zoom avant
 None	GraphEditor		Aucune
-H	GraphEditor	status bar: a node's height	H
 Fit the whole graph into the window	GraphEditor		Ajuster tout le graphe à la fenêtre
 Yes/No	GraphEditor		Oui/Non
 Arrows	GraphEditor		Flèches
@@ -27,14 +27,13 @@ Border	GraphEditor		Bordure
 Straight	GraphEditor		Droite
 Shape of the selected nodes	GraphEditor		Forme des nœuds sélectionnés
 Attribute	GraphEditor		Attribut
-X	GraphEditor	status bar: a node's left edge	X
+Size	GraphEditor	status bar: before a node's width × height	Taille
 Highlight	GraphEditor		Accent
 Untitled	GraphEditor		Sans titre
 Border pen size for selected nodes	GraphEditor		Épaisseur de bordure des nœuds sélectionnés
 Graph	GraphEditor		Graphe
 Choice list	GraphEditor		Liste de choix
 Choose a file	GraphEditor		Choisir un fichier
-W	GraphEditor	status bar: a node's width	L
 Top edge of the selected nodes	GraphEditor		Bord supérieur des nœuds sélectionnés
 Change…	AttributeRenderer		Modifier…
 Number	GraphEditor		Nombre
@@ -78,6 +77,5 @@ Choose…	ValueRenderer		Choisir…
 At target	GraphEditor		À la cible
 Shape	GraphEditor		Forme
 Edit choices…	ValueRenderer		Modifier les choix…
-Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Extrémités des connexions sélectionnées qui portent une flèche
 Shape of the selected connections	GraphEditor		Forme des connexions sélectionnées

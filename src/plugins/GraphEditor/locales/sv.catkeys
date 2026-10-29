@@ -1,16 +1,16 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	2153277546
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	3074511775
 Line	GraphEditor		Linje
 Delete	AttributeRenderer		Radera
 Triangle	GraphEditor		Triangel
 Date	DatePopup		Datum
 Connection	GraphEditor		Förbindelse
+Position	GraphEditor	status bar: before a node's x, y	Position
 Today	DatePopup		Idag
 Fit	GraphEditor		Anpassa
 Fill pattern for selected nodes	GraphEditor		Fyllnadsmönster för markerade noder
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# koppling} other{# kopplingar}}
 Zoom in	GraphEditor		Zooma in
 None	GraphEditor		Ingen
-H	GraphEditor	status bar: a node's height	H
 Fit the whole graph into the window	GraphEditor		Anpassa hela grafen till fönstret
 Yes/No	GraphEditor		Ja/Nej
 Arrows	GraphEditor		Pilar
@@ -27,14 +27,13 @@ Border	GraphEditor		Kant
 Straight	GraphEditor		Rak
 Shape of the selected nodes	GraphEditor		Form på markerade noder
 Attribute	GraphEditor		Attribut
-X	GraphEditor	status bar: a node's left edge	X
+Size	GraphEditor	status bar: before a node's width × height	Storlek
 Highlight	GraphEditor		Accent
 Untitled	GraphEditor		Namnlös
 Border pen size for selected nodes	GraphEditor		Kantbredd för markerade noder
 Graph	GraphEditor		Graf
 Choice list	GraphEditor		Vallista
 Choose a file	GraphEditor		Välj en fil
-W	GraphEditor	status bar: a node's width	B
 Top edge of the selected nodes	GraphEditor		Överkant för markerade noder
 Change…	AttributeRenderer		Ändra…
 Number	GraphEditor		Tal
@@ -78,6 +77,5 @@ Choose…	ValueRenderer		Välj…
 At target	GraphEditor		Vid målet
 Shape	GraphEditor		Form
 Edit choices…	ValueRenderer		Redigera val…
-Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Vilka ändar av de markerade förbindelserna som har en pil
 Shape of the selected connections	GraphEditor		Form på de markerade förbindelserna

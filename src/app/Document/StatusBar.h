@@ -24,6 +24,9 @@ public:
 			 * removes the slot and its view. The caller keeps the view. */
 			void			SetView(const char *slot, BView *view);
 			void			AddRightView(BView *view);
+			/** places the slots again, e.g. after a slot's view changed
+			 * its preferred width */
+			void			LayoutSlots(void);
 			void			RemoveRightView(BView *view);
 
 	virtual	void			Draw(BRect updateRect);
@@ -40,7 +43,6 @@ private:
 		float		x;
 	};
 			void			_LayoutRightViews(void);
-			void			_LayoutSlots(void);
 			bool			_Shown(const Slot &slot) const;
 
 			std::vector<Slot>	fSlots;

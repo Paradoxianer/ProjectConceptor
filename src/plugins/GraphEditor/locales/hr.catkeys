@@ -1,16 +1,16 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	2153277546
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	3074511775
 Line	GraphEditor		Linija
 Delete	AttributeRenderer		Izbriši
 Triangle	GraphEditor		Trokut
 Date	DatePopup		Datum
 Connection	GraphEditor		Veza
+Position	GraphEditor	status bar: before a node's x, y	Položaj
 Today	DatePopup		Danas
 Fit	GraphEditor		Prilagodi
 Fill pattern for selected nodes	GraphEditor		Uzorak ispune za odabrane čvorove
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# veza} few{# veze} other{# veza}}
 Zoom in	GraphEditor		Povećaj
 None	GraphEditor		Nijedna
-H	GraphEditor	status bar: a node's height	V
 Fit the whole graph into the window	GraphEditor		Prilagodi cijeli graf prozoru
 Yes/No	GraphEditor		Da/Ne
 Arrows	GraphEditor		Strelice
@@ -27,14 +27,13 @@ Border	GraphEditor		Obrub
 Straight	GraphEditor		Ravna
 Shape of the selected nodes	GraphEditor		Oblik odabranih čvorova
 Attribute	GraphEditor		Atribut
-X	GraphEditor	status bar: a node's left edge	X
+Size	GraphEditor	status bar: before a node's width × height	Veličina
 Highlight	GraphEditor		Naglasak
 Untitled	GraphEditor		Bez naslova
 Border pen size for selected nodes	GraphEditor		Debljina obruba za odabrane čvorove
 Graph	GraphEditor		Graf
 Choice list	GraphEditor		Popis izbora
 Choose a file	GraphEditor		Odaberi datoteku
-W	GraphEditor	status bar: a node's width	Š
 Top edge of the selected nodes	GraphEditor		Gornji rub odabranih čvorova
 Change…	AttributeRenderer		Promijeni…
 Number	GraphEditor		Broj
@@ -78,6 +77,5 @@ Choose…	ValueRenderer		Odaberi…
 At target	GraphEditor		Na odredištu
 Shape	GraphEditor		Oblik
 Edit choices…	ValueRenderer		Uredi izbore…
-Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Koji krajevi odabranih veza imaju strelicu
 Shape of the selected connections	GraphEditor		Oblik odabranih veza

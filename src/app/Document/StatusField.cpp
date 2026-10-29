@@ -6,7 +6,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-static const float	kInset	= 3;
+// little room on the right: a "," or "×" follows right after the number
+static const float	kInsetLeft	= 4;
+static const float	kInsetRight	= 1;
 
 
 StatusField::StatusField(const char *name, BMessage *message, int32 digits)
@@ -140,8 +142,12 @@ void StatusField::GetPreferredSize(float *width, float *height)
 {
 	font_height	fh;
 	be_plain_font->GetHeight(&fh);
+	// at least two digits wide, so an empty field can still be clicked
+	float	textWidth	= be_plain_font->StringWidth(Text());
+	float	minimum		= be_plain_font->StringWidth("00");
 	if (width != NULL)
-		*width	= ceilf(be_plain_font->StringWidth("0") * fDigits) + 2 * kInset + 4;
+		*width	= ceilf(textWidth > minimum ? textWidth : minimum)
+			+ kInsetLeft + kInsetRight;
 	if (height != NULL)
 		*height	= ceilf(fh.ascent + fh.descent) + 6;
 }
@@ -154,5 +160,31 @@ void StatusField::FrameResized(float width, float height)
 	be_plain_font->GetHeight(&fh);
 	float	textHeight	= ceilf(fh.ascent + fh.descent);
 	float	top			= floorf((height - textHeight) / 2);
-	SetTextRect(BRect(kInset + 2, top, width - kInset - 2, top + textHeight));
+	// wide enough for any number: the field grows after the text, not before
+	SetTextRect(BRect(kInsetLeft, top,
+		kInsetLeft + be_plain_font->StringWidth("0") * (fDigits + 2), top + textHeight));
+}
+
+
+void StatusField::InsertText(const char *text, int32 length, int32 offset,
+	const text_run_array *runs)
+{
+	BTextView::InsertText(text, length, offset, runs);
+	_TextChanged();
+}
+
+
+void StatusField::DeleteText(int32 fromOffset, int32 toOffset)
+{
+	BTextView::DeleteText(fromOffset, toOffset);
+	_TextChanged();
+}
+
+
+void StatusField::_TextChanged(void)
+{
+	float	width;
+	GetPreferredSize(&width, NULL);
+	if ((Parent() != NULL) && (width != Bounds().Width()))
+		Parent()->FrameResized(Parent()->Bounds().Width(), Parent()->Bounds().Height());
 }

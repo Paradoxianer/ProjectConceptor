@@ -31,6 +31,7 @@ public:
 
 private:
 			void			_Layout(void);
+			float			_GapBefore(int32 field) const;
 
 			StatusField		*fFields[FIELD_COUNT];
 			const char		*fLabels[FIELD_COUNT];

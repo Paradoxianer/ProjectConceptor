@@ -1,16 +1,16 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	2153277546
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	3074511775
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Elimine
 Triangle	GraphEditor		Triangul
 Date	DatePopup		Date
 Connection	GraphEditor		Conession
+Position	GraphEditor	status bar: before a node's x, y	Posizion
 Today	DatePopup		Vuê
 Fit	GraphEditor		Adatâ
 Fill pattern for selected nodes	GraphEditor		Motîf di jemplament pai grops selezionâts
 {0, plural, one{# connection} other{# connections}}	GraphEditor		{0, plural, one{# conession} other{# conessions}}
 Zoom in	GraphEditor		Ingrandìs
 None	GraphEditor		Nissune
-H	GraphEditor	status bar: a node's height	A
 Fit the whole graph into the window	GraphEditor		Adatâ dut il grafic al barcon
 Yes/No	GraphEditor		Sì/No
 Arrows	GraphEditor		Frecis
@@ -27,14 +27,13 @@ Border	GraphEditor		Ôr
 Straight	GraphEditor		Drete
 Shape of the selected nodes	GraphEditor		Forme dai grops selezionâts
 Attribute	GraphEditor		Atribût
-X	GraphEditor	status bar: a node's left edge	X
+Size	GraphEditor	status bar: before a node's width × height	Dimension
 Highlight	GraphEditor		Acent
 Untitled	GraphEditor		Cence titul
 Border pen size for selected nodes	GraphEditor		Spessôr dal ôr pai grops selezionâts
 Graph	GraphEditor		Grafic
 Choice list	GraphEditor		Liste di sieltis
 Choose a file	GraphEditor		Sielç un file
-W	GraphEditor	status bar: a node's width	L
 Top edge of the selected nodes	GraphEditor		Ôr parsore dai grops selezionâts
 Change…	AttributeRenderer		Cambie…
 Number	GraphEditor		Numar
@@ -78,6 +77,5 @@ Choose…	ValueRenderer		Sielç…
 At target	GraphEditor		Te destinazion
 Shape	GraphEditor		Forme
 Edit choices…	ValueRenderer		Modifiche lis sieltis…
-Y	GraphEditor	status bar: a node's top edge	Y
 Which ends of the selected connections carry an arrow	GraphEditor		Cuai cjâfs des conessions selezionadis a àn une frece
 Shape of the selected connections	GraphEditor		Forme des conessions selezionadis
