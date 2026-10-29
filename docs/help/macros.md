@@ -212,7 +212,7 @@ Fields marked *optional* can be left out.
 | If | `searchString`, or `attribute`, `operator`, `value`; *optional* `scope` | Runs its steps only if the search finds something. |
 | Insert | `node` (with the node's data); *optional* `resultVariable` | Inserts nodes and connections. |
 | Layout | *optional* `direction` (`TB`, `LR`, ...), `engine` (`dot`, `neato`, `fdp`, `sfdp`, `circo`, `twopi`) | Automatic layout of the whole graph. |
-| Move | `dx`, `dy` | Moves the selection. |
+| Move | `dx`, `dy`, or `left` and/or `top` | Moves the selection by `dx`, `dy`, or every selected node to `left`, `top`. |
 | Remember | `variable` | Stores the selection; restore it with `Select` and `node=$variable`. |
 | RemoveAttribute | `node` or `Node::selected=true`; `valueContainer` (`name`, `subgroup`, `index`) | Removes an attribute from the node(s). |
 | Repeat | `count`; *optional* `counterVariable` | Runs its steps `count` times. |

@@ -7,8 +7,10 @@ Move::Move():PCommand()
 
 static const property_info kMoveProperties[] = {
 	{ "Move", { B_EXECUTE_PROPERTY, 0 }, { B_DIRECT_SPECIFIER, 0 },
-		"Moves the current selection by (dx, dy).", 0, {0},
-		{ { { {"dx", B_FLOAT_TYPE}, {"dy", B_FLOAT_TYPE} } } } },
+		"Moves the current selection by (dx, dy), or each selected node "
+		"to left and/or top.", 0, {0},
+		{ { { {"dx", B_FLOAT_TYPE}, {"dy", B_FLOAT_TYPE} } },
+		  { { {P_C_MOVE_LEFT, B_FLOAT_TYPE}, {P_C_MOVE_TOP, B_FLOAT_TYPE} } } } },
 };
 
 const property_info* Move::PropertyInfo(int32 *count)
@@ -62,24 +64,36 @@ void Move::Undo(PDocument *doc,BMessage *undo) {
 }
 
 BMessage* Move::Do(PDocument *doc, BMessage *settings) {
-	
-	BMessage	*undoMessage	= new BMessage();
-	BList		*selected		= doc->GetSelected();
+	BMessage		undoMessage;
+	BList			*selected		= doc->GetSelected();
 	set<BMessage*>	*changed		= doc->GetChangedNodes();
-	float		dx,dy;
-	BMessage	*node			= new BMessage();
-	int32			i					= 0;
-	if ( (settings->FindFloat("dx",&dx)==B_OK) && (settings->FindFloat("dy",&dy)==B_OK) )	{
-		for (i=0;i<selected->CountItems();i++) {
-			node=(BMessage *)selected->ItemAt(i);
+	float			dx				= 0;
+	float			dy				= 0;
+	float			left			= 0;
+	float			top				= 0;
+	bool			toLeft			= (settings->FindFloat(P_C_MOVE_LEFT,&left) == B_OK);
+	bool			toTop			= (settings->FindFloat(P_C_MOVE_TOP,&top) == B_OK);
+	bool			byDelta			= (settings->FindFloat("dx",&dx) == B_OK)
+		&& (settings->FindFloat("dy",&dy) == B_OK);
+	if (toLeft || toTop || byDelta) {
+		for (int32 i = 0; i < selected->CountItems(); i++) {
+			BMessage	*node	= (BMessage *)selected->ItemAt(i);
 			if (HasSelectedAncestor(node))
 				continue;
-			MoveNode(doc, changed,node, dx, dy, undoMessage);
+			if (toLeft || toTop) {
+				// a place of its own per node: the distance differs
+				BRect	frame;
+				if (node->FindRect(P_C_NODE_FRAME,&frame) != B_OK)
+					continue;
+				dx	= toLeft ? left - frame.left : 0;
+				dy	= toTop ? top - frame.top : 0;
+			}
+			MoveNode(doc, changed, node, dx, dy, &undoMessage);
 		}
 	}
 	doc->SetModified();
 	settings->RemoveName("Move::Undo");
-	settings->AddMessage("Move::Undo", undoMessage);
+	settings->AddMessage("Move::Undo", &undoMessage);
 	settings = PCommand::Do(doc,settings);
 	return settings;
 }

@@ -361,6 +361,12 @@ extern const char*		P_C_FIND_VALUE;			//			= "value"
 /** Resize: how far the left/top edges move, besides dx/dy for right/bottom */
 extern const char*		P_C_RESIZE_LEFT;	//				= "dleft"
 extern const char*		P_C_RESIZE_TOP;		//				= "dtop"
+/** Resize: the new width/height, instead of moving edges */
+extern const char*		P_C_RESIZE_WIDTH;	//				= "width"
+extern const char*		P_C_RESIZE_HEIGHT;	//				= "height"
+/** Move: the new left/top, instead of moving by dx/dy */
+extern const char*		P_C_MOVE_LEFT;		//				= "left"
+extern const char*		P_C_MOVE_TOP;		//				= "top"
 
 extern const char*		P_C_NODE_CONNECTION_FROM;	//		= "Node::from"
 extern const char*		P_C_NODE_CONNECTION_TO;		//		= "Node::to"

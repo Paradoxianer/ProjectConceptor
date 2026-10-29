@@ -49,6 +49,10 @@ const char*		P_C_FIND_OPERATOR				= "operator";
 const char*		P_C_FIND_VALUE					= "value";
 const char*		P_C_RESIZE_LEFT					= "dleft";
 const char*		P_C_RESIZE_TOP					= "dtop";
+const char*		P_C_RESIZE_WIDTH				= "width";
+const char*		P_C_RESIZE_HEIGHT				= "height";
+const char*		P_C_MOVE_LEFT					= "left";
+const char*		P_C_MOVE_TOP					= "top";
 
 const char*		P_C_NODE_CONNECTION_FROM		= "Node::from";
 const char*		P_C_NODE_CONNECTION_TO			= "Node::to";

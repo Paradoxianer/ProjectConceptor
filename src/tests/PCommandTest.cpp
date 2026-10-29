@@ -1278,3 +1278,49 @@ void PCommandTest::ResizeMovesLeftAndTopEdgesAndUndoes(void)
 	doc->GetSelected()->MakeEmpty();
 	doc->GetAllNodes()->MakeEmpty();
 }
+
+
+void PCommandTest::MoveAndResizeToAbsoluteValues(void)
+{
+	// the status bar's fields: one value for nodes of different places and
+	// sizes, so every node gets its own distance
+	PDocument	*doc	= NewHeadlessTestDocument();
+	BMessage	a(P_C_CLASS_TYPE);
+	BMessage	b(P_C_CLASS_TYPE);
+	a.AddRect(P_C_NODE_FRAME,BRect(100,100,200,180));
+	b.AddRect(P_C_NODE_FRAME,BRect(300,50,350,90));
+	doc->GetAllNodes()->AddItem(&a);
+	doc->GetAllNodes()->AddItem(&b);
+	doc->GetSelected()->AddItem(&a);
+	doc->GetSelected()->AddItem(&b);
+
+	BMessage	moveSettings;
+	moveSettings.AddFloat(P_C_MOVE_LEFT,40);
+	Move		move;
+	BMessage	*moved	= move.Do(doc,&moveSettings);
+	CPPUNIT_ASSERT(moved != NULL);
+	BRect	frame;
+	CPPUNIT_ASSERT(a.FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+	CPPUNIT_ASSERT(frame == BRect(40,100,140,180));
+	CPPUNIT_ASSERT(b.FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+	CPPUNIT_ASSERT(frame == BRect(40,50,90,90));
+
+	BMessage	resizeSettings;
+	resizeSettings.AddFloat(P_C_RESIZE_HEIGHT,60);
+	Resize		resize;
+	BMessage	*resized	= resize.Do(doc,&resizeSettings);
+	CPPUNIT_ASSERT(resized != NULL);
+	CPPUNIT_ASSERT(a.FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+	CPPUNIT_ASSERT(frame == BRect(40,100,140,160));
+	CPPUNIT_ASSERT(b.FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+	CPPUNIT_ASSERT(frame == BRect(40,50,90,110));
+
+	resize.Undo(doc,resized);
+	move.Undo(doc,moved);
+	CPPUNIT_ASSERT(a.FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+	CPPUNIT_ASSERT(frame == BRect(100,100,200,180));
+	CPPUNIT_ASSERT(b.FindRect(P_C_NODE_FRAME,&frame) == B_OK);
+	CPPUNIT_ASSERT(frame == BRect(300,50,350,90));
+	doc->GetSelected()->MakeEmpty();
+	doc->GetAllNodes()->MakeEmpty();
+}

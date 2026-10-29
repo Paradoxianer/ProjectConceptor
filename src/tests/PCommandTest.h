@@ -40,6 +40,7 @@ public:
 	void MenuSearchFindForwardsShadowFlagToRecording(void);
 
 	void ResizeMovesLeftAndTopEdgesAndUndoes(void);
+	void MoveAndResizeToAbsoluteValues(void);
 
 	CPPUNIT_TEST_SUITE(PCommandTest);
 	CPPUNIT_TEST(ChangeValueDoUndo);
@@ -70,6 +71,7 @@ public:
 	CPPUNIT_TEST(SleepUndoDoesNothing);
 	CPPUNIT_TEST(MenuSearchFindForwardsShadowFlagToRecording);
 	CPPUNIT_TEST(ResizeMovesLeftAndTopEdgesAndUndoes);
+	CPPUNIT_TEST(MoveAndResizeToAbsoluteValues);
 	CPPUNIT_TEST_SUITE_END();
 };
 
