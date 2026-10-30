@@ -30,6 +30,7 @@
 #define P_C_SVG_TYPE 'pcSV'
 #define P_C_MERMAID_TYPE 'pcMM'
 #define P_C_MARKDOWN_TYPE 'pcMD'
+#define P_C_GRAPHML_TYPE 'pcGM'
 
 
 const uint32	P_C_PLUGIN_MESSAGE				= 'pcPM';
@@ -408,6 +409,8 @@ extern const char*		P_C_PATTERN_FILL_COLOR;	//			= "FillColor"
 extern const char*		P_C_PATTERN_HIGHLIGHT_COLOR;	//	= "HighlightColor"
 extern const char*		P_C_PATTERN_BORDER_COLOR;	//		= "BorderColor"
 extern const char*		P_C_PATTERN_HIGH_COLOR;	//			= "HighColor"
+/** float, the border's width */
+extern const char*		P_C_PATTERN_PEN_SIZE;	//			= "PenSize"
 
 extern const char*		P_C_NODE_CONNECTION_FROM;	//		= "Node::from"
 extern const char*		P_C_NODE_CONNECTION_TO;		//		= "Node::to"

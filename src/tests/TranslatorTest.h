@@ -17,6 +17,8 @@ public:
 	void HtmlExportIsOneSelfContainedPage(void);
 	void SvgExportStandsAlone(void);
 	void MermaidExportWritesAFlowchart(void);
+	void GraphMLRoundTrips(void);
+	void GraphMLImportsOtherTools(void);
 	void ExportWritesACopyOfItsOwnType(void);
 	void ImportedFileIsNotTheDocumentsFile(void);
 
@@ -29,6 +31,8 @@ public:
 	CPPUNIT_TEST(HtmlExportIsOneSelfContainedPage);
 	CPPUNIT_TEST(SvgExportStandsAlone);
 	CPPUNIT_TEST(MermaidExportWritesAFlowchart);
+	CPPUNIT_TEST(GraphMLRoundTrips);
+	CPPUNIT_TEST(GraphMLImportsOtherTools);
 	CPPUNIT_TEST(ExportWritesACopyOfItsOwnType);
 	CPPUNIT_TEST(ImportedFileIsNotTheDocumentsFile);
 	CPPUNIT_TEST_SUITE_END();

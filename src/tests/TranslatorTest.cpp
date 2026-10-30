@@ -264,6 +264,133 @@ void TranslatorTest::MermaidExportWritesAFlowchart(void)
 }
 
 
+// the document a translator makes of text
+static BMessage Imported(const char *text)
+{
+	BMemoryIO	input(text, strlen(text));
+	BMallocIO	output;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, BTranslatorRoster::Default()->Translate(
+		&input, NULL, NULL, &output, P_C_DOCUMENT_RAW_TYPE));
+	output.Seek(0, SEEK_SET);
+	BMessage	document;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, document.Unflatten(&output));
+	return document;
+}
+
+
+// the entry of a list whose Node::Data name is name
+static BMessage Named(const BMessage &document, const char *list, const char *name)
+{
+	BMessage	all;
+	document.FindMessage(list, &all);
+	BMessage	entry;
+	for (int32 i = 0; all.FindMessage(P_C_DOC_ENTRY, i, &entry) == B_OK; i++) {
+		BMessage	data;
+		entry.FindMessage(P_C_NODE_DATA, &data);
+		if (strcmp(data.GetString(P_C_NODE_NAME, ""), name) == 0)
+			return entry;
+	}
+	CPPUNIT_FAIL(BString("no node named ").Append(name).String());
+	return BMessage();
+}
+
+
+void TranslatorTest::GraphMLRoundTrips(void)
+{
+	BString		graphml	= Exported(GroupedDocument(), P_C_GRAPHML_TYPE);
+	CPPUNIT_ASSERT(graphml.FindFirst("<graphml ") >= 0);
+	// yEd sees a group with both nodes inside
+	CPPUNIT_ASSERT(graphml.FindFirst("<node id=\"n3\" yfiles.foldertype=\"group\">") >= 0);
+	CPPUNIT_ASSERT(graphml.FindFirst("<graph id=\"n3:\"") < graphml.FindFirst("<node id=\"n1\">"));
+
+	BMessage	back	= Imported(graphml.String());
+	BMessage	first	= Named(back, P_C_DOC_ALLNODES, "first");
+	BMessage	group	= Named(back, P_C_DOC_ALLNODES, "Team \"A\"");
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_GROUP_TYPE, group.what);
+	CPPUNIT_ASSERT_EQUAL(CountField(group, P_C_NODE_CHILD_IDS), (int32)2);
+	CPPUNIT_ASSERT_EQUAL(group.GetInt32(P_C_NODE_ID, 0), first.GetInt32(P_C_NODE_PARENT, -1));
+	CPPUNIT_ASSERT(first.GetRect(P_C_NODE_FRAME, BRect()) == BRect(10, 70, 110, 110));
+	BMessage	data;
+	first.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	owner;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("Owner", &owner));
+	CPPUNIT_ASSERT_EQUAL((uint32)B_STRING_TYPE, owner.what);
+	CPPUNIT_ASSERT_EQUAL(BString("Ann & Bob"), BString(owner.GetString(P_C_ATTRIBUTE_VALUE, "")));
+	BMessage	connections;
+	back.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	CPPUNIT_ASSERT_EQUAL((int32)1, CountField(connections, P_C_DOC_ENTRY));
+}
+
+
+void TranslatorTest::GraphMLImportsOtherTools(void)
+{
+	// as NetworkX writes it: no places, an undirected graph, typed data
+	BMessage	plain	= Imported(
+		"<?xml version='1.0' encoding='utf-8'?>\n"
+		"<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\">\n"
+		"<key id=\"d0\" for=\"node\" attr.name=\"label\" attr.type=\"string\"/>\n"
+		"<key id=\"d1\" for=\"node\" attr.name=\"weight\" attr.type=\"double\"/>\n"
+		"<key id=\"d2\" for=\"node\" attr.name=\"done\" attr.type=\"boolean\"/>\n"
+		"<graph edgedefault=\"undirected\">\n"
+		"<node id=\"a\"><data key=\"d0\">Alpha</data><data key=\"d1\">2.5</data>"
+			"<data key=\"d2\">true</data></node>\n"
+		"<node id=\"b\"/>\n"
+		"<edge source=\"a\" target=\"b\"/>\n"
+		"</graph></graphml>\n");
+	BMessage	alpha	= Named(plain, P_C_DOC_ALLNODES, "Alpha");
+	// a node without a label is called by its id
+	BMessage	b		= Named(plain, P_C_DOC_ALLNODES, "b");
+	BRect		alphaFrame	= alpha.GetRect(P_C_NODE_FRAME, BRect());
+	CPPUNIT_ASSERT(alphaFrame.IsValid());
+	CPPUNIT_ASSERT(!alphaFrame.Intersects(b.GetRect(P_C_NODE_FRAME, BRect())));
+	BMessage	data;
+	alpha.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	weight;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("weight", &weight));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NUMBER, weight.what);
+	CPPUNIT_ASSERT_EQUAL(2.5f, weight.GetFloat(P_C_ATTRIBUTE_VALUE, 0));
+	BMessage	done;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("done", &done));
+	CPPUNIT_ASSERT(done.GetBool(P_C_ATTRIBUTE_VALUE, false));
+	BMessage	connections;
+	plain.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	BMessage	edge;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, connections.FindMessage(P_C_DOC_ENTRY, &edge));
+	CPPUNIT_ASSERT_EQUAL((int8)0, edge.GetInt8(P_C_NODE_CONNECTION_ARROWS, -1));
+
+	// as yEd writes it: places, labels and a group in its graphics only
+	BMessage	yEd	= Imported(
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\" "
+			"xmlns:y=\"http://www.yworks.com/xml/graphml\">\n"
+		"<key for=\"node\" id=\"d6\" yfiles.type=\"nodegraphics\"/>\n"
+		"<graph edgedefault=\"directed\" id=\"G\">\n"
+		"<node id=\"n0\" yfiles.foldertype=\"group\"><data key=\"d6\">"
+			"<y:ProxyAutoBoundsNode><y:Realizers active=\"0\"><y:GroupNode>"
+			"<y:Geometry height=\"200\" width=\"300\" x=\"0\" y=\"0\"/>"
+			"<y:NodeLabel>Box</y:NodeLabel></y:GroupNode></y:Realizers>"
+			"</y:ProxyAutoBoundsNode></data>\n"
+		"<graph edgedefault=\"directed\" id=\"n0:\">\n"
+		"<node id=\"n0::n0\"><data key=\"d6\"><y:ShapeNode>"
+			"<y:Geometry height=\"30\" width=\"80\" x=\"20\" y=\"40\"/>"
+			"<y:Fill color=\"#FFCC00\" transparent=\"false\"/>"
+			"<y:NodeLabel>Inside</y:NodeLabel></y:ShapeNode></data></node>\n"
+		"</graph></node>\n"
+		"</graph></graphml>\n");
+	BMessage	inside	= Named(yEd, P_C_DOC_ALLNODES, "Inside");
+	BMessage	box		= Named(yEd, P_C_DOC_ALLNODES, "Box");
+	CPPUNIT_ASSERT(inside.GetRect(P_C_NODE_FRAME, BRect()) == BRect(20, 40, 100, 70));
+	CPPUNIT_ASSERT_EQUAL(box.GetInt32(P_C_NODE_ID, 0), inside.GetInt32(P_C_NODE_PARENT, -1));
+	BMessage	pattern;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, inside.FindMessage(P_C_NODE_PATTERN, &pattern));
+	int32		packed	= 0;
+	pattern.FindInt32(P_C_PATTERN_FILL_COLOR, &packed);
+	rgb_color	fill;
+	memcpy(&fill, &packed, sizeof(fill));
+	CPPUNIT_ASSERT_EQUAL((int)0xcc, (int)fill.green);
+}
+
+
 void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
 {
 	// opening a document asks every translator for the native format;
@@ -283,6 +410,7 @@ void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
 	CPPUNIT_ASSERT(strcmp(name, "DOTTranslator") != 0);
 	CPPUNIT_ASSERT(strcmp(name, "HTMLTranslator") != 0);
 	CPPUNIT_ASSERT(strcmp(name, "MermaidTranslator") != 0);
+	CPPUNIT_ASSERT(strcmp(name, "GraphMLTranslator") != 0);
 }
 
 

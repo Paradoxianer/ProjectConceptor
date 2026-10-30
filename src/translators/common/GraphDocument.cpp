@@ -159,6 +159,122 @@ status_t GraphDocument::_ReadConnection(const BMessage &message)
 }
 
 
+// the int32 the editor keeps an rgb_color in
+static int32 Packed(rgb_color color)
+{
+	uint8	bytes[4]	= { color.red, color.green, color.blue, color.alpha };
+	int32	packed;
+	memcpy(&packed, bytes, sizeof(packed));
+	return packed;
+}
+
+
+// an attribute block {Name, Value[, Unit]} of its kind
+static BMessage AttributeBlock(const GraphAttribute &attribute)
+{
+	BMessage	block(attribute.kind);
+	block.AddString(P_C_ATTRIBUTE_NAME, attribute.name);
+	switch (attribute.kind) {
+		case B_BOOL_TYPE:
+			block.AddBool(P_C_ATTRIBUTE_VALUE, attribute.value == "true");
+			break;
+		case P_C_ATTRIBUTE_NUMBER: {
+			float	number	= 0;
+			BString	unit;
+			if (ParseNumberWithUnit(attribute.value.String(), &number, &unit) == B_OK) {
+				block.AddFloat(P_C_ATTRIBUTE_VALUE, number);
+				block.AddString(P_C_ATTRIBUTE_UNIT, unit);
+			} else {
+				// not a number after all: kept as text
+				block.what	= B_STRING_TYPE;
+				block.AddString(P_C_ATTRIBUTE_VALUE, attribute.value);
+			}
+			break;
+		}
+		case P_C_ATTRIBUTE_COLOR: {
+			unsigned int	red, green, blue;
+			if (sscanf(attribute.value.String(), "#%2x%2x%2x", &red, &green, &blue) == 3) {
+				rgb_color	color	= make_color(red, green, blue);
+				block.AddData(P_C_ATTRIBUTE_VALUE, B_RGB_COLOR_TYPE, &color, sizeof(color));
+			} else {
+				block.what	= B_STRING_TYPE;
+				block.AddString(P_C_ATTRIBUTE_VALUE, attribute.value);
+			}
+			break;
+		}
+		default:
+			block.AddString(P_C_ATTRIBUTE_VALUE, attribute.value);
+	}
+	return block;
+}
+
+
+status_t GraphDocument::Write(BPositionIO *out) const
+{
+	BMessage	allNodes;
+	BMessage	allConnections;
+	for (size_t i = 0; i < nodes.size(); i++) {
+		const GraphNode	&node	= nodes[i];
+		BMessage	message(node.isGroup ? P_C_GROUP_TYPE : P_C_CLASS_TYPE);
+		message.AddInt32(P_C_NODE_ID, node.id);
+		message.AddRect(P_C_NODE_FRAME, node.frame);
+		if (FindNode(node.parent) != NULL)
+			message.AddInt32(P_C_NODE_PARENT, node.parent);
+		for (size_t c = 0; c < nodes.size(); c++) {
+			if (node.isGroup && (nodes[c].parent == node.id))
+				message.AddInt32(P_C_NODE_CHILD_IDS, nodes[c].id);
+		}
+		BMessage	data;
+		data.AddString(P_C_NODE_NAME, node.name);
+		for (size_t a = 0; a < node.attributes.size(); a++) {
+			BMessage	block	= AttributeBlock(node.attributes[a]);
+			data.AddMessage(node.attributes[a].name.String(), &block);
+		}
+		message.AddMessage(P_C_NODE_DATA, &data);
+		if (node.hasFillColor || node.hasBandColor || node.hasBorderColor
+			|| node.hasTextColor) {
+			// a pattern without FillColor or PenSize would zero them
+			BMessage	pattern;
+			pattern.AddInt32(P_C_PATTERN_FILL_COLOR,
+				Packed(node.hasFillColor ? node.fillColor : kStandardFill));
+			if (node.hasBandColor)
+				pattern.AddInt32(P_C_PATTERN_HIGHLIGHT_COLOR, Packed(node.bandColor));
+			if (node.hasBorderColor)
+				pattern.AddInt32(P_C_PATTERN_BORDER_COLOR, Packed(node.borderColor));
+			if (node.hasTextColor)
+				pattern.AddInt32(P_C_PATTERN_HIGH_COLOR, Packed(node.textColor));
+			pattern.AddFloat(P_C_PATTERN_PEN_SIZE, 1.0);
+			message.AddMessage(P_C_NODE_PATTERN, &pattern);
+		}
+		allNodes.AddMessage(P_C_DOC_ENTRY, &message);
+	}
+	for (size_t i = 0; i < connections.size(); i++) {
+		const GraphConnection	&connection	= connections[i];
+		BMessage	message(P_C_CONNECTION_TYPE);
+		message.AddInt32(P_C_NODE_ID, connection.id);
+		message.AddInt32(P_C_NODE_CONNECTION_FROM, connection.from);
+		message.AddInt32(P_C_NODE_CONNECTION_TO, connection.to);
+		message.AddInt8(P_C_NODE_CONNECTION_ARROWS, connection.arrows);
+		BMessage	data;
+		data.AddString(P_C_NODE_NAME, "");
+		message.AddMessage(P_C_NODE_DATA, &data);
+		if (connection.hasColor) {
+			BMessage	pattern;
+			pattern.AddInt32(P_C_PATTERN_FILL_COLOR, Packed(connection.color));
+			pattern.AddFloat(P_C_PATTERN_PEN_SIZE, 1.0);
+			message.AddMessage(P_C_NODE_PATTERN, &pattern);
+		}
+		allConnections.AddMessage(P_C_DOC_ENTRY, &message);
+	}
+	BMessage	document;
+	// PDocument::Load() refuses documents without a format version
+	document.AddInt32(P_C_DOC_FORMAT_VERSION_FIELD, P_C_DOC_FORMAT_VERSION);
+	document.AddMessage(P_C_DOC_ALLNODES, &allNodes);
+	document.AddMessage(P_C_DOC_ALLCONNECTIONS, &allConnections);
+	return document.Flatten(out);
+}
+
+
 const GraphNode *GraphDocument::FindNode(int32 id) const
 {
 	for (size_t i = 0; i < nodes.size(); i++) {

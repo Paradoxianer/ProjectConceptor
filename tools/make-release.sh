@@ -175,7 +175,7 @@ for plugin in Plugins/GraphEditor Plugins/MacroEditor Plugins/NavigatorEditor \
 	[ "$(xres -l "$CHECK/apps/ProjectConceptor/$plugin" | grep -c CADA || true)" -gt 1 ] \
 		|| fail "$plugin catalogs missing"
 done
-for t in DOTTranslator FreeMindTranslator HTMLTranslator MermaidTranslator ProjectConceptorTranslator; do
+for t in DOTTranslator FreeMindTranslator GraphMLTranslator HTMLTranslator MermaidTranslator ProjectConceptorTranslator; do
 	[ -f "$CHECK/$ADDONS/Translators/$t" ] || fail "$t missing"
 done
 

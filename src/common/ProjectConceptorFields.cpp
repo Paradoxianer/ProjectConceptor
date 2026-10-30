@@ -71,6 +71,7 @@ const char*		P_C_PATTERN_FILL_COLOR			= "FillColor";
 const char*		P_C_PATTERN_HIGHLIGHT_COLOR		= "HighlightColor";
 const char*		P_C_PATTERN_BORDER_COLOR		= "BorderColor";
 const char*		P_C_PATTERN_HIGH_COLOR			= "HighColor";
+const char*		P_C_PATTERN_PEN_SIZE			= "PenSize";
 
 const char*		P_C_NODE_CONNECTION_FROM		= "Node::from";
 const char*		P_C_NODE_CONNECTION_TO			= "Node::to";

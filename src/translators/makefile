@@ -1,6 +1,7 @@
 translators = \
 	DOT \
 	FreeMind \
+	GraphML \
 	HTML \
 	Mermaid \
 	Standard 

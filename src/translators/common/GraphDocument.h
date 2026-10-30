@@ -25,6 +25,10 @@ struct GraphAttribute {
 };
 
 struct GraphNode {
+				GraphNode(void)
+					: id(0), isGroup(false), parent(-1), attributeColumn(0),
+					hasFillColor(false), hasBandColor(false),
+					hasBorderColor(false), hasTextColor(false) {}
 	int32		id;
 	bool		isGroup;
 	/** id of the group the node lies in, -1 for none */
@@ -49,6 +53,8 @@ struct GraphNode {
 };
 
 struct GraphConnection {
+				GraphConnection(void)
+					: id(0), from(0), to(0), arrows(1), hasColor(false) {}
 	int32		id;
 	int32		from;
 	int32		to;
@@ -62,6 +68,9 @@ class GraphDocument {
 public:
 	/** B_BAD_DATA if in holds no ProjectConceptor document */
 			status_t		Read(BPositionIO *in);
+	/** the flattened document, for a translator that imports: each
+	 * attribute typed after its kind from its value text */
+			status_t		Write(BPositionIO *out) const;
 
 	/** NULL for an unknown id */
 			const GraphNode	*FindNode(int32 id) const;
