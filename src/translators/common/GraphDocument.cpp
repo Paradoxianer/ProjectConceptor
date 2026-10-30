@@ -189,6 +189,14 @@ BString XmlEscaped(const char *text)
 }
 
 
+BString ShownValue(const GraphAttribute &attribute)
+{
+	if (attribute.kind == B_BOOL_TYPE)
+		return BString(attribute.value == "true" ? "☑" : "☐");
+	return attribute.value;
+}
+
+
 BString HexColor(rgb_color color)
 {
 	BString	text;

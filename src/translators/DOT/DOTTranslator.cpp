@@ -60,7 +60,7 @@ static BString NodeLabel(const GraphNode &node)
 	label << "<TR><TD COLSPAN=\"2\">" << font << "<B>"
 		<< XmlEscaped(node.name.String()) << "</B>" << fontEnd << "</TD></TR>";
 	for (size_t i = 0; i < node.attributes.size(); i++) {
-		BString	value(XmlEscaped(node.attributes[i].value.String()));
+		BString	value(XmlEscaped(ShownValue(node.attributes[i]).String()));
 		value.ReplaceAll("\n", "<BR ALIGN=\"LEFT\"/>");
 		label << "<TR><TD ALIGN=\"LEFT\">" << font << "<FONT COLOR=\"#6b7378\">"
 			<< XmlEscaped(node.attributes[i].name.String()) << "</FONT>" << fontEnd

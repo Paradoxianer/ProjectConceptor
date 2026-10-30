@@ -74,9 +74,7 @@ static BString Fitted(const BString &text, float size, float width,
 // a value as one row of a card
 static BString RowText(const GraphAttribute &attribute)
 {
-	if (attribute.kind == B_BOOL_TYPE)
-		return BString(attribute.value == "true" ? "☑" : "☐");
-	BString	text(attribute.value);
+	BString	text(ShownValue(attribute));
 	if ((attribute.kind == P_C_ATTRIBUTE_FILE) || (attribute.kind == P_C_ATTRIBUTE_IMAGE)) {
 		int32	slash	= text.FindLast('/');
 		if (slash >= 0)

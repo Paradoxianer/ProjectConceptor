@@ -83,6 +83,9 @@ bool		LooksLikeDocument(BPositionIO *in);
 /** text for XML content and attribute values: & < > " escaped */
 BString		XmlEscaped(const char *text);
 
+/** the value as an export shows it: yes/no as ☑/☐, the rest as stored */
+BString		ShownValue(const GraphAttribute &attribute);
+
 /** #rrggbb */
 BString		HexColor(rgb_color color);
 
