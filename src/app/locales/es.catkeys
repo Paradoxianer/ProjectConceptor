@@ -1,4 +1,5 @@
-1	Spanish	application/x-vnd.ProjectConceptor	14280131
+1	Spanish	application/x-vnd.ProjectConceptor	1899809901
+Export	SavePanel		Exportar
 Macro shortcuts (double-click to change the key)	ShortCutView		Atajos de macros (doble clic para cambiar la tecla)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Pulse la combinación de teclas para la macro «%s» (Esc para cancelar).
 About	MainWindow		Acerca de
@@ -62,6 +63,7 @@ Save	Document		Guardar
 Search	MainWindow		Buscar
 OK	PluginManager		Aceptar
 Could not find plugins	SavePanel		No se encontraron plugins
+Export	MainWindow		Exportar
 File	MainWindow		Archivo
 The macro is empty - nothing to play.	CommandManager		La macro está vacía; no hay nada que reproducir.
 No active editor - please install an editor plugin.	Document		No hay ningún editor activo; instale un complemento de editor.

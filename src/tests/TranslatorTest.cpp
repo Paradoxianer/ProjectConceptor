@@ -1,6 +1,9 @@
 #include "TranslatorTest.h"
 
 #include <DataIO.h>
+#include <Entry.h>
+#include <File.h>
+#include <NodeInfo.h>
 #include <GraphicsDefs.h>
 #include <Message.h>
 #include <TranslatorRoster.h>
@@ -9,7 +12,9 @@
 
 #include <string.h>
 
+#include "PDocument.h"
 #include "ProjectConceptorDefs.h"
+#include "TestDocument.h"
 
 static const char *kFreeMindSample =
 	"<map version=\"0.9.0\">\n"
@@ -212,6 +217,29 @@ void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
 	BTranslatorRoster::Default()->GetTranslatorInfo(info.translator, &name,
 		&infoText, &version);
 	CPPUNIT_ASSERT(strcmp(name, "DOTTranslator") != 0);
+}
+
+
+void TranslatorTest::ExportWritesACopyOfItsOwnType(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+	BMessage	format;
+	format.AddInt32(P_C_FORMAT_TYPE, P_C_DOT_TYPE);
+	format.AddString(P_C_FORMAT_MIME, "text/vnd.graphviz");
+	BEntry		entry("/tmp/projectconceptor-export-test.dot");
+	entry_ref	ref;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, entry.GetRef(&ref));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, doc->WriteTo(ref, format, true));
+
+	BFile		file(&ref, B_READ_ONLY);
+	char		start[8]	= {0};
+	CPPUNIT_ASSERT_EQUAL((ssize_t)7, file.Read(start, 7));
+	CPPUNIT_ASSERT_EQUAL(BString("digraph"), BString(start));
+	// opens in the app for its format, not in ProjectConceptor
+	char		mime[B_MIME_TYPE_LENGTH];
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, BNodeInfo(&file).GetType(mime));
+	CPPUNIT_ASSERT_EQUAL(BString("text/vnd.graphviz"), BString(mime));
+	entry.Remove();
 }
 
 

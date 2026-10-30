@@ -1,4 +1,5 @@
-1	French	application/x-vnd.ProjectConceptor	14280131
+1	French	application/x-vnd.ProjectConceptor	1899809901
+Export	SavePanel		Exporter
 Macro shortcuts (double-click to change the key)	ShortCutView		Raccourcis des macros (double-clic pour changer la touche)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Appuyez sur la combinaison de touches pour la macro « %s » (Échap pour annuler).
 About	MainWindow		À propos de
@@ -62,6 +63,7 @@ Save	Document		Sauvegarder
 Search	MainWindow		Rechercher
 OK	PluginManager		OK
 Could not find plugins	SavePanel		Impossible de trouver des greffons
+Export	MainWindow		Exporter
 File	MainWindow		Fichier
 The macro is empty - nothing to play.	CommandManager		La macro est vide ; rien à exécuter.
 No active editor - please install an editor plugin.	Document		Aucun éditeur actif ; veuillez installer un greffon d'édition.

@@ -1,4 +1,5 @@
-1	Swedish	application/x-vnd.ProjectConceptor	14280131
+1	Swedish	application/x-vnd.ProjectConceptor	1899809901
+Export	SavePanel		Exportera
 Macro shortcuts (double-click to change the key)	ShortCutView		Makrokortkommandon (dubbelklicka för att ändra tangenten)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tryck på tangentkombinationen för makrot ”%s” (Esc avbryter).
 About	MainWindow		Om
@@ -62,6 +63,7 @@ Save	Document		Spara
 Search	MainWindow		Sök
 OK	PluginManager		OK
 Could not find plugins	SavePanel		Kunde inte hitta plugins
+Export	MainWindow		Exportera
 File	MainWindow		Arkiv
 The macro is empty - nothing to play.	CommandManager		Makrot är tomt – inget att spela upp.
 No active editor - please install an editor plugin.	Document		Ingen aktiv redigerare – installera ett redigeringsinsticksprogram.

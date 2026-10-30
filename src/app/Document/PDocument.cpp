@@ -216,16 +216,37 @@ void PDocument::MessageReceived(BMessage* message) {
 			break;
 		}
 		case  B_SAVE_REQUESTED: {
-				BMessage	*saveSettings	= new BMessage();
-				message->FindMessage("saveSettings",saveSettings);
-				entry_ref *ref	= new entry_ref;
-				const char* name;
-				message->FindRef("directory",ref);
-				message->FindString("name", &name);
-				SetEntry(ref,name);
-				if (documentSetting->ReplaceMessage("saveSettings",saveSettings) != B_OK)
-					documentSetting->AddMessage("saveSettings",saveSettings);
+				BMessage	saveSettings;
+				message->FindMessage("saveSettings",&saveSettings);
+				entry_ref	directory;
+				const char	*name	= NULL;
+				if ((message->FindRef("directory",&directory) != B_OK)
+					|| (message->FindString("name",&name) != B_OK))
+					break;
+				SetEntry(&directory,name);
+				if (documentSetting->ReplaceMessage("saveSettings",&saveSettings) != B_OK)
+					documentSetting->AddMessage("saveSettings",&saveSettings);
 				Save();
+			break;
+		}
+		case MENU_FILE_EXPORT: {
+			ExportPanel();
+			break;
+		}
+		case P_C_EXPORT_REQUESTED: {
+			// a copy: the document keeps its own file and format
+			BMessage	saveSettings;
+			entry_ref	directory;
+			const char	*name	= NULL;
+			if ((message->FindMessage("saveSettings",&saveSettings) != B_OK)
+				|| (message->FindRef("directory",&directory) != B_OK)
+				|| (message->FindString("name",&name) != B_OK))
+				break;
+			BDirectory	dir(&directory);
+			BEntry		entry(&dir,name);
+			entry_ref	ref;
+			if (entry.GetRef(&ref) == B_OK)
+				WriteTo(ref,saveSettings,true);
 			break;
 		}
 		case B_COPY: {
@@ -428,6 +449,7 @@ void PDocument::_InitData(void){
 	printableRect	= NULL;
 	paperRect		= NULL;
 	savePanel		= NULL;
+	exportPanel		= NULL;
 	width			= 600;
 	height			= 800;
 	dirty			= true;
@@ -781,23 +803,34 @@ void PDocument::Save(void)
 		SavePanel();
 		return;
 	}
+	BMessage	saveSettings;
+	documentSetting->FindMessage("saveSettings",&saveSettings);
+	if (WriteTo(*entryRef,saveSettings) != B_OK)
+		return;
+	ResetModified();
+	UpdateWindowTitle();
+	be_roster->AddToRecentDocuments(entryRef,APP_SIGNATURE);
+}
+
+
+status_t PDocument::WriteTo(const entry_ref &ref, const BMessage &saveSettings,
+	bool exporting)
+{
 	BAutolock	autolock(this);
 	BMessage	archived;
 	Archive(&archived,true);
-	BFile		file(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
+	BFile		file(&ref,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
 	status_t	err	= file.InitCheck();
-	BMessage	saveSettings;
 	int32		outType		= 0;
 	bool		useTranslator	= (err == B_OK)
-		&& (documentSetting->FindMessage("saveSettings",&saveSettings) == B_OK)
-		&& (saveSettings.FindInt32("format::type",&outType) == B_OK);
+		&& (saveSettings.FindInt32(P_C_FORMAT_TYPE,&outType) == B_OK);
 	if (useTranslator) {
 		// translator ids change between sessions; the format type doesn't
 		translator_info	translatorInfo;
 		err = FindSaveTranslator((uint32)outType,&translatorInfo.translator);
 		if (err == B_OK) {
-			const char	*formatName	= "";
-			saveSettings.FindString("format::name",&formatName);
+			// FindString() would leave NULL behind for a missing name
+			const char	*formatName	= saveSettings.GetString(P_C_FORMAT_NAME,"");
 			translatorInfo.type			= P_C_DOCUMENT_RAW_TYPE;
 			translatorInfo.group		= P_C_DOCUMENT_RAW_TYPE;
 			translatorInfo.quality		= 0.9;
@@ -816,14 +849,18 @@ void PDocument::Save(void)
 		text.SetToFormat(B_TRANSLATE("Could not save the document: %s"),strerror(err));
 		(new BAlert(B_TRANSLATE("Error"),text.String(),B_TRANSLATE("OK"),
 			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go(NULL);
-		return;
+		return err;
 	}
 	BNodeInfo	nodeInfo(&file);
-	nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
-	nodeInfo.SetPreferredApp(APP_SIGNATURE);
-	ResetModified();
-	UpdateWindowTitle();
-	be_roster->AddToRecentDocuments(entryRef,APP_SIGNATURE);
+	const char	*mime	= NULL;
+	if (exporting && (saveSettings.FindString(P_C_FORMAT_MIME,&mime) == B_OK)) {
+		// an export opens in the app made for its format
+		nodeInfo.SetType(mime);
+	} else {
+		nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
+		nodeInfo.SetPreferredApp(APP_SIGNATURE);
+	}
+	return B_OK;
 }
 
 void PDocument::Load(void)
@@ -935,6 +972,33 @@ BMessage* PDocument::BuildChangedNodesMessage(void)
 	for (it = valueChanged->begin(); it != valueChanged->end(); ++it)
 		message->AddPointer("node",*it);
 	return message;
+}
+
+
+void PDocument::ExportPanel()
+{
+	TRACE();
+	if (!exportPanel) {
+		// the panel copies both
+		BMessage	request(P_C_EXPORT_REQUESTED);
+		BMessenger	target(this);
+		exportPanel = new PCSavePanel(&request,&target,true);
+	}
+	BString	name(Title());
+	if (entryRef != NULL) {
+		// next to the document, named like it without its extension
+		BEntry		entry(entryRef);
+		BEntry		directory;
+		if (entry.GetParent(&directory) == B_OK)
+			exportPanel->SetPanelDirectory(&directory);
+		int32	dot	= name.FindLast('.');
+		if (dot > 0)
+			name.Truncate(dot);
+	}
+	exportPanel->SetSaveText(name.String());
+	exportPanel->FormatChanged();
+	exportPanel->Window()->SetWorkspaces(B_CURRENT_WORKSPACE);
+	exportPanel->Show();
 }
 
 

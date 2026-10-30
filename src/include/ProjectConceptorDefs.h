@@ -144,6 +144,8 @@ const uint32	MENU_FILE_CLOSE					= 'MFcl';
 const uint32	MENU_FILE_SAVE					= 'MFsv';
 const uint32	MENU_FILE_SAVEAS				= 'MFsa';
 const uint32	MENU_FILE_EXPORT				= 'MFex';
+/** the export panel's answer: "directory", "name", "saveSettings" */
+const uint32	P_C_EXPORT_REQUESTED			= 'MFer';
 const uint32	MENU_FILE_PAGESETUP				= 'MFps';
 const uint32	MENU_FILE_PRINT					= 'MFpr';
 const uint32	MENU_FILE_QUIT					= 'MFqu';

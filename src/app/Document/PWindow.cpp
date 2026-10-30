@@ -234,12 +234,11 @@ BMenuBar *PWindow::MakeMenu(void)
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_SAVE_AS);
 	item->SetTarget(doc);
-	menu->AddSeparatorItem();
-	/*menu->AddItem(item = new BMenuItem(B_TRANSLATE(P_MENU_FILE_EXPORT),new BMessage(MENU_FILE_EXPORT)));
+	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Export"),new BMessage(MENU_FILE_EXPORT)));
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_EXPORT);
 	item->SetTarget(doc);
-	menu->AddSeparatorItem();*/
+	menu->AddSeparatorItem();
 	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Page setup"),new BMessage(MENU_FILE_PAGESETUP)));
 	item->SetEnabled(false);
 	item->SetTarget(doc);

@@ -1,4 +1,5 @@
-1	Friulian	application/x-vnd.ProjectConceptor	14280131
+1	Friulian	application/x-vnd.ProjectConceptor	1899809901
+Export	SavePanel		Espuarte
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtis des macros (dopli clic par cambiâ il tast)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Frache la combinazion di tascj pe macro “%s” (Esc par anulâ).
 About	MainWindow		Informazions
@@ -62,6 +63,7 @@ Save	Document		Salve
 Search	MainWindow		Cîr
 OK	PluginManager		Va ben
 Could not find plugins	SavePanel		Impussibil cjatâ plugin
+Export	MainWindow		Espuarte
 File	MainWindow		File
 The macro is empty - nothing to play.	CommandManager		La macro e je vueide – nuie di riprodusi.
 No active editor - please install an editor plugin.	Document		Nissun editôr atîf – instale un plugin di editôr.

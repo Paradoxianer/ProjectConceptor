@@ -14,6 +14,7 @@ public:
 	void UnknownOutputTypeIsRefused(void);
 	void DotExportWritesClustersLabelsAndEdges(void);
 	void ExportFormatsNeverOpenDocuments(void);
+	void ExportWritesACopyOfItsOwnType(void);
 
 	CPPUNIT_TEST_SUITE(TranslatorTest);
 	CPPUNIT_TEST(FreeMindImportBuildsNodesAndConnections);
@@ -21,6 +22,7 @@ public:
 	CPPUNIT_TEST(UnknownOutputTypeIsRefused);
 	CPPUNIT_TEST(DotExportWritesClustersLabelsAndEdges);
 	CPPUNIT_TEST(ExportFormatsNeverOpenDocuments);
+	CPPUNIT_TEST(ExportWritesACopyOfItsOwnType);
 	CPPUNIT_TEST_SUITE_END();
 };
 

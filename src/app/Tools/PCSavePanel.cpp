@@ -1,4 +1,6 @@
+#include <interface/TextControl.h>
 #include <interface/Window.h>
+#include <support/Autolock.h>
 #include <Catalog.h>
 #include <string.h>
 
@@ -9,15 +11,42 @@
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "SavePanel"
 
+// sent by the format menu's items
+static const uint32	kFormatChanged	= 'PCfc';
 
 
-PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target): BFilePanel(B_SAVE_PANEL,target,NULL,B_FILE_NODE,false,msg,NULL,false,true)
+/** the panel's window handler for the format menu: BFilePanel is no
+ * BHandler itself */
+class FormatChangedHandler : public BHandler
+{
+public:
+					FormatChangedHandler(PCSavePanel *panel)
+						: BHandler("FormatChangedHandler"), panel(panel) {}
+	virtual	void	MessageReceived(BMessage *message)
+	{
+		if (message->what == kFormatChanged)
+			panel->FormatChanged();
+		else
+			BHandler::MessageReceived(message);
+	}
+private:
+	PCSavePanel		*panel;
+};
+
+
+PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target, bool exporting)
+	: BFilePanel(B_SAVE_PANEL,target,NULL,B_FILE_NODE,false,msg,NULL,false,true),
+	exporting(exporting)
 {
 	float 	height		= 74;
 	Window()->Lock();
 	BView 	*background = Window()->ChildAt(0);
 	BView	*textView;
-	Window()->SetTitle(B_TRANSLATE("Save as"));
+	Window()->SetTitle(exporting ? B_TRANSLATE("Export") : B_TRANSLATE("Save as"));
+	if (exporting)
+		SetButtonLabel(B_DEFAULT_BUTTON, B_TRANSLATE("Export"));
+	formatHandler	= new FormatChangedHandler(this);
+	Window()->AddHandler(formatHandler);
 
 
 	BRect limit 				= background->Bounds();
@@ -30,10 +59,10 @@ PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target): BFilePanel(B_SAVE_
 	BMenuItem	*defaultItem	= NULL;
 	for (int32 i=0; i<format_menu->CountItems(); i++) {
 		BMenuItem	*item	= format_menu->ItemAt(i);
-		const char	*name	= NULL;
+		int32		type	= 0;
 		if ( (item->Message() != NULL)
-			&& (item->Message()->FindString("format::name",&name) == B_OK)
-			&& (strcmp(name,"ProjectConceptor Document") == 0) ) {
+			&& (item->Message()->FindInt32(P_C_FORMAT_TYPE,&type) == B_OK)
+			&& (type == P_C_DOCUMENT_TYPE) ) {
 			defaultItem = item;
 			break;
 		}
@@ -68,13 +97,42 @@ PCSavePanel::PCSavePanel(BMessage *msg,  BMessenger* target): BFilePanel(B_SAVE_
 	textView->SetResizingMode(B_FOLLOW_LEFT|B_FOLLOW_BOTTOM);
 	formatMenu->SetResizingMode(B_FOLLOW_BOTTOM | B_FOLLOW_LEFT );
 	background->FindView("PoseView")->SetResizingMode(B_FOLLOW_ALL_SIDES);
-	
+
 	BRect sRect=background->FindView("cancel button")->Frame();
 	sRect.OffsetTo(textView->Frame().right+10,sRect.top);
 	settings	= new BButton(sRect,"Settings",B_TRANSLATE("Settings"),NULL);
 	background->AddChild(settings);
 	Window()->Unlock();
 }
+
+
+PCSavePanel::~PCSavePanel()
+{
+	if (Window()->Lock()) {
+		Window()->RemoveHandler(formatHandler);
+		Window()->Unlock();
+	}
+	delete formatHandler;
+}
+
+
+// the file name extension the translator gives for type, or ""
+static BString FormatExtension(BTranslatorRoster *roster, translator_id id,
+	uint32 type)
+{
+	BMessage	config;
+	if (roster->GetConfigurationMessage(id, &config) != B_OK)
+		return BString();
+	int32		configType;
+	const char	*extension;
+	for (int32 i = 0; config.FindInt32(P_C_FORMAT_TYPE, i, &configType) == B_OK; i++) {
+		if (((uint32)configType == type)
+			&& (config.FindString(P_C_FORMAT_EXTENSION, i, &extension) == B_OK))
+			return BString(extension);
+	}
+	return BString();
+}
+
 
 BMenu *PCSavePanel::BuildFormatsMenu(void)
 {
@@ -87,39 +145,72 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 	translator_id				*translators		= NULL;
 	const	translation_format	*oFormats;
 	const	translation_format	*iFormats;
-	translation_format			*allFormats			= NULL;
 	BMessage					*message			= NULL;
 	BMenu						*menu				= new BMenu(B_TRANSLATE("File format") );
 	BMenuItem					*item				= NULL;
 	roster->GetAllTranslators(&translators, &num_translators);
-	allFormats	=	new translation_format[num_translators];
 	for (i=0;i<num_translators;i++)  {
 		roster->GetInputFormats(translators[i], &iFormats, &inNum);
-		for (q=0;q<inNum;q++)  {
-			if (iFormats[q].type == P_C_DOCUMENT_RAW_TYPE) {
-				roster->GetOutputFormats(translators[i], &oFormats, &outNum);
-				for (int j=0; j<outNum; j++) {
-					//	and take the first output format that isn't P_C_DOCUMENT_RAW_TYPE
-					if( oFormats[j].type != P_C_DOCUMENT_RAW_TYPE) {
-						message	= new BMessage();
-						message->AddString("format::name",oFormats[j].name);
-						message->AddString("format::MIME",oFormats[j].MIME);
-						message->AddInt32("format::type",oFormats[j].type);
-						message->AddInt32("format::group",oFormats[j].group);
-						message->AddFloat("format::quality",oFormats[j].quality);
-						message->AddFloat("format::capability",oFormats[j].capability);
-						item = new BMenuItem(oFormats[j].name, message);
-						menu->AddItem( item );
-					}
-				}
-			}
+		bool	readsDocument	= false;
+		for (q=0;q<inNum;q++)
+			readsDocument |= (iFormats[q].type == P_C_DOCUMENT_RAW_TYPE);
+		if (!readsDocument)
+			continue;
+		roster->GetOutputFormats(translators[i], &oFormats, &outNum);
+		for (int j=0; j<outNum; j++) {
+			if (oFormats[j].type == P_C_DOCUMENT_RAW_TYPE)
+				continue;
+			// a saved document must open again: the translator reads the
+			// format back; everything else is an export
+			bool	readsBack	= false;
+			for (q=0;q<inNum;q++)
+				readsBack |= (iFormats[q].type == oFormats[j].type);
+			if (readsBack == exporting)
+				continue;
+			message	= new BMessage(kFormatChanged);
+			message->AddString(P_C_FORMAT_NAME,oFormats[j].name);
+			message->AddString(P_C_FORMAT_MIME,oFormats[j].MIME);
+			message->AddInt32(P_C_FORMAT_TYPE,oFormats[j].type);
+			message->AddString(P_C_FORMAT_EXTENSION,
+				FormatExtension(roster, translators[i], oFormats[j].type));
+			item = new BMenuItem(oFormats[j].name, message);
+			item->SetTarget(formatHandler);
+			menu->AddItem( item );
 		}
 	}
-	delete [] translators; 
+	delete [] translators;
 	if (menu->CountItems() == 0)
 		menu->AddItem(new BMenuItem(B_TRANSLATE("Could not find plugins"),NULL));
 	return menu;
 }
+
+
+void PCSavePanel::FormatChanged(void)
+{
+	BAutolock	lock(Window());
+	BMenuItem	*marked		= formatMenu->Menu()->FindMarked();
+	const char	*extension	= NULL;
+	BTextControl	*nameControl	= dynamic_cast<BTextControl*>(
+		Window()->FindView("text view"));
+	if ((marked == NULL) || (marked->Message() == NULL) || (nameControl == NULL)
+		|| (marked->Message()->FindString(P_C_FORMAT_EXTENSION,&extension) != B_OK))
+		return;
+	// the name keeps what was typed, only the format's extension changes
+	BString	name(nameControl->Text());
+	int32	dot	= name.FindLast('.');
+	if ((dot > 0) && (lastExtension.Length() > 0)
+		&& (strcmp(name.String() + dot + 1, lastExtension.String()) == 0))
+		name.Truncate(dot);
+	if (extension[0] != '\0')
+		name << "." << extension;
+	lastExtension	= extension;
+	SetSaveText(name.String());
+	// the panel enables it only on a key or click (TFilePanel::AdjustButton)
+	BButton	*button	= dynamic_cast<BButton*>(Window()->FindView("default button"));
+	if (button != NULL)
+		button->SetEnabled(name.Length() > 0);
+}
+
 
 void	PCSavePanel::SendMessage(const BMessenger* messenger, BMessage *message)
 {

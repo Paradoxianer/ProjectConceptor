@@ -1,4 +1,5 @@
-1	German	application/x-vnd.ProjectConceptor	14280131
+1	German	application/x-vnd.ProjectConceptor	1899809901
+Export	SavePanel		Exportieren
 Macro shortcuts (double-click to change the key)	ShortCutView		Makro-Kürzel (Doppelklick ändert die Taste)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tastenkombination für das Makro \"%s\" drücken (Esc bricht ab).
 About	MainWindow		Über...
@@ -62,6 +63,7 @@ Save	Document		Speichern
 Search	MainWindow		Suchen
 OK	PluginManager		OK
 Could not find plugins	SavePanel		Keine Plugins gefunden
+Export	MainWindow		Exportieren
 File	MainWindow		Datei
 The macro is empty - nothing to play.	CommandManager		Das Makro ist leer – nichts abzuspielen.
 No active editor - please install an editor plugin.	Document		Kein aktiver Editor – bitte ein Editor-Plugin installieren.

@@ -205,6 +205,10 @@ See [Macros](macros.md) for the full guide and the command reference.
 ## Save, load, undo
 
 - **File → Save / Save As** writes the document to a `.pcd` file.
+  Save As also offers the other formats ProjectConceptor can open
+  again, e.g. FreeMind.
+- **File → Export** writes a copy in a format for other programs, e.g.
+  Graphviz DOT. The document itself stays in its own file.
 - **File → Open** loads an existing document.
 - **Edit → Undo / Redo** covers every change - creating nodes, moving
   them, grouping, editing attributes, drawing connections.

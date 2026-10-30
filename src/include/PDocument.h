@@ -150,6 +150,12 @@ public:
 	 *@see SetEntry
 	 */
 			void				Save(void);
+	/** writes the document to ref in the format of saveSettings (the
+	 * native one without P_C_FORMAT_TYPE), without making ref its file;
+	 * an export gets the format's MIME type instead of the document's */
+			status_t			WriteTo(const entry_ref &ref,
+									const BMessage &saveSettings,
+									bool exporting = false);
 	/**save the file from the entry
 	 *
 	 *@todo mime check
@@ -162,6 +168,9 @@ public:
 	 *@see SetEntry
 	 */
 			void				SavePanel();
+	/** a save panel for a copy in a format the document can't be opened
+	 * from (P_C_EXPORT_REQUESTED) */
+			void				ExportPanel();
 
 			bool				QuitRequested(void);
 
@@ -236,6 +245,7 @@ protected:
 			BMessage			*printerSetting;
 			BMessage	 	 	*documentSetting;
 			PCSavePanel			*savePanel;
+			PCSavePanel			*exportPanel;
 
 		 	float				width,height;
 			bool				dirty;

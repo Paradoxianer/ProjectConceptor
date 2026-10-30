@@ -1,4 +1,5 @@
-1	Croatian	application/x-vnd.ProjectConceptor	14280131
+1	Croatian	application/x-vnd.ProjectConceptor	1899809901
+Export	SavePanel		Izvezi
 Macro shortcuts (double-click to change the key)	ShortCutView		Prečaci makronaredbi (dvostruki klik za promjenu tipke)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Pritisnite kombinaciju tipki za makronaredbu „%s” (Esc za odustajanje).
 About	MainWindow		O programu
@@ -62,6 +63,7 @@ Save	Document		Spremi
 Search	MainWindow		Traži
 OK	PluginManager		U redu
 Could not find plugins	SavePanel		Ne mogu naći priključke
+Export	MainWindow		Izvezi
 File	MainWindow		Datoteka
 The macro is empty - nothing to play.	CommandManager		Makronaredba je prazna – nema se što izvesti.
 No active editor - please install an editor plugin.	Document		Nema aktivnog uređivača – instalirajte dodatak za uređivanje.

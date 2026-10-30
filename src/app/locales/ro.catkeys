@@ -1,4 +1,5 @@
-1	Romanian	application/x-vnd.ProjectConceptor	14280131
+1	Romanian	application/x-vnd.ProjectConceptor	1899809901
+Export	SavePanel		Exportă
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtături pentru macrocomenzi (dublu clic pentru a schimba tasta)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Apăsați combinația de taste pentru macrocomanda „%s” (Esc pentru anulare).
 About	MainWindow		Despre
@@ -62,6 +63,7 @@ Save	Document		Salvează
 Search	MainWindow		Căutare
 OK	PluginManager		OK
 Could not find plugins	SavePanel		Nu s-au putut găsi modulele
+Export	MainWindow		Exportă
 File	MainWindow		Fișier
 The macro is empty - nothing to play.	CommandManager		Macrocomanda este goală – nimic de rulat.
 No active editor - please install an editor plugin.	Document		Niciun editor activ – instalați un modul de editare.
