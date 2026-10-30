@@ -207,8 +207,16 @@ See [Macros](macros.md) for the full guide and the command reference.
 - **File → Save / Save As** writes the document to a `.pcd` file.
   Save As also offers the other formats ProjectConceptor can open
   again, e.g. FreeMind.
-- **File → Export** writes a copy in a format for other programs, e.g.
-  Graphviz DOT. The document itself stays in its own file.
+- **File → Export** writes a copy in a format for other programs. The
+  document itself stays in its own file.
+  - **HTML page**: one file anyone can open in a browser, no Haiku
+    needed. Drag to move, scroll to zoom, click a node to see all its
+    attributes, type into Search to find nodes. Follows the browser's
+    light or dark scheme.
+  - **SVG image**: the graph as a picture to put into other documents or
+    to edit further, e.g. in Inkscape.
+  - **Graphviz DOT**: for the Graphviz tools; `neato -n` keeps the
+    positions from ProjectConceptor, `dot` lays the graph out anew.
 - **File → Open** loads an existing document.
 - **Edit → Undo / Redo** covers every change - creating nodes, moving
   them, grouping, editing attributes, drawing connections.

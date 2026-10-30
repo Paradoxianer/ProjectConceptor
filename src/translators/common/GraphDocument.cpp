@@ -86,6 +86,7 @@ status_t GraphDocument::_ReadNode(const BMessage &message)
 	node.isGroup	= (message.what == P_C_GROUP_TYPE);
 	node.parent		= message.GetInt32(P_C_NODE_PARENT, -1);
 	node.frame		= message.GetRect(P_C_NODE_FRAME, BRect());
+	node.attributeColumn	= message.GetFloat(P_C_NODE_ATTRIBUTE_COLUMN, 0);
 
 	BMessage	data;
 	message.FindMessage(P_C_NODE_DATA, &data);

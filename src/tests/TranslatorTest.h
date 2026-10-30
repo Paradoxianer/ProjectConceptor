@@ -14,6 +14,8 @@ public:
 	void UnknownOutputTypeIsRefused(void);
 	void DotExportWritesClustersLabelsAndEdges(void);
 	void ExportFormatsNeverOpenDocuments(void);
+	void HtmlExportIsOneSelfContainedPage(void);
+	void SvgExportStandsAlone(void);
 	void ExportWritesACopyOfItsOwnType(void);
 
 	CPPUNIT_TEST_SUITE(TranslatorTest);
@@ -22,6 +24,8 @@ public:
 	CPPUNIT_TEST(UnknownOutputTypeIsRefused);
 	CPPUNIT_TEST(DotExportWritesClustersLabelsAndEdges);
 	CPPUNIT_TEST(ExportFormatsNeverOpenDocuments);
+	CPPUNIT_TEST(HtmlExportIsOneSelfContainedPage);
+	CPPUNIT_TEST(SvgExportStandsAlone);
 	CPPUNIT_TEST(ExportWritesACopyOfItsOwnType);
 	CPPUNIT_TEST_SUITE_END();
 };

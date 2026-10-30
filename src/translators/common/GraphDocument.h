@@ -32,6 +32,8 @@ struct GraphNode {
 	BString		name;
 	BRect		frame;
 	std::vector<GraphAttribute>	attributes;
+	/** width of the attribute name column, 0 = fit to the names */
+	float		attributeColumn;
 	/** the card, its colored band, its border and its text; each only
 	 * meaningful where the matching has*Color is set */
 	rgb_color	fillColor;

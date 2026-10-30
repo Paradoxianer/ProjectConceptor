@@ -839,7 +839,15 @@ status_t PDocument::WriteTo(const entry_ref &ref, const BMessage &saveSettings,
 			strlcpy(translatorInfo.MIME,P_C_DOCUMENT_MIMETYPE,sizeof(translatorInfo.MIME));
 			BMallocIO	input;
 			archived.Flatten(&input);
-			err = BTranslatorRoster::Default()->Translate(&input,&translatorInfo,NULL,&file,outType);
+			// the document's name without extension, e.g. for a page title
+			BString		title(Title());
+			int32		dot	= title.FindLast('.');
+			if (dot > 0)
+				title.Truncate(dot);
+			BMessage	extension;
+			extension.AddString(P_C_FORMAT_TITLE,title);
+			err = BTranslatorRoster::Default()->Translate(&input,&translatorInfo,
+				&extension,&file,outType);
 		}
 	} else if (err == B_OK)
 		err = archived.Flatten(&file);

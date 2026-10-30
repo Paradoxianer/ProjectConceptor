@@ -227,8 +227,18 @@ command reference.</p>
 		a <code>.pcd</code> file. Save As also offers the other formats
 		ProjectConceptor can open again, e.g. FreeMind.</li>
 	<li><strong>File &rarr; Export</strong> writes a copy in a format for
-		other programs, e.g. Graphviz DOT. The document itself stays in its
-		own file.</li>
+		other programs. The document itself stays in its own file.
+		<ul>
+			<li><strong>HTML page</strong>: one file anyone can open in a
+				browser, no Haiku needed. Drag to move, scroll to zoom, click a
+				node to see all its attributes, type into Search to find nodes.
+				Follows the browser's light or dark scheme.</li>
+			<li><strong>SVG image</strong>: the graph as a picture to put into
+				other documents or to edit further, e.g. in Inkscape.</li>
+			<li><strong>Graphviz DOT</strong>: for the Graphviz tools;
+				<code>neato -n</code> keeps the positions from ProjectConceptor,
+				<code>dot</code> lays the graph out anew.</li>
+		</ul></li>
 	<li><strong>File &rarr; Open</strong> loads an existing document.</li>
 	<li><strong>Edit &rarr; Undo / Redo</strong> covers every change &mdash;
 		creating nodes, moving them, grouping, editing attributes, drawing

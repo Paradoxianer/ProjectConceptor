@@ -26,6 +26,8 @@
 #define P_C_DOCUMENT_TEXT_TYPE 'pcXT'
 // export formats of the translators in src/translators
 #define P_C_DOT_TYPE 'pcDO'
+#define P_C_HTML_TYPE 'pcHT'
+#define P_C_SVG_TYPE 'pcSV'
 
 
 const uint32	P_C_PLUGIN_MESSAGE				= 'pcPM';
@@ -387,6 +389,8 @@ extern const char*		P_C_FORMAT_NAME;	//				= "format::name"
 extern const char*		P_C_FORMAT_MIME;	//				= "format::MIME"
 extern const char*		P_C_FORMAT_TYPE;	//				= "format::type"
 extern const char*		P_C_FORMAT_EXTENSION;	//			= "format::extension"
+/** in the ioExtension of an export: the document's name, for a title */
+extern const char*		P_C_FORMAT_TITLE;	//				= "format::title"
 
 /** a flattened document: both lists hold their nodes/connections as
  * P_C_DOC_ENTRY messages, linked by P_C_NODE_ID; a group lists its

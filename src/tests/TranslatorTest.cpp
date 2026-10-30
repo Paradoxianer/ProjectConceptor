@@ -200,6 +200,52 @@ void TranslatorTest::DotExportWritesClustersLabelsAndEdges(void)
 }
 
 
+void TranslatorTest::HtmlExportIsOneSelfContainedPage(void)
+{
+	BMessage	document	= GroupedDocument();
+	// a name that would end the page's script block if left as it is
+	BMessage	allNodes;
+	document.FindMessage(P_C_DOC_ALLNODES, &allNodes);
+	BMessage	node;
+	allNodes.FindMessage(P_C_DOC_ENTRY, 1, &node);
+	BMessage	data;
+	node.FindMessage(P_C_NODE_DATA, &data);
+	data.ReplaceString(P_C_NODE_NAME, "</script><b>x");
+	node.ReplaceMessage(P_C_NODE_DATA, &data);
+	allNodes.ReplaceMessage(P_C_DOC_ENTRY, 1, &node);
+	document.ReplaceMessage(P_C_DOC_ALLNODES, &allNodes);
+
+	BString	html	= Exported(document, P_C_HTML_TYPE);
+	CPPUNIT_ASSERT(html.StartsWith("<!DOCTYPE html>"));
+	// nothing loaded from elsewhere
+	CPPUNIT_ASSERT(html.FindFirst(" src=") < 0);
+	CPPUNIT_ASSERT(html.FindFirst("<link") < 0);
+	CPPUNIT_ASSERT(html.FindFirst("class=\"pc-group\" id=\"n3\"") >= 0);
+	CPPUNIT_ASSERT(html.FindFirst("class=\"pc-node\" id=\"n1\"") >= 0);
+	CPPUNIT_ASSERT(html.FindFirst("data-from=\"1\" data-to=\"2\"") >= 0);
+	// on the card (shortened to fit) and in full for the details panel
+	CPPUNIT_ASSERT(html.FindFirst(">Owner</text>") >= 0);
+	CPPUNIT_ASSERT(html.FindFirst("[\"Owner\",\"Ann & Bob\",\"text\"]") >= 0);
+	// the name only escaped: once in the SVG, once in the data
+	CPPUNIT_ASSERT(html.FindFirst("</script><b>") < 0);
+	CPPUNIT_ASSERT(html.FindFirst("&lt;/script&gt;&lt;b&gt;x") >= 0);
+	CPPUNIT_ASSERT(html.FindFirst("<\\/script><b>x") >= 0);
+}
+
+
+void TranslatorTest::SvgExportStandsAlone(void)
+{
+	BString	svg	= Exported(GroupedDocument(), P_C_SVG_TYPE);
+	CPPUNIT_ASSERT(svg.StartsWith("<?xml"));
+	CPPUNIT_ASSERT(svg.FindFirst("<svg xmlns=\"http://www.w3.org/2000/svg\"") >= 0);
+	// its own style, the colors of both schemes
+	CPPUNIT_ASSERT(svg.FindFirst("<style>") >= 0);
+	CPPUNIT_ASSERT(svg.FindFirst("prefers-color-scheme:dark") >= 0);
+	CPPUNIT_ASSERT(svg.FindFirst("<script") < 0);
+	CPPUNIT_ASSERT(svg.EndsWith("</svg>\n"));
+}
+
+
 void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
 {
 	// opening a document asks every translator for the native format;
@@ -217,6 +263,7 @@ void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
 	BTranslatorRoster::Default()->GetTranslatorInfo(info.translator, &name,
 		&infoText, &version);
 	CPPUNIT_ASSERT(strcmp(name, "DOTTranslator") != 0);
+	CPPUNIT_ASSERT(strcmp(name, "HTMLTranslator") != 0);
 }
 
 
@@ -239,6 +286,22 @@ void TranslatorTest::ExportWritesACopyOfItsOwnType(void)
 	char		mime[B_MIME_TYPE_LENGTH];
 	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, BNodeInfo(&file).GetType(mime));
 	CPPUNIT_ASSERT_EQUAL(BString("text/vnd.graphviz"), BString(mime));
+	entry.Remove();
+
+	// a page is titled after the document
+	BMessage	page;
+	page.AddInt32(P_C_FORMAT_TYPE, P_C_HTML_TYPE);
+	page.AddString(P_C_FORMAT_MIME, "text/html");
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, doc->WriteTo(ref, page, true));
+	BFile		html(&ref, B_READ_ONLY);
+	off_t		size	= 0;
+	html.GetSize(&size);
+	BString		text;
+	html.Read(text.LockBuffer(size), size);
+	text.UnlockBuffer(size);
+	BString		title;
+	title << "<title>" << doc->Title() << "</title>";
+	CPPUNIT_ASSERT(text.FindFirst(title) >= 0);
 	entry.Remove();
 }
 

@@ -1,6 +1,7 @@
 translators = \
 	DOT \
 	FreeMind \
+	HTML \
 	Standard 
 
 
