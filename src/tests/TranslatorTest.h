@@ -16,6 +16,7 @@ public:
 	void ExportFormatsNeverOpenDocuments(void);
 	void HtmlExportIsOneSelfContainedPage(void);
 	void SvgExportStandsAlone(void);
+	void MermaidExportWritesAFlowchart(void);
 	void ExportWritesACopyOfItsOwnType(void);
 
 	CPPUNIT_TEST_SUITE(TranslatorTest);
@@ -26,6 +27,7 @@ public:
 	CPPUNIT_TEST(ExportFormatsNeverOpenDocuments);
 	CPPUNIT_TEST(HtmlExportIsOneSelfContainedPage);
 	CPPUNIT_TEST(SvgExportStandsAlone);
+	CPPUNIT_TEST(MermaidExportWritesAFlowchart);
 	CPPUNIT_TEST(ExportWritesACopyOfItsOwnType);
 	CPPUNIT_TEST_SUITE_END();
 };

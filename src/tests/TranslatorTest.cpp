@@ -246,6 +246,24 @@ void TranslatorTest::SvgExportStandsAlone(void)
 }
 
 
+void TranslatorTest::MermaidExportWritesAFlowchart(void)
+{
+	BString	mermaid	= Exported(GroupedDocument(), P_C_MERMAID_TYPE);
+	CPPUNIT_ASSERT(mermaid.StartsWith("flowchart "));
+	// quotes in a label as Mermaid's own entity
+	CPPUNIT_ASSERT(mermaid.FindFirst("subgraph g3 [\"Team #quot;A#quot;\"]") >= 0);
+	CPPUNIT_ASSERT(mermaid.FindFirst("n1[\"<b>first</b><br/>Owner: Ann & Bob\"]") >= 0);
+	CPPUNIT_ASSERT(mermaid.FindFirst("n1 --> n2") >= 0);
+	// both nodes inside the subgraph
+	CPPUNIT_ASSERT(mermaid.FindFirst("n2[") < mermaid.FindFirst("  end\n"));
+
+	BString	markdown	= Exported(GroupedDocument(), P_C_MARKDOWN_TYPE);
+	CPPUNIT_ASSERT(markdown.StartsWith("# "));
+	CPPUNIT_ASSERT(markdown.FindFirst("```mermaid\nflowchart ") >= 0);
+	CPPUNIT_ASSERT(markdown.EndsWith("```\n"));
+}
+
+
 void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
 {
 	// opening a document asks every translator for the native format;
@@ -264,6 +282,7 @@ void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
 		&infoText, &version);
 	CPPUNIT_ASSERT(strcmp(name, "DOTTranslator") != 0);
 	CPPUNIT_ASSERT(strcmp(name, "HTMLTranslator") != 0);
+	CPPUNIT_ASSERT(strcmp(name, "MermaidTranslator") != 0);
 }
 
 

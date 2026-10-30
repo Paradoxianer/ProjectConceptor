@@ -28,6 +28,8 @@
 #define P_C_DOT_TYPE 'pcDO'
 #define P_C_HTML_TYPE 'pcHT'
 #define P_C_SVG_TYPE 'pcSV'
+#define P_C_MERMAID_TYPE 'pcMM'
+#define P_C_MARKDOWN_TYPE 'pcMD'
 
 
 const uint32	P_C_PLUGIN_MESSAGE				= 'pcPM';

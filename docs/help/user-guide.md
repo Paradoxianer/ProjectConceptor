@@ -217,6 +217,9 @@ See [Macros](macros.md) for the full guide and the command reference.
     to edit further, e.g. in Inkscape.
   - **Graphviz DOT**: for the Graphviz tools; `neato -n` keeps the
     positions from ProjectConceptor, `dot` lays the graph out anew.
+  - **Mermaid flowchart** and **Markdown with Mermaid**: text that
+    GitHub, GitLab and many Markdown editors show as a diagram, e.g. in
+    a README or an issue.
 - **File → Open** loads an existing document.
 - **Edit → Undo / Redo** covers every change - creating nodes, moving
   them, grouping, editing attributes, drawing connections.

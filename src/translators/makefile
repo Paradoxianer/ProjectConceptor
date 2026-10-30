@@ -2,6 +2,7 @@ translators = \
 	DOT \
 	FreeMind \
 	HTML \
+	Mermaid \
 	Standard 
 
 
