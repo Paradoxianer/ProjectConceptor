@@ -16,7 +16,8 @@ resource app_signature "application/x-vnd.ProjectConceptor";
 resource file_types message {
 	"types" = "application/x-vnd.projectconceptor-document",
 	"types" = "application/x-freemind",
-	"types" = "application/graphml+xml"
+	"types" = "application/graphml+xml",
+	"types" = "application/vnd.jgraph.mxfile"
 };
 
 resource(1, "document") #'HVIF' array {

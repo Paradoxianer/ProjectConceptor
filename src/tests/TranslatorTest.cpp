@@ -391,6 +391,79 @@ void TranslatorTest::GraphMLImportsOtherTools(void)
 }
 
 
+void TranslatorTest::DrawioRoundTrips(void)
+{
+	BMessage	document	= GroupedDocument();
+	// a note keeps its lines, a number its unit
+	BMessage	allNodes;
+	document.FindMessage(P_C_DOC_ALLNODES, &allNodes);
+	BMessage	node;
+	allNodes.FindMessage(P_C_DOC_ENTRY, 1, &node);
+	BMessage	data;
+	node.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	note(P_C_ATTRIBUTE_NOTE);
+	note.AddString(P_C_ATTRIBUTE_NAME, "Next steps");
+	note.AddString(P_C_ATTRIBUTE_VALUE, "call\tAnn\nwrite to Bob");
+	data.AddMessage("Next steps", &note);
+	BMessage	price(P_C_ATTRIBUTE_NUMBER);
+	price.AddString(P_C_ATTRIBUTE_NAME, "Price");
+	price.AddFloat(P_C_ATTRIBUTE_VALUE, 25.5);
+	price.AddString(P_C_ATTRIBUTE_UNIT, "€");
+	data.AddMessage("Price", &price);
+	node.ReplaceMessage(P_C_NODE_DATA, &data);
+	allNodes.ReplaceMessage(P_C_DOC_ENTRY, 1, &node);
+	document.ReplaceMessage(P_C_DOC_ALLNODES, &allNodes);
+
+	BString		drawio	= Exported(document, P_C_DRAWIO_TYPE);
+	CPPUNIT_ASSERT(drawio.StartsWith("<mxfile"));
+	// members of a container are placed relative to it
+	CPPUNIT_ASSERT(drawio.FindFirst("vertex=\"1\" parent=\"n3\"") >= 0);
+	CPPUNIT_ASSERT(drawio.FindFirst("Next_steps=\"call&#9;Ann&#10;write to Bob\"") >= 0);
+
+	BMessage	back	= Imported(drawio.String());
+	BMessage	second	= Named(back, P_C_DOC_ALLNODES, "second");
+	BMessage	group	= Named(back, P_C_DOC_ALLNODES, "Team \"A\"");
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_GROUP_TYPE, group.what);
+	CPPUNIT_ASSERT_EQUAL(group.GetInt32(P_C_NODE_ID, 0), second.GetInt32(P_C_NODE_PARENT, -1));
+	CPPUNIT_ASSERT(second.GetRect(P_C_NODE_FRAME, BRect()).LeftTop() == BPoint(10, 130));
+	second.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	restored;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("Next steps", &restored));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NOTE, restored.what);
+	CPPUNIT_ASSERT_EQUAL(BString("call\tAnn\nwrite to Bob"),
+		BString(restored.GetString(P_C_ATTRIBUTE_VALUE, "")));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("Price", &restored));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NUMBER, restored.what);
+	CPPUNIT_ASSERT_EQUAL(25.5f, restored.GetFloat(P_C_ATTRIBUTE_VALUE, 0));
+	CPPUNIT_ASSERT_EQUAL(BString("€"), BString(restored.GetString(P_C_ATTRIBUTE_UNIT, "")));
+	BMessage	connections;
+	back.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	CPPUNIT_ASSERT_EQUAL((int32)1, CountField(connections, P_C_DOC_ENTRY));
+}
+
+
+void TranslatorTest::DrawioImportsCompressedDiagrams(void)
+{
+	// as older draw.io versions saved: deflated, base64, URL-encoded
+	BMessage	document	= Imported(
+		"<mxfile host=\"app.diagrams.net\"><diagram id=\"x\" name=\"Page-1\">"
+		"xVNBbsMgEHwNd2KkqNfYbXPqI0jYGCTsRWuc2L/vFkhSy03VSpV6MGJnd0bMYIRqumlPOtg3NOCF"
+		"ehGqIcSYd93UgPeiks4I9SyqSvInqtcH3U3qyqAJ+vgTgs6Es/YjZGTng2WUaVvdBaHqvDLSYB4e"
+		"4uzLMIu5MHBRn5z3DXqk1FBGw9PpmHhJHyjC9PCMCSoH3AN2EGnmkSshW5BzLosjeXEm2jJxxSy4"
+		"1hbRbcH0kOv2JnzPgzclkq/jOaziqSHqVQyEY2/gg7P5G8uV/D/PsL7l3uyI8MJVjz3cLIJp4XuD"
+		"LIMjHWHxs0VNLcRPAa9jIPA6uvNS/RemuLy/odRbPLF3"
+		"</diagram></mxfile>");
+	BMessage	alpha	= Named(document, P_C_DOC_ALLNODES, "Alpha & Co");
+	Named(document, P_C_DOC_ALLNODES, "Beta");
+	CPPUNIT_ASSERT(alpha.GetRect(P_C_NODE_FRAME, BRect()) == BRect(10, 20, 130, 80));
+	BMessage	connections;
+	document.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	BMessage	edge;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, connections.FindMessage(P_C_DOC_ENTRY, &edge));
+	CPPUNIT_ASSERT_EQUAL((int8)0, edge.GetInt8(P_C_NODE_CONNECTION_ARROWS, -1));
+}
+
+
 void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
 {
 	// opening a document asks every translator for the native format;
@@ -411,6 +484,7 @@ void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
 	CPPUNIT_ASSERT(strcmp(name, "HTMLTranslator") != 0);
 	CPPUNIT_ASSERT(strcmp(name, "MermaidTranslator") != 0);
 	CPPUNIT_ASSERT(strcmp(name, "GraphMLTranslator") != 0);
+	CPPUNIT_ASSERT(strcmp(name, "DrawioTranslator") != 0);
 }
 
 

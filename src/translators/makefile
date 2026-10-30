@@ -1,5 +1,6 @@
 translators = \
 	DOT \
+	Drawio \
 	FreeMind \
 	GraphML \
 	HTML \

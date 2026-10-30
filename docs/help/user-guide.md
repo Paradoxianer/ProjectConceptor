@@ -219,14 +219,18 @@ See [Macros](macros.md) for the full guide and the command reference.
   - **Mermaid flowchart** and **Markdown with Mermaid**: text that
     GitHub, GitLab and many Markdown editors show as a diagram, e.g. in
     a README or an issue.
+  - **draw.io diagram**: to edit further in draw.io (diagrams.net), in
+    any browser; draw.io in turn exports to Visio, PDF and PNG. Groups
+    become containers, attributes the shapes' data. ProjectConceptor
+    opens draw.io files too.
   - **GraphML**: for yEd, Gephi, NetworkX, Cytoscape and other graph
     tools; yEd shows places, colors and labels as here. ProjectConceptor
     opens GraphML files too.
   - **FreeMind**: a mind map; the graph becomes a tree from one of its
     nodes.
 - **File → Open** loads an existing document, or a file of another
-  format such as a FreeMind mind map or a GraphML graph from yEd, Gephi
-  or NetworkX. That one stays as it is: the
+  format: a draw.io diagram, a GraphML graph from yEd, Gephi or
+  NetworkX, or a FreeMind mind map. That one stays as it is: the
   first Save asks where to store the document.
 - **Edit → Undo / Redo** covers every change - creating nodes, moving
   them, grouping, editing attributes, drawing connections.
