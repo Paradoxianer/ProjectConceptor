@@ -24,6 +24,8 @@
 // group (B_TRANSLATOR_NONE vs B_TRANSLATOR_TEXT), which never reaches
 // Translate() at all (see PDocument::Save(), PCSavePanel::BuildFormatsMenu())
 #define P_C_DOCUMENT_TEXT_TYPE 'pcXT'
+// export formats of the translators in src/translators
+#define P_C_DOT_TYPE 'pcDO'
 
 
 const uint32	P_C_PLUGIN_MESSAGE				= 'pcPM';
@@ -374,6 +376,30 @@ extern const char*		P_C_MACRO_RUN_ON_OPEN;	//			= "Macro::runOnOpen"
 /** the variable every playback starts with: today as YYYY-MM-DD, the way
  * date attributes store it */
 extern const char*		P_C_VARIABLE_TODAY;	//				= "today"
+
+/** a file format of a translator: in the save/export panel's menu items,
+ * in a document's saveSettings, and in a translator's configuration
+ * message, which pairs each P_C_FORMAT_TYPE with the file name
+ * P_C_FORMAT_EXTENSION (without the dot) the format is saved with */
+extern const char*		P_C_FORMAT_NAME;	//				= "format::name"
+extern const char*		P_C_FORMAT_MIME;	//				= "format::MIME"
+extern const char*		P_C_FORMAT_TYPE;	//				= "format::type"
+extern const char*		P_C_FORMAT_EXTENSION;	//			= "format::extension"
+
+/** a flattened document: both lists hold their nodes/connections as
+ * P_C_DOC_ENTRY messages, linked by P_C_NODE_ID; a group lists its
+ * children's ids in P_C_NODE_CHILD_IDS, see Indexer */
+extern const char*		P_C_DOC_ALLNODES;	//				= "PDocument::allNodes"
+extern const char*		P_C_DOC_ALLCONNECTIONS;	//			= "PDocument::allConnections"
+extern const char*		P_C_DOC_ENTRY;		//				= "node"
+extern const char*		P_C_NODE_ID;		//				= "this"
+extern const char*		P_C_NODE_CHILD_IDS;	//				= "allNodesList"
+/** colors in Node::Pattern (int32 holding an rgb_color): the card, its
+ * band, its border and its text */
+extern const char*		P_C_PATTERN_FILL_COLOR;	//			= "FillColor"
+extern const char*		P_C_PATTERN_HIGHLIGHT_COLOR;	//	= "HighlightColor"
+extern const char*		P_C_PATTERN_BORDER_COLOR;	//		= "BorderColor"
+extern const char*		P_C_PATTERN_HIGH_COLOR;	//			= "HighColor"
 
 extern const char*		P_C_NODE_CONNECTION_FROM;	//		= "Node::from"
 extern const char*		P_C_NODE_CONNECTION_TO;		//		= "Node::to"

@@ -1,4 +1,5 @@
 translators = \
+	DOT \
 	FreeMind \
 	Standard 
 

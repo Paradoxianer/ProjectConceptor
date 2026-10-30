@@ -5,6 +5,8 @@
 #include <Message.h>
 #include <TranslatorRoster.h>
 
+#include <String.h>
+
 #include <string.h>
 
 #include "ProjectConceptorDefs.h"
@@ -115,6 +117,101 @@ void TranslatorTest::TextExportRoundTrips(void)
 	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
 		restored.FindMessage("PDocument::allNodes", &allNodes));
 	CPPUNIT_ASSERT_EQUAL((int32)2, CountField(allNodes, "node"));
+}
+
+
+// two nodes in a group, one with an attribute, connected
+static BMessage GroupedDocument(void)
+{
+	BMessage	document	= TwoNodeDocument();
+	BMessage	allNodes;
+	document.FindMessage(P_C_DOC_ALLNODES, &allNodes);
+	BMessage	node;
+	allNodes.FindMessage(P_C_DOC_ENTRY, 0, &node);
+	BMessage	data;
+	node.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	attribute(B_STRING_TYPE);
+	attribute.AddString(P_C_ATTRIBUTE_NAME, "Owner");
+	attribute.AddString(P_C_ATTRIBUTE_VALUE, "Ann & Bob");
+	data.AddMessage("Owner", &attribute);
+	node.ReplaceMessage(P_C_NODE_DATA, &data);
+	allNodes.ReplaceMessage(P_C_DOC_ENTRY, 0, &node);
+	for (int32 i = 0; i < 2; i++) {
+		allNodes.FindMessage(P_C_DOC_ENTRY, i, &node);
+		node.AddInt32(P_C_NODE_PARENT, 3);
+		allNodes.ReplaceMessage(P_C_DOC_ENTRY, i, &node);
+	}
+	BMessage	group(P_C_GROUP_TYPE);
+	BMessage	groupData;
+	groupData.AddString(P_C_NODE_NAME, "Team \"A\"");
+	group.AddMessage(P_C_NODE_DATA, &groupData);
+	group.AddRect(P_C_NODE_FRAME, BRect(0, 50, 120, 180));
+	group.AddInt32(P_C_NODE_ID, 3);
+	group.AddInt32(P_C_NODE_CHILD_IDS, 1);
+	group.AddInt32(P_C_NODE_CHILD_IDS, 2);
+	allNodes.AddMessage(P_C_DOC_ENTRY, &group);
+	document.ReplaceMessage(P_C_DOC_ALLNODES, &allNodes);
+
+	BMessage	allConnections;
+	BMessage	connection(P_C_CONNECTION_TYPE);
+	BMessage	connectionData;
+	connectionData.AddString(P_C_NODE_NAME, "asks");
+	connection.AddMessage(P_C_NODE_DATA, &connectionData);
+	connection.AddInt32(P_C_NODE_ID, 4);
+	connection.AddInt32(P_C_NODE_CONNECTION_FROM, 1);
+	connection.AddInt32(P_C_NODE_CONNECTION_TO, 2);
+	allConnections.AddMessage(P_C_DOC_ENTRY, &connection);
+	document.ReplaceMessage(P_C_DOC_ALLCONNECTIONS, &allConnections);
+	return document;
+}
+
+
+// the document written by the translator for outType, as text
+static BString Exported(const BMessage &document, uint32 outType)
+{
+	BMallocIO	native;
+	document.Flatten(&native);
+	native.Seek(0, SEEK_SET);
+	BMallocIO	output;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, BTranslatorRoster::Default()->Translate(
+		&native, NULL, NULL, &output, outType));
+	return BString((const char *)output.Buffer(), output.BufferLength());
+}
+
+
+void TranslatorTest::DotExportWritesClustersLabelsAndEdges(void)
+{
+	BString	dot	= Exported(GroupedDocument(), P_C_DOT_TYPE);
+	CPPUNIT_ASSERT(dot.StartsWith("digraph"));
+	CPPUNIT_ASSERT(dot.FindFirst("subgraph cluster_3 {") >= 0);
+	CPPUNIT_ASSERT(dot.FindFirst("label=\"Team \\\"A\\\"\"") >= 0);
+	// the attribute as a row of the node's label, escaped for it
+	CPPUNIT_ASSERT(dot.FindFirst("<B>first</B>") >= 0);
+	CPPUNIT_ASSERT(dot.FindFirst("Ann &amp; Bob") >= 0);
+	CPPUNIT_ASSERT(dot.FindFirst("<B>second</B>") >= 0);
+	// both nodes inside the cluster, the edge after it
+	CPPUNIT_ASSERT(dot.FindFirst("n2 [") < dot.FindFirst("\t}\n"));
+	CPPUNIT_ASSERT(dot.FindFirst("n1 -> n2 [dir=forward]") >= 0);
+}
+
+
+void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
+{
+	// opening a document asks every translator for the native format;
+	// an export-only one must not answer
+	BMessage		document	= TwoNodeDocument();
+	BMallocIO		native;
+	document.Flatten(&native);
+	native.Seek(0, SEEK_SET);
+	translator_info	info;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, BTranslatorRoster::Default()->Identify(
+		&native, NULL, &info, P_C_DOCUMENT_RAW_TYPE));
+	const char		*name	= NULL;
+	const char		*infoText	= NULL;
+	int32			version	= 0;
+	BTranslatorRoster::Default()->GetTranslatorInfo(info.translator, &name,
+		&infoText, &version);
+	CPPUNIT_ASSERT(strcmp(name, "DOTTranslator") != 0);
 }
 
 

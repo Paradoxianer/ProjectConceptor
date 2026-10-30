@@ -12,11 +12,15 @@ public:
 	void FreeMindImportBuildsNodesAndConnections(void);
 	void TextExportRoundTrips(void);
 	void UnknownOutputTypeIsRefused(void);
+	void DotExportWritesClustersLabelsAndEdges(void);
+	void ExportFormatsNeverOpenDocuments(void);
 
 	CPPUNIT_TEST_SUITE(TranslatorTest);
 	CPPUNIT_TEST(FreeMindImportBuildsNodesAndConnections);
 	CPPUNIT_TEST(TextExportRoundTrips);
 	CPPUNIT_TEST(UnknownOutputTypeIsRefused);
+	CPPUNIT_TEST(DotExportWritesClustersLabelsAndEdges);
+	CPPUNIT_TEST(ExportFormatsNeverOpenDocuments);
 	CPPUNIT_TEST_SUITE_END();
 };
 
