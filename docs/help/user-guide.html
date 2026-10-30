@@ -224,8 +224,8 @@ command reference.</p>
 
 <ul>
 	<li><strong>File &rarr; Save / Save As</strong> writes the document to
-		a <code>.pcd</code> file. Save As also offers the other formats
-		ProjectConceptor can open again, e.g. FreeMind.</li>
+		a <code>.pcd</code> file (or as XML text, which keeps everything
+		too).</li>
 	<li><strong>File &rarr; Export</strong> writes a copy in a format for
 		other programs. The document itself stays in its own file.
 		<ul>
@@ -241,8 +241,12 @@ command reference.</p>
 			<li><strong>Mermaid flowchart</strong> and <strong>Markdown with
 				Mermaid</strong>: text that GitHub, GitLab and many Markdown
 				editors show as a diagram, e.g. in a README or an issue.</li>
+			<li><strong>FreeMind</strong>: a mind map; the graph becomes a tree
+				from one of its nodes.</li>
 		</ul></li>
-	<li><strong>File &rarr; Open</strong> loads an existing document.</li>
+	<li><strong>File &rarr; Open</strong> loads an existing document, or a
+		file of another format such as a FreeMind mind map. That one stays
+		as it is: the first Save asks where to store the document.</li>
 	<li><strong>Edit &rarr; Undo / Redo</strong> covers every change &mdash;
 		creating nodes, moving them, grouping, editing attributes, drawing
 		connections.</li>

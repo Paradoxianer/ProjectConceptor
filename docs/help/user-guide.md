@@ -204,9 +204,8 @@ See [Macros](macros.md) for the full guide and the command reference.
 
 ## Save, load, undo
 
-- **File → Save / Save As** writes the document to a `.pcd` file.
-  Save As also offers the other formats ProjectConceptor can open
-  again, e.g. FreeMind.
+- **File → Save / Save As** writes the document to a `.pcd` file (or
+  as XML text, which keeps everything too).
 - **File → Export** writes a copy in a format for other programs. The
   document itself stays in its own file.
   - **HTML page**: one file anyone can open in a browser, no Haiku
@@ -220,7 +219,11 @@ See [Macros](macros.md) for the full guide and the command reference.
   - **Mermaid flowchart** and **Markdown with Mermaid**: text that
     GitHub, GitLab and many Markdown editors show as a diagram, e.g. in
     a README or an issue.
-- **File → Open** loads an existing document.
+  - **FreeMind**: a mind map; the graph becomes a tree from one of its
+    nodes.
+- **File → Open** loads an existing document, or a file of another
+  format such as a FreeMind mind map. That one stays as it is: the
+  first Save asks where to store the document.
 - **Edit → Undo / Redo** covers every change - creating nodes, moving
   them, grouping, editing attributes, drawing connections.
 - **Edit → Select all** selects the entire graph at once, e.g. to move

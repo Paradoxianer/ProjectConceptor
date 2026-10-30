@@ -18,6 +18,7 @@ public:
 	void SvgExportStandsAlone(void);
 	void MermaidExportWritesAFlowchart(void);
 	void ExportWritesACopyOfItsOwnType(void);
+	void ImportedFileIsNotTheDocumentsFile(void);
 
 	CPPUNIT_TEST_SUITE(TranslatorTest);
 	CPPUNIT_TEST(FreeMindImportBuildsNodesAndConnections);
@@ -29,6 +30,7 @@ public:
 	CPPUNIT_TEST(SvgExportStandsAlone);
 	CPPUNIT_TEST(MermaidExportWritesAFlowchart);
 	CPPUNIT_TEST(ExportWritesACopyOfItsOwnType);
+	CPPUNIT_TEST(ImportedFileIsNotTheDocumentsFile);
 	CPPUNIT_TEST_SUITE_END();
 };
 

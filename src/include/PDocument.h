@@ -250,6 +250,11 @@ protected:
 		 	float				width,height;
 			bool				dirty;
 			entry_ref			*entryRef;
+			/** the name of a file opened from another format, without its
+			 * extension: the document has no file of its own then */
+			BString				importedName;
+			/** where that file is, for the save panel */
+			entry_ref			importedDirectory;
 			BEntry				*autoSaveRef;
 			bool				modified;
 

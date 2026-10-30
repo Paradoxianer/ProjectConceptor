@@ -15,8 +15,7 @@
 class FormatChangedHandler;
 
 /** Save panel with a menu of the document formats the translators offer.
- * Saving lists the formats a document can be opened from again; exporting
- * lists the others. The file name follows the chosen format's extension.
+ * Saving lists the document's own formats, exporting the others. The file name follows the chosen format's extension.
  */
 class PCSavePanel : public BFilePanel
 {

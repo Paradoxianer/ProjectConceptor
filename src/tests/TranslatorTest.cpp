@@ -325,6 +325,25 @@ void TranslatorTest::ExportWritesACopyOfItsOwnType(void)
 }
 
 
+void TranslatorTest::ImportedFileIsNotTheDocumentsFile(void)
+{
+	BFile		mindMap("/tmp/projectconceptor-import-test.mm",
+		B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+	mindMap.Write(kFreeMindSample, strlen(kFreeMindSample));
+	BEntry		entry("/tmp/projectconceptor-import-test.mm");
+	entry_ref	ref;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, entry.GetRef(&ref));
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->SetEntry(&ref, NULL);
+	doc->Load();
+	// Save asks for a new file instead of writing over the mind map,
+	// offering its name
+	CPPUNIT_ASSERT(doc->Entry() == NULL);
+	CPPUNIT_ASSERT_EQUAL(BString("projectconceptor-import-test"), BString(doc->Title()));
+	entry.Remove();
+}
+
+
 void TranslatorTest::UnknownOutputTypeIsRefused(void)
 {
 	BMessage	document	= TwoNodeDocument();

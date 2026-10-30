@@ -523,6 +523,8 @@ const char* PDocument::Title(void)
 		return NULL;
 	if (entryRef)
 		return entryRef->name;
+	if (importedName.Length() > 0)
+		return importedName.String();
 	return B_TRANSLATE("Untitled");
 }
 
@@ -880,6 +882,7 @@ void PDocument::Load(void)
 	BMessage			loaded;
 	BFile				file(entryRef,B_READ_ONLY);
 	status_t			err				= file.InitCheck();
+	bool				imported		= false;
 	if (err == B_OK) {
 		BTranslatorRoster	*roster	= BTranslatorRoster::Default();
 		translator_info		identified;
@@ -891,6 +894,11 @@ void PDocument::Load(void)
 			output.Seek(0,SEEK_SET);
 			err = loaded.Unflatten(&output);
 		}
+		// read by another translator than the one writing documents
+		translator_id	native;
+		imported	= (err == B_OK)
+			&& ((FindSaveTranslator(P_C_DOCUMENT_TYPE,&native) != B_OK)
+				|| (identified.translator != native));
 	}
 	if (err != B_OK) {
 		BString	text;
@@ -898,6 +906,21 @@ void PDocument::Load(void)
 		(new BAlert(B_TRANSLATE("Error"),text.String(),B_TRANSLATE("OK"),
 			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go(NULL);
 		return;
+	}
+	if (imported) {
+		// Save must not write the document over the file it came from:
+		// it asks for a name, offering the file's without its extension
+		importedName	= entryRef->name;
+		int32	dot	= importedName.FindLast('.');
+		if (dot > 0)
+			importedName.Truncate(dot);
+		BEntry	imported(entryRef);
+		BEntry	directory;
+		if ((imported.GetParent(&directory) != B_OK)
+			|| (directory.GetRef(&importedDirectory) != B_OK))
+			importedDirectory	= entry_ref();
+		delete entryRef;
+		entryRef	= NULL;
 	}
 	ResetModified();
 	UpdateWindowTitle();
@@ -1017,7 +1040,17 @@ void PDocument::SavePanel()
 //		savePanel = new PCSavePanel(B_SAVE_PANEL, new BMessenger(this),NULL,0,false);
 		savePanel = new PCSavePanel(NULL,new BMessenger(this));
 	}
-	if (entryRef) savePanel->SetPanelDirectory(entryRef);
+	BEntry	entry;
+	BEntry	directory;
+	if ((entryRef != NULL) && (entry.SetTo(entryRef) == B_OK)
+		&& (entry.GetParent(&directory) == B_OK))
+		savePanel->SetPanelDirectory(&directory);
+	else if (importedName.Length() > 0) {
+		if (importedDirectory.name != NULL)
+			savePanel->SetPanelDirectory(&importedDirectory);
+		savePanel->SetSaveText(importedName.String());
+		savePanel->FormatChanged();
+	}
 	savePanel->Window()->SetWorkspaces(B_CURRENT_WORKSPACE);
 	savePanel->Show();
 }

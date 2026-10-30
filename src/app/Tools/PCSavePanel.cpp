@@ -160,12 +160,11 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 		for (int j=0; j<outNum; j++) {
 			if (oFormats[j].type == P_C_DOCUMENT_RAW_TYPE)
 				continue;
-			// a saved document must open again: the translator reads the
-			// format back; everything else is an export
-			bool	readsBack	= false;
-			for (q=0;q<inNum;q++)
-				readsBack |= (iFormats[q].type == oFormats[j].type);
-			if (readsBack == exporting)
+			// a document is saved in its own formats only, which keep
+			// everything; the others are exports, opened as imports
+			bool	native	= (oFormats[j].type == P_C_DOCUMENT_TYPE)
+				|| (oFormats[j].type == P_C_DOCUMENT_TEXT_TYPE);
+			if (native == exporting)
 				continue;
 			message	= new BMessage(kFormatChanged);
 			message->AddString(P_C_FORMAT_NAME,oFormats[j].name);
