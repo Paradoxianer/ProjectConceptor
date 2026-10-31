@@ -10,8 +10,11 @@
 
 #include <String.h>
 
+#include <map>
+
 #include <string.h>
 
+#include "PCSavePanel.h"
 #include "PDocument.h"
 #include "ProjectConceptorDefs.h"
 #include "TestDocument.h"
@@ -543,6 +546,42 @@ void TranslatorTest::ImportedFileIsNotTheDocumentsFile(void)
 	CPPUNIT_ASSERT(doc->Entry() == NULL);
 	CPPUNIT_ASSERT_EQUAL(BString("projectconceptor-import-test"), BString(doc->Title()));
 	entry.Remove();
+}
+
+
+// the format menu's entries by name, each with its message
+static std::map<BString, BMessage> FormatItems(bool exporting)
+{
+	PCSavePanel	panel(NULL, NULL, exporting);
+	BMenu		*menu	= panel.BuildFormatsMenu();
+	std::map<BString, BMessage>	items;
+	for (int32 i = 0; i < menu->CountItems(); i++) {
+		BMenuItem	*item	= menu->ItemAt(i);
+		if ((item->Label() != NULL) && (item->Message() != NULL))
+			items[BString(item->Label())]	= *item->Message();
+	}
+	delete menu;
+	return items;
+}
+
+
+void TranslatorTest::SaveAndExportOfferTheRightFormats(void)
+{
+	std::map<BString, BMessage>	save		= FormatItems(false);
+	std::map<BString, BMessage>	exporting	= FormatItems(true);
+	CPPUNIT_ASSERT(save.find("ProjectConceptor Document") != save.end());
+	CPPUNIT_ASSERT(save.find("Graphviz DOT") == save.end());
+	CPPUNIT_ASSERT(save.find("FreeMind") == save.end());
+	CPPUNIT_ASSERT(exporting.find("ProjectConceptor Document") == exporting.end());
+	CPPUNIT_ASSERT(exporting.find("HTML page") != exporting.end());
+	CPPUNIT_ASSERT_EQUAL(BString("html"),
+		BString(exporting["HTML page"].GetString(P_C_FORMAT_EXTENSION, "")));
+	// pictures through the system's bitmap translators
+	std::map<BString, BMessage>::iterator	png	= exporting.find("PNG image");
+	CPPUNIT_ASSERT(png != exporting.end());
+	CPPUNIT_ASSERT(png->second.GetBool(P_C_FORMAT_BITMAP, false));
+	CPPUNIT_ASSERT_EQUAL(BString("png"),
+		BString(png->second.GetString(P_C_FORMAT_EXTENSION, "")));
 }
 
 

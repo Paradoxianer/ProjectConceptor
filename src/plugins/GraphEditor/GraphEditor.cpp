@@ -19,6 +19,8 @@
 #include <support/DateTime.h>
 
 #include "GraphEditor.h"
+
+#include <interface/Bitmap.h>
 #include "ColorSwatchView.h"
 #include "ColorPickerWindow.h"
 #include "AttributeText.h"
@@ -162,6 +164,7 @@ void GraphEditor::Init(void) {
 	fromPoint		= new BPoint(0,0);
 	toPoint			= new BPoint(0,0);
 	renderer		= new BList();
+	forPaper		= false;
 	scale			= 1.0;
 	animatingRenderers	= new BList();
 	pendingChangedNodes	= new BList();
@@ -595,17 +598,51 @@ BRect GraphEditor::PrintFrame(void) {
 	return frame;
 }
 
+void GraphEditor::_DrawForPaper(BView *target, BRect updateRect) {
+	// the graph in the light style on white, without the grid, the
+	// selection or anything else the editing adds
+	GraphStyle	screen	= style;
+	style	= GraphStyle::Card(make_color(255,255,255),make_color(0,0,0),
+		screen.accent,be_plain_font->Size());
+	forPaper	= true;
+	target->SetHighColor(255,255,255);
+	target->FillRect(updateRect);
+	for (int32 i = 0; i < renderer->CountItems(); i++)
+		((Renderer *)renderer->ItemAt(i))->Draw(target,updateRect);
+	forPaper	= false;
+	style	= screen;
+}
+
+BBitmap* GraphEditor::PaperBitmap(float scale) {
+	BRect	frame	= PrintFrame();
+	if (!frame.IsValid())
+		return NULL;
+	BRect	bounds(0,0,ceilf(frame.Width()*scale),ceilf(frame.Height()*scale));
+	BBitmap	*bitmap	= new BBitmap(bounds,B_BITMAP_ACCEPTS_VIEWS,B_RGB32);
+	if (bitmap->InitCheck() != B_OK) {
+		delete bitmap;
+		return NULL;
+	}
+	BView	*paper	= new BView(bounds,"paper",B_FOLLOW_NONE,B_WILL_DRAW);
+	bitmap->AddChild(paper);
+	bitmap->Lock();
+	// document coordinates, the graph's corner at the bitmap's
+	// like the editor's own view: see-through fills and smooth edges
+	paper->SetDrawingMode(B_OP_ALPHA);
+	// the origin is in pixels, not in the scaled points
+	paper->SetScale(scale);
+	paper->SetOrigin(-frame.left*scale,-frame.top*scale);
+	_DrawForPaper(paper,frame);
+	paper->Sync();
+	bitmap->RemoveChild(paper);
+	bitmap->Unlock();
+	delete paper;
+	return bitmap;
+}
+
 void GraphEditor::Draw(BRect updateRect) {
 	if (IsPrinting()) {
-		// paper: the graph at 100 % in the light style, without the grid,
-		// the selection or anything else the editing adds
-		GraphStyle	screen	= style;
-		style	= GraphStyle::Card(make_color(255,255,255),make_color(0,0,0),
-			screen.accent,be_plain_font->Size());
-		SetHighColor(255,255,255);
-		FillRect(updateRect);
-		renderer->DoForEach(DrawRenderer,this);
-		style	= screen;
+		_DrawForPaper(this,updateRect);
 		return;
 	}
 	// BView wraps every Draw() in one PushState()/PopState() pair, so the

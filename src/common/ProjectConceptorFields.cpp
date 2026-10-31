@@ -61,6 +61,7 @@ const char*		P_C_FORMAT_MIME					= "format::MIME";
 const char*		P_C_FORMAT_TYPE					= "format::type";
 const char*		P_C_FORMAT_EXTENSION			= "format::extension";
 const char*		P_C_FORMAT_TITLE				= "format::title";
+const char*		P_C_FORMAT_BITMAP				= "format::bitmap";
 
 const char*		P_C_DOC_ALLNODES				= "PDocument::allNodes";
 const char*		P_C_DOC_ALLCONNECTIONS			= "PDocument::allConnections";

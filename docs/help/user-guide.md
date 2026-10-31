@@ -208,6 +208,10 @@ See [Macros](macros.md) for the full guide and the command reference.
   as XML text, which keeps everything too).
 - **File → Export** writes a copy in a format for other programs. The
   document itself stays in its own file.
+  - **Pictures** (PNG, JPEG, WebP, … - whatever image formats Haiku has
+    translators for): the graph as the editor draws it, on white,
+    without the grid or the selection, at twice its size so it stays
+    sharp.
   - **HTML page**: one file anyone can open in a browser, no Haiku
     needed. Drag to move, scroll to zoom, click a node to see all its
     attributes, type into Search to find nodes. Follows the browser's

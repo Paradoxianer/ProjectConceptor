@@ -393,6 +393,9 @@ extern const char*		P_C_FORMAT_NAME;	//				= "format::name"
 extern const char*		P_C_FORMAT_MIME;	//				= "format::MIME"
 extern const char*		P_C_FORMAT_TYPE;	//				= "format::type"
 extern const char*		P_C_FORMAT_EXTENSION;	//			= "format::extension"
+/** bool in a format's message: an image the editor draws, written by the
+ * system's bitmap translators */
+extern const char*		P_C_FORMAT_BITMAP;	//				= "format::bitmap"
 /** in the ioExtension of an export: the document's name, for a title */
 extern const char*		P_C_FORMAT_TITLE;	//				= "format::title"
 

@@ -17,6 +17,8 @@
 #include <support/List.h>
 #include "ShortCutFilter.h"
 
+class BBitmap;
+
 class PEditorManager;
 class PDocument;
 /**
@@ -114,6 +116,13 @@ public:
 	 * Draw() - the editor draws for paper then.
 	 */
 	virtual BRect			PrintFrame(void) {return BRect();};
+
+	/**
+	 * PrintFrame() drawn the way it is printed into a new bitmap (the
+	 * caller's), scale pixels per point; NULL for an editor that doesn't
+	 * print. Called with the view's looper locked.
+	 */
+	virtual BBitmap*		PaperBitmap(float scale) {return NULL;};
 
 	/**
 	 * if the Editor is an View, this should not return a link to the BView Handler.

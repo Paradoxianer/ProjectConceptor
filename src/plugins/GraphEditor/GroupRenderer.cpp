@@ -453,7 +453,7 @@ bool GroupRenderer::Caught(BPoint where)
 
 void GroupRenderer::Draw(BView *drawOn, BRect updateRect)
 {
-	if (drawOn->IsPrinting() && (selected || hovered)) {
+	if (editor->ForPaper() && (selected || hovered)) {
 		// paper shows the graph, not the selection or the pointer
 		bool	wasSelected	= selected;
 		bool	wasHovered	= hovered;

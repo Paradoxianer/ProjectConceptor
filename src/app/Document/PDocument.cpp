@@ -2,6 +2,7 @@
 #include <app/PropertyInfo.h>
 #include <app/Roster.h>
 #include <interface/Alert.h>
+#include <interface/Bitmap.h>
 #include <interface/PrintJob.h>
 #include <interface/TextView.h>
 #include <interface/Screen.h>
@@ -10,6 +11,7 @@
 #include <support/Debug.h>
 #include <support/String.h>
 #include <storage/NodeInfo.h>
+#include <BitmapStream.h>
 #include <TranslationUtils.h>
 #include <TranslatorRoster.h>
 #include <string.h>
@@ -783,6 +785,36 @@ void PDocument::Save(void)
 }
 
 
+// the largest side of an exported picture, in pixels
+static const float	kMaxBitmapSide	= 8000;
+
+// the graph as a picture, through the system's bitmap translators
+static status_t WriteBitmap(PEditorManager *editorManager, BPositionIO *out,
+	uint32 type)
+{
+	PEditor	*editor	= PrintableEditor(editorManager);
+	if (editor == NULL)
+		return B_ERROR;
+	BView	*view	= editor->GetView();
+	if (!view->LockLooper())
+		return B_ERROR;
+	BRect	frame	= editor->PrintFrame();
+	// two pixels per point stay sharp on any screen
+	float	scale	= std::min(2.0f,
+		kMaxBitmapSide / std::max(frame.Width(),frame.Height()));
+	BBitmap	*bitmap	= editor->PaperBitmap(scale);
+	view->UnlockLooper();
+	if (bitmap == NULL)
+		return B_NO_MEMORY;
+	BBitmapStream	stream(bitmap);
+	status_t		err	= BTranslatorRoster::Default()->Translate(&stream,NULL,NULL,
+		out,type);
+	stream.DetachBitmap(&bitmap);
+	delete bitmap;
+	return err;
+}
+
+
 status_t PDocument::WriteTo(const entry_ref &ref, const BMessage &saveSettings,
 	bool exporting)
 {
@@ -794,7 +826,9 @@ status_t PDocument::WriteTo(const entry_ref &ref, const BMessage &saveSettings,
 	int32		outType		= 0;
 	bool		useTranslator	= (err == B_OK)
 		&& (saveSettings.FindInt32(P_C_FORMAT_TYPE,&outType) == B_OK);
-	if (useTranslator) {
+	if (useTranslator && saveSettings.GetBool(P_C_FORMAT_BITMAP,false)) {
+		err = WriteBitmap(editorManager,&file,(uint32)outType);
+	} else if (useTranslator) {
 		// translator ids change between sessions; the format type doesn't
 		translator_info	translatorInfo;
 		err = FindSaveTranslator((uint32)outType,&translatorInfo.translator);

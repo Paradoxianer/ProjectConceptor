@@ -103,7 +103,7 @@ void ConnectionRenderer::LanguageChanged() {
 }
 
 void ConnectionRenderer::Draw(BView *drawOn, BRect updateRect) {
-	if (drawOn->IsPrinting() && (selected)) {
+	if (editor->ForPaper() && (selected)) {
 		// paper shows the graph, not the selection or the pointer
 		bool	wasSelected	= selected;
 		selected	= false;

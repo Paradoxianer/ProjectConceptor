@@ -23,6 +23,7 @@ public:
 	void DrawioImportsCompressedDiagrams(void);
 	void ExportWritesACopyOfItsOwnType(void);
 	void ImportedFileIsNotTheDocumentsFile(void);
+	void SaveAndExportOfferTheRightFormats(void);
 
 	CPPUNIT_TEST_SUITE(TranslatorTest);
 	CPPUNIT_TEST(FreeMindImportBuildsNodesAndConnections);
@@ -39,6 +40,7 @@ public:
 	CPPUNIT_TEST(DrawioImportsCompressedDiagrams);
 	CPPUNIT_TEST(ExportWritesACopyOfItsOwnType);
 	CPPUNIT_TEST(ImportedFileIsNotTheDocumentsFile);
+	CPPUNIT_TEST(SaveAndExportOfferTheRightFormats);
 	CPPUNIT_TEST_SUITE_END();
 };
 

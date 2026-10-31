@@ -116,6 +116,9 @@ public:
 	virtual	BView*			GetView(void);
 	virtual	const char*		TabLabel(void);
 	virtual	BRect			PrintFrame(void);
+	virtual	BBitmap*		PaperBitmap(float scale);
+	/** drawing for paper or a picture: no selection, hover or grid */
+			bool			ForPaper(void) {return forPaper;};
 	virtual BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
 
@@ -366,6 +369,7 @@ protected:
 			BMessage		pickedAttributeColor;
 			bool			attributeColorPicker;
 			BList			*renderer;
+			bool			forPaper;
 			float			scale;
 
 			/** renderers currently mid-AnimationStep(); drives the shared
@@ -392,5 +396,6 @@ protected:
 			uint32			oldEventMask;
 
 private:
+			void			_DrawForPaper(BView *target, BRect updateRect);
 };
 #endif

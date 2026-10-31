@@ -1,5 +1,7 @@
 #include <interface/TextControl.h>
 #include <interface/Window.h>
+#include <storage/MimeType.h>
+#include <translation/TranslatorFormats.h>
 #include <support/Autolock.h>
 #include <Catalog.h>
 #include <string.h>
@@ -148,6 +150,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 	BMessage					*message			= NULL;
 	BMenu						*menu				= new BMenu(B_TRANSLATE("File format") );
 	BMenuItem					*item				= NULL;
+	bool						bitmapsStarted		= false;
 	roster->GetAllTranslators(&translators, &num_translators);
 	for (i=0;i<num_translators;i++)  {
 		roster->GetInputFormats(translators[i], &iFormats, &inNum);
@@ -172,6 +175,40 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 			message->AddInt32(P_C_FORMAT_TYPE,oFormats[j].type);
 			message->AddString(P_C_FORMAT_EXTENSION,
 				FormatExtension(roster, translators[i], oFormats[j].type));
+			item = new BMenuItem(oFormats[j].name, message);
+			item->SetTarget(formatHandler);
+			menu->AddItem( item );
+		}
+	}
+	// an export can also be a picture: every format the system's bitmap
+	// translators write
+	for (i=0; exporting && (i<num_translators); i++) {
+		roster->GetInputFormats(translators[i], &iFormats, &inNum);
+		bool	readsBitmaps	= false;
+		for (q=0;q<inNum;q++)
+			readsBitmaps |= (iFormats[q].type == B_TRANSLATOR_BITMAP);
+		if (!readsBitmaps)
+			continue;
+		roster->GetOutputFormats(translators[i], &oFormats, &outNum);
+		for (int j=0; j<outNum; j++) {
+			if ((oFormats[j].type == B_TRANSLATOR_BITMAP)
+				|| (oFormats[j].group != B_TRANSLATOR_BITMAP))
+				continue;
+			if (!bitmapsStarted) {
+				menu->AddSeparatorItem();
+				bitmapsStarted	= true;
+			}
+			BMessage	extensions;
+			const char	*extension	= "";
+			BMimeType	mime(oFormats[j].MIME);
+			if (mime.GetFileExtensions(&extensions) == B_OK)
+				extension	= extensions.GetString("extensions", "");
+			message	= new BMessage(kFormatChanged);
+			message->AddString(P_C_FORMAT_NAME,oFormats[j].name);
+			message->AddString(P_C_FORMAT_MIME,oFormats[j].MIME);
+			message->AddInt32(P_C_FORMAT_TYPE,oFormats[j].type);
+			message->AddString(P_C_FORMAT_EXTENSION,extension);
+			message->AddBool(P_C_FORMAT_BITMAP,true);
 			item = new BMenuItem(oFormats[j].name, message);
 			item->SetTarget(formatHandler);
 			menu->AddItem( item );
