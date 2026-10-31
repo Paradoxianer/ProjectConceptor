@@ -119,6 +119,12 @@ public:
 	virtual	BBitmap*		PaperBitmap(float scale);
 	/** drawing for paper or a picture: no selection, hover or grid */
 			bool			ForPaper(void) {return forPaper;};
+	/** a point (document coordinates) far enough out of the window that
+	 * moving nodes becomes dragging them out (#120) */
+			bool			FarOutside(BPoint where);
+	/** the selection as a negotiated drag: Tracker makes a PNG of it, or
+	 * a document of only these nodes; the reply comes as B_COPY_TARGET */
+			void			DragSelectionOut(void);
 	virtual BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
 
@@ -396,6 +402,10 @@ protected:
 			uint32			oldEventMask;
 
 private:
-			void			_DrawForPaper(BView *target, BRect updateRect);
+			void			_DrawForPaper(BView *target, BRect updateRect,
+								bool selectionOnly);
+			BRect			_PaperFrame(bool selectionOnly);
+			BBitmap*		_PaperBitmap(float scale, bool selectionOnly);
+			void			_DeliverDrag(BMessage *request);
 };
 #endif

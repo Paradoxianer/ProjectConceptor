@@ -1,4 +1,4 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	3074511775
+1	German	application/x-vnd.ProjectConceptor-plugin	3159529502
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Löschen
 Triangle	GraphEditor		Dreieck
@@ -25,6 +25,7 @@ Status	GraphEditor		Status
 Open\nIn progress\nDone	GraphEditor		Offen\nIn Arbeit\nErledigt
 Border	GraphEditor		Rand
 Straight	GraphEditor		Gerade
+PNG image	GraphEditor		PNG-Bild
 Shape of the selected nodes	GraphEditor		Form der ausgewählten Knoten
 Attribute	GraphEditor		Attribut
 Size	GraphEditor	status bar: before a node's width × height	Größe
@@ -48,6 +49,7 @@ Left edge of the selected nodes	GraphEditor		Linker Rand der ausgewählten Knote
 Toggle grid	GraphEditor		Raster ein/aus
 Text	GraphEditor		Text
 Add an attribute to the selected nodes	GraphEditor		Attribut zu den ausgewählten Knoten hinzufügen
+ProjectConceptor document	GraphEditor		ProjectConceptor-Dokument
 Group	GraphEditor		Gruppieren
 Parallelogram	GraphEditor		Parallelogramm
 Toggle smart alignment guides	GraphEditor		Intelligente Ausrichtungshilfen ein/aus

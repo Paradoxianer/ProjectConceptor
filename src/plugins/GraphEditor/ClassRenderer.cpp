@@ -214,6 +214,23 @@ void ClassRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
 		ResizeSelected(target.left-frame.left,target.top-frame.top,
 			target.right-frame.right,target.bottom-frame.bottom);
 	}
+	else if (editor->FarOutside(pt)) {
+		// far out of the window the move becomes dragging the selection
+		// out (#120): the nodes go back first
+		BList *renderer	= editor->RenderList();
+		for (int32 i=0;i<renderer->CountItems();i++)
+			MoveAll(renderer->ItemAt(i),startFrame.left-frame.left,startFrame.top-frame.top);
+		if (parentNode) {
+			GroupRenderer	*parent	= NULL;
+			if (parentNode->FindPointer(editor->RenderString(), (void **)&parent) == B_OK)
+				parent->RecalcFrame();
+		}
+		tracking	= false;
+		editor->ClearActiveGuides();
+		editor->Invalidate();
+		editor->DragSelectionOut();
+		return;
+	}
 	else {
 		float	dx	= 0;
 		float	dy	= 0;

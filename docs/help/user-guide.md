@@ -232,6 +232,11 @@ See [Macros](macros.md) for the full guide and the command reference.
     opens GraphML files too.
   - **FreeMind**: a mind map; the graph becomes a tree from one of its
     nodes.
+- **Dragging nodes out of the window**: move the selected nodes on, far
+  past the window's edge, and they come along as a picture. Dropped on
+  the Desktop or into a Tracker folder they become a PNG image; drag
+  with the right mouse button and Tracker asks whether you want the
+  picture or a ProjectConceptor document with only these nodes.
 - **File → Print** prints the whole graph at 100 %, over as many pages
   as it needs, on white paper without the grid or the selection. With
   the *PDF Writer* printer (set it up in the Printers preferences) this
