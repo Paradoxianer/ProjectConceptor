@@ -13,6 +13,8 @@
 #include <TranslationUtils.h>
 #include <TranslatorRoster.h>
 #include <string.h>
+#include <algorithm>
+#include <math.h>
 #include <FindDirectory.h>
 #include <Catalog.h>
 
@@ -25,6 +27,7 @@
 #include "PDocument.h"
 #include "PDocLoader.h"
 #include "PDocumentManager.h"
+#include "PEditor.h"
 #include "PEditorManager.h"
 #include "PluginManager.h"
 #include "ProjectConceptor.h"
@@ -156,6 +159,10 @@ void PDocument::MessageReceived(BMessage* message) {
 		}
 		case MENU_FILE_PRINT: 	{
 			Print();
+			break;
+		}
+		case MENU_FILE_PAGESETUP: {
+			PageSetup();
 			break;
 		}
 		case MENU_APP_SETTINGS:
@@ -446,8 +453,6 @@ void PDocument::_InitData(void){
 	printerSetting	= NULL;
 	documentSetting	= new BMessage();
 	bounds			= BRect(0,0,600,800);
-	printableRect	= NULL;
-	paperRect		= NULL;
 	savePanel		= NULL;
 	exportPanel		= NULL;
 	width			= 600;
@@ -504,7 +509,7 @@ void PDocument::Init(BMessage *archive)
 {
 	TRACE();
 	bool locked = Lock();
-	printerSetting	= NULL;
+	printerSetting	= new BMessage();
 	documentSetting	= new BMessage();
 	archive->FindMessage("PDocument::documentSetting",documentSetting);
 	if (documentSetting->FindMessage("Printer Setting",printerSetting) != B_OK) {
@@ -601,136 +606,99 @@ void PDocument::ShowSettings(void)
 }
 
 
-BMessage* PDocument::PrintSettings(void)
+void PDocument::PageSetup(void)
 {
 	TRACE();
-	status_t result = B_OK;
-	BPrintJob printJob(Title());
-	if (! printerSetting) {
-		result = printJob.ConfigPage();
-		if ((result == B_OK) && (Lock())) {
-			SetPrintSettings (printJob.Settings());
-			paperRect 		= new BRect(printJob.PaperRect());
-			printableRect	= new BRect(printJob.PrintableRect());
-			SetModified();
-			Unlock();
-		}
-	}
-	return printerSetting;
+	BPrintJob	printJob(Title());
+	if (printerSetting != NULL)
+		// the job owns what it gets
+		printJob.SetSettings(new BMessage(*printerSetting));
+	if (printJob.ConfigPage() != B_OK)
+		return;
+	SetPrintSettings(printJob.Settings());
+	SetModified();
 }
+
 
 void PDocument::SetPrintSettings(BMessage *settings)
 {
 	TRACE();
-	if (Lock()){
-		if (settings!=NULL) {
-			BMessage	*tmpMessage	= new BMessage();
-			if (documentSetting->FindMessage("Printer Setting",tmpMessage) == B_OK)
-				documentSetting->ReplaceMessage("Printer Setting",settings);
-			else
-				documentSetting->AddMessage("Printer Setting",settings);
-			printerSetting	= settings;
-			delete tmpMessage;
-		}
-		Unlock();
+	BAutolock	autolock(this);
+	if (settings == NULL)
+		return;
+	if (documentSetting->ReplaceMessage("Printer Setting",settings) != B_OK)
+		documentSetting->AddMessage("Printer Setting",settings);
+	delete printerSetting;
+	printerSetting	= settings;
+}
+
+
+// the editor to print: the active one, else the first that can
+static PEditor* PrintableEditor(PEditorManager *editorManager)
+{
+	PEditor	*active	= editorManager->GetActivPEditor();
+	for (int32 i = -1; i < editorManager->CountPEditors(); i++) {
+		PEditor	*editor	= (i < 0) ? active : editorManager->PEditorAt(i);
+		BView	*view	= (editor != NULL) ? editor->GetView() : NULL;
+		if ((view == NULL) || !view->LockLooper())
+			continue;
+		bool	printable	= editor->PrintFrame().IsValid();
+		view->UnlockLooper();
+		if (printable)
+			return editor;
 	}
+	return NULL;
 }
 
 
 void PDocument::Print(void)
 {
 	TRACE();
-	status_t	result	= B_OK;
-	BPrintJob	printJob("doc_name");
-	if (Lock()) {
-		if (printerSetting == NULL) {
-				result = printJob.ConfigPage();
-				if (result == B_OK) {
-					// Get the user Settings
-					SetPrintSettings(printJob.Settings());
-					//	 Use the new settings for your internal use
-					paperRect = new BRect(printJob.PaperRect());
-					printableRect = new BRect(printJob.PrintableRect());
-				}
-			}
-			// Setup the driver with user settings
-			printJob.SetSettings(printerSetting);
-
-			result = printJob.ConfigJob();
-			if (result == B_OK) {
-				// WARNING: here, setup CANNOT be NULL.
-	         if (printerSetting == NULL) {
-				(new BAlert(B_TRANSLATE("Error"),B_TRANSLATE("I had problems while setting up the Printer!"),"Ohh"))->Go();
-	         }
-			//**dont know why this was here :-)      		 delete printerSetting;
-			// Get the user Settings
-			SetPrintSettings( printJob.Settings());
-			paperRect 		= new BRect(printJob.PaperRect());
-			printableRect	= new BRect(printJob.PrintableRect());
-
-			// Now you have to calculate the number of pages
-			// (note: page are zero-based)
-			int32 firstPage = printJob.FirstPage();
-			int32 lastPage = printJob.LastPage();
-
-			// Verify the range is correct
-			// 0 ... LONG_MAX -> Print all the document
-			// n ... LONG_MAX -> Print from page n to the end
-			// n ... m -> Print from page n to page m
-			PEditor *activePEditor=editorManager->GetActivPEditor();
-			if (activePEditor != NULL) {
-				BView *editorView=activePEditor->GetView();
-				if (editorView != NULL) {
-					// calculate the Number of Pages
-					bool locked	= editorView->LockLooper();
-					int32 xPages,yPages;
-					BRect editorRect = editorView->Bounds();
-					xPages=editorRect.IntegerWidth()/printableRect->IntegerWidth();
-					if (editorRect.IntegerWidth()%printableRect->IntegerWidth() > 0)
-						xPages++;
-					yPages=editorRect.IntegerHeight()/printableRect->IntegerHeight();
-					if (editorRect.IntegerHeight()% printableRect->IntegerHeight() > 0)
-						yPages++;
-					int32 document_last_page= xPages*yPages;
-					if (lastPage > document_last_page)
-						lastPage = document_last_page;
-					int32 nbPages = lastPage - firstPage + 1;
-					if (nbPages <= 0)
-						;
-						//**return B_ERROR;
-					// Now we can print the page
-					printJob.BeginJob();
-					// Print all pages
-					bool can_continue = printJob.CanContinue();
-					for (int i=firstPage-1; can_continue && i<lastPage ; i++) {
-						float xStart	= (i%xPages)*printableRect->Width();
-						float yStart	= (i/xPages)*printableRect->Height();
-						BRect viewRect(xStart,yStart,xStart+printableRect->Width(),yStart+printableRect->Height());
-//						printJob.DrawView(editorView, viewRect, BPoint(0,0));
-						printJob.DrawView(editorView, viewRect, BPoint(printableRect->left,printableRect->top));
-						printJob.SpoolPage();
-						/*if (user_has_canceled)
-						{
-		       	        // tell the print_server to cancel the printjob
-   	 	   	        	printJob.CancelJob();
-							can_continue = false;
-							break;
-   	         		}*/
-						can_continue = printJob.CanContinue();
-					}
-					if (can_continue)
-						printJob.CommitJob();
-					else
-						result = B_ERROR;
-					if (locked) editorView->UnlockLooper();
-				}
-			}
-			else{
-				(new BAlert(B_TRANSLATE("Error"),B_TRANSLATE("No active editor - please install an editor plugin."),"Ohh"))->Go();
-			}
-		}
-		Unlock();
+	PEditor	*editor	= PrintableEditor(editorManager);
+	if (editor == NULL) {
+		(new BAlert(B_TRANSLATE("Print"),B_TRANSLATE("There is nothing to print."),
+			B_TRANSLATE("OK")))->Go(NULL);
+		return;
 	}
+	BPrintJob	printJob(Title());
+	if (printerSetting != NULL)
+		// the job owns what it gets
+		printJob.SetSettings(new BMessage(*printerSetting));
+	else if (printJob.ConfigPage() != B_OK)
+		return;
+	if (printJob.ConfigJob() != B_OK)
+		return;
+	SetPrintSettings(printJob.Settings());
+
+	BView	*view	= editor->GetView();
+	if (!view->LockLooper())
+		return;
+	// the whole graph, tiled over as many pages as it needs
+	BRect	frame		= editor->PrintFrame();
+	BRect	printable	= printJob.PrintableRect();
+	float	pageWidth	= floorf(printable.Width());
+	float	pageHeight	= floorf(printable.Height());
+	int32	columns		= (int32)ceilf((frame.Width() + 1) / pageWidth);
+	int32	rows		= (int32)ceilf((frame.Height() + 1) / pageHeight);
+	view->UnlockLooper();
+	int32	firstPage	= std::max((int32)1, printJob.FirstPage());
+	int32	lastPage	= std::min(columns * rows, printJob.LastPage());
+
+	printJob.BeginJob();
+	for (int32 page = firstPage; (page <= lastPage) && printJob.CanContinue(); page++) {
+		int32	column	= (page - 1) % columns;
+		int32	row		= (page - 1) / columns;
+		BRect	part(frame.left + column * pageWidth, frame.top + row * pageHeight,
+			frame.left + (column + 1) * pageWidth - 1,
+			frame.top + (row + 1) * pageHeight - 1);
+		// the point is relative to the printable rectangle
+		printJob.DrawView(view, part, B_ORIGIN);
+		printJob.SpoolPage();
+	}
+	if (printJob.CanContinue())
+		printJob.CommitJob();
+	else
+		printJob.CancelJob();
 }
 
 

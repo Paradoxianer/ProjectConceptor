@@ -1,4 +1,4 @@
-1	Romanian	application/x-vnd.ProjectConceptor	1899809901
+1	Romanian	application/x-vnd.ProjectConceptor	1524208958
 Export	SavePanel		Exportă
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtături pentru macrocomenzi (dublu clic pentru a schimba tasta)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Apăsați combinația de taste pentru macrocomanda „%s” (Esc pentru anulare).
@@ -35,6 +35,7 @@ Save before close	Document		Salvează înainte de închidere
 Untitled %ld	MainWindow		Fără titlu %ld
 Paste	MainWindow		Lipire
 Help	MainWindow		Ajutor
+There is nothing to print.	Document		Nu este nimic de imprimat.
 Remove	ShortCutView		Elimină
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Noua asociere se aplică documentelor deschise de acum înainte – ferestrele deja deschise își păstrează scurtăturile inițiale.
 Problems while trying to save the file	Document		Probleme în timpul încercării de a salva fișierul
@@ -66,7 +67,6 @@ Could not find plugins	SavePanel		Nu s-au putut găsi modulele
 Export	MainWindow		Exportă
 File	MainWindow		Fișier
 The macro is empty - nothing to play.	CommandManager		Macrocomanda este goală – nimic de rulat.
-No active editor - please install an editor plugin.	Document		Niciun editor activ – instalați un modul de editare.
 Continue recording	CommandManager		Continuă înregistrarea
 Restart recording	CommandManager		Reîncepe înregistrarea
 Macro recording already started!	CommandManager		Înregistrarea macroului a început deja!
@@ -85,7 +85,6 @@ Run when opening the document	MainWindow		Rulează la deschiderea documentului
 OK	Document		OK
 Window	MainWindow		Fereastră
 \"${%s}\": no such variable	CommandManager		„${%s}”: variabila nu există
-I had problems while setting up the Printer!	Document		Au fost probleme la configurarea imprimantei!
 E-mail Warning	AboutURLView		Avertisment email
 Editor shortcuts (double-click to change)	ShortCutView		Scurtăturile editorului (dublu clic pentru a schimba)
 There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Nu există niciun browser web pe mașină care este configurat ca programul implicit pentru vizualizarea paginilor web.
@@ -105,6 +104,7 @@ Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Apăsaț
 New…	ShortCutView		Nou…
 Cancel	Document		Anulează
 Print	MainWindow		Tipărire
+Print	Document		Imprimă
 Find next	MainWindow		Caută înainte
 Error!	CommandManager		Eroare!
 Title Vertical	MainWindow		Aranjare verticală

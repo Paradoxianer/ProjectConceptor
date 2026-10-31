@@ -115,6 +115,7 @@ public:
 
 	virtual	BView*			GetView(void);
 	virtual	const char*		TabLabel(void);
+	virtual	BRect			PrintFrame(void);
 	virtual BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
 

@@ -240,7 +240,6 @@ BMenuBar *PWindow::MakeMenu(void)
 	item->SetTarget(doc);
 	menu->AddSeparatorItem();
 	menu->AddItem(item = new BMenuItem(B_TRANSLATE("Page setup"),new BMessage(MENU_FILE_PAGESETUP)));
-	item->SetEnabled(false);
 	item->SetTarget(doc);
 	localizeMenuItems->AddPointer("item",(void *) item);
 	localizeMenuItems->AddPointer("itemstring",P_MENU_FILE_PAGESETUP);

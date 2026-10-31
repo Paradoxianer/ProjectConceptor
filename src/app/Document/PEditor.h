@@ -108,6 +108,14 @@ public:
 	virtual BView*			GetPrintView(void) {return NULL;};
 
 	/**
+	 * what printing covers of GetView(), in its coordinates at 100 %
+	 * zoom; invalid for an editor that doesn't print. Called with the
+	 * view's looper locked. While printing, BView::IsPrinting() is true in
+	 * Draw() - the editor draws for paper then.
+	 */
+	virtual BRect			PrintFrame(void) {return BRect();};
+
+	/**
 	 * if the Editor is an View, this should not return a link to the BView Handler.
 	 * else it shoud be the pointer to the handler for the Editor (e.g. a Network Client)
 	 * this handler will be added to the PDocument and will informed about all Document Messages

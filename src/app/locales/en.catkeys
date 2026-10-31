@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor	1899809901
+1	English	application/x-vnd.ProjectConceptor	1524208958
 Export	SavePanel		Export
 Macro shortcuts (double-click to change the key)	ShortCutView		Macro shortcuts (double-click to change the key)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Press the key combination for the macro \"%s\" (Esc to cancel).
@@ -35,6 +35,7 @@ Save before close	Document		Save before close
 Untitled %ld	MainWindow		Untitled %ld
 Paste	MainWindow		Paste
 Help	MainWindow		Help
+There is nothing to print.	Document		There is nothing to print.
 Remove	ShortCutView		Remove
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.
 Problems while trying to save the file	Document		Problems while trying to save the file
@@ -66,7 +67,6 @@ Could not find plugins	SavePanel		Could not find plugins
 Export	MainWindow		Export
 File	MainWindow		File
 The macro is empty - nothing to play.	CommandManager		The macro is empty - nothing to play.
-No active editor - please install an editor plugin.	Document		No active editor - please install an editor plugin.
 Continue recording	CommandManager		Continue recording
 Restart recording	CommandManager		Restart recording
 Macro recording already started!	CommandManager		Macro recording already started!
@@ -85,7 +85,6 @@ Run when opening the document	MainWindow		Run when opening the document
 OK	Document		OK
 Window	MainWindow		Window
 \"${%s}\": no such variable	CommandManager		\"${%s}\": no such variable
-I had problems while setting up the Printer!	Document		I had problems while setting up the Printer!
 E-mail Warning	AboutURLView		E-mail Warning
 Editor shortcuts (double-click to change)	ShortCutView		Editor shortcuts (double-click to change)
 There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		There is no web browser on your machine that is configured as the default program to view web pages.
@@ -105,6 +104,7 @@ Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Press th
 New…	ShortCutView		New…
 Cancel	Document		Cancel
 Print	MainWindow		Print
+Print	Document		Print
 Find next	MainWindow		Find next
 Error!	CommandManager		Error!
 Title Vertical	MainWindow		Title Vertical

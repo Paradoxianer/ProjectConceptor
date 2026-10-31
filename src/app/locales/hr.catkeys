@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor	1899809901
+1	Croatian	application/x-vnd.ProjectConceptor	1524208958
 Export	SavePanel		Izvezi
 Macro shortcuts (double-click to change the key)	ShortCutView		Prečaci makronaredbi (dvostruki klik za promjenu tipke)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Pritisnite kombinaciju tipki za makronaredbu „%s” (Esc za odustajanje).
@@ -35,6 +35,7 @@ Save before close	Document		Spremi prije zatvaranja
 Untitled %ld	MainWindow		Bez naslova %ld
 Paste	MainWindow		Zalijepi
 Help	MainWindow		Pomoć
+There is nothing to print.	Document		Nema ničega za ispis.
 Remove	ShortCutView		Ukloni
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Nova dodjela vrijedi za dokumente otvorene od sada – već otvoreni prozori zadržavaju svoje dosadašnje prečace.
 Problems while trying to save the file	Document		Problemi pri pokušaju spremanja datoteke
@@ -66,7 +67,6 @@ Could not find plugins	SavePanel		Ne mogu naći priključke
 Export	MainWindow		Izvezi
 File	MainWindow		Datoteka
 The macro is empty - nothing to play.	CommandManager		Makronaredba je prazna – nema se što izvesti.
-No active editor - please install an editor plugin.	Document		Nema aktivnog uređivača – instalirajte dodatak za uređivanje.
 Continue recording	CommandManager		Nastavi snimanje
 Restart recording	CommandManager		Ponovno pokreni snimanje
 Macro recording already started!	CommandManager		Snimanje makronaredbe je već pokrenuto!
@@ -85,7 +85,6 @@ Run when opening the document	MainWindow		Pokreni pri otvaranju dokumenta
 OK	Document		U redu
 Window	MainWindow		Prozor
 \"${%s}\": no such variable	CommandManager		„${%s}”: ne postoji takva varijabla
-I had problems while setting up the Printer!	Document		Došlo je do problema pri postavljanju pisača!
 E-mail Warning	AboutURLView		E-mail upozorenje
 Editor shortcuts (double-click to change)	ShortCutView		Prečaci uređivača (dvostruki klik za promjenu)
 There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Nema nijednog preglednika na vašem stroju koji je konfiguriran kao zadani program za gledanje web stranica.
@@ -105,6 +104,7 @@ Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Pritisni
 New…	ShortCutView		Novo…
 Cancel	Document		Otkaži
 Print	MainWindow		Ispis
+Print	Document		Ispis
 Find next	MainWindow		Nađi tekst
 Error!	CommandManager		Greška!
 Title Vertical	MainWindow		Složi okomito

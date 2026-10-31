@@ -97,6 +97,9 @@ struct AttributeKind {
 	const char	*name;
 };
 
+// around the graph on paper: shadows and arrow heads reach past the frames
+static const float	kPrintMargin	= 16;
+
 static const AttributeKind kAttributeKinds[] = {
 	{ B_STRING_TYPE,			B_TRANSLATE_MARK("Text"),		B_TRANSLATE_MARK("Attribute") },
 	{ B_BOOL_TYPE,			B_TRANSLATE_MARK("Yes/No"),		B_TRANSLATE_MARK("Attribute") },
@@ -580,7 +583,31 @@ void GraphEditor::SetDirty(BRegion *region) {
 }
 
 
+BRect GraphEditor::PrintFrame(void) {
+	BRect	frame;
+	for (int32 i = 0; i < renderer->CountItems(); i++) {
+		BRect	part	= ((Renderer *)renderer->ItemAt(i))->Frame();
+		frame	= frame.IsValid() ? (frame | part) : part;
+	}
+	// room for shadows and arrow heads
+	if (frame.IsValid())
+		frame.InsetBy(-kPrintMargin,-kPrintMargin);
+	return frame;
+}
+
 void GraphEditor::Draw(BRect updateRect) {
+	if (IsPrinting()) {
+		// paper: the graph at 100 % in the light style, without the grid,
+		// the selection or anything else the editing adds
+		GraphStyle	screen	= style;
+		style	= GraphStyle::Card(make_color(255,255,255),make_color(0,0,0),
+			screen.accent,be_plain_font->Size());
+		SetHighColor(255,255,255);
+		FillRect(updateRect);
+		renderer->DoForEach(DrawRenderer,this);
+		style	= screen;
+		return;
+	}
 	// BView wraps every Draw() in one PushState()/PopState() pair, so the
 	// zoom is set on that state only and never piles up
 	SetScale(scale);

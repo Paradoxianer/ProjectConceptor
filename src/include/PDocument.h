@@ -129,15 +129,15 @@ public:
 			void				SetDocumentSettings(BMessage *message);
 			void				ShowSettings(void);
 
-	//* Returns the PrintSettings as a BMessage if there is no PrintSettings a dialog shows up where the printsettings shoud be configured :-)
-			BMessage*			PrintSettings(void);
-	/**Set the PrintSettings
+	/** the print server's page dialog; the settings stay with the document */
+			void				PageSetup(void);
+	/** keeps settings (owned from now on) in the document settings
 	 * @warning There is no check if the printersettings are valid!!!!!
 	 */
 			void				SetPrintSettings(BMessage *settings);
-	/**Print´s the lastly activated Editor
-	 *@todo some error handling and printerSettings.. autocall
-	 */
+	/** prints what the active editor's PEditor::PrintFrame() covers, or
+	 * that of the first editor that can print, over as many pages as it
+	 * needs */
 			void				Print(void);
 
 	/**Set the save and load entry
@@ -208,7 +208,6 @@ public:
 			status_t			RemoveToolMenu(const char* toolbarSignature,const char* toolmenuSignature) ;
 			status_t			RemoveToolItem(const char* toolbarSignature,const char* toolitemSignature);
 
-			BRect*				GetPrintRect(void){return printableRect;};
 
 			BMessage*			FindObject(BPoint *where);
 
@@ -240,8 +239,6 @@ protected:
 			set<BMessage*>			*valueChanged;
 
 			BRect				bounds;
-			BRect				*paperRect;
-			BRect				*printableRect;
 			BMessage			*printerSetting;
 			BMessage	 	 	*documentSetting;
 			PCSavePanel			*savePanel;

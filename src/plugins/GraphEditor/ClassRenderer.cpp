@@ -367,6 +367,16 @@ rgb_color ClassRenderer::CardBorderColor(const GraphStyle &style) {
 }
 
 void ClassRenderer::Draw(BView *drawOn, BRect updateRect) {
+	if (drawOn->IsPrinting() && (selected || hovered)) {
+		// paper shows the graph, not the selection or the pointer
+		bool	wasSelected	= selected;
+		bool	wasHovered	= hovered;
+		selected = hovered	= false;
+		Draw(drawOn,updateRect);
+		selected	= wasSelected;
+		hovered	= wasHovered;
+		return;
+	}
 	// mid-slide: shift this node's whole draw (shape+name+attributes+
 	// connectors, all already positioned at the real/final frame) so it
 	// paints at the current animated position instead - frame itself and

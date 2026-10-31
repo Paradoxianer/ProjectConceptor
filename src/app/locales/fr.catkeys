@@ -1,4 +1,4 @@
-1	French	application/x-vnd.ProjectConceptor	1899809901
+1	French	application/x-vnd.ProjectConceptor	1524208958
 Export	SavePanel		Exporter
 Macro shortcuts (double-click to change the key)	ShortCutView		Raccourcis des macros (double-clic pour changer la touche)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Appuyez sur la combinaison de touches pour la macro « %s » (Échap pour annuler).
@@ -35,6 +35,7 @@ Save before close	Document		Sauvegarder avant de fermer
 Untitled %ld	MainWindow		Sans titre %ld
 Paste	MainWindow		Coller
 Help	MainWindow		Aide
+There is nothing to print.	Document		Il n'y a rien à imprimer.
 Remove	ShortCutView		Retirer
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		La nouvelle association s'applique aux documents ouverts à partir de maintenant ; les fenêtres déjà ouvertes conservent leurs raccourcis d'origine.
 Problems while trying to save the file	Document		Problèmes en essayant de sauvegarder le fichier
@@ -66,7 +67,6 @@ Could not find plugins	SavePanel		Impossible de trouver des greffons
 Export	MainWindow		Exporter
 File	MainWindow		Fichier
 The macro is empty - nothing to play.	CommandManager		La macro est vide ; rien à exécuter.
-No active editor - please install an editor plugin.	Document		Aucun éditeur actif ; veuillez installer un greffon d'édition.
 Continue recording	CommandManager		Continuer l'enregistrement
 Restart recording	CommandManager		Redémarrer l'enregistrement
 Macro recording already started!	CommandManager		Enregistrement de la macro déjà démarré !
@@ -85,7 +85,6 @@ Run when opening the document	MainWindow		Exécuter à l'ouverture du document
 OK	Document		OK
 Window	MainWindow		Fenêtre
 \"${%s}\": no such variable	CommandManager		« ${%s} » : variable inexistante
-I had problems while setting up the Printer!	Document		J'ai eu des problèmes durant le paramétrage de l'imprimante !
 E-mail Warning	AboutURLView		Alerte par courriel
 Editor shortcuts (double-click to change)	ShortCutView		Raccourcis de l'éditeur (double-clic pour modifier)
 There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Il n'y a pas, sur votre machine,  de navigateur qui soit configuré comme le programme par défaut pour visualiser des pages web.
@@ -105,6 +104,7 @@ Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Appuyez 
 New…	ShortCutView		Nouveau…
 Cancel	Document		Abandon
 Print	MainWindow		Imprimer
+Print	Document		Imprimer
 Find next	MainWindow		Chercher l'occurence suivante .
 Error!	CommandManager		Erreur !
 Title Vertical	MainWindow		Mosaïque verticale

@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor	1899809901
+1	Friulian	application/x-vnd.ProjectConceptor	1524208958
 Export	SavePanel		Espuarte
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtis des macros (dopli clic par cambiâ il tast)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Frache la combinazion di tascj pe macro “%s” (Esc par anulâ).
@@ -35,6 +35,7 @@ Save before close	Document		Salve prime di sierâ
 Untitled %ld	MainWindow		Cence titul %ld
 Paste	MainWindow		Tache
 Help	MainWindow		Jutori
+There is nothing to print.	Document		No 'nd è nuie di stampâ.
 Remove	ShortCutView		Gjave
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		La gnove associazion e vâl pai documents vierts di cumò indevant; i barcons za vierts a tegnin i scurtis che a vevin.
 Problems while trying to save the file	Document		Problemis intal cirî di salvâ il file
@@ -66,7 +67,6 @@ Could not find plugins	SavePanel		Impussibil cjatâ plugin
 Export	MainWindow		Espuarte
 File	MainWindow		File
 The macro is empty - nothing to play.	CommandManager		La macro e je vueide – nuie di riprodusi.
-No active editor - please install an editor plugin.	Document		Nissun editôr atîf – instale un plugin di editôr.
 Continue recording	CommandManager		Continue la regjistrazion
 Restart recording	CommandManager		Torne tache la regjistrazion
 Macro recording already started!	CommandManager		Regjistrazion de macro za tacade!
@@ -85,7 +85,6 @@ Run when opening the document	MainWindow		Eseguìs cuant che si vierç il docume
 OK	Document		Va ben
 Window	MainWindow		Barcon
 \"${%s}\": no such variable	CommandManager		“${%s}”: variabile che no esist
-I had problems while setting up the Printer!	Document		I ai vût problemis intal configurâ la Stampadore!
 E-mail Warning	AboutURLView		Avertiment e-mail
 Editor shortcuts (double-click to change)	ShortCutView		Scurtis dal editôr (dopli clic par cambiâ)
 There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Nol è presint nissun navigadôr web te machine che al sedi configurât come program predefinît par viodi pagjinis web.
@@ -105,6 +104,7 @@ Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Frache l
 New…	ShortCutView		Gnûf…
 Cancel	Document		Anule
 Print	MainWindow		Stampe
+Print	Document		Stampe
 Find next	MainWindow		Cjate prossim
 Error!	CommandManager		Erôr!
 Title Vertical	MainWindow		Mosaic verticâl

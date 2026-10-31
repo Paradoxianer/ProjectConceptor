@@ -228,6 +228,10 @@ See [Macros](macros.md) for the full guide and the command reference.
     opens GraphML files too.
   - **FreeMind**: a mind map; the graph becomes a tree from one of its
     nodes.
+- **File → Print** prints the whole graph at 100 %, over as many pages
+  as it needs, on white paper without the grid or the selection. With
+  the *PDF Writer* printer (set it up in the Printers preferences) this
+  makes a PDF file. **File → Page setup** chooses the paper.
 - **File → Open** loads an existing document, or a file of another
   format: a draw.io diagram, a GraphML graph from yEd, Gephi or
   NetworkX, or a FreeMind mind map. That one stays as it is: the

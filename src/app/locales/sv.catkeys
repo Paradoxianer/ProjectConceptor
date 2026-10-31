@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor	1899809901
+1	Swedish	application/x-vnd.ProjectConceptor	1524208958
 Export	SavePanel		Exportera
 Macro shortcuts (double-click to change the key)	ShortCutView		Makrokortkommandon (dubbelklicka för att ändra tangenten)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tryck på tangentkombinationen för makrot ”%s” (Esc avbryter).
@@ -35,6 +35,7 @@ Save before close	Document		Spara före stängning
 Untitled %ld	MainWindow		Namnlös %ld
 Paste	MainWindow		Klistra in
 Help	MainWindow		Hjälp
+There is nothing to print.	Document		Det finns inget att skriva ut.
 Remove	ShortCutView		Ta bort
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Den nya kopplingen gäller dokument som öppnas från och med nu – redan öppna fönster behåller sina ursprungliga kortkommandon.
 Problems while trying to save the file	Document		Ett fel inträffade när filen skulle sparas
@@ -66,7 +67,6 @@ Could not find plugins	SavePanel		Kunde inte hitta plugins
 Export	MainWindow		Exportera
 File	MainWindow		Arkiv
 The macro is empty - nothing to play.	CommandManager		Makrot är tomt – inget att spela upp.
-No active editor - please install an editor plugin.	Document		Ingen aktiv redigerare – installera ett redigeringsinsticksprogram.
 Continue recording	CommandManager		Fortsätt inspelningen
 Restart recording	CommandManager		Börja om inspelning
 Macro recording already started!	CommandManager		Inspelning av makro har redan startat!
@@ -85,7 +85,6 @@ Run when opening the document	MainWindow		Kör när dokumentet öppnas
 OK	Document		OK
 Window	MainWindow		Fönster
 \"${%s}\": no such variable	CommandManager		”${%s}”: ingen sådan variabel
-I had problems while setting up the Printer!	Document		Ett fel inträffade när skrivaren ställdes in!
 E-mail Warning	AboutURLView		E-mailvarning
 Editor shortcuts (double-click to change)	ShortCutView		Redigerarens kortkommandon (dubbelklicka för att ändra)
 There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Det finns ingen webläsare som är konfigurerad som standardvisare av websidor på ditt system.
@@ -105,6 +104,7 @@ Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Tryck p�
 New…	ShortCutView		Ny…
 Cancel	Document		Avbryt
 Print	MainWindow		Skriv ut
+Print	Document		Skriv ut
 Find next	MainWindow		Hitta nästa
 Error!	CommandManager		Fel!
 Title Vertical	MainWindow		Ordna vertikalt

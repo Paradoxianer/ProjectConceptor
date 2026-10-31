@@ -1,4 +1,4 @@
-1	German	application/x-vnd.ProjectConceptor	1899809901
+1	German	application/x-vnd.ProjectConceptor	1524208958
 Export	SavePanel		Exportieren
 Macro shortcuts (double-click to change the key)	ShortCutView		Makro-Kürzel (Doppelklick ändert die Taste)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tastenkombination für das Makro \"%s\" drücken (Esc bricht ab).
@@ -35,6 +35,7 @@ Save before close	Document		Vor dem Beenden speichern
 Untitled %ld	MainWindow		Unbenannt %ld
 Paste	MainWindow		Einfügen
 Help	MainWindow		Hilfe
+There is nothing to print.	Document		Es gibt nichts zu drucken.
 Remove	ShortCutView		Entfernen
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		Die neue Belegung gilt für ab jetzt geöffnete Dokumente – bereits offene Fenster behalten ihre bisherigen Tastenkürzel.
 Problems while trying to save the file	Document		Es gab ein Problem beim Speichern der Datei
@@ -66,7 +67,6 @@ Could not find plugins	SavePanel		Keine Plugins gefunden
 Export	MainWindow		Exportieren
 File	MainWindow		Datei
 The macro is empty - nothing to play.	CommandManager		Das Makro ist leer – nichts abzuspielen.
-No active editor - please install an editor plugin.	Document		Kein aktiver Editor – bitte ein Editor-Plugin installieren.
 Continue recording	CommandManager		Aufnahme fortsetzen
 Restart recording	CommandManager		Aufnahme neu beginnen
 Macro recording already started!	CommandManager		Aufnahme eines Makros läuft bereits!
@@ -85,7 +85,6 @@ Run when opening the document	MainWindow		Beim Öffnen des Dokuments ausführen
 OK	Document		OK
 Window	MainWindow		Fenster
 \"${%s}\": no such variable	CommandManager		\"${%s}\": unbekannte Variable
-I had problems while setting up the Printer!	Document		Es ist ein Fehler beim Einrichten des Druckers aufgetreten.
 E-mail Warning	AboutURLView		E-Mail-Warnung
 Editor shortcuts (double-click to change)	ShortCutView		Editor-Kürzel (Doppelklick zum Ändern)
 There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		Es ist keine Standard-Anwendung definiert, um Internetseiten anzuzeigen.
@@ -105,6 +104,7 @@ Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Neue Tas
 New…	ShortCutView		Neu…
 Cancel	Document		Abbrechen
 Print	MainWindow		Drucken
+Print	Document		Drucken
 Find next	MainWindow		Weitersuchen
 Error!	CommandManager		Fehler!
 Title Vertical	MainWindow		Untereinander anordnen
