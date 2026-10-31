@@ -85,15 +85,15 @@
 <p>A macro is a list of commands - insert nodes, select, move, change an
 attribute, lay out the graph, ... - that ProjectConceptor plays back on
 the current document. Macros can be recorded while you work, built and
-edited in the <strong>MacroEditor</strong> tab, and use loops, conditions and
+edited in the <strong>Macros</strong> tab, and use loops, conditions and
 variables. They are saved with the document and can be exported to a
 text file.</p>
-<p><img alt="The MacroEditor tab" src="screenshots/10-macro-editor.png"></p>
+<p><img alt="The Macros tab" src="screenshots/10-macro-editor.png"></p>
 <nav class="toc">
 <ul>
 <li><a href="#quick-start">Quick start</a></li>
 <li><a href="#the-macro-menu">The Macro menu</a></li>
-<li><a href="#the-macroeditor-tab">The MacroEditor tab</a></li>
+<li><a href="#the-macros-tab">The Macros tab</a></li>
 <li><a href="#recording">Recording</a></li>
 <li><a href="#playing">Playing</a></li>
 <li><a href="#variables">Variables</a></li>
@@ -110,7 +110,7 @@ text file.</p>
 <p><strong>Record one:</strong> choose <strong>Macro &gt; Start recording</strong>, do your edits in
 the graph, choose <strong>Macro &gt; Stop recording</strong> and give the macro a name.
 It now appears under <strong>Macro &gt; Play</strong>.</p>
-<p><strong>Build one:</strong> choose <strong>Macro &gt; New</strong>, switch to the <strong>MacroEditor</strong>
+<p><strong>Build one:</strong> choose <strong>Macro &gt; New</strong>, switch to the <strong>Macros</strong>
 tab and drag commands from the list on the right into the tree in the
 middle. Click a value to change it. Play it with <strong>Macro &gt; Play</strong>.</p>
 <h2 id="the-macro-menu">The Macro menu</h2>
@@ -132,7 +132,7 @@ middle. Click a value to change it. Play it with <strong>Macro &gt; Play</strong
 </tr>
 <tr>
 <td>New</td>
-<td>Creates an empty macro to build in the MacroEditor tab.</td>
+<td>Creates an empty macro to build in the Macros tab.</td>
 </tr>
 <tr>
 <td>Open</td>
@@ -140,17 +140,21 @@ middle. Click a value to change it. Play it with <strong>Macro &gt; Play</strong
 </tr>
 <tr>
 <td>Save</td>
-<td>Exports the macro selected in the MacroEditor tab to a text file.</td>
+<td>Exports the macro selected in the Macros tab to a text file.</td>
 </tr>
 <tr>
 <td>Rename / Duplicate / Delete</td>
-<td>Act on the macro selected in the MacroEditor tab. Delete asks first and can't be undone.</td>
+<td>Act on the macro selected in the Macros tab. Delete asks first and can't be undone.</td>
+</tr>
+<tr>
+<td>Run when opening the document</td>
+<td>Switches on or off whether the selected macro plays by itself each time the document is opened. Such a macro shows "(on open)" in the Macros tab.</td>
 </tr>
 </tbody>
 </table>
 <p>Macros belong to the document: they are saved with it and are there
 again when you open it.</p>
-<h2 id="the-macroeditor-tab">The MacroEditor tab</h2>
+<h2 id="the-macros-tab">The Macros tab</h2>
 <p>The tab has three parts: the document's <strong>macros</strong> on the left, the
 selected macro as a <strong>tree</strong> in the middle, and a <strong>reference of all
 commands</strong> with their fields on the right. Hover a command in the
@@ -170,7 +174,14 @@ status line says so and the old value stays.</p>
 <p><strong>Adding a field:</strong> click <strong>+ Add field</strong> below a command; the menu
 lists that command's fields. Fields that can repeat (like Select's
 <code>node</code>) stay in the menu after you've added them once. Inside nested
-data you can add a field of any type under a name of your choice.</p>
+data you can add a field of any type, or an empty block, under a name of
+your choice.</p>
+<p><strong>Attributes:</strong> a node's attributes are blocks too, and their kind (text,
+number, date, …) shows in brackets after the name. AddAttribute's
+<code>valueContainer</code> and a node's <code>Node::Data</code> offer <strong>Attribute</strong> in the
+<strong>+ Add field</strong> menu: pick the kind, type the name, and the block comes
+with a value to start from. Right-click a block to change its kind with
+<strong>Attribute kind</strong>; its value stays as it is, so change that to match.</p>
 <p><strong>Adding a command:</strong> drag it from the reference on the right into the
 tree. Drop it on the upper or lower half of a row to place it before or
 after that command; drop it on a Repeat, ForEach, If or Batch to add it
@@ -198,7 +209,7 @@ complete node, so playing the macro creates it again.</p>
 <h2 id="playing">Playing</h2>
 <p>Choose the macro under <strong>Macro &gt; Play</strong>, or press its shortcut (see
 below). The graph updates after each step. When the macro has finished,
-the status line in the MacroEditor tab reports the result, for example
+the status line in the Macros tab reports the result, for example
 "Played 6 command(s).".</p>
 <p>If something didn't work, an alert says what - the first problem and
 how many there were (see <a href="#when-something-goes-wrong">When something goes wrong</a>).
@@ -255,6 +266,8 @@ plays. They exist only during that one playback.</p>
 </tr>
 </tbody>
 </table>
+<p>Every playback starts with <code>today</code>: today's date as <code>2026-10-29</code>, the
+way date attributes store it.</p>
 <p>There are two ways to use a variable:</p>
 <p><strong>A whole field: <code>$name</code>.</strong> Write <code>$</code> and the variable's name as the
 field's value - <code>dx=$offset</code>, <code>node=$cell</code>. The field gets the
@@ -265,9 +278,19 @@ attribute's value, an Ask prompt, nested data included - <code>${name}</code> is
 replaced by the variable's value: <code>"Row ${row}, column ${col}"</code>. Whole
 numbers appear without decimals (<code>3</code>, not <code>3.000000</code>). Write <code>$${</code> for
 a literal <code>${</code>.</p>
+<p><strong>Special characters in text:</strong> <code>\"</code> is a quote, <code>\\</code> a backslash and
+<code>\n</code> a line break - a note's lines are written this way, since every
+field of a macro stands on one line.</p>
 <p><strong>Numbers and text:</strong> text in a number field is converted - <code>12.5</code> and
 <code>12,5</code> both work. Text that isn't a number is an error, not 0. <code>1.000,5</code>
 (dot and comma together) is an error too, because it's ambiguous.</p>
+<p>With <code>today</code> and <strong>Run when opening the document</strong>, a macro can mark
+everything overdue whenever the document is opened:</p>
+<pre><code>Find
+  attribute=&quot;Due&quot;
+  operator=&quot;&lt;&quot;
+  value=&quot;${today}&quot;
+</code></pre>
 <p>Loop counters start at 0. For a count starting at 1, add a step before:</p>
 <pre><code>Calculate
   left=$i
@@ -280,8 +303,8 @@ a literal <code>${</code>.</p>
 <li><strong>Repeat</strong> runs its steps <code>count</code> times.</li>
 <li><strong>ForEach</strong> runs its steps once for every node that is selected when
   it starts.</li>
-<li><strong>If</strong> runs its steps only if a search for <code>searchString</code> finds
-  something - the same search as Find, but it doesn't change the
+<li><strong>If</strong> runs its steps only if a search finds something - the same
+  search as Find, text or comparison, but it doesn't change the
   selection.</li>
 <li><strong>Batch</strong> groups its steps into one undo step.</li>
 <li><strong>Sleep</strong> pauses for <code>milliseconds</code> - useful to watch a long macro.</li>
@@ -306,8 +329,8 @@ a node.</p>
 <tbody>
 <tr>
 <td>AddAttribute</td>
-<td><code>node</code> or <code>Node::selected=true</code>; <code>valueContainer</code> (<code>name</code>, <code>subgroup</code>, <code>type</code>, <code>newAttribute</code>)</td>
-<td>Adds an attribute to the node(s).</td>
+<td><code>node</code> or <code>Node::selected=true</code>; <code>valueContainer</code> (<code>name</code>, <code>subgroup="Node::Data"</code>, <code>type=message</code>, <code>~newAttribute</code> with <code>what</code>, <code>Name</code>, <code>Value</code>)</td>
+<td>Adds an attribute to the node(s); <code>name</code> and <code>Name</code> are the same.</td>
 </tr>
 <tr>
 <td>Ask</td>
@@ -331,8 +354,8 @@ a node.</p>
 </tr>
 <tr>
 <td>Find</td>
-<td><code>searchString</code>; <em>optional</em> <code>scope</code> (<code>nodes</code>, <code>connections</code>, <code>both</code>), <code>setOperation</code> (<code>replace</code>, <code>add</code>, <code>subtract</code>, <code>intersect</code>)</td>
-<td>Selects what contains the text, combined with the current selection as set by <code>setOperation</code>.</td>
+<td><code>searchString</code>, or <code>attribute</code>, <code>operator</code>, <code>value</code>; <em>optional</em> <code>scope</code> (<code>nodes</code>, <code>connections</code>, <code>both</code>), <code>setOperation</code> (<code>replace</code>, <code>add</code>, <code>subtract</code>, <code>intersect</code>)</td>
+<td>Selects what contains the text - or whose attribute compares with <code>value</code> by <code>operator</code> (<code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>contains</code>; <code>attribute</code> empty: any, <code>name</code>: the node's name) - combined with the current selection as set by <code>setOperation</code>.</td>
 </tr>
 <tr>
 <td>ForEach</td>
@@ -351,7 +374,7 @@ a node.</p>
 </tr>
 <tr>
 <td>If</td>
-<td><code>searchString</code>; <em>optional</em> <code>scope</code></td>
+<td><code>searchString</code>, or <code>attribute</code>, <code>operator</code>, <code>value</code>; <em>optional</em> <code>scope</code></td>
 <td>Runs its steps only if the search finds something.</td>
 </tr>
 <tr>
@@ -366,8 +389,8 @@ a node.</p>
 </tr>
 <tr>
 <td>Move</td>
-<td><code>dx</code>, <code>dy</code></td>
-<td>Moves the selection.</td>
+<td><code>dx</code>, <code>dy</code>, or <code>left</code> and/or <code>top</code></td>
+<td>Moves the selection by <code>dx</code>, <code>dy</code>, or every selected node to <code>left</code>, <code>top</code>.</td>
 </tr>
 <tr>
 <td>Remember</td>
@@ -436,6 +459,21 @@ Move pushes pass number <code>i</code> by <code>i</code> x 130 pixels to the rig
 <p>A node written by hand like this needs only a name and a frame; it gets
 the default font and colors. Recorded and dragged-in Inserts bring
 their complete look.</p>
+<p><strong>Select everything over budget, and ask if some of it isn't done:</strong></p>
+<pre><code>Find
+  attribute=&quot;Budget&quot;
+  operator=&quot;&gt;&quot;
+  value=&quot;1000&quot;
+If
+  attribute=&quot;Status&quot;
+  operator=&quot;!=&quot;
+  value=&quot;Done&quot;
+  Ask
+    variable=&quot;answer&quot;
+    prompt=&quot;Some nodes over budget aren't done yet.&quot;
+</code></pre>
+<p>Find selects every node whose number attribute "Budget" is over 1000,
+whatever its unit; If asks only when one of the nodes isn't done.</p>
 <p><strong>Add up "Costs" over everything connected to the selected node</strong> -
 select a node first:</p>
 <pre><code>SelectConnected
@@ -481,7 +519,9 @@ the one in the examples above:</p>
   <code>$name</code> (a variable).</li>
 <li><code>~name</code> starts nested data; its fields follow one level deeper.
   Inside it, <code>what=class</code>, <code>what=group</code> or <code>what=connection</code> says what
-  kind of object it is.</li>
+  kind of object it is; for an attribute it's the kind: <code>what=text</code>,
+  <code>bool</code>, <code>note</code>, <code>number</code>, <code>choice</code>, <code>date</code>, <code>color</code>, <code>link</code>, <code>file</code> or
+  <code>image</code>. A name with spaces is written in quotes: <code>~"Due date"</code>.</li>
 <li>Lines starting with <code>#</code> are comments.</li>
 <li><code>raw:...</code> values preserve data that has no readable form; they're not
   meant to be written by hand.</li>
