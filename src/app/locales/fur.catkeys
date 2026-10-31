@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor	1524208958
+1	Friulian	application/x-vnd.ProjectConceptor	2709756247
 Export	SavePanel		Espuarte
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtis des macros (dopli clic par cambiâ il tast)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Frache la combinazion di tascj pe macro “%s” (Esc par anulâ).
@@ -10,6 +10,7 @@ Settings	SavePanel		Impostazions
 Replace	MainWindow		Sostituìs
 Start recording	MainWindow		Tache la regjistrazion
 OK	CommandManager		Va ben
+Nothing is selected to export.	Document		Nol è nuie di selezionât di espuartâ.
 OK	ShortCutView		Va ben
 \"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		“$%s” (par “%s”) al è “%s”, no un numar
 New	MainWindow		Gnûf
@@ -31,8 +32,8 @@ Undo	MainWindow		Disfe
 File format	SavePanel		Formât dal file
 Macro	CommandManager		Macro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Chest file al è stât salvât di une version no compatibile di ProjectConceptor e nol pues jessi viert.
-Save before close	Document		Salve prime di sierâ
 Untitled %ld	MainWindow		Cence titul %ld
+Save before close	Document		Salve prime di sierâ
 Paste	MainWindow		Tache
 Help	MainWindow		Jutori
 There is nothing to print.	Document		No 'nd è nuie di stampâ.

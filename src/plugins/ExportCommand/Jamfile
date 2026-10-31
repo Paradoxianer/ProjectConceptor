@@ -1,0 +1,10 @@
+SubDir HAIKU_TOP 3rdparty projectconceptor src plugins ExportCommand ;
+
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include ] ;
+SEARCH_SOURCE += [ FDirName $(HAIKU_TOP) 3rdparty projectconceptor src include plugins ] ;
+
+Addon pc_command_export :
+	Export.cpp
+	ExportPlugin.cpp
+        : be tracker translation libprojectconceptor.a
+;

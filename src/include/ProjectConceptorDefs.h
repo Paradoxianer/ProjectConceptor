@@ -384,6 +384,11 @@ extern const char*		P_C_MACRO_RUN_ON_OPEN;	//			= "Macro::runOnOpen"
 /** the variable every playback starts with: today as YYYY-MM-DD, the way
  * date attributes store it */
 extern const char*		P_C_VARIABLE_TODAY;	//				= "today"
+/** Export: the file, its format as a file name extension (else the
+ * file's own) and whether only the selection is written */
+extern const char*		P_C_EXPORT_PATH;	//				= "path"
+extern const char*		P_C_EXPORT_FORMAT;	//				= "format"
+extern const char*		P_C_EXPORT_SELECTION;	//			= "selection"
 
 /** a file format of a translator: in the save/export panel's menu items,
  * in a document's saveSettings, and in a translator's configuration

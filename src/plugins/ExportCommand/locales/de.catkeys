@@ -1,0 +1,7 @@
+1	German	application/x-vnd.ProjectConceptor-plugin	2436460492
+There is no format for \"%s\".	Export		Es gibt kein Format für \"%s\".
+Export needs a file in \"path\".	Export		Export braucht eine Datei in \"path\".
+Could not find the home folder: %s	Export		Der Home-Ordner wurde nicht gefunden: %s
+Could not write to \"%s\": %s	Export		Konnte nicht nach \"%s\" schreiben: %s
+\"%s\" has no extension to tell the format by, and \"format\" is empty.	Export		\"%s\" hat keine Endung, an der sich das Format erkennen lässt, und \"format\" ist leer.
+\"%s\" lies next to the document, which isn't saved yet.	Export		\"%s\" liegt neben dem Dokument, das aber noch nicht gespeichert ist.

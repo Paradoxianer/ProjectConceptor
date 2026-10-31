@@ -150,12 +150,19 @@ public:
 	 *@see SetEntry
 	 */
 			void				Save(void);
-	/** writes the document to ref in the format of saveSettings (the
-	 * native one without P_C_FORMAT_TYPE), without making ref its file;
-	 * an export gets the format's MIME type instead of the document's */
+	/** writes the document, or only its selection, to ref in the format
+	 * of saveSettings (the native one without P_C_FORMAT_TYPE), without
+	 * making ref its file; an export gets the format's MIME type instead
+	 * of the document's. Why it failed goes to error, else to an alert. */
 			status_t			WriteTo(const entry_ref &ref,
 									const BMessage &saveSettings,
-									bool exporting = false);
+									bool exporting = false,
+									bool selectionOnly = false,
+									BString *error = NULL);
+	/** the selection of a flattened document (Archive()) as a document of
+	 * its own: the selected nodes, what lies in them and the connections
+	 * between them */
+	static	BMessage			SelectionArchive(const BMessage &archive);
 	/**save the file from the entry
 	 *
 	 *@todo mime check

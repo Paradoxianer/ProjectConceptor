@@ -171,7 +171,7 @@ app="$CHECK/apps/ProjectConceptor/ProjectConceptor"
 catalogs="$(xres -l "$app" | grep -c CADA || true)"
 [ "$catalogs" -gt 1 ] || fail "app catalogs missing"
 for plugin in Plugins/GraphEditor Plugins/MacroEditor Plugins/NavigatorEditor \
-		Plugins/LayoutEditor Plugins/Commands/Ask; do
+		Plugins/LayoutEditor Plugins/Commands/Ask Plugins/Commands/Export; do
 	[ "$(xres -l "$CHECK/apps/ProjectConceptor/$plugin" | grep -c CADA || true)" -gt 1 ] \
 		|| fail "$plugin catalogs missing"
 done

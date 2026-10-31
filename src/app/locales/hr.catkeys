@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor	1524208958
+1	Croatian	application/x-vnd.ProjectConceptor	2709756247
 Export	SavePanel		Izvezi
 Macro shortcuts (double-click to change the key)	ShortCutView		Prečaci makronaredbi (dvostruki klik za promjenu tipke)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Pritisnite kombinaciju tipki za makronaredbu „%s” (Esc za odustajanje).
@@ -10,6 +10,7 @@ Settings	SavePanel		Postavke
 Replace	MainWindow		Zamijeni
 Start recording	MainWindow		Započni snimati
 OK	CommandManager		U redu
+Nothing is selected to export.	Document		Ništa nije odabrano za izvoz.
 OK	ShortCutView		U redu
 \"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		„$%s” (za „%s”) je „%s”, a ne broj
 New	MainWindow		Novo
@@ -31,8 +32,8 @@ Undo	MainWindow		Poništi
 File format	SavePanel		Format datoteke
 Macro	CommandManager		Makronaredba
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Ovu je datoteku spremila nekompatibilna inačica programa ProjectConceptor i ne može se otvoriti.
-Save before close	Document		Spremi prije zatvaranja
 Untitled %ld	MainWindow		Bez naslova %ld
+Save before close	Document		Spremi prije zatvaranja
 Paste	MainWindow		Zalijepi
 Help	MainWindow		Pomoć
 There is nothing to print.	Document		Nema ničega za ispis.

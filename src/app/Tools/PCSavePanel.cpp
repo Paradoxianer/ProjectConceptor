@@ -5,6 +5,7 @@
 #include <support/Autolock.h>
 #include <Catalog.h>
 #include <string.h>
+#include <strings.h>
 
 #include "PCSavePanel.h"
 #include "ProjectConceptorDefs.h"
@@ -136,9 +137,8 @@ static BString FormatExtension(BTranslatorRoster *roster, translator_id id,
 }
 
 
-BMenu *PCSavePanel::BuildFormatsMenu(void)
+std::vector<BMessage> PCSavePanel::Formats(bool exporting)
 {
-	// Builds a menu with all the possible file types
 	BTranslatorRoster			*roster				= BTranslatorRoster::Default();
 	int32						num_translators		= 0;
 	int32						i,q					= 0;
@@ -147,10 +147,7 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 	translator_id				*translators		= NULL;
 	const	translation_format	*oFormats;
 	const	translation_format	*iFormats;
-	BMessage					*message			= NULL;
-	BMenu						*menu				= new BMenu(B_TRANSLATE("File format") );
-	BMenuItem					*item				= NULL;
-	bool						bitmapsStarted		= false;
+	std::vector<BMessage>		formats;
 	roster->GetAllTranslators(&translators, &num_translators);
 	for (i=0;i<num_translators;i++)  {
 		roster->GetInputFormats(translators[i], &iFormats, &inNum);
@@ -169,15 +166,13 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 				|| (oFormats[j].type == P_C_DOCUMENT_TEXT_TYPE);
 			if (native == exporting)
 				continue;
-			message	= new BMessage(kFormatChanged);
-			message->AddString(P_C_FORMAT_NAME,oFormats[j].name);
-			message->AddString(P_C_FORMAT_MIME,oFormats[j].MIME);
-			message->AddInt32(P_C_FORMAT_TYPE,oFormats[j].type);
-			message->AddString(P_C_FORMAT_EXTENSION,
+			BMessage	format(kFormatChanged);
+			format.AddString(P_C_FORMAT_NAME,oFormats[j].name);
+			format.AddString(P_C_FORMAT_MIME,oFormats[j].MIME);
+			format.AddInt32(P_C_FORMAT_TYPE,oFormats[j].type);
+			format.AddString(P_C_FORMAT_EXTENSION,
 				FormatExtension(roster, translators[i], oFormats[j].type));
-			item = new BMenuItem(oFormats[j].name, message);
-			item->SetTarget(formatHandler);
-			menu->AddItem( item );
+			formats.push_back(format);
 		}
 	}
 	// an export can also be a picture: every format the system's bitmap
@@ -194,27 +189,55 @@ BMenu *PCSavePanel::BuildFormatsMenu(void)
 			if ((oFormats[j].type == B_TRANSLATOR_BITMAP)
 				|| (oFormats[j].group != B_TRANSLATOR_BITMAP))
 				continue;
-			if (!bitmapsStarted) {
-				menu->AddSeparatorItem();
-				bitmapsStarted	= true;
-			}
 			BMessage	extensions;
 			const char	*extension	= "";
 			BMimeType	mime(oFormats[j].MIME);
 			if (mime.GetFileExtensions(&extensions) == B_OK)
 				extension	= extensions.GetString("extensions", "");
-			message	= new BMessage(kFormatChanged);
-			message->AddString(P_C_FORMAT_NAME,oFormats[j].name);
-			message->AddString(P_C_FORMAT_MIME,oFormats[j].MIME);
-			message->AddInt32(P_C_FORMAT_TYPE,oFormats[j].type);
-			message->AddString(P_C_FORMAT_EXTENSION,extension);
-			message->AddBool(P_C_FORMAT_BITMAP,true);
-			item = new BMenuItem(oFormats[j].name, message);
-			item->SetTarget(formatHandler);
-			menu->AddItem( item );
+			BMessage	format(kFormatChanged);
+			format.AddString(P_C_FORMAT_NAME,oFormats[j].name);
+			format.AddString(P_C_FORMAT_MIME,oFormats[j].MIME);
+			format.AddInt32(P_C_FORMAT_TYPE,oFormats[j].type);
+			format.AddString(P_C_FORMAT_EXTENSION,extension);
+			format.AddBool(P_C_FORMAT_BITMAP,true);
+			formats.push_back(format);
 		}
 	}
 	delete [] translators;
+	return formats;
+}
+
+
+status_t PCSavePanel::FindFormat(const char *extension, BMessage *format)
+{
+	for (int32 exporting = 0; exporting < 2; exporting++) {
+		std::vector<BMessage>	formats	= Formats(exporting != 0);
+		for (size_t i = 0; i < formats.size(); i++) {
+			if (strcasecmp(formats[i].GetString(P_C_FORMAT_EXTENSION,""),extension) == 0) {
+				*format	= formats[i];
+				return B_OK;
+			}
+		}
+	}
+	return B_NAME_NOT_FOUND;
+}
+
+
+BMenu *PCSavePanel::BuildFormatsMenu(void)
+{
+	BMenu					*menu		= new BMenu(B_TRANSLATE("File format"));
+	std::vector<BMessage>	formats		= Formats(exporting);
+	bool					bitmaps		= false;
+	for (size_t i = 0; i < formats.size(); i++) {
+		if (formats[i].GetBool(P_C_FORMAT_BITMAP,false) && !bitmaps) {
+			menu->AddSeparatorItem();
+			bitmaps	= true;
+		}
+		BMenuItem	*item	= new BMenuItem(formats[i].GetString(P_C_FORMAT_NAME,""),
+			new BMessage(formats[i]));
+		item->SetTarget(formatHandler);
+		menu->AddItem(item);
+	}
 	if (menu->CountItems() == 0)
 		menu->AddItem(new BMenuItem(B_TRANSLATE("Could not find plugins"),NULL));
 	return menu;

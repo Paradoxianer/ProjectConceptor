@@ -111,18 +111,19 @@ public:
 
 	/**
 	 * what printing covers of GetView(), in its coordinates at 100 %
-	 * zoom; invalid for an editor that doesn't print. Called with the
-	 * view's looper locked. While printing, BView::IsPrinting() is true in
-	 * Draw() - the editor draws for paper then.
+	 * zoom, or only the selection of it; invalid for an editor that
+	 * doesn't print. Called with the view's looper locked. While printing,
+	 * BView::IsPrinting() is true in Draw() - the editor draws for paper
+	 * then.
 	 */
-	virtual BRect			PrintFrame(void) {return BRect();};
+	virtual BRect			PrintFrame(bool selectionOnly) {return BRect();};
 
 	/**
-	 * PrintFrame() drawn the way it is printed into a new bitmap (the
+	 * PrintFrame(selectionOnly) drawn the way it is printed into a new bitmap (the
 	 * caller's), scale pixels per point; NULL for an editor that doesn't
 	 * print. Called with the view's looper locked.
 	 */
-	virtual BBitmap*		PaperBitmap(float scale) {return NULL;};
+	virtual BBitmap*		PaperBitmap(float scale, bool selectionOnly) {return NULL;};
 
 	/**
 	 * if the Editor is an View, this should not return a link to the BView Handler.

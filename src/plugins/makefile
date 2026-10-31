@@ -6,6 +6,7 @@ plugins = \
 	ChangeValueCommand \
 	CopyCommand \
 	DeleteCommand \
+	ExportCommand \
 	FindCommand \
 	ForEachCommand \
 	GetValueCommand \

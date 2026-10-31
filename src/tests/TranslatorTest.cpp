@@ -3,7 +3,9 @@
 #include <DataIO.h>
 #include <Entry.h>
 #include <File.h>
+#include <FindDirectory.h>
 #include <NodeInfo.h>
+#include <Path.h>
 #include <GraphicsDefs.h>
 #include <Message.h>
 #include <TranslatorRoster.h>
@@ -14,6 +16,9 @@
 
 #include <string.h>
 
+#include "BasePlugin.h"
+#include "Export.h"
+#include "PCommandManager.h"
 #include "PCSavePanel.h"
 #include "PDocument.h"
 #include "ProjectConceptorDefs.h"
@@ -594,4 +599,153 @@ void TranslatorTest::UnknownOutputTypeIsRefused(void)
 	CPPUNIT_ASSERT(BTranslatorRoster::Default()->Translate(
 		&native, NULL, NULL, &output, 'PNG ') != B_OK);
 	CPPUNIT_ASSERT_EQUAL((size_t)0, output.BufferLength());
+}
+
+
+// Export's file and format for a path, else its error
+static status_t ExportTarget(PDocument *doc, const char *path, const char *format,
+	BMessage *found, BString *where = NULL)
+{
+	BMessage	settings;
+	settings.AddString(P_C_EXPORT_PATH, path);
+	if (format != NULL)
+		settings.AddString(P_C_EXPORT_FORMAT, format);
+	entry_ref	ref;
+	BString		error;
+	status_t	err	= Export::Target(doc, settings, &ref, found, &error);
+	if (err != B_OK) {
+		CPPUNIT_ASSERT(error.Length() > 0);
+		return err;
+	}
+	if (where != NULL)
+		*where	= BPath(&ref).Path();
+	return B_OK;
+}
+
+
+// path with its links resolved, like /tmp
+static BString Resolved(const char *path)
+{
+	entry_ref	ref;
+	BEntry(path).GetRef(&ref);
+	return BString(BPath(&ref).Path());
+}
+
+
+// TwoNodeDocument() saved and opened again, so it has a file
+static PDocument* SavedTwoNodeDocument(const char *path)
+{
+	BMallocIO	flat;
+	TwoNodeDocument().Flatten(&flat);
+	BFile		file(path, B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+	file.Write(flat.Buffer(), flat.BufferLength());
+	BEntry		entry(path);
+	entry_ref	ref;
+	entry.GetRef(&ref);
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->SetEntry(&ref, NULL);
+	doc->Load();
+	return doc;
+}
+
+
+void TranslatorTest::ExportCommandFindsFileAndFormat(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+	BMessage	format;
+	BString		where;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(doc, "/tmp/plan.dot", NULL,
+		&format, &where));
+	CPPUNIT_ASSERT_EQUAL((int32)P_C_DOT_TYPE, format.GetInt32(P_C_FORMAT_TYPE, 0));
+	CPPUNIT_ASSERT_EQUAL(Resolved("/tmp/plan.dot"), where);
+	// "format" wins over the file's extension, in any case
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(doc, "/tmp/plan.dot", "HTML",
+		&format));
+	CPPUNIT_ASSERT_EQUAL((int32)P_C_HTML_TYPE, format.GetInt32(P_C_FORMAT_TYPE, 0));
+	// pictures and the document's own format
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(doc, "/tmp/plan.png", NULL,
+		&format));
+	CPPUNIT_ASSERT(format.GetBool(P_C_FORMAT_BITMAP, false));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(doc, "/tmp/plan.pcd", NULL,
+		&format));
+	CPPUNIT_ASSERT_EQUAL((int32)P_C_DOCUMENT_TYPE, format.GetInt32(P_C_FORMAT_TYPE, 0));
+	// ~/ is the home folder
+	BPath		home;
+	find_directory(B_USER_DIRECTORY, &home);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(doc, "~/plan.svg", NULL,
+		&format, &where));
+	CPPUNIT_ASSERT_EQUAL(BString(home.Path()) << "/plan.svg", where);
+	// what can't be exported says why
+	CPPUNIT_ASSERT_EQUAL((status_t)B_NAME_NOT_FOUND,
+		ExportTarget(doc, "/tmp/plan.nothing", NULL, &format));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE, ExportTarget(doc, "/tmp/plan", NULL, &format));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE, ExportTarget(doc, "", NULL, &format));
+	// a relative path lies next to the document, which needs a file
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE, ExportTarget(doc, "plan.dot", NULL, &format));
+	PDocument	*saved	= SavedTwoNodeDocument("/tmp/projectconceptor-export-cmd.pcd");
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(saved, "plan.dot", NULL,
+		&format, &where));
+	CPPUNIT_ASSERT_EQUAL(Resolved("/tmp/plan.dot"), where);
+	BEntry("/tmp/projectconceptor-export-cmd.pcd").Remove();
+}
+
+
+namespace {
+class TestExportPlugin : public BasePlugin {
+public:
+	TestExportPlugin(void) : BasePlugin(0) {}
+	virtual char*	GetName(void) { return (char *)"Export"; }
+	virtual char*	GetAutor(void) { return (char *)"test"; }
+	virtual char*	GetVersionsString(void) { return (char *)"0"; }
+	virtual char*	GetDescription(void) { return (char *)"test"; }
+	virtual uint32	GetType(void) { return P_C_COMMANDO_PLUGIN_TYPE; }
+	virtual void*	GetNewObject(void *value) { return new Export(); }
+};
+}
+
+
+static BString FileText(const char *path)
+{
+	BFile		file(path, B_READ_ONLY);
+	off_t		size	= 0;
+	file.GetSize(&size);
+	BString		text;
+	file.Read(text.LockBuffer(size), size);
+	text.UnlockBuffer(size);
+	return text;
+}
+
+
+void TranslatorTest::ExportCommandWritesTheSelection(void)
+{
+	PDocument	*doc	= SavedTwoNodeDocument("/tmp/projectconceptor-export-cmd.pcd");
+	doc->GetCommandManager()->RegisterPCommand(new TestExportPlugin());
+	CPPUNIT_ASSERT_EQUAL((int32)2, doc->GetAllNodes()->CountItems());
+	BMessage	*first	= NULL;
+	for (int32 i = 0; i < doc->GetAllNodes()->CountItems(); i++) {
+		BMessage	*node	= (BMessage *)doc->GetAllNodes()->ItemAt(i);
+		BMessage	data;
+		node->FindMessage(P_C_NODE_DATA, &data);
+		if (BString(data.GetString(P_C_NODE_NAME, "")) == "first")
+			first	= node;
+	}
+	CPPUNIT_ASSERT(first != NULL);
+	first->AddBool(P_C_NODE_SELECTED, true);
+	doc->GetSelected()->AddItem(first);
+
+	BMessage	settings(P_C_EXECUTE_COMMAND);
+	settings.AddString("Command::Name", "Export");
+	settings.AddString(P_C_EXPORT_PATH, "projectconceptor-export-cmd.mmd");
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, doc->GetCommandManager()->Execute(&settings));
+	BString		all	= FileText("/tmp/projectconceptor-export-cmd.mmd");
+	CPPUNIT_ASSERT(all.FindFirst("first") >= 0);
+	CPPUNIT_ASSERT(all.FindFirst("second") >= 0);
+
+	settings.AddBool(P_C_EXPORT_SELECTION, true);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, doc->GetCommandManager()->Execute(&settings));
+	BString		part	= FileText("/tmp/projectconceptor-export-cmd.mmd");
+	CPPUNIT_ASSERT(part.FindFirst("first") >= 0);
+	CPPUNIT_ASSERT(part.FindFirst("second") < 0);
+	BEntry("/tmp/projectconceptor-export-cmd.mmd").Remove();
+	BEntry("/tmp/projectconceptor-export-cmd.pcd").Remove();
 }

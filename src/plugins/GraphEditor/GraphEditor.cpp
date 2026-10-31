@@ -624,7 +624,22 @@ static bool InSelection(BMessage *node)
 	return false;
 }
 
-BRect GraphEditor::_PaperFrame(bool selectionOnly) {
+// a hidden tab's editor has no renderers (see DetachedFromWindow()): the
+// paper gets them for the moment
+bool GraphEditor::_RenderersForPaper(void) {
+	if ((Window() != NULL) || (doc == NULL) || !renderer->IsEmpty())
+		return false;
+	InitAll();
+	return true;
+}
+
+void GraphEditor::_RemoveRenderers(void) {
+	while (renderer->CountItems() > 0)
+		RemoveRenderer((Renderer *)renderer->ItemAt(0));
+}
+
+BRect GraphEditor::PrintFrame(bool selectionOnly) {
+	bool	borrowed	= _RenderersForPaper();
 	BRect	frame;
 	for (int32 i = 0; i < renderer->CountItems(); i++) {
 		Renderer	*painter	= (Renderer *)renderer->ItemAt(i);
@@ -636,11 +651,9 @@ BRect GraphEditor::_PaperFrame(bool selectionOnly) {
 	// room for shadows and arrow heads
 	if (frame.IsValid())
 		frame.InsetBy(-kPrintMargin,-kPrintMargin);
+	if (borrowed)
+		_RemoveRenderers();
 	return frame;
-}
-
-BRect GraphEditor::PrintFrame(void) {
-	return _PaperFrame(false);
 }
 
 void GraphEditor::_DrawForPaper(BView *target, BRect updateRect, bool selectionOnly) {
@@ -661,20 +674,28 @@ void GraphEditor::_DrawForPaper(BView *target, BRect updateRect, bool selectionO
 	style	= screen;
 }
 
-BBitmap* GraphEditor::PaperBitmap(float scale) {
-	return _PaperBitmap(scale,false);
+BBitmap* GraphEditor::PaperBitmap(float scale, bool selectionOnly) {
+	bool	borrowed	= _RenderersForPaper();
+	BRect	frame		= PrintFrame(selectionOnly);
+	BBitmap	*bitmap		= NULL;
+	if (frame.IsValid()) {
+		BRect	bounds(0,0,ceilf(frame.Width()*scale),ceilf(frame.Height()*scale));
+		bitmap	= new BBitmap(bounds,B_BITMAP_ACCEPTS_VIEWS,B_RGB32);
+		if (bitmap->InitCheck() == B_OK)
+			_DrawPaper(bitmap,frame,scale,selectionOnly);
+		else {
+			delete bitmap;
+			bitmap	= NULL;
+		}
+	}
+	if (borrowed)
+		_RemoveRenderers();
+	return bitmap;
 }
 
-BBitmap* GraphEditor::_PaperBitmap(float scale, bool selectionOnly) {
-	BRect	frame	= _PaperFrame(selectionOnly);
-	if (!frame.IsValid())
-		return NULL;
-	BRect	bounds(0,0,ceilf(frame.Width()*scale),ceilf(frame.Height()*scale));
-	BBitmap	*bitmap	= new BBitmap(bounds,B_BITMAP_ACCEPTS_VIEWS,B_RGB32);
-	if (bitmap->InitCheck() != B_OK) {
-		delete bitmap;
-		return NULL;
-	}
+void GraphEditor::_DrawPaper(BBitmap *bitmap, BRect frame, float scale,
+	bool selectionOnly) {
+	BRect	bounds	= bitmap->Bounds();
 	BView	*paper	= new BView(bounds,"paper",B_FOLLOW_NONE,B_WILL_DRAW);
 	bitmap->AddChild(paper);
 	bitmap->Lock();
@@ -691,7 +712,6 @@ BBitmap* GraphEditor::_PaperBitmap(float scale, bool selectionOnly) {
 	bitmap->RemoveChild(paper);
 	bitmap->Unlock();
 	delete paper;
-	return bitmap;
 }
 
 bool GraphEditor::FarOutside(BPoint where) {
@@ -703,7 +723,7 @@ bool GraphEditor::FarOutside(BPoint where) {
 }
 
 void GraphEditor::DragSelectionOut(void) {
-	BRect	frame	= _PaperFrame(true);
+	BRect	frame	= PrintFrame(true);
 	if (!frame.IsValid())
 		return;
 	BMessage	drag(B_SIMPLE_DATA);
@@ -722,7 +742,7 @@ void GraphEditor::DragSelectionOut(void) {
 	drag.AddString("be:clip_name",name.String());
 	// a small picture of what is dragged
 	float	side	= std::max(frame.Width(),frame.Height());
-	BBitmap	*preview	= _PaperBitmap(std::min(1.0f,kDragPreviewSide/side),true);
+	BBitmap	*preview	= PaperBitmap(std::min(1.0f,kDragPreviewSide/side),true);
 	BPoint	pointer;
 	uint32	buttons;
 	GetMouse(&pointer,&buttons,false);
@@ -731,55 +751,6 @@ void GraphEditor::DragSelectionOut(void) {
 		DragMessage(&drag,preview,B_OP_BLEND,offset,this);
 	} else
 		DragMessage(&drag,BRect(pointer,pointer).InsetByCopy(-16,-16),this);
-}
-
-// the selection as a document of its own: the flattened document with
-// only the selected nodes, what lies in them and the connections between
-static BMessage SelectionDocument(const BMessage &archive)
-{
-	BMessage	allNodes;
-	BMessage	allConnections;
-	archive.FindMessage(P_C_DOC_ALLNODES,&allNodes);
-	archive.FindMessage(P_C_DOC_ALLCONNECTIONS,&allConnections);
-	std::map<int32,BMessage>	nodes;
-	BMessage	entry;
-	for (int32 i = 0; allNodes.FindMessage(P_C_DOC_ENTRY,i,&entry) == B_OK; i++)
-		nodes[entry.GetInt32(P_C_NODE_ID,-1)]	= entry;
-	std::set<int32>	kept;
-	for (std::map<int32,BMessage>::iterator node = nodes.begin(); node != nodes.end(); node++) {
-		int32	id	= node->first;
-		for (int32 depth = 0; depth < 64; depth++) {
-			std::map<int32,BMessage>::iterator	found	= nodes.find(id);
-			if (found == nodes.end())
-				break;
-			if (found->second.GetBool(P_C_NODE_SELECTED,false)) {
-				kept.insert(node->first);
-				break;
-			}
-			id	= found->second.GetInt32(P_C_NODE_PARENT,-1);
-		}
-	}
-	BMessage	keptNodes;
-	for (std::map<int32,BMessage>::iterator node = nodes.begin(); node != nodes.end(); node++) {
-		if (kept.find(node->first) == kept.end())
-			continue;
-		BMessage	copy(node->second);
-		if (kept.find(copy.GetInt32(P_C_NODE_PARENT,-1)) == kept.end())
-			copy.RemoveName(P_C_NODE_PARENT);
-		copy.RemoveName(P_C_NODE_SELECTED);
-		keptNodes.AddMessage(P_C_DOC_ENTRY,&copy);
-	}
-	BMessage	keptConnections;
-	for (int32 i = 0; allConnections.FindMessage(P_C_DOC_ENTRY,i,&entry) == B_OK; i++) {
-		if ((kept.find(entry.GetInt32(P_C_NODE_CONNECTION_FROM,-1)) != kept.end())
-			&& (kept.find(entry.GetInt32(P_C_NODE_CONNECTION_TO,-1)) != kept.end()))
-			keptConnections.AddMessage(P_C_DOC_ENTRY,&entry);
-	}
-	BMessage	document;
-	document.AddInt32(P_C_DOC_FORMAT_VERSION_FIELD,P_C_DOC_FORMAT_VERSION);
-	document.AddMessage(P_C_DOC_ALLNODES,&keptNodes);
-	document.AddMessage(P_C_DOC_ALLCONNECTIONS,&keptConnections);
-	return document;
 }
 
 void GraphEditor::_DeliverDrag(BMessage *request) {
@@ -802,9 +773,9 @@ void GraphEditor::_DeliverDrag(BMessage *request) {
 			doc->Archive(&archive,true);
 			doc->Unlock();
 		}
-		err	= SelectionDocument(archive).Flatten(&data);
+		err	= PDocument::SelectionArchive(archive).Flatten(&data);
 	} else {
-		BBitmap	*bitmap	= _PaperBitmap(2.0,true);
+		BBitmap	*bitmap	= PaperBitmap(2.0,true);
 		if (bitmap == NULL)
 			return;
 		BBitmapStream	stream(bitmap);
@@ -1178,11 +1149,7 @@ void GraphEditor::DetachedFromWindow(void) {
 				configBar->RemoveItem(guides);
 			}
 		}
-		Renderer	*nodeRenderer	= NULL;
-		while(renderer->CountItems()>0) {
-			nodeRenderer = (Renderer *)renderer->ItemAt(0);
-			RemoveRenderer(nodeRenderer);
-		}
+		_RemoveRenderers();
 	}
 }
 void GraphEditor::MessageReceived(BMessage *message) {

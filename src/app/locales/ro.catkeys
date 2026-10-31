@@ -1,4 +1,4 @@
-1	Romanian	application/x-vnd.ProjectConceptor	1524208958
+1	Romanian	application/x-vnd.ProjectConceptor	2709756247
 Export	SavePanel		Exportă
 Macro shortcuts (double-click to change the key)	ShortCutView		Scurtături pentru macrocomenzi (dublu clic pentru a schimba tasta)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Apăsați combinația de taste pentru macrocomanda „%s” (Esc pentru anulare).
@@ -10,6 +10,7 @@ Settings	SavePanel		Configurări
 Replace	MainWindow		Înlocuire
 Start recording	MainWindow		Începe înregistrarea
 OK	CommandManager		OK
+Nothing is selected to export.	Document		Nu este nimic selectat pentru export.
 OK	ShortCutView		OK
 \"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		„$%s” (pentru „%s”) este „%s”, nu un număr
 New	MainWindow		Nou
@@ -31,8 +32,8 @@ Undo	MainWindow		Reface
 File format	SavePanel		Format fișier
 Macro	CommandManager		Macro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Acest fișier a fost salvat de o versiune incompatibilă de ProjectConceptor și nu poate fi deschis.
-Save before close	Document		Salvează înainte de închidere
 Untitled %ld	MainWindow		Fără titlu %ld
+Save before close	Document		Salvează înainte de închidere
 Paste	MainWindow		Lipire
 Help	MainWindow		Ajutor
 There is nothing to print.	Document		Nu este nimic de imprimat.

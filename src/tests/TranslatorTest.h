@@ -24,6 +24,8 @@ public:
 	void ExportWritesACopyOfItsOwnType(void);
 	void ImportedFileIsNotTheDocumentsFile(void);
 	void SaveAndExportOfferTheRightFormats(void);
+	void ExportCommandFindsFileAndFormat(void);
+	void ExportCommandWritesTheSelection(void);
 
 	CPPUNIT_TEST_SUITE(TranslatorTest);
 	CPPUNIT_TEST(FreeMindImportBuildsNodesAndConnections);
@@ -41,6 +43,8 @@ public:
 	CPPUNIT_TEST(ExportWritesACopyOfItsOwnType);
 	CPPUNIT_TEST(ImportedFileIsNotTheDocumentsFile);
 	CPPUNIT_TEST(SaveAndExportOfferTheRightFormats);
+	CPPUNIT_TEST(ExportCommandFindsFileAndFormat);
+	CPPUNIT_TEST(ExportCommandWritesTheSelection);
 	CPPUNIT_TEST_SUITE_END();
 };
 

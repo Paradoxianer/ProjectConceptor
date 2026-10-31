@@ -16,6 +16,8 @@
 #include <TranslatorRoster.h>
 #include <string.h>
 #include <algorithm>
+#include <map>
+#include <set>
 #include <math.h>
 #include <FindDirectory.h>
 #include <Catalog.h>
@@ -635,17 +637,34 @@ void PDocument::SetPrintSettings(BMessage *settings)
 }
 
 
-// the editor to print: the active one, else the first that can
-static PEditor* PrintableEditor(PEditorManager *editorManager)
+/** locks the window of an editor's view - if it has one: BTabView takes
+ * the views of the tabs not shown out of the window, and nothing else
+ * draws them then */
+static bool LockEditorView(BView *view)
+{
+	return view->LockLooper() || (view->Looper() == NULL);
+}
+
+static void UnlockEditorView(BView *view)
+{
+	if (view->Looper() != NULL)
+		view->UnlockLooper();
+}
+
+
+// the editor to print: the active one, else the first that can; only
+// one in a window can go to a printer
+static PEditor* PrintableEditor(PEditorManager *editorManager, bool shownOnly)
 {
 	PEditor	*active	= editorManager->GetActivPEditor();
 	for (int32 i = -1; i < editorManager->CountPEditors(); i++) {
 		PEditor	*editor	= (i < 0) ? active : editorManager->PEditorAt(i);
 		BView	*view	= (editor != NULL) ? editor->GetView() : NULL;
-		if ((view == NULL) || !view->LockLooper())
+		if ((view == NULL) || (shownOnly && (view->Window() == NULL))
+			|| !LockEditorView(view))
 			continue;
-		bool	printable	= editor->PrintFrame().IsValid();
-		view->UnlockLooper();
+		bool	printable	= editor->PrintFrame(false).IsValid();
+		UnlockEditorView(view);
 		if (printable)
 			return editor;
 	}
@@ -656,7 +675,7 @@ static PEditor* PrintableEditor(PEditorManager *editorManager)
 void PDocument::Print(void)
 {
 	TRACE();
-	PEditor	*editor	= PrintableEditor(editorManager);
+	PEditor	*editor	= PrintableEditor(editorManager,true);
 	if (editor == NULL) {
 		(new BAlert(B_TRANSLATE("Print"),B_TRANSLATE("There is nothing to print."),
 			B_TRANSLATE("OK")))->Go(NULL);
@@ -676,7 +695,7 @@ void PDocument::Print(void)
 	if (!view->LockLooper())
 		return;
 	// the whole graph, tiled over as many pages as it needs
-	BRect	frame		= editor->PrintFrame();
+	BRect	frame		= editor->PrintFrame(false);
 	BRect	printable	= printJob.PrintableRect();
 	float	pageWidth	= floorf(printable.Width());
 	float	pageHeight	= floorf(printable.Height());
@@ -788,22 +807,27 @@ void PDocument::Save(void)
 // the largest side of an exported picture, in pixels
 static const float	kMaxBitmapSide	= 8000;
 
-// the graph as a picture, through the system's bitmap translators
+// the graph or its selection as a picture, through the system's bitmap
+// translators
 static status_t WriteBitmap(PEditorManager *editorManager, BPositionIO *out,
-	uint32 type)
+	uint32 type, bool selectionOnly)
 {
-	PEditor	*editor	= PrintableEditor(editorManager);
+	PEditor	*editor	= PrintableEditor(editorManager,false);
 	if (editor == NULL)
-		return B_ERROR;
+		return B_NOT_SUPPORTED;
 	BView	*view	= editor->GetView();
-	if (!view->LockLooper())
+	if (!LockEditorView(view))
 		return B_ERROR;
-	BRect	frame	= editor->PrintFrame();
+	BRect	frame	= editor->PrintFrame(selectionOnly);
+	if (!frame.IsValid()) {
+		UnlockEditorView(view);
+		return B_BAD_VALUE;
+	}
 	// two pixels per point stay sharp on any screen
 	float	scale	= std::min(2.0f,
 		kMaxBitmapSide / std::max(frame.Width(),frame.Height()));
-	BBitmap	*bitmap	= editor->PaperBitmap(scale);
-	view->UnlockLooper();
+	BBitmap	*bitmap	= editor->PaperBitmap(scale,selectionOnly);
+	UnlockEditorView(view);
 	if (bitmap == NULL)
 		return B_NO_MEMORY;
 	BBitmapStream	stream(bitmap);
@@ -815,19 +839,84 @@ static status_t WriteBitmap(PEditorManager *editorManager, BPositionIO *out,
 }
 
 
+BMessage PDocument::SelectionArchive(const BMessage &archive)
+{
+	BMessage	allNodes;
+	BMessage	allConnections;
+	archive.FindMessage(P_C_DOC_ALLNODES,&allNodes);
+	archive.FindMessage(P_C_DOC_ALLCONNECTIONS,&allConnections);
+	std::map<int32,BMessage>	nodes;
+	BMessage	entry;
+	for (int32 i = 0; allNodes.FindMessage(P_C_DOC_ENTRY,i,&entry) == B_OK; i++)
+		nodes[entry.GetInt32(P_C_NODE_ID,-1)]	= entry;
+	std::set<int32>	kept;
+	for (std::map<int32,BMessage>::iterator node = nodes.begin(); node != nodes.end(); node++) {
+		int32	id	= node->first;
+		for (int32 depth = 0; depth < 64; depth++) {
+			std::map<int32,BMessage>::iterator	found	= nodes.find(id);
+			if (found == nodes.end())
+				break;
+			if (found->second.GetBool(P_C_NODE_SELECTED,false)) {
+				kept.insert(node->first);
+				break;
+			}
+			id	= found->second.GetInt32(P_C_NODE_PARENT,-1);
+		}
+	}
+	BMessage	keptNodes;
+	for (std::map<int32,BMessage>::iterator node = nodes.begin(); node != nodes.end(); node++) {
+		if (kept.find(node->first) == kept.end())
+			continue;
+		BMessage	copy(node->second);
+		if (kept.find(copy.GetInt32(P_C_NODE_PARENT,-1)) == kept.end())
+			copy.RemoveName(P_C_NODE_PARENT);
+		copy.RemoveName(P_C_NODE_SELECTED);
+		keptNodes.AddMessage(P_C_DOC_ENTRY,&copy);
+	}
+	BMessage	keptConnections;
+	for (int32 i = 0; allConnections.FindMessage(P_C_DOC_ENTRY,i,&entry) == B_OK; i++) {
+		if ((kept.find(entry.GetInt32(P_C_NODE_CONNECTION_FROM,-1)) != kept.end())
+			&& (kept.find(entry.GetInt32(P_C_NODE_CONNECTION_TO,-1)) != kept.end()))
+			keptConnections.AddMessage(P_C_DOC_ENTRY,&entry);
+	}
+	BMessage	document;
+	document.AddInt32(P_C_DOC_FORMAT_VERSION_FIELD,P_C_DOC_FORMAT_VERSION);
+	document.AddMessage(P_C_DOC_ALLNODES,&keptNodes);
+	document.AddMessage(P_C_DOC_ALLCONNECTIONS,&keptConnections);
+	return document;
+}
+
+// the reason a write failed: in error, else in an alert
+static void WriteError(const BString &text, BString *error)
+{
+	if (error != NULL) {
+		*error	= text;
+		return;
+	}
+	(new BAlert(B_TRANSLATE("Error"),text.String(),B_TRANSLATE("OK"),
+		NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go(NULL);
+}
+
+
 status_t PDocument::WriteTo(const entry_ref &ref, const BMessage &saveSettings,
-	bool exporting)
+	bool exporting, bool selectionOnly, BString *error)
 {
 	BAutolock	autolock(this);
+	if (selectionOnly && selected->IsEmpty()) {
+		WriteError(B_TRANSLATE("Nothing is selected to export."),error);
+		return B_BAD_VALUE;
+	}
 	BMessage	archived;
 	Archive(&archived,true);
+	if (selectionOnly)
+		archived	= SelectionArchive(archived);
 	BFile		file(&ref,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
 	status_t	err	= file.InitCheck();
 	int32		outType		= 0;
 	bool		useTranslator	= (err == B_OK)
 		&& (saveSettings.FindInt32(P_C_FORMAT_TYPE,&outType) == B_OK);
 	if (useTranslator && saveSettings.GetBool(P_C_FORMAT_BITMAP,false)) {
-		err = WriteBitmap(editorManager,&file,(uint32)outType);
+		err = WriteBitmap(editorManager,&file,(uint32)outType,selectionOnly);
 	} else if (useTranslator) {
 		// translator ids change between sessions; the format type doesn't
 		translator_info	translatorInfo;
@@ -859,13 +948,16 @@ status_t PDocument::WriteTo(const entry_ref &ref, const BMessage &saveSettings,
 	if (err != B_OK) {
 		BString	text;
 		text.SetToFormat(B_TRANSLATE("Could not save the document: %s"),strerror(err));
-		(new BAlert(B_TRANSLATE("Error"),text.String(),B_TRANSLATE("OK"),
-			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go(NULL);
+		WriteError(text,error);
+		// a copy that failed is no use; a document's own file is kept
+		if (exporting)
+			BEntry(&ref).Remove();
 		return err;
 	}
 	BNodeInfo	nodeInfo(&file);
 	const char	*mime	= NULL;
-	if (exporting && (saveSettings.FindString(P_C_FORMAT_MIME,&mime) == B_OK)) {
+	if (exporting && (saveSettings.FindString(P_C_FORMAT_MIME,&mime) == B_OK)
+		&& (strcmp(mime,P_C_DOCUMENT_MIMETYPE) != 0)) {
 		// an export opens in the app made for its format
 		nodeInfo.SetType(mime);
 	} else {

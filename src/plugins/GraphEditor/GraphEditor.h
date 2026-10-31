@@ -115,8 +115,8 @@ public:
 
 	virtual	BView*			GetView(void);
 	virtual	const char*		TabLabel(void);
-	virtual	BRect			PrintFrame(void);
-	virtual	BBitmap*		PaperBitmap(float scale);
+	virtual	BRect			PrintFrame(bool selectionOnly);
+	virtual	BBitmap*		PaperBitmap(float scale, bool selectionOnly);
 	/** drawing for paper or a picture: no selection, hover or grid */
 			bool			ForPaper(void) {return forPaper;};
 	/** a point (document coordinates) far enough out of the window that
@@ -404,8 +404,10 @@ protected:
 private:
 			void			_DrawForPaper(BView *target, BRect updateRect,
 								bool selectionOnly);
-			BRect			_PaperFrame(bool selectionOnly);
-			BBitmap*		_PaperBitmap(float scale, bool selectionOnly);
 			void			_DeliverDrag(BMessage *request);
+			bool			_RenderersForPaper(void);
+			void			_RemoveRenderers(void);
+			void			_DrawPaper(BBitmap *bitmap, BRect frame,
+								float scale, bool selectionOnly);
 };
 #endif

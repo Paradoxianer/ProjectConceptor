@@ -291,6 +291,16 @@ everything overdue whenever the document is opened:</p>
   operator=&quot;&lt;&quot;
   value=&quot;${today}&quot;
 </code></pre>
+<p><strong>Export</strong> writes a copy of the document like File &gt; Export, in the
+format of the file's extension (<code>html</code>, <code>svg</code>, <code>png</code>, <code>drawio</code>,
+<code>graphml</code>, <code>dot</code>, <code>mmd</code>, <code>md</code>, <code>pcd</code> ...) or of <code>format</code>. A path
+without <code>/</code> lies next to the document, <code>~/</code> is your home folder, and an
+existing file is overwritten. With <code>selection=true</code> only the selected
+nodes are written. Run when opening, this keeps a dated web page of the
+plan:</p>
+<pre><code>Export
+  path=&quot;plan-${today}.html&quot;
+</code></pre>
 <p>Loop counters start at 0. For a count starting at 1, add a step before:</p>
 <pre><code>Calculate
   left=$i
@@ -351,6 +361,11 @@ a node.</p>
 <td>ChangeValue</td>
 <td><code>node</code> or <code>Node::selected=true</code>; <code>valueContainer</code> (<code>name</code>, <code>subgroup</code>, <code>type</code>, <code>newValue</code>)</td>
 <td>Changes one field of the node(s).</td>
+</tr>
+<tr>
+<td>Export</td>
+<td><code>path</code>; <em>optional</em> <code>format</code>, <code>selection</code></td>
+<td>Writes a copy in the format of <code>format</code> or of the path's extension; <code>selection=true</code> writes only the selection.</td>
 </tr>
 <tr>
 <td>Find</td>

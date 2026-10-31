@@ -12,6 +12,8 @@
 #include <TranslatorRoster.h>
 #include <String.h>
 
+#include <vector>
+
 class FormatChangedHandler;
 
 /** Save panel with a menu of the document formats the translators offer.
@@ -24,6 +26,12 @@ public:
 						bool exporting = false);
 					~PCSavePanel();
 		BMenu		*BuildFormatsMenu(void);
+	/** the formats a document is saved in, or those it is exported in,
+	 * each a message with the P_C_FORMAT_* fields */
+static	std::vector<BMessage>	Formats(bool exporting);
+	/** the save or export format whose file name extension (without the
+	 * dot, any case) is extension */
+static	status_t	FindFormat(const char *extension, BMessage *format);
 	//virtual void SelectionChanged();
 virtual	void		SendMessage(const BMessenger*, BMessage*);
 		void		FormatChanged(void);

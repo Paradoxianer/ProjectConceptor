@@ -178,6 +178,19 @@ Find
   value="${today}"
 ```
 
+**Export** writes a copy of the document like File > Export, in the
+format of the file's extension (`html`, `svg`, `png`, `drawio`,
+`graphml`, `dot`, `mmd`, `md`, `pcd` ...) or of `format`. A path
+without `/` lies next to the document, `~/` is your home folder, and an
+existing file is overwritten. With `selection=true` only the selected
+nodes are written. Run when opening, this keeps a dated web page of the
+plan:
+
+```
+Export
+  path="plan-${today}.html"
+```
+
 Loop counters start at 0. For a count starting at 1, add a step before:
 
 ```
@@ -219,6 +232,7 @@ Fields marked *optional* can be left out.
 | Batch | - | Runs its steps as one undo step. |
 | Calculate | `left`, `operator`, `right`, `resultVariable` | `+ - * / mod min max` combine `left` and `right`; `round floor ceil abs` use only `left`. |
 | ChangeValue | `node` or `Node::selected=true`; `valueContainer` (`name`, `subgroup`, `type`, `newValue`) | Changes one field of the node(s). |
+| Export | `path`; *optional* `format`, `selection` | Writes a copy in the format of `format` or of the path's extension; `selection=true` writes only the selection. |
 | Find | `searchString`, or `attribute`, `operator`, `value`; *optional* `scope` (`nodes`, `connections`, `both`), `setOperation` (`replace`, `add`, `subtract`, `intersect`) | Selects what contains the text - or whose attribute compares with `value` by `operator` (`==`, `!=`, `<`, `<=`, `>`, `>=`, `contains`; `attribute` empty: any, `name`: the node's name) - combined with the current selection as set by `setOperation`. |
 | ForEach | *optional* `nodeVariable` | Runs its steps once per selected node. |
 | GetValue | `node`, `valueContainer` (`name`, `subgroup`), `resultVariable`; *optional* `default` | Reads an attribute of the node into a variable. Missing attribute: `default` if given, otherwise an error. |

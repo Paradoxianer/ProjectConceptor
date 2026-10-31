@@ -1,0 +1,7 @@
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	2436460492
+There is no format for \"%s\".	Export		Ne postoji format za \"%s\".
+Export needs a file in \"path\".	Export		Export treba datoteku u \"path\".
+Could not find the home folder: %s	Export		Nije pronađena osobna mapa: %s
+Could not write to \"%s\": %s	Export		Nije moguće pisati u \"%s\": %s
+\"%s\" has no extension to tell the format by, and \"format\" is empty.	Export		\"%s\" nema nastavak po kojem bi se prepoznao format, a \"format\" je prazan.
+\"%s\" lies next to the document, which isn't saved yet.	Export		\"%s\" se nalazi pokraj dokumenta, koji još nije spremljen.

@@ -1,4 +1,4 @@
-1	Spanish	application/x-vnd.ProjectConceptor	1524208958
+1	Spanish	application/x-vnd.ProjectConceptor	2709756247
 Export	SavePanel		Exportar
 Macro shortcuts (double-click to change the key)	ShortCutView		Atajos de macros (doble clic para cambiar la tecla)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Pulse la combinación de teclas para la macro «%s» (Esc para cancelar).
@@ -10,6 +10,7 @@ Settings	SavePanel		Configuración
 Replace	MainWindow		Reemplazar
 Start recording	MainWindow		Iniciar grabación
 OK	CommandManager		Aceptar
+Nothing is selected to export.	Document		No hay nada seleccionado para exportar.
 OK	ShortCutView		Aceptar
 \"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		«$%s» (para «%s») es «%s», no un número
 New	MainWindow		Nuevo
@@ -31,8 +32,8 @@ Undo	MainWindow		Deshacer
 File format	SavePanel		Formato de archivo
 Macro	CommandManager		Macro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Este archivo se guardó con una versión incompatible de ProjectConceptor y no se puede abrir.
-Save before close	Document		Guardar antes de cerrar
 Untitled %ld	MainWindow		Sin título %ld
+Save before close	Document		Guardar antes de cerrar
 Paste	MainWindow		Pegar
 Help	MainWindow		Ayuda
 There is nothing to print.	Document		No hay nada que imprimir.

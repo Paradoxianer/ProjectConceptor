@@ -55,6 +55,9 @@ const char*		P_C_MOVE_LEFT					= "left";
 const char*		P_C_MOVE_TOP					= "top";
 const char*		P_C_MACRO_RUN_ON_OPEN			= "Macro::runOnOpen";
 const char*		P_C_VARIABLE_TODAY				= "today";
+const char*		P_C_EXPORT_PATH					= "path";
+const char*		P_C_EXPORT_FORMAT				= "format";
+const char*		P_C_EXPORT_SELECTION			= "selection";
 
 const char*		P_C_FORMAT_NAME					= "format::name";
 const char*		P_C_FORMAT_MIME					= "format::MIME";

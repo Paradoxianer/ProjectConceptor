@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor	1524208958
+1	Swedish	application/x-vnd.ProjectConceptor	2709756247
 Export	SavePanel		Exportera
 Macro shortcuts (double-click to change the key)	ShortCutView		Makrokortkommandon (dubbelklicka för att ändra tangenten)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Tryck på tangentkombinationen för makrot ”%s” (Esc avbryter).
@@ -10,6 +10,7 @@ Settings	SavePanel		Inställningar
 Replace	MainWindow		Ersätt
 Start recording	MainWindow		Starta inspelning
 OK	CommandManager		OK
+Nothing is selected to export.	Document		Inget är markerat för export.
 OK	ShortCutView		OK
 \"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		”$%s” (för ”%s”) är ”%s”, inte ett tal
 New	MainWindow		Ny
@@ -31,8 +32,8 @@ Undo	MainWindow		Ångra
 File format	SavePanel		Filformat
 Macro	CommandManager		Makro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		Filen sparades av en inkompatibel version av ProjectConceptor och kan inte öppnas.
-Save before close	Document		Spara före stängning
 Untitled %ld	MainWindow		Namnlös %ld
+Save before close	Document		Spara före stängning
 Paste	MainWindow		Klistra in
 Help	MainWindow		Hjälp
 There is nothing to print.	Document		Det finns inget att skriva ut.
