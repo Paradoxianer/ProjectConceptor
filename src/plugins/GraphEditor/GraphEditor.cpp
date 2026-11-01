@@ -115,6 +115,7 @@ static const float	kPrintMargin	= 16;
 static const float	kDragOutDistance	= 40;
 // the largest side of the picture that follows the pointer then
 static const float	kDragPreviewSide	= 200;
+static const uint8	kDragPreviewAlpha	= 192;
 static const char	*kDragImageType		= "image/png";
 
 static const AttributeKind kAttributeKinds[] = {
@@ -747,8 +748,26 @@ void GraphEditor::DragSelectionOut(void) {
 	uint32	buttons;
 	GetMouse(&pointer,&buttons,false);
 	if (preview != NULL) {
-		BPoint	offset(preview->Bounds().Width()/2,preview->Bounds().Height()/2);
-		DragMessage(&drag,preview,B_OP_BLEND,offset,this);
+		// the app_server ignores the drag mode and composes the bitmap by its
+		// alpha channel, which drawing into B_RGB32 leaves undefined
+		BBitmap	*image	= new BBitmap(preview->Bounds(),B_RGBA32);
+		uint8	*source	= (uint8 *)preview->Bits();
+		uint8	*target	= (uint8 *)image->Bits();
+		int32	width	= preview->Bounds().IntegerWidth() + 1;
+		for (int32 y = 0; y <= preview->Bounds().IntegerHeight(); y++) {
+			uint8	*from	= source + y * preview->BytesPerRow();
+			uint8	*to		= target + y * image->BytesPerRow();
+			for (int32 x = 0; x < width; x++, from += 4, to += 4) {
+				to[0]	= from[0];
+				to[1]	= from[1];
+				to[2]	= from[2];
+				to[3]	= kDragPreviewAlpha;
+			}
+		}
+		delete preview;
+		BPoint	offset(image->Bounds().Width()/2,image->Bounds().Height()/2);
+		// DragMessage() deletes the image
+		DragMessage(&drag,image,B_OP_ALPHA,offset,this);
 	} else
 		DragMessage(&drag,BRect(pointer,pointer).InsetByCopy(-16,-16),this);
 }
