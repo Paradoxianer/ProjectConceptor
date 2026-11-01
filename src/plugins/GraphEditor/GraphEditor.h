@@ -114,6 +114,7 @@ public:
 	virtual	void			DetachedFromManager(void);
 
 	virtual	BView*			GetView(void);
+	virtual	BView*			GetPrintView(void) {return this;};
 	virtual	const char*		TabLabel(void);
 	virtual	BRect			PrintFrame(bool selectionOnly);
 	virtual	BBitmap*		PaperBitmap(float scale, bool selectionOnly);

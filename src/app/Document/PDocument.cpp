@@ -691,7 +691,8 @@ void PDocument::Print(void)
 		return;
 	SetPrintSettings(printJob.Settings());
 
-	BView	*view	= editor->GetView();
+	BView	*view	= (editor->GetPrintView() != NULL) ? editor->GetPrintView()
+		: editor->GetView();
 	if (!view->LockLooper())
 		return;
 	// the whole graph, tiled over as many pages as it needs
