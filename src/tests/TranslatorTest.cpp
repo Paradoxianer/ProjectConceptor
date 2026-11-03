@@ -12,6 +12,7 @@
 
 #include <String.h>
 
+#include <algorithm>
 #include <map>
 
 #include <string.h>
@@ -29,13 +30,21 @@ static const char *kFreeMindSample =
 	"<node ID=\"ID_100\" TEXT=\"Root\" BACKGROUND_COLOR=\"#ffcc00\">\n"
 	"<node ID=\"ID_200\" POSITION=\"right\" TEXT=\"Child A\">\n"
 	"<font NAME=\"SansSerif\" SIZE=\"12\"/>\n"
-	"<node ID=\"ID_400\" TEXT=\"Grandchild\"/>\n"
+	"<node ID=\"ID_400\" TEXT=\"Grandchild\">\n"
+	"<attribute NAME=\"Budget\" VALUE=\"450 &#x20ac;\"/>\n"
+	"</node>\n"
 	"</node>\n"
 	"<node ID=\"ID_300\" POSITION=\"left\" TEXT=\"Child B\">\n"
 	"<arrowlink DESTINATION=\"ID_200\" ID=\"Freemind_Arrow_Link_1\"/>\n"
 	"</node>\n"
 	"</node>\n"
 	"</map>\n";
+
+
+static BMessage GroupedDocument(void);
+static BString Exported(const BMessage &document, uint32 outType);
+static BMessage Imported(const char *text);
+static BMessage Named(const BMessage &document, const char *list, const char *name);
 
 
 static int32 CountField(const BMessage &message, const char *name)
@@ -87,24 +96,147 @@ void TranslatorTest::FreeMindImportBuildsNodesAndConnections(void)
 	BMessage	allNodes;
 	BMessage	allConnections;
 	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
-		document.FindMessage("PDocument::allNodes", &allNodes));
+		document.FindMessage(P_C_DOC_ALLNODES, &allNodes));
 	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
-		document.FindMessage("PDocument::allConnections", &allConnections));
-	CPPUNIT_ASSERT_EQUAL((int32)4, CountField(allNodes, "node"));
+		document.FindMessage(P_C_DOC_ALLCONNECTIONS, &allConnections));
+	CPPUNIT_ASSERT_EQUAL((int32)4, CountField(allNodes, P_C_DOC_ENTRY));
 	// three tree edges plus the arrow link
-	CPPUNIT_ASSERT_EQUAL((int32)4, CountField(allConnections, "node"));
+	CPPUNIT_ASSERT_EQUAL((int32)4, CountField(allConnections, P_C_DOC_ENTRY));
 
-	BMessage	root;
+	// the map's color marks the node's band
+	BMessage	root	= Named(document, P_C_DOC_ALLNODES, "Root");
 	BMessage	pattern;
-	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, allNodes.FindMessage("node", 3, &root));
 	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, root.FindMessage(P_C_NODE_PATTERN, &pattern));
 	int32		packed	= 0;
-	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, pattern.FindInt32("FillColor", &packed));
-	rgb_color	fill;
-	memcpy(&fill, &packed, sizeof(fill));
-	CPPUNIT_ASSERT_EQUAL((int)0xff, (int)fill.red);
-	CPPUNIT_ASSERT_EQUAL((int)0xcc, (int)fill.green);
-	CPPUNIT_ASSERT_EQUAL((int)0x00, (int)fill.blue);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		pattern.FindInt32(P_C_PATTERN_HIGHLIGHT_COLOR, &packed));
+	rgb_color	band;
+	memcpy(&band, &packed, sizeof(band));
+	CPPUNIT_ASSERT_EQUAL((int)0xff, (int)band.red);
+	CPPUNIT_ASSERT_EQUAL((int)0xcc, (int)band.green);
+	CPPUNIT_ASSERT_EQUAL((int)0x00, (int)band.blue);
+
+	// laid out as a mind map: the branches on their sides of the root
+	BRect	rootFrame	= root.GetRect(P_C_NODE_FRAME, BRect());
+	BRect	a	= Named(document, P_C_DOC_ALLNODES, "Child A").GetRect(P_C_NODE_FRAME, BRect());
+	BRect	b	= Named(document, P_C_DOC_ALLNODES, "Child B").GetRect(P_C_NODE_FRAME, BRect());
+	BRect	grandchild	= Named(document, P_C_DOC_ALLNODES, "Grandchild")
+		.GetRect(P_C_NODE_FRAME, BRect());
+	CPPUNIT_ASSERT(a.left > rootFrame.right);
+	CPPUNIT_ASSERT(b.right < rootFrame.left);
+	CPPUNIT_ASSERT(grandchild.left > a.right);
+	// on the canvas, which starts at 0
+	CPPUNIT_ASSERT(b.left >= 0);
+	CPPUNIT_ASSERT(std::min(a.top, std::min(b.top, rootFrame.top)) >= 0);
+
+	// no declaration: the character reference is UTF-8 all the same
+	BMessage	data;
+	Named(document, P_C_DOC_ALLNODES, "Grandchild").FindMessage(P_C_NODE_DATA, &data);
+	BMessage	budget;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("Budget", &budget));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NUMBER, budget.what);
+	CPPUNIT_ASSERT_EQUAL(BString("€"), BString(budget.GetString(P_C_ATTRIBUTE_UNIT, "")));
+}
+
+
+void TranslatorTest::FreeMindRoundTrips(void)
+{
+	// a group, typed attributes, a note and a circle of connections
+	BMessage	document	= GroupedDocument();
+	BMessage	allNodes;
+	document.FindMessage(P_C_DOC_ALLNODES, &allNodes);
+	BMessage	second;
+	allNodes.FindMessage(P_C_DOC_ENTRY, 1, &second);
+	BMessage	data;
+	second.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	done(B_BOOL_TYPE);
+	done.AddString(P_C_ATTRIBUTE_NAME, "Done");
+	done.AddBool(P_C_ATTRIBUTE_VALUE, true);
+	data.AddMessage("Done", &done);
+	BMessage	cost(P_C_ATTRIBUTE_NUMBER);
+	cost.AddString(P_C_ATTRIBUTE_NAME, "Cost");
+	cost.AddFloat(P_C_ATTRIBUTE_VALUE, 25.5);
+	cost.AddString(P_C_ATTRIBUTE_UNIT, "€");
+	data.AddMessage("Cost", &cost);
+	BMessage	note(P_C_ATTRIBUTE_NOTE);
+	note.AddString(P_C_ATTRIBUTE_NAME, "Note");
+	note.AddString(P_C_ATTRIBUTE_VALUE, "line one\nline <two>");
+	data.AddMessage("Note", &note);
+	second.ReplaceMessage(P_C_NODE_DATA, &data);
+	allNodes.ReplaceMessage(P_C_DOC_ENTRY, 1, &second);
+	BMessage	third(P_C_CLASS_TYPE);
+	BMessage	thirdData;
+	thirdData.AddString(P_C_NODE_NAME, "third");
+	third.AddMessage(P_C_NODE_DATA, &thirdData);
+	third.AddRect(P_C_NODE_FRAME, BRect(300, 70, 400, 110));
+	third.AddInt32(P_C_NODE_ID, 5);
+	allNodes.AddMessage(P_C_DOC_ENTRY, &third);
+	document.ReplaceMessage(P_C_DOC_ALLNODES, &allNodes);
+	BMessage	allConnections;
+	document.FindMessage(P_C_DOC_ALLCONNECTIONS, &allConnections);
+	for (int32 i = 0; i < 2; i++) {
+		BMessage	connection(P_C_CONNECTION_TYPE);
+		connection.AddInt32(P_C_NODE_ID, 6 + i);
+		connection.AddInt32(P_C_NODE_CONNECTION_FROM, i == 0 ? 2 : 5);
+		connection.AddInt32(P_C_NODE_CONNECTION_TO, i == 0 ? 5 : 1);
+		allConnections.AddMessage(P_C_DOC_ENTRY, &connection);
+	}
+	document.ReplaceMessage(P_C_DOC_ALLCONNECTIONS, &allConnections);
+
+	// through the roster as the translate tool does it
+	BString		map	= Exported(document, P_C_FREEMIND_TYPE);
+	CPPUNIT_ASSERT(map.StartsWith("<map version="));
+	CPPUNIT_ASSERT(map.FindFirst("<node ID=\"PC_GROUP_3\" TEXT=\"Team &quot;A&quot;\"") >= 0);
+	CPPUNIT_ASSERT(map.FindFirst("<attribute NAME=\"Owner\" VALUE=\"Ann &amp; Bob\"/>") >= 0);
+	CPPUNIT_ASSERT(map.FindFirst("<p>line one</p><p>line &lt;two&gt;</p>") >= 0);
+	CPPUNIT_ASSERT(map.FindFirst("<arrowlink ") >= 0);
+
+	BMessage	back	= Imported(map.String());
+	BMessage	group	= Named(back, P_C_DOC_ALLNODES, "Team \"A\"");
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_GROUP_TYPE, group.what);
+	CPPUNIT_ASSERT_EQUAL((int32)2, CountField(group, P_C_NODE_CHILD_IDS));
+	BMessage	first	= Named(back, P_C_DOC_ALLNODES, "first");
+	CPPUNIT_ASSERT_EQUAL(group.GetInt32(P_C_NODE_ID, 0), first.GetInt32(P_C_NODE_PARENT, -1));
+	BMessage	secondBack	= Named(back, P_C_DOC_ALLNODES, "second");
+	BMessage	secondData;
+	secondBack.FindMessage(P_C_NODE_DATA, &secondData);
+	BMessage	attribute;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, secondData.FindMessage("Done", &attribute));
+	CPPUNIT_ASSERT_EQUAL((uint32)B_BOOL_TYPE, attribute.what);
+	CPPUNIT_ASSERT(attribute.GetBool(P_C_ATTRIBUTE_VALUE, false));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, secondData.FindMessage("Cost", &attribute));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NUMBER, attribute.what);
+	CPPUNIT_ASSERT_EQUAL(25.5f, attribute.GetFloat(P_C_ATTRIBUTE_VALUE, 0));
+	CPPUNIT_ASSERT_EQUAL(BString("€"), BString(attribute.GetString(P_C_ATTRIBUTE_UNIT, "")));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, secondData.FindMessage("Note", &attribute));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NOTE, attribute.what);
+	CPPUNIT_ASSERT_EQUAL(BString("line one\nline <two>"),
+		BString(attribute.GetString(P_C_ATTRIBUTE_VALUE, "")));
+	// every connection once, as a branch or as an arrow link
+	BMessage	connections;
+	back.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	CPPUNIT_ASSERT_EQUAL((int32)3, CountField(connections, P_C_DOC_ENTRY));
+}
+
+
+void TranslatorTest::FreeMindIsOnlyAMapFirst(void)
+{
+	// FreeMind and Freeplane may start with a declaration and comments;
+	// a node needs no ID
+	BMessage	plain	= Imported(
+		"\xef\xbb\xbf<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<!-- Freeplane -->\n"
+		"<map version=\"freeplane 1.9.13\"><node TEXT=\"Alone\"/></map>\n");
+	Named(plain, P_C_DOC_ALLNODES, "Alone");
+
+	// a page with an image map is no mind map
+	static const char	*page	=
+		"<html><body><map name=\"m\"><area href=\"x\"/></map></body></html>";
+	BMemoryIO		input(page, strlen(page));
+	translator_info	info;
+	status_t		err	= BTranslatorRoster::Default()->Identify(&input, NULL, &info,
+		0, NULL, P_C_DOCUMENT_RAW_TYPE);
+	CPPUNIT_ASSERT((err != B_OK) || (info.type != P_C_FREEMIND_TYPE));
 }
 
 
@@ -581,6 +713,8 @@ void TranslatorTest::SaveAndExportOfferTheRightFormats(void)
 	CPPUNIT_ASSERT(exporting.find("HTML page") != exporting.end());
 	CPPUNIT_ASSERT_EQUAL(BString("html"),
 		BString(exporting["HTML page"].GetString(P_C_FORMAT_EXTENSION, "")));
+	CPPUNIT_ASSERT_EQUAL(BString("mm"),
+		BString(exporting["FreeMind"].GetString(P_C_FORMAT_EXTENSION, "")));
 	// pictures through the system's bitmap translators
 	std::map<BString, BMessage>::iterator	png	= exporting.find("PNG image");
 	CPPUNIT_ASSERT(png != exporting.end());

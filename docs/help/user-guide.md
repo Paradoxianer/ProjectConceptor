@@ -230,8 +230,12 @@ See [Macros](macros.md) for the full guide and the command reference.
   - **GraphML**: for yEd, Gephi, NetworkX, Cytoscape and other graph
     tools; yEd shows places, colors and labels as here. ProjectConceptor
     opens GraphML files too.
-  - **FreeMind**: a mind map; the graph becomes a tree from one of its
-    nodes.
+  - **FreeMind**: a mind map for FreeMind or Freeplane. The graph becomes
+    a tree from the nodes nothing points to; a connection to a node
+    that is already in the tree becomes an arrow link, the members of a
+    group its branches. Attributes, notes and colors come along.
+    ProjectConceptor opens FreeMind files too and lays them out as a
+    mind map.
 - **Dragging nodes out of the window**: move the selected nodes on, far
   past the window's edge, and they come along as a picture. Dropped on
   the Desktop or into a Tracker folder they become a PNG image; drag

@@ -32,6 +32,7 @@
 #define P_C_MARKDOWN_TYPE 'pcMD'
 #define P_C_GRAPHML_TYPE 'pcGM'
 #define P_C_DRAWIO_TYPE 'pcDI'
+#define P_C_FREEMIND_TYPE 'free'
 
 
 const uint32	P_C_PLUGIN_MESSAGE				= 'pcPM';

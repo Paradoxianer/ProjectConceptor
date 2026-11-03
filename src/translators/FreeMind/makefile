@@ -28,6 +28,7 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-FreeMindTranslator
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
 SRCS= 	FreeMindTranslator.cpp \
+		../common/GraphDocument.cpp \
 		../common/TranslatorMain.cpp \
 		../common/ConfigView.cpp \
 		../../common/ProjectConceptorFields.cpp \
@@ -68,6 +69,7 @@ SYSTEM_INCLUDE_PATHS =
 #	thes use the form: #include "header"
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS =	../../include  \
+						../common \
 						../../app/Tools \
 
 #	specify the level of optimization that you desire

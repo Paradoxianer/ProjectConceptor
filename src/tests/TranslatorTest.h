@@ -10,6 +10,8 @@ class TranslatorTest : public CppUnit::TestFixture
 {
 public:
 	void FreeMindImportBuildsNodesAndConnections(void);
+	void FreeMindRoundTrips(void);
+	void FreeMindIsOnlyAMapFirst(void);
 	void TextExportRoundTrips(void);
 	void UnknownOutputTypeIsRefused(void);
 	void DotExportWritesClustersLabelsAndEdges(void);
@@ -29,6 +31,8 @@ public:
 
 	CPPUNIT_TEST_SUITE(TranslatorTest);
 	CPPUNIT_TEST(FreeMindImportBuildsNodesAndConnections);
+	CPPUNIT_TEST(FreeMindRoundTrips);
+	CPPUNIT_TEST(FreeMindIsOnlyAMapFirst);
 	CPPUNIT_TEST(TextExportRoundTrips);
 	CPPUNIT_TEST(UnknownOutputTypeIsRefused);
 	CPPUNIT_TEST(DotExportWritesClustersLabelsAndEdges);

@@ -180,7 +180,7 @@ Find
 
 **Export** writes a copy of the document like File > Export, in the
 format of the file's extension (`html`, `svg`, `png`, `drawio`,
-`graphml`, `dot`, `mmd`, `md`, `pcd` ...) or of `format`. A path
+`graphml`, `mm`, `dot`, `mmd`, `md`, `pcd` ...) or of `format`. A path
 without `/` lies next to the document, `~/` is your home folder, and an
 existing file is overwritten. With `selection=true` only the selected
 nodes are written. Run when opening, this keeps a dated web page of the
