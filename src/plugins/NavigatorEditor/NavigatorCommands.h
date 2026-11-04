@@ -28,9 +28,10 @@ class NavigatorEditor;
  * fields like Frame/Font/Pattern, deleting those would just break
  * rendering elsewhere for no benefit), delete node, and - only when
  * isChildList is true, i.e. this node lives in a group's own
- * P_C_NODE_ALLNODES list - add a child node. */
+ * P_C_NODE_ALLNODES list - add a child node. "Show in graph" goes to
+ * editor as N_A_SHOW_IN_GRAPH. */
 void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
-	BView *owner, BPoint screenPoint);
+	NavigatorEditor *editor, BView *owner, BPoint screenPoint);
 
 /** Context menu for empty list space: add a new node - top-level if
  * parentNode is NULL, a child of parentNode otherwise. */

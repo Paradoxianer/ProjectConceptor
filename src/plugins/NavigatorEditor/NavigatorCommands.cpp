@@ -239,9 +239,13 @@ static void NavAddDeleteFieldItems(BMenu *deleteMenu, BMessage *node)
 }
 
 void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
-	BView *owner, BPoint screenPoint)
+	NavigatorEditor *editor, BView *owner, BPoint screenPoint)
 {
 	BPopUpMenu	*menu		= new BPopUpMenu("nodeContext",false,false);
+
+	BMenuItem	*showInGraph	= new BMenuItem(B_TRANSLATE("Show in graph"),NULL);
+	menu->AddItem(showInGraph);
+	menu->AddSeparatorItem();
 
 	BMenu		*addFieldMenu	= new BMenu(B_TRANSLATE("Add field"));
 	BMenuItem	*addBool	= new BMenuItem(B_TRANSLATE("Boolean"),NULL);
@@ -286,7 +290,14 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 	BMenuItem	*chosen	= menu->Go(screenPoint,true,true);
 	if (chosen == NULL)
 		return;
-	if (chosen == addBool)
+	if (chosen == showInGraph) {
+		// switching tabs detaches the lists, not from inside their
+		// MouseDown()
+		BMessage	show(N_A_SHOW_IN_GRAPH);
+		show.AddPointer(P_C_DOC_ENTRY,node);
+		BMessenger(editor).SendMessage(&show);
+	}
+	else if (chosen == addBool)
 		NavAddField(doc,node,B_BOOL_TYPE);
 	else if (chosen == addInt8)
 		NavAddField(doc,node,B_INT8_TYPE);

@@ -197,6 +197,10 @@ public:
 			void			SetZoom(float newScale);
 			/** zooms and scrolls so the whole graph is visible */
 			void			ZoomToFit(void);
+			/** scrolls the nodes of a P_C_REVEAL_NODES message into the
+			 * middle of the view, or their top left corner when they
+			 * don't fit, at the current zoom */
+			void			RevealNodes(BMessage *message);
 			/** node and connection formats are active only for a matching
 			 * selection and show the first selected one's values;
 			 * needs the document locked */

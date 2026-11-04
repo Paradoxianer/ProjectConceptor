@@ -25,6 +25,8 @@ const uint32	N_A_INVOKATION			= 'naIK';
 const uint32	N_A_VALUE_CHANGED		= 'naVC';
 const uint32	N_A_ADD					= 'naAd';
 const uint32	N_A_DELETE_NODE			= 'naDN';
+/** pointer P_C_DOC_ENTRY: select that node, show it in the graph */
+const uint32	N_A_SHOW_IN_GRAPH		= 'naSG';
 
 class ToolBar;
 class ToolItem;
@@ -99,6 +101,7 @@ protected:
 //			void			InsertRenderObject(BMessage *node);
 			void			DeleteRenderObject(BMessage *node);
 			void			InitToolBar(void);
+			void			ShowInGraph(BMessage *node);
 			void			UpdateScrollBars(void);
 
 			/** Places the columns side by side, each as wide as

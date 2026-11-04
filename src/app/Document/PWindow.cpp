@@ -628,6 +628,10 @@ bool PWindow::SelectEditorTab(const char *viewName)
 	for (int32 i = 0; i < mainView->CountTabs(); i++) {
 		BTab	*tab	= mainView->TabAt(i);
 		BView	*view	= (tab != NULL) ? tab->View() : NULL;
+		// an editor that scrolls has its scroll view in the tab
+		BScrollView	*scroller	= dynamic_cast<BScrollView *>(view);
+		if ((scroller != NULL) && (scroller->Target() != NULL))
+			view	= scroller->Target();
 		if ((view != NULL) && (view->Name() != NULL) && (strcmp(view->Name(),viewName) == 0)) {
 			found	= i;
 			break;

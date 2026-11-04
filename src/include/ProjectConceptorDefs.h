@@ -116,6 +116,10 @@ const uint32	P_C_VALUE_CHANGED				= 'pcVC';
 /** sent to every editor after a macro ran: string "report", bool "error" */
 const uint32	P_C_MACRO_PLAYED				= 'pcMP';
 const uint32	P_C_DOC_BOUNDS_CHANGED			= 'pcDB';
+/** sent to every editor: pointers P_C_DOC_ENTRY, the nodes to show. Each
+ * editor shows them as it can (GraphEditor scrolls them into view) or
+ * ignores it; switching to an editor's tab is up to the sender */
+const uint32	P_C_REVEAL_NODES				= 'pcRV';
 
 const uint32	P_C_EDITOR_SWITCHED_ACTIV		= 'pcSA';
 const uint32	P_C_EDITOR_SWITCHED_INACTIV		= 'pcSI';

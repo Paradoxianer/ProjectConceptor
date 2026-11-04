@@ -60,7 +60,8 @@ public:
 	 */
 	virtual	void			RemoveEditor(void);
 	/**Selects the editor tab whose view is named viewName (the labels are
-	 * translated), attaching its view
+	 * translated; for an editor in a BScrollView, the scroll view's
+	 * target), attaching its view
 	 * (a non-selected tab's view has no Looper - see AddEditor()/
 	 * CreatEditorList()'s own comment on this) - so a caller wanting to
 	 * message a specific editor's handler needs this first, or the

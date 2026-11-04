@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	1724990872
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	2241214158
 Untitled	NavigatorCommands		Cence titul
 Integer (8-bit)	NavigatorCommands		Intîr (8 bit)
 Field name	NavigatorCommands		Non dal cjamp
@@ -33,3 +33,4 @@ y: 	PointItem		y:
 Integer (32-bit)	NavigatorCommands		Intîr (32 bit)
 Add a node (child of the selection, or top-level)	NavigatorEditor		Zonte un grop (fî de selezion o di prin nivel)
 Node name	NavigatorCommands		Non dal grop
+Show in graph	NavigatorCommands		Mostre tal grafic

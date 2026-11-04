@@ -470,6 +470,13 @@ void NavigatorEditor::MessageReceived(BMessage *message)
 			NavToolbarDelete(doc,focusedList);
 			break;
 		}
+		case N_A_SHOW_IN_GRAPH:
+		{
+			BMessage	*node	= NULL;
+			if (message->FindPointer(P_C_DOC_ENTRY,(void **)&node) == B_OK)
+				ShowInGraph(node);
+			break;
+		}
 		default:
 			BView::MessageReceived(message);
 			break;
@@ -510,6 +517,23 @@ void NavigatorEditor::InsertNewList(BListView *source)
 		}
 		LayoutColumns();
 	}
+}
+
+void NavigatorEditor::ShowInGraph(BMessage *node)
+{
+	BMessage	select(P_C_EXECUTE_COMMAND);
+	select.AddPointer("node",node);
+	select.AddString("Command::Name","Select");
+	BMessenger(doc).SendMessage(&select);
+	// before the broadcast: a tab that isn't shown has no looper
+	PWindow	*window	= dynamic_cast<PWindow *>(Window());
+	if ((window == NULL) || !window->SelectEditorTab("GraphEditor")) {
+		PRINT(("NavigatorEditor::ShowInGraph: no GraphEditor tab\n"));
+		return;
+	}
+	BMessage	reveal(P_C_REVEAL_NODES);
+	reveal.AddPointer(P_C_DOC_ENTRY,node);
+	doc->GetEditorManager()->BroadCast(&reveal);
 }
 
 void NavigatorEditor::DeleteRenderObject(BMessage *node)

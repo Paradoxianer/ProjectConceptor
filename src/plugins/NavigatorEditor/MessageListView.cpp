@@ -81,7 +81,7 @@ void MessageListView::MouseDown(BPoint point)
 		isChildList	= true;
 
 	ConvertToScreen(&point);
-	NavShowNodeContextMenu(doc,item->GetNode(),isChildList,this,point);
+	NavShowNodeContextMenu(doc,item->GetNode(),isChildList,editor,this,point);
 }
 
 void MessageListView::AttachedToWindow(void)

@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	1724990872
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	2241214158
 Untitled	NavigatorCommands		Namnlös
 Integer (8-bit)	NavigatorCommands		Heltal (8 bitar)
 Field name	NavigatorCommands		Fältnamn
@@ -33,3 +33,4 @@ y: 	PointItem		y:
 Integer (32-bit)	NavigatorCommands		Heltal (32 bitar)
 Add a node (child of the selection, or top-level)	NavigatorEditor		Lägg till en nod (under markeringen eller på översta nivån)
 Node name	NavigatorCommands		Nodnamn
+Show in graph	NavigatorCommands		Visa i grafen

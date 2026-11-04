@@ -35,7 +35,7 @@ void NodeListView::MouseDown(BPoint point)
 	}
 	NodeItem	*item	= dynamic_cast<NodeItem *>(ItemAt(index));
 	if (item != NULL)
-		NavShowNodeContextMenu(doc,item->GetNode(),false,this,point);
+		NavShowNodeContextMenu(doc,item->GetNode(),false,editor,this,point);
 }
 
 

@@ -1185,6 +1185,10 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			UpdateScrollBars();
 			break;
 		}
+		case P_C_REVEAL_NODES: {
+			RevealNodes(message);
+			break;
+		}
 		case B_COLORS_UPDATED:
 		case B_FONTS_UPDATED: {
 			style	= GraphStyle::SystemCard();
@@ -2179,6 +2183,30 @@ void GraphEditor::ZoomToFit(void) {
 		content.top		= 0;
 	SetZoom(Zoom::Fit(content,Bounds(),20));
 	ScrollTo(0,0);
+}
+
+void GraphEditor::RevealNodes(BMessage *message) {
+	const float	margin	= 20;
+	BRect		area(0,0,-1,-1);
+	BMessage	*node	= NULL;
+	for (int32 i = 0; message->FindPointer(P_C_DOC_ENTRY,i,(void **)&node) == B_OK; i++) {
+		Renderer	*painter	= FindRenderer(node);
+		if (painter == NULL) {
+			PRINT(("GraphEditor::RevealNodes: no renderer for node %p\n",node));
+			continue;
+		}
+		area	= area.IsValid() ? (area | painter->Frame()) : painter->Frame();
+	}
+	if (!area.IsValid())
+		return;
+	BRect	visible	= Bounds();
+	float	x		= (area.left+area.Width()/2)*scale-visible.Width()/2;
+	float	y		= (area.top+area.Height()/2)*scale-visible.Height()/2;
+	if (area.Width()*scale > visible.Width()-2*margin)
+		x	= area.left*scale-margin;
+	if (area.Height()*scale > visible.Height()-2*margin)
+		y	= area.top*scale-margin;
+	ScrollTo(x,y);
 }
 
 

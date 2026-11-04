@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	1724990872
+1	English	application/x-vnd.ProjectConceptor-plugin	2241214158
 Untitled	NavigatorCommands		Untitled
 Integer (8-bit)	NavigatorCommands		Integer (8-bit)
 Field name	NavigatorCommands		Field name
@@ -25,6 +25,7 @@ top	RectItem		top
 Double	NavigatorCommands		Double
 bottom	RectItem		bottom
 Rectangle	NavigatorCommands		Rectangle
+Show in graph	NavigatorCommands		Show in graph
 Delete field	NavigatorCommands		Delete field
 Text	NavigatorCommands		Text
 Delete node	NavigatorCommands		Delete node
