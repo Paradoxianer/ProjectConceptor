@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	4048263145
+1	English	application/x-vnd.ProjectConceptor-plugin	731756625
 Untitled	NavigatorCommands		Untitled
 Integer (8-bit)	NavigatorCommands		Integer (8-bit)
 Field name	NavigatorCommands		Field name
@@ -6,6 +6,7 @@ Add child node	NavigatorCommands		Add child node
 Add field	NavigatorCommands		Add field
 Float	NavigatorCommands		Float
 Message (nested fields)	NavigatorCommands		Message (nested fields)
+Connect to	NavigatorCommands		Connect to
 x: 	PointItem		x: 
 true	BoolItem		true
 OK	NavigatorCommands		OK
@@ -13,6 +14,7 @@ Boolean	NavigatorCommands		Boolean
 Delete the selected node or field	NavigatorEditor		Delete the selected node or field
 false	BoolItem		false
 Add node	NavigatorCommands		Add node
+Delete connection	NavigatorCommands		Delete connection
 Point	NavigatorCommands		Point
 Data	NavigatorEditor		Data
 Filter	NavigatorEditor		Filter
@@ -28,8 +30,8 @@ bottom	RectItem		bottom
 Rectangle	NavigatorCommands		Rectangle
 Show in graph	NavigatorCommands		Show in graph
 Delete field	NavigatorCommands		Delete field
-Text	NavigatorCommands		Text
 Delete node	NavigatorCommands		Delete node
+Text	NavigatorCommands		Text
 right	RectItem		right
 y: 	PointItem		y: 
 Integer (32-bit)	NavigatorCommands		Integer (32-bit)

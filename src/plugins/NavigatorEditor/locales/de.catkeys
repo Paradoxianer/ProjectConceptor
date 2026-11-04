@@ -1,4 +1,4 @@
-1	German	application/x-vnd.ProjectConceptor-plugin	4048263145
+1	German	application/x-vnd.ProjectConceptor-plugin	731756625
 Untitled	NavigatorCommands		Unbenannt
 Integer (8-bit)	NavigatorCommands		Ganzzahl (8 Bit)
 Field name	NavigatorCommands		Feldname
@@ -35,3 +35,5 @@ Add a node (child of the selection, or top-level)	NavigatorEditor		Knoten hinzuf
 Node name	NavigatorCommands		Knotenname
 Show in graph	NavigatorCommands		Im Graph zeigen
 Filter	NavigatorEditor		Filter
+Connect to	NavigatorCommands		Verbinden mit
+Delete connection	NavigatorCommands		Verbindung löschen

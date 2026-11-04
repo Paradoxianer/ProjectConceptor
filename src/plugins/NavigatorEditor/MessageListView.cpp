@@ -79,9 +79,34 @@ void MessageListView::MouseDown(BPoint point)
 	BStringItem	*superLabel	= dynamic_cast<BStringItem *>(super);
 	if ((superLabel != NULL) && (strcmp(superLabel->Text(),P_C_NODE_ALLNODES) == 0))
 		isChildList	= true;
+	BMessage	*connection	= NULL;
+	if (superLabel != NULL)
+		connection	= ConnectionFor(superLabel->Text(),item->GetNode());
 
 	ConvertToScreen(&point);
-	NavShowNodeContextMenu(doc,item->GetNode(),isChildList,editor,this,point);
+	NavShowNodeContextMenu(doc,item->GetNode(),isChildList,connection,editor,this,point);
+}
+
+BMessage* MessageListView::ConnectionFor(const char *listName, BMessage *other)
+{
+	const char	*end	= NULL;
+	if (strcmp(listName,P_C_NODE_OUTGOING) == 0)
+		end	= P_C_NODE_CONNECTION_TO;
+	else if (strcmp(listName,P_C_NODE_INCOMING) == 0)
+		end	= P_C_NODE_CONNECTION_FROM;
+	else
+		return NULL;
+	BList	*list	= NULL;
+	if (container->FindPointer(listName,(void **)&list) != B_OK)
+		return NULL;
+	// the first one; two connections between the same nodes look alike here
+	for (int32 i = 0; i < list->CountItems(); i++) {
+		BMessage	*connection	= (BMessage *)list->ItemAt(i);
+		BMessage	*node		= NULL;
+		if ((connection->FindPointer(end,(void **)&node) == B_OK) && (node == other))
+			return connection;
+	}
+	return NULL;
 }
 
 void MessageListView::AttachedToWindow(void)

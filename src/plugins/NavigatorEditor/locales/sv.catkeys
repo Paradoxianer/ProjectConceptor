@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	4048263145
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	731756625
 Untitled	NavigatorCommands		Namnlös
 Integer (8-bit)	NavigatorCommands		Heltal (8 bitar)
 Field name	NavigatorCommands		Fältnamn
@@ -35,3 +35,5 @@ Add a node (child of the selection, or top-level)	NavigatorEditor		Lägg till en
 Node name	NavigatorCommands		Nodnamn
 Show in graph	NavigatorCommands		Visa i grafen
 Filter	NavigatorEditor		Filter
+Connect to	NavigatorCommands		Anslut till
+Delete connection	NavigatorCommands		Ta bort anslutning

@@ -199,6 +199,37 @@ static void NavDeleteNode(PDocument *doc, BMessage *node)
 	BMessenger(doc).SendMessage(deleteMessage);
 }
 
+static char* NavNodeName(BMessage *node)
+{
+	BMessage	data;
+	const char	*name	= NULL;
+	if ((node->FindMessage(P_C_NODE_DATA,&data) == B_OK)
+			&& (data.FindString(P_C_NODE_NAME,&name) == B_OK))
+		// data is a copy, the string must outlive it
+		return strdup(name);
+	return strdup(B_TRANSLATE("Untitled"));
+}
+
+// the same connection the graph draws when dragging from node to node,
+// owned by the document once Insert ran
+static void NavConnect(PDocument *doc, BMessage *from, BMessage *to)
+{
+	BMessage	*connection	= new BMessage(P_C_CONNECTION_TYPE);
+	BMessage	data;
+	data.AddString(P_C_NODE_NAME,B_TRANSLATE("Untitled"));
+	connection->AddPointer(P_C_NODE_CONNECTION_FROM,from);
+	connection->AddPointer(P_C_NODE_CONNECTION_TO,to);
+	connection->AddMessage(P_C_NODE_DATA,&data);
+	connection->AddInt8(P_C_NODE_CONNECTION_TYPE,1);
+	connection->AddInt8(P_C_NODE_CONNECTION_ARROWS,1);
+	connection->AddPointer("ProjectConceptor::doc",doc);
+
+	BMessage	command(P_C_EXECUTE_COMMAND);
+	command.AddString("Command::Name","Insert");
+	command.AddPointer("node",connection);
+	BMessenger(doc).SendMessage(&command);
+}
+
 // One menu item per deletable field, both kinds:
 //  - GraphEditor's own Name/Value-wrapped attributes under Node::data
 //    (each its own B_MESSAGE_TYPE field there)
@@ -240,7 +271,7 @@ static void NavAddDeleteFieldItems(BMenu *deleteMenu, BMessage *node)
 }
 
 void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
-	NavigatorEditor *editor, BView *owner, BPoint screenPoint)
+	BMessage *connection, NavigatorEditor *editor, BView *owner, BPoint screenPoint)
 {
 	BPopUpMenu	*menu		= new BPopUpMenu("nodeContext",false,false);
 
@@ -277,6 +308,28 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 	NavAddDeleteFieldItems(deleteFieldMenu,node);
 	deleteFieldMenu->SetEnabled(deleteFieldMenu->CountItems() > 0);
 	menu->AddItem(deleteFieldMenu);
+
+	menu->AddSeparatorItem();
+	// every other node, picked by name: the message carries the target
+	BMenu	*connectMenu	= new BMenu(B_TRANSLATE("Connect to"));
+	BList	*allNodes		= doc->GetAllNodes();
+	for (int32 i = 0; i < allNodes->CountItems(); i++) {
+		BMessage	*target	= (BMessage *)allNodes->ItemAt(i);
+		if (target == node)
+			continue;
+		BMessage	*payload	= new BMessage(N_A_CONNECT_TO);
+		payload->AddPointer(P_C_NODE_CONNECTION_TO,target);
+		char		*name		= NavNodeName(target);
+		connectMenu->AddItem(new BMenuItem(name,payload));
+		free(name);
+	}
+	connectMenu->SetEnabled(connectMenu->CountItems() > 0);
+	menu->AddItem(connectMenu);
+	BMenuItem	*deleteConnection	= NULL;
+	if (connection != NULL) {
+		deleteConnection	= new BMenuItem(B_TRANSLATE("Delete connection"),NULL);
+		menu->AddItem(deleteConnection);
+	}
 
 	menu->AddSeparatorItem();
 	BMenuItem	*addChild	= NULL;
@@ -322,6 +375,14 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 		NavAddField(doc,node,B_MESSAGE_TYPE);
 	else if (chosen == addChild)
 		NavInsertNode(doc,node);
+	else if ((chosen->Message() != NULL) && (chosen->Message()->what == N_A_CONNECT_TO)) {
+		BMessage	*target	= NULL;
+		if (chosen->Message()->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&target) == B_OK)
+			NavConnect(doc,node,target);
+	}
+	else if (chosen == deleteConnection)
+		// Delete removes whatever is selected, connections too
+		NavDeleteNode(doc,connection);
 	else if (chosen == deleteNode)
 		NavDeleteNode(doc,node);
 	else if (chosen->Message() != NULL) {

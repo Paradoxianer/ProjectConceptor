@@ -1,4 +1,4 @@
-1	Romanian	application/x-vnd.ProjectConceptor-plugin	4048263145
+1	Romanian	application/x-vnd.ProjectConceptor-plugin	731756625
 Untitled	NavigatorCommands		Fără titlu
 Integer (8-bit)	NavigatorCommands		Întreg (8 biți)
 Field name	NavigatorCommands		Numele câmpului
@@ -35,3 +35,5 @@ Add a node (child of the selection, or top-level)	NavigatorEditor		Adaugă un no
 Node name	NavigatorCommands		Numele nodului
 Show in graph	NavigatorCommands		Arată în graf
 Filter	NavigatorEditor		Filtru
+Connect to	NavigatorCommands		Conectează la
+Delete connection	NavigatorCommands		Șterge conexiunea

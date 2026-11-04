@@ -27,6 +27,8 @@ const uint32	N_A_ADD					= 'naAd';
 const uint32	N_A_DELETE_NODE			= 'naDN';
 /** pointer "ListView": that column's filter field changed */
 const uint32	N_A_FILTER				= 'naFL';
+/** a "Connect to" menu item: pointer P_C_NODE_CONNECTION_TO */
+const uint32	N_A_CONNECT_TO			= 'naCT';
 /** pointer P_C_DOC_ENTRY: select that node, show it in the graph */
 const uint32	N_A_SHOW_IN_GRAPH		= 'naSG';
 

@@ -35,6 +35,9 @@ protected:
 							bool showAll = false);
 			/** removes a group header nothing under it is shown for */
 			void		DropIfEmpty(BListItem *header, bool showAll);
+			/** the connection of the container's list listName
+			 * (Node::outgoing or Node::incoming) to or from other, or NULL */
+			BMessage*	ConnectionFor(const char *listName, BMessage *other);
 			void		AddNodeUnder(BMessage *node, BListItem *header,
 							bool showAll);
 	BMessage			*container;
