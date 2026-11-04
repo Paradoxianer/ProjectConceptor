@@ -159,6 +159,21 @@ also for shaped nodes. Its shape and arrow ends can be
 changed afterward via the toolbar icons above, as long as the
 connection is selected (works on several at once).
 
+A selected connection shows round handles on its bends and a small
+**+** in the middle of each stretch between them:
+
+- **Drag a handle** to route the line where you want it, e.g. around a
+  node in the way. From then on the bends stay where you put them when
+  nodes move.
+- **Drag or click a +** to add a bend there.
+- **Click a handle** to pick that bend; **Delete point** in the small
+  bar above it, or the Delete key, removes it.
+- **Automatic route** in the same bar drops all bends you set and lets
+  ProjectConceptor route the line again.
+
+The line keeps its shape through the bends: straight, rounded or
+angular.
+
 ## Grouping
 
 Select several nodes, then click **Group** in the small bar that
