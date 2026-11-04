@@ -78,6 +78,7 @@ instance.</p>
 		<li><a href="#connections">Connections</a></li>
 		<li><a href="#grouping">Grouping</a></li>
 		<li><a href="#automatic-layout">Automatic layout</a></li>
+		<li><a href="#data-tab">The Data tab</a></li>
 		<li><a href="#macros">Macros</a></li>
 		<li><a href="#save-load-undo">Save, load, undo</a></li>
 	</ul>
@@ -204,6 +205,29 @@ gap:</p>
 the whole graph &mdash; useful after inserting many nodes by hand,
 which tend to overlap. Direction and topology can be set first via the
 two fields next to it.</p>
+
+<h2 id="data-tab">The Data tab</h2>
+
+<p>The <strong>Data</strong> tab shows the document's raw data in
+columns: the left one lists all nodes, a click on one opens its fields
+in a column next to it, and a node under <strong>Node::outgoing</strong>,
+<strong>Node::incoming</strong> or a group's children opens in the next
+column again.</p>
+
+<ul>
+	<li><strong>Resize a column</strong> by dragging the divider on its
+		right; the columns after it move along.</li>
+	<li><strong>Filter</strong> above each column narrows its rows down as
+		you type: field names and text values, without regard to upper and
+		lower case. A matching group (e.g. <code>pattern</code>) shows all
+		of it.</li>
+	<li>A <strong>right click on a node</strong> offers: <strong>Show in
+		graph</strong> (selects it and scrolls the <strong>Graph</strong>
+		tab to it), <strong>Connect to</strong> (a connection to the node
+		you pick), <strong>Delete connection</strong> on a row under
+		Node::outgoing or Node::incoming, fields to add or delete, and
+		<strong>Delete node</strong>.</li>
+</ul>
 
 <h2 id="macros">Macros</h2>
 

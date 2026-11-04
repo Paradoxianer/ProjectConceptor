@@ -189,6 +189,23 @@ whole graph - useful after inserting many nodes by hand, which tend to
 overlap. Direction and topology can be set first via the two fields
 next to it.
 
+## The Data tab
+
+The **Data** tab shows the document's raw data in columns: the left
+one lists all nodes, a click on one opens its fields in a column next
+to it, and a node under **Node::outgoing**, **Node::incoming** or a
+group's children opens in the next column again.
+
+- **Resize a column** by dragging the divider on its right; the columns
+  after it move along.
+- **Filter** above each column narrows its rows down as you type: field
+  names and text values, without regard to upper and lower case. A
+  matching group (e.g. `pattern`) shows all of it.
+- A **right click on a node** offers: **Show in graph** (selects it and
+  scrolls the **Graph** tab to it), **Connect to** (a connection to the
+  node you pick), **Delete connection** on a row under Node::outgoing
+  or Node::incoming, fields to add or delete, and **Delete node**.
+
 ## Macros
 
 The **Macro** menu records a sequence of actions and plays it back
