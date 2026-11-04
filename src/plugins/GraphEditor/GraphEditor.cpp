@@ -276,8 +276,8 @@ void GraphEditor::Init(void) {
 	patternItem	= new PatternToolItem(B_TRANSLATE("Pattern"),B_SOLID_HIGH, new BMessage(G_E_PATTERN_CHANGED));
 	patternItem->BButton::SetToolTip(B_TRANSLATE("Fill pattern for selected nodes"));
 
-	// grouping sits in the context bar above the selection
-	contextBar.AddButton(B_TRANSLATE("Group"),new BMessage(G_E_GROUP));
+	// UpdateContextBar() fills the context bar for what is selected
+	contextButtons	= -1;
 
 	// one entry per attribute kind; new kinds (date, image, ...) go here
 	addAttribute	= new ChoiceToolItem(B_TRANSLATE("Attribute"),
@@ -340,11 +340,10 @@ void GraphEditor::AttachedToManager(void) {
 	int32	deleteModifiers	= 0;
 	ReadShortcutBinding(P_C_SHORTCUT_ACTION_DELETE,&deleteKey,&deleteModifiers);
 	shortcuts->AddInt32("key",deleteKey);
-	sendMessage	= new BMessage(P_C_EXECUTE_COMMAND);
-	sendMessage->AddString("Command::Name","Delete");
+	sendMessage	= new BMessage(G_E_DELETE);
 	shortcuts->AddInt32("modifiers",deleteModifiers);
 	shortcuts->AddMessage("message",sendMessage);
-	shortcuts->AddPointer("handler",new BMessenger(doc,NULL,&err));
+	shortcuts->AddPointer("handler",new BMessenger(this,NULL,&err));
 
 
 	int32	addBoolKey			= 'b';
@@ -999,11 +998,13 @@ void GraphEditor::MouseMoved(	BPoint where, uint32 code, const BMessage *a_messa
 			if (candidate->Caught(scaledWhere))
 				under	= DrillIntoGroup(candidate,scaledWhere);
 		}
+		BCursorID	cursor	= (under != NULL) ? under->CursorAt(scaledWhere)
+			: B_CURSOR_ID_SYSTEM_DEFAULT;
+		// a connection has no hover look, only its bend handles' cursor
 		if ((under != NULL) && (under->GetMessage()->what == P_C_CONNECTION_TYPE))
 			under	= NULL;
 		SetHovered(under);
-		SetCursorId((under != NULL) ? under->CursorAt(scaledWhere)
-			: B_CURSOR_ID_SYSTEM_DEFAULT);
+		SetCursorId(cursor);
 	}
 }
 
@@ -1481,6 +1482,30 @@ void GraphEditor::MessageReceived(BMessage *message) {
 			break;
 		}
 		case G_E_INVALIDATE: {
+			Invalidate();
+			break;
+		}
+		case G_E_DELETE: {
+			ConnectionRenderer	*route	= SelectedRoute();
+			if ((route != NULL) && (route->SelectedBend() >= 0)) {
+				route->DeleteSelectedBend();
+				Invalidate();
+				break;
+			}
+			BMessage	command(P_C_EXECUTE_COMMAND);
+			command.AddString("Command::Name","Delete");
+			sentTo->SendMessage(&command);
+			break;
+		}
+		case G_E_DELETE_BEND:
+		case G_E_AUTO_ROUTE: {
+			ConnectionRenderer	*route	= SelectedRoute();
+			if (route == NULL)
+				break;
+			if (message->what == G_E_DELETE_BEND)
+				route->DeleteSelectedBend();
+			else
+				route->AutoRoute();
 			Invalidate();
 			break;
 		}
@@ -2361,7 +2386,13 @@ void GraphEditor::UpdateFormatItems(void) {
 
 
 void GraphEditor::UpdateContextBar(void) {
+	enum {
+		kGroup		= 1,
+		kDeleteBend	= 2,
+		kAutoRoute	= 4
+	};
 	BRect	selection(0,0,-1,-1);
+	int32	buttons	= 0;
 	if (mouseReciver == NULL) {
 		for (int32 i = 0; i < renderer->CountItems(); i++) {
 			ClassRenderer	*node	= dynamic_cast<ClassRenderer*>((Renderer*)renderer->ItemAt(i));
@@ -2369,10 +2400,33 @@ void GraphEditor::UpdateContextBar(void) {
 				continue;
 			selection	= selection.IsValid() ? (selection | node->Frame()) : node->Frame();
 		}
+		if (selection.IsValid())
+			buttons	= kGroup;
+		ConnectionRenderer	*route	= selection.IsValid() ? NULL : SelectedRoute();
+		if ((route != NULL) && (route->SelectedBend() >= 0)) {
+			buttons	|= kDeleteBend;
+			BPoint	bend	= route->SelectedBendPoint();
+			selection	= BRect(bend,bend).InsetByCopy(-6/scale,-6/scale);
+		}
+		if ((route != NULL) && route->HasFixedRoute()) {
+			buttons	|= kAutoRoute;
+			if (!selection.IsValid())
+				selection	= route->Frame();
+		}
 	}
-	if (!selection.IsValid()) {
+	if (buttons == 0) {
 		contextBar.Hide();
 		return;
+	}
+	if (buttons != contextButtons) {
+		contextBar.MakeEmpty();
+		if (buttons & kGroup)
+			contextBar.AddButton(B_TRANSLATE("Group"),new BMessage(G_E_GROUP));
+		if (buttons & kDeleteBend)
+			contextBar.AddButton(B_TRANSLATE("Delete point"),new BMessage(G_E_DELETE_BEND));
+		if (buttons & kAutoRoute)
+			contextBar.AddButton(B_TRANSLATE("Automatic route"),new BMessage(G_E_AUTO_ROUTE));
+		contextButtons	= buttons;
 	}
 	BRect	anchor(selection.left*scale,selection.top*scale,
 		selection.right*scale,selection.bottom*scale);
@@ -2382,6 +2436,22 @@ void GraphEditor::UpdateContextBar(void) {
 	font_height	fh;
 	be_plain_font->GetHeight(&fh);
 	contextBar.Layout(anchor,Bounds(),widths,ceilf(fh.ascent+fh.descent));
+}
+
+
+ConnectionRenderer* GraphEditor::SelectedRoute(void) {
+	ConnectionRenderer	*route	= NULL;
+	for (int32 i = 0; i < renderer->CountItems(); i++) {
+		Renderer	*candidate	= (Renderer*)renderer->ItemAt(i);
+		if (!candidate->Selected())
+			continue;
+		if (dynamic_cast<ClassRenderer*>(candidate) != NULL)
+			return NULL;
+		ConnectionRenderer	*connection	= dynamic_cast<ConnectionRenderer*>(candidate);
+		if ((route == NULL) && (connection != NULL))
+			route	= connection;
+	}
+	return route;
 }
 
 

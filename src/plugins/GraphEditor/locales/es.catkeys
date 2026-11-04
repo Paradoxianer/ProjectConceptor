@@ -1,4 +1,4 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	3159529502
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	2487965849
 Line	GraphEditor		Línea
 Delete	AttributeRenderer		Borrar
 Triangle	GraphEditor		Triángulo
@@ -81,3 +81,5 @@ Shape	GraphEditor		Forma
 Edit choices…	ValueRenderer		Editar opciones…
 Which ends of the selected connections carry an arrow	GraphEditor		Qué extremos de las conexiones seleccionadas llevan flecha
 Shape of the selected connections	GraphEditor		Forma de las conexiones seleccionadas
+Delete point	GraphEditor		Eliminar punto
+Automatic route	GraphEditor		Ruta automática

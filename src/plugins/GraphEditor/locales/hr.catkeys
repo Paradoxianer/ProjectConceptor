@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	3159529502
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	2487965849
 Line	GraphEditor		Linija
 Delete	AttributeRenderer		Izbriši
 Triangle	GraphEditor		Trokut
@@ -81,3 +81,5 @@ Shape	GraphEditor		Oblik
 Edit choices…	ValueRenderer		Uredi izbore…
 Which ends of the selected connections carry an arrow	GraphEditor		Koji krajevi odabranih veza imaju strelicu
 Shape of the selected connections	GraphEditor		Oblik odabranih veza
+Delete point	GraphEditor		Izbriši točku
+Automatic route	GraphEditor		Automatska putanja

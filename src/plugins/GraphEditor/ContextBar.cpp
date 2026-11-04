@@ -20,8 +20,17 @@ ContextBar::ContextBar(void)
 
 ContextBar::~ContextBar(void)
 {
+	MakeEmpty();
+}
+
+
+void ContextBar::MakeEmpty(void)
+{
 	for (size_t i = 0; i < fButtons.size(); i++)
 		delete fButtons[i].message;
+	fButtons.clear();
+	fVisible	= false;
+	fHighlight	= -1;
 }
 
 

@@ -34,6 +34,11 @@ const uint32			G_E_RENDERER			= 'geRr';
 const uint32			G_E_CONNECTING			= 'geCG';
 const uint32			G_E_CONNECTED			= 'geCD';
 const uint32			G_E_GROUP				= 'geGR';
+// context bar of a selected connection: its selected bend, or all fixed ones
+const uint32			G_E_DELETE_BEND			= 'geDB';
+const uint32			G_E_AUTO_ROUTE			= 'geAR';
+// the Delete shortcut: the selected bend if there is one, else the selection
+const uint32			G_E_DELETE				= 'geDL';
 
 const uint32			G_E_NEW_SCALE			= 'geNS';
 // one zoom step in / out, and the zoom that shows the whole graph
@@ -97,6 +102,7 @@ const float		kMinNodeHeight	= 30;
 const rgb_color	kDefaultConnectionColor	= {187, 67, 47, 255};
 
 class Renderer;
+class ConnectionRenderer;
 class StatusBar;
 class StatusButton;
 class GeometryFields;
@@ -210,9 +216,13 @@ public:
 			/** the style color a field's standard value stands for */
 			bool			StyleStandard(const char *field, uint32 what,
 								rgb_color *color);
-			/** places the context bar above the selected nodes, or hides
-			 * it when there are none or a drag is running */
+			/** places the context bar above the selected nodes, or above
+			 * the selected connection's bends, or hides it when there are
+			 * none or a drag is running */
 			void			UpdateContextBar(void);
+			/** the selected connection whose bends the context bar acts
+			 * on: the first one, if no node is selected */
+			ConnectionRenderer*	SelectedRoute(void);
 			void			StartPendingAttributeEdit(void);
 			/** the view's cursor, e.g. an I-beam over text */
 			void			SetCursorId(BCursorID id);
@@ -312,6 +322,8 @@ protected:
 			/** the selected nodes' X, Y, W, H, left in the status bar */
 			GeometryFields	*geometry;
 			ContextBar		contextBar;
+			/** which buttons contextBar has, see UpdateContextBar() */
+			int32			contextButtons;
 			ToolItem		*grid;
 			ToolItem		*guides;
 

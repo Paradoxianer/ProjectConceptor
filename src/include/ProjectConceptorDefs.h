@@ -442,6 +442,12 @@ extern const char*		P_C_NODE_CONNECTION_TYPE;	//		= "Connection::type"
  * connections saved before this existed - ConnectionRenderer adds it with
  * the target-only default, matching how they used to draw. */
 extern const char*		P_C_NODE_CONNECTION_ARROWS;	//		= "Connection::arrows"
+/** message, the bends the user fixed by hand: one P_C_BEND_POINT
+ * (BPoint, document coordinates) per bend, from the source to the target.
+ * Empty means the route is computed. Missing on older connections -
+ * ConnectionRenderer adds it empty, so ChangeValue can replace it. */
+extern const char*		P_C_NODE_CONNECTION_BENDS;	//		= "Connection::bends"
+extern const char*		P_C_BEND_POINT;				//		= "Bend::point"
 
 extern const char*		P_C_NODE_INCOMING;			//		= "Node::incoming"
 extern const char*		P_C_NODE_OUTGOING;			//		= "Node::outgoing"

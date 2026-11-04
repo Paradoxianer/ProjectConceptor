@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	3159529502
+1	English	application/x-vnd.ProjectConceptor-plugin	2487965849
 Line	GraphEditor		Line
 Delete	AttributeRenderer		Delete
 Triangle	GraphEditor		Triangle
@@ -17,6 +17,7 @@ Arrows	GraphEditor		Arrows
 Choose file…	ValueRenderer		Choose file…
 Choose image…	ImageRenderer		Choose image…
 Date	GraphEditor		Date
+Delete point	GraphEditor		Delete point
 Zoom	GraphEditor		Zoom
 Rounded rectangle	GraphEditor		Rounded rectangle
 Width of the selected nodes	GraphEditor		Width of the selected nodes
@@ -56,6 +57,7 @@ Toggle smart alignment guides	GraphEditor		Toggle smart alignment guides
 Ellipse	GraphEditor		Ellipse
 No selection	GraphEditor		No selection
 Rounded	GraphEditor		Rounded
+Automatic route	GraphEditor		Automatic route
 Pen size	GraphEditor		Pen size
 Pointer %d, %d	GraphEditor		Pointer %d, %d
 Note	GraphEditor		Note

@@ -3,6 +3,7 @@
 #include "ProjectConceptorDefs.h"
 
 #include <Catalog.h>
+#include <DataIO.h>
 #include <interface/Window.h>
 #include <stdio.h>
 #include <math.h>
@@ -29,7 +30,10 @@ void ConnectionRenderer::Init() {
 	penSize			= 2.0;
 	connectionType	= 2;
 	arrows			= 1;
-	bezier			= BShape();
+	selectedBend	= -1;
+	dragBend		= -1;
+	dragMoved		= false;
+	dragAdded		= false;
 
 //	connectionName	= new BTextControl(BRect(0,0,100,55),"Name",NULL,"Unbenannt",new BMessage(B_C_NAME_CHANGED));
 //	AddChild(connectionName);
@@ -77,6 +81,27 @@ void ConnectionRenderer::Init() {
 
 void ConnectionRenderer::MouseDown(BPoint where, int32 buttons,
 	                              int32 clicks,int32 modifiers) {
+	if (selected && (buttons & B_PRIMARY_MOUSE_BUTTON)) {
+		int32	handle	= HandleAt(where);
+		int32	plus	= (handle < 0) ? PlusAt(where) : -1;
+		if ((handle >= 0) || (plus >= 0)) {
+			// dragging any handle fixes the whole route as it is now
+			dragPoints	= handles;
+			dragAdded	= (plus >= 0);
+			dragMoved	= false;
+			dragStart	= where;
+			if (dragAdded) {
+				BPoint	point;
+				PlusPoint(plus,&point);
+				dragPoints.insert(dragPoints.begin() + plus,point);
+				dragBend	= plus;
+			}
+			else
+				dragBend	= handle;
+			editor->SetMouseEventMask(B_POINTER_EVENTS, B_NO_POINTER_HISTORY | B_SUSPEND_VIEW_FOCUS | B_LOCK_WINDOW_FOCUS);
+			return;
+		}
+	}
 	if (Caught(where)==true) {
 		if (buttons & B_PRIMARY_MOUSE_BUTTON)
 			editor->BringToFront(this);
@@ -94,9 +119,79 @@ void ConnectionRenderer::MouseDown(BPoint where, int32 buttons,
 }
 
 void ConnectionRenderer::MouseMoved(BPoint pt, uint32 code, const BMessage *msg) {
+	if ((dragBend < 0) || (pt == dragStart))
+		return;
+	if (editor->GridEnabled()) {
+		float	grid	= editor->GridWidth();
+		pt.x	= roundf(pt.x / grid) * grid;
+		pt.y	= roundf(pt.y / grid) * grid;
+	}
+	dragPoints[dragBend]	= pt;
+	dragMoved				= true;
+	editor->Invalidate();
 }
 
 void ConnectionRenderer::MouseUp(BPoint where) {
+	if (dragBend < 0)
+		return;
+	// a click on a handle only selects it, one on a "+" adds the bend
+	selectedBend	= dragBend;
+	dragBend		= -1;
+	if (dragMoved || dragAdded) {
+		// shown as is until the command's change comes back
+		bends	= dragPoints;
+		SendBends(dragPoints);
+	}
+	editor->Invalidate();
+}
+
+BCursorID ConnectionRenderer::CursorAt(BPoint where) {
+	if (dragBend >= 0)
+		return B_CURSOR_ID_MOVE;
+	if (!selected)
+		return B_CURSOR_ID_SYSTEM_DEFAULT;
+	if (HandleAt(where) >= 0)
+		return B_CURSOR_ID_MOVE;
+	if (PlusAt(where) >= 0)
+		return B_CURSOR_ID_COPY;
+	return B_CURSOR_ID_SYSTEM_DEFAULT;
+}
+
+BPoint ConnectionRenderer::SelectedBendPoint(void) const {
+	if ((selectedBend < 0) || (selectedBend >= (int32)handles.size()))
+		return BPoint(0,0);
+	return handles[selectedBend];
+}
+
+void ConnectionRenderer::DeleteSelectedBend(void) {
+	if ((selectedBend < 0) || (selectedBend >= (int32)handles.size()))
+		return;
+	std::vector<BPoint>	points	= handles;
+	points.erase(points.begin() + selectedBend);
+	selectedBend	= -1;
+	SendBends(points);
+}
+
+void ConnectionRenderer::AutoRoute(void) {
+	selectedBend	= -1;
+	SendBends(std::vector<BPoint>());
+}
+
+void ConnectionRenderer::SendBends(const std::vector<BPoint> &points) {
+	BMessage	bendsMessage;
+	for (size_t i = 0; i < points.size(); i++)
+		bendsMessage.AddPoint(P_C_BEND_POINT,points[i]);
+	BMallocIO	flat;
+	bendsMessage.Flatten(&flat);
+	BMessage	valueContainer;
+	valueContainer.AddString("name",P_C_NODE_CONNECTION_BENDS);
+	valueContainer.AddInt32("type",B_MESSAGE_TYPE);
+	valueContainer.AddData("newValue",B_MESSAGE_TYPE,flat.Buffer(),flat.BufferLength());
+	BMessage	change(P_C_EXECUTE_COMMAND);
+	change.AddString("Command::Name","ChangeValue");
+	change.AddPointer("node",container);
+	change.AddMessage("valueContainer",&valueContainer);
+	sentTo->SendMessage(&change);
 }
 
 void ConnectionRenderer::LanguageChanged() {
@@ -112,17 +207,10 @@ void ConnectionRenderer::Draw(BView *drawOn, BRect updateRect) {
 		return;
 	}
 
-	//ValueChanged();
 	CalcLine();
-	if (connectionType == 0)
-		DrawStraight(drawOn,updateRect);
-	else if (connectionType == 1)
-		DrawBended(drawOn,updateRect);
-	else if (connectionType == 2)
-		DrawAngled(drawOn,updateRect);
-	else
-		DrawStraight(drawOn,updateRect);
-
+	DrawRoute(drawOn);
+	if (selected)
+		DrawHandles(drawOn);
 }
 
 void ConnectionRenderer::MessageReceived(BMessage *message) {
@@ -153,7 +241,17 @@ void ConnectionRenderer::ValueChanged() {
 	if (container->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&tmpNode) == B_OK)
 		tmpNode->FindPointer(editor->RenderString(),(void **)&to);
 	selected		= container->GetBool(P_C_NODE_SELECTED,false);
+	if (!selected)
+		selectedBend	= -1;
 	connectionType	= container->GetInt8(P_C_NODE_CONNECTION_TYPE,connectionType);
+	// added empty for the same reason as the arrows below
+	BMessage	bendsMessage;
+	if (container->FindMessage(P_C_NODE_CONNECTION_BENDS,&bendsMessage) != B_OK)
+		container->AddMessage(P_C_NODE_CONNECTION_BENDS,&bendsMessage);
+	bends.clear();
+	BPoint		bend;
+	for (int32 i = 0; bendsMessage.FindPoint(P_C_BEND_POINT,i,&bend) == B_OK; i++)
+		bends.push_back(bend);
 	// connections saved before arrow ends were selectable have no such
 	// field - give them the target-only default, which is exactly how they
 	// used to draw. Added rather than only defaulted locally so the
@@ -201,15 +299,28 @@ void ConnectionRenderer::CalcLine() {
 	// the head grows with the line, or a thick line outgrows it
 	const float	lineWidth	= (penSize <= 1.0f) ? editor->Style().connectionWidth : penSize;
 	const float	arrowSize	= fmax(::arrowSize,lineWidth*2.5f+2.0f);
+	legs.clear();
+	handles.clear();
 	if (from != NULL &&  to != NULL)
 	{
+		const std::vector<BPoint>	&route	= (dragMoved || dragAdded) && (dragBend >= 0)
+			? dragPoints : bends;
 		BRect	*fromRect	= new BRect(from->Frame());
 		BRect	*toRect		= new BRect(to->Frame());
 		BPoint	fromOutward	= BPoint(0,0);
+		BPoint	toOutward	= BPoint(0,0);
 		float	toMiddleX 	=	(toRect->right-toRect->left)/2;
 		float	toMiddleY	=	(toRect->bottom-toRect->top)/2;
 		alpha		= atan2((toRect->top-fromRect->top),(toRect->left-fromRect->left));
-		if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) ) {
+		if (!route.empty()) {
+			CalcFixedEnds(route,&fromOutward,&toOutward);
+			// the same head the branches below build, toward the last bend
+			BPoint	base(third.x+toOutward.x*arrowSize,third.y+toOutward.y*arrowSize);
+			first		= BPoint(base.x-toOutward.y*arrowSize,base.y+toOutward.x*arrowSize);
+			second		= BPoint(base.x+toOutward.y*arrowSize,base.y-toOutward.x*arrowSize);
+			toPoint		= base;
+		}
+		else if ( (alpha < -M_PI_3_4 ) || (alpha > M_PI_3_4) ) {
 			third		= to->Anchor(BPoint(toRect->right,toRect->top+toMiddleY));
 			first		= BPoint(third.x+arrowSize,third.y-arrowSize);
 			second		= BPoint(first.x,third.y+arrowSize);
@@ -281,89 +392,274 @@ void ConnectionRenderer::CalcLine() {
 			fromPoint	= BPoint(fromPoint.x+outX,fromPoint.y+outY);
 		delete fromRect;
 		delete toRect;
+		if (route.empty())
+			CalcAutoLegs();
+		else
+			CalcFixedLegs(route,fromOutward,toOutward);
+	}
+	if (selectedBend >= (int32)handles.size())
+		selectedBend	= -1;
+}
+
+
+// the middle of the frame's side facing toward - measured against the
+// frame's diagonal, so a wide node docks on top for a point above it
+static BPoint FacingSide(BRect frame, BPoint toward, BPoint *outward)
+{
+	float	midX	= (frame.left + frame.right) / 2;
+	float	midY	= (frame.top + frame.bottom) / 2;
+	float	dx		= toward.x - midX;
+	float	dy		= toward.y - midY;
+	if (fabs(dx) * frame.Height() > fabs(dy) * frame.Width()) {
+		*outward	= BPoint((dx > 0) ? 1 : -1,0);
+		return BPoint((dx > 0) ? frame.right : frame.left,midY);
+	}
+	*outward	= BPoint(0,(dy > 0) ? 1 : -1);
+	return BPoint(midX,(dy > 0) ? frame.bottom : frame.top);
+}
+
+
+static BPoint Cubic(BPoint start, BPoint control1, BPoint control2, BPoint end, float t)
+{
+	float	u	= 1 - t;
+	float	a	= u*u*u;
+	float	b	= 3*u*u*t;
+	float	c	= 3*u*t*t;
+	float	d	= t*t*t;
+	return BPoint(a*start.x + b*control1.x + c*control2.x + d*end.x,
+		a*start.y + b*control1.y + c*control2.y + d*end.y);
+}
+
+
+void ConnectionRenderer::CalcFixedEnds(const std::vector<BPoint> &route,
+	BPoint *fromOutward, BPoint *toOutward)
+{
+	fromPoint	= from->Anchor(FacingSide(from->Frame(),route.front(),fromOutward));
+	third		= to->Anchor(FacingSide(to->Frame(),route.back(),toOutward));
+}
+
+
+void ConnectionRenderer::CalcAutoLegs(void)
+{
+	std::vector<BPoint>	leg;
+	leg.push_back(fromPoint);
+	if (connectionType == 1) {
+		// split at a third and two thirds: the handles sit on the curve,
+		// not on its control points
+		const int32	steps	= 48;
+		for (int32 k = 1; k <= steps; k++) {
+			leg.push_back(PointOnBezier((float)k / steps));
+			if ((k % (steps / 3) == 0) && (k < steps)) {
+				handles.push_back(leg.back());
+				legs.push_back(leg);
+				leg.clear();
+				leg.push_back(handles.back());
+			}
+		}
+	}
+	else if (connectionType == 2) {
+		handles.push_back(firstBend);
+		handles.push_back(secondBend);
+		leg.push_back(firstBend);
+		legs.push_back(leg);
+		leg.clear();
+		leg.push_back(firstBend);
+		leg.push_back(secondBend);
+		legs.push_back(leg);
+		leg.clear();
+		leg.push_back(secondBend);
+		leg.push_back(toPoint);
+	}
+	else
+		leg.push_back(toPoint);
+	legs.push_back(leg);
+}
+
+
+void ConnectionRenderer::CalcFixedLegs(const std::vector<BPoint> &route,
+	BPoint fromOutward, BPoint toOutward)
+{
+	handles	= route;
+	std::vector<BPoint>	points;
+	points.push_back(fromPoint);
+	points.insert(points.end(),route.begin(),route.end());
+	points.push_back(toPoint);
+	int32	last	= points.size() - 1;
+	if (connectionType == 1) {
+		// a smooth curve through the points: leaving and entering the
+		// nodes straight out of their sides, in between along the
+		// neighbours (Catmull-Rom)
+		std::vector<BPoint>	tangent(points.size());
+		float	firstLength	= Distance(points[0],points[1]);
+		float	lastLength	= Distance(points[last-1],points[last]);
+		tangent[0]		= BPoint(fromOutward.x*firstLength,fromOutward.y*firstLength);
+		tangent[last]	= BPoint(-toOutward.x*lastLength,-toOutward.y*lastLength);
+		for (int32 i = 1; i < last; i++)
+			tangent[i]	= BPoint((points[i+1].x-points[i-1].x)/2,(points[i+1].y-points[i-1].y)/2);
+		for (int32 i = 0; i < last; i++) {
+			BPoint	control1(points[i].x+tangent[i].x/3,points[i].y+tangent[i].y/3);
+			BPoint	control2(points[i+1].x-tangent[i+1].x/3,points[i+1].y-tangent[i+1].y/3);
+			std::vector<BPoint>	leg;
+			for (int32 k = 0; k <= 16; k++)
+				leg.push_back(Cubic(points[i],control1,control2,points[i+1],k / 16.0f));
+			legs.push_back(leg);
+		}
+	}
+	else if (connectionType == 2) {
+		// every bend is a corner: each leg starts along the source side's
+		// axis and turns once; the last one has to arrive along the
+		// target side's axis, which takes a second turn if they agree
+		bool	horizontal		= (fromOutward.x != 0);
+		bool	endHorizontal	= (toOutward.x != 0);
+		for (int32 i = 0; i < last; i++) {
+			BPoint	start	= points[i];
+			BPoint	end		= points[i+1];
+			std::vector<BPoint>	leg;
+			leg.push_back(start);
+			if ((i == last-1) && (horizontal == endHorizontal)) {
+				if (horizontal) {
+					float	middle	= (start.x+end.x)/2;
+					leg.push_back(BPoint(middle,start.y));
+					leg.push_back(BPoint(middle,end.y));
+				}
+				else {
+					float	middle	= (start.y+end.y)/2;
+					leg.push_back(BPoint(start.x,middle));
+					leg.push_back(BPoint(end.x,middle));
+				}
+			}
+			else if (horizontal)
+				leg.push_back(BPoint(end.x,start.y));
+			else
+				leg.push_back(BPoint(start.x,end.y));
+			leg.push_back(end);
+			legs.push_back(leg);
+		}
+	}
+	else {
+		for (int32 i = 0; i < last; i++) {
+			std::vector<BPoint>	leg;
+			leg.push_back(points[i]);
+			leg.push_back(points[i+1]);
+			legs.push_back(leg);
+		}
 	}
 }
 
 
 BRect ConnectionRenderer::Frame()
 {
-	float	left	= fromPoint.x;
-	float	top		= fromPoint.y;
-	float	right	= toPoint.x;
-	float	bottom	= toPoint.y;
-	float	c;
-	if (left>right) 	{
-		c		= right;
-		right	= left;
-		left	= c;
+	CalcLine();
+	BRect	frame(fromPoint,fromPoint);
+	frame	= frame | BRect(toPoint,toPoint);
+	for (size_t i = 0; i < legs.size(); i++) {
+		for (size_t j = 0; j < legs[i].size(); j++)
+			frame	= frame | BRect(legs[i][j],legs[i][j]);
 	}
-	if (top>bottom) {
-		c		= top;
-		top		= bottom;
-		bottom	= c;
-	}
-	return BRect(left,top,right,bottom);
+	return frame;
 }
 
 bool ConnectionRenderer::Caught(BPoint where){
-	if (connectionType == 0)
-		return CaughtStraigt(where);
-	else if (connectionType == 1)
-		return CaughtBended(where);
-	else if (connectionType == 2)
-		return CaughtAngled(where);
-	// matches Draw(), which draws unknown types straight
-	return CaughtStraigt(where);
+	if (selected && ((HandleAt(where) >= 0) || (PlusAt(where) >= 0)))
+		return true;
+	for (size_t i = 0; i < legs.size(); i++) {
+		for (size_t j = 1; j < legs[i].size(); j++) {
+			if (DistanceToSegment(where,legs[i][j-1],legs[i][j]) < max_entfernung)
+				return true;
+		}
+	}
+	return false;
 }
 
-void ConnectionRenderer::DrawStraight(BView *drawOn, BRect updateRect){
-		const GraphStyle	&style	= editor->Style();
-		drawOn->SetPenSize(LineWidth(style));
-		drawOn->SetLineMode(B_ROUND_CAP,B_ROUND_JOIN);
-		drawOn->SetHighColor(LineColor(style));
-		drawOn->StrokeLine(	fromPoint,toPoint);
-		DrawArrows(drawOn);
-}
+// in view pixels, whatever the zoom
+static const float	kHandleRadius	= 4.5;
+static const float	kPlusHalf		= 5;
+static const float	kMinPlusLeg		= 36;
 
-void ConnectionRenderer::DrawBended(BView *drawOn, BRect updateRect){
+void ConnectionRenderer::DrawRoute(BView *drawOn){
 	const GraphStyle	&style	= editor->Style();
 	drawOn->SetPenSize(LineWidth(style));
 	drawOn->SetLineMode(B_ROUND_CAP,B_ROUND_JOIN);
 	drawOn->SetHighColor(LineColor(style));
-	bezier=BShape();
-	bezier.MoveTo(fromPoint);
-	BPoint	controlPoints[3];
-	controlPoints[0]=firstBend;
-	controlPoints[1]=secondBend;
-	controlPoints[2]=toPoint;
-	bezier.BezierTo(controlPoints);
-	// `bezier` above is kept only so CaughtBended()'s Bounds() pre-check has
-	// something to work with - it's not used for drawing. StrokeShape()
-	// verified live to ignore BView::SetScale() entirely in this Haiku
-	// build: at any zoom other than 100% the curve painted at its native,
-	// unscaled size/position while every other primitive here (StrokeLine,
-	// FillRoundRect, ...) scaled correctly. Approximating the curve as short
-	// StrokeLine() segments via PointOnBezier() (same source CaughtBended()
-	// already uses for hit-testing) sidesteps StrokeShape() entirely and
-	// scales like everything else.
-	BPoint	previous = fromPoint;
-	for (float t = 0.02; t <= 1.0; t += 0.02) {
-		BPoint	current = PointOnBezier(t);
-		drawOn->StrokeLine(previous,current);
-		previous = current;
+	// short StrokeLine()s rather than StrokeShape() for the curves:
+	// StrokeShape() was verified live to ignore BView::SetScale() in this
+	// Haiku build, painting the curve unscaled at any zoom but 100%
+	for (size_t i = 0; i < legs.size(); i++) {
+		for (size_t j = 1; j < legs[i].size(); j++)
+			drawOn->StrokeLine(legs[i][j-1],legs[i][j]);
 	}
 	DrawArrows(drawOn);
 }
 
-void ConnectionRenderer::DrawAngled(BView *drawOn, BRect updateRect){
+void ConnectionRenderer::DrawHandles(BView *drawOn){
 	const GraphStyle	&style	= editor->Style();
-	drawOn->SetPenSize(LineWidth(style));
-	drawOn->SetLineMode(B_ROUND_CAP,B_ROUND_JOIN);
-	drawOn->SetHighColor(LineColor(style));
-	drawOn->StrokeLine(	fromPoint,firstBend);
-	drawOn->StrokeLine(	firstBend,secondBend);
-	drawOn->StrokeLine(	secondBend,toPoint);
-	DrawArrows(drawOn);
+	float	scale	= editor->Scale();
+	float	radius	= kHandleRadius / scale;
+	float	half	= kPlusHalf / scale;
+	float	arm		= half * 0.55f;
+	drawOn->SetPenSize(1.5f / scale);
+	for (int32 i = 0; i < (int32)legs.size(); i++) {
+		BPoint	plus;
+		if (!PlusPoint(i,&plus))
+			continue;
+		BRect	box(plus.x-half,plus.y-half,plus.x+half,plus.y+half);
+		drawOn->SetHighColor(style.cardFill);
+		drawOn->FillRect(box);
+		drawOn->SetHighColor(style.accent);
+		drawOn->StrokeRect(box);
+		drawOn->StrokeLine(BPoint(plus.x-arm,plus.y),BPoint(plus.x+arm,plus.y));
+		drawOn->StrokeLine(BPoint(plus.x,plus.y-arm),BPoint(plus.x,plus.y+arm));
+	}
+	for (int32 i = 0; i < (int32)handles.size(); i++) {
+		drawOn->SetHighColor((i == selectedBend) ? style.accent : style.cardFill);
+		drawOn->FillEllipse(handles[i],radius,radius);
+		drawOn->SetHighColor(style.accent);
+		drawOn->StrokeEllipse(handles[i],radius,radius);
+	}
+}
+
+int32 ConnectionRenderer::HandleAt(BPoint where){
+	float	reach	= (kHandleRadius + 3) / editor->Scale();
+	for (int32 i = handles.size() - 1; i >= 0; i--) {
+		if (Distance(where,handles[i]) <= reach)
+			return i;
+	}
+	return -1;
+}
+
+int32 ConnectionRenderer::PlusAt(BPoint where){
+	float	reach	= (kPlusHalf + 2) / editor->Scale();
+	for (int32 i = 0; i < (int32)legs.size(); i++) {
+		BPoint	plus;
+		if (PlusPoint(i,&plus) && (fabs(where.x-plus.x) <= reach)
+				&& (fabs(where.y-plus.y) <= reach))
+			return i;
+	}
+	return -1;
+}
+
+bool ConnectionRenderer::PlusPoint(int32 i, BPoint *point){
+	if ((i < 0) || (i >= (int32)legs.size()))
+		return false;
+	const std::vector<BPoint>	&leg	= legs[i];
+	float	length	= 0;
+	for (size_t j = 1; j < leg.size(); j++)
+		length	+= Distance(leg[j-1],leg[j]);
+	if (length * editor->Scale() < kMinPlusLeg)
+		return false;
+	float	left	= length / 2;
+	for (size_t j = 1; j < leg.size(); j++) {
+		float	step	= Distance(leg[j-1],leg[j]);
+		if ((step > 0) && (left <= step)) {
+			float	t	= left / step;
+			*point	= BPoint(leg[j-1].x + t*(leg[j].x-leg[j-1].x),
+				leg[j-1].y + t*(leg[j].y-leg[j-1].y));
+			return true;
+		}
+		left	-= step;
+	}
+	*point	= leg.back();
+	return true;
 }
 
 rgb_color ConnectionRenderer::LineColor(const GraphStyle &style) {
@@ -390,28 +686,7 @@ void ConnectionRenderer::DrawArrows(BView *drawOn) {
 		drawOn->FillTriangle(fromFirst,fromSecond,fromThird);
 }
 
-bool ConnectionRenderer::CaughtStraigt(BPoint where){
-	return DistanceToSegment(where,fromPoint,toPoint) < max_entfernung;
-}
 
-bool ConnectionRenderer::CaughtBended(BPoint where){
-	// bezier's points are absolute (document-space), same as
-	// PointOnBezier() below, so Bounds() needs no offset here.
-	if (bezier.Bounds().Contains(where) == true )
-	{
-		float t = 0;
-		float minDist=999999;
-		for ( t=0; t<1.0; t+=0.01)
-		{
-			minDist =fmin(minDist, Distance(where,PointOnBezier(t)));
-			if (minDist < max_entfernung)
-				return true;
-		}
-		return false;
-	}
-	else
-		return false;
-}
 
 float ConnectionRenderer::Distance(BPoint one, BPoint two)
 {
@@ -448,10 +723,3 @@ BPoint ConnectionRenderer::PointOnBezier(float t)
 	return BPoint(x,y);
 }
 
-bool ConnectionRenderer::CaughtAngled(BPoint where){
-	if (DistanceToSegment(where,fromPoint,firstBend) < max_entfernung)
-		return true;
-	if (DistanceToSegment(where,firstBend,secondBend) < max_entfernung)
-		return true;
-	return DistanceToSegment(where,secondBend,toPoint) < max_entfernung;
-}

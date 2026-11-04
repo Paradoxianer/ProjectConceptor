@@ -22,6 +22,7 @@ public:
 
 			/** label is shown as is; the bar owns message */
 			void			AddButton(const char *label, BMessage *message);
+			void			MakeEmpty(void);
 			int32			CountButtons(void) const {return fButtons.size();};
 
 			/** places the buttons, each width[i] wide (text only), centered

@@ -12,6 +12,8 @@
 #include <math.h>
 #include <interface/Shape.h>
 
+#include <vector>
+
 
 const uint32	B_C_NAME_CHANGED	= 'bcNC';
 
@@ -62,6 +64,16 @@ public:
 
 	virtual	void		SetPreviewColor(const char *field, rgb_color color);
 	virtual	void		ClearPreviewColor(void);
+	virtual	BCursorID	CursorAt(BPoint where);
+
+	/** index of the bend handle clicked last, -1 for none */
+			int32		SelectedBend(void) const {return selectedBend;};
+			BPoint		SelectedBendPoint(void) const;
+	/** whether the bends are fixed by hand rather than computed */
+			bool		HasFixedRoute(void) const {return !bends.empty();};
+	/** commands removing the selected bend, or all fixed ones */
+			void		DeleteSelectedBend(void);
+			void		AutoRoute(void);
 
 protected:
 	/** fillColor, or the live preview color while a picker is open and
@@ -79,13 +91,24 @@ protected:
 			void		DrawArrows(BView *drawOn);
 			void		Init();
 			void		CalcLine();
-			void		DrawStraight(BView *drawOn, BRect updateRect);
-			void		DrawBended(BView *drawOn, BRect updateRect);
-			void		DrawAngled(BView *drawOn, BRect updateRect);
-			bool		CaughtStraigt(BPoint where);
-			bool		CaughtBended(BPoint where);
-			bool		CaughtAngled(BPoint where);
-			
+	/** fromPoint/third on the sides of from/to facing the first/last bend;
+	 * the outward directions of those sides */
+			void		CalcFixedEnds(const std::vector<BPoint> &route,
+							BPoint *fromOutward, BPoint *toOutward);
+	/** legs and handles for the computed route */
+			void		CalcAutoLegs(void);
+	/** legs through route, in the connection's shape */
+			void		CalcFixedLegs(const std::vector<BPoint> &route,
+							BPoint fromOutward, BPoint toOutward);
+			void		DrawRoute(BView *drawOn);
+			void		DrawHandles(BView *drawOn);
+	/** index into handles/legs under where, -1 for none */
+			int32		HandleAt(BPoint where);
+			int32		PlusAt(BPoint where);
+	/** halfway along leg i; false if the leg is too short for a "+" */
+			bool		PlusPoint(int32 i, BPoint *point);
+			void		SendBends(const std::vector<BPoint> &points);
+
 			BPoint		PointOnBezier(float t);
 			float		Distance(BPoint one, BPoint two);
 			float		DistanceToSegment(BPoint p, BPoint segStart, BPoint segEnd);
@@ -105,9 +128,26 @@ protected:
 	ClassRenderer		*to;
 	BPoint				fromPoint;
 	BPoint				toPoint;
+	/** control points of the computed route: the corners of an angular
+	 * line, the bezier controls of a rounded one */
 	BPoint				firstBend;
 	BPoint				secondBend;
-	BShape				bezier;
+	/** P_C_NODE_CONNECTION_BENDS */
+	std::vector<BPoint>	bends;
+	/** the bends while a handle is dragged, drawn instead of bends once
+	 * the drag changed something */
+	std::vector<BPoint>	dragPoints;
+	BPoint				dragStart;
+	/** the drawn line, one polyline from handle to handle */
+	std::vector<std::vector<BPoint> >	legs;
+	/** where the bend handles sit: the fixed bends, or the computed
+	 * route's bends that dragging one would fix */
+	std::vector<BPoint>	handles;
+	int32				selectedBend;
+	/** the handle being dragged, -1 for none */
+	int32				dragBend;
+	bool				dragMoved;
+	bool				dragAdded;
 	bool				mirrorX,mirrorY;
 	double				alpha;
 //	PCommand			*selectCommand;
