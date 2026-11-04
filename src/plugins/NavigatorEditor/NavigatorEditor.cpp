@@ -14,6 +14,7 @@
 #include <interface/Font.h>
 #include <interface/GraphicsDefs.h>
 #include <interface/ScrollView.h>
+#include <interface/TextControl.h>
 #include <support/List.h>
 #include <translation/TranslationUtils.h>
 #include <translation/TranslatorFormats.h>
@@ -138,7 +139,7 @@ void NavigatorEditor::InitGraph()
 		selected->AddPointer("ListView",root);
 		root->SetSelectionMessage(selected);
 		root->SetTarget(this);
-		AddChild(new BScrollView("root",root,B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true));
+		AddChild(MakeColumn(root,ColumnWidth(0)));
 		SetViewColor(255,255,255,255);
 		LayoutColumns();
 }
@@ -360,20 +361,12 @@ BList* NavigatorEditor::GetPCommandList(void)
 void NavigatorEditor::ValueChanged(BMessage *changedNodes)
 {
 	TRACE();
-	BView 			*child 				= NULL;
-	NodeListView	*nodeListView		= NULL;
-	MessageListView	*messageListView	= NULL;
 	root->ValueChanged();
-	if ((child = ChildAt(1)) != NULL)
-	{
-		while ( child )
-		{
-			messageListView = dynamic_cast<MessageListView *>(((BScrollView *)child)->Target());
-			if (messageListView)
-				messageListView->ValueChanged();
-			child = child->NextSibling();
-		}
-	} 
+	for (BView *column = ChildAt(1); column != NULL; column = column->NextSibling()) {
+		MessageListView	*messageListView = dynamic_cast<MessageListView *>(ListOf(column));
+		if (messageListView != NULL)
+			messageListView->ValueChanged();
+	}
 }
 
 
@@ -470,6 +463,20 @@ void NavigatorEditor::MessageReceived(BMessage *message)
 			NavToolbarDelete(doc,focusedList);
 			break;
 		}
+		case N_A_FILTER:
+		{
+			BListView	*list	= NULL;
+			if (message->FindPointer("ListView",(void **)&list) != B_OK)
+				break;
+			BTextControl	*field	= dynamic_cast<BTextControl *>(ColumnOf(list)->ChildAt(0));
+			if (field == NULL)
+				break;
+			if (NodeListView *nodes = dynamic_cast<NodeListView *>(list))
+				nodes->SetFilter(field->Text());
+			else if (MessageListView *fields = dynamic_cast<MessageListView *>(list))
+				fields->SetFilter(field->Text());
+			break;
+		}
 		case N_A_SHOW_IN_GRAPH:
 		{
 			BMessage	*node	= NULL;
@@ -497,11 +504,11 @@ void NavigatorEditor::InsertNewList(BListView *source)
 		if (item == NULL)
 			return;
 		//vorher alle  überfüssigen Views löschen
-		BView *sibling=source->Parent()->NextSibling();
+		BView *sibling=ColumnOf(source)->NextSibling();
 		while (sibling != NULL)
 		{
 			RemoveChild(sibling);
-			sibling=source->Parent()->NextSibling();
+			sibling=ColumnOf(source)->NextSibling();
 		}
 		if (item->GetSupportedType() == P_C_CLASS_TYPE)
 		{
@@ -513,10 +520,51 @@ void NavigatorEditor::InsertNewList(BListView *source)
 			invoked->AddPointer("ListView",list);
 			list->SetInvocationMessage(invoked);
 			list->SetTarget(this);
-			AddChild(new BScrollView("root",list,B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true));
+			AddChild(MakeColumn(list,ColumnWidth(CountChildren())));
 		}
 		LayoutColumns();
 	}
+}
+
+BView* NavigatorEditor::MakeColumn(BListView *list, float width)
+{
+	const float	gap		= 2;
+	BView	*column	= new BView(BRect(0,0,width,Bounds().Height()),"column",
+		B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0);
+	column->SetViewUIColor(B_PANEL_BACKGROUND_COLOR);
+
+	BMessage	*changed	= new BMessage(N_A_FILTER);
+	changed->AddPointer("ListView",list);
+	BTextControl	*field	= new BTextControl(BRect(gap,gap,width-gap,gap+10),
+		"filter",B_TRANSLATE("Filter"),"",NULL,
+		B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP);
+	field->SetModificationMessage(changed);
+	field->SetTarget(this);
+	float	preferredWidth;
+	float	preferredHeight;
+	field->GetPreferredSize(&preferredWidth,&preferredHeight);
+	field->ResizeTo(width-2*gap,preferredHeight);
+	field->SetDivider(field->StringWidth(field->Label())+8);
+	column->AddChild(field);
+
+	BScrollView	*scroller	= new BScrollView("list",list,B_FOLLOW_ALL_SIDES,0,false,true);
+	float		top			= field->Frame().bottom+gap;
+	scroller->MoveTo(0,top);
+	scroller->ResizeTo(width,column->Bounds().Height()-top);
+	column->AddChild(scroller);
+	return column;
+}
+
+BView* NavigatorEditor::ColumnOf(BView *list) const
+{
+	// list -> its scroll view -> the column
+	return list->Parent()->Parent();
+}
+
+BListView* NavigatorEditor::ListOf(BView *column) const
+{
+	BScrollView	*scroller	= dynamic_cast<BScrollView *>(column->ChildAt(1));
+	return (scroller != NULL) ? dynamic_cast<BListView *>(scroller->Target()) : NULL;
 }
 
 void NavigatorEditor::ShowInGraph(BMessage *node)

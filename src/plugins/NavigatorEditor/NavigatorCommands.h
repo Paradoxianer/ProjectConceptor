@@ -38,6 +38,9 @@ void NavShowNodeContextMenu(PDocument *doc, BMessage *node, bool isChildList,
 void NavShowEmptyContextMenu(PDocument *doc, BMessage *parentNode,
 	BView *owner, BPoint screenPoint);
 
+/** true when filter is empty or text contains it, ignoring case */
+bool NavMatchesFilter(const char *text, const char *filter);
+
 /** Called from NodeListView/MessageListView::MouseDown so the toolbar
  * (which has no click position of its own to work out its target from)
  * knows which list the user last interacted with. */

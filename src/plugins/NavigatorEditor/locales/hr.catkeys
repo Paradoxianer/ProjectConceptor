@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	2241214158
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	4048263145
 Untitled	NavigatorCommands		Bez naslova
 Integer (8-bit)	NavigatorCommands		Cijeli broj (8-bitni)
 Field name	NavigatorCommands		Naziv polja
@@ -34,3 +34,4 @@ Integer (32-bit)	NavigatorCommands		Cijeli broj (32-bitni)
 Add a node (child of the selection, or top-level)	NavigatorEditor		Dodaj čvor (podređen odabiru ili na najvišoj razini)
 Node name	NavigatorCommands		Naziv čvora
 Show in graph	NavigatorCommands		Prikaži u grafu
+Filter	NavigatorEditor		Filtar

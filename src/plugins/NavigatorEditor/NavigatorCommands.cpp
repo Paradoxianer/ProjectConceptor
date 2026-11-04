@@ -6,6 +6,7 @@
 #include <interface/OutlineListView.h>
 #include <interface/PopUpMenu.h>
 #include <support/List.h>
+#include <support/String.h>
 #include <support/TypeConstants.h>
 
 #include <Catalog.h>
@@ -346,6 +347,13 @@ void NavShowEmptyContextMenu(PDocument *doc, BMessage *parentNode,
 	BMenuItem	*chosen	= menu->Go(screenPoint,true,true);
 	if (chosen == addNode)
 		NavInsertNode(doc,parentNode);
+}
+
+bool NavMatchesFilter(const char *text, const char *filter)
+{
+	if ((filter == NULL) || (filter[0] == '\0'))
+		return true;
+	return (text != NULL) && (BString(text).IFindFirst(filter) >= 0);
 }
 
 void NavSetFocusedList(NavigatorEditor *editor, BListView *list)

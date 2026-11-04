@@ -1,4 +1,4 @@
-1	French	application/x-vnd.ProjectConceptor-plugin	2241214158
+1	French	application/x-vnd.ProjectConceptor-plugin	4048263145
 Untitled	NavigatorCommands		Sans titre
 Integer (8-bit)	NavigatorCommands		Entier (8 bits)
 Field name	NavigatorCommands		Nom du champ
@@ -34,3 +34,4 @@ Integer (32-bit)	NavigatorCommands		Entier (32 bits)
 Add a node (child of the selection, or top-level)	NavigatorEditor		Ajouter un nœud (enfant de la sélection ou de premier niveau)
 Node name	NavigatorCommands		Nom du nœud
 Show in graph	NavigatorCommands		Afficher dans le graphe
+Filter	NavigatorEditor		Filtre

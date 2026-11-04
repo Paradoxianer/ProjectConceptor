@@ -1,4 +1,4 @@
-1	Spanish	application/x-vnd.ProjectConceptor-plugin	2241214158
+1	Spanish	application/x-vnd.ProjectConceptor-plugin	4048263145
 Untitled	NavigatorCommands		Sin título
 Integer (8-bit)	NavigatorCommands		Entero (8 bits)
 Field name	NavigatorCommands		Nombre del campo
@@ -34,3 +34,4 @@ Integer (32-bit)	NavigatorCommands		Entero (32 bits)
 Add a node (child of the selection, or top-level)	NavigatorEditor		Añadir un nodo (hijo de la selección o de nivel superior)
 Node name	NavigatorCommands		Nombre del nodo
 Show in graph	NavigatorCommands		Mostrar en el grafo
+Filter	NavigatorEditor		Filtro

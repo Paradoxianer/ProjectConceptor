@@ -41,15 +41,26 @@ void NodeListView::MouseDown(BPoint point)
 
 void NodeListView::ValueChanged()
 {
-	BMessage	*messageNode	= NULL;
 	MakeEmpty();
 	nodes->DoForEach(AddNodes,this);
 }
 
+void NodeListView::SetFilter(const char *newFilter)
+{
+	filter	= newFilter;
+	ValueChanged();
+}
+
 bool NodeListView::AddNodes(void *node,void *list)
 {
-	BMessage *nodeMessage=(BMessage *)node;
-	if (nodeMessage!=NULL)
-		((BListView *)list)->AddItem(new NodeItem(nodeMessage));
-	return false;	
+	BMessage		*nodeMessage	= (BMessage *)node;
+	NodeListView	*view			= (NodeListView *)list;
+	if (nodeMessage == NULL)
+		return false;
+	NodeItem	*item	= new NodeItem(nodeMessage);
+	if (NavMatchesFilter(item->Name(),view->filter.String()))
+		view->AddItem(item);
+	else
+		delete item;
+	return false;
 }

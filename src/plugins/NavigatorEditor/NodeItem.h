@@ -17,6 +17,7 @@ class NodeItem : public BaseListItem
 public:
 						NodeItem(BMessage *newNode, uint32 level = 0, bool expanded = true);
 	virtual	BMessage*	GetNode(void){return node;};
+			const char*	Name(void){return label;};
 	virtual void		SetNode(BMessage *newNode){node=newNode;};
 
 	virtual void		ValueChanged(void);

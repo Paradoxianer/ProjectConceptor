@@ -1,4 +1,4 @@
-1	English	application/x-vnd.ProjectConceptor-plugin	2241214158
+1	English	application/x-vnd.ProjectConceptor-plugin	4048263145
 Untitled	NavigatorCommands		Untitled
 Integer (8-bit)	NavigatorCommands		Integer (8-bit)
 Field name	NavigatorCommands		Field name
@@ -15,6 +15,7 @@ false	BoolItem		false
 Add node	NavigatorCommands		Add node
 Point	NavigatorCommands		Point
 Data	NavigatorEditor		Data
+Filter	NavigatorEditor		Filter
 Integer (16-bit)	NavigatorCommands		Integer (16-bit)
 left	RectItem		left
 Name	NavigatorCommands		Name

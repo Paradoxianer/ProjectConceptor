@@ -95,7 +95,32 @@ void MessageListView::ValueChanged()
 	AddMessage(container,NULL);
 }
 
-void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
+void MessageListView::SetFilter(const char *newFilter)
+{
+	filter	= newFilter;
+	ValueChanged();
+}
+
+void MessageListView::DropIfEmpty(BListItem *header, bool showAll)
+{
+	if (showAll || (CountItemsUnder(header,true) > 0))
+		return;
+	RemoveItem(header);
+	delete header;
+}
+
+void MessageListView::AddNodeUnder(BMessage *node, BListItem *header,
+	bool showAll)
+{
+	NodeItem	*item	= new NodeItem(node);
+	if (showAll || NavMatchesFilter(item->Name(),filter.String()))
+		AddUnder(item,header);
+	else
+		delete item;
+}
+
+void MessageListView::AddMessage(BMessage *message,BListItem* superItem,
+	bool showAll)
 {
 	char		*name; 
 	uint32		type; 
@@ -106,6 +131,14 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 	for (int32 i = 0; message->GetInfo(B_ANY_TYPE, i,(char **) &name, &type, &count) == B_OK; i++)
 	#endif
 	{
+		if ((type != B_MESSAGE_TYPE) && (type != B_POINTER_TYPE) && !showAll) {
+			const char	*text	= NULL;
+			if (type == B_STRING_TYPE)
+				message->FindString(name,count-1,&text);
+			if (!NavMatchesFilter(name,filter.String())
+					&& !((text != NULL) && NavMatchesFilter(text,filter.String())))
+				continue;
+		}
 		switch(type)
 		{
 			case B_MESSAGE_TYPE:
@@ -126,7 +159,9 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 					editMessage->FindMessage("valueContainer",valueContainer);
 					valueContainer->AddString("subgroup",name);
 					editMessage->ReplaceMessage("valueContainer",valueContainer);
-					AddMessage(tmpMessage,newSuperItem);
+					bool	groupShown	= showAll || NavMatchesFilter(name,filter.String());
+					AddMessage(tmpMessage,newSuperItem,groupShown);
+					DropIfEmpty(newSuperItem,groupShown);
 				}
 				break;
 			}
@@ -330,12 +365,14 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 						AddItem(masterItem);
 					message->FindPointer(name,count-1,(void **)&list);
 
+					bool	groupShown	= showAll || NavMatchesFilter(name,filter.String());
 					for (int32 i=0;i<list->CountItems();i++)
 					{
 						connection	= (BMessage*)list->ItemAt(i);
 						connection->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&toNode);
-						AddUnder(new NodeItem(toNode),masterItem);
+						AddNodeUnder(toNode,masterItem,groupShown);
 					}
+					DropIfEmpty(masterItem,groupShown);
 				}
 				// same shape as OUTGOING above, just following each
 				// connection back to where it came from instead of where
@@ -353,12 +390,14 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 						AddItem(masterItem);
 					message->FindPointer(name,count-1,(void **)&list);
 
+					bool	groupShown	= showAll || NavMatchesFilter(name,filter.String());
 					for (int32 i=0;i<list->CountItems();i++)
 					{
 						connection	= (BMessage*)list->ItemAt(i);
 						connection->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&fromNode);
-						AddUnder(new NodeItem(fromNode),masterItem);
+						AddNodeUnder(fromNode,masterItem,groupShown);
 					}
+					DropIfEmpty(masterItem,groupShown);
 				}
 				// a group's children - unlike OUTGOING/INCOMING this list
 				// holds each child's own node BMessage directly, not a
@@ -373,8 +412,10 @@ void MessageListView::AddMessage(BMessage *message,BListItem* superItem)
 						AddItem(masterItem);
 					message->FindPointer(name,count-1,(void **)&list);
 
+					bool	groupShown	= showAll || NavMatchesFilter(name,filter.String());
 					for (int32 i=0;i<list->CountItems();i++)
-						AddUnder(new NodeItem((BMessage*)list->ItemAt(i)),masterItem);
+						AddNodeUnder((BMessage*)list->ItemAt(i),masterItem,groupShown);
+					DropIfEmpty(masterItem,groupShown);
 				}
 
 /*				message->FindPointer(name,count,(void **)&pointer);
