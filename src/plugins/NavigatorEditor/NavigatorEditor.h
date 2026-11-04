@@ -7,6 +7,8 @@
 #include <interface/View.h>
 #include <support/List.h>
 
+#include <vector>
+
 #include "PEditor.h"
 #include "PDocument.h"
 #include "PluginManager.h"
@@ -72,7 +74,12 @@ public:
 	virtual void			AttachedToWindow(void);
 	virtual void			DetachedFromWindow(void);
 	virtual void			FrameResized(float width, float height);
-	
+	virtual	void			Draw(BRect updateRect);
+	virtual	void			MouseDown(BPoint where);
+	virtual	void			MouseMoved(BPoint where, uint32 transit,
+								const BMessage *dragMessage);
+	virtual	void			MouseUp(BPoint where);
+
 	virtual	void			KeyDown(const char *bytes, int32 numBytes);
 	virtual	void			KeyUp(const char *bytes, int32 numBytes);
 
@@ -94,6 +101,15 @@ protected:
 			void			InitToolBar(void);
 			void			UpdateScrollBars(void);
 
+			/** Places the columns side by side, each as wide as
+			 * columnWidths says, a divider between them, and grows this
+			 * view to fit them. */
+			void			LayoutColumns(void);
+			float			ColumnWidth(int32 index) const;
+			/** The column whose divider (the gap right of it) is at
+			 * where, or -1. */
+			int32			DividerAt(BPoint where) const;
+
 			int32			id;
 			char*			renderString;
 
@@ -111,6 +127,14 @@ protected:
 			ToolItem		*deleteItem;
 
 			BList			*viewLine;
+
+			// widths the user dragged a column to, by its place from the
+			// left; kept when drilling down replaces the columns
+			std::vector<float>	columnWidths;
+			int32			draggedDivider;
+			float			dragStartX;
+			float			dragStartWidth;
+			bool			resizeCursor;
 private:
 };
 #endif

@@ -8,7 +8,9 @@
 #include "PEditorManager.h"
 #include "PWindow.h"
 
+#include <app/Cursor.h>
 #include <interface/Bitmap.h>
+#include <interface/ControlLook.h>
 #include <interface/Font.h>
 #include <interface/GraphicsDefs.h>
 #include <interface/ScrollView.h>
@@ -16,10 +18,17 @@
 #include <translation/TranslationUtils.h>
 #include <translation/TranslatorFormats.h>
 #include <Catalog.h>
+#include <math.h>
 #include <string.h>
 
 #undef B_TRANSLATION_CONTEXT
 #define B_TRANSLATION_CONTEXT "NavigatorEditor"
+
+// column widths include the column's own vertical scroll bar
+static const float	kRootColumnWidth	= 200+B_V_SCROLL_BAR_WIDTH;
+static const float	kColumnWidth		= 400+B_V_SCROLL_BAR_WIDTH;
+static const float	kMinColumnWidth		= 80;
+static const float	kDividerWidth		= 6;
 
 // A plain, filled "+" or "-" tile, drawn once instead of shipped as a
 // PNG resource. Deliberately just the bare symbol at near-maximum size -
@@ -71,6 +80,10 @@ void NavigatorEditor::Init(void)
 	toolBar			= NULL;
 	myScrollParent	= NULL;
 	focusedList		= NULL;
+	draggedDivider	= -1;
+	dragStartX		= 0;
+	dragStartWidth	= 0;
+	resizeCursor	= false;
 	font_family		family;
 	font_style		style;
 	
@@ -118,7 +131,7 @@ void NavigatorEditor::InitGraph()
 		BList		*allNodes		= doc->GetAllNodes();
 		BList		*allConnections	= doc->GetAllConnections();
 		BRect		rootrect		= Bounds();
-		rootrect.right				= 200;
+		rootrect.right				= kRootColumnWidth-B_V_SCROLL_BAR_WIDTH;
 		root						= new NodeListView(rootrect,allNodes,doc,this);
 		focusedList					= root;
 		BMessage *selected 			= new BMessage(N_A_INVOKATION);
@@ -127,8 +140,7 @@ void NavigatorEditor::InitGraph()
 		root->SetTarget(this);
 		AddChild(new BScrollView("root",root,B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true));
 		SetViewColor(255,255,255,255);
-		UpdateScrollBars();
-		Invalidate();
+		LayoutColumns();
 }
 
 BView* NavigatorEditor::GetView(void)
@@ -157,6 +169,105 @@ void NavigatorEditor::UpdateScrollBars(void)
 		sb->SetProportion(viewRect.Width()/contentRect.Width());
 		sb->SetSteps(contentRect.Width()/8.0,contentRect.Width()/2.0);
 	}
+}
+
+void NavigatorEditor::LayoutColumns(void)
+{
+	float	left	= 0;
+	int32	index	= 0;
+	for (BView *column = ChildAt(0); column != NULL; column = column->NextSibling()) {
+		column->MoveTo(left,0);
+		column->ResizeTo(ColumnWidth(index),Bounds().Height());
+		left	+= ColumnWidth(index)+kDividerWidth;
+		index++;
+	}
+	// never narrower than the tab, or the white area ends mid-window
+	float	width	= left;
+	if ((myScrollParent != NULL) && (myScrollParent->Bounds().Width() > width))
+		width	= myScrollParent->Bounds().Width();
+	if (width != Bounds().Width())
+		ResizeTo(width,Bounds().Height());
+	UpdateScrollBars();
+	Invalidate();
+}
+
+float NavigatorEditor::ColumnWidth(int32 index) const
+{
+	if ((index >= 0) && (index < (int32)columnWidths.size()))
+		return columnWidths[index];
+	return (index == 0) ? kRootColumnWidth : kColumnWidth;
+}
+
+int32 NavigatorEditor::DividerAt(BPoint where) const
+{
+	int32	index	= 0;
+	for (BView *column = ChildAt(0); column != NULL; column = column->NextSibling()) {
+		float	right	= column->Frame().right;
+		if ((where.x > right) && (where.x <= right+kDividerWidth))
+			return index;
+		index++;
+	}
+	return -1;
+}
+
+void NavigatorEditor::Draw(BRect updateRect)
+{
+	rgb_color	base	= ui_color(B_PANEL_BACKGROUND_COLOR);
+	int32		index	= 0;
+	for (BView *column = ChildAt(0); column != NULL; column = column->NextSibling()) {
+		BRect	divider(column->Frame().right+1,Bounds().top,
+			column->Frame().right+kDividerWidth,Bounds().bottom);
+		uint32	flags	= (index == draggedDivider) ? BControlLook::B_CLICKED : 0;
+		if (divider.Intersects(updateRect))
+			be_control_look->DrawSplitter(this,divider,updateRect,base,
+				B_HORIZONTAL,flags,0);
+		index++;
+	}
+}
+
+void NavigatorEditor::MouseDown(BPoint where)
+{
+	int32	divider	= DividerAt(where);
+	if (divider < 0) {
+		BView::MouseDown(where);
+		return;
+	}
+	draggedDivider	= divider;
+	// in screen coordinates: this view moves under the mouse while the
+	// columns are laid out anew
+	dragStartX		= ConvertToScreen(where).x;
+	dragStartWidth	= ColumnWidth(divider);
+	SetMouseEventMask(B_POINTER_EVENTS,B_NO_POINTER_HISTORY | B_LOCK_WINDOW_FOCUS);
+	Invalidate();
+}
+
+void NavigatorEditor::MouseMoved(BPoint where, uint32 transit,
+	const BMessage *dragMessage)
+{
+	if (draggedDivider >= 0) {
+		while ((int32)columnWidths.size() <= draggedDivider)
+			columnWidths.push_back(ColumnWidth(columnWidths.size()));
+		float	width	= dragStartWidth+ConvertToScreen(where).x-dragStartX;
+		columnWidths[draggedDivider]	= fmax(width,kMinColumnWidth);
+		LayoutColumns();
+		return;
+	}
+	bool	overDivider	= (transit != B_EXITED_VIEW) && (DividerAt(where) >= 0);
+	if (overDivider != resizeCursor) {
+		BCursor	cursor(overDivider ? B_CURSOR_ID_RESIZE_EAST_WEST : B_CURSOR_ID_SYSTEM_DEFAULT);
+		SetViewCursor(&cursor);
+		resizeCursor	= overDivider;
+	}
+	BView::MouseMoved(where,transit,dragMessage);
+}
+
+void NavigatorEditor::MouseUp(BPoint where)
+{
+	if (draggedDivider >= 0) {
+		draggedDivider	= -1;
+		Invalidate();
+	}
+	BView::MouseUp(where);
 }
 
 void NavigatorEditor::InitToolBar(void)
@@ -278,7 +389,8 @@ void NavigatorEditor::AttachedToWindow(void)
 void NavigatorEditor::FrameResized(float width, float height)
 {
 	TRACE();
-	UpdateScrollBars();
+	// the tab shrinking shrinks this view too, columns must stay reachable
+	LayoutColumns();
 }
 
 void NavigatorEditor::DetachedFromWindow(void)
@@ -386,22 +498,17 @@ void NavigatorEditor::InsertNewList(BListView *source)
 		}
 		if (item->GetSupportedType() == P_C_CLASS_TYPE)
 		{
+			// LayoutColumns() places and sizes it
 			BRect		listrect		= Bounds();
-			listrect.left				= source->Parent()->Frame().right+5;
-			listrect.right				= listrect.left	+400;
-			if (listrect.right > Bounds().right)
-			{
-				ResizeTo(listrect.right+B_V_SCROLL_BAR_WIDTH+5,Bounds().bottom);
-			}
+			listrect.right				= listrect.left+kColumnWidth-B_V_SCROLL_BAR_WIDTH;
 			BListView	*list			= new MessageListView(doc,listrect,((NodeItem *)item)->GetNode(),this);
 			BMessage *invoked 			= new BMessage(N_A_INVOKATION);
 			invoked->AddPointer("ListView",list);
 			list->SetInvocationMessage(invoked);
 			list->SetTarget(this);
 			AddChild(new BScrollView("root",list,B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM,0,false,true));
-			UpdateScrollBars();
 		}
-		Invalidate();
+		LayoutColumns();
 	}
 }
 
