@@ -47,10 +47,6 @@ clean:
 		$(MAKE) -C $$dir clean; \
 	done
 
-install:
-	for dir in $(plugins); do \
-		$(MAKE) -C $$dir install; \
-	done
 
 
 catkeys:
@@ -60,6 +56,7 @@ catkeys:
 
 bindcatalogs:
 	$(MAKE) -C AskCommand bindcatalogs
+	$(MAKE) -C ExportCommand bindcatalogs
 	$(MAKE) -C FindCommand bindcatalogs
 	$(MAKE) -C GetValueCommand bindcatalogs
 	$(MAKE) -C IfCommand bindcatalogs
