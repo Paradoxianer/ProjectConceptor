@@ -372,7 +372,11 @@ void NavigatorEditor::InsertNewList(BListView *source)
 	selection = source->CurrentSelection(0);
 	if (selection>=0)
 	{
-		item =(BaseListItem *) source->ItemAt(selection);
+		// the group headers (Node::Data, Node::outgoing...) are plain
+		// BStringItems, nothing to open
+		item = dynamic_cast<BaseListItem *>(source->ItemAt(selection));
+		if (item == NULL)
+			return;
 		//vorher alle  überfüssigen Views löschen
 		BView *sibling=source->Parent()->NextSibling();
 		while (sibling != NULL)
