@@ -128,7 +128,7 @@ LINKER_FLAGS =
 
 TARGET_DIR	=  .
 
-#INSTALL_DIR	= /boot/apps/ProjectConceptor
+
 #PLUGIN_DIR	= Plugins
 
 
@@ -146,7 +146,6 @@ include $(DEVEL_DIRECTORY)/etc/makefile-engine
 #	mkdir -p ../../$(APP_DIR)
 #	cp -rf $(NAME) ../../$(APP_DIR)
 #	ln -sf $(NAME) ../../$(APP_DIR)/ProjectConceptor.a
-#	cp -rf ../.PackageInfo ../../bin
 #	mkdir -p ../../bin/data/deskbar/menu/Applications
 #	ln -sf ../../../../apps/ProjectConceptor/$(NAME) ../../bin/data/deskbar/menu/Applications
 

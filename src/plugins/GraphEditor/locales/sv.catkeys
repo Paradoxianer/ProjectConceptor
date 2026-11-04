@@ -1,4 +1,4 @@
-1	Swedish	application/x-vnd.ProjectConceptor-plugin	3074511775
+1	Swedish	application/x-vnd.ProjectConceptor-plugin	3159529502
 Line	GraphEditor		Linje
 Delete	AttributeRenderer		Radera
 Triangle	GraphEditor		Triangel
@@ -25,6 +25,7 @@ Status	GraphEditor		Status
 Open\nIn progress\nDone	GraphEditor		Öppen\nPågår\nKlar
 Border	GraphEditor		Kant
 Straight	GraphEditor		Rak
+PNG image	GraphEditor		PNG-bild
 Shape of the selected nodes	GraphEditor		Form på markerade noder
 Attribute	GraphEditor		Attribut
 Size	GraphEditor	status bar: before a node's width × height	Storlek
@@ -48,6 +49,7 @@ Left edge of the selected nodes	GraphEditor		Vänsterkant för markerade noder
 Toggle grid	GraphEditor		Visa/dölj rutnät
 Text	GraphEditor		Text
 Add an attribute to the selected nodes	GraphEditor		Lägg till ett attribut på markerade noder
+ProjectConceptor document	GraphEditor		ProjectConceptor-dokument
 Group	GraphEditor		Gruppera
 Parallelogram	GraphEditor		Parallellogram
 Toggle smart alignment guides	GraphEditor		Slå på/av smarta justeringslinjer

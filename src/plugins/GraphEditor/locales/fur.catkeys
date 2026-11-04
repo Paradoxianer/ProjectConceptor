@@ -1,4 +1,4 @@
-1	Friulian	application/x-vnd.ProjectConceptor-plugin	3074511775
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	3159529502
 Line	GraphEditor		Linie
 Delete	AttributeRenderer		Elimine
 Triangle	GraphEditor		Triangul
@@ -25,6 +25,7 @@ Status	GraphEditor		Stât
 Open\nIn progress\nDone	GraphEditor		Viert\nIn vore\nFat
 Border	GraphEditor		Ôr
 Straight	GraphEditor		Drete
+PNG image	GraphEditor		Imagjin PNG
 Shape of the selected nodes	GraphEditor		Forme dai grops selezionâts
 Attribute	GraphEditor		Atribût
 Size	GraphEditor	status bar: before a node's width × height	Dimension
@@ -48,6 +49,7 @@ Left edge of the selected nodes	GraphEditor		Ôr di çampe dai grops selezionât
 Toggle grid	GraphEditor		Mostre/plate la grile
 Text	GraphEditor		Test
 Add an attribute to the selected nodes	GraphEditor		Zonte un atribût ai grops selezionâts
+ProjectConceptor document	GraphEditor		Document di ProjectConceptor
 Group	GraphEditor		Ragrupâ
 Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Ative/disative lis guidis di aliniament inteligjentis

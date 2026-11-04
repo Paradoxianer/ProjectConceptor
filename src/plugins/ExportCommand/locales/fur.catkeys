@@ -1,0 +1,7 @@
+1	Friulian	application/x-vnd.ProjectConceptor-plugin	2436460492
+There is no format for \"%s\".	Export		Nol è nissun formât par \"%s\".
+Export needs a file in \"path\".	Export		Export al à bisugne di un file in \"path\".
+Could not find the home folder: %s	Export		No si à cjatât la cartele personâl: %s
+Could not write to \"%s\": %s	Export		No si à rivât a scrivi su \"%s\": %s
+\"%s\" has no extension to tell the format by, and \"format\" is empty.	Export		\"%s\" nol à une estension par ricognossi il formât, e \"format\" al è vueit.
+\"%s\" lies next to the document, which isn't saved yet.	Export		\"%s\" al è dongje dal document, che nol è ancjemò salvât.

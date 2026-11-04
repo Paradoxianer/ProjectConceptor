@@ -10,13 +10,45 @@ class TranslatorTest : public CppUnit::TestFixture
 {
 public:
 	void FreeMindImportBuildsNodesAndConnections(void);
+	void FreeMindRoundTrips(void);
+	void FreeMindIsOnlyAMapFirst(void);
 	void TextExportRoundTrips(void);
 	void UnknownOutputTypeIsRefused(void);
+	void DotExportWritesClustersLabelsAndEdges(void);
+	void ExportFormatsNeverOpenDocuments(void);
+	void HtmlExportIsOneSelfContainedPage(void);
+	void SvgExportStandsAlone(void);
+	void MermaidExportWritesAFlowchart(void);
+	void GraphMLRoundTrips(void);
+	void GraphMLImportsOtherTools(void);
+	void DrawioRoundTrips(void);
+	void DrawioImportsCompressedDiagrams(void);
+	void ExportWritesACopyOfItsOwnType(void);
+	void ImportedFileIsNotTheDocumentsFile(void);
+	void SaveAndExportOfferTheRightFormats(void);
+	void ExportCommandFindsFileAndFormat(void);
+	void ExportCommandWritesTheSelection(void);
 
 	CPPUNIT_TEST_SUITE(TranslatorTest);
 	CPPUNIT_TEST(FreeMindImportBuildsNodesAndConnections);
+	CPPUNIT_TEST(FreeMindRoundTrips);
+	CPPUNIT_TEST(FreeMindIsOnlyAMapFirst);
 	CPPUNIT_TEST(TextExportRoundTrips);
 	CPPUNIT_TEST(UnknownOutputTypeIsRefused);
+	CPPUNIT_TEST(DotExportWritesClustersLabelsAndEdges);
+	CPPUNIT_TEST(ExportFormatsNeverOpenDocuments);
+	CPPUNIT_TEST(HtmlExportIsOneSelfContainedPage);
+	CPPUNIT_TEST(SvgExportStandsAlone);
+	CPPUNIT_TEST(MermaidExportWritesAFlowchart);
+	CPPUNIT_TEST(GraphMLRoundTrips);
+	CPPUNIT_TEST(GraphMLImportsOtherTools);
+	CPPUNIT_TEST(DrawioRoundTrips);
+	CPPUNIT_TEST(DrawioImportsCompressedDiagrams);
+	CPPUNIT_TEST(ExportWritesACopyOfItsOwnType);
+	CPPUNIT_TEST(ImportedFileIsNotTheDocumentsFile);
+	CPPUNIT_TEST(SaveAndExportOfferTheRightFormats);
+	CPPUNIT_TEST(ExportCommandFindsFileAndFormat);
+	CPPUNIT_TEST(ExportCommandWritesTheSelection);
 	CPPUNIT_TEST_SUITE_END();
 };
 

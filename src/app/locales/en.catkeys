@@ -1,4 +1,5 @@
-1	English	application/x-vnd.ProjectConceptor	14280131
+1	English	application/x-vnd.ProjectConceptor	2709756247
+Export	SavePanel		Export
 Macro shortcuts (double-click to change the key)	ShortCutView		Macro shortcuts (double-click to change the key)
 Press the key combination for the macro \"%s\" (Esc to cancel).	ShortCutView		Press the key combination for the macro \"%s\" (Esc to cancel).
 About	MainWindow		About
@@ -9,6 +10,7 @@ Settings	SavePanel		Settings
 Replace	MainWindow		Replace
 Start recording	MainWindow		Start recording
 OK	CommandManager		OK
+Nothing is selected to export.	Document		Nothing is selected to export.
 OK	ShortCutView		OK
 \"$%s\" (for \"%s\") is \"%s\", not a number	CommandManager		\"$%s\" (for \"%s\") is \"%s\", not a number
 New	MainWindow		New
@@ -30,10 +32,11 @@ Undo	MainWindow		Undo
 File format	SavePanel		File format
 Macro	CommandManager		Macro
 This file was saved by an incompatible version of ProjectConceptor and cannot be opened.	Document		This file was saved by an incompatible version of ProjectConceptor and cannot be opened.
-Save before close	Document		Save before close
 Untitled %ld	MainWindow		Untitled %ld
+Save before close	Document		Save before close
 Paste	MainWindow		Paste
 Help	MainWindow		Help
+There is nothing to print.	Document		There is nothing to print.
 Remove	ShortCutView		Remove
 The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.	ShortCutView		The new binding applies to documents opened from now on - already open windows keep the shortcuts they started with.
 Problems while trying to save the file	Document		Problems while trying to save the file
@@ -62,9 +65,9 @@ Save	Document		Save
 Search	MainWindow		Search
 OK	PluginManager		OK
 Could not find plugins	SavePanel		Could not find plugins
+Export	MainWindow		Export
 File	MainWindow		File
 The macro is empty - nothing to play.	CommandManager		The macro is empty - nothing to play.
-No active editor - please install an editor plugin.	Document		No active editor - please install an editor plugin.
 Continue recording	CommandManager		Continue recording
 Restart recording	CommandManager		Restart recording
 Macro recording already started!	CommandManager		Macro recording already started!
@@ -83,7 +86,6 @@ Run when opening the document	MainWindow		Run when opening the document
 OK	Document		OK
 Window	MainWindow		Window
 \"${%s}\": no such variable	CommandManager		\"${%s}\": no such variable
-I had problems while setting up the Printer!	Document		I had problems while setting up the Printer!
 E-mail Warning	AboutURLView		E-mail Warning
 Editor shortcuts (double-click to change)	ShortCutView		Editor shortcuts (double-click to change)
 There is no web browser on your machine that is configured as the default program to view web pages.	AboutURLView		There is no web browser on your machine that is configured as the default program to view web pages.
@@ -103,6 +105,7 @@ Press the new key combination for \"%s\" (Esc to cancel).	ShortCutView		Press th
 New…	ShortCutView		New…
 Cancel	Document		Cancel
 Print	MainWindow		Print
+Print	Document		Print
 Find next	MainWindow		Find next
 Error!	CommandManager		Error!
 Title Vertical	MainWindow		Title Vertical

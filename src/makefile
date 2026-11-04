@@ -1,44 +1,12 @@
 first: default
 
-PLNAME = $(shell uname)
-
-pkgupdate:
-	@echo "---------PKG INFO GEN-----------"
-	touch .PackageInfo
-	rm .PackageInfo
-	@echo "" >> .PackageInfo 
-	@echo "#//do not edit this" >> .PackageInfo
-	@echo "name			ProjectConceptor" >> .PackageInfo
-#later use git describe --abbrev=0 --tags to use git tags
-	@echo "version			0.0.6-$(GIT_REV)" >> .PackageInfo
-	@echo "" >> .PackageInfo  
-	@echo "architecture	$(shell getarch)" >> .PackageInfo
-	@echo "summary			\"Projectconceptor a Graph editing suite\"" >> .PackageInfo  
-	@echo "description		\"Projectconceptor is modular Graphediting suite with export and import support for freemind\"" >> .PackageInfo  
-	@echo "packager		\"paradoxon <.will come later@later.de>\"" >> .PackageInfo  
-	@echo "vendor			\"Paradoxon\"" >> .PackageInfo  
-	@echo "licenses {" >> .PackageInfo  
-	@echo "	\"MIT\"" >> .PackageInfo  
-	@echo "}" >> .PackageInfo  
-	@echo "copyrights {" >> .PackageInfo  
-	@echo "	\"Copyright (C) 2005-2016 by Paradoxon\"" >> .PackageInfo  
-	@echo "}" >> .PackageInfo  
-	@echo "provides {" >> .PackageInfo  
-	@echo "        ProjectConceptor = 0.0.6-$(GIT_REV)" >> .PackageInfo  
-	@echo "}" >> .PackageInfo  
-	@echo "requires {" >> .PackageInfo  
-	@echo "	haiku >= r1~alpha4_pm-1" >> .PackageInfo  
-	@echo "}" >> .PackageInfo  
-	@echo "source-urls {" >> .PackageInfo
-	@echo "	\"Download <https://github.com/Paradoxianer/ProjectConceptor/archive/master.zip>\"" >> .PackageInfo
-	@echo "}" >> .PackageInfo
-	@echo "" >> .PackageInfo
-
-	@echo "UPDATED"
-	@echo "--------------------------------"
-
-
-INSTALL_DIR	= /boot/home/config/packages
+# make install: a package of this tree, built like a release
+# (tools/make-release.sh) and put in place of the installed one. The version
+# is the last tag and the commits since, e.g. 0.5.1.16, which comes after
+# that release; without git (the VM's copy) dev.sh passes PACKAGE_VERSION.
+PACKAGE_VERSION	?= $(shell git describe --tags --match 'v[0-9]*' 2>/dev/null \
+	| sed -e 's/^v//' -e 's/-\([0-9]*\)-g.*/.\1/')
+PACKAGES	= /boot/home/config/packages
 
 #global setting global the app Dir
 export APP_DIR		=	bin/apps/ProjectConceptor
@@ -79,17 +47,11 @@ lib: app/lib/makefile FORCE
 lib_clean:
 	cd app/lib && make clean
 
-lib_install: app/lib/makefile FORCE
-	cd app/lib && make install
-
-app: lib pkgupdate app/makefile FORCE
+app: lib app/makefile FORCE
 	cd app && make
 
 app_clean:
 	cd app && make clean
-
-app_install: lib_install pkgupdate app/makefile FORCE
-	cd app && make install
 
 app_catkeys: app/makefile FORCE
 	cd app && make catkeys
@@ -104,9 +66,6 @@ plugins: lib plugins/makefile FORCE
 plugins_clean:
 	cd plugins && make clean
 
-plugins_install: lib_install plugins/makefile FORCE
-	cd plugins && make install
-
 plugins_catkeys: plugins/makefile FORCE
 	cd plugins && make catkeys
 	
@@ -119,9 +78,6 @@ translators: lib translators/makefile FORCE
 
 translators_clean:
 	cd translators && make clean
-
-translators_install: lib_install translators/makefile FORCE
-	cd translators && make install
 
 translators_catkeys: translators/makefile FORCE
 	cd translators && make catkeys
@@ -138,13 +94,19 @@ catkeys: app_catkeys plugins_catkeys translators_catkeys
 
 bindcatalogs: app_bindcat plugins_bindcat translators_bindcat
 
-install:: $(NAME)
-	@echo "making a package"
-	@cp .PackageInfo ../bin
-	@package create -C ../bin ProjectConceptor-$(shell getarch)-$(if $(DEBUGGER),debug-$(GIT_REV)).hpkg
-	@echo "installing package"
-	@cp ProjectConceptor-$(shell getarch)-$(if $(DEBUGGER),debug-$(GIT_REV)).hpkg $(INSTALL_DIR)
-	@echo "Installation done."
+install: FORCE
+	@if [ -z "$(PACKAGE_VERSION)" ]; then \
+		echo "make install: git describe found no version tag, call" \
+			"\"make install PACKAGE_VERSION=<version>\"" >&2; exit 1; fi
+	cd .. && tools/make-release.sh $(PACKAGE_VERSION)
+	@# the old package and its debug info out, they require each other
+	@set -e; arch=$$(getarch); primary=$$(getarch -p); \
+	name=projectconceptor; \
+	if [ "$$arch" != "$$primary" ]; then name=projectconceptor_$$arch; fi; \
+	rm -f $(PACKAGES)/$$name-[0-9]*.hpkg $(PACKAGES)/$${name}_debuginfo-[0-9]*.hpkg; \
+	cp ../release/$$name-$(PACKAGE_VERSION)-1-$$primary.hpkg \
+		../release/$${name}_debuginfo-$(PACKAGE_VERSION)-1-$$primary.hpkg $(PACKAGES)/; \
+	echo "Installed $$name $(PACKAGE_VERSION)."
 
 
 FORCE:

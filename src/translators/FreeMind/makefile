@@ -28,6 +28,7 @@ APP_MIME_SIG = application/x-vnd.ProjectConceptor-FreeMindTranslator
 #	are included from different directories.  Also note that spaces
 #	in folder names do not work well with this makefile.
 SRCS= 	FreeMindTranslator.cpp \
+		../common/GraphDocument.cpp \
 		../common/TranslatorMain.cpp \
 		../common/ConfigView.cpp \
 		../../common/ProjectConceptorFields.cpp \
@@ -68,6 +69,7 @@ SYSTEM_INCLUDE_PATHS =
 #	thes use the form: #include "header"
 #	source file directories are automatically included
 LOCAL_INCLUDE_PATHS =	../../include  \
+						../common \
 						../../app/Tools \
 
 #	specify the level of optimization that you desire
@@ -103,7 +105,6 @@ COMPILER_FLAGS =
 
 #	specify additional linker flags
 LINKER_FLAGS =
-INSTALL_DIR    = /boot/home/config/add-ons/Translators
 
 ## include the makefile-engine
 DEVEL_DIRECTORY := \
@@ -114,10 +115,3 @@ default .DEFAULT:
 	mkdir -p ../../../bin/add-ons/Translators
 	cp -rf  $(OBJ_DIR)/$(NAME) ../../../bin/add-ons/Translators
 	
-install:: default
-	@echo "Copying locale files"
-	@echo $(INSTALL_DIR)
-	@mkdir -p $(INSTALL_DIR)
-	@cp -rf $(TARGET) $(INSTALL_DIR)
-	@echo "Done copying."
-

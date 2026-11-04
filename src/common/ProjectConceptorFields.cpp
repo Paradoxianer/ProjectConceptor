@@ -55,6 +55,27 @@ const char*		P_C_MOVE_LEFT					= "left";
 const char*		P_C_MOVE_TOP					= "top";
 const char*		P_C_MACRO_RUN_ON_OPEN			= "Macro::runOnOpen";
 const char*		P_C_VARIABLE_TODAY				= "today";
+const char*		P_C_EXPORT_PATH					= "path";
+const char*		P_C_EXPORT_FORMAT				= "format";
+const char*		P_C_EXPORT_SELECTION			= "selection";
+
+const char*		P_C_FORMAT_NAME					= "format::name";
+const char*		P_C_FORMAT_MIME					= "format::MIME";
+const char*		P_C_FORMAT_TYPE					= "format::type";
+const char*		P_C_FORMAT_EXTENSION			= "format::extension";
+const char*		P_C_FORMAT_TITLE				= "format::title";
+const char*		P_C_FORMAT_BITMAP				= "format::bitmap";
+
+const char*		P_C_DOC_ALLNODES				= "PDocument::allNodes";
+const char*		P_C_DOC_ALLCONNECTIONS			= "PDocument::allConnections";
+const char*		P_C_DOC_ENTRY					= "node";
+const char*		P_C_NODE_ID						= "this";
+const char*		P_C_NODE_CHILD_IDS				= "allNodesList";
+const char*		P_C_PATTERN_FILL_COLOR			= "FillColor";
+const char*		P_C_PATTERN_HIGHLIGHT_COLOR		= "HighlightColor";
+const char*		P_C_PATTERN_BORDER_COLOR		= "BorderColor";
+const char*		P_C_PATTERN_HIGH_COLOR			= "HighColor";
+const char*		P_C_PATTERN_PEN_SIZE			= "PenSize";
 
 const char*		P_C_NODE_CONNECTION_FROM		= "Node::from";
 const char*		P_C_NODE_CONNECTION_TO			= "Node::to";

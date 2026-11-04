@@ -19,6 +19,18 @@
 #include <support/DateTime.h>
 
 #include "GraphEditor.h"
+
+#include <interface/Bitmap.h>
+#include <storage/Directory.h>
+#include <storage/File.h>
+#include <storage/NodeInfo.h>
+#include <translation/BitmapStream.h>
+#include <translation/TranslatorFormats.h>
+#include <translation/TranslatorRoster.h>
+
+#include <algorithm>
+#include <map>
+#include <set>
 #include "ColorSwatchView.h"
 #include "ColorPickerWindow.h"
 #include "AttributeText.h"
@@ -97,6 +109,15 @@ struct AttributeKind {
 	const char	*name;
 };
 
+// around the graph on paper: shadows and arrow heads reach past the frames
+static const float	kPrintMargin	= 16;
+// how far past the window moving nodes turns into dragging them out
+static const float	kDragOutDistance	= 40;
+// the largest side of the picture that follows the pointer then
+static const float	kDragPreviewSide	= 200;
+static const uint8	kDragPreviewAlpha	= 192;
+static const char	*kDragImageType		= "image/png";
+
 static const AttributeKind kAttributeKinds[] = {
 	{ B_STRING_TYPE,			B_TRANSLATE_MARK("Text"),		B_TRANSLATE_MARK("Attribute") },
 	{ B_BOOL_TYPE,			B_TRANSLATE_MARK("Yes/No"),		B_TRANSLATE_MARK("Attribute") },
@@ -159,6 +180,7 @@ void GraphEditor::Init(void) {
 	fromPoint		= new BPoint(0,0);
 	toPoint			= new BPoint(0,0);
 	renderer		= new BList();
+	forPaper		= false;
 	scale			= 1.0;
 	animatingRenderers	= new BList();
 	pendingChangedNodes	= new BList();
@@ -580,7 +602,242 @@ void GraphEditor::SetDirty(BRegion *region) {
 }
 
 
+// a node in the selection: it or a group around it is selected; a
+// connection when both its ends are
+static bool InSelection(BMessage *node)
+{
+	if (node == NULL)
+		return false;
+	if (node->what == P_C_CONNECTION_TYPE) {
+		BMessage	*from	= NULL;
+		BMessage	*to		= NULL;
+		node->FindPointer(P_C_NODE_CONNECTION_FROM,(void **)&from);
+		node->FindPointer(P_C_NODE_CONNECTION_TO,(void **)&to);
+		return InSelection(from) && InSelection(to);
+	}
+	for (int32 depth = 0; (node != NULL) && (depth < 64); depth++) {
+		if (node->GetBool(P_C_NODE_SELECTED,false))
+			return true;
+		BMessage	*parent	= NULL;
+		node->FindPointer(P_C_NODE_PARENT,(void **)&parent);
+		node	= parent;
+	}
+	return false;
+}
+
+// a hidden tab's editor has no renderers (see DetachedFromWindow()): the
+// paper gets them for the moment
+bool GraphEditor::_RenderersForPaper(void) {
+	if ((Window() != NULL) || (doc == NULL) || !renderer->IsEmpty())
+		return false;
+	InitAll();
+	return true;
+}
+
+void GraphEditor::_RemoveRenderers(void) {
+	while (renderer->CountItems() > 0)
+		RemoveRenderer((Renderer *)renderer->ItemAt(0));
+}
+
+BRect GraphEditor::PrintFrame(bool selectionOnly) {
+	bool	borrowed	= _RenderersForPaper();
+	BRect	frame;
+	for (int32 i = 0; i < renderer->CountItems(); i++) {
+		Renderer	*painter	= (Renderer *)renderer->ItemAt(i);
+		if (selectionOnly && !InSelection(painter->GetMessage()))
+			continue;
+		BRect	part	= painter->Frame();
+		frame	= frame.IsValid() ? (frame | part) : part;
+	}
+	// room for shadows and arrow heads
+	if (frame.IsValid())
+		frame.InsetBy(-kPrintMargin,-kPrintMargin);
+	if (borrowed)
+		_RemoveRenderers();
+	return frame;
+}
+
+void GraphEditor::_DrawForPaper(BView *target, BRect updateRect, bool selectionOnly) {
+	// the graph in the light style on white, without the grid, the
+	// selection or anything else the editing adds
+	GraphStyle	screen	= style;
+	style	= GraphStyle::Card(make_color(255,255,255),make_color(0,0,0),
+		screen.accent,be_plain_font->Size());
+	forPaper	= true;
+	target->SetHighColor(255,255,255);
+	target->FillRect(updateRect);
+	for (int32 i = 0; i < renderer->CountItems(); i++) {
+		Renderer	*painter	= (Renderer *)renderer->ItemAt(i);
+		if (!selectionOnly || InSelection(painter->GetMessage()))
+			painter->Draw(target,updateRect);
+	}
+	forPaper	= false;
+	style	= screen;
+}
+
+BBitmap* GraphEditor::PaperBitmap(float scale, bool selectionOnly) {
+	bool	borrowed	= _RenderersForPaper();
+	BRect	frame		= PrintFrame(selectionOnly);
+	BBitmap	*bitmap		= NULL;
+	if (frame.IsValid()) {
+		BRect	bounds(0,0,ceilf(frame.Width()*scale),ceilf(frame.Height()*scale));
+		bitmap	= new BBitmap(bounds,B_BITMAP_ACCEPTS_VIEWS,B_RGB32);
+		if (bitmap->InitCheck() == B_OK)
+			_DrawPaper(bitmap,frame,scale,selectionOnly);
+		else {
+			delete bitmap;
+			bitmap	= NULL;
+		}
+	}
+	if (borrowed)
+		_RemoveRenderers();
+	return bitmap;
+}
+
+void GraphEditor::_DrawPaper(BBitmap *bitmap, BRect frame, float scale,
+	bool selectionOnly) {
+	BRect	bounds	= bitmap->Bounds();
+	BView	*paper	= new BView(bounds,"paper",B_FOLLOW_NONE,B_WILL_DRAW);
+	bitmap->AddChild(paper);
+	bitmap->Lock();
+	// all of it white: the scaled frame can end a pixel short
+	paper->SetHighColor(255,255,255);
+	paper->FillRect(bounds);
+	// like the editor's own view: see-through fills and smooth edges
+	paper->SetDrawingMode(B_OP_ALPHA);
+	// the origin is in pixels, not in the scaled points
+	paper->SetScale(scale);
+	paper->SetOrigin(-frame.left*scale,-frame.top*scale);
+	_DrawForPaper(paper,frame,selectionOnly);
+	paper->Sync();
+	bitmap->RemoveChild(paper);
+	bitmap->Unlock();
+	delete paper;
+}
+
+bool GraphEditor::FarOutside(BPoint where) {
+	if (Window() == NULL)
+		return false;
+	BPoint	screen	= ConvertToScreen(BPoint(where.x*scale,where.y*scale));
+	return !Window()->Frame().InsetByCopy(-kDragOutDistance,-kDragOutDistance)
+		.Contains(screen);
+}
+
+void GraphEditor::DragSelectionOut(void) {
+	BRect	frame	= PrintFrame(true);
+	if (!frame.IsValid())
+		return;
+	BMessage	drag(B_SIMPLE_DATA);
+	drag.AddInt32("be:actions",B_COPY_TARGET);
+	drag.AddString("be:types",B_FILE_MIME_TYPE);
+	// the first is what a plain drop makes
+	drag.AddString("be:types",kDragImageType);
+	drag.AddString("be:filetypes",kDragImageType);
+	drag.AddString("be:type_descriptions",B_TRANSLATE("PNG image"));
+	drag.AddString("be:filetypes",P_C_DOCUMENT_MIMETYPE);
+	drag.AddString("be:type_descriptions",B_TRANSLATE("ProjectConceptor document"));
+	BString	name(doc->Title());
+	int32	dot	= name.FindLast('.');
+	if (dot > 0)
+		name.Truncate(dot);
+	drag.AddString("be:clip_name",name.String());
+	// a small picture of what is dragged
+	float	side	= std::max(frame.Width(),frame.Height());
+	BBitmap	*preview	= PaperBitmap(std::min(1.0f,kDragPreviewSide/side),true);
+	BPoint	pointer;
+	uint32	buttons;
+	GetMouse(&pointer,&buttons,false);
+	if (preview != NULL) {
+		// the app_server ignores the drag mode and composes the bitmap by its
+		// alpha channel, which drawing into B_RGB32 leaves undefined
+		BBitmap	*image	= new BBitmap(preview->Bounds(),B_RGBA32);
+		uint8	*source	= (uint8 *)preview->Bits();
+		uint8	*target	= (uint8 *)image->Bits();
+		int32	width	= preview->Bounds().IntegerWidth() + 1;
+		for (int32 y = 0; y <= preview->Bounds().IntegerHeight(); y++) {
+			uint8	*from	= source + y * preview->BytesPerRow();
+			uint8	*to		= target + y * image->BytesPerRow();
+			for (int32 x = 0; x < width; x++, from += 4, to += 4) {
+				to[0]	= from[0];
+				to[1]	= from[1];
+				to[2]	= from[2];
+				to[3]	= kDragPreviewAlpha;
+			}
+		}
+		delete preview;
+		BPoint	offset(image->Bounds().Width()/2,image->Bounds().Height()/2);
+		// DragMessage() deletes the image
+		DragMessage(&drag,image,B_OP_ALPHA,offset,this);
+	} else
+		DragMessage(&drag,BRect(pointer,pointer).InsetByCopy(-16,-16),this);
+}
+
+void GraphEditor::_DeliverDrag(BMessage *request) {
+	// Get*(): Find*() would leave NULL behind for a missing field
+	const char	*type		= request->GetString("be:types","");
+	bool		toFile		= (strcmp(type,B_FILE_MIME_TYPE) == 0);
+	// what the user picked, else the first of the offered ones
+	const char	*fileType	= toFile
+		? request->GetString("be:filetypes",kDragImageType) : type;
+	if ((strcmp(fileType,kDragImageType) != 0)
+		&& (strcmp(fileType,P_C_DOCUMENT_MIMETYPE) != 0 || !toFile)) {
+		fprintf(stderr,"GraphEditor: a drop asked for %s, which isn't offered\n",fileType);
+		return;
+	}
+	BMallocIO	data;
+	status_t	err	= B_OK;
+	if (strcmp(fileType,P_C_DOCUMENT_MIMETYPE) == 0) {
+		BMessage	archive;
+		if (doc->Lock()) {
+			doc->Archive(&archive,true);
+			doc->Unlock();
+		}
+		err	= PDocument::SelectionArchive(archive).Flatten(&data);
+	} else {
+		BBitmap	*bitmap	= PaperBitmap(2.0,true);
+		if (bitmap == NULL)
+			return;
+		BBitmapStream	stream(bitmap);
+		err	= BTranslatorRoster::Default()->Translate(&stream,NULL,NULL,&data,
+			B_PNG_FORMAT);
+		stream.DetachBitmap(&bitmap);
+		delete bitmap;
+	}
+	if (err != B_OK) {
+		fprintf(stderr,"GraphEditor: the dragged %s failed: %s\n",fileType,strerror(err));
+		return;
+	}
+	if (!toFile) {
+		BMessage	reply(B_MIME_DATA);
+		reply.AddData(kDragImageType,B_MIME_DATA,data.Buffer(),data.BufferLength());
+		request->SendReply(&reply);
+		return;
+	}
+	entry_ref	directory;
+	const char	*name	= NULL;
+	if ((request->FindRef("directory",&directory) != B_OK)
+		|| (request->FindString("name",&name) != B_OK)) {
+		fprintf(stderr,"GraphEditor: a drop on a file without directory or name\n");
+		return;
+	}
+	BDirectory	folder(&directory);
+	BFile		file(&folder,name,B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+	if ((file.InitCheck() != B_OK)
+		|| (file.Write(data.Buffer(),data.BufferLength()) != (ssize_t)data.BufferLength())) {
+		fprintf(stderr,"GraphEditor: could not write the dropped %s\n",name);
+		return;
+	}
+	BNodeInfo	info(&file);
+	info.SetType(fileType);
+	if (strcmp(fileType,P_C_DOCUMENT_MIMETYPE) == 0)
+		info.SetPreferredApp(APP_SIGNATURE);
+}
+
 void GraphEditor::Draw(BRect updateRect) {
+	if (IsPrinting()) {
+		_DrawForPaper(this,updateRect,false);
+		return;
+	}
 	// BView wraps every Draw() in one PushState()/PopState() pair, so the
 	// zoom is set on that state only and never piles up
 	SetScale(scale);
@@ -911,16 +1168,15 @@ void GraphEditor::DetachedFromWindow(void) {
 				configBar->RemoveItem(guides);
 			}
 		}
-		Renderer	*nodeRenderer	= NULL;
-		while(renderer->CountItems()>0) {
-			nodeRenderer = (Renderer *)renderer->ItemAt(0);
-			RemoveRenderer(nodeRenderer);
-		}
+		_RemoveRenderers();
 	}
 }
 void GraphEditor::MessageReceived(BMessage *message) {
 	//TRACE();
 	switch(message->what) {
+		case B_COPY_TARGET:
+			_DeliverDrag(message);
+			break;
 		case P_C_VALUE_CHANGED: {
 			ValueChanged(message);
 			break;

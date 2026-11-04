@@ -129,15 +129,15 @@ public:
 			void				SetDocumentSettings(BMessage *message);
 			void				ShowSettings(void);
 
-	//* Returns the PrintSettings as a BMessage if there is no PrintSettings a dialog shows up where the printsettings shoud be configured :-)
-			BMessage*			PrintSettings(void);
-	/**Set the PrintSettings
+	/** the print server's page dialog; the settings stay with the document */
+			void				PageSetup(void);
+	/** keeps settings (owned from now on) in the document settings
 	 * @warning There is no check if the printersettings are valid!!!!!
 	 */
 			void				SetPrintSettings(BMessage *settings);
-	/**Print´s the lastly activated Editor
-	 *@todo some error handling and printerSettings.. autocall
-	 */
+	/** prints what the active editor's PEditor::PrintFrame() covers, or
+	 * that of the first editor that can print, over as many pages as it
+	 * needs */
 			void				Print(void);
 
 	/**Set the save and load entry
@@ -150,6 +150,19 @@ public:
 	 *@see SetEntry
 	 */
 			void				Save(void);
+	/** writes the document, or only its selection, to ref in the format
+	 * of saveSettings (the native one without P_C_FORMAT_TYPE), without
+	 * making ref its file; an export gets the format's MIME type instead
+	 * of the document's. Why it failed goes to error, else to an alert. */
+			status_t			WriteTo(const entry_ref &ref,
+									const BMessage &saveSettings,
+									bool exporting = false,
+									bool selectionOnly = false,
+									BString *error = NULL);
+	/** the selection of a flattened document (Archive()) as a document of
+	 * its own: the selected nodes, what lies in them and the connections
+	 * between them */
+	static	BMessage			SelectionArchive(const BMessage &archive);
 	/**save the file from the entry
 	 *
 	 *@todo mime check
@@ -162,6 +175,9 @@ public:
 	 *@see SetEntry
 	 */
 			void				SavePanel();
+	/** a save panel for a copy in a format the document can't be opened
+	 * from (P_C_EXPORT_REQUESTED) */
+			void				ExportPanel();
 
 			bool				QuitRequested(void);
 
@@ -199,7 +215,6 @@ public:
 			status_t			RemoveToolMenu(const char* toolbarSignature,const char* toolmenuSignature) ;
 			status_t			RemoveToolItem(const char* toolbarSignature,const char* toolitemSignature);
 
-			BRect*				GetPrintRect(void){return printableRect;};
 
 			BMessage*			FindObject(BPoint *where);
 
@@ -231,15 +246,19 @@ protected:
 			set<BMessage*>			*valueChanged;
 
 			BRect				bounds;
-			BRect				*paperRect;
-			BRect				*printableRect;
 			BMessage			*printerSetting;
 			BMessage	 	 	*documentSetting;
 			PCSavePanel			*savePanel;
+			PCSavePanel			*exportPanel;
 
 		 	float				width,height;
 			bool				dirty;
 			entry_ref			*entryRef;
+			/** the name of a file opened from another format, without its
+			 * extension: the document has no file of its own then */
+			BString				importedName;
+			/** where that file is, for the save panel */
+			entry_ref			importedDirectory;
 			BEntry				*autoSaveRef;
 			bool				modified;
 

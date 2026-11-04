@@ -1,4 +1,4 @@
-1	Croatian	application/x-vnd.ProjectConceptor-plugin	3074511775
+1	Croatian	application/x-vnd.ProjectConceptor-plugin	3159529502
 Line	GraphEditor		Linija
 Delete	AttributeRenderer		Izbriši
 Triangle	GraphEditor		Trokut
@@ -25,6 +25,7 @@ Status	GraphEditor		Status
 Open\nIn progress\nDone	GraphEditor		Otvoreno\nU tijeku\nGotovo
 Border	GraphEditor		Obrub
 Straight	GraphEditor		Ravna
+PNG image	GraphEditor		PNG slika
 Shape of the selected nodes	GraphEditor		Oblik odabranih čvorova
 Attribute	GraphEditor		Atribut
 Size	GraphEditor	status bar: before a node's width × height	Veličina
@@ -48,6 +49,7 @@ Left edge of the selected nodes	GraphEditor		Lijevi rub odabranih čvorova
 Toggle grid	GraphEditor		Uključi/isključi rešetku
 Text	GraphEditor		Tekst
 Add an attribute to the selected nodes	GraphEditor		Dodaj atribut odabranim čvorovima
+ProjectConceptor document	GraphEditor		ProjectConceptor dokument
 Group	GraphEditor		Grupiraj
 Parallelogram	GraphEditor		Paralelogram
 Toggle smart alignment guides	GraphEditor		Uključi/isključi pametne vodilice za poravnanje

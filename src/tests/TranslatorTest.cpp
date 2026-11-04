@@ -1,26 +1,50 @@
 #include "TranslatorTest.h"
 
 #include <DataIO.h>
+#include <Entry.h>
+#include <File.h>
+#include <FindDirectory.h>
+#include <NodeInfo.h>
+#include <Path.h>
 #include <GraphicsDefs.h>
 #include <Message.h>
 #include <TranslatorRoster.h>
 
+#include <String.h>
+
+#include <algorithm>
+#include <map>
+
 #include <string.h>
 
+#include "BasePlugin.h"
+#include "Export.h"
+#include "PCommandManager.h"
+#include "PCSavePanel.h"
+#include "PDocument.h"
 #include "ProjectConceptorDefs.h"
+#include "TestDocument.h"
 
 static const char *kFreeMindSample =
 	"<map version=\"0.9.0\">\n"
 	"<node ID=\"ID_100\" TEXT=\"Root\" BACKGROUND_COLOR=\"#ffcc00\">\n"
 	"<node ID=\"ID_200\" POSITION=\"right\" TEXT=\"Child A\">\n"
 	"<font NAME=\"SansSerif\" SIZE=\"12\"/>\n"
-	"<node ID=\"ID_400\" TEXT=\"Grandchild\"/>\n"
+	"<node ID=\"ID_400\" TEXT=\"Grandchild\">\n"
+	"<attribute NAME=\"Budget\" VALUE=\"450 &#x20ac;\"/>\n"
+	"</node>\n"
 	"</node>\n"
 	"<node ID=\"ID_300\" POSITION=\"left\" TEXT=\"Child B\">\n"
 	"<arrowlink DESTINATION=\"ID_200\" ID=\"Freemind_Arrow_Link_1\"/>\n"
 	"</node>\n"
 	"</node>\n"
 	"</map>\n";
+
+
+static BMessage GroupedDocument(void);
+static BString Exported(const BMessage &document, uint32 outType);
+static BMessage Imported(const char *text);
+static BMessage Named(const BMessage &document, const char *list, const char *name);
 
 
 static int32 CountField(const BMessage &message, const char *name)
@@ -72,24 +96,147 @@ void TranslatorTest::FreeMindImportBuildsNodesAndConnections(void)
 	BMessage	allNodes;
 	BMessage	allConnections;
 	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
-		document.FindMessage("PDocument::allNodes", &allNodes));
+		document.FindMessage(P_C_DOC_ALLNODES, &allNodes));
 	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
-		document.FindMessage("PDocument::allConnections", &allConnections));
-	CPPUNIT_ASSERT_EQUAL((int32)4, CountField(allNodes, "node"));
+		document.FindMessage(P_C_DOC_ALLCONNECTIONS, &allConnections));
+	CPPUNIT_ASSERT_EQUAL((int32)4, CountField(allNodes, P_C_DOC_ENTRY));
 	// three tree edges plus the arrow link
-	CPPUNIT_ASSERT_EQUAL((int32)4, CountField(allConnections, "node"));
+	CPPUNIT_ASSERT_EQUAL((int32)4, CountField(allConnections, P_C_DOC_ENTRY));
 
-	BMessage	root;
+	// the map's color marks the node's band
+	BMessage	root	= Named(document, P_C_DOC_ALLNODES, "Root");
 	BMessage	pattern;
-	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, allNodes.FindMessage("node", 3, &root));
 	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, root.FindMessage(P_C_NODE_PATTERN, &pattern));
 	int32		packed	= 0;
-	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, pattern.FindInt32("FillColor", &packed));
-	rgb_color	fill;
-	memcpy(&fill, &packed, sizeof(fill));
-	CPPUNIT_ASSERT_EQUAL((int)0xff, (int)fill.red);
-	CPPUNIT_ASSERT_EQUAL((int)0xcc, (int)fill.green);
-	CPPUNIT_ASSERT_EQUAL((int)0x00, (int)fill.blue);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK,
+		pattern.FindInt32(P_C_PATTERN_HIGHLIGHT_COLOR, &packed));
+	rgb_color	band;
+	memcpy(&band, &packed, sizeof(band));
+	CPPUNIT_ASSERT_EQUAL((int)0xff, (int)band.red);
+	CPPUNIT_ASSERT_EQUAL((int)0xcc, (int)band.green);
+	CPPUNIT_ASSERT_EQUAL((int)0x00, (int)band.blue);
+
+	// laid out as a mind map: the branches on their sides of the root
+	BRect	rootFrame	= root.GetRect(P_C_NODE_FRAME, BRect());
+	BRect	a	= Named(document, P_C_DOC_ALLNODES, "Child A").GetRect(P_C_NODE_FRAME, BRect());
+	BRect	b	= Named(document, P_C_DOC_ALLNODES, "Child B").GetRect(P_C_NODE_FRAME, BRect());
+	BRect	grandchild	= Named(document, P_C_DOC_ALLNODES, "Grandchild")
+		.GetRect(P_C_NODE_FRAME, BRect());
+	CPPUNIT_ASSERT(a.left > rootFrame.right);
+	CPPUNIT_ASSERT(b.right < rootFrame.left);
+	CPPUNIT_ASSERT(grandchild.left > a.right);
+	// on the canvas, which starts at 0
+	CPPUNIT_ASSERT(b.left >= 0);
+	CPPUNIT_ASSERT(std::min(a.top, std::min(b.top, rootFrame.top)) >= 0);
+
+	// no declaration: the character reference is UTF-8 all the same
+	BMessage	data;
+	Named(document, P_C_DOC_ALLNODES, "Grandchild").FindMessage(P_C_NODE_DATA, &data);
+	BMessage	budget;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("Budget", &budget));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NUMBER, budget.what);
+	CPPUNIT_ASSERT_EQUAL(BString("€"), BString(budget.GetString(P_C_ATTRIBUTE_UNIT, "")));
+}
+
+
+void TranslatorTest::FreeMindRoundTrips(void)
+{
+	// a group, typed attributes, a note and a circle of connections
+	BMessage	document	= GroupedDocument();
+	BMessage	allNodes;
+	document.FindMessage(P_C_DOC_ALLNODES, &allNodes);
+	BMessage	second;
+	allNodes.FindMessage(P_C_DOC_ENTRY, 1, &second);
+	BMessage	data;
+	second.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	done(B_BOOL_TYPE);
+	done.AddString(P_C_ATTRIBUTE_NAME, "Done");
+	done.AddBool(P_C_ATTRIBUTE_VALUE, true);
+	data.AddMessage("Done", &done);
+	BMessage	cost(P_C_ATTRIBUTE_NUMBER);
+	cost.AddString(P_C_ATTRIBUTE_NAME, "Cost");
+	cost.AddFloat(P_C_ATTRIBUTE_VALUE, 25.5);
+	cost.AddString(P_C_ATTRIBUTE_UNIT, "€");
+	data.AddMessage("Cost", &cost);
+	BMessage	note(P_C_ATTRIBUTE_NOTE);
+	note.AddString(P_C_ATTRIBUTE_NAME, "Note");
+	note.AddString(P_C_ATTRIBUTE_VALUE, "line one\nline <two>");
+	data.AddMessage("Note", &note);
+	second.ReplaceMessage(P_C_NODE_DATA, &data);
+	allNodes.ReplaceMessage(P_C_DOC_ENTRY, 1, &second);
+	BMessage	third(P_C_CLASS_TYPE);
+	BMessage	thirdData;
+	thirdData.AddString(P_C_NODE_NAME, "third");
+	third.AddMessage(P_C_NODE_DATA, &thirdData);
+	third.AddRect(P_C_NODE_FRAME, BRect(300, 70, 400, 110));
+	third.AddInt32(P_C_NODE_ID, 5);
+	allNodes.AddMessage(P_C_DOC_ENTRY, &third);
+	document.ReplaceMessage(P_C_DOC_ALLNODES, &allNodes);
+	BMessage	allConnections;
+	document.FindMessage(P_C_DOC_ALLCONNECTIONS, &allConnections);
+	for (int32 i = 0; i < 2; i++) {
+		BMessage	connection(P_C_CONNECTION_TYPE);
+		connection.AddInt32(P_C_NODE_ID, 6 + i);
+		connection.AddInt32(P_C_NODE_CONNECTION_FROM, i == 0 ? 2 : 5);
+		connection.AddInt32(P_C_NODE_CONNECTION_TO, i == 0 ? 5 : 1);
+		allConnections.AddMessage(P_C_DOC_ENTRY, &connection);
+	}
+	document.ReplaceMessage(P_C_DOC_ALLCONNECTIONS, &allConnections);
+
+	// through the roster as the translate tool does it
+	BString		map	= Exported(document, P_C_FREEMIND_TYPE);
+	CPPUNIT_ASSERT(map.StartsWith("<map version="));
+	CPPUNIT_ASSERT(map.FindFirst("<node ID=\"PC_GROUP_3\" TEXT=\"Team &quot;A&quot;\"") >= 0);
+	CPPUNIT_ASSERT(map.FindFirst("<attribute NAME=\"Owner\" VALUE=\"Ann &amp; Bob\"/>") >= 0);
+	CPPUNIT_ASSERT(map.FindFirst("<p>line one</p><p>line &lt;two&gt;</p>") >= 0);
+	CPPUNIT_ASSERT(map.FindFirst("<arrowlink ") >= 0);
+
+	BMessage	back	= Imported(map.String());
+	BMessage	group	= Named(back, P_C_DOC_ALLNODES, "Team \"A\"");
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_GROUP_TYPE, group.what);
+	CPPUNIT_ASSERT_EQUAL((int32)2, CountField(group, P_C_NODE_CHILD_IDS));
+	BMessage	first	= Named(back, P_C_DOC_ALLNODES, "first");
+	CPPUNIT_ASSERT_EQUAL(group.GetInt32(P_C_NODE_ID, 0), first.GetInt32(P_C_NODE_PARENT, -1));
+	BMessage	secondBack	= Named(back, P_C_DOC_ALLNODES, "second");
+	BMessage	secondData;
+	secondBack.FindMessage(P_C_NODE_DATA, &secondData);
+	BMessage	attribute;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, secondData.FindMessage("Done", &attribute));
+	CPPUNIT_ASSERT_EQUAL((uint32)B_BOOL_TYPE, attribute.what);
+	CPPUNIT_ASSERT(attribute.GetBool(P_C_ATTRIBUTE_VALUE, false));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, secondData.FindMessage("Cost", &attribute));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NUMBER, attribute.what);
+	CPPUNIT_ASSERT_EQUAL(25.5f, attribute.GetFloat(P_C_ATTRIBUTE_VALUE, 0));
+	CPPUNIT_ASSERT_EQUAL(BString("€"), BString(attribute.GetString(P_C_ATTRIBUTE_UNIT, "")));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, secondData.FindMessage("Note", &attribute));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NOTE, attribute.what);
+	CPPUNIT_ASSERT_EQUAL(BString("line one\nline <two>"),
+		BString(attribute.GetString(P_C_ATTRIBUTE_VALUE, "")));
+	// every connection once, as a branch or as an arrow link
+	BMessage	connections;
+	back.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	CPPUNIT_ASSERT_EQUAL((int32)3, CountField(connections, P_C_DOC_ENTRY));
+}
+
+
+void TranslatorTest::FreeMindIsOnlyAMapFirst(void)
+{
+	// FreeMind and Freeplane may start with a declaration and comments;
+	// a node needs no ID
+	BMessage	plain	= Imported(
+		"\xef\xbb\xbf<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<!-- Freeplane -->\n"
+		"<map version=\"freeplane 1.9.13\"><node TEXT=\"Alone\"/></map>\n");
+	Named(plain, P_C_DOC_ALLNODES, "Alone");
+
+	// a page with an image map is no mind map
+	static const char	*page	=
+		"<html><body><map name=\"m\"><area href=\"x\"/></map></body></html>";
+	BMemoryIO		input(page, strlen(page));
+	translator_info	info;
+	status_t		err	= BTranslatorRoster::Default()->Identify(&input, NULL, &info,
+		0, NULL, P_C_DOCUMENT_RAW_TYPE);
+	CPPUNIT_ASSERT((err != B_OK) || (info.type != P_C_FREEMIND_TYPE));
 }
 
 
@@ -118,6 +265,465 @@ void TranslatorTest::TextExportRoundTrips(void)
 }
 
 
+// two nodes in a group, one with an attribute, connected
+static BMessage GroupedDocument(void)
+{
+	BMessage	document	= TwoNodeDocument();
+	BMessage	allNodes;
+	document.FindMessage(P_C_DOC_ALLNODES, &allNodes);
+	BMessage	node;
+	allNodes.FindMessage(P_C_DOC_ENTRY, 0, &node);
+	BMessage	data;
+	node.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	attribute(B_STRING_TYPE);
+	attribute.AddString(P_C_ATTRIBUTE_NAME, "Owner");
+	attribute.AddString(P_C_ATTRIBUTE_VALUE, "Ann & Bob");
+	data.AddMessage("Owner", &attribute);
+	node.ReplaceMessage(P_C_NODE_DATA, &data);
+	allNodes.ReplaceMessage(P_C_DOC_ENTRY, 0, &node);
+	for (int32 i = 0; i < 2; i++) {
+		allNodes.FindMessage(P_C_DOC_ENTRY, i, &node);
+		node.AddInt32(P_C_NODE_PARENT, 3);
+		allNodes.ReplaceMessage(P_C_DOC_ENTRY, i, &node);
+	}
+	BMessage	group(P_C_GROUP_TYPE);
+	BMessage	groupData;
+	groupData.AddString(P_C_NODE_NAME, "Team \"A\"");
+	group.AddMessage(P_C_NODE_DATA, &groupData);
+	group.AddRect(P_C_NODE_FRAME, BRect(0, 50, 120, 180));
+	group.AddInt32(P_C_NODE_ID, 3);
+	group.AddInt32(P_C_NODE_CHILD_IDS, 1);
+	group.AddInt32(P_C_NODE_CHILD_IDS, 2);
+	allNodes.AddMessage(P_C_DOC_ENTRY, &group);
+	document.ReplaceMessage(P_C_DOC_ALLNODES, &allNodes);
+
+	BMessage	allConnections;
+	BMessage	connection(P_C_CONNECTION_TYPE);
+	BMessage	connectionData;
+	connectionData.AddString(P_C_NODE_NAME, "asks");
+	connection.AddMessage(P_C_NODE_DATA, &connectionData);
+	connection.AddInt32(P_C_NODE_ID, 4);
+	connection.AddInt32(P_C_NODE_CONNECTION_FROM, 1);
+	connection.AddInt32(P_C_NODE_CONNECTION_TO, 2);
+	allConnections.AddMessage(P_C_DOC_ENTRY, &connection);
+	document.ReplaceMessage(P_C_DOC_ALLCONNECTIONS, &allConnections);
+	return document;
+}
+
+
+// the document written by the translator for outType, as text
+static BString Exported(const BMessage &document, uint32 outType)
+{
+	BMallocIO	native;
+	document.Flatten(&native);
+	native.Seek(0, SEEK_SET);
+	BMallocIO	output;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, BTranslatorRoster::Default()->Translate(
+		&native, NULL, NULL, &output, outType));
+	return BString((const char *)output.Buffer(), output.BufferLength());
+}
+
+
+void TranslatorTest::DotExportWritesClustersLabelsAndEdges(void)
+{
+	BString	dot	= Exported(GroupedDocument(), P_C_DOT_TYPE);
+	CPPUNIT_ASSERT(dot.StartsWith("digraph"));
+	CPPUNIT_ASSERT(dot.FindFirst("subgraph cluster_3 {") >= 0);
+	CPPUNIT_ASSERT(dot.FindFirst("label=\"Team \\\"A\\\"\"") >= 0);
+	// the attribute as a row of the node's label, escaped for it
+	CPPUNIT_ASSERT(dot.FindFirst("<B>first</B>") >= 0);
+	CPPUNIT_ASSERT(dot.FindFirst("Ann &amp; Bob") >= 0);
+	CPPUNIT_ASSERT(dot.FindFirst("<B>second</B>") >= 0);
+	// both nodes inside the cluster, the edge after it
+	CPPUNIT_ASSERT(dot.FindFirst("n2 [") < dot.FindFirst("\t}\n"));
+	CPPUNIT_ASSERT(dot.FindFirst("n1 -> n2 [dir=forward]") >= 0);
+}
+
+
+void TranslatorTest::HtmlExportIsOneSelfContainedPage(void)
+{
+	BMessage	document	= GroupedDocument();
+	// a name that would end the page's script block if left as it is
+	BMessage	allNodes;
+	document.FindMessage(P_C_DOC_ALLNODES, &allNodes);
+	BMessage	node;
+	allNodes.FindMessage(P_C_DOC_ENTRY, 1, &node);
+	BMessage	data;
+	node.FindMessage(P_C_NODE_DATA, &data);
+	data.ReplaceString(P_C_NODE_NAME, "</script><b>x");
+	node.ReplaceMessage(P_C_NODE_DATA, &data);
+	allNodes.ReplaceMessage(P_C_DOC_ENTRY, 1, &node);
+	document.ReplaceMessage(P_C_DOC_ALLNODES, &allNodes);
+
+	BString	html	= Exported(document, P_C_HTML_TYPE);
+	CPPUNIT_ASSERT(html.StartsWith("<!DOCTYPE html>"));
+	// nothing loaded from elsewhere
+	CPPUNIT_ASSERT(html.FindFirst(" src=") < 0);
+	CPPUNIT_ASSERT(html.FindFirst("<link") < 0);
+	CPPUNIT_ASSERT(html.FindFirst("class=\"pc-group\" id=\"n3\"") >= 0);
+	CPPUNIT_ASSERT(html.FindFirst("class=\"pc-node\" id=\"n1\"") >= 0);
+	CPPUNIT_ASSERT(html.FindFirst("data-from=\"1\" data-to=\"2\"") >= 0);
+	// on the card (shortened to fit) and in full for the details panel
+	CPPUNIT_ASSERT(html.FindFirst(">Owner</text>") >= 0);
+	CPPUNIT_ASSERT(html.FindFirst("[\"Owner\",\"Ann & Bob\",\"text\"]") >= 0);
+	// the name only escaped: once in the SVG, once in the data
+	CPPUNIT_ASSERT(html.FindFirst("</script><b>") < 0);
+	CPPUNIT_ASSERT(html.FindFirst("&lt;/script&gt;&lt;b&gt;x") >= 0);
+	CPPUNIT_ASSERT(html.FindFirst("<\\/script><b>x") >= 0);
+}
+
+
+void TranslatorTest::SvgExportStandsAlone(void)
+{
+	BString	svg	= Exported(GroupedDocument(), P_C_SVG_TYPE);
+	CPPUNIT_ASSERT(svg.StartsWith("<?xml"));
+	CPPUNIT_ASSERT(svg.FindFirst("<svg xmlns=\"http://www.w3.org/2000/svg\"") >= 0);
+	// its own style, the colors of both schemes
+	CPPUNIT_ASSERT(svg.FindFirst("<style>") >= 0);
+	CPPUNIT_ASSERT(svg.FindFirst("prefers-color-scheme:dark") >= 0);
+	CPPUNIT_ASSERT(svg.FindFirst("<script") < 0);
+	CPPUNIT_ASSERT(svg.EndsWith("</svg>\n"));
+}
+
+
+void TranslatorTest::MermaidExportWritesAFlowchart(void)
+{
+	BString	mermaid	= Exported(GroupedDocument(), P_C_MERMAID_TYPE);
+	CPPUNIT_ASSERT(mermaid.StartsWith("flowchart "));
+	// quotes in a label as Mermaid's own entity
+	CPPUNIT_ASSERT(mermaid.FindFirst("subgraph g3 [\"Team #quot;A#quot;\"]") >= 0);
+	CPPUNIT_ASSERT(mermaid.FindFirst("n1[\"<b>first</b><br/>Owner: Ann & Bob\"]") >= 0);
+	CPPUNIT_ASSERT(mermaid.FindFirst("n1 --> n2") >= 0);
+	// both nodes inside the subgraph
+	CPPUNIT_ASSERT(mermaid.FindFirst("n2[") < mermaid.FindFirst("  end\n"));
+
+	BString	markdown	= Exported(GroupedDocument(), P_C_MARKDOWN_TYPE);
+	CPPUNIT_ASSERT(markdown.StartsWith("# "));
+	CPPUNIT_ASSERT(markdown.FindFirst("```mermaid\nflowchart ") >= 0);
+	CPPUNIT_ASSERT(markdown.EndsWith("```\n"));
+}
+
+
+// the document a translator makes of text
+static BMessage Imported(const char *text)
+{
+	BMemoryIO	input(text, strlen(text));
+	BMallocIO	output;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, BTranslatorRoster::Default()->Translate(
+		&input, NULL, NULL, &output, P_C_DOCUMENT_RAW_TYPE));
+	output.Seek(0, SEEK_SET);
+	BMessage	document;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, document.Unflatten(&output));
+	return document;
+}
+
+
+// the entry of a list whose Node::Data name is name
+static BMessage Named(const BMessage &document, const char *list, const char *name)
+{
+	BMessage	all;
+	document.FindMessage(list, &all);
+	BMessage	entry;
+	for (int32 i = 0; all.FindMessage(P_C_DOC_ENTRY, i, &entry) == B_OK; i++) {
+		BMessage	data;
+		entry.FindMessage(P_C_NODE_DATA, &data);
+		if (strcmp(data.GetString(P_C_NODE_NAME, ""), name) == 0)
+			return entry;
+	}
+	CPPUNIT_FAIL(BString("no node named ").Append(name).String());
+	return BMessage();
+}
+
+
+void TranslatorTest::GraphMLRoundTrips(void)
+{
+	BString		graphml	= Exported(GroupedDocument(), P_C_GRAPHML_TYPE);
+	CPPUNIT_ASSERT(graphml.FindFirst("<graphml ") >= 0);
+	// yEd sees a group with both nodes inside
+	CPPUNIT_ASSERT(graphml.FindFirst("<node id=\"n3\" yfiles.foldertype=\"group\">") >= 0);
+	CPPUNIT_ASSERT(graphml.FindFirst("<graph id=\"n3:\"") < graphml.FindFirst("<node id=\"n1\">"));
+
+	BMessage	back	= Imported(graphml.String());
+	BMessage	first	= Named(back, P_C_DOC_ALLNODES, "first");
+	BMessage	group	= Named(back, P_C_DOC_ALLNODES, "Team \"A\"");
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_GROUP_TYPE, group.what);
+	CPPUNIT_ASSERT_EQUAL(CountField(group, P_C_NODE_CHILD_IDS), (int32)2);
+	CPPUNIT_ASSERT_EQUAL(group.GetInt32(P_C_NODE_ID, 0), first.GetInt32(P_C_NODE_PARENT, -1));
+	CPPUNIT_ASSERT(first.GetRect(P_C_NODE_FRAME, BRect()) == BRect(10, 70, 110, 110));
+	BMessage	data;
+	first.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	owner;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("Owner", &owner));
+	CPPUNIT_ASSERT_EQUAL((uint32)B_STRING_TYPE, owner.what);
+	CPPUNIT_ASSERT_EQUAL(BString("Ann & Bob"), BString(owner.GetString(P_C_ATTRIBUTE_VALUE, "")));
+	BMessage	connections;
+	back.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	CPPUNIT_ASSERT_EQUAL((int32)1, CountField(connections, P_C_DOC_ENTRY));
+}
+
+
+void TranslatorTest::GraphMLImportsOtherTools(void)
+{
+	// as NetworkX writes it: no places, an undirected graph, typed data
+	BMessage	plain	= Imported(
+		"<?xml version='1.0' encoding='utf-8'?>\n"
+		"<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\">\n"
+		"<key id=\"d0\" for=\"node\" attr.name=\"label\" attr.type=\"string\"/>\n"
+		"<key id=\"d1\" for=\"node\" attr.name=\"weight\" attr.type=\"double\"/>\n"
+		"<key id=\"d2\" for=\"node\" attr.name=\"done\" attr.type=\"boolean\"/>\n"
+		"<graph edgedefault=\"undirected\">\n"
+		"<node id=\"a\"><data key=\"d0\">Alpha</data><data key=\"d1\">2.5</data>"
+			"<data key=\"d2\">true</data></node>\n"
+		"<node id=\"b\"/>\n"
+		"<edge source=\"a\" target=\"b\"/>\n"
+		"</graph></graphml>\n");
+	BMessage	alpha	= Named(plain, P_C_DOC_ALLNODES, "Alpha");
+	// a node without a label is called by its id
+	BMessage	b		= Named(plain, P_C_DOC_ALLNODES, "b");
+	BRect		alphaFrame	= alpha.GetRect(P_C_NODE_FRAME, BRect());
+	CPPUNIT_ASSERT(alphaFrame.IsValid());
+	CPPUNIT_ASSERT(!alphaFrame.Intersects(b.GetRect(P_C_NODE_FRAME, BRect())));
+	BMessage	data;
+	alpha.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	weight;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("weight", &weight));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NUMBER, weight.what);
+	CPPUNIT_ASSERT_EQUAL(2.5f, weight.GetFloat(P_C_ATTRIBUTE_VALUE, 0));
+	BMessage	done;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("done", &done));
+	CPPUNIT_ASSERT(done.GetBool(P_C_ATTRIBUTE_VALUE, false));
+	BMessage	connections;
+	plain.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	BMessage	edge;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, connections.FindMessage(P_C_DOC_ENTRY, &edge));
+	CPPUNIT_ASSERT_EQUAL((int8)0, edge.GetInt8(P_C_NODE_CONNECTION_ARROWS, -1));
+
+	// as yEd writes it: places, labels and a group in its graphics only
+	BMessage	yEd	= Imported(
+		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+		"<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\" "
+			"xmlns:y=\"http://www.yworks.com/xml/graphml\">\n"
+		"<key for=\"node\" id=\"d6\" yfiles.type=\"nodegraphics\"/>\n"
+		"<graph edgedefault=\"directed\" id=\"G\">\n"
+		"<node id=\"n0\" yfiles.foldertype=\"group\"><data key=\"d6\">"
+			"<y:ProxyAutoBoundsNode><y:Realizers active=\"0\"><y:GroupNode>"
+			"<y:Geometry height=\"200\" width=\"300\" x=\"0\" y=\"0\"/>"
+			"<y:NodeLabel>Box</y:NodeLabel></y:GroupNode></y:Realizers>"
+			"</y:ProxyAutoBoundsNode></data>\n"
+		"<graph edgedefault=\"directed\" id=\"n0:\">\n"
+		"<node id=\"n0::n0\"><data key=\"d6\"><y:ShapeNode>"
+			"<y:Geometry height=\"30\" width=\"80\" x=\"20\" y=\"40\"/>"
+			"<y:Fill color=\"#FFCC00\" transparent=\"false\"/>"
+			"<y:NodeLabel>Inside</y:NodeLabel></y:ShapeNode></data></node>\n"
+		"</graph></node>\n"
+		"</graph></graphml>\n");
+	BMessage	inside	= Named(yEd, P_C_DOC_ALLNODES, "Inside");
+	BMessage	box		= Named(yEd, P_C_DOC_ALLNODES, "Box");
+	CPPUNIT_ASSERT(inside.GetRect(P_C_NODE_FRAME, BRect()) == BRect(20, 40, 100, 70));
+	CPPUNIT_ASSERT_EQUAL(box.GetInt32(P_C_NODE_ID, 0), inside.GetInt32(P_C_NODE_PARENT, -1));
+	BMessage	pattern;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, inside.FindMessage(P_C_NODE_PATTERN, &pattern));
+	int32		packed	= 0;
+	pattern.FindInt32(P_C_PATTERN_FILL_COLOR, &packed);
+	rgb_color	fill;
+	memcpy(&fill, &packed, sizeof(fill));
+	CPPUNIT_ASSERT_EQUAL((int)0xcc, (int)fill.green);
+}
+
+
+void TranslatorTest::DrawioRoundTrips(void)
+{
+	BMessage	document	= GroupedDocument();
+	// a note keeps its lines, a number its unit
+	BMessage	allNodes;
+	document.FindMessage(P_C_DOC_ALLNODES, &allNodes);
+	BMessage	node;
+	allNodes.FindMessage(P_C_DOC_ENTRY, 1, &node);
+	BMessage	data;
+	node.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	note(P_C_ATTRIBUTE_NOTE);
+	note.AddString(P_C_ATTRIBUTE_NAME, "Next steps");
+	note.AddString(P_C_ATTRIBUTE_VALUE, "call\tAnn\nwrite to Bob");
+	data.AddMessage("Next steps", &note);
+	BMessage	price(P_C_ATTRIBUTE_NUMBER);
+	price.AddString(P_C_ATTRIBUTE_NAME, "Price");
+	price.AddFloat(P_C_ATTRIBUTE_VALUE, 25.5);
+	price.AddString(P_C_ATTRIBUTE_UNIT, "€");
+	data.AddMessage("Price", &price);
+	node.ReplaceMessage(P_C_NODE_DATA, &data);
+	allNodes.ReplaceMessage(P_C_DOC_ENTRY, 1, &node);
+	document.ReplaceMessage(P_C_DOC_ALLNODES, &allNodes);
+
+	BString		drawio	= Exported(document, P_C_DRAWIO_TYPE);
+	CPPUNIT_ASSERT(drawio.StartsWith("<mxfile"));
+	// members of a container are placed relative to it
+	CPPUNIT_ASSERT(drawio.FindFirst("vertex=\"1\" parent=\"n3\"") >= 0);
+	CPPUNIT_ASSERT(drawio.FindFirst("Next_steps=\"call&#9;Ann&#10;write to Bob\"") >= 0);
+
+	BMessage	back	= Imported(drawio.String());
+	BMessage	second	= Named(back, P_C_DOC_ALLNODES, "second");
+	BMessage	group	= Named(back, P_C_DOC_ALLNODES, "Team \"A\"");
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_GROUP_TYPE, group.what);
+	CPPUNIT_ASSERT_EQUAL(group.GetInt32(P_C_NODE_ID, 0), second.GetInt32(P_C_NODE_PARENT, -1));
+	CPPUNIT_ASSERT(second.GetRect(P_C_NODE_FRAME, BRect()).LeftTop() == BPoint(10, 130));
+	second.FindMessage(P_C_NODE_DATA, &data);
+	BMessage	restored;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("Next steps", &restored));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NOTE, restored.what);
+	CPPUNIT_ASSERT_EQUAL(BString("call\tAnn\nwrite to Bob"),
+		BString(restored.GetString(P_C_ATTRIBUTE_VALUE, "")));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, data.FindMessage("Price", &restored));
+	CPPUNIT_ASSERT_EQUAL((uint32)P_C_ATTRIBUTE_NUMBER, restored.what);
+	CPPUNIT_ASSERT_EQUAL(25.5f, restored.GetFloat(P_C_ATTRIBUTE_VALUE, 0));
+	CPPUNIT_ASSERT_EQUAL(BString("€"), BString(restored.GetString(P_C_ATTRIBUTE_UNIT, "")));
+	BMessage	connections;
+	back.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	CPPUNIT_ASSERT_EQUAL((int32)1, CountField(connections, P_C_DOC_ENTRY));
+}
+
+
+void TranslatorTest::DrawioImportsCompressedDiagrams(void)
+{
+	// as older draw.io versions saved: deflated, base64, URL-encoded
+	BMessage	document	= Imported(
+		"<mxfile host=\"app.diagrams.net\"><diagram id=\"x\" name=\"Page-1\">"
+		"xVNBbsMgEHwNd2KkqNfYbXPqI0jYGCTsRWuc2L/vFkhSy03VSpV6MGJnd0bMYIRqumlPOtg3NOCF"
+		"ehGqIcSYd93UgPeiks4I9SyqSvInqtcH3U3qyqAJ+vgTgs6Es/YjZGTng2WUaVvdBaHqvDLSYB4e"
+		"4uzLMIu5MHBRn5z3DXqk1FBGw9PpmHhJHyjC9PCMCSoH3AN2EGnmkSshW5BzLosjeXEm2jJxxSy4"
+		"1hbRbcH0kOv2JnzPgzclkq/jOaziqSHqVQyEY2/gg7P5G8uV/D/PsL7l3uyI8MJVjz3cLIJp4XuD"
+		"LIMjHWHxs0VNLcRPAa9jIPA6uvNS/RemuLy/odRbPLF3"
+		"</diagram></mxfile>");
+	BMessage	alpha	= Named(document, P_C_DOC_ALLNODES, "Alpha & Co");
+	Named(document, P_C_DOC_ALLNODES, "Beta");
+	CPPUNIT_ASSERT(alpha.GetRect(P_C_NODE_FRAME, BRect()) == BRect(10, 20, 130, 80));
+	BMessage	connections;
+	document.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	BMessage	edge;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, connections.FindMessage(P_C_DOC_ENTRY, &edge));
+	CPPUNIT_ASSERT_EQUAL((int8)0, edge.GetInt8(P_C_NODE_CONNECTION_ARROWS, -1));
+}
+
+
+void TranslatorTest::ExportFormatsNeverOpenDocuments(void)
+{
+	// opening a document asks every translator for the native format;
+	// an export-only one must not answer
+	BMessage		document	= TwoNodeDocument();
+	BMallocIO		native;
+	document.Flatten(&native);
+	native.Seek(0, SEEK_SET);
+	translator_info	info;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, BTranslatorRoster::Default()->Identify(
+		&native, NULL, &info, P_C_DOCUMENT_RAW_TYPE));
+	const char		*name	= NULL;
+	const char		*infoText	= NULL;
+	int32			version	= 0;
+	BTranslatorRoster::Default()->GetTranslatorInfo(info.translator, &name,
+		&infoText, &version);
+	CPPUNIT_ASSERT(strcmp(name, "DOTTranslator") != 0);
+	CPPUNIT_ASSERT(strcmp(name, "HTMLTranslator") != 0);
+	CPPUNIT_ASSERT(strcmp(name, "MermaidTranslator") != 0);
+	CPPUNIT_ASSERT(strcmp(name, "GraphMLTranslator") != 0);
+	CPPUNIT_ASSERT(strcmp(name, "DrawioTranslator") != 0);
+}
+
+
+void TranslatorTest::ExportWritesACopyOfItsOwnType(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+	BMessage	format;
+	format.AddInt32(P_C_FORMAT_TYPE, P_C_DOT_TYPE);
+	format.AddString(P_C_FORMAT_MIME, "text/vnd.graphviz");
+	BEntry		entry("/tmp/projectconceptor-export-test.dot");
+	entry_ref	ref;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, entry.GetRef(&ref));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, doc->WriteTo(ref, format, true));
+
+	BFile		file(&ref, B_READ_ONLY);
+	char		start[8]	= {0};
+	CPPUNIT_ASSERT_EQUAL((ssize_t)7, file.Read(start, 7));
+	CPPUNIT_ASSERT_EQUAL(BString("digraph"), BString(start));
+	// opens in the app for its format, not in ProjectConceptor
+	char		mime[B_MIME_TYPE_LENGTH];
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, BNodeInfo(&file).GetType(mime));
+	CPPUNIT_ASSERT_EQUAL(BString("text/vnd.graphviz"), BString(mime));
+	entry.Remove();
+
+	// a page is titled after the document
+	BMessage	page;
+	page.AddInt32(P_C_FORMAT_TYPE, P_C_HTML_TYPE);
+	page.AddString(P_C_FORMAT_MIME, "text/html");
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, doc->WriteTo(ref, page, true));
+	BFile		html(&ref, B_READ_ONLY);
+	off_t		size	= 0;
+	html.GetSize(&size);
+	BString		text;
+	html.Read(text.LockBuffer(size), size);
+	text.UnlockBuffer(size);
+	BString		title;
+	title << "<title>" << doc->Title() << "</title>";
+	CPPUNIT_ASSERT(text.FindFirst(title) >= 0);
+	entry.Remove();
+}
+
+
+void TranslatorTest::ImportedFileIsNotTheDocumentsFile(void)
+{
+	BFile		mindMap("/tmp/projectconceptor-import-test.mm",
+		B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+	mindMap.Write(kFreeMindSample, strlen(kFreeMindSample));
+	BEntry		entry("/tmp/projectconceptor-import-test.mm");
+	entry_ref	ref;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, entry.GetRef(&ref));
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->SetEntry(&ref, NULL);
+	doc->Load();
+	// Save asks for a new file instead of writing over the mind map,
+	// offering its name
+	CPPUNIT_ASSERT(doc->Entry() == NULL);
+	CPPUNIT_ASSERT_EQUAL(BString("projectconceptor-import-test"), BString(doc->Title()));
+	entry.Remove();
+}
+
+
+// the format menu's entries by name, each with its message
+static std::map<BString, BMessage> FormatItems(bool exporting)
+{
+	PCSavePanel	panel(NULL, NULL, exporting);
+	BMenu		*menu	= panel.BuildFormatsMenu();
+	std::map<BString, BMessage>	items;
+	for (int32 i = 0; i < menu->CountItems(); i++) {
+		BMenuItem	*item	= menu->ItemAt(i);
+		if ((item->Label() != NULL) && (item->Message() != NULL))
+			items[BString(item->Label())]	= *item->Message();
+	}
+	delete menu;
+	return items;
+}
+
+
+void TranslatorTest::SaveAndExportOfferTheRightFormats(void)
+{
+	std::map<BString, BMessage>	save		= FormatItems(false);
+	std::map<BString, BMessage>	exporting	= FormatItems(true);
+	CPPUNIT_ASSERT(save.find("ProjectConceptor Document") != save.end());
+	CPPUNIT_ASSERT(save.find("Graphviz DOT") == save.end());
+	CPPUNIT_ASSERT(save.find("FreeMind") == save.end());
+	CPPUNIT_ASSERT(exporting.find("ProjectConceptor Document") == exporting.end());
+	CPPUNIT_ASSERT(exporting.find("HTML page") != exporting.end());
+	CPPUNIT_ASSERT_EQUAL(BString("html"),
+		BString(exporting["HTML page"].GetString(P_C_FORMAT_EXTENSION, "")));
+	CPPUNIT_ASSERT_EQUAL(BString("mm"),
+		BString(exporting["FreeMind"].GetString(P_C_FORMAT_EXTENSION, "")));
+	// pictures through the system's bitmap translators
+	std::map<BString, BMessage>::iterator	png	= exporting.find("PNG image");
+	CPPUNIT_ASSERT(png != exporting.end());
+	CPPUNIT_ASSERT(png->second.GetBool(P_C_FORMAT_BITMAP, false));
+	CPPUNIT_ASSERT_EQUAL(BString("png"),
+		BString(png->second.GetString(P_C_FORMAT_EXTENSION, "")));
+}
+
+
 void TranslatorTest::UnknownOutputTypeIsRefused(void)
 {
 	BMessage	document	= TwoNodeDocument();
@@ -127,4 +733,153 @@ void TranslatorTest::UnknownOutputTypeIsRefused(void)
 	CPPUNIT_ASSERT(BTranslatorRoster::Default()->Translate(
 		&native, NULL, NULL, &output, 'PNG ') != B_OK);
 	CPPUNIT_ASSERT_EQUAL((size_t)0, output.BufferLength());
+}
+
+
+// Export's file and format for a path, else its error
+static status_t ExportTarget(PDocument *doc, const char *path, const char *format,
+	BMessage *found, BString *where = NULL)
+{
+	BMessage	settings;
+	settings.AddString(P_C_EXPORT_PATH, path);
+	if (format != NULL)
+		settings.AddString(P_C_EXPORT_FORMAT, format);
+	entry_ref	ref;
+	BString		error;
+	status_t	err	= Export::Target(doc, settings, &ref, found, &error);
+	if (err != B_OK) {
+		CPPUNIT_ASSERT(error.Length() > 0);
+		return err;
+	}
+	if (where != NULL)
+		*where	= BPath(&ref).Path();
+	return B_OK;
+}
+
+
+// path with its links resolved, like /tmp
+static BString Resolved(const char *path)
+{
+	entry_ref	ref;
+	BEntry(path).GetRef(&ref);
+	return BString(BPath(&ref).Path());
+}
+
+
+// TwoNodeDocument() saved and opened again, so it has a file
+static PDocument* SavedTwoNodeDocument(const char *path)
+{
+	BMallocIO	flat;
+	TwoNodeDocument().Flatten(&flat);
+	BFile		file(path, B_WRITE_ONLY | B_CREATE_FILE | B_ERASE_FILE);
+	file.Write(flat.Buffer(), flat.BufferLength());
+	BEntry		entry(path);
+	entry_ref	ref;
+	entry.GetRef(&ref);
+	PDocument	*doc	= NewHeadlessTestDocument();
+	doc->SetEntry(&ref, NULL);
+	doc->Load();
+	return doc;
+}
+
+
+void TranslatorTest::ExportCommandFindsFileAndFormat(void)
+{
+	PDocument	*doc	= NewHeadlessTestDocument();
+	BMessage	format;
+	BString		where;
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(doc, "/tmp/plan.dot", NULL,
+		&format, &where));
+	CPPUNIT_ASSERT_EQUAL((int32)P_C_DOT_TYPE, format.GetInt32(P_C_FORMAT_TYPE, 0));
+	CPPUNIT_ASSERT_EQUAL(Resolved("/tmp/plan.dot"), where);
+	// "format" wins over the file's extension, in any case
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(doc, "/tmp/plan.dot", "HTML",
+		&format));
+	CPPUNIT_ASSERT_EQUAL((int32)P_C_HTML_TYPE, format.GetInt32(P_C_FORMAT_TYPE, 0));
+	// pictures and the document's own format
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(doc, "/tmp/plan.png", NULL,
+		&format));
+	CPPUNIT_ASSERT(format.GetBool(P_C_FORMAT_BITMAP, false));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(doc, "/tmp/plan.pcd", NULL,
+		&format));
+	CPPUNIT_ASSERT_EQUAL((int32)P_C_DOCUMENT_TYPE, format.GetInt32(P_C_FORMAT_TYPE, 0));
+	// ~/ is the home folder
+	BPath		home;
+	find_directory(B_USER_DIRECTORY, &home);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(doc, "~/plan.svg", NULL,
+		&format, &where));
+	CPPUNIT_ASSERT_EQUAL(BString(home.Path()) << "/plan.svg", where);
+	// what can't be exported says why
+	CPPUNIT_ASSERT_EQUAL((status_t)B_NAME_NOT_FOUND,
+		ExportTarget(doc, "/tmp/plan.nothing", NULL, &format));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE, ExportTarget(doc, "/tmp/plan", NULL, &format));
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE, ExportTarget(doc, "", NULL, &format));
+	// a relative path lies next to the document, which needs a file
+	CPPUNIT_ASSERT_EQUAL((status_t)B_BAD_VALUE, ExportTarget(doc, "plan.dot", NULL, &format));
+	PDocument	*saved	= SavedTwoNodeDocument("/tmp/projectconceptor-export-cmd.pcd");
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, ExportTarget(saved, "plan.dot", NULL,
+		&format, &where));
+	CPPUNIT_ASSERT_EQUAL(Resolved("/tmp/plan.dot"), where);
+	BEntry("/tmp/projectconceptor-export-cmd.pcd").Remove();
+}
+
+
+namespace {
+class TestExportPlugin : public BasePlugin {
+public:
+	TestExportPlugin(void) : BasePlugin(0) {}
+	virtual char*	GetName(void) { return (char *)"Export"; }
+	virtual char*	GetAutor(void) { return (char *)"test"; }
+	virtual char*	GetVersionsString(void) { return (char *)"0"; }
+	virtual char*	GetDescription(void) { return (char *)"test"; }
+	virtual uint32	GetType(void) { return P_C_COMMANDO_PLUGIN_TYPE; }
+	virtual void*	GetNewObject(void *value) { return new Export(); }
+};
+}
+
+
+static BString FileText(const char *path)
+{
+	BFile		file(path, B_READ_ONLY);
+	off_t		size	= 0;
+	file.GetSize(&size);
+	BString		text;
+	file.Read(text.LockBuffer(size), size);
+	text.UnlockBuffer(size);
+	return text;
+}
+
+
+void TranslatorTest::ExportCommandWritesTheSelection(void)
+{
+	PDocument	*doc	= SavedTwoNodeDocument("/tmp/projectconceptor-export-cmd.pcd");
+	doc->GetCommandManager()->RegisterPCommand(new TestExportPlugin());
+	CPPUNIT_ASSERT_EQUAL((int32)2, doc->GetAllNodes()->CountItems());
+	BMessage	*first	= NULL;
+	for (int32 i = 0; i < doc->GetAllNodes()->CountItems(); i++) {
+		BMessage	*node	= (BMessage *)doc->GetAllNodes()->ItemAt(i);
+		BMessage	data;
+		node->FindMessage(P_C_NODE_DATA, &data);
+		if (BString(data.GetString(P_C_NODE_NAME, "")) == "first")
+			first	= node;
+	}
+	CPPUNIT_ASSERT(first != NULL);
+	first->AddBool(P_C_NODE_SELECTED, true);
+	doc->GetSelected()->AddItem(first);
+
+	BMessage	settings(P_C_EXECUTE_COMMAND);
+	settings.AddString("Command::Name", "Export");
+	settings.AddString(P_C_EXPORT_PATH, "projectconceptor-export-cmd.mmd");
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, doc->GetCommandManager()->Execute(&settings));
+	BString		all	= FileText("/tmp/projectconceptor-export-cmd.mmd");
+	CPPUNIT_ASSERT(all.FindFirst("first") >= 0);
+	CPPUNIT_ASSERT(all.FindFirst("second") >= 0);
+
+	settings.AddBool(P_C_EXPORT_SELECTION, true);
+	CPPUNIT_ASSERT_EQUAL((status_t)B_OK, doc->GetCommandManager()->Execute(&settings));
+	BString		part	= FileText("/tmp/projectconceptor-export-cmd.mmd");
+	CPPUNIT_ASSERT(part.FindFirst("first") >= 0);
+	CPPUNIT_ASSERT(part.FindFirst("second") < 0);
+	BEntry("/tmp/projectconceptor-export-cmd.mmd").Remove();
+	BEntry("/tmp/projectconceptor-export-cmd.pcd").Remove();
 }

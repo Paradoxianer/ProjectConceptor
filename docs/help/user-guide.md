@@ -204,8 +204,51 @@ See [Macros](macros.md) for the full guide and the command reference.
 
 ## Save, load, undo
 
-- **File → Save / Save As** writes the document to a `.pcd` file.
-- **File → Open** loads an existing document.
+- **File → Save / Save As** writes the document to a `.pcd` file (or
+  as XML text, which keeps everything too).
+- **File → Export** writes a copy in a format for other programs. The
+  document itself stays in its own file.
+  - **Pictures** (PNG, JPEG, WebP, … - whatever image formats Haiku has
+    translators for): the graph as the editor draws it, on white,
+    without the grid or the selection, at twice its size so it stays
+    sharp.
+  - **HTML page**: one file anyone can open in a browser, no Haiku
+    needed. Drag to move, scroll to zoom, click a node to see all its
+    attributes, type into Search to find nodes. Follows the browser's
+    light or dark scheme.
+  - **SVG image**: the graph as a picture to put into other documents or
+    to edit further, e.g. in Inkscape.
+  - **Graphviz DOT**: for the Graphviz tools; `neato -n` keeps the
+    positions from ProjectConceptor, `dot` lays the graph out anew.
+  - **Mermaid flowchart** and **Markdown with Mermaid**: text that
+    GitHub, GitLab and many Markdown editors show as a diagram, e.g. in
+    a README or an issue.
+  - **draw.io diagram**: to edit further in draw.io (diagrams.net), in
+    any browser; draw.io in turn exports to Visio, PDF and PNG. Groups
+    become containers, attributes the shapes' data. ProjectConceptor
+    opens draw.io files too.
+  - **GraphML**: for yEd, Gephi, NetworkX, Cytoscape and other graph
+    tools; yEd shows places, colors and labels as here. ProjectConceptor
+    opens GraphML files too.
+  - **FreeMind**: a mind map for FreeMind or Freeplane. The graph becomes
+    a tree from the nodes nothing points to; a connection to a node
+    that is already in the tree becomes an arrow link, the members of a
+    group its branches. Attributes, notes and colors come along.
+    ProjectConceptor opens FreeMind files too and lays them out as a
+    mind map.
+- **Dragging nodes out of the window**: move the selected nodes on, far
+  past the window's edge, and they come along as a picture. Dropped on
+  the Desktop or into a Tracker folder they become a PNG image; drag
+  with the right mouse button and Tracker asks whether you want the
+  picture or a ProjectConceptor document with only these nodes.
+- **File → Print** prints the whole graph at 100 %, over as many pages
+  as it needs, on white paper without the grid or the selection. With
+  the *PDF Writer* printer (set it up in the Printers preferences) this
+  makes a PDF file. **File → Page setup** chooses the paper.
+- **File → Open** loads an existing document, or a file of another
+  format: a draw.io diagram, a GraphML graph from yEd, Gephi or
+  NetworkX, or a FreeMind mind map. That one stays as it is: the
+  first Save asks where to store the document.
 - **Edit → Undo / Redo** covers every change - creating nodes, moving
   them, grouping, editing attributes, drawing connections.
 - **Edit → Select all** selects the entire graph at once, e.g. to move

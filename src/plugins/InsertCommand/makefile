@@ -99,19 +99,11 @@ COMPILER_FLAGS =
 #	specify additional linker flags
 LINKER_FLAGS = -Xlinker -rpath=\$$ORIGIN/../..
 
-INSTALL_DIR    = /boot/apps/ProjectConceptor/Plugins/Commands
 
 ## include the makefile-engine
 DEVEL_DIRECTORY := \
 	$(shell findpaths -r "makefile_engine" B_FIND_PATH_DEVELOP_DIRECTORY)
 include $(DEVEL_DIRECTORY)/etc/makefile-engine
-
-install:: default
-	@echo "Copying locale files"
-	@echo $(INSTALL_DIR)
-	@mkdir -p $(INSTALL_DIR)
-	@cp -rf $(TARGET) $(INSTALL_DIR)
-	@echo "Done copying."
 
 default .DEFAULT:
 	mkdir -p ../../../$(APP_DIR)/$(PLUGIN_DIR)/Commands

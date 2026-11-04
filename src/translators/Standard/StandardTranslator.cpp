@@ -148,7 +148,9 @@ status_t MakeConfig(BMessage * ioExtension,	BView * * outView, BRect * outExtent
 
 status_t GetConfigMessage(BMessage * ioExtension)
 {
-	status_t err = B_OK;
-
-	return err;
+	ioExtension->AddInt32(P_C_FORMAT_TYPE, P_C_DOCUMENT_TYPE);
+	ioExtension->AddString(P_C_FORMAT_EXTENSION, "pcd");
+	ioExtension->AddInt32(P_C_FORMAT_TYPE, P_C_DOCUMENT_TEXT_TYPE);
+	ioExtension->AddString(P_C_FORMAT_EXTENSION, "xml");
+	return B_OK;
 }

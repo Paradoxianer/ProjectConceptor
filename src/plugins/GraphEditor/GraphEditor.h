@@ -114,7 +114,18 @@ public:
 	virtual	void			DetachedFromManager(void);
 
 	virtual	BView*			GetView(void);
+	virtual	BView*			GetPrintView(void) {return this;};
 	virtual	const char*		TabLabel(void);
+	virtual	BRect			PrintFrame(bool selectionOnly);
+	virtual	BBitmap*		PaperBitmap(float scale, bool selectionOnly);
+	/** drawing for paper or a picture: no selection, hover or grid */
+			bool			ForPaper(void) {return forPaper;};
+	/** a point (document coordinates) far enough out of the window that
+	 * moving nodes becomes dragging them out (#120) */
+			bool			FarOutside(BPoint where);
+	/** the selection as a negotiated drag: Tracker makes a PNG of it, or
+	 * a document of only these nodes; the reply comes as B_COPY_TARGET */
+			void			DragSelectionOut(void);
 	virtual BHandler*		GetHandler(void){return this;};
 	virtual	BList*			GetPCommandList(void);
 
@@ -365,6 +376,7 @@ protected:
 			BMessage		pickedAttributeColor;
 			bool			attributeColorPicker;
 			BList			*renderer;
+			bool			forPaper;
 			float			scale;
 
 			/** renderers currently mid-AnimationStep(); drives the shared
@@ -391,5 +403,12 @@ protected:
 			uint32			oldEventMask;
 
 private:
+			void			_DrawForPaper(BView *target, BRect updateRect,
+								bool selectionOnly);
+			void			_DeliverDrag(BMessage *request);
+			bool			_RenderersForPaper(void);
+			void			_RemoveRenderers(void);
+			void			_DrawPaper(BBitmap *bitmap, BRect frame,
+								float scale, bool selectionOnly);
 };
 #endif

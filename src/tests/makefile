@@ -107,6 +107,7 @@ SRCS= 	TestMain.cpp \
 		../plugins/GetValueCommand/GetValue.cpp \
 		../plugins/SelectConnectedCommand/SelectConnected.cpp \
 		../plugins/AskCommand/Ask.cpp \
+		../plugins/ExportCommand/Export.cpp \
 		../plugins/LayoutCommand/Layout.cpp \
 		../plugins/GraphEditor/GroupBoundary.cpp \
 		../plugins/GraphEditor/SmartGuides.cpp \

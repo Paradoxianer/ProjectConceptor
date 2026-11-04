@@ -2,6 +2,7 @@
 #include <app/PropertyInfo.h>
 #include <app/Roster.h>
 #include <interface/Alert.h>
+#include <interface/Bitmap.h>
 #include <interface/PrintJob.h>
 #include <interface/TextView.h>
 #include <interface/Screen.h>
@@ -10,9 +11,14 @@
 #include <support/Debug.h>
 #include <support/String.h>
 #include <storage/NodeInfo.h>
+#include <BitmapStream.h>
 #include <TranslationUtils.h>
 #include <TranslatorRoster.h>
 #include <string.h>
+#include <algorithm>
+#include <map>
+#include <set>
+#include <math.h>
 #include <FindDirectory.h>
 #include <Catalog.h>
 
@@ -25,6 +31,7 @@
 #include "PDocument.h"
 #include "PDocLoader.h"
 #include "PDocumentManager.h"
+#include "PEditor.h"
 #include "PEditorManager.h"
 #include "PluginManager.h"
 #include "ProjectConceptor.h"
@@ -158,6 +165,10 @@ void PDocument::MessageReceived(BMessage* message) {
 			Print();
 			break;
 		}
+		case MENU_FILE_PAGESETUP: {
+			PageSetup();
+			break;
+		}
 		case MENU_APP_SETTINGS:
 				ShowSettings();
 			break;
@@ -216,16 +227,37 @@ void PDocument::MessageReceived(BMessage* message) {
 			break;
 		}
 		case  B_SAVE_REQUESTED: {
-				BMessage	*saveSettings	= new BMessage();
-				message->FindMessage("saveSettings",saveSettings);
-				entry_ref *ref	= new entry_ref;
-				const char* name;
-				message->FindRef("directory",ref);
-				message->FindString("name", &name);
-				SetEntry(ref,name);
-				if (documentSetting->ReplaceMessage("saveSettings",saveSettings) != B_OK)
-					documentSetting->AddMessage("saveSettings",saveSettings);
+				BMessage	saveSettings;
+				message->FindMessage("saveSettings",&saveSettings);
+				entry_ref	directory;
+				const char	*name	= NULL;
+				if ((message->FindRef("directory",&directory) != B_OK)
+					|| (message->FindString("name",&name) != B_OK))
+					break;
+				SetEntry(&directory,name);
+				if (documentSetting->ReplaceMessage("saveSettings",&saveSettings) != B_OK)
+					documentSetting->AddMessage("saveSettings",&saveSettings);
 				Save();
+			break;
+		}
+		case MENU_FILE_EXPORT: {
+			ExportPanel();
+			break;
+		}
+		case P_C_EXPORT_REQUESTED: {
+			// a copy: the document keeps its own file and format
+			BMessage	saveSettings;
+			entry_ref	directory;
+			const char	*name	= NULL;
+			if ((message->FindMessage("saveSettings",&saveSettings) != B_OK)
+				|| (message->FindRef("directory",&directory) != B_OK)
+				|| (message->FindString("name",&name) != B_OK))
+				break;
+			BDirectory	dir(&directory);
+			BEntry		entry(&dir,name);
+			entry_ref	ref;
+			if (entry.GetRef(&ref) == B_OK)
+				WriteTo(ref,saveSettings,true);
 			break;
 		}
 		case B_COPY: {
@@ -425,9 +457,8 @@ void PDocument::_InitData(void){
 	printerSetting	= NULL;
 	documentSetting	= new BMessage();
 	bounds			= BRect(0,0,600,800);
-	printableRect	= NULL;
-	paperRect		= NULL;
 	savePanel		= NULL;
+	exportPanel		= NULL;
 	width			= 600;
 	height			= 800;
 	dirty			= true;
@@ -482,7 +513,7 @@ void PDocument::Init(BMessage *archive)
 {
 	TRACE();
 	bool locked = Lock();
-	printerSetting	= NULL;
+	printerSetting	= new BMessage();
 	documentSetting	= new BMessage();
 	archive->FindMessage("PDocument::documentSetting",documentSetting);
 	if (documentSetting->FindMessage("Printer Setting",printerSetting) != B_OK) {
@@ -501,6 +532,8 @@ const char* PDocument::Title(void)
 		return NULL;
 	if (entryRef)
 		return entryRef->name;
+	if (importedName.Length() > 0)
+		return importedName.String();
 	return B_TRANSLATE("Untitled");
 }
 
@@ -577,136 +610,117 @@ void PDocument::ShowSettings(void)
 }
 
 
-BMessage* PDocument::PrintSettings(void)
+void PDocument::PageSetup(void)
 {
 	TRACE();
-	status_t result = B_OK;
-	BPrintJob printJob(Title());
-	if (! printerSetting) {
-		result = printJob.ConfigPage();
-		if ((result == B_OK) && (Lock())) {
-			SetPrintSettings (printJob.Settings());
-			paperRect 		= new BRect(printJob.PaperRect());
-			printableRect	= new BRect(printJob.PrintableRect());
-			SetModified();
-			Unlock();
-		}
-	}
-	return printerSetting;
+	BPrintJob	printJob(Title());
+	if (printerSetting != NULL)
+		// the job owns what it gets
+		printJob.SetSettings(new BMessage(*printerSetting));
+	if (printJob.ConfigPage() != B_OK)
+		return;
+	SetPrintSettings(printJob.Settings());
+	SetModified();
 }
+
 
 void PDocument::SetPrintSettings(BMessage *settings)
 {
 	TRACE();
-	if (Lock()){
-		if (settings!=NULL) {
-			BMessage	*tmpMessage	= new BMessage();
-			if (documentSetting->FindMessage("Printer Setting",tmpMessage) == B_OK)
-				documentSetting->ReplaceMessage("Printer Setting",settings);
-			else
-				documentSetting->AddMessage("Printer Setting",settings);
-			printerSetting	= settings;
-			delete tmpMessage;
-		}
-		Unlock();
+	BAutolock	autolock(this);
+	if (settings == NULL)
+		return;
+	if (documentSetting->ReplaceMessage("Printer Setting",settings) != B_OK)
+		documentSetting->AddMessage("Printer Setting",settings);
+	delete printerSetting;
+	printerSetting	= settings;
+}
+
+
+/** locks the window of an editor's view - if it has one: BTabView takes
+ * the views of the tabs not shown out of the window, and nothing else
+ * draws them then */
+static bool LockEditorView(BView *view)
+{
+	return view->LockLooper() || (view->Looper() == NULL);
+}
+
+static void UnlockEditorView(BView *view)
+{
+	if (view->Looper() != NULL)
+		view->UnlockLooper();
+}
+
+
+// the editor to print: the active one, else the first that can; only
+// one in a window can go to a printer
+static PEditor* PrintableEditor(PEditorManager *editorManager, bool shownOnly)
+{
+	PEditor	*active	= editorManager->GetActivPEditor();
+	for (int32 i = -1; i < editorManager->CountPEditors(); i++) {
+		PEditor	*editor	= (i < 0) ? active : editorManager->PEditorAt(i);
+		BView	*view	= (editor != NULL) ? editor->GetView() : NULL;
+		if ((view == NULL) || (shownOnly && (view->Window() == NULL))
+			|| !LockEditorView(view))
+			continue;
+		bool	printable	= editor->PrintFrame(false).IsValid();
+		UnlockEditorView(view);
+		if (printable)
+			return editor;
 	}
+	return NULL;
 }
 
 
 void PDocument::Print(void)
 {
 	TRACE();
-	status_t	result	= B_OK;
-	BPrintJob	printJob("doc_name");
-	if (Lock()) {
-		if (printerSetting == NULL) {
-				result = printJob.ConfigPage();
-				if (result == B_OK) {
-					// Get the user Settings
-					SetPrintSettings(printJob.Settings());
-					//	 Use the new settings for your internal use
-					paperRect = new BRect(printJob.PaperRect());
-					printableRect = new BRect(printJob.PrintableRect());
-				}
-			}
-			// Setup the driver with user settings
-			printJob.SetSettings(printerSetting);
-
-			result = printJob.ConfigJob();
-			if (result == B_OK) {
-				// WARNING: here, setup CANNOT be NULL.
-	         if (printerSetting == NULL) {
-				(new BAlert(B_TRANSLATE("Error"),B_TRANSLATE("I had problems while setting up the Printer!"),"Ohh"))->Go();
-	         }
-			//**dont know why this was here :-)      		 delete printerSetting;
-			// Get the user Settings
-			SetPrintSettings( printJob.Settings());
-			paperRect 		= new BRect(printJob.PaperRect());
-			printableRect	= new BRect(printJob.PrintableRect());
-
-			// Now you have to calculate the number of pages
-			// (note: page are zero-based)
-			int32 firstPage = printJob.FirstPage();
-			int32 lastPage = printJob.LastPage();
-
-			// Verify the range is correct
-			// 0 ... LONG_MAX -> Print all the document
-			// n ... LONG_MAX -> Print from page n to the end
-			// n ... m -> Print from page n to page m
-			PEditor *activePEditor=editorManager->GetActivPEditor();
-			if (activePEditor != NULL) {
-				BView *editorView=activePEditor->GetView();
-				if (editorView != NULL) {
-					// calculate the Number of Pages
-					bool locked	= editorView->LockLooper();
-					int32 xPages,yPages;
-					BRect editorRect = editorView->Bounds();
-					xPages=editorRect.IntegerWidth()/printableRect->IntegerWidth();
-					if (editorRect.IntegerWidth()%printableRect->IntegerWidth() > 0)
-						xPages++;
-					yPages=editorRect.IntegerHeight()/printableRect->IntegerHeight();
-					if (editorRect.IntegerHeight()% printableRect->IntegerHeight() > 0)
-						yPages++;
-					int32 document_last_page= xPages*yPages;
-					if (lastPage > document_last_page)
-						lastPage = document_last_page;
-					int32 nbPages = lastPage - firstPage + 1;
-					if (nbPages <= 0)
-						;
-						//**return B_ERROR;
-					// Now we can print the page
-					printJob.BeginJob();
-					// Print all pages
-					bool can_continue = printJob.CanContinue();
-					for (int i=firstPage-1; can_continue && i<lastPage ; i++) {
-						float xStart	= (i%xPages)*printableRect->Width();
-						float yStart	= (i/xPages)*printableRect->Height();
-						BRect viewRect(xStart,yStart,xStart+printableRect->Width(),yStart+printableRect->Height());
-//						printJob.DrawView(editorView, viewRect, BPoint(0,0));
-						printJob.DrawView(editorView, viewRect, BPoint(printableRect->left,printableRect->top));
-						printJob.SpoolPage();
-						/*if (user_has_canceled)
-						{
-		       	        // tell the print_server to cancel the printjob
-   	 	   	        	printJob.CancelJob();
-							can_continue = false;
-							break;
-   	         		}*/
-						can_continue = printJob.CanContinue();
-					}
-					if (can_continue)
-						printJob.CommitJob();
-					else
-						result = B_ERROR;
-					if (locked) editorView->UnlockLooper();
-				}
-			}
-			else{
-				(new BAlert(B_TRANSLATE("Error"),B_TRANSLATE("No active editor - please install an editor plugin."),"Ohh"))->Go();
-			}
-		}
-		Unlock();
+	PEditor	*editor	= PrintableEditor(editorManager,true);
+	if (editor == NULL) {
+		(new BAlert(B_TRANSLATE("Print"),B_TRANSLATE("There is nothing to print."),
+			B_TRANSLATE("OK")))->Go(NULL);
+		return;
 	}
+	BPrintJob	printJob(Title());
+	if (printerSetting != NULL)
+		// the job owns what it gets
+		printJob.SetSettings(new BMessage(*printerSetting));
+	else if (printJob.ConfigPage() != B_OK)
+		return;
+	if (printJob.ConfigJob() != B_OK)
+		return;
+	SetPrintSettings(printJob.Settings());
+
+	BView	*view	= (editor->GetPrintView() != NULL) ? editor->GetPrintView()
+		: editor->GetView();
+	if (!view->LockLooper())
+		return;
+	// the whole graph, tiled over as many pages as it needs
+	BRect	frame		= editor->PrintFrame(false);
+	BRect	printable	= printJob.PrintableRect();
+	float	pageWidth	= floorf(printable.Width());
+	float	pageHeight	= floorf(printable.Height());
+	int32	columns		= (int32)ceilf((frame.Width() + 1) / pageWidth);
+	int32	rows		= (int32)ceilf((frame.Height() + 1) / pageHeight);
+	view->UnlockLooper();
+	int32	firstPage	= std::max((int32)1, printJob.FirstPage());
+	int32	lastPage	= std::min(columns * rows, printJob.LastPage());
+
+	printJob.BeginJob();
+	for (int32 page = firstPage; (page <= lastPage) && printJob.CanContinue(); page++) {
+		int32	column	= (page - 1) % columns;
+		int32	row		= (page - 1) / columns;
+		BRect	part(frame.left + column * pageWidth, frame.top + row * pageHeight,
+			frame.left + (column + 1) * pageWidth - 1,
+			frame.top + (row + 1) * pageHeight - 1);
+		// the point is relative to the printable rectangle
+		printJob.DrawView(view, part, B_ORIGIN);
+		printJob.SpoolPage();
+	}
+	if (printJob.CanContinue())
+		printJob.CommitJob();
+	else
+		printJob.CancelJob();
 }
 
 
@@ -781,23 +795,136 @@ void PDocument::Save(void)
 		SavePanel();
 		return;
 	}
+	BMessage	saveSettings;
+	documentSetting->FindMessage("saveSettings",&saveSettings);
+	if (WriteTo(*entryRef,saveSettings) != B_OK)
+		return;
+	ResetModified();
+	UpdateWindowTitle();
+	be_roster->AddToRecentDocuments(entryRef,APP_SIGNATURE);
+}
+
+
+// the largest side of an exported picture, in pixels
+static const float	kMaxBitmapSide	= 8000;
+
+// the graph or its selection as a picture, through the system's bitmap
+// translators
+static status_t WriteBitmap(PEditorManager *editorManager, BPositionIO *out,
+	uint32 type, bool selectionOnly)
+{
+	PEditor	*editor	= PrintableEditor(editorManager,false);
+	if (editor == NULL)
+		return B_NOT_SUPPORTED;
+	BView	*view	= editor->GetView();
+	if (!LockEditorView(view))
+		return B_ERROR;
+	BRect	frame	= editor->PrintFrame(selectionOnly);
+	if (!frame.IsValid()) {
+		UnlockEditorView(view);
+		return B_BAD_VALUE;
+	}
+	// two pixels per point stay sharp on any screen
+	float	scale	= std::min(2.0f,
+		kMaxBitmapSide / std::max(frame.Width(),frame.Height()));
+	BBitmap	*bitmap	= editor->PaperBitmap(scale,selectionOnly);
+	UnlockEditorView(view);
+	if (bitmap == NULL)
+		return B_NO_MEMORY;
+	BBitmapStream	stream(bitmap);
+	status_t		err	= BTranslatorRoster::Default()->Translate(&stream,NULL,NULL,
+		out,type);
+	stream.DetachBitmap(&bitmap);
+	delete bitmap;
+	return err;
+}
+
+
+BMessage PDocument::SelectionArchive(const BMessage &archive)
+{
+	BMessage	allNodes;
+	BMessage	allConnections;
+	archive.FindMessage(P_C_DOC_ALLNODES,&allNodes);
+	archive.FindMessage(P_C_DOC_ALLCONNECTIONS,&allConnections);
+	std::map<int32,BMessage>	nodes;
+	BMessage	entry;
+	for (int32 i = 0; allNodes.FindMessage(P_C_DOC_ENTRY,i,&entry) == B_OK; i++)
+		nodes[entry.GetInt32(P_C_NODE_ID,-1)]	= entry;
+	std::set<int32>	kept;
+	for (std::map<int32,BMessage>::iterator node = nodes.begin(); node != nodes.end(); node++) {
+		int32	id	= node->first;
+		for (int32 depth = 0; depth < 64; depth++) {
+			std::map<int32,BMessage>::iterator	found	= nodes.find(id);
+			if (found == nodes.end())
+				break;
+			if (found->second.GetBool(P_C_NODE_SELECTED,false)) {
+				kept.insert(node->first);
+				break;
+			}
+			id	= found->second.GetInt32(P_C_NODE_PARENT,-1);
+		}
+	}
+	BMessage	keptNodes;
+	for (std::map<int32,BMessage>::iterator node = nodes.begin(); node != nodes.end(); node++) {
+		if (kept.find(node->first) == kept.end())
+			continue;
+		BMessage	copy(node->second);
+		if (kept.find(copy.GetInt32(P_C_NODE_PARENT,-1)) == kept.end())
+			copy.RemoveName(P_C_NODE_PARENT);
+		copy.RemoveName(P_C_NODE_SELECTED);
+		keptNodes.AddMessage(P_C_DOC_ENTRY,&copy);
+	}
+	BMessage	keptConnections;
+	for (int32 i = 0; allConnections.FindMessage(P_C_DOC_ENTRY,i,&entry) == B_OK; i++) {
+		if ((kept.find(entry.GetInt32(P_C_NODE_CONNECTION_FROM,-1)) != kept.end())
+			&& (kept.find(entry.GetInt32(P_C_NODE_CONNECTION_TO,-1)) != kept.end()))
+			keptConnections.AddMessage(P_C_DOC_ENTRY,&entry);
+	}
+	BMessage	document;
+	document.AddInt32(P_C_DOC_FORMAT_VERSION_FIELD,P_C_DOC_FORMAT_VERSION);
+	document.AddMessage(P_C_DOC_ALLNODES,&keptNodes);
+	document.AddMessage(P_C_DOC_ALLCONNECTIONS,&keptConnections);
+	return document;
+}
+
+// the reason a write failed: in error, else in an alert
+static void WriteError(const BString &text, BString *error)
+{
+	if (error != NULL) {
+		*error	= text;
+		return;
+	}
+	(new BAlert(B_TRANSLATE("Error"),text.String(),B_TRANSLATE("OK"),
+		NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go(NULL);
+}
+
+
+status_t PDocument::WriteTo(const entry_ref &ref, const BMessage &saveSettings,
+	bool exporting, bool selectionOnly, BString *error)
+{
 	BAutolock	autolock(this);
+	if (selectionOnly && selected->IsEmpty()) {
+		WriteError(B_TRANSLATE("Nothing is selected to export."),error);
+		return B_BAD_VALUE;
+	}
 	BMessage	archived;
 	Archive(&archived,true);
-	BFile		file(entryRef,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
+	if (selectionOnly)
+		archived	= SelectionArchive(archived);
+	BFile		file(&ref,B_WRITE_ONLY | B_ERASE_FILE | B_CREATE_FILE);
 	status_t	err	= file.InitCheck();
-	BMessage	saveSettings;
 	int32		outType		= 0;
 	bool		useTranslator	= (err == B_OK)
-		&& (documentSetting->FindMessage("saveSettings",&saveSettings) == B_OK)
-		&& (saveSettings.FindInt32("format::type",&outType) == B_OK);
-	if (useTranslator) {
+		&& (saveSettings.FindInt32(P_C_FORMAT_TYPE,&outType) == B_OK);
+	if (useTranslator && saveSettings.GetBool(P_C_FORMAT_BITMAP,false)) {
+		err = WriteBitmap(editorManager,&file,(uint32)outType,selectionOnly);
+	} else if (useTranslator) {
 		// translator ids change between sessions; the format type doesn't
 		translator_info	translatorInfo;
 		err = FindSaveTranslator((uint32)outType,&translatorInfo.translator);
 		if (err == B_OK) {
-			const char	*formatName	= "";
-			saveSettings.FindString("format::name",&formatName);
+			// FindString() would leave NULL behind for a missing name
+			const char	*formatName	= saveSettings.GetString(P_C_FORMAT_NAME,"");
 			translatorInfo.type			= P_C_DOCUMENT_RAW_TYPE;
 			translatorInfo.group		= P_C_DOCUMENT_RAW_TYPE;
 			translatorInfo.quality		= 0.9;
@@ -806,7 +933,15 @@ void PDocument::Save(void)
 			strlcpy(translatorInfo.MIME,P_C_DOCUMENT_MIMETYPE,sizeof(translatorInfo.MIME));
 			BMallocIO	input;
 			archived.Flatten(&input);
-			err = BTranslatorRoster::Default()->Translate(&input,&translatorInfo,NULL,&file,outType);
+			// the document's name without extension, e.g. for a page title
+			BString		title(Title());
+			int32		dot	= title.FindLast('.');
+			if (dot > 0)
+				title.Truncate(dot);
+			BMessage	extension;
+			extension.AddString(P_C_FORMAT_TITLE,title);
+			err = BTranslatorRoster::Default()->Translate(&input,&translatorInfo,
+				&extension,&file,outType);
 		}
 	} else if (err == B_OK)
 		err = archived.Flatten(&file);
@@ -814,16 +949,23 @@ void PDocument::Save(void)
 	if (err != B_OK) {
 		BString	text;
 		text.SetToFormat(B_TRANSLATE("Could not save the document: %s"),strerror(err));
-		(new BAlert(B_TRANSLATE("Error"),text.String(),B_TRANSLATE("OK"),
-			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go(NULL);
-		return;
+		WriteError(text,error);
+		// a copy that failed is no use; a document's own file is kept
+		if (exporting)
+			BEntry(&ref).Remove();
+		return err;
 	}
 	BNodeInfo	nodeInfo(&file);
-	nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
-	nodeInfo.SetPreferredApp(APP_SIGNATURE);
-	ResetModified();
-	UpdateWindowTitle();
-	be_roster->AddToRecentDocuments(entryRef,APP_SIGNATURE);
+	const char	*mime	= NULL;
+	if (exporting && (saveSettings.FindString(P_C_FORMAT_MIME,&mime) == B_OK)
+		&& (strcmp(mime,P_C_DOCUMENT_MIMETYPE) != 0)) {
+		// an export opens in the app made for its format
+		nodeInfo.SetType(mime);
+	} else {
+		nodeInfo.SetType(P_C_DOCUMENT_MIMETYPE);
+		nodeInfo.SetPreferredApp(APP_SIGNATURE);
+	}
+	return B_OK;
 }
 
 void PDocument::Load(void)
@@ -835,6 +977,7 @@ void PDocument::Load(void)
 	BMessage			loaded;
 	BFile				file(entryRef,B_READ_ONLY);
 	status_t			err				= file.InitCheck();
+	bool				imported		= false;
 	if (err == B_OK) {
 		BTranslatorRoster	*roster	= BTranslatorRoster::Default();
 		translator_info		identified;
@@ -846,6 +989,11 @@ void PDocument::Load(void)
 			output.Seek(0,SEEK_SET);
 			err = loaded.Unflatten(&output);
 		}
+		// read by another translator than the one writing documents
+		translator_id	native;
+		imported	= (err == B_OK)
+			&& ((FindSaveTranslator(P_C_DOCUMENT_TYPE,&native) != B_OK)
+				|| (identified.translator != native));
 	}
 	if (err != B_OK) {
 		BString	text;
@@ -853,6 +1001,21 @@ void PDocument::Load(void)
 		(new BAlert(B_TRANSLATE("Error"),text.String(),B_TRANSLATE("OK"),
 			NULL,NULL,B_WIDTH_AS_USUAL,B_STOP_ALERT))->Go(NULL);
 		return;
+	}
+	if (imported) {
+		// Save must not write the document over the file it came from:
+		// it asks for a name, offering the file's without its extension
+		importedName	= entryRef->name;
+		int32	dot	= importedName.FindLast('.');
+		if (dot > 0)
+			importedName.Truncate(dot);
+		BEntry	imported(entryRef);
+		BEntry	directory;
+		if ((imported.GetParent(&directory) != B_OK)
+			|| (directory.GetRef(&importedDirectory) != B_OK))
+			importedDirectory	= entry_ref();
+		delete entryRef;
+		entryRef	= NULL;
 	}
 	ResetModified();
 	UpdateWindowTitle();
@@ -938,6 +1101,33 @@ BMessage* PDocument::BuildChangedNodesMessage(void)
 }
 
 
+void PDocument::ExportPanel()
+{
+	TRACE();
+	if (!exportPanel) {
+		// the panel copies both
+		BMessage	request(P_C_EXPORT_REQUESTED);
+		BMessenger	target(this);
+		exportPanel = new PCSavePanel(&request,&target,true);
+	}
+	BString	name(Title());
+	if (entryRef != NULL) {
+		// next to the document, named like it without its extension
+		BEntry		entry(entryRef);
+		BEntry		directory;
+		if (entry.GetParent(&directory) == B_OK)
+			exportPanel->SetPanelDirectory(&directory);
+		int32	dot	= name.FindLast('.');
+		if (dot > 0)
+			name.Truncate(dot);
+	}
+	exportPanel->SetSaveText(name.String());
+	exportPanel->FormatChanged();
+	exportPanel->Window()->SetWorkspaces(B_CURRENT_WORKSPACE);
+	exportPanel->Show();
+}
+
+
 void PDocument::SavePanel()
 {
 	TRACE();
@@ -945,7 +1135,17 @@ void PDocument::SavePanel()
 //		savePanel = new PCSavePanel(B_SAVE_PANEL, new BMessenger(this),NULL,0,false);
 		savePanel = new PCSavePanel(NULL,new BMessenger(this));
 	}
-	if (entryRef) savePanel->SetPanelDirectory(entryRef);
+	BEntry	entry;
+	BEntry	directory;
+	if ((entryRef != NULL) && (entry.SetTo(entryRef) == B_OK)
+		&& (entry.GetParent(&directory) == B_OK))
+		savePanel->SetPanelDirectory(&directory);
+	else if (importedName.Length() > 0) {
+		if (importedDirectory.name != NULL)
+			savePanel->SetPanelDirectory(&importedDirectory);
+		savePanel->SetSaveText(importedName.String());
+		savePanel->FormatChanged();
+	}
 	savePanel->Window()->SetWorkspaces(B_CURRENT_WORKSPACE);
 	savePanel->Show();
 }

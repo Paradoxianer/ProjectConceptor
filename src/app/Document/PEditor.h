@@ -17,6 +17,8 @@
 #include <support/List.h>
 #include "ShortCutFilter.h"
 
+class BBitmap;
+
 class PEditorManager;
 class PDocument;
 /**
@@ -101,11 +103,28 @@ public:
 	virtual	const char*		TabLabel(void) {return NULL;};
 
 	/**
-	 * if the View wich should be printet is different than the View 
-	 * return by GetView you shoudl overwrite this Method and return the
-	 * View wich should be printed.
+	 * the view that is printed, NULL for GetView() itself. An editor whose
+	 * GetView() wraps it, e.g. in a BScrollView, returns the inner one:
+	 * BPrintJob::DrawView() prints a view's children only within their
+	 * bounds, and its scroll bars too.
 	 */
 	virtual BView*			GetPrintView(void) {return NULL;};
+
+	/**
+	 * what printing covers of the print view, in its coordinates at 100 %
+	 * zoom, or only the selection of it; invalid for an editor that
+	 * doesn't print. Called with the view's looper locked. While printing,
+	 * BView::IsPrinting() is true in Draw() - the editor draws for paper
+	 * then.
+	 */
+	virtual BRect			PrintFrame(bool selectionOnly) {return BRect();};
+
+	/**
+	 * PrintFrame(selectionOnly) drawn the way it is printed into a new bitmap (the
+	 * caller's), scale pixels per point; NULL for an editor that doesn't
+	 * print. Called with the view's looper locked.
+	 */
+	virtual BBitmap*		PaperBitmap(float scale, bool selectionOnly) {return NULL;};
 
 	/**
 	 * if the Editor is an View, this should not return a link to the BView Handler.

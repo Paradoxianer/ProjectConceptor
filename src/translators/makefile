@@ -1,5 +1,10 @@
 translators = \
+	DOT \
+	Drawio \
 	FreeMind \
+	GraphML \
+	HTML \
+	Mermaid \
 	Standard 
 
 
@@ -13,10 +18,6 @@ clean:
 		$(MAKE) -C $$dir clean; \
 	done    
 
-install: 
-	for dir in $(translators); do \
-		$(MAKE) -C $$dir install; \
-	done
 
 
 catkeys:

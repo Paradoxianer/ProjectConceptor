@@ -32,7 +32,14 @@ OUT="$ROOT/release"
 
 fail() { echo "RELEASE FAILED: $1" >&2; exit 1; }
 
-rm -rf "$WORK"
+# a tree of an earlier run is only moved aside here and deleted at the end:
+# thousands of files deleted and right away created again can panic the
+# kernel ("vnode ... already exists", Haiku #9839)
+TRASH="$HOME/release-work/.trash"
+if [ -e "$WORK" ]; then
+	mkdir -p "$TRASH"
+	mv "$WORK" "$TRASH/$NAME-$FULL.$$"
+fi
 mkdir -p "$BUILD" "$MAIN" "$DEBUG/develop/debug" "$OUT"
 
 # --- build: clean copy, catalogs bound, bound binaries copied into bin/ ---
@@ -171,13 +178,15 @@ app="$CHECK/apps/ProjectConceptor/ProjectConceptor"
 catalogs="$(xres -l "$app" | grep -c CADA || true)"
 [ "$catalogs" -gt 1 ] || fail "app catalogs missing"
 for plugin in Plugins/GraphEditor Plugins/MacroEditor Plugins/NavigatorEditor \
-		Plugins/LayoutEditor Plugins/Commands/Ask; do
+		Plugins/LayoutEditor Plugins/Commands/Ask Plugins/Commands/Export; do
 	[ "$(xres -l "$CHECK/apps/ProjectConceptor/$plugin" | grep -c CADA || true)" -gt 1 ] \
 		|| fail "$plugin catalogs missing"
 done
-for t in FreeMindTranslator ProjectConceptorTranslator; do
+for t in DOTTranslator DrawioTranslator FreeMindTranslator GraphMLTranslator HTMLTranslator MermaidTranslator ProjectConceptorTranslator; do
 	[ -f "$CHECK/$ADDONS/Translators/$t" ] || fail "$t missing"
 done
+
+rm -rf "$TRASH"
 
 echo "app catalogs: $catalogs, plugins: $(find "$CHECK/apps/ProjectConceptor/Plugins" -type f | wc -l)"
 echo "$MAIN_PKG"
