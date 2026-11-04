@@ -3,6 +3,7 @@
 
 #include <app/Message.h>
 #include <interface/GraphicsDefs.h>
+#include <interface/Point.h>
 #include <interface/Rect.h>
 #include <support/DataIO.h>
 #include <support/String.h>
@@ -62,6 +63,9 @@ struct GraphConnection {
 	int8		arrows;
 	rgb_color	color;
 	bool		hasColor;
+	/** the bends fixed by hand, in document coordinates; empty for a
+	 * computed route */
+	std::vector<BPoint>	bends;
 };
 
 class GraphDocument {

@@ -151,7 +151,17 @@ BString GraphMLWriter::Write(void)
 			<< "      <data key=\"arrows\">" << (int32)connection.arrows << "</data>\n";
 		if (connection.hasColor)
 			out << "      <data key=\"edgecolor\">" << color << "</data>\n";
-		out << "      <data key=\"eg\"><y:PolyLineEdge><y:LineStyle color=\"" << color
+		out << "      <data key=\"eg\"><y:PolyLineEdge>";
+		if (!connection.bends.empty()) {
+			// offsets 0: the line runs from the nodes' centers, as yEd docks it
+			out << "<y:Path sx=\"0\" sy=\"0\" tx=\"0\" ty=\"0\">";
+			for (size_t b = 0; b < connection.bends.size(); b++) {
+				out << "<y:Point x=\"" << Number(connection.bends[b].x) << "\" y=\""
+					<< Number(connection.bends[b].y) << "\"/>";
+			}
+			out << "</y:Path>";
+		}
+		out << "<y:LineStyle color=\"" << color
 			<< "\" type=\"line\" width=\"1.5\"/><y:Arrows source=\""
 			<< ((connection.arrows & 2) != 0 ? "standard" : "none") << "\" target=\""
 			<< ((connection.arrows & 1) != 0 ? "standard" : "none")
@@ -541,7 +551,19 @@ status_t GraphMLReader::_ReadEdge(const TiXmlElement *element, bool directed)
 			connection.arrows	= (int8)(atoi(ElementText(child).String()) & 3);
 		else if (key->second.name == "color")
 			connection.hasColor	= ParseColor(ElementText(child).String(), &connection.color);
-		else if ((key->second.yfiles == "edgegraphics") && !ownExport) {
+		else if (key->second.yfiles == "edgegraphics") {
+			// own exports keep their bends here too
+			const TiXmlElement	*path	= FindDescendant(child, "Path");
+			for (const TiXmlElement *point = (path != NULL) ? path->FirstChildElement() : NULL;
+					point != NULL; point = point->NextSiblingElement()) {
+				double	x = 0, y = 0;
+				if ((strcmp(LocalName(point), "Point") == 0)
+						&& (point->Attribute("x", &x) != NULL)
+						&& (point->Attribute("y", &y) != NULL))
+					connection.bends.push_back(BPoint(x, y));
+			}
+			if (ownExport)
+				continue;
 			const TiXmlElement	*line	= FindDescendant(child, "LineStyle");
 			rgb_color			color;
 			if (!connection.hasColor && (line != NULL)

@@ -23,6 +23,7 @@ public:
 	void GraphMLImportsOtherTools(void);
 	void DrawioRoundTrips(void);
 	void DrawioImportsCompressedDiagrams(void);
+	void BendsTravelThroughFormats(void);
 	void ExportWritesACopyOfItsOwnType(void);
 	void ImportedFileIsNotTheDocumentsFile(void);
 	void SaveAndExportOfferTheRightFormats(void);
@@ -44,6 +45,7 @@ public:
 	CPPUNIT_TEST(GraphMLImportsOtherTools);
 	CPPUNIT_TEST(DrawioRoundTrips);
 	CPPUNIT_TEST(DrawioImportsCompressedDiagrams);
+	CPPUNIT_TEST(BendsTravelThroughFormats);
 	CPPUNIT_TEST(ExportWritesACopyOfItsOwnType);
 	CPPUNIT_TEST(ImportedFileIsNotTheDocumentsFile);
 	CPPUNIT_TEST(SaveAndExportOfferTheRightFormats);

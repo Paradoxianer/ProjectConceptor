@@ -137,9 +137,20 @@ BString DrawioWriter::Write(const char *title)
 			<< ";strokeColor=" << (connection.hasColor ? HexColor(connection.color)
 				: BString(kEdgeColor))
 			<< ";strokeWidth=1.5;\" edge=\"1\" parent=\"1\" source=\"n" << connection.from
-			<< "\" target=\"n" << connection.to << "\">\n"
-			<< "          <mxGeometry relative=\"1\" as=\"geometry\"/>\n"
-			<< "        </mxCell>\n";
+			<< "\" target=\"n" << connection.to << "\">\n";
+		if (connection.bends.empty())
+			out << "          <mxGeometry relative=\"1\" as=\"geometry\"/>\n";
+		else {
+			// waypoints of an edge on the top layer: page coordinates
+			out << "          <mxGeometry relative=\"1\" as=\"geometry\">\n"
+				<< "            <Array as=\"points\">\n";
+			for (size_t b = 0; b < connection.bends.size(); b++) {
+				out << "              <mxPoint x=\"" << Number(connection.bends[b].x)
+					<< "\" y=\"" << Number(connection.bends[b].y) << "\"/>\n";
+			}
+			out << "            </Array>\n          </mxGeometry>\n";
+		}
+		out << "        </mxCell>\n";
 	}
 	out << "      </root>\n    </mxGraphModel>\n  </diagram>\n</mxfile>\n";
 	return out;
@@ -380,6 +391,8 @@ struct DrawioCell {
 	bool					edge;
 	BRect					geometry;
 	bool					hasGeometry;
+	/** an edge's waypoints, relative to its parent like geometry */
+	std::vector<BPoint>		points;
 	std::vector<GraphAttribute>	data;
 };
 
@@ -471,6 +484,17 @@ void DrawioReader::_Collect(const TiXmlElement *root)
 			entry.hasGeometry	= (geometry->Attribute("width", &width) != NULL)
 				&& (geometry->Attribute("height", &height) != NULL);
 			entry.geometry.Set(x, y, x + width, y + height);
+			const TiXmlElement	*points	= geometry->FirstChildElement("Array");
+			if ((points != NULL) && (points->Attribute("as") != NULL)
+				&& (strcmp(points->Attribute("as"), "points") == 0)) {
+				for (const TiXmlElement *point = points->FirstChildElement("mxPoint");
+						point != NULL; point = point->NextSiblingElement("mxPoint")) {
+					double	px = 0, py = 0;
+					point->Attribute("x", &px);
+					point->Attribute("y", &py);
+					entry.points.push_back(BPoint(px, py));
+				}
+			}
 		}
 		if (entry.id.Length() == 0)
 			continue;
@@ -610,6 +634,9 @@ status_t DrawioReader::Read(const char *text, GraphDocument *document)
 		connection.id	= (int32)(ids.size() + document->connections.size() + 1);
 		connection.from	= from->second;
 		connection.to	= to->second;
+		BPoint	origin	= _Origin(cell.parent, 0);
+		for (size_t p = 0; p < cell.points.size(); p++)
+			connection.bends.push_back(cell.points[p] + origin);
 		BString	end		= StyleValue(cell.style.String(), "endArrow");
 		BString	start	= StyleValue(cell.style.String(), "startArrow");
 		// draw.io's defaults: an arrow at the end, none at the start

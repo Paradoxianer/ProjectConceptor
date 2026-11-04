@@ -265,6 +265,12 @@ BString SvgWriter::Svg(bool standalone, const char *title)
 	BRect	bounds;
 	for (std::map<int32, BRect>::iterator i = frames.begin(); i != frames.end(); i++)
 		bounds	= bounds.IsValid() ? (bounds | i->second) : i->second;
+	// a bend may lie outside all nodes
+	for (size_t i = 0; bounds.IsValid() && (i < document.connections.size()); i++) {
+		const std::vector<BPoint>	&bends	= document.connections[i].bends;
+		for (size_t b = 0; b < bends.size(); b++)
+			bounds	= bounds | BRect(bends[b], bends[b]);
+	}
 	if (!bounds.IsValid())
 		bounds.Set(0, 0, 200, 100);
 	bounds.InsetBy(-kMargin, -kMargin);
@@ -343,6 +349,24 @@ void SvgWriter::_WriteGroup(const GraphNode &group)
 }
 
 
+// the one of the four side midpoints closest to toward
+static BPoint Nearest(const BPoint sides[4], BPoint toward)
+{
+	BPoint	nearest		= sides[0];
+	float	shortest	= -1;
+	for (int32 i = 0; i < 4; i++) {
+		float	dx			= toward.x - sides[i].x;
+		float	dy			= toward.y - sides[i].y;
+		float	distance	= dx * dx + dy * dy;
+		if ((shortest < 0) || (distance < shortest)) {
+			shortest	= distance;
+			nearest		= sides[i];
+		}
+	}
+	return nearest;
+}
+
+
 BString SvgWriter::_Marker(const GraphConnection &connection)
 {
 	BString	key(connection.hasColor ? HexColor(connection.color) : BString());
@@ -383,24 +407,41 @@ void SvgWriter::_WriteConnection(const GraphConnection &connection)
 		BPoint((b.left + b.right) / 2, b.bottom) };
 	BPoint	start		= starts[0];
 	BPoint	end			= ends[0];
-	float	shortest	= -1;
-	for (int32 i = 0; i < 4; i++) {
-		for (int32 j = 0; j < 4; j++) {
-			float	dx			= ends[j].x - starts[i].x;
-			float	dy			= ends[j].y - starts[i].y;
-			float	distance	= dx * dx + dy * dy;
-			if ((shortest < 0) || (distance < shortest)) {
-				shortest	= distance;
-				start		= starts[i];
-				end			= ends[j];
+	if (!connection.bends.empty()) {
+		// fixed bends: each end on the side nearest its own bend
+		start	= Nearest(starts, connection.bends.front());
+		end		= Nearest(ends, connection.bends.back());
+	} else {
+		float	shortest	= -1;
+		for (int32 i = 0; i < 4; i++) {
+			for (int32 j = 0; j < 4; j++) {
+				float	dx			= ends[j].x - starts[i].x;
+				float	dy			= ends[j].y - starts[i].y;
+				float	distance	= dx * dx + dy * dy;
+				if ((shortest < 0) || (distance < shortest)) {
+					shortest	= distance;
+					start		= starts[i];
+					end			= ends[j];
+				}
 			}
 		}
 	}
 	BString	marker	= _Marker(connection);
-	out << "<line class=\"pc-edge\" data-from=\"" << connection.from
-		<< "\" data-to=\"" << connection.to << "\" x1=\"" << Number(start.x)
-		<< "\" y1=\"" << Number(start.y) << "\" x2=\"" << Number(end.x)
-		<< "\" y2=\"" << Number(end.y) << "\"";
+	if (connection.bends.empty()) {
+		out << "<line class=\"pc-edge\" data-from=\"" << connection.from
+			<< "\" data-to=\"" << connection.to << "\" x1=\"" << Number(start.x)
+			<< "\" y1=\"" << Number(start.y) << "\" x2=\"" << Number(end.x)
+			<< "\" y2=\"" << Number(end.y) << "\"";
+	} else {
+		out << "<polyline class=\"pc-edge\" data-from=\"" << connection.from
+			<< "\" data-to=\"" << connection.to << "\" points=\"" << Number(start.x)
+			<< "," << Number(start.y);
+		for (size_t b = 0; b < connection.bends.size(); b++) {
+			out << " " << Number(connection.bends[b].x) << ","
+				<< Number(connection.bends[b].y);
+		}
+		out << " " << Number(end.x) << "," << Number(end.y) << "\"";
+	}
 	if ((connection.arrows & 1) != 0)
 		out << " marker-end=\"url(#" << marker << ")\"";
 	if ((connection.arrows & 2) != 0)

@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <map>
+#include <vector>
 
 #include <string.h>
 
@@ -579,6 +580,60 @@ void TranslatorTest::DrawioRoundTrips(void)
 	BMessage	connections;
 	back.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
 	CPPUNIT_ASSERT_EQUAL((int32)1, CountField(connections, P_C_DOC_ENTRY));
+}
+
+
+// the bends of the imported document's only connection
+static std::vector<BPoint> ImportedBends(const BMessage &document)
+{
+	std::vector<BPoint>	bends;
+	BMessage	connections;
+	BMessage	connection;
+	BMessage	points;
+	BPoint		point;
+	document.FindMessage(P_C_DOC_ALLCONNECTIONS, &connections);
+	connections.FindMessage(P_C_DOC_ENTRY, &connection);
+	// a polyline in other programs: straight through the bends
+	CPPUNIT_ASSERT_EQUAL((int8)0, connection.GetInt8(P_C_NODE_CONNECTION_TYPE, -1));
+	connection.FindMessage(P_C_NODE_CONNECTION_BENDS, &points);
+	for (int32 i = 0; points.FindPoint(P_C_BEND_POINT, i, &point) == B_OK; i++)
+		bends.push_back(point);
+	return bends;
+}
+
+
+void TranslatorTest::BendsTravelThroughFormats(void)
+{
+	BMessage	document	= GroupedDocument();
+	BMessage	allConnections;
+	BMessage	connection;
+	document.FindMessage(P_C_DOC_ALLCONNECTIONS, &allConnections);
+	allConnections.FindMessage(P_C_DOC_ENTRY, &connection);
+	BMessage	bends;
+	bends.AddPoint(P_C_BEND_POINT, BPoint(200, 90));
+	bends.AddPoint(P_C_BEND_POINT, BPoint(200, 300));
+	connection.AddMessage(P_C_NODE_CONNECTION_BENDS, &bends);
+	allConnections.ReplaceMessage(P_C_DOC_ENTRY, &connection);
+	document.ReplaceMessage(P_C_DOC_ALLCONNECTIONS, &allConnections);
+
+	BString	drawio	= Exported(document, P_C_DRAWIO_TYPE);
+	CPPUNIT_ASSERT(drawio.FindFirst("<mxPoint x=\"200\" y=\"300\"/>") >= 0);
+	std::vector<BPoint>	back	= ImportedBends(Imported(drawio.String()));
+	CPPUNIT_ASSERT_EQUAL((size_t)2, back.size());
+	CPPUNIT_ASSERT(back[0] == BPoint(200, 90));
+	CPPUNIT_ASSERT(back[1] == BPoint(200, 300));
+
+	BString	graphml	= Exported(document, P_C_GRAPHML_TYPE);
+	CPPUNIT_ASSERT(graphml.FindFirst("<y:Point x=\"200.0\" y=\"90.0\"/>") >= 0);
+	back	= ImportedBends(Imported(graphml.String()));
+	CPPUNIT_ASSERT_EQUAL((size_t)2, back.size());
+	CPPUNIT_ASSERT(back[1] == BPoint(200, 300));
+
+	// a polyline through the bends
+	BString	svg	= Exported(document, P_C_SVG_TYPE);
+	CPPUNIT_ASSERT(svg.FindFirst("<polyline class=\"pc-edge\"") >= 0);
+	CPPUNIT_ASSERT(svg.FindFirst(" 200,90 200,300 ") >= 0);
+	CPPUNIT_ASSERT(svg.FindFirst("<line class=\"pc-edge\"") < 0);
 }
 
 

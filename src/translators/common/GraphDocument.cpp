@@ -154,6 +154,11 @@ status_t GraphDocument::_ReadConnection(const BMessage &message)
 	message.FindMessage(P_C_NODE_PATTERN, &pattern);
 	connection.hasColor	= FindColor(pattern, P_C_PATTERN_FILL_COLOR,
 		kStandardConnection, &connection.color);
+	BMessage	bends;
+	BPoint		bend;
+	message.FindMessage(P_C_NODE_CONNECTION_BENDS, &bends);
+	for (int32 i = 0; bends.FindPoint(P_C_BEND_POINT, i, &bend) == B_OK; i++)
+		connection.bends.push_back(bend);
 	connections.push_back(connection);
 	return B_OK;
 }
@@ -255,6 +260,14 @@ status_t GraphDocument::Write(BPositionIO *out) const
 		message.AddInt32(P_C_NODE_CONNECTION_FROM, connection.from);
 		message.AddInt32(P_C_NODE_CONNECTION_TO, connection.to);
 		message.AddInt8(P_C_NODE_CONNECTION_ARROWS, connection.arrows);
+		if (!connection.bends.empty()) {
+			// other programs' bends are corners of a polyline: straight
+			BMessage	bends;
+			for (size_t b = 0; b < connection.bends.size(); b++)
+				bends.AddPoint(P_C_BEND_POINT, connection.bends[b]);
+			message.AddMessage(P_C_NODE_CONNECTION_BENDS, &bends);
+			message.AddInt8(P_C_NODE_CONNECTION_TYPE, 0);
+		}
 		BMessage	data;
 		data.AddString(P_C_NODE_NAME, "");
 		message.AddMessage(P_C_NODE_DATA, &data);
