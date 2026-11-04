@@ -179,7 +179,7 @@ SVG_ICON = ../../Data/Icons/Logogross.svg
 
 TARGET_DIR	=  .
 
-#INSTALL_DIR	= /boot/apps/ProjectConceptor
+
 PLUGIN_DIR	= Plugins
 
 
@@ -196,7 +196,6 @@ include $(DEVEL_DIRECTORY)/etc/makefile-engine
 default .DEFAULT:
 	mkdir -p ../../$(APP_DIR)
 	cp -rf $(NAME) ../../$(APP_DIR)
-	cp -rf ../.PackageInfo ../../bin
 	mkdir -p ../../bin/data/deskbar/menu/Applications
 	ln -sf ../../../../apps/ProjectConceptor/$(NAME) ../../bin/data/deskbar/menu/Applications
 

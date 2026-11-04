@@ -50,7 +50,6 @@ LINKER_FLAGS =
 
 TARGET_DIR	=  .
 
-INSTALL_DIR	= /boot/apps/ProjectConceptor
 
 ## include the makefile-engine
 DEVEL_DIRECTORY := \
@@ -61,6 +60,3 @@ default .DEFAULT:
 	mkdir -p ../../../$(APP_DIR)
 	cp -rf $(NAME) ../../../$(APP_DIR)
 
-install:: default
-	mkdir -p $(INSTALL_DIR)
-	cp -rf $(TARGET) $(INSTALL_DIR)

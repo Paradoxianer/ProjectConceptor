@@ -102,19 +102,11 @@ COMPILER_FLAGS =
 
 #	specify additional linker flags
 LINKER_FLAGS =
-INSTALL_DIR    = /boot/home/config/add-ons/Translators
 
 ## include the makefile-engine
 DEVEL_DIRECTORY := \
 	$(shell findpaths -r "makefile_engine" B_FIND_PATH_DEVELOP_DIRECTORY)
 include $(DEVEL_DIRECTORY)/etc/makefile-engine
-
-install:: default
-	@echo "Copying locale files"
-	@echo $(INSTALL_DIR)
-	@mkdir -p $(INSTALL_DIR)
-	@cp -rf $(TARGET) $(INSTALL_DIR)
-	@echo "Done copying."
 
 default .DEFAULT:
 	mkdir -p ../../../bin/add-ons/Translators
